@@ -60,7 +60,7 @@ export async function recordCounselEngagement(
   if (!office) throw new AuthorityStoreError('DENIED', 'ENGAGEMENT_RECORDER_NOT_AUTHORIZED: no live executive-office mandate')
   const row = (
     await exec.query<Row>(
-      `INSERT INTO ue_authority_counsel_engagements
+      `INSERT INTO public.ue_authority_counsel_engagements
          (organization_id, matter_id, counsel_user_id, capacity, information_barrier, recorded_by, effective_at, expires_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id::text AS id`,
       [i.organizationId, i.matterId, i.counselUserId, i.capacity, i.informationBarrier, i.recorderUserId, i.effectiveAt, i.expiresAt ?? null],
@@ -91,7 +91,7 @@ export async function revokeCounselEngagement(
     throw new AuthorityStoreError('DENIED', 'ENGAGEMENT_RECORDER_NOT_AUTHORIZED: only an active executive may revoke a counsel engagement')
   }
   const r = await exec.query(
-    `UPDATE ue_authority_counsel_engagements SET revoked_at = now(), revoked_by = $3
+    `UPDATE public.ue_authority_counsel_engagements SET revoked_at = now(), revoked_by = $3
       WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
     [i.organizationId, i.engagementId, i.revokerUserId],
   )
@@ -109,7 +109,7 @@ export async function loadCounselEngagement(
     await exec.query<Row>(
       `SELECT id::text AS id, organization_id::text AS organization_id, matter_id::text AS matter_id, counsel_user_id, capacity,
               information_barrier, effective_at, expires_at, revoked_at
-         FROM ue_authority_counsel_engagements
+         FROM public.ue_authority_counsel_engagements
         WHERE organization_id = $1 AND matter_id = $2 AND counsel_user_id = $3
         ORDER BY created_at DESC LIMIT 1`,
       [i.organizationId, i.matterId, i.userId],
@@ -141,7 +141,7 @@ export function createDurableNonceStore(exec: SqlExecutor, ctx: { organizationId
     async consume(nonce: string, expiresAt: Date): Promise<boolean> {
       const hash = createHash('sha256').update(nonce).digest('hex')
       const r = await exec.query(
-        `INSERT INTO ue_authority_counsel_nonces (organization_id, matter_id, nonce_hash, consumed_by, expires_at)
+        `INSERT INTO public.ue_authority_counsel_nonces (organization_id, matter_id, nonce_hash, consumed_by, expires_at)
          VALUES ($1,$2,$3,$4,$5) ON CONFLICT (organization_id, nonce_hash) DO NOTHING RETURNING id::text AS id`,
         [ctx.organizationId, ctx.matterId, hash, ctx.consumedBy, expiresAt],
       )

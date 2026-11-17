@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T12:12:45.673Z",
+  "generatedAt": "2026-11-17T21:15:14.380Z",
   "overallScore": 7.6,
   "categories": {
     "runtime_proof": {
@@ -39,11 +39,11 @@
       "findings": [
         "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml",
         "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml",
-        "Effective active workflow count is 66 (total 69, emergency/manual 3)."
+        "Effective active workflow count is 69 (total 72, emergency/manual 3)."
       ]
     },
     "overengineering": {
-      "score": 4.4,
+      "score": 4.1,
       "findings": [
         "Effective workflow surface remains larger than ideal for a disciplined canonical release path."
       ]
@@ -91,7 +91,7 @@
     },
     {
       "category": "ci_efficiency",
-      "finding": "Effective active workflow count is 66 (total 69, emergency/manual 3)."
+      "finding": "Effective active workflow count is 69 (total 72, emergency/manual 3)."
     },
     {
       "category": "overengineering",

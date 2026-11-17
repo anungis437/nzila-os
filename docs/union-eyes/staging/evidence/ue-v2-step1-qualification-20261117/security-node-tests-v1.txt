@@ -1,0 +1,35 @@
+✔ a malformed or empty lockfile cannot be certified as no dependencies (89.340708ms)
+✔ resolved direct, scoped, and peer-suffixed packages are inventoried (37.087917ms)
+✔ registry response is strictly typed and bound to installed packages (1.064334ms)
+✔ noncanonical advisory IDs cannot alias valid advisory identities (1.707292ms)
+✔ duplicate advisory IDs cannot overwrite or downgrade earlier findings (0.383ms)
+✔ unsupported ignore-registry-errors escape hatch is rejected before any scan (210.917708ms)
+✔ inventory rejects fabricated keys, unsupported lockfiles, and out-of-section records (69.083833ms)
+✔ duplicate snapshots sections cannot hide dependencies from the audit inventory (24.85475ms)
+✔ duplicate or conflicting lockfile version declarations fail closed (64.879333ms)
+✔ duplicate resolved snapshot keys fail closed instead of silently collapsing the graph (20.526ms)
+✔ ambiguous audit CLI flags fail before reading a lockfile or contacting the registry (949.517375ms)
+✔ audit report paths containing equals signs are preserved without truncation (109.674125ms)
+✔ noncanonical snapshot headers cannot conceal a second dependency graph (11.097417ms)
+✔ the shapes pnpm actually writes are inventoried: quoted keys and empty inline mappings (18.628792ms)
+✔ the repository's own pnpm-lock.yaml parses completely (16.349625ms)
+✔ advisory ids are recorded as the canonical string the policy binds to the map key (0.188333ms)
+✔ bounded repeated extglob +(*) {} (238.688666ms)
+✔ bounded repeated extglob +(*) {"maxExtglobRecursion":false} (158.882875ms)
+✔ bounded repeated extglob +(*a) {} (155.657667ms)
+✔ bounded repeated extglob +(*a) {"maxExtglobRecursion":false} (141.211042ms)
+✔ bounded repeated extglob *(*a) {} (134.359375ms)
+✔ bounded repeated extglob *(*a) {"maxExtglobRecursion":false} (135.107667ms)
+✔ bounded repeated extglob +(*?a) {} (146.306ms)
+✔ bounded repeated extglob +(*?a) {"maxExtglobRecursion":false} (123.671167ms)
+✔ bounded repeated extglob +(ab|abab) {} (124.701167ms)
+✔ bounded repeated extglob +(ab|abab) {"maxExtglobRecursion":false} (107.577416ms)
+✔ ordinary workspace globs and safe extglobs keep their matching behavior (8.657625ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1820.57

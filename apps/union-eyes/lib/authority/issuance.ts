@@ -12,7 +12,7 @@
  * the exact issuance); this module additionally checks what only facts can show
  * (issuer capacity and mandate, membership, conflicts, segregation of duties).
  */
-import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower, validInstant } from './common'
+import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower, validInstant, validStringArray } from './common'
 import { dutyConflicts } from './policies/finance'
 import {
   POLICY_VERSION,
@@ -182,6 +182,11 @@ function result(
 
 function ruleIntegrityProblem(rule: IssuanceRule): string | null {
   if (rule.status !== 'active') return `rule is ${rule.status}`
+  if (!validStringArray(rule.allowedPowers) || !validStringArray(rule.issuerCapacities) || !validStringArray(rule.approvedBy)
+    || (!rule.issuerCapacities.length && !rule.issuerMandateKind)
+    || ((rule.issuerMandateKind == null) !== (rule.issuerMandatePower == null))
+    || !Number.isSafeInteger(rule.requiredIndependentApprovals) || rule.requiredIndependentApprovals < 0
+    || (rule.maxTermDays !== null && (!Number.isSafeInteger(rule.maxTermDays) || rule.maxTermDays <= 0))) return 'rule authority, ceilings or approval provenance is malformed'
   if (rule.domain === 'supervisory' && (rule.operation === 'issue' || rule.operation === 'amend') &&
       hasPrimaryCaseHandlerOnlyPower(rule.allowedPowers)) {
     return 'supervisory issuance rule exceeds the primary case-handler-only ceiling'
@@ -339,6 +344,12 @@ function evaluate(
       if (operating) return deny({ code: 'SEGREGATION_OF_DUTIES', detail: 'a governance reviewer cannot also hold executive or financial authority' })
       break
     }
+    case 'executive_office':
+    case 'financial':
+      if ((req.holderMandates ?? []).some(m => m.kind === 'governance_review' && assessMandate(m, org, now).effective)) {
+        return deny({ code: 'SEGREGATION_OF_DUTIES', detail: 'operational authority cannot coexist with independent oversight' })
+      }
+      break
     default:
       break
   }

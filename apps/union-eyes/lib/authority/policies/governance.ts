@@ -186,6 +186,9 @@ export function decideReview(
   if (!hasCapacity(membership, ['governance_reviewer'])) {
     return deny(req, now, { code: 'CAPACITY_NOT_ELIGIBLE', detail: 'a recorded oversight appointment is required' })
   }
+  if (facts.mandates.some(m => m.principalUserId === me && (m.kind === 'executive_office' || m.kind === 'financial') && assessMandate(m, orgId, now).effective)) {
+    return deny(req, now, { code: 'SEGREGATION_OF_DUTIES', detail: 'independent oversight cannot be exercised while holding operational authority' })
+  }
   // Privileged material needs separately authorised counsel scope; no oversight
   // mandate reaches it.
   if (req.action === 'review:access_evidence' && rv.classification === 'privileged') {

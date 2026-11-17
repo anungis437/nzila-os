@@ -1,0 +1,7 @@
+{
+  "images": [
+    "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:1a518438d0af40871dd171824d1c7f8924c3cbca49041b996a8c501e8bfa1c3d"
+  ],
+  "latestRevision": "nzila-ue-v2-staging-app--relcccfc8c311",
+  "runningStatus": "Running"
+}

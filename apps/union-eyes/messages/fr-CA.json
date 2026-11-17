@@ -1844,7 +1844,104 @@
       "recipientEmail": "Courriel",
       "recipientHint": "La personne à qui la lettre est adressée. Laissez vide pour n’ajouter aucun destinataire.",
       "signMyself": "Je signerai cette lettre",
-      "signMyselfHint": "Vous devenez le signataire désigné. Un autre dirigeant doit tout de même approuver la lettre."
+      "signMyselfHint": "Vous devenez le signataire désigné. Un autre dirigeant doit tout de même approuver la lettre.",
+      "chooseTitle": "Choisir un point de départ",
+      "chooseHint": "Sélectionnez un modèle adapté au contexte ou commencez une lettre vierge.",
+      "composeTitle": "Rédiger une lettre",
+      "template": "Modèle :",
+      "back": "Retour aux modèles",
+      "cancel": "Annuler",
+      "subject": "Objet *",
+      "subjectPlaceholder": "Saisir l’objet…",
+      "type": "Type",
+      "priority": "Priorité",
+      "body": "Texte *",
+      "bodyPlaceholder": "Rédiger le contenu de la lettre…",
+      "placeholderHint": "Remplacez les éléments entre crochets (p. ex. [Nom du destinataire]) par les valeurs appropriées avant de soumettre.",
+      "draftHint": "La lettre sera enregistrée comme brouillon. Vous pourrez la modifier et la soumettre à la révision plus tard.",
+      "create": "Créer le brouillon",
+      "creating": "Création…",
+      "aiAssist": "Aide à la rédaction par IA",
+      "aiLoading": "Rédaction…",
+      "aiSubjectRequired": "Saisissez d’abord un objet pour guider la rédaction par IA.",
+      "aiUnavailable": "L’aide à la rédaction est temporairement indisponible. Vous pouvez rédiger la lettre vous-même.",
+      "aiGenerated": "Brouillon généré — révisez-le et personnalisez-le avant l’envoi.",
+      "aiEmpty": "L’IA n’a renvoyé aucun texte. Précisez l’objet et réessayez.",
+      "createFailed": "Impossible de créer la lettre",
+      "created": "Lettre enregistrée comme brouillon.",
+      "types": {
+        "letter": "Lettre",
+        "notice": "Avis",
+        "memo": "Note de service",
+        "demand": "Mise en demeure",
+        "response": "Réponse",
+        "proposal": "Proposition",
+        "agreement": "Entente",
+        "report": "Rapport",
+        "other": "Autre"
+      },
+      "priorities": {
+        "low": "Faible",
+        "normal": "Normale",
+        "high": "Élevée",
+        "urgent": "Urgente"
+      },
+      "templates": {
+        "grievance_notification": {
+          "label": "Avis de grief",
+          "description": "Avis officiel à l’employeur qu’un grief a été déposé en vertu de la convention collective.",
+          "subject": "Avis officiel de grief — [Numéro du grief]",
+          "body": "Madame, Monsieur [Nom du destinataire],\n\nLa présente vous informe officiellement qu’un grief a été déposé en vertu de la convention collective.\n\nObjet du grief : [Objet du grief]\nPersonne plaignante : [Nom de la personne plaignante]\nEmployeur : [Nom de l’employeur]\nDate de dépôt : [Date]\n\nNous demandons une rencontre à une date convenant aux parties afin de discuter de cette question conformément à la procédure de règlement des griefs prévue à notre convention collective.\n\nVeuillez accuser réception du présent avis dans les cinq (5) jours ouvrables.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Section locale]"
+        },
+        "demand_letter": {
+          "label": "Mise en demeure",
+          "description": "Demande officielle de mesure corrective ou de respect de la convention collective.",
+          "subject": "Mise en demeure — [Objet]",
+          "body": "Madame, Monsieur [Nom du destinataire],\n\nLa présente constitue une demande officielle concernant [décrire le problème], relativement aux obligations prévues à la convention collective.\n\nNous demandons précisément que l’employeur :\n\n1. [Mesure demandée]\n2. [Mesure demandée]\n3. [Délai de mise en conformité]\n\nLe défaut de donner suite dans les [X] jours ouvrables pourrait entraîner d’autres démarches dans le cadre de la procédure de règlement des griefs et d’arbitrage.\n\nCette demande est formulée sous réserve de tous les autres droits et recours prévus à la convention collective ou à la législation applicable.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Section locale]"
+        },
+        "documentation_request": {
+          "label": "Demande de documents",
+          "description": "Demande de dossiers, de documents ou de renseignements de l’employeur pertinents à un dossier.",
+          "subject": "Demande de documents — [Référence]",
+          "body": "Madame, Monsieur [Nom du destinataire],\n\nRelativement au [numéro du grief ou du dossier], nous demandons les documents suivants pour appuyer l’examen :\n\n1. [Préciser le type de document]\n2. [Préciser le type de document]\n3. [Préciser le type de document]\n\nEn vertu de la convention collective, l’employeur doit fournir les documents pertinents dans les [X] jours ouvrables suivant cette demande.\n\nVeuillez transmettre les documents demandés à la personne soussignée dès que possible.\n\nNous vous remercions de votre collaboration.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Section locale]"
+        },
+        "meeting_request": {
+          "label": "Demande de rencontre",
+          "description": "Demande de rencontre d’étape, de médiation ou de discussion avec l’employeur.",
+          "subject": "Demande de rencontre — [Objet]",
+          "body": "Madame, Monsieur [Nom du destinataire],\n\nNous souhaitons convenir d’une rencontre concernant [objet ou numéro du grief].\n\nNous proposons les possibilités suivantes :\n- Date et heure 1 : [Insérer la date et l’heure]\n- Date et heure 2 : [Insérer la date et l’heure]\n- Date et heure 3 : [Insérer la date et l’heure]\n\nLieu : [Insérer le lieu souhaité ou le lien de rencontre virtuelle]\n\nLes personnes suivantes représenteront le syndicat :\n- [Nom de la personne plaignante] (personne plaignante)\n- [Nom de la personne déléguée syndicale] (délégation syndicale ou représentation)\n\nVeuillez confirmer une date et une heure dans les trois (3) jours ouvrables.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Section locale]"
+        },
+        "response_letter": {
+          "label": "Réponse à l’employeur",
+          "description": "Réponse officielle à une communication, une proposition ou une décision de l’employeur.",
+          "subject": "Objet : [Objet initial]",
+          "body": "Madame, Monsieur [Nom du destinataire],\n\nNous vous remercions de votre communication du [date] concernant [objet].\n\nAprès examen, voici notre réponse :\n\n[Votre réponse et votre position]\n\n[Le cas échéant : Nous demandons de poursuivre la discussion / Nous acceptons les conditions proposées / Nous rejetons la proposition pour les raisons suivantes :]\n\nNous demeurons résolus à régler cette question par la procédure établie de règlement des griefs et par un dialogue constructif.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Section locale]"
+        },
+        "resolution_proposal": {
+          "label": "Proposition de règlement",
+          "description": "Conditions de règlement proposées pour un grief en cours.",
+          "subject": "Proposition de règlement — [Référence]",
+          "body": "Madame, Monsieur [Nom du destinataire],\n\nÀ la suite de nos discussions concernant [numéro du grief ou du dossier], nous proposons le règlement suivant :\n\nConditions proposées :\n1. [Insérer la mesure corrective proposée]\n2. [Insérer le calendrier de mise en œuvre]\n3. [Insérer les conditions, s’il y a lieu]\n\nCette proposition est formulée sous réserve de tous droits et doit être ratifiée par la personne plaignante et le syndicat.\n\nNous estimons qu’elle répond aux préoccupations soulevées et souhaitons convenir d’une rencontre pour en discuter.\n\nVeuillez répondre dans les [X] jours ouvrables.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Section locale]"
+        },
+        "official_notice": {
+          "label": "Avis officiel",
+          "description": "Avis légal ou contractuel aux membres, à l’employeur ou à des tiers.",
+          "subject": "Avis — [Objet]",
+          "body": "À qui de droit,\n\nVeuillez prendre connaissance de l’avis suivant :\n\n[Décrire l’objet de l’avis]\n\nDate d’entrée en vigueur : [Date]\n\nLe présent avis est donné en vertu de [citer l’article, le règlement interne ou la disposition pertinente].\n\n[Autres précisions ou mesures demandées]\n\nPour toute question ou tout renseignement complémentaire, veuillez communiquer avec la personne soussignée.\n\nVeuillez agréer nos salutations distinguées.\n[Votre nom]\n[Titre / Section locale]"
+        },
+        "investigation_report": {
+          "label": "Rapport d’enquête",
+          "description": "Rapport officiel présentant les constatations d’une enquête ou d’un examen en milieu de travail.",
+          "subject": "Rapport d’enquête — [Objet]",
+          "body": "RAPPORT D’ENQUÊTE\n\nRéférence : [Numéro du dossier]\nDate : [Date]\nResponsable de l’enquête : [Votre nom]\n\n1. CONTEXTE\n[Décrire les circonstances à l’origine de l’enquête]\n\n2. MÉTHODOLOGIE\n[Décrire la démarche : entrevues, documents examinés et échéancier]\n\n3. CONSTATATIONS\n[Présenter les constatations factuelles par question]\n\n4. ANALYSE\n[Analyser les constatations selon la convention collective, les politiques ou la législation]\n\n5. CONCLUSIONS\n[Résumer les conclusions]\n\n6. RECOMMANDATIONS\n[Énumérer les mesures recommandées]\n\nPrésenté par :\n[Votre nom]\n[Titre / Section locale]"
+        },
+        "blank": {
+          "label": "Lettre vierge",
+          "description": "Commencez une lettre sans modèle.",
+          "subject": "",
+          "body": ""
+        }
+      }
     },
     "detail": {
       "title": "Détails de la lettre",

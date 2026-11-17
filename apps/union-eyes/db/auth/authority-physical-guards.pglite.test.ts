@@ -210,7 +210,7 @@ describe('base authority physical source contract', () => {
         const insert = (powers: string[], holder: string) =>
           f.audited(
             'issuer',
-            `INSERT INTO ue_authority_mandates(organization_id,principal_user_id,kind,powers,scope,source_instrument,granted_by,effective_at,expires_at) VALUES($1,$2,'supervisory',$3::text[], '{"resourceIds":["fixture-case"]}'::jsonb,'Synthetic ceiling fixture','issuer',now(),now()+interval '1 day')`,
+            `INSERT INTO ue_authority_mandates(organization_id,principal_user_id,kind,powers,scope,source_instrument,granted_by,effective_at,expires_at) VALUES($1,$2,'supervisory',$3::text[], '{"resourceIds":["00000000-0000-4000-8000-000000000123"]}'::jsonb,'Synthetic ceiling fixture','issuer',now(),now()+interval '1 day')`,
             [f.org, holder, powers],
           )
         for (const [i, power] of forbidden.entries())

@@ -447,21 +447,19 @@ export async function updateClaimStatus(
       }
 
       // AUTO-CREATE SATISFACTION SURVEY ("Rate My LRO")
-      // When a claim is resolved or closed with an assigned LRO, send
-      // the member a satisfaction survey to rate their experience
-      if (claim.memberId && claim.assignedTo) {
+      // When a claim is resolved or closed, resolve the governed primary before creating
+      // the member's satisfaction survey. The legacy assignment mirror is not attribution.
+      if (claim.memberId) {
         try {
           const { createSatisfactionSurvey } = await import('@/lib/services/satisfaction-service');
           await createSatisfactionSurvey({
             organizationId: claim.organizationId!,
             claimId: claim.id,
             memberId: claim.memberId,
-            lroId: claim.assignedTo,
-          });
+          },actor.userId);
           logger.info('Satisfaction survey created on case closure', {
             claimId: claim.claimId,
             memberId: claim.memberId,
-            lroId: claim.assignedTo,
           });
         } catch (_satisfactionError) {
           // Don't fail the status update if satisfaction survey creation fails

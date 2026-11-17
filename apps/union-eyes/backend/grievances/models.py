@@ -189,12 +189,39 @@ class Claims(BaseModel):
         return str(self.claim_number)
 
 
+class ClaimStatusTransitions(models.Model):
+    """Protected status journal: the claim FK is the internal Claims.id, not claim_id.
+
+    Historical transaction identifiers remain unknown. The current database writer
+    stamps only new events; this model does not infer or backfill past authority.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization_id = models.UUIDField()
+    claim = models.ForeignKey("Claims", on_delete=models.PROTECT)
+    from_status = models.CharField(max_length=50, null=True, blank=True)
+    to_status = models.CharField(max_length=50)
+    changed_at = models.DateTimeField(default=timezone.now)
+    changed_by = models.CharField(max_length=255, null=True, blank=True)
+    transaction_id = models.BigIntegerField(null=True, blank=True, editable=False)
+
+    class Meta:
+        db_table = "claim_status_transitions"
+        indexes = [
+            models.Index(fields=["claim", "changed_at"], name="claim_status_trans_claim_idx"),
+            models.Index(fields=["organization_id", "changed_at"], name="claim_status_trans_org_idx"),
+        ]
+
+
 class ClaimUpdates(BaseModel):
     """Migrated from drizzle: claims-schema.ts"""
 
     update_id = models.UUIDField(default=uuid.uuid4, unique=True)
     claim = models.ForeignKey(
         "Claims", on_delete=models.CASCADE, related_name="claim_updates_claim_set"
+    )
+    transition = models.OneToOneField(
+        "ClaimStatusTransitions", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="public_projection",
     )
     update_type = models.CharField(max_length=50, null=True, blank=True)
     message = models.TextField(null=True, blank=True)

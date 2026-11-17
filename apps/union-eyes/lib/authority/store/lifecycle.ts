@@ -85,7 +85,7 @@ async function evaluateIssuance(exec: SqlExecutor, deps: EnforcementDeps, e: Eva
   const holderMandates = e.operation === 'issue' || e.operation === 'amend' ? await loadHolderMandates(exec, e.organizationId, e.holderUserId) : []
   // Issuer facts contain only the issuer/delegators' recusals. Conferring a grant must also load the proposed holder's own recusals.
   const holderRecusals = e.operation === 'issue' || e.operation === 'amend'
-    ? (await exec.query<Row>('SELECT * FROM ue_authority_recusals WHERE organization_id=$1 AND principal_user_id=$2',
+    ? (await exec.query<Row>('SELECT * FROM public.ue_authority_recusals WHERE organization_id=$1 AND principal_user_id=$2',
       [e.organizationId, e.holderUserId])).rows.map(mapRecusal) : []
   let approval = null
   if (e.approvalRequestId) {
@@ -146,11 +146,11 @@ export async function draftIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps
   requireRulePowerCeiling(i.domain, i.operation, i.allowedPowers)
   const row = (
     await exec.query<Row>(
-      `INSERT INTO ue_authority_issuance_rules
+      `INSERT INTO public.ue_authority_issuance_rules
          (organization_id, domain, operation, issuer_capacities, issuer_mandate_kind, issuer_mandate_power, allowed_powers,
           max_term_days, requires_acceptance, required_independent_approvals, version, status, source_instrument, drafted_by)
        VALUES ($1,$2,$3,$4::text[],$5,$6,$7::text[],$8,$9,$10,
-               COALESCE((SELECT max(version) FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $2 AND operation = $3), 0) + 1,
+               COALESCE((SELECT max(version) FROM public.ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $2 AND operation = $3), 0) + 1,
                'draft',$11,$12) RETURNING id::text AS id`,
       [
         i.organizationId, i.domain, i.operation, [...i.issuerCapacities], i.issuerMandateKind ?? null, i.issuerMandatePower ?? null,
@@ -204,13 +204,13 @@ export async function requestRuleAdoption(exec: SqlExecutor, deps: EnforcementDe
   if (named.includes(i.actorUserId)) throw new AuthorityStoreError('DENIED', 'the requester cannot be a named approver')
   await requireAdopter(exec, deps, i.organizationId, i.actorUserId)
   for (const u of named) await requireAdopter(exec, deps, i.organizationId, u)
-  const rule = (await exec.query<Row>(`SELECT status, drafted_by FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
+  const rule = (await exec.query<Row>(`SELECT status, drafted_by FROM public.ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
   if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
   if (named.includes(String(rule.drafted_by))) throw new AuthorityStoreError('DENIED', 'a rule cannot be approved by its drafter')
-  const live = await exec.query(`SELECT 1 FROM ue_authority_approval_requests WHERE organization_id = $1 AND subject_type = 'rule_adoption' AND subject_id = $2 AND status IN ('open', 'satisfied')`, [i.organizationId, i.ruleId])
+  const live = await exec.query(`SELECT 1 FROM public.ue_authority_approval_requests WHERE organization_id = $1 AND subject_type = 'rule_adoption' AND subject_id = $2 AND status IN ('open', 'satisfied')`, [i.organizationId, i.ruleId])
   if (live.rows.length > 0) throw new AuthorityStoreError('PRECONDITION', 'this rule already has a live adoption request')
   const set = await exec.query(
-    `UPDATE ue_authority_issuance_rules SET source_instrument = $3 WHERE organization_id = $1 AND id = $2 AND status = 'draft' RETURNING id`,
+    `UPDATE public.ue_authority_issuance_rules SET source_instrument = $3 WHERE organization_id = $1 AND id = $2 AND status = 'draft' RETURNING id`,
     [i.organizationId, i.ruleId, i.sourceInstrument],
   )
   if (set.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
@@ -239,7 +239,7 @@ export async function activateIssuanceRule(exec: SqlExecutor, deps: EnforcementD
   requireUuids(i.organizationId, i.ruleId, i.approvalRequestId)
   requirePrincipals(i.actorUserId)
   await bindSessionActor(exec, i.actorUserId, 'rule activator')
-  const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by, source_instrument, allowed_powers FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
+  const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by, source_instrument, allowed_powers FROM public.ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
   if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
   if (rule.domain === 'supervisory' && (rule.operation === 'issue' || rule.operation === 'amend')) {
     if (!Array.isArray(rule.allowed_powers) || !rule.allowed_powers.every((power: unknown): power is string => typeof power === 'string')) {
@@ -263,12 +263,12 @@ export async function activateIssuanceRule(exec: SqlExecutor, deps: EnforcementD
 
   // A newer version replaces the active one in the same transaction.
   const retired = await exec.query<Row>(
-    `UPDATE ue_authority_issuance_rules SET status = 'retired', retired_at = now()
+    `UPDATE public.ue_authority_issuance_rules SET status = 'retired', retired_at = now()
       WHERE organization_id = $1 AND domain = $2 AND operation = $3 AND status = 'active' RETURNING id::text AS id`,
     [i.organizationId, rule.domain, rule.operation],
   )
   await exec.query(
-    `UPDATE ue_authority_issuance_rules
+    `UPDATE public.ue_authority_issuance_rules
         SET status = 'active', approved_by = $3::text[], activated_at = now()
       WHERE organization_id = $1 AND id = $2 AND status = 'draft'`,
     [i.organizationId, i.ruleId, approvers],
@@ -286,7 +286,7 @@ export async function retireIssuanceRule(exec: SqlExecutor, deps: EnforcementDep
   requirePrincipals(actorUserId)
   await bindSessionActor(exec, actorUserId, 'rule retirer')
   await requireAdopter(exec, deps, organizationId, actorUserId)
-  const r = await exec.query(`UPDATE ue_authority_issuance_rules SET status = 'retired', retired_at = now() WHERE organization_id = $1 AND id = $2 AND status <> 'retired' RETURNING id`, [organizationId, ruleId])
+  const r = await exec.query(`UPDATE public.ue_authority_issuance_rules SET status = 'retired', retired_at = now() WHERE organization_id = $1 AND id = $2 AND status <> 'retired' RETURNING id`, [organizationId, ruleId])
   if (r.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no live rule with this id')
   await auditAuthorityMutation(exec, { organizationId, action: 'rule.retire', resourceType: 'ue_authority_issuance_rules', resourceId: ruleId, details: { actor: actorUserId } })
 }
@@ -387,7 +387,7 @@ export async function issueMandate(exec: SqlExecutor, deps: EnforcementDeps, i: 
 }
 
 async function loadMandateRow(exec: SqlExecutor, organizationId: string, id: string): Promise<Mandate> {
-  const row = (await exec.query<Row>(`SELECT * FROM ue_authority_mandates WHERE organization_id = $1 AND id = $2`, [organizationId, id])).rows[0]
+  const row = (await exec.query<Row>(`SELECT * FROM public.ue_authority_mandates WHERE organization_id = $1 AND id = $2`, [organizationId, id])).rows[0]
   if (!row) throw new AuthorityStoreError('NOT_FOUND', 'mandate not found in this organization')
   return mapMandate(row)
 }
@@ -473,7 +473,7 @@ export async function revokeDelegationGoverned(
 ): Promise<void> {
   requireUuids(i.organizationId, i.delegationId)
   await bindSessionActor(exec, i.issuerUserId, 'issuer')
-  const d = (await exec.query<Row>(`SELECT delegate_user_id FROM ue_authority_delegations WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.delegationId])).rows[0]
+  const d = (await exec.query<Row>(`SELECT delegate_user_id FROM public.ue_authority_delegations WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.delegationId])).rows[0]
   if (!d) throw new AuthorityStoreError('NOT_FOUND', 'delegation not found in this organization')
   const { decision } = await evaluateIssuance(exec, deps, {
     organizationId: i.organizationId, issuerUserId: i.issuerUserId, holderUserId: String(d.delegate_user_id),
@@ -500,7 +500,7 @@ export async function liftRecusal(
 ): Promise<void> {
   requireUuids(i.organizationId, i.recusalId)
   await bindSessionActor(exec, i.issuerUserId, 'issuer')
-  const r = (await exec.query<Row>(`SELECT principal_user_id, resource_type, resource_id::text AS resource_id FROM ue_authority_recusals WHERE organization_id = $1 AND id = $2 AND lifted_at IS NULL`, [i.organizationId, i.recusalId])).rows[0]
+  const r = (await exec.query<Row>(`SELECT principal_user_id, resource_type, resource_id::text AS resource_id FROM public.ue_authority_recusals WHERE organization_id = $1 AND id = $2 AND lifted_at IS NULL`, [i.organizationId, i.recusalId])).rows[0]
   if (!r) throw new AuthorityStoreError('NOT_FOUND', 'no active recusal with this id')
   const { decision } = await evaluateIssuance(exec, deps, {
     organizationId: i.organizationId, issuerUserId: i.issuerUserId, holderUserId: String(r.principal_user_id),
@@ -572,7 +572,7 @@ export async function revokeCaseAssignment(
   const resource = { type: 'case' as const, id: i.caseId, organizationId: i.organizationId }
   const row = (
     await exec.query<Row>(
-      `SELECT principal_user_id FROM ue_authority_resource_relationships
+      `SELECT principal_user_id FROM public.ue_authority_resource_relationships
         WHERE organization_id = $1 AND id = $2 AND resource_type = 'case' AND resource_id = $3
           AND relation IN ('assignee', 'owner', 'collaborator') AND revoked_at IS NULL`,
       [i.organizationId, i.relationshipId, i.caseId],
@@ -611,7 +611,7 @@ export async function reassignCase(
   if (i.outgoingUserId === i.incomingUserId) throw new AuthorityStoreError('PRECONDITION', 'the incoming assignee is the outgoing assignee')
   const live = (
     await exec.query<Row>(
-      `SELECT id::text AS id FROM ue_authority_resource_relationships
+      `SELECT id::text AS id FROM public.ue_authority_resource_relationships
         WHERE organization_id = $1 AND resource_type = 'case' AND resource_id = $2 AND principal_user_id = $3
           AND relation IN ('assignee', 'owner') AND revoked_at IS NULL ORDER BY id`,
       [i.organizationId, i.caseId, i.outgoingUserId],
@@ -651,11 +651,11 @@ export async function succeedOffice(
   requireUuids(i.organizationId)
   requirePrincipals(i.issuerUserId, i.outgoingUserId)
   const offices = (await exec.query<Row>(
-    `SELECT id::text AS id FROM ue_authority_mandates WHERE organization_id = $1 AND principal_user_id = $2 AND kind = 'executive_office' AND revoked_at IS NULL`,
+    `SELECT id::text AS id FROM public.ue_authority_mandates WHERE organization_id = $1 AND principal_user_id = $2 AND kind = 'executive_office' AND revoked_at IS NULL`,
     [i.organizationId, i.outgoingUserId],
   )).rows.map((r) => String(r.id))
   const delegations = (await exec.query<Row>(
-    `SELECT id::text AS id FROM ue_authority_delegations WHERE organization_id = $1 AND delegator_user_id = $2 AND revoked_at IS NULL`,
+    `SELECT id::text AS id FROM public.ue_authority_delegations WHERE organization_id = $1 AND delegator_user_id = $2 AND revoked_at IS NULL`,
     [i.organizationId, i.outgoingUserId],
   )).rows.map((r) => String(r.id))
   for (const d of delegations) await revokeDelegationGoverned(exec, deps, { organizationId: i.organizationId, issuerUserId: i.issuerUserId, delegationId: d })

@@ -18,7 +18,7 @@
  *
  * Neither path is delegable and neither can be reached by emergency access.
  */
-import { activeMembership, activeRecusal, build, deny, hasCapacity, isLive } from '../common'
+import { activeMembership, activeRecusal, build, deny, hasCapacity, isLive, validStringArray } from '../common'
 import type {
   AuthorityFacts,
   AuthorityRequest,
@@ -31,7 +31,7 @@ import type {
 const HANDLER: readonly Capacity[] = ['steward', 'chief_steward', 'officer']
 
 const consentLive = (c: DisclosureConsent, now: Date): boolean =>
-  isLive({ status: 'active', effectiveAt: c.grantedAt, expiresAt: c.expiresAt, revokedAt: c.revokedAt }, now)
+  validStringArray(c.categories) && isLive({ status: 'active', effectiveAt: c.grantedAt, expiresAt: c.expiresAt, revokedAt: c.revokedAt }, now)
 
 export function decideWorkAid(
   req: AuthorityRequest,
@@ -61,7 +61,7 @@ export function decideWorkAid(
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   const categories = req.categories ?? []
-  if (categories.length === 0 || categories.includes('*')) {
+  if (!validStringArray(categories) || categories.length === 0 || categories.includes('*')) {
     return deny(req, now, { code: 'CONSENT_SCOPE_EXCEEDED', detail: 'explicit information categories are required; wildcards are not accepted' })
   }
 

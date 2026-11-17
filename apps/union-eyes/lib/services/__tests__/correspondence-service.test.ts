@@ -45,7 +45,7 @@ vi.mock('drizzle-orm', () => ({
 }));
 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
-vi.mock('@/lib/correspondence/access',()=>({mayReadCorrespondence:async()=>true,requireCorrespondenceWrite:async()=>{}}));
+vi.mock('@/lib/correspondence/access',()=>({mayReadCorrespondence:async()=>true,requireCorrespondenceWrite:async()=>{},requireCorrespondenceDisclosure:async()=>{}}));
 vi.mock('@/db/schema/domains/communications/notifications',()=>({notificationQueue:new Proxy({}, {get:(_t,p)=>p === 'name'?'notification_queue':String(p)})}));
 vi.mock('@/lib/db/with-rls-context', async () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import('@/db')).db),

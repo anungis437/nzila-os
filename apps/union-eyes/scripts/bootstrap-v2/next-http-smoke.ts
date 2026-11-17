@@ -8,6 +8,10 @@ import {
   generateTotpSecret,
   verifyTotp,
 } from '../../../../packages/platform-auth/src/mfa/totp'
+import {
+  runAuthenticatedCaseworkLoad,
+  seedAuthenticatedCaseworkFixtures,
+} from './authenticated-casework-load'
 
 export interface HttpObservation {
   name: string
@@ -16,7 +20,11 @@ export interface HttpObservation {
   status: number
 }
 
-export async function seedNextHttpSmoke(seed: pg.Client, mfaEncryptionKey: string) {
+export async function seedNextHttpSmoke(
+  seed: pg.Client,
+  mfaEncryptionKey: string,
+  authenticatedCaseworkLoad = false,
+) {
   const organizations = [randomUUID(), randomUUID(), randomUUID()]
   const actor = `ue-v2-http-${randomUUID()}`
   const administrator = `ue-v2-http-admin-${randomUUID()}`
@@ -63,7 +71,15 @@ export async function seedNextHttpSmoke(seed: pg.Client, mfaEncryptionKey: strin
        ($4,$2,'admin',true,true,now())`,
     [actor, organizations[0], organizations[1], administrator],
   )
-  return { organizations, actor, administrator, password, mfaSecret }
+  const loadFixture = authenticatedCaseworkLoad
+    ? await seedAuthenticatedCaseworkFixtures(seed, {
+        organizationId: organizations[0],
+        foreignOrganizationId: organizations[2],
+        passwordHash,
+        encryptedMfaSecret,
+      })
+    : null
+  return { organizations, actor, administrator, password, mfaSecret, loadFixture }
 }
 
 export async function runNextHttpSmoke(
@@ -71,7 +87,11 @@ export async function runNextHttpSmoke(
   seed: pg.Client,
   fixture: Awaited<ReturnType<typeof seedNextHttpSmoke>>,
   observations: HttpObservation[],
-  options: { duesInitiationStatuses?: number[]; documentRepositoryStatuses?: number[] } = {},
+  options: {
+    duesInitiationStatuses?: number[]
+    documentRepositoryStatuses?: number[]
+    authenticatedCaseworkLoad?: { runtimeUrl: string; authUrl: string }
+  } = {},
 ) {
   const { actor, administrator, password, organizations, mfaSecret } = fixture
   const cronSecret = process.env.UE_V2_SMOKE_CRON_SECRET ?? 'ue-v2-cron-secret'
@@ -175,18 +195,27 @@ export async function runNextHttpSmoke(
   cookie = cookies(switched.response)
   // Client-supplied organization and user identifiers are never an authority: the route's strict schema now REFUSES them
   // outright (it previously ignored them). Nothing may be written for a refused request.
-  await request('hostile-identity-fields-in-preference-write-refused', '/api/notifications/preferences', [400], {
-    method: 'PUT',
-    cookie,
-    body: {
-      email: `${actor}@example.invalid`,
-      emailEnabled: false,
-      organizationId: organizations[2],
-      userId: administrator,
+  await request(
+    'hostile-identity-fields-in-preference-write-refused',
+    '/api/notifications/preferences',
+    [400],
+    {
+      method: 'PUT',
+      cookie,
+      body: {
+        email: `${actor}@example.invalid`,
+        emailEnabled: false,
+        organizationId: organizations[2],
+        userId: administrator,
+      },
     },
-  })
+  )
   assert.equal(
-    (await seed.query('SELECT 1 FROM public.user_notification_preferences WHERE user_id=ANY($1)', [[actor, administrator]])).rowCount,
+    (
+      await seed.query('SELECT 1 FROM public.user_notification_preferences WHERE user_id=ANY($1)', [
+        [actor, administrator],
+      ])
+    ).rowCount,
     0,
     'A refused preference write persisted a row',
   )
@@ -298,35 +327,63 @@ export async function runNextHttpSmoke(
   // organization, so neither another organization's role, a client-supplied tenant header, a forged cookie, a cross-tenant
   // administrator nor a suspended identity can widen what the session may do.
   const claimId = claimRows.rows[0].id as string
-  const otherOrg = await request('multi-org-switch-to-member-organization', '/api/organizations/switch', [200], {
-    method: 'POST',
-    cookie,
-    body: { organizationId: organizations[0] },
-  })
+  const otherOrg = await request(
+    'multi-org-switch-to-member-organization',
+    '/api/organizations/switch',
+    [200],
+    {
+      method: 'POST',
+      cookie,
+      body: { organizationId: organizations[0] },
+    },
+  )
   const memberHere = cookies(otherOrg.response)
   await request('steward-elsewhere-is-only-member-here', '/api/claims', [403], {
     method: 'POST',
     cookie: memberHere,
     body: journeyClaim,
   })
-  const backToStewardOrg = await request('multi-org-switch-back', '/api/organizations/switch', [200], {
-    method: 'POST',
-    cookie: memberHere,
-    body: { organizationId: organizations[1] },
-  })
+  const backToStewardOrg = await request(
+    'multi-org-switch-back',
+    '/api/organizations/switch',
+    [200],
+    {
+      method: 'POST',
+      cookie: memberHere,
+      body: { organizationId: organizations[1] },
+    },
+  )
   cookie = cookies(backToStewardOrg.response)
-  const hostileHeader = await request('client-tenant-header-does-not-select-organization', '/api/notifications/preferences', [200, 404], {
-    cookie,
-    headers: { 'x-org-id': organizations[2], 'x-organization-id': organizations[2] },
-  })
-  assert.ok(!JSON.stringify(hostileHeader.body).includes(organizations[2]), 'a client tenant header selected an organization')
+  const hostileHeader = await request(
+    'client-tenant-header-does-not-select-organization',
+    '/api/notifications/preferences',
+    [200, 404],
+    {
+      cookie,
+      headers: { 'x-org-id': organizations[2], 'x-organization-id': organizations[2] },
+    },
+  )
+  assert.ok(
+    !JSON.stringify(hostileHeader.body).includes(organizations[2]),
+    'a client tenant header selected an organization',
+  )
   const forged = cookie.replace(/=([^;]+)/, (_match, value: string) => `=${value.slice(0, -4)}AAAA`)
   assert.notEqual(forged, cookie)
-  await request('forged-session-cookie-denied', '/api/notifications/preferences', [401], { cookie: forged })
-  const bystander = await request('cross-tenant-administrator-claim-read-denied', `/api/claims/${claimId}`, [403, 404], {
-    cookie: adminCookie,
+  await request('forged-session-cookie-denied', '/api/notifications/preferences', [401], {
+    cookie: forged,
   })
-  assert.ok(!JSON.stringify(bystander.body).includes(claimNumber), 'a cross-tenant administrator read another organization claim')
+  const bystander = await request(
+    'cross-tenant-administrator-claim-read-denied',
+    `/api/claims/${claimId}`,
+    [403, 404],
+    {
+      cookie: adminCookie,
+    },
+  )
+  assert.ok(
+    !JSON.stringify(bystander.body).includes(claimNumber),
+    'a cross-tenant administrator read another organization claim',
+  )
   await seed.query(
     "UPDATE user_management.users SET lifecycle_state='suspended', is_active=false WHERE user_id=$1",
     [actor],
@@ -340,7 +397,9 @@ export async function runNextHttpSmoke(
     "UPDATE user_management.users SET lifecycle_state='active', is_active=true WHERE user_id=$1",
     [actor],
   )
-  await request('reinstated-identity-session-allowed', '/api/notifications/preferences', [200], { cookie })
+  await request('reinstated-identity-session-allowed', '/api/notifications/preferences', [200], {
+    cookie,
+  })
   await seed.query(
     "UPDATE user_management.organization_users SET role='member' WHERE user_id=$1 AND organization_id=$2",
     [actor, organizations[1]],
@@ -399,7 +458,9 @@ export async function runNextHttpSmoke(
     documentPayload.title,
   ])
   assert.equal(documentRows.rowCount, 0, 'denied document request persisted a row')
-  await request('cron-without-credential-denied', '/api/cron/deadline-reminders', [401], { method: 'POST' })
+  await request('cron-without-credential-denied', '/api/cron/deadline-reminders', [401], {
+    method: 'POST',
+  })
   await request('cron-with-credential', '/api/cron/deadline-reminders', [200], {
     method: 'POST',
     headers: { 'x-cron-secret': cronSecret },
@@ -407,10 +468,26 @@ export async function runNextHttpSmoke(
   await request('session-logout', '/api/auth/logout', [200], { method: 'POST', cookie })
   await request('revoked-session-denied', '/api/notifications/preferences', [401], { cookie })
   await request('health', '/api/health', [200])
+  const authenticatedCaseworkLoad = options.authenticatedCaseworkLoad
+    ? await runAuthenticatedCaseworkLoad({
+        origin: base,
+        seed,
+        fixture: assertLoadFixture(fixture.loadFixture),
+        password,
+        mfaSecret,
+        ...options.authenticatedCaseworkLoad,
+      })
+    : { status: 'UNEXECUTED', reason: 'UE_V2_AUTHENTICATED_CASEWORK_LOAD=1 was not enabled.' }
   return {
-    status: 'PASS',
+    status: authenticatedCaseworkLoad.status === 'FAIL' ? 'FAIL' : 'PASS',
+    authenticatedCaseworkLoad,
     ordinaryWrite: 'PERSISTED_RELOADED_CANONICAL_ACTOR_AND_ORGANIZATION',
     systemWrite: 'AUTHORIZED_AND_PERSISTED_ORDINARY_CALLER_DENIED',
     limitations: ['Representative HTTP smoke is not complete caller or financial qualification.'],
   }
+}
+
+function assertLoadFixture<T>(fixture: T | null): T {
+  assert.ok(fixture, 'Enabled authenticated load requires its producer-owned synthetic fixtures')
+  return fixture
 }

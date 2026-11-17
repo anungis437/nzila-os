@@ -8,7 +8,7 @@ import { getFromEmail,sendResendEmail,type SendEmailResult } from '@/lib/email-s
 import { correspondenceEmailKey,correspondenceEmailRetryAllowed,CORRESPONDENCE_EMAIL_LEASE_MS,CORRESPONDENCE_EMAIL_RETRY_WINDOW_MS } from '@/lib/correspondence/email-intent'
 import { drizzleExecutor } from '@/lib/authority/store/route-adapter'
 import { issueQueuedCaseMailCapability,queuedCaseMailContext } from '@/lib/authority/store/queued-case-mail'
-import { CASE_STATUS_EMAIL_PURPOSE,sealCaseStatusEmail,verifyCaseStatusEmail,sealCaseStatusReceipt,verifyCaseStatusReceipt,type CaseStatusEmailIntent } from './case-status-intent'
+import { CASE_STATUS_EMAIL_PURPOSE,renderCaseStatusNotification,sealCaseStatusEmail,verifyCaseStatusEmail,sealCaseStatusReceipt,verifyCaseStatusReceipt,type CaseStatusEmailIntent } from './case-status-intent'
 
 type QueueRow=typeof notificationQueue.$inferSelect
 const purpose=sql`${notificationQueue.payload}->>'purpose'=${CASE_STATUS_EMAIL_PURPOSE}`
@@ -50,28 +50,28 @@ async function claim(now:Date) {
     if(!row)return null
     let intent:CaseStatusEmailIntent
     try{intent=verifyCaseStatusEmail(row.payload,row,key)}catch{
-      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CASE_STATUS_INVALID_SEAL',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CASE_STATUS_INVALID_SEAL',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'review_required',{reason:'invalid_seal'});return null
     }
     const prior=await receipt(tx,intent,key)
-    if(prior){await tx.update(notificationQueue).set({status:'completed',completedAt:new Date(prior.acceptedAt),updatedAt:now,errorMessage:null}).where(eq(notificationQueue.id,row.id));return null}
+    if(prior){await tx.update(notificationQueue).set({status:'completed',completedAt:new Date(prior.acceptedAt),updatedAt:now,errorMessage:null}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)));return null}
     const context=await queuedCaseMailContext(drizzleExecutor(tx),{queueId:row.id,capability:intent.authorityCapability})
     const email=z.string().email().max(320).safeParse(context.recipientEmail)
     if(!context.allowed || !email.success || (intent.mail && intent.mail.to!==email.data)) {
-      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CASE_STATUS_AUTHORITY_REVOKED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CASE_STATUS_AUTHORITY_REVOKED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'suppressed',{reason:'authority_or_recipient_changed'});return null
     }
     const count=/^\d$/.test(row.attemptCount)?Number(row.attemptCount):99
     if(count>=3 || !correspondenceEmailRetryAllowed(row.createdAt,now)) {
-      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CASE_STATUS_RECONCILIATION_REQUIRED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CASE_STATUS_RECONCILIATION_REQUIRED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'review_required',{reason:'retry_boundary'});return null
     }
     if(!intent.mail){
       const {seal:_seal,...unsigned}=intent
-      intent=sealCaseStatusEmail({...unsigned,mail:{from:getFromEmail(),to:email.data,subject:'Your case status was updated',
-        text:`Your case status was updated to ${intent.newStatus.replace(/_/g,' ')}. Sign in to Union Eyes to view your case.`}},key)
+      intent=sealCaseStatusEmail({...unsigned,mail:{from:getFromEmail(),to:email.data,
+        ...renderCaseStatusNotification(intent.newStatus,context.recipientLocale)}},key)
     }
-    await tx.update(notificationQueue).set({payload:intent,status:'processing',attemptCount:String(count+1),processedAt:now,nextRetryAt:null,errorMessage:null,updatedAt:now}).where(eq(notificationQueue.id,row.id))
+    await tx.update(notificationQueue).set({payload:intent,status:'processing',attemptCount:String(count+1),processedAt:now,nextRetryAt:null,errorMessage:null,updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
     await record(tx,row,'attempted',{attempt:count+1})
     return {row,intent,attempt:count+1}
   })
@@ -102,12 +102,12 @@ export async function processCaseStatusEmails(limit=5) {
         const proof=sealCaseStatusReceipt({purpose:'case_status_email_receipt_v1',queueId:row.id,organizationId:row.organizationId,
           intentSeal:intent.seal,providerMessageId:result.messageId!,acceptedAt:now.toISOString()},key)
         await record(tx,row,'accepted',proof)
-        await tx.update(notificationQueue).set({status:'completed',completedAt:now,updatedAt:now,errorMessage:null}).where(eq(notificationQueue.id,row.id))
+        await tx.update(notificationQueue).set({status:'completed',completedAt:now,updatedAt:now,errorMessage:null}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       }else if(row.status==='processing' && row.attemptCount===String(task.attempt)){
         const permanent=result.statusCode!==undefined && result.statusCode>=400 && result.statusCode<500 && ![408,409,425,429].includes(result.statusCode)
         const retry=!permanent && task.attempt<3 && correspondenceEmailRetryAllowed(row.createdAt,now)
         await tx.update(notificationQueue).set({status:retry?'retrying':'failed',nextRetryAt:retry?new Date(now.getTime()+60000):null,
-          errorMessage:permanent?'CASE_STATUS_PROVIDER_REJECTED':'CASE_STATUS_OUTCOME_UNCONFIRMED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+          errorMessage:permanent?'CASE_STATUS_PROVIDER_REJECTED':'CASE_STATUS_OUTCOME_UNCONFIRMED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
         await record(tx,row,permanent?'rejected':'unconfirmed',{attempt:task.attempt})
       }
     })

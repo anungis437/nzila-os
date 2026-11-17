@@ -1,0 +1,61 @@
+{
+  "recordedAt": "2026-11-17T20:45:16.073617+00:00",
+  "kind": "INTERIM_UNCOMMITTED_SOURCE_COMPONENT_EVIDENCE",
+  "gitHead": "7663ac457e43a1cad698b8159578fe70f619e119",
+  "finalCandidateSha": null,
+  "environment": "Local source/components and disposable PostgreSQL; not staging acceptance",
+  "promotionsPerformed": false,
+  "step2Initiated": false,
+  "rawDependencyAuditVerdict": "FAIL_HIGH_PICOMATCH_1247710",
+  "advisory": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+  "officialFirstPatchedVersion": null,
+  "localPatchCases": "56 Node tests passed including 40 matcher modifier/case-fold cases and 16 bulk-audit contract tests; 41 supply-chain/SBOM unit tests passed. This does not suppress the raw HIGH advisory.",
+  "fullRegressionDiscovery": {
+    "passed": 26597,
+    "failed": 42,
+    "skipped": 50,
+    "sourceChangedDuringRun": true,
+    "notFinalQualification": true
+  },
+  "targetedRerunOfAll13FailedFiles": {
+    "passed": 184,
+    "failed": 0,
+    "notFinalQualification": true
+  },
+  "sourceHashes": {
+    "package.json": "70ff115bedfe230bf2540e22f6d3a1858825802f09460723bb0a76cc18449a9f",
+    "pnpm-lock.yaml": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0",
+    "patches/picomatch@4.0.7.patch": "84f9739f825f963ad0896f3320add6fa2f0ea137ce1a4c57c6eb0827fdd45d36",
+    "patches/README.md": "b7393fb6b7802784ff64512c1e8c24ff06de041b8ae21a5b6455a860bd259e2a",
+    "tooling/security/picomatch-repeated-extglob.test.mjs": "f2c617510ff59b49c9a4fc8a1196f1373fd8c8ff10eea8c119d5f7066dea5ba5",
+    "scripts/generate-sbom.ts": "7d88d1a31f6d73f2e07880a0c56a9a666abeae88168f22808030ad5616baefe3",
+    "ops/security/npm-package-metadata.json": "17223d30bcd613179ffe9018c9426a6978d625b4690fbf53caca9ff980f2aa1d",
+    "ops/security/sbom.json": "b999c11aba12ee013163f759f94f710defaa204b2f3b15a54ab2eaa9df25f962",
+    "Dockerfile": "edcad760c10ee34b7c9699cef9eeec5fc68104c81fd7026f3bba4708349a9fa7"
+  },
+  "artifacts": {
+    "dependency-audit-installed-v2.json": "f68a9d210d8af8056573a98998bca5d7c1ea6eb291f5e96b0d0577eb43973df5",
+    "dependency-bulk-audit-installed-v2.json": "a5a12118ec7daf7316b5cc7c32b44c792ce6eb52fb8d3f9abd221965b6e52b8c",
+    "picomatch-advisory-v2.json": "ae8baf9957774748b6e1e9d4812435ebaef2a9ff87d28306c35016ab9a6dd3cd",
+    "picomatch-registry-v2.json": "8973a626ac8770ce1b817ad43225b08be0d7379c88b6d92bbb8ab99d31072e4a",
+    "security-node-tests-v2.txt": "4d45515df1d91e334573d05f101c276dd04d70a81cd200b90a692b4daee1c7fb",
+    "security-unit-tests-v2.txt": "3ffca16a5dd7c8bfe101d50e610e20ec2e44cdcf19f01d5fd35b45cbf8ddde51",
+    "dependency-frozen-install-v2.txt": "8f9c55889d469780c0567a59291cabc85315d49cc35895f1172f3bc9fc1c33bb",
+    "sbom-generation-v2.txt": "2a99936e0243d25736efb817d929c50c030763997f3d2177108899f158872145",
+    "full-union-eyes-discovery-v1.txt": "685157cd4761a71f2aa8e86d11ca983537a0a4ddc808605cffbcb70831ca31b5",
+    "discovered-failures-targeted-v5.txt": "0a77ab08fd701eb3ee342b42720009b61fcbf14308f15dc53e506ba6f1a80519",
+    "root-lint-interim-v1.txt": "84e1132bae1aee273bf07187fca652348c6bfe5ca88d4158a93da69c0b79c991",
+    "authority-native-targeted-v3.txt": "1819f41e4f3f163173016577109a04bb4cdd2fa1b96d22d0f2c1fa022b30cdef",
+    "authority-component-targeted-v4.txt": "d2813c88d2ab181374f1e9324370834e1baff736e661709c501c06f121ae6e01",
+    "authority-issuer-component-v5.txt": "0eb00cc7727d32d84aeeedfd8d7e812f14ab4b810691ad0e3919fd214c70f27c",
+    "legacy-authority-component-v3.txt": "11c23e95790ee131e5d93f7096ee767d55a8153de7dad0d1135fc206bcbffa78",
+    "ue-typecheck-interim-v1.txt": "5a45e12bce9a7a6af7f6058b82008b2bd3834beef23c4e8a6ed505452c3a4928"
+  },
+  "limitations": [
+    "Raw package audit remains blocked; no advisory waiver added",
+    "Full runtime/container/app-build qualification pending",
+    "All checks must bind the final integrated commit",
+    "Interim source hashes are recorded at evidence collection; no claim of unchanged source across these earlier discovery runs",
+    "Final independent adversarial review remains open"
+  ]
+}

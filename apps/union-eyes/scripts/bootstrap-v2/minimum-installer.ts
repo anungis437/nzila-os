@@ -2,7 +2,7 @@ import pg from 'pg'
 import { AUTH_EXECUTION_ROLES, AUTH_ROLE_MEMBERSHIP_EXPECTATIONS } from './auth-sql'
 import { CANONICAL_BOOTSTRAP_ROLES, INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 import { FRAMEWORK_MEMBERSHIPS, FRAMEWORK_ROLES } from './framework-contract'
-import { quote } from './source'
+import { quote, type V2Plan } from './source'
 import { compileRolePrerequisiteAssertions } from '../../../../packages/db/src/auth-storage-authority/role-prerequisites'
 
 export { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
@@ -36,7 +36,10 @@ export function compileMinimumRoleProvisioningSql(): string {
   ].join('\n')
 }
 
-export async function assertMinimumInstaller(client: pg.Client): Promise<void> {
+export const currentPlanRequiresVector = (plan: Pick<V2Plan,'statements'>): boolean =>
+  plan.statements.some(statement => statement.canonicalId === 'CURRENT_EXTENSION:vector')
+
+export async function assertMinimumInstaller(client: pg.Client, options: {vectorRequired?:boolean} = {}): Promise<void> {
   await client.query(
     compileRolePrerequisiteAssertions(
       Object.values(AUTH_EXECUTION_ROLES),
@@ -79,11 +82,14 @@ export async function assertMinimumInstaller(client: pg.Client): Promise<void> {
       WHERE member.rolname IN ('union_eyes_runtime','union_eyes_system')) THEN
       RAISE EXCEPTION 'UE_V2_INSTALLER_APPLICATION_MEMBERSHIP_DRIFT';
     END IF;
-    IF NOT EXISTS (SELECT FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace
+    IF ${options.vectorRequired === false ? 'false' : 'true'} AND NOT EXISTS (SELECT FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace
       JOIN pg_roles owner ON owner.oid=e.extowner
       WHERE e.extname='vector' AND e.extversion='0.8.1' AND n.nspname='public'
         AND owner.rolname='postgres') THEN
       RAISE EXCEPTION 'UE_V2_OPERATOR_PREPROVISIONED_VECTOR_REQUIRED';
+    END IF;
+    IF ${options.vectorRequired === false ? 'true' : 'false'} AND EXISTS(SELECT FROM pg_extension WHERE extname='vector') THEN
+      RAISE EXCEPTION 'UE_V2_UNDECLARED_VECTOR_PREINSTALL_DENIED';
     END IF;
   END $minimum_installer$`)
 }

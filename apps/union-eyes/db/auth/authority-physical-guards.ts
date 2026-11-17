@@ -2,6 +2,17 @@
 import type { PhysicalGuardContract } from './physical-guard-catalog'
 import { ACTIVE_RECUSAL_SQL } from '../../lib/authority/common'
 
+// Data-only immutable validation: no authority lookup or institutional entitlement is conferred.
+const MANDATE_SCOPE_VALID_BODY = `
+  SELECT CASE WHEN scope IS NULL OR jsonb_typeof(scope)<>'object' THEN false ELSE
+    (scope-ARRAY['unitIds','territoryIds','resourceIds','accountIds','classificationCeiling'])='{}'::jsonb
+    AND (NOT(scope ? 'classificationCeiling') OR scope->'classificationCeiling' IN ('"standard"'::jsonb,'"confidential"'::jsonb))
+    AND NOT EXISTS(SELECT FROM jsonb_each(scope) field WHERE field.key IN ('unitIds','territoryIds','resourceIds','accountIds')
+      AND (jsonb_typeof(field.value)<>'array' OR EXISTS(
+        SELECT FROM jsonb_array_elements(CASE WHEN jsonb_typeof(field.value)='array' THEN field.value ELSE '[]'::jsonb END) item
+        WHERE jsonb_typeof(item)<>'string' OR item#>>'{}' !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')))
+    END
+`
 // Additive companion: existing released guard bodies remain immutable on installed databases.
 const LIFECYCLE_DECISION_GUARD_BODY = `
 DECLARE checked_at timestamptz;
@@ -83,6 +94,7 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
     'ue_authority_reviews',
   ],
   functions: [
+    { name:'ue_authority_scope_valid',body:MANDATE_SCOPE_VALID_BODY,returns:'boolean',args:'scope jsonb',volatility:'i',language:'sql',path:'pg_catalog,pg_temp',callable:true },
     {
       name: 'ue_authority_guard_lifecycle_decision',
       body: LIFECYCLE_DECISION_GUARD_BODY,
@@ -895,6 +907,10 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
     {
       table_name: 'ue_authority_delegations', name: 'ue_authority_deleg_finite_time_chk', type: 'c',
       definition: 'CHECK ((isfinite(effective_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name:'ue_authority_mandates',name:'ue_authority_mandates_scope_shape_chk',type:'c',
+      definition:"CHECK (((status <> 'active'::text) OR ue_authority_scope_valid(scope)))",
     },
     {
       table_name: 'ue_authority_mandates', name: 'ue_authority_mandates_finite_time_chk', type: 'c',

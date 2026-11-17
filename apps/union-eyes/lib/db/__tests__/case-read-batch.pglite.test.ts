@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { drizzle } from 'drizzle-orm/pglite'
+import {PgDialect} from 'drizzle-orm/pg-core'
+import type {SQL} from 'drizzle-orm'
 import type { PGlite } from '@electric-sql/pglite'
 import { ORG, U, newUuid } from '@/db/__tests__/authority-kernel-harness'
 import { freshDb, kit, minutesAgo } from '@/db/__tests__/authority-kernel-testkit'
@@ -61,8 +63,8 @@ describe('batched case projections using the canonical PostgreSQL loaders and po
       const tx={execute:(query:Parameters<typeof database.execute>[0])=>{
         // Actual PostgreSQL denies this missing relation; the unchanged canonical loader catches it.
         const executor=drizzleExecutor(database as never)
-        void query
-        return executor.query('SELECT * FROM deliberately_missing_authority_relation')
+        const text=typeof query==='string'?query:new PgDialect().sqlToQuery(query as SQL).sql
+        return text.includes('ue_authority_delegations') ? executor.query('SELECT * FROM deliberately_missing_authority_relation') : database.execute(query)
       }}
       await expect(decideCaseCapabilitiesBatch(tx as never,{userId:U.steward,organizationId:ORG,caseIds:cases},k.deps)).rejects.toThrow('unavailable')
     })

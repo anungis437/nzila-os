@@ -19,6 +19,7 @@ interface Context extends Record<string, unknown> {
   checkedAt?: string
   action?: 'case:transition' | 'case:disclose_to_member'
   recipientEmail?: string | null
+  recipientLocale?: string | null
 }
 
 function contextAllowed(value: unknown): value is Context {
@@ -60,14 +61,15 @@ export async function issueQueuedCaseMailCapability(exec: SqlExecutor, input: { 
 }
 
 /** Only the system role may invoke the SQL verifier. The token cannot be rebound to another queue, actor or resource. */
-export async function queuedCaseMailContext(exec: SqlExecutor, input: { queueId: string; capability: string }): Promise<{ allowed: boolean; recipientEmail: string | null }> {
+export async function queuedCaseMailContext(exec: SqlExecutor, input: { queueId: string; capability: string }): Promise<{ allowed: boolean; recipientEmail: string | null; recipientLocale?: string }> {
   if (!isUuid(input.queueId) || !/^[a-f0-9]{64}$/.test(input.capability)) return { allowed: false, recipientEmail: null }
   try {
     const context = (await exec.query<{ context: unknown }>(
       'SELECT public.ue_queued_case_mail_context($1::uuid,$2::text) AS context', [input.queueId, input.capability],
     )).rows[0]?.context
     if (!contextAllowed(context)) return { allowed: false, recipientEmail: null }
-    return { allowed: true, recipientEmail: typeof context.recipientEmail === 'string' ? context.recipientEmail : null }
+    return { allowed: true, recipientEmail: typeof context.recipientEmail === 'string' ? context.recipientEmail : null,
+      ...(typeof context.recipientLocale === 'string' ? {recipientLocale: /^fr(?:[-_]|$)/i.test(context.recipientLocale) ? 'fr-CA' : 'en-CA'} : {}) }
   } catch {
     // An unreadable authority source is a retryable outage, never a fictional revocation or network admission.
     throw new AuthorityStoreError('PRECONDITION', 'queued mail authority verification is unavailable')

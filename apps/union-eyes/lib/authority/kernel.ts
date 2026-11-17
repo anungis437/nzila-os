@@ -7,7 +7,7 @@
  * contradiction yields a deny Decision (fail closed). The clock is an explicit
  * argument so every decision is reproducible from its inputs.
  */
-import { deny } from './common'
+import { deny, withAppointmentCapacities } from './common'
 import type {
   AuthorityFacts,
   AuthorityRequest,
@@ -64,6 +64,8 @@ function evaluate(
       detail: 'counsel-controlled material is not accessible to union principals; authority rests with counsel',
     })
   }
+
+  if (facts.sourceMemberships) facts = { ...facts, memberships: withAppointmentCapacities(facts.sourceMemberships, facts.mandates, req.principalUserId, req.organizationId, now) }
 
   if (!facts.principal.authenticated) return deny(req, now, { code: 'PRINCIPAL_NOT_AUTHENTICATED' })
   if (facts.principal.userId !== req.principalUserId) return deny(req, now, { code: 'PRINCIPAL_MISMATCH' })

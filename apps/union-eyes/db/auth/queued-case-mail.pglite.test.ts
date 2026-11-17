@@ -52,11 +52,18 @@ describe('database-issued queued mail capability',()=>{
   })
   it('mints under a real live session and revalidates the exact current action without direct identity grants',async()=>{
     const intent=await issue()
-    expect(await context(intent.queueId,intent.capability)).toEqual({allowed:true,recipientEmail:'member@example.invalid'})
+    expect(await context(intent.queueId,intent.capability)).toEqual({allowed:true,recipientEmail:'member@example.invalid',recipientLocale:'en-CA'})
     const stored=(await pg.query<{request_hash:string;result:unknown}>('SELECT request_hash,result FROM public.ue_authority_requests WHERE idempotency_key=$1',[intent.queueId])).rows[0]
     expect(stored.request_hash).not.toBe(intent.capability)
     expect(JSON.stringify(stored)).not.toContain(intent.capability)
     for(const role of ['union_eyes_runtime','union_eyes_system'])expect((await pg.query<{readable:boolean}>("SELECT has_table_privilege($1,'user_management.users','SELECT') AS readable",[role])).rows[0].readable).toBe(false)
+  })
+  it('takes the supported message language from the exact live recipient preference',async()=>{
+    await pg.query('UPDATE user_management.users SET locale=$1 WHERE user_id=$2',['fr_CA',member])
+    try {
+      const intent=await issue()
+      expect(await context(intent.queueId,intent.capability)).toEqual({allowed:true,recipientEmail:'member@example.invalid',recipientLocale:'fr-CA'})
+    } finally { await pg.query('UPDATE user_management.users SET locale=$1 WHERE user_id=$2',['en-CA',member]) }
   })
   it('denies raw capability fabrication, derived assignment resurrection and system minting',async()=>{
     await expect(tenant(()=>pg.query(`INSERT INTO public.ue_authority_resource_relationships(organization_id,principal_user_id,resource_type,resource_id,relation,origin,effective_at) VALUES($1,$2,'case',$3,'owner','derived',now())`,[org,actor,randomUUID()]))).rejects.toThrow('ue_authority_rel_primary_origin_chk')

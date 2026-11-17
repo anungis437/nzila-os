@@ -150,7 +150,7 @@ async function requireFinanceSource(exec: SqlExecutor): Promise<void> {
 async function liveFinancialMandateCount(exec: SqlExecutor, organizationId: string): Promise<number> {
   const row = (
     await exec.query<{ n: number | string }>(
-      `SELECT count(*)::int AS n FROM ue_authority_mandates
+      `SELECT count(*)::int AS n FROM public.ue_authority_mandates
         WHERE organization_id = $1::uuid AND kind = 'financial' AND status = 'active' AND revoked_at IS NULL
           AND effective_at <= now() AND expires_at > now()`,
       [organizationId],

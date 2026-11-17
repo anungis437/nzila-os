@@ -31,7 +31,7 @@ import type {
   ResourceRelationship,
   WorkAidMatterFacts,
 } from '../ontology'
-import { validInstant } from '../common'
+import { ACTIVE_CASE_RESPONDENT_SQL, validInstant } from '../common'
 import { DEFAULT_DOCUMENT_CLASS_POLICY, type DocumentClassPolicy } from '../document-class'
 import { isPrincipalId, isUuid, parsePgTextArray, type SqlExecutor } from './executor'
 
@@ -130,7 +130,7 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
   if (scope?.territory_id != null && scope.territory_organization_id !== org) throw new Error('case territory belongs to another organization or is missing')
   const respondents = scope ? (await exec.query<Row>(
     `SELECT respondent_user_id FROM public.case_respondents WHERE organization_id=$1::uuid AND scope_id=$2::uuid
-       AND (revoked_at IS NULL OR NOT isfinite(revoked_at) OR revoked_at>$3 OR revoked_at<recorded_at OR revoked_by IS NULL)`,
+       AND ${ACTIVE_CASE_RESPONDENT_SQL.replaceAll('clock_timestamp()', '$3::timestamptz')}`,
     [org, scope.id, now],
   )).rows : []
   if (respondents.some(party => !isPrincipalId(party.respondent_user_id))) throw new Error('case respondent identity is malformed')
@@ -138,7 +138,7 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
   // Counsel control comes only from an accepted, unwithdrawn WorkAid referral.
   const counsel = (
     await exec.query<Row>(
-      `SELECT 1 FROM ue_authority_workaid_matters
+      `SELECT 1 FROM public.ue_authority_workaid_matters
         WHERE organization_id = $1::uuid AND case_id = $2::uuid AND counsel_accepted_at IS NOT NULL AND withdrawn_at IS NULL`,
       [org, req.resource.id],
     )
@@ -291,7 +291,7 @@ export async function loadFinancialTransaction(exec: SqlExecutor, req: Authority
   const steps = (
     await exec.query<Row>(
       `SELECT step, actor, account_id::text AS account_id, required_approvals, amount_minor::text AS amount_minor, currency, at
-         FROM ue_authority_financial_steps
+         FROM public.ue_authority_financial_steps
         WHERE organization_id = $1::uuid AND subject_type = 'payment' AND subject_id = $2::uuid ORDER BY at, id`,
       [org, req.resource.id],
     )
@@ -357,7 +357,7 @@ export async function loadReview(exec: SqlExecutor, req: AuthorityRequest): Prom
     await exec.query<Row>(
       `SELECT id::text AS id, organization_id::text AS organization_id, complainant_user_id, adverse_user_ids,
               classification, remediation_owner_user_id
-         FROM ue_authority_reviews WHERE organization_id = $1::uuid AND id = $2::uuid`,
+         FROM public.ue_authority_reviews WHERE organization_id = $1::uuid AND id = $2::uuid`,
       [org, req.resource.id],
     )
   ).rows[0]
@@ -382,7 +382,7 @@ export async function loadWorkAidMatter(exec: SqlExecutor, req: AuthorityRequest
   const r = (
     await exec.query<Row>(
       `SELECT id::text AS id, organization_id::text AS organization_id, member_user_id, case_id::text AS case_id
-         FROM ue_authority_workaid_matters WHERE organization_id = $1::uuid AND id = $2::uuid AND withdrawn_at IS NULL`,
+         FROM public.ue_authority_workaid_matters WHERE organization_id = $1::uuid AND id = $2::uuid AND withdrawn_at IS NULL`,
       [org, req.resource.id],
     )
   ).rows[0]
@@ -404,7 +404,7 @@ export async function loadMessageThread(exec: SqlExecutor, req: AuthorityRequest
   const r = (
     await exec.query<Row>(
       `SELECT id::text AS id, organization_id::text AS organization_id, member_id, staff_id, status
-         FROM message_threads WHERE organization_id = $1::uuid AND id = $2::uuid`,
+         FROM public.message_threads WHERE organization_id = $1::uuid AND id = $2::uuid`,
       [org, req.resource.id],
     )
   ).rows[0]

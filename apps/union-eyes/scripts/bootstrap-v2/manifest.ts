@@ -13,6 +13,7 @@ import {
 } from './manifest-trace'
 import { qualifyNativePrivileges } from './manifest-security'
 import { verifyDeclaredDefaults } from './manifest-defaults'
+import { parseSql } from '../lib/sql-census/parse'
 
 export interface PortableDependency {
   canonicalId: string | null
@@ -379,6 +380,54 @@ export async function buildNativeManifest(
   }
 }
 
+// Compare PostgreSQL parse trees, retaining predicate, opclass, ordering, included
+// columns and every other index option. Only source offsets and the default
+// public schema spelling differ between Django SQL and pg_get_indexdef.
+export async function declaredConditionalIndexMatches(
+  sourceSql: string,
+  actualSql: string,
+  expected: { table: string; name: string; columns: string[] },
+) {
+  const normalize = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(normalize)
+    if (value !== null && typeof value === 'object')
+      return Object.fromEntries(
+        Object.entries(value)
+          .filter(([key]) => key !== 'location')
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([key, entry]) => [key, normalize(entry)]),
+      )
+    return value
+  }
+  const identity = expected.table.split('.')
+  if (identity.length > 2 || !expected.columns.length) return false
+  const table = identity.at(-1)!
+  const schema = identity.length === 2 ? identity[0] : 'public'
+  const canonical = async (sql: string) => {
+    const parsed = await parseSql(sql)
+    if (!parsed.ok || parsed.statements.length !== 1) return null
+    const statement = parsed.statements[0].IndexStmt
+    if (
+      !statement ||
+      statement.unique !== true ||
+      !statement.whereClause ||
+      statement.idxname !== expected.name ||
+      statement.relation?.relname !== table ||
+      (statement.relation?.schemaname ?? 'public') !== schema ||
+      !Array.isArray(statement.indexParams) ||
+      JSON.stringify(statement.indexParams.map((entry: { IndexElem?: { name?: string } }) => entry.IndexElem?.name)) !==
+        JSON.stringify(expected.columns)
+    ) return null
+    return normalize({
+      ...statement,
+      relation: { ...statement.relation, schemaname: schema },
+    })
+  }
+  const source = await canonical(sourceSql)
+  const actual = await canonical(actualSql)
+  return source !== null && actual !== null && JSON.stringify(source) === JSON.stringify(actual)
+}
+
 export async function verifyDeclaredSource(client: pg.Client, plan: V2Plan) {
   const catalog = await client.query<{
     table: string
@@ -432,6 +481,18 @@ export async function verifyDeclaredSource(client: pg.Client, plan: V2Plan) {
     WHERE c.relnamespace IN ('public'::regnamespace,to_regnamespace('user_management'))
       AND i.indisunique AND i.indisvalid AND i.indisready AND i.indpred IS NULL AND i.indexprs IS NULL
   `)
+  const conditionalIndexes = plan.currentModels.models.some((model) =>
+    model.databaseConstraints?.some((constraint) => constraint.deferredUniqueIndex),
+  )
+    ? (await client.query<{ table: string; name: string; definition: string }>(`
+        SELECT CASE WHEN c.relnamespace='public'::regnamespace THEN c.relname ELSE c.relnamespace::regnamespace::text||'.'||c.relname END AS table,
+          idx.relname AS name,pg_get_indexdef(i.indexrelid) AS definition
+        FROM pg_index i JOIN pg_class c ON c.oid=i.indrelid JOIN pg_class idx ON idx.oid=i.indexrelid
+        WHERE c.relnamespace IN ('public'::regnamespace,to_regnamespace('user_management'))
+          AND i.indisunique AND i.indisvalid AND i.indisready AND i.indislive
+          AND i.indpred IS NOT NULL AND i.indexprs IS NULL
+      `)).rows
+    : []
   const mismatches: string[] = []
   let checkedColumns = 0
   let checkedConstraints = 0
@@ -500,6 +561,25 @@ export async function verifyDeclaredSource(client: pg.Client, plan: V2Plan) {
       const options = Array.isArray(declared)
         ? (declared[1] as { name?: string; fields?: string[] })
         : null
+      const metadata = model.databaseConstraints?.find((entry) => entry.name === options?.name)
+      if (metadata?.deferredUniqueIndex) {
+        const actual = conditionalIndexes.filter(
+          (index) => index.table === model.table && index.name === options?.name,
+        )
+        if (
+          metadata.kind !== 'UniqueConstraint' ||
+          !options?.name ||
+          !options.fields?.length ||
+          actual.length !== 1 ||
+          !(await declaredConditionalIndexMatches(metadata.sql, actual[0].definition, {
+            table: model.table,
+            name: options.name,
+            columns: options.fields.map(physicalColumn),
+          }))
+        )
+          mismatches.push(`CURRENT_MODEL_NAMED_CONSTRAINT_MISMATCH:${model.table}:${options?.name ?? 'unresolved'}`)
+        continue
+      }
       const actual = keys.rows.find(
         (key) => key.table === model.table && key.name === options?.name,
       )

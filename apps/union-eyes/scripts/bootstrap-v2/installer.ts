@@ -1,4 +1,8 @@
+import { CASE_PRIMARY_DOMAIN_GUARDS, compileCaseDomainSupportSql } from '../../db/auth/case-primary-domain-guards'
 import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
+import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
+import { AUTHORITY_ISSUER_GUARDS } from '../../db/auth/authority-issuer-guards'
+import { compileQueuedCaseMailSql } from '../../db/auth/queued-case-mail'
 import { inspectPhysicalGuards, planPhysicalGuards } from '../../db/auth/physical-guard-catalog'
 import assert from 'node:assert/strict'
 import pg from 'pg'
@@ -16,6 +20,7 @@ import { compileFrameworkSql } from './framework-sql'
 import { canonicalCatalogObject } from './catalog-normalization'
 import {
   assertMinimumInstaller,
+  currentPlanRequiresVector,
   inspectVectorObjectIds,
   VECTOR_FUNCTION_ACL_SQL,
 } from './minimum-installer'
@@ -143,7 +148,7 @@ export async function createCurrentState(
   if (options.profile === 'PREPROVISIONED_NON_SUPERUSER') {
     if (localClients.get(client) !== 'ue_v2_fixture_installer')
       throw new Error('UE_V2_GENUINE_RESTRICTED_INSTALLER_LOGIN_REQUIRED')
-    await assertMinimumInstaller(client)
+    await assertMinimumInstaller(client, {vectorRequired:currentPlanRequiresVector(plan)})
   }
   const execute = async (producer: Producer) => {
     if (hook) await hook(producer, () => client.query(producer.sql))
@@ -169,7 +174,9 @@ export async function createCurrentState(
     await execute(installerProducer('EXTENSION_FUNCTION_ACL', VECTOR_FUNCTION_ACL_SQL))
   }
   await client.query('SET LOCAL ROLE ue_v2_owner')
-  await client.query('SET LOCAL search_path = public, pg_catalog')
+  // Current model DDL has unqualified CREATE targets, so public is the creation schema.
+  // pg_temp is explicit and last; runtime read transactions separately put pg_catalog first.
+  await client.query('SET LOCAL search_path = public, pg_catalog, pg_temp')
   const deferred: typeof plan.statements = []
   for (const statement of plan.statements) {
     if (statement.canonicalId.startsWith('CURRENT_EXTENSION:')) continue
@@ -222,20 +229,23 @@ export async function createCurrentState(
       sourceDigest: producerBytes('apps/union-eyes/db/auth/messaging-physical-guards.ts'),
     })
   if (plan.tables.some((table) => table.name === 'ue_authority_approval_requests')) {
-    const guards = planPhysicalGuards(
-      AUTHORITY_PHYSICAL_GUARDS,
-      await inspectPhysicalGuards(
-        AUTHORITY_PHYSICAL_GUARDS,
-        async (sql) => (await client.query(sql)).rows,
-      ),
-    )
-    for (const [index, sql] of guards.statements.entries())
-      await execute({
-        canonicalId: `CURRENT_AUTHORITY_GUARD:${index}`,
-        sql,
-        source: AUTHORITY_PHYSICAL_GUARDS.source,
-        sourceDigest: producerBytes(AUTHORITY_PHYSICAL_GUARDS.source),
-      })
+    for (const [prefix, contract] of [
+      ['CURRENT_AUTHORITY_GUARD', AUTHORITY_PHYSICAL_GUARDS],
+      ['CURRENT_CASE_SCOPE_GUARD', CASE_SCOPE_PHYSICAL_GUARDS],
+      ['CURRENT_AUTHORITY_ISSUER_GUARD', AUTHORITY_ISSUER_GUARDS],
+    ] as const) {
+      const guards = planPhysicalGuards(
+        contract,
+        await inspectPhysicalGuards(contract, async (sql) => (await client.query(sql)).rows),
+      )
+      for (const [index, sql] of guards.statements.entries())
+        await execute({
+          canonicalId: `${prefix}:${index}`,
+          sql,
+          source: contract.source,
+          sourceDigest: producerBytes(contract.source),
+        })
+    }
   }
   if (plan.authExecution) {
     if (options.profile !== 'PREPROVISIONED_NON_SUPERUSER') await client.query('RESET ROLE')
@@ -247,10 +257,20 @@ export async function createCurrentState(
           compileMemberAccessProjectionSql(),
           compileCaseAssigneePredicateSql(),
           compileConversationAssigneePredicateSql(),
+          compileQueuedCaseMailSql(),
+          compileCaseDomainSupportSql(),
         ].join('\n'),
       ),
     )
     await client.query('SET LOCAL ROLE ue_v2_owner')
+  }
+  if (plan.authExecution && plan.tables.some(table => table.name === 'claim_status_transitions')) {
+    const contract = CASE_PRIMARY_DOMAIN_GUARDS
+    const guards = planPhysicalGuards(contract, await inspectPhysicalGuards(contract, async sql => (await client.query(sql)).rows))
+    for (const [index, sql] of guards.statements.entries()) await execute({
+      canonicalId: `CURRENT_CASE_PRIMARY_DOMAIN_GUARD:${index}`, sql,
+      source: contract.source, sourceDigest: producerBytes(contract.source),
+    })
   }
   await execute(
     installerProducer(
@@ -281,7 +301,7 @@ export async function applyV2(
     if (options.profile === 'PREPROVISIONED_NON_SUPERUSER') {
       if (localClients.get(client) !== 'ue_v2_fixture_installer')
         throw new Error('UE_V2_GENUINE_RESTRICTED_INSTALLER_LOGIN_REQUIRED')
-      await assertMinimumInstaller(client)
+      await assertMinimumInstaller(client, {vectorRequired:currentPlanRequiresVector(plan)})
       await client.query('SET LOCAL ROLE ue_v2_owner')
     }
     await client.query("SELECT pg_advisory_xact_lock(hashtext('UE_BOOTSTRAP_V2'))")
@@ -308,7 +328,7 @@ export async function applyV2(
       return { result: 'NOOP', created: 0, catalogDigest: catalogDigest(current) }
     }
     const vectorIds =
-      options.profile === 'PREPROVISIONED_NON_SUPERUSER'
+      options.profile === 'PREPROVISIONED_NON_SUPERUSER' && currentPlanRequiresVector(plan)
         ? await inspectVectorObjectIds(client)
         : new Set<string>()
     const expectedById = new Map(expected.map((object) => [`${object.kind}:${object.id}`, object]))
@@ -330,10 +350,16 @@ export async function applyV2(
         (object) =>
           object.kind === 'extension' &&
           object.id !== 'plpgsql' &&
-          !(options.profile === 'PREPROVISIONED_NON_SUPERUSER' && object.id === 'vector'),
+          !(options.profile === 'PREPROVISIONED_NON_SUPERUSER' && currentPlanRequiresVector(plan) && object.id === 'vector'),
       )
     )
-      throw new Error('UE_V2_PARTIAL_PREINSTALL_DENIED')
+      throw new Error('UE_V2_PARTIAL_PREINSTALL_DENIED', {cause: {
+        unexpectedObjects: nonBaseline.map(object => ({kind:object.kind,id:object.id,
+          extensionOwned:vectorIds.has(`${object.kind}:${object.id}`),
+          actualDigest:catalogDigest([object]),
+          expectedDigest:expectedById.has(`${object.kind}:${object.id}`)?catalogDigest([expectedById.get(`${object.kind}:${object.id}`)!]):null,
+        })),
+      }})
     await createCurrentState(client, plan, undefined, options)
     const after = await inspectCatalog(client)
     if (fault === 'verify' || catalogDigest(after) !== catalogDigest(expected))

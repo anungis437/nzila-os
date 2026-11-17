@@ -1,0 +1,96 @@
+diff --git a/lib/parse.js b/lib/parse.js
+index 29207512c60183b4bb9bf5112be3b9b5f4a9a9fd..93ab0dfec26da625ffeae73f0b1fb6d56f007638 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -139,20 +139,34 @@ const normalizeSimpleBranch = branch => {
+   return value.replace(/\\(.)/g, '$1');
+ };
+ 
+-const hasRepeatedCharPrefixOverlap = branches => {
++const hasRepeatedCharPrefixOverlap = (branches, options) => {
+   const values = branches.map(normalizeSimpleBranch).filter(Boolean);
++  const flags = options.flags || (options.nocase ? 'i' : '');
++  const foldFlags = typeof flags === 'string' && flags.includes('i')
++    ? ['i', 'u', 'v'].filter(flag => flags.includes(flag)).join('')
++    : '';
++  const prefixes = new Map();
++  const overlaps = (value, prefix) => {
++    if (!foldFlags) return value.startsWith(prefix);
++    try {
++      if (!prefixes.has(prefix)) {
++        // Only an escaped literal is compiled here, never attacker regex syntax.
++        // Use the engine's actual case folding, including Unicode flags, rather
++        // than an incomplete lowercase approximation.
++        const literal = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
++        prefixes.set(prefix, new RegExp(`^(?:${literal})`, foldFlags));
++      }
++      return prefixes.get(prefix).test(value);
++    } catch {
++      return true;
++    }
++  };
+ 
+   for (let i = 0; i < values.length; i++) {
+     for (let j = i + 1; j < values.length; j++) {
+       const a = values[i];
+       const b = values[j];
+-      const char = a[0];
+-
+-      if (!char || a !== char.repeat(a.length) || b !== char.repeat(b.length)) {
+-        continue;
+-      }
+-
+-      if (a === b || a.startsWith(b) || b.startsWith(a)) {
++      if (a === b || overlaps(a, b) || overlaps(b, a)) {
+         return true;
+       }
+     }
+@@ -285,10 +299,7 @@ const repeatedExtglobRecursion = pattern => {
+ };
+ 
+ const analyzeRepeatedExtglob = (body, options) => {
+-  if (options.maxExtglobRecursion === false) {
+-    return { risky: false };
+-  }
+-
++  // Security guards cannot be disabled by the recursion tuning option.
+   const max =
+     typeof options.maxExtglobRecursion === 'number'
+       ? options.maxExtglobRecursion
+@@ -300,7 +311,7 @@ const analyzeRepeatedExtglob = (body, options) => {
+     if (
+       branches.some(branch => branch === '') ||
+       branches.some(branch => /^[*?]+$/.test(branch)) ||
+-      hasRepeatedCharPrefixOverlap(branches)
++      hasRepeatedCharPrefixOverlap(branches, options)
+     ) {
+       return { risky: true };
+     }
+@@ -343,6 +354,27 @@ const analyzeRepeatedExtglob = (body, options) => {
+       : { risky: true };
+   }
+ 
++  // GHSA-fc5q-39xc-vjpf: a single branch can also contain an unbounded
++  // wildcard. Repeating it nests quantifiers (e.g. +(*a)); branch count is
++  // irrelevant. Use the parser's existing risky-pattern literalization.
++  if (branches.some(branch => {
++    let escaped = false;
++    let bracket = 0;
++    let quoted = false;
++    for (const ch of branch) {
++      if (escaped) { escaped = false; continue; }
++      if (ch === '\\') { escaped = true; continue; }
++      if (ch === '"') { quoted = !quoted; continue; }
++      if (quoted) continue;
++      if (ch === '[') { bracket++; continue; }
++      if (ch === ']' && bracket) { bracket--; continue; }
++      if (!bracket && (ch === '*' || ch === '+')) return true;
++    }
++    return false;
++  })) {
++    return { risky: true };
++  }
++
+   return { risky: false };
+ };
+ 

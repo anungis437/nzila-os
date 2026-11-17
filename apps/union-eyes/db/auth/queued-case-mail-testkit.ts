@@ -18,7 +18,7 @@ export async function installQueuedMailFixture(pg:MailFixtureDb,input:{org:strin
   for(const sql of [...ddl.filter(sql=>!sql.startsWith('ALTER TABLE')),...ddl.filter(sql=>sql.startsWith('ALTER TABLE'))])await pg.exec(sql)
   await pg.exec(`RESET ROLE;
     CREATE SCHEMA user_management;
-    CREATE TABLE user_management.users(user_id text PRIMARY KEY,email text,email_verified boolean,is_active boolean,lifecycle_state text);
+    CREATE TABLE user_management.users(user_id text PRIMARY KEY,email text,email_verified boolean,is_active boolean,lifecycle_state text,locale text DEFAULT 'en-CA');
     CREATE TABLE user_management.organization_users(user_id text,organization_id uuid,role text,is_active boolean);
     CREATE TABLE user_management.user_sessions(user_id text,organization_id uuid,session_token_hash text,is_active boolean,expires_at timestamptz,session_id uuid DEFAULT gen_random_uuid(),device_info jsonb DEFAULT '{}');
     CREATE TABLE public.notification_queue(id uuid PRIMARY KEY,organization_id uuid,payload jsonb,created_at timestamptz,status text);
@@ -42,7 +42,7 @@ export async function installQueuedMailFixture(pg:MailFixtureDb,input:{org:strin
     await pg.exec(`GRANT SELECT,INSERT,UPDATE ON public.${table} TO union_eyes_runtime; CREATE POLICY fixture_tenant ON public.${table} TO union_eyes_runtime USING (organization_id::text=nullif(current_setting('app.current_org_id',true),'')) WITH CHECK (organization_id::text=nullif(current_setting('app.current_org_id',true),''))`)
   }
   await pg.exec('GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO union_eyes_runtime')
-  await pg.query(`INSERT INTO user_management.users VALUES($1,'primary@example.invalid',true,true,'active'),($2,'member@example.invalid',true,true,'active')`,[actor,member])
+  await pg.query(`INSERT INTO user_management.users(user_id,email,email_verified,is_active,lifecycle_state) VALUES($1,'primary@example.invalid',true,true,'active'),($2,'member@example.invalid',true,true,'active')`,[actor,member])
   await pg.query(`INSERT INTO user_management.organization_users VALUES($1,$3,'steward',true),($2,$3,'member',true)`,[actor,member,org])
   await pg.query(`INSERT INTO user_management.user_sessions(user_id,organization_id,session_token_hash,is_active,expires_at) VALUES($1,$2,$3,true,now()+interval '1 hour')`,[actor,org,sessionHash])
   await pg.query(`INSERT INTO public.claims VALUES($1,$2,$3,'under_review')`,[caseId,org,member])

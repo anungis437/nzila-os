@@ -26,6 +26,14 @@ describe('request-local canonical fact read transport',()=>{
   expect((await executor.query('SELECT clock_timestamp() AS now')).rows).toEqual([{now:2}])
   expect(query).toHaveBeenCalledTimes(2)
  })
+ it('executes each transaction-bound read lock control even when SQL text is identical',async()=>{
+  const query=vi.fn(async()=>({rows:[{held:true}]})),{executor}=createReadBatchExecutor({query} as SqlExecutor)
+  await executor.query('SELECT /* ue.authority.read-lock */ pg_catalog.set_config($1,$2,true)',['marker','transaction'])
+  await executor.query('SELECT /* ue.authority.read-lock */ pg_catalog.set_config($1,$2,true)',['marker','transaction'])
+  await executor.query('SELECT /* ue.authority.read-lock-check */ true AS held')
+  await executor.query('SELECT /* ue.authority.read-lock-check */ true AS held')
+  expect(query).toHaveBeenCalledTimes(4)
+ })
  it('retains injection-like strings as bound data, never interpolated query text',async()=>{
   const attack="x');DELETE FROM cases;--",query=vi.fn(async(text:string,params:unknown[])=>{
    expect(text).not.toContain(attack);expect(params).toEqual([attack,'safe']);return {rows:[]}

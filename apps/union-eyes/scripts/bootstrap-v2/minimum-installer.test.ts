@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileMinimumRoleProvisioningSql,
+  currentPlanRequiresVector,
   INSTALLER_FUNCTION_OWNER_ROLES,
 } from './minimum-installer'
 import { CANONICAL_BOOTSTRAP_ROLES } from './execution-roles'
@@ -78,4 +79,11 @@ describe('bounded minimum installer prerequisites', () => {
     expect(sql).not.toContain('TO union_eyes_runtime')
     expect(sql).not.toContain('TO union_eyes_system')
   })
+})
+
+describe('source-selected optional extension prerequisite',()=>{
+ it('requires vector only when the executable source plan declares it',()=>{
+   expect(currentPlanRequiresVector({statements:[]})).toBe(false)
+   expect(currentPlanRequiresVector({statements:[{canonicalId:'CURRENT_EXTENSION:vector'}]} as never)).toBe(true)
+ })
 })

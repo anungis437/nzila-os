@@ -87,8 +87,9 @@ const newCase = async (creator: string = U.member, org = ORG): Promise<string> =
 const newRep = async (caseId: string, role = 'steward'): Promise<{ user: string; relationshipId: string }> => {
   const user = `user_rep_${++seq}`
   await k.asAdmin(() => seedMembership(db, user, ORG, role))
+  const rule = (await adminOne<{ id:string }>("SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id=$1 AND domain='case_assignment' AND operation='issue' AND status='active'",[ORG]))[0].id
   const relationshipId = await k.as(U.president)((t) =>
-    insertRelationship(t, { organizationId: ORG, principalUserId: user, resourceType: 'case', resourceId: caseId, relation: 'assignee', origin: 'derived', effectiveAt: minutesAgo() }),
+    insertRelationship(t, { organizationId: ORG, principalUserId: user, resourceType: 'case', resourceId: caseId, relation: 'assignee', origin: 'explicit', grantedBy: U.president, issuanceRuleId:rule, effectiveAt: minutesAgo() }),
   )
   return { user, relationshipId }
 }

@@ -31,6 +31,7 @@ import { proveFrameworkApplication } from './framework-application'
 import { qualifyNativePrivileges } from './manifest-security'
 import {
   compileMinimumRoleProvisioningSql,
+  currentPlanRequiresVector,
   INSTALLER_FUNCTION_OWNER_ROLES,
   VECTOR_FUNCTION_ACL_SQL,
 } from './minimum-installer'
@@ -297,8 +298,10 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
     const minimumExpected = await inspectCatalog(reference)
     const minimumDatabase = async (suffix: string) => {
       const operator = await database(`minimum_${suffix}`)
-      await operator.query("CREATE EXTENSION vector WITH VERSION '0.8.1'")
-      await operator.query(VECTOR_FUNCTION_ACL_SQL)
+      if (currentPlanRequiresVector(plan)) {
+        await operator.query("CREATE EXTENSION vector WITH VERSION '0.8.1'")
+        await operator.query(VECTOR_FUNCTION_ACL_SQL)
+      }
       const installer = await connectLocalV2({
         ...config,
         user: 'ue_v2_fixture_installer',
@@ -543,6 +546,8 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
   } catch (error: unknown) {
     failure = error
     evidence.failure = error instanceof Error ? error.message : String(error)
+    if (error instanceof Error && error.message === 'UE_V2_PARTIAL_PREINSTALL_DENIED' && error.cause && typeof error.cause === 'object' && 'unexpectedObjects' in error.cause)
+      evidence.failureDetails = error.cause
     evidence.engineeringReadiness = 'FAIL'
     evidence.productionSecurityReadiness = 'FAIL'
   } finally {

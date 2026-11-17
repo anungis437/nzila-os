@@ -1,4 +1,12 @@
+import { CASE_PRIMARY_DOMAIN_GUARDS, CASE_DOMAIN_SUPPORT_CATALOG_QUERY, CASE_DOMAIN_SUPPORT_FUNCTION_SIGNATURES, caseDomainSupportViolations } from '../../db/auth/case-primary-domain-guards'
 import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
+import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
+import { AUTHORITY_ISSUER_GUARDS } from '../../db/auth/authority-issuer-guards'
+import {
+  QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY,
+  QUEUED_CASE_MAIL_FUNCTION_SIGNATURES,
+  queuedCaseMailFunctionViolations,
+} from '../../db/auth/queued-case-mail'
 import { physicalGuardViolations } from '../../db/auth/physical-guard-catalog'
 import {
   inspectMessagingPhysicalCatalog,
@@ -91,13 +99,23 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
         await inspectMessagingPhysicalCatalog(async (sql) => (await client.query(sql)).rows),
       ),
     )
-  if (plan.tables.some((table) => table.name === 'ue_authority_approval_requests'))
+  if (plan.tables.some((table) => table.name === 'ue_authority_approval_requests')) {
+    for (const contract of [
+      AUTHORITY_PHYSICAL_GUARDS,
+      CASE_SCOPE_PHYSICAL_GUARDS,
+      AUTHORITY_ISSUER_GUARDS,
+      CASE_PRIMARY_DOMAIN_GUARDS,
+    ])
+      mismatches.push(
+        ...(await physicalGuardViolations(contract, async (sql) => (await client.query(sql)).rows)),
+      )
     mismatches.push(
-      ...(await physicalGuardViolations(
-        AUTHORITY_PHYSICAL_GUARDS,
-        async (sql) => (await client.query(sql)).rows,
-      )),
+      ...queuedCaseMailFunctionViolations(
+        (await client.query(QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY)).rows,
+      ),
     )
+  }
+  if (plan.authExecution) mismatches.push(...caseDomainSupportViolations((await client.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows))
   const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)
   const frameworkPrivileges = plan.frameworkExecution
@@ -238,13 +256,18 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
     // catalog admission (caseAssigneePredicateViolations / conversationAssigneePredicateViolations). Anything else stays undeclared.
     if (
       plan.authExecution &&
-      ASSIGNEE_COMPANION_SIGNATURES.includes(entry.signature) &&
+      [...ASSIGNEE_COMPANION_SIGNATURES, ...QUEUED_CASE_MAIL_FUNCTION_SIGNATURES, ...CASE_DOMAIN_SUPPORT_FUNCTION_SIGNATURES].includes(entry.signature) &&
       entry.owner === CASE_ASSIGNEE_PREDICATE_OWNER &&
       entry.definer &&
       entry.config?.length === 1 &&
       entry.config[0] === 'search_path=pg_catalog'
     )
       continue
+    // Source-declared invoker guards are admitted only after their exact body,
+    // ownership, argument, ACL and path catalog checks above. Overloads fail those checks.
+    if ([AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS]
+      .some(contract => contract.functions.some(fn => entry.signature.startsWith(fn.name + '('))) &&
+      entry.owner === 'ue_v2_owner' && !entry.definer) continue
     if (
       entry.owner !== 'ue_v2_owner' &&
       !(entry.extension === 'vector' && entry.owner === 'postgres')

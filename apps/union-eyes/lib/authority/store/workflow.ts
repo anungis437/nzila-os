@@ -76,7 +76,7 @@ export async function recordFinancialStep(exec: SqlExecutor, deps: EnforcementDe
 
   const row = (
     await exec.query<Row>(
-      `INSERT INTO ue_authority_financial_steps
+      `INSERT INTO public.ue_authority_financial_steps
          (organization_id, subject_type, subject_id, step, actor, account_id, required_approvals, amount_minor, currency)
        VALUES ($1,'payment',$2,$3,$4,$5,$6,$7,$8) RETURNING id::text AS id`,
       [i.organizationId, i.paymentId, i.step, i.actorUserId, i.accountId ?? null, i.step === 'registered' ? i.requiredApprovals : null, snapshot?.amountMinor ?? null, snapshot?.currency ?? null],
@@ -124,7 +124,7 @@ export async function registerReview(
   if (m.length !== 1 || m[0].status !== 'active') throw new AuthorityStoreError('DENIED', 'only an active member may open a review')
   const row = (
     await exec.query<Row>(
-      `INSERT INTO ue_authority_reviews (organization_id, review_type, complainant_user_id, adverse_user_ids, classification, opened_by)
+      `INSERT INTO public.ue_authority_reviews (organization_id, review_type, complainant_user_id, adverse_user_ids, classification, opened_by)
        VALUES ($1,$2,$3,$4::text[],$5,$6) RETURNING id::text AS id`,
       [i.organizationId, i.reviewType, i.complainantUserId ?? null, [...(i.adverseUserIds ?? [])], i.classification ?? 'standard', i.openedBy],
     )
@@ -154,7 +154,7 @@ export async function recordCounselAcceptance(exec: SqlExecutor, deps: Pick<Enfo
     claimedUserId: (await sessionActorOrThrow(exec)),
   })
   const r = await exec.query(
-    `UPDATE ue_authority_workaid_matters SET counsel_accepted_at = now(), counsel_accepted_by = $3
+    `UPDATE public.ue_authority_workaid_matters SET counsel_accepted_at = now(), counsel_accepted_by = $3
       WHERE organization_id = $1 AND id = $2 AND counsel_accepted_at IS NULL AND withdrawn_at IS NULL
         AND member_user_id <> $3 AND referred_by <> $3 RETURNING id`,
     [i.organizationId, i.matterId, counselUserId],
@@ -213,7 +213,7 @@ export async function referToWorkAid(
     throw new AuthorityStoreError('DENIED', 'CATEGORY_NOT_ALLOWED: the referral categories are not a closed scope')
   }
   await exec.query(
-    `INSERT INTO ue_authority_workaid_matters (id, organization_id, member_user_id, case_id, referred_by, referred_categories)
+    `INSERT INTO public.ue_authority_workaid_matters (id, organization_id, member_user_id, case_id, referred_by, referred_categories)
      VALUES ($1,$2,$3,$4,$5,$6::text[])`,
     [matterId, i.organizationId, i.memberUserId, i.caseId, i.referrerUserId, stored],
   )

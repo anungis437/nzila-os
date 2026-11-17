@@ -156,7 +156,7 @@ export function compileAuthorityMembershipReaderSql(options: { ordinaryRole?: st
     GRANT CREATE ON SCHEMA user_management TO ${q(reader)};
     CREATE FUNCTION user_management.ue_authority_membership_rows(p_org uuid, p_users text[])
     RETURNS TABLE (user_id text, organization_id uuid, role text, member_active boolean, user_active boolean, lifecycle_state text)
-    LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+    LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
       SELECT m.user_id::text, m.organization_id, m.role::text, m.is_active, u.is_active, u.lifecycle_state::text
         FROM user_management.organization_users m
         JOIN user_management.users u ON u.user_id = m.user_id

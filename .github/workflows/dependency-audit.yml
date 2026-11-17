@@ -30,6 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      - name: Verify repeated-extglob dependency regression
+        run: node --test tooling/security/picomatch-repeated-extglob.test.mjs
       # Audit at critical level — capture report for waiver evaluation.
       # Exit code is intentionally suppressed here; the waiver policy step
       # is the authoritative gate (it accounts for accepted/waived CVEs).

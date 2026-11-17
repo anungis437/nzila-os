@@ -223,6 +223,7 @@ async function stop(child: ChildProcess | undefined) {
 
 export async function runNextAcceptance() {
   const ownership = randomUUID()
+  const authenticatedCaseworkLoad = process.env.UE_V2_AUTHENTICATED_CASEWORK_LOAD === '1'
   const snapshot = path.join(root, 'artifacts', `ue-v2-next-${ownership}`)
   const app = path.join(snapshot, 'apps', 'union-eyes')
   const result: Record<string, unknown> = {
@@ -232,6 +233,12 @@ export async function runNextAcceptance() {
     rawSyntheticSecretsPersisted: 'NOT_VERIFIED',
     legacyPredevInvoked: false,
     mandatorySecurityBypasses: [],
+    authenticatedCaseworkLoad: {
+      status: authenticatedCaseworkLoad ? 'PENDING' : 'UNEXECUTED',
+      reason: authenticatedCaseworkLoad
+        ? 'Requested full historical profile; no result before actual authenticated HTTP execution.'
+        : 'UE_V2_AUTHENTICATED_CASEWORK_LOAD=1 was not enabled.',
+    },
   }
   const plan: V2Plan = JSON.parse(
     readFileSync(path.join(folder, 'UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'), 'utf8'),
@@ -270,7 +277,11 @@ export async function runNextAcceptance() {
     mkdirSync(statePath)
     const env = syntheticNextEnvironment(fixture, port, boundary, statePath)
     assert.ok(env.AUTH_MFA_ENCRYPTION_KEY)
-    const httpFixture = await seedNextHttpSmoke(fixture.seed, env.AUTH_MFA_ENCRYPTION_KEY)
+    const httpFixture = await seedNextHttpSmoke(
+      fixture.seed,
+      env.AUTH_MFA_ENCRYPTION_KEY!,
+      authenticatedCaseworkLoad,
+    )
     vault = await openLocalVaultFixture(statePath)
     Object.assign(env, vault.environment)
     env.UE_V2_LOCAL_PORTS += `,${vault.ports.join(',')}`
@@ -373,12 +384,23 @@ export async function runNextAcceptance() {
     result.serverOutput = redact(output)
     const httpObservations: HttpObservation[] = []
     result.httpObservations = httpObservations
-    result.httpSmoke = await runNextHttpSmoke(
+    const httpSmoke = await runNextHttpSmoke(
       `http://127.0.0.1:${port}`,
       fixture.seed,
       httpFixture,
       httpObservations,
+      authenticatedCaseworkLoad
+        ? {
+            authenticatedCaseworkLoad: {
+              runtimeUrl: fixture.runtimeUrl,
+              authUrl: fixture.authUrl!,
+            },
+          }
+        : {},
     )
+    result.httpSmoke = httpSmoke
+    result.authenticatedCaseworkLoad = httpSmoke.authenticatedCaseworkLoad
+    assert.equal(httpSmoke.status, 'PASS', 'Actual authenticated casework load profile failed')
     result.serverOutput = redact(output)
     result.serverRuntimeSmoke = 'PASS'
     // Complete caller and financial qualification remain separate gates.
@@ -386,6 +408,16 @@ export async function runNextAcceptance() {
   } catch (error) {
     result.error = redact(error instanceof Error ? error.message : String(error))
     result.lastProcessOutput = redact(output)
+    if (
+      authenticatedCaseworkLoad &&
+      (result.authenticatedCaseworkLoad as { status: string }).status === 'PENDING'
+    ) {
+      result.authenticatedCaseworkLoad = {
+        status: 'INCOMPLETE',
+        reason:
+          'Requested profile did not reach a complete measured result; see the sanitized run error.',
+      }
+    }
   } finally {
     const failures: string[] = []
     try {

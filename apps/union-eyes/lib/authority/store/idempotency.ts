@@ -36,19 +36,19 @@ export async function runIdempotent<T extends Record<string, unknown>>(
   }
   const hash = requestHash(input.operation, input.payload)
   const inserted = await exec.query<{ id: string }>(
-    `INSERT INTO ue_authority_requests (organization_id, idempotency_key, operation, request_hash, actor)
+    `INSERT INTO public.ue_authority_requests (organization_id, idempotency_key, operation, request_hash, actor)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (organization_id, idempotency_key) DO NOTHING RETURNING id::text AS id`,
     [input.organizationId, input.key, input.operation, hash, input.actorUserId],
   )
   if (inserted.rows.length === 1) {
     const result = await fn()
-    await exec.query(`UPDATE ue_authority_requests SET result = $2::jsonb WHERE id = $1::uuid`, [inserted.rows[0].id, JSON.stringify(result)])
+    await exec.query(`UPDATE public.ue_authority_requests SET result = $2::jsonb WHERE id = $1::uuid`, [inserted.rows[0].id, JSON.stringify(result)])
     return { replayed: false, result }
   }
   const existing = (
     await exec.query<{ request_hash: string; operation: string; result: T | null }>(
-      `SELECT request_hash, operation, result FROM ue_authority_requests WHERE organization_id = $1 AND idempotency_key = $2`,
+      `SELECT request_hash, operation, result FROM public.ue_authority_requests WHERE organization_id = $1 AND idempotency_key = $2`,
       [input.organizationId, input.key],
     )
   ).rows[0]

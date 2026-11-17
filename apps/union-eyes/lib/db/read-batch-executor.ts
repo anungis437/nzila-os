@@ -43,7 +43,7 @@ export function createReadBatchExecutor(database:SqlExecutor,maxQueries=64) {
       }
       // Evaluators may read the database clock after awaited facts or locks. Such a read
       // must reach PostgreSQL at that point, even if the same request read it earlier.
-      if(/\b(?:clock_timestamp|statement_timestamp|transaction_timestamp|now)\s*\(|\bcurrent_timestamp\b/i.test(text))
+      if(/\/\* ue\.authority\.read-lock(?:-check)? \*\/|\b(?:clock_timestamp|statement_timestamp|transaction_timestamp|now)\s*\(|\bcurrent_timestamp\b/i.test(text))
         return database.query<T>(text,params).catch(error=>{failure??=error;throw error})
       const key=JSON.stringify([text,params])
       let shared=inflight.get(key)

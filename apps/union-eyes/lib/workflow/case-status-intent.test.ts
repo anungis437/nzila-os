@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest'
 import {randomUUID} from 'node:crypto'
-import {CASE_STATUS_EMAIL_PURPOSE,sealCaseStatusEmail,verifyCaseStatusEmail,sealCaseStatusReceipt,verifyCaseStatusReceipt} from './case-status-intent'
+import {CASE_STATUS_EMAIL_PURPOSE,renderCaseStatusNotification,sealCaseStatusEmail,verifyCaseStatusEmail,sealCaseStatusReceipt,verifyCaseStatusReceipt} from './case-status-intent'
 const key='synthetic-test-seal-key-not-a-real-key-123456'
 const createdAt=new Date('2026-11-17T13:00:00.000Z')
 const input={purpose:CASE_STATUS_EMAIL_PURPOSE,version:1 as const,queueId:randomUUID(),organizationId:randomUUID(),caseId:randomUUID(),
@@ -33,5 +33,19 @@ describe('case state notification seals',()=>{
   expect(verifyCaseStatusReceipt({...receipt,providerMessageId:randomUUID()},intent,key)).toBeNull()
   expect(verifyCaseStatusReceipt({...receipt,seal:'0'.repeat(64)},intent,key)).toBeNull()
   expect(verifyCaseStatusReceipt(receipt,{...intent,seal:'a'.repeat(64)},key)).toBeNull()
+ })
+})
+
+describe('English and French state-only case mail',()=>{
+ it.each(['submitted','under_review','assigned','investigation','pending_documentation','resolved','rejected','closed'] as const)('renders %s in both supported languages',status=>{
+   const en=renderCaseStatusNotification(status,'en-CA'),fr=renderCaseStatusNotification(status,'fr-CA')
+   expect(en.subject).toBe('Your case status was updated');expect(fr.subject).toContain('votre dossier')
+   expect(fr.text).toContain('Connectez-vous à Union Eyes');expect(fr.text).not.toContain('Sign in')
+   expect(fr.text).not.toContain(status);expect(en.text).not.toContain(input.caseId);expect(fr.text).not.toContain(input.recipientId)
+   expect(renderCaseStatusNotification(status,'fr')).toEqual(fr)
+   expect(renderCaseStatusNotification(status,'unsupported')).toEqual(en)
+ })
+ it('rejects an unrecognized state rather than inserting arbitrary narrative',()=>{
+   expect(()=>renderCaseStatusNotification('private staff note' as never,'fr-CA')).toThrow()
  })
 })

@@ -1,7 +1,7 @@
 /** Governed mail execution capabilities. No business/system role receives raw canonical identity access. */
 import { AUTH_BRIDGE_PURPOSE, AUTH_BRIDGE_PROVIDER_NO_PARENT } from '@nzila/db/auth-storage-authority'
 import { ROLE_CAPACITIES } from '../../lib/authority/capacity'
-import { ACTIVE_RECUSAL_SQL } from '../../lib/authority/common'
+import { ACTIVE_CASE_RESPONDENT_SQL, ACTIVE_RECUSAL_SQL } from '../../lib/authority/common'
 import { TENANT_LOCAL_ROLES, getRoleLevel, UserRole } from '../../lib/auth/roles'
 
 export const QUEUED_CASE_MAIL_OWNER = 'nzila_auth_org_authority_reader'
@@ -23,7 +23,7 @@ export const QUEUED_CASE_MAIL_LOAD_BODY = `
 #variable_conflict use_variable
 DECLARE
   actor text := ${key('actor')}; org uuid := ${key('org')}::uuid; case_id uuid;
-  member_role text; letter record; c record; s record; claim_row record; grievance_row record; has_claim boolean; has_grievance boolean; adverse jsonb; recipient text; recipient_email text; source_hash text;
+  member_role text; letter record; c record; s record; claim_row record; grievance_row record; has_claim boolean; has_grievance boolean; adverse jsonb; recipient text; recipient_email text; recipient_locale text; source_hash text;
   checked_at timestamptz := clock_timestamp(); relationships jsonb; mandates jsonb; recusals jsonb; purpose text := task->>'purpose';
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.principal:'||person,0))
@@ -88,8 +88,7 @@ BEGIN
     WHERE a.organization_id=org AND a.case_id=case_id;
   checked_at:=clock_timestamp();
   SELECT COALESCE(jsonb_agg(respondent_user_id),'[]'::jsonb) INTO adverse FROM public.case_respondents
-    WHERE organization_id=org AND scope_id=s.id AND (revoked_at IS NULL OR NOT isfinite(revoked_at)
-      OR revoked_at>checked_at OR revoked_at<recorded_at OR revoked_by IS NULL);
+    WHERE organization_id=org AND scope_id=s.id AND ${ACTIVE_CASE_RESPONDENT_SQL.replaceAll('clock_timestamp()', 'checked_at')};
   IF adverse ? actor THEN RETURN NULL; END IF;
   IF has_grievance THEN c:=grievance_row;
   ELSE SELECT false AS has_legal_implications,false AS is_confidential INTO c; END IF;
@@ -97,7 +96,7 @@ BEGIN
     IF NOT EXISTS(SELECT FROM public.claims WHERE claim_id=case_id AND organization_id=org
       AND member_id=recipient AND status::text=task->>'newStatus') THEN RETURN NULL; END IF;
     PERFORM set_config('ue.mail_recipient',recipient,true);
-    SELECT u.email INTO recipient_email FROM user_management.users u
+    SELECT u.email,u.locale INTO recipient_email,recipient_locale FROM user_management.users u
       JOIN user_management.organization_users m ON m.user_id=u.user_id
       WHERE u.user_id=recipient AND u.is_active AND u.lifecycle_state='active' AND u.email_verified
         AND m.organization_id=org AND m.is_active;
@@ -141,7 +140,7 @@ BEGIN
   IF EXISTS(SELECT FROM public.ue_authority_recusals WHERE organization_id=org AND principal_user_id=actor
     AND resource_type='case' AND resource_id=case_id AND ${ACTIVE_RECUSAL_SQL.replaceAll('clock_timestamp()', 'checked_at').replaceAll('statement_timestamp()', 'checked_at')}) THEN RETURN NULL; END IF;
   RETURN jsonb_build_object('organizationId',org,'userId',actor,'caseId',case_id,'membershipRole',member_role,
-    'relationships',relationships,'mandates',mandates,'recusals',recusals,'sourceHash',source_hash,'recipientEmail',recipient_email,'checkedAt',checked_at,
+    'relationships',relationships,'mandates',mandates,'recusals',recusals,'sourceHash',source_hash,'recipientEmail',recipient_email,'recipientLocale',recipient_locale,'checkedAt',checked_at,
     'action',CASE WHEN purpose='case_status_notification_v1' THEN 'case:transition' ELSE 'case:disclose_to_member' END,
     'resource',jsonb_build_object('kind','case','id',case_id,'organizationId',org,
       'unitId',CASE WHEN s.unit_status='active' AND s.unit_archived IS NULL THEN s.unit_id ELSE NULL END,
@@ -261,7 +260,7 @@ export function compileQueuedCaseMailSql(): string {
       THEN RAISE EXCEPTION 'Existing bounded canonical reader is required'; END IF;
   END $ue_mail$;
   GRANT CREATE ON SCHEMA public TO ${reader};
-  GRANT SELECT(user_id,email,email_verified) ON user_management.users TO ${reader};
+  GRANT SELECT(user_id,email,email_verified,locale) ON user_management.users TO ${reader};
   GRANT SELECT(id,organization_id,payload,created_at,status) ON public.notification_queue TO ${reader};
   GRANT SELECT(id,organization_id,idempotency_key,operation,request_hash,actor,result,created_at),INSERT(organization_id,idempotency_key,operation,request_hash,actor,result) ON public.ue_authority_requests TO ${reader};
   GRANT INSERT(organization_id,source_table,source_id,operation,actor_user_id,row_before,row_after) ON public.ue_authority_events TO ${reader};
@@ -277,7 +276,7 @@ export function compileQueuedCaseMailSql(): string {
   GRANT SELECT(claim_id,organization_id,member_id,status) ON public.claims TO ${reader};
   GRANT SELECT(id,organization_id,represented_member_user_id,has_legal_implications,is_confidential) ON public.grievances TO ${reader};
   GRANT SELECT(id,organization_id,case_id,claim_id,grievance_id,unit_id,territory_id,grievance_mirror_id,mirror_recorded_at,mirror_recorded_by) ON public.case_authority_scopes TO ${reader};
-  GRANT SELECT(organization_id,scope_id,respondent_user_id,recorded_at,revoked_at,revoked_by) ON public.case_respondents TO ${reader};
+  GRANT SELECT(organization_id,scope_id,respondent_user_id,recorded_at,revoked_at,revoked_by,revoked_proposal_id) ON public.case_respondents TO ${reader};
   GRANT SELECT(id,organization_id,status,archived_at) ON public.bargaining_units TO ${reader};
   GRANT SELECT(id,organization_id,retired_at,source_instrument) ON public.case_territories TO ${reader};
   GRANT SELECT(id,organization_id,grievance_id,status,drafted_by,approved_by,approved_at,assigned_signer_id,signed_by,signed_at,signature_id,subject,body,reference_number) ON public.correspondence TO ${reader};

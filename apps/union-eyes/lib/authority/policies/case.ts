@@ -28,6 +28,7 @@ import {
   instrumentOf,
   isLive,
   PRIMARY_CASE_HANDLER_ONLY_ACTIONS,
+  validStringArray,
 } from '../common'
 import type {
   Action,
@@ -303,6 +304,7 @@ interface RelationshipGrant {
 
 /** What a relationship, combined with the holder's CAPACITY, permits. */
 function relationshipGrant(r: ResourceRelationship, capacities: readonly Capacity[]): RelationshipGrant {
+  if (!validStringArray(r.permissions)) return { actions: [], visibility: 'internal', miss: { code: 'INSTRUMENT_INVALID', detail: 'relationship permissions are malformed' } }
   const handler = HANDLER_CAPACITIES.some((c) => capacities.includes(c))
   switch (r.relation) {
     case 'represented_member':

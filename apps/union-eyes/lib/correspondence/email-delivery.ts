@@ -158,7 +158,7 @@ async function claimEmail(now: Date): Promise<{ row:QueueRow; intent:Corresponde
     }
     // The system transport may execute only the live principal's bounded, database-minted intent.
     if(!intent.authorityCapability) {
-      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_REVALIDATION_REQUIRED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_REVALIDATION_REQUIRED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'review_required',{reason:'authority_capability_required'});return null
     }
     const context=await queuedCaseMailContext(drizzleExecutor(tx),{queueId:row.id,capability:intent.authorityCapability})
@@ -168,7 +168,7 @@ async function claimEmail(now: Date): Promise<{ row:QueueRow; intent:Corresponde
       try { unchanged=(await signedEmailMaterial(tx,letter,key)).contentHash===intent.contentHash } catch { unchanged=false }
     }
     if(!context.allowed || !unchanged) {
-      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_OR_CONTENT_CHANGED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_OR_CONTENT_CHANGED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'suppressed',{reason:'authority_or_content_changed'});return null
     }
     const attempt = count+1

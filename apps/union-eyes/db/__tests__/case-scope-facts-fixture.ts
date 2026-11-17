@@ -6,5 +6,5 @@ export const CASE_SCOPE_FACTS_FIXTURE_SQL = `
     claim_id uuid,grievance_id uuid,unit_id uuid,territory_id uuid,revision integer DEFAULT 0,last_proposal_id uuid,
     grievance_mirror_id uuid,mirror_recorded_at timestamptz,mirror_recorded_by text);
   CREATE TABLE public.case_respondents(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),organization_id uuid,scope_id uuid,
-    respondent_user_id text,recorded_at timestamptz DEFAULT now(),recorded_by text,revoked_at timestamptz,revoked_by text);
+    respondent_user_id text,recorded_at timestamptz DEFAULT now(),recorded_by text,revoked_at timestamptz,revoked_by text,revoked_proposal_id uuid);
 `

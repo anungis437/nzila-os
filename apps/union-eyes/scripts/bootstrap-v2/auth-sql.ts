@@ -14,5 +14,7 @@ export {
   AUTH_BUSINESS_CONTEXT_KEYS,
   authBusinessContextSettings,
   compileAuthOrgBindingSql,
+  AUTH_BUSINESS_FUNCTION_CATALOG_QUERY,
+  authBusinessFunctionViolations,
   type AuthExecutionContext,
 } from '../../../../packages/db/src/auth-storage-authority'

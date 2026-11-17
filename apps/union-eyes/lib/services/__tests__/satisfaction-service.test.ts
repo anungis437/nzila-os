@@ -24,6 +24,8 @@ const mocks = vi.hoisted(() => ({
   mockInsert: vi.fn(),
   mockUpdate: vi.fn(),
   mockAudit: vi.fn(),
+  resolvePrimary:vi.fn(),
+  authorizeCase:vi.fn(),
 }));
 
 vi.mock('@/db/db', () => {
@@ -40,6 +42,7 @@ vi.mock('@/db/db', () => {
   return { db: dbMock };
 });
 
+vi.mock('@/lib/services/case-survey-primary',()=>({resolveCaseSurveyPrimary:mocks.resolvePrimary,authorizeCaseSurveyCreation:mocks.authorizeCase,SurveyAttributionError:class extends Error{}}));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.mockAudit }));
 
 vi.mock('@/db/schema', () => ({
@@ -74,6 +77,8 @@ describe('SatisfactionService', () => {
     mocks.mockInsert.mockReturnValue(chain([]));
     mocks.mockUpdate.mockReturnValue(chain([]));
     mocks.mockAudit.mockResolvedValue(undefined);
+    mocks.authorizeCase.mockResolvedValue(undefined);
+    mocks.resolvePrimary.mockImplementation(async(_tx,data)=>({primaryUserId:data.lroId??'governed-primary',memberId:data.memberId,claimId:data.claimId}));
   });
 
   // ── createSatisfactionSurvey ──────────────────────────────────
@@ -86,6 +91,15 @@ describe('SatisfactionService', () => {
         organizationId: 'org-1', claimId: 'c-1', memberId: 'm-1', lroId: 'lro-1',
       });
       expect(result).toEqual(existing);
+      expect(mocks.resolvePrimary).not.toHaveBeenCalled();
+    });
+
+    it('authorizes current case access before returning an existing row or probing anonymous-answer state',async()=>{
+      mocks.mockFindFirst.mockResolvedValue({id:'historic-survey',lroId:'historic-primary'});
+      mocks.authorizeCase.mockRejectedValueOnce(new Error('case authority denied'));
+      const {createSatisfactionSurvey}=await import('../satisfaction-service');
+      await expect(createSatisfactionSurvey({organizationId:'org-1',claimId:'case',memberId:'member',lroId:'legacy'})).rejects.toThrow('Failed to create satisfaction survey');
+      expect(mocks.mockFindFirst).not.toHaveBeenCalled();expect(mocks.mockInsert).not.toHaveBeenCalled();
     });
 
     it('inserts new survey and audits it on the same transaction', async () => {
@@ -100,6 +114,14 @@ describe('SatisfactionService', () => {
         expect.objectContaining({ query: expect.anything() }),
         expect.objectContaining({ organizationId: 'org-1', userId: 'steward-1', action: 'satisfaction.survey.create', resourceId: 'srv-new' }),
       );
+    });
+
+    it('persists and audits the governed primary when the closure caller supplies no legacy assignee',async()=>{
+      const values=vi.fn(()=>({returning:async()=>[{id:'new-survey'}]}));mocks.mockInsert.mockReturnValueOnce({values});
+      const {createSatisfactionSurvey}=await import('../satisfaction-service');
+      await createSatisfactionSurvey({organizationId:'org-1',claimId:'case-internal',memberId:'member-text'},'actual-handler');
+      expect(values).toHaveBeenCalledWith(expect.objectContaining({lroId:'governed-primary',memberId:'member-text'}));
+      expect(mocks.mockAudit).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({userId:'actual-handler',details:{claimId:'case-internal',lroId:'governed-primary'}}));
     });
 
     it('records the claim-closure workflow as the system actor', async () => {
@@ -122,6 +144,7 @@ describe('SatisfactionService', () => {
       ).rejects.toBeInstanceOf(SurveyAlreadyAnsweredError);
       expect(mocks.mockInsert).not.toHaveBeenCalled();
       expect(mocks.mockAudit).not.toHaveBeenCalled();
+      expect(mocks.resolvePrimary).not.toHaveBeenCalled();
     });
 
     it('does not create a survey when its audit cannot be written', async () => {

@@ -33,6 +33,22 @@ export function reconcileCurrentAuthority(
       reviewPriority: 'NONE',
     }
   }
+  if (model.table === 'claim_status_transitions') {
+    if (model.source !== 'apps/union-eyes/backend/grievances/models.py' ||
+      !model.columns.some(column => column.name === 'transaction_id' && column.type === 'bigint'))
+      throw new Error('UE_V2_CASE_JOURNAL_ORIGIN_SOURCE_REQUIRED')
+    return {
+      table: model.table,
+      classification: 'TENANT_RLS_REQUIRED',
+      reason: 'The source-owned case transition journal is append-only through its sole trigger writer. Ordinary and system principals may read under their existing tenant policies; neither may insert, amend, delete or replay journal rows. The bounded current-transaction writer has independently inspected column grants and RLS.',
+      supportingCapability: [model.source, 'apps/union-eyes/db/auth/case-primary-domain-guards.ts'],
+      requiredRuntimePrivileges: ['SELECT'],
+      requiredSystemPrivileges: ['SELECT'],
+      invocationAuthority: 'MIXED',
+      dbExecutionPrincipal: 'MIXED',
+      reviewPriority: 'NONE',
+    }
+  }
   if (model.table === 'donations') {
     const organization = model.columns.find((column) => column.name === 'organization_id')
     if (

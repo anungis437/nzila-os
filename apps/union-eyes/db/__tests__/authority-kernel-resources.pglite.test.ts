@@ -31,6 +31,12 @@ const decide = (user: string, action: Action, type: ResourceType, id: string, or
   k.as(user, org)((t) => enforceAuthority(t, k.deps, { principalUserId: user, organizationId: org, action, resource: { type, id, organizationId: org }, ...extra }, { authenticated: true }))
 const readCase = (user: string, id = CASE, action: Action = 'case:read') => decide(user, action, 'case', id)
 const codes = (d: { reasons: readonly { code: string }[] }) => d.reasons.map((r) => r.code)
+// Primary facts come from an independent issuance under the fixture's adopted rule.
+const grantPrimary = async (holder:string,caseId:string,relation:'owner'|'assignee') => {
+  const rule=(await k.asAdmin(()=>db.query<{id:string}>("SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id=$1 AND domain='case_assignment' AND operation='issue' AND status='active'",[ORG]))).rows[0].id
+  return k.as(U.president)(tx=>insertRelationship(tx,{organizationId:ORG,principalUserId:holder,resourceType:'case',resourceId:caseId,relation,origin:'explicit',grantedBy:U.president,issuanceRuleId:rule,effectiveAt:minutesAgo()}))
+}
+
 
 beforeAll(async () => {
   db = await freshDb()
@@ -207,8 +213,8 @@ describe('classified document access: the case file, the member\'s own submissio
       await collab(READONLY, 'read_only', true)
       await collab(U.steward2, 'secondary_lro', false) // label only
     })
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: OWNER, resourceType: 'case', resourceId: CASE, relation: 'owner', origin: 'derived', effectiveAt: minutesAgo() }))
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: OWNER, resourceType: 'case', resourceId: CASE_PRIV, relation: 'owner', origin: 'derived', effectiveAt: minutesAgo() }))
+    await grantPrimary(OWNER,CASE,'owner')
+    await grantPrimary(OWNER,CASE_PRIV,'owner')
     const ruleId = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
     const grant = (user: string, caseId: string, extra: { privilegedAccess?: boolean; expiresAt?: Date; effectiveAt?: Date } = {}) =>
       k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: user, resourceType: 'case', resourceId: caseId, relation: 'collaborator', permissions: ['read', 'read_internal'], origin: 'explicit', grantedBy: U.chief, issuanceRuleId: ruleId, effectiveAt: extra.effectiveAt ?? minutesAgo(), ...extra }))
@@ -449,7 +455,7 @@ describe('governance review register and WorkAid referral', () => {
   it('referral needs a live owner/assignee relationship AND live member consent naming the categories', async () => {
     const matter = newUuid()
     await k.asAdmin(() => seedMembership(db, 'user_assignee', ORG, 'steward'))
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: 'user_assignee', resourceType: 'case', resourceId: CASE, relation: 'assignee', origin: 'derived', effectiveAt: minutesAgo() }))
+    await grantPrimary('user_assignee',CASE,'assignee')
     const refer = (cats: string[]) => k.as('user_assignee')((t) => referToWorkAid(t, k.deps, { organizationId: ORG, referrerUserId: 'user_assignee', caseId: CASE, memberUserId: U.member, categories: cats, matterId: matter }))
     await expect(refer(['status'])).rejects.toThrow(/CONSENT_REQUIRED/)
     await k.as(U.member)((t) => insertConsent(t, { organizationId: ORG, memberUserId: U.member, matterId: matter, direction: 'union_to_workaid', issuer: 'member', issuedBy: U.member, categories: ['status'], purpose: 'legal referral', grantedAt: minutesAgo(), expiresAt: daysAhead(30) }))
@@ -484,8 +490,11 @@ describe('governance review register and WorkAid referral', () => {
     await expect(session(engagement({ informationBarrier: false }))).rejects.toThrow(/COUNSEL_NO_INFORMATION_BARRIER/)
     expect(await session(engagement())).toBe(lawyer)
     // A relationship to the underlying case is a conflict even under a good engagement.
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: lawyer, resourceType: 'case', resourceId: CASE, relation: 'creator', origin: 'derived', effectiveAt: minutesAgo() }))
-    await expect(session(engagement())).rejects.toThrow(/COUNSEL_CASE_RELATIONSHIP/)
+    // Stored subject grants are refused; a real source creator remains a conflict.
+    await expect(k.as(U.president)(t => insertRelationship(t, {organizationId:ORG,principalUserId:lawyer,resourceType:'case',resourceId:CASE,relation:'creator',origin:'derived',effectiveAt:minutesAgo()}))).rejects.toThrow(/derived subject relationships/)
+    await k.asAdmin(() => db.query('UPDATE public.grievances SET created_by=$1 WHERE id=$2',[lawyer,CASE]))
+    try { await expect(session(engagement())).rejects.toThrow(/COUNSEL_CASE_RELATIONSHIP/) }
+    finally { await k.asAdmin(() => db.query('UPDATE public.grievances SET created_by=$1 WHERE id=$2',[U.member,CASE])) }
   })
 
   it('after counsel accepts, privileged reads are refused for everyone and counsel material is unreachable', async () => {

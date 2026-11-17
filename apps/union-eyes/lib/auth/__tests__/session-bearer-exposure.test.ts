@@ -37,6 +37,8 @@ describe('UE-CONV-A-004 source ratchets', () => {
     expect(files).toEqual(
       [
         'apps/union-eyes/backend/auth_core/canonical_context.py',
+        // Bounded mint/verification reads the bearer inside PostgreSQL and stores only capability digests.
+        'apps/union-eyes/db/auth/queued-case-mail.ts',
         'apps/union-eyes/db/migrations-cache/0017_snapshot_authority_reconciliation.sql',
         'apps/union-eyes/lib/authority/store/executor.ts',
         'apps/union-eyes/scripts/bootstrap-v2/auth-org-runtime.ts',

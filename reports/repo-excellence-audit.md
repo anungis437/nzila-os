@@ -1,6 +1,6 @@
 # Repo Excellence Audit
 
-Generated: 2026-11-09T12:12:45.673Z
+Generated: 2026-11-17T21:15:14.380Z
 
 Overall score: 7.6 / 10
 
@@ -15,7 +15,7 @@ Overall score: 7.6 / 10
 | docs_truth | 9 |
 | naming_consistency | 10 |
 | ci_efficiency | 9 |
-| overengineering | 4.4 |
+| overengineering | 4.1 |
 | dead_assets | 7.9 |
 | ownership | 10 |
 
@@ -32,7 +32,7 @@ Overall score: 7.6 / 10
 - [script_sprawl] Root command surface is still dense and benefits from continued pruning.
 - [ci_efficiency] Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml
 - [ci_efficiency] App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml
-- [ci_efficiency] Effective active workflow count is 66 (total 69, emergency/manual 3).
+- [ci_efficiency] Effective active workflow count is 69 (total 72, emergency/manual 3).
 - [overengineering] Effective workflow surface remains larger than ideal for a disciplined canonical release path.
 - [dead_assets] Active app-specific deployment entry points remain and should be converged into the canonical release path.
 

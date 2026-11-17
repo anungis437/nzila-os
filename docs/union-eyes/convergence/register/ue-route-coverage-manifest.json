@@ -3,7 +3,7 @@
  "summary": {
   "routes": 1044,
   "mutating": 712,
-  "kernel": 64,
+  "kernel": 67,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 15,
@@ -5169,7 +5169,7 @@
    ],
    "mutating": false,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
@@ -8524,7 +8524,7 @@
    ],
    "mutating": false,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
@@ -9290,7 +9290,7 @@
    ],
    "mutating": false,
    "guard": "WITH_API",
-   "kernel": false,
+   "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"

@@ -4,7 +4,7 @@ import { decide } from '../kernel'
 import { decideIssuance, type IssuanceRule } from '../issuance'
 import { assertVerifiedBinding } from '../store/platform-identity'
 import { canonicalMembershipStatus } from '../store/membership-reconciliation'
-import { ahead, ago, CASE_ID, caseFacts, DAY, delegation, facts, HOUR, mandate, membership, NOW, ORG, recusal, ref, relationship, request, U } from './fixtures'
+import { ahead, ago, CASE_ID, caseFacts, DAY, delegation, facts, HOUR, mandate, membership, NOW, ORG, REVIEW_ID, recusal, ref, relationship, request, U } from './fixtures'
 
 const invalid = () => new Date('invalid')
 const resource = ref('case', CASE_ID)
@@ -68,4 +68,34 @@ describe('authority validity and restriction lifecycle', () => {
       expiresAt: ahead(HOUR), authority: 'pg-session' }, invalid())).toThrow('evaluation clock')
     expect(() => canonicalMembershipStatus({ state: 'active', effectiveFrom: ago(HOUR), effectiveTo: ahead(HOUR), revokedAt: null } as never, invalid())).toThrow('evaluation clock')
   })
+  it.each([
+    {resourceIds: CASE_ID}, {resourceIds: [null]}, {resourceIds: [1]}, {resourceIds: ['not-a-uuid']},
+    {resourceIds: null}, {resourceIds: {includes: () => true,length:1}}, {classificationCeiling:null},
+  ])('rejects malformed scope shapes rather than using string membership: %o', scope => {
+    const m=mandate({scope:scope as never})
+    expect(assessMandate(m,ORG,NOW).effective).toBe(false)
+    expect(decide(request(U.chief,'case:read',resource),facts(U.chief,['chief_steward'],{mandates:[m]}),caseFacts(),NOW).effect).toBe('deny')
+  })
+  it('does not treat power/action strings as arrays with substring membership',()=>{
+    expect(assessMandate(mandate({powers:'read_internal' as never}),ORG,NOW).effective).toBe(false)
+    expect(assessDelegation(delegation({actions:'case:read_internal' as never}),ORG,NOW).effective).toBe(false)
+  })
+  it('keeps review independence regardless of the order operational authority was acquired',()=>{
+    const review=mandate({id:'00000000-0000-4000-8000-000000000001',principalUserId:U.reviewer,kind:'governance_review',powers:['monitor'],scope:{resourceIds:[REVIEW_ID]}})
+    const office=mandate({id:'00000000-0000-4000-8000-000000000002',principalUserId:U.reviewer,kind:'executive_office',powers:['approve'],scope:{}})
+    const requestReview=request(U.reviewer,'review:monitor',ref('governance_review',REVIEW_ID))
+    const resourceReview={kind:'governance_review' as const,id:REVIEW_ID,organizationId:ORG,classification:'standard' as const,adverseUserIds:[]}
+    expect(decide(requestReview,facts(U.reviewer,['member','governance_reviewer'],{mandates:[review]}),resourceReview,NOW).effect).toBe('allow')
+    expect(decide(requestReview,facts(U.reviewer,['member','governance_reviewer','executive'],{mandates:[review,office]}),resourceReview,NOW).reasons).toEqual(expect.arrayContaining([expect.objectContaining({code:'SEGREGATION_OF_DUTIES'})]))
+    expect(decide(requestReview,facts(U.reviewer,['member','governance_reviewer','executive'],{mandates:[review,{...office,expiresAt:ago(1)}]}),resourceReview,NOW).effect).toBe('allow')
+  })
+  it('recomputes appointment-only eligibility from canonical membership at the final decision time',()=>{
+    const review=mandate({principalUserId:U.reviewer,kind:'governance_review',powers:['monitor'],scope:{resourceIds:[REVIEW_ID]},expiresAt:ahead(1000)})
+    const context={...facts(U.reviewer,['member','governance_reviewer'],{mandates:[review]}),sourceMemberships:[membership(U.reviewer,['member'])]}
+    const action=request(U.reviewer,'review:monitor',ref('governance_review',REVIEW_ID))
+    const resourceReview={kind:'governance_review' as const,id:REVIEW_ID,organizationId:ORG,classification:'standard' as const,adverseUserIds:[]}
+    expect(decide(action,context,resourceReview,NOW).effect).toBe('allow')
+    expect(decide(action,context,resourceReview,ahead(1000)).effect).toBe('deny')
+  })
+
 })

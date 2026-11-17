@@ -46,12 +46,37 @@ export type Liveness = 'live' | 'not_yet_effective' | 'expired' | 'revoked' | 'i
 export const validInstant = (value: unknown): value is Date =>
   value instanceof Date && Number.isFinite(value.getTime())
 
+export const validStringArray = (value: unknown): value is readonly string[] =>
+  Array.isArray(value) && value.every(item => typeof item === 'string' && item.length > 0 && item === item.trim())
+
+const SCOPE_ARRAY_KEYS = ['unitIds', 'territoryIds', 'resourceIds', 'accountIds'] as const
+const SCOPE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+/** JSON strings have includes()/length too; they must never stand in for explicitly enumerated resource ids. */
+export function validMandateScope(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+    ![Object.prototype, null].includes(Object.getPrototypeOf(value))) return false
+  const scope = value as Record<string, unknown>
+  if (Object.keys(scope).some(key => key !== 'classificationCeiling' && !SCOPE_ARRAY_KEYS.includes(key as typeof SCOPE_ARRAY_KEYS[number]))) return false
+  for (const key of SCOPE_ARRAY_KEYS) {
+    if (!Object.hasOwn(scope, key)) { if (scope[key] !== undefined) return false; continue }
+    if (scope[key] === undefined) continue
+    if (!validStringArray(scope[key]) || !scope[key].every(id => SCOPE_ID.test(id))) return false
+  }
+  return scope.classificationCeiling === undefined || scope.classificationCeiling === 'standard' || scope.classificationCeiling === 'confidential'
+}
+
 /** Set-based callers must not discard a restriction because its purported lift is malformed or future-dated. */
 export const ACTIVE_RECUSAL_SQL = `((lifted_at IS NOT NULL AND isfinite(declared_at) AND isfinite(lifted_at)
   AND lifted_at >= declared_at AND lifted_at <= clock_timestamp()
   AND lifted_by IS NOT NULL AND lifted_by <> principal_user_id
   AND length(lifted_by) BETWEEN 1 AND 255 AND lifted_by = btrim(lifted_by)
   AND lifted_by !~ '[[:cntrl:]]') IS NOT TRUE)`
+
+/** Revocation removes an adverse-party restriction only with coherent recorded proposal provenance. */
+export const ACTIVE_CASE_RESPONDENT_SQL = `((revoked_at IS NOT NULL AND isfinite(recorded_at) AND isfinite(revoked_at)
+  AND revoked_at >= recorded_at AND revoked_at <= clock_timestamp() AND revoked_proposal_id IS NOT NULL
+  AND revoked_by IS NOT NULL AND length(revoked_by) BETWEEN 1 AND 255 AND revoked_by=btrim(revoked_by)
+  AND revoked_by !~ '[[:cntrl:]]') IS NOT TRUE)`
 
 /**
  * Time is authoritative over the status column: a row marked active but past
@@ -126,6 +151,10 @@ export function assessMandate(m: Mandate, orgId: string, now: Date): InstrumentV
     bad('mandate belongs to another organization')
     return { effective: false, reasons }
   }
+  if (!validMandateScope(m.scope) || !validStringArray(m.powers)) {
+    bad('mandate scope or power list is malformed')
+    return { effective: false, reasons }
+  }
   const lv = liveness(m, now)
   if (lv === 'inconsistent') bad('status, window and revocation are contradictory')
   else if (lv !== 'live') {
@@ -196,6 +225,10 @@ export function assessDelegation(
   const reasons: Reason[] = []
   const bad = (detail: string) => reasons.push({ code: 'DELEGATION_INVALID', detail, ref: d.id })
   if (d.organizationId !== orgId) bad('delegation belongs to another organization')
+  if (!validStringArray(d.actions) || !validStringArray(d.resourceTypes)) {
+    bad('delegation action or resource-type list is malformed')
+    return { effective: false, reasons }
+  }
   const lv = liveness(d, now)
   if (lv !== 'live') bad(`delegation is ${lv}`)
   if (d.delegatorUserId === d.delegateUserId) bad('self-delegation')
@@ -208,6 +241,31 @@ export function assessDelegation(
     reasons.push({ code: 'NOT_ACCEPTED', detail: 'the delegate has not accepted this delegation', ref: d.id })
   }
   return { effective: reasons.length === 0, reasons }
+}
+
+/**
+ * Appointment-only capacities are earned by a LIVE mandate, never by a role
+ * label. They remain eligibility only: the mandate is still what grants access.
+ */
+export function withAppointmentCapacities(
+  memberships: readonly Membership[],
+  mandates: readonly Mandate[],
+  me: string,
+  org: string,
+  now: Date,
+): Membership[] {
+  const earned = new Set<Capacity>()
+  for (const m of mandates) {
+    if (m.principalUserId !== me || !assessMandate(m, org, now).effective) continue
+    if (m.kind === 'financial' && m.powers.includes('audit')) earned.add('auditor')
+    if (m.kind === 'governance_review') earned.add('governance_reviewer')
+  }
+  if (earned.size === 0) return [...memberships]
+  return memberships.map((mem) =>
+    mem.userId === me && mem.organizationId === org
+      ? { ...mem, capacities: [...new Set<Capacity>([...mem.capacities, ...earned])] }
+      : mem,
+  )
 }
 
 // ── Restrictions ──────────────────────────────────────────────────────────

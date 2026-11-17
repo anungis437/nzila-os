@@ -77,7 +77,7 @@ export async function recordConsentText(
   const id = String(
     (
       await exec.query<Row>(
-        `INSERT INTO ue_authority_workaid_consent_texts (organization_id, version, body, body_sha256, recorded_by, effective_at)
+        `INSERT INTO public.ue_authority_workaid_consent_texts (organization_id, version, body, body_sha256, recorded_by, effective_at)
          VALUES ($1,$2,$3,encode(sha256(convert_to($3, 'UTF8')), 'hex'),$4,$5) RETURNING id::text AS id`,
         [i.organizationId, i.version, i.body, i.recorderUserId, i.effectiveAt],
       )
@@ -94,7 +94,7 @@ export async function retireConsentText(exec: SqlExecutor, deps: Deps, i: { orga
   await bindSessionActor(exec, i.retirerUserId, 'consent wording retirer')
   await requireExecutiveOffice(exec, deps, i.organizationId, i.retirerUserId, 'retire')
   const r = await exec.query(
-    `UPDATE ue_authority_workaid_consent_texts SET retired_at = now(), retired_by = $3 WHERE organization_id = $1 AND id = $2 AND retired_at IS NULL RETURNING id`,
+    `UPDATE public.ue_authority_workaid_consent_texts SET retired_at = now(), retired_by = $3 WHERE organization_id = $1 AND id = $2 AND retired_at IS NULL RETURNING id`,
     [i.organizationId, i.textId, i.retirerUserId],
   )
   if (r.rows.length !== 1) throw new AuthorityStoreError('NOT_FOUND', 'no live consent wording with this id in this organization')
@@ -114,7 +114,7 @@ export async function loadCurrentConsentText(exec: SqlExecutor, organizationId: 
   requireUuids(organizationId)
   const r = (
     await exec.query<Row>(
-      `SELECT id::text AS id, version, body, body_sha256, effective_at FROM ue_authority_workaid_consent_texts
+      `SELECT id::text AS id, version, body, body_sha256, effective_at FROM public.ue_authority_workaid_consent_texts
         WHERE organization_id = $1 AND retired_at IS NULL AND effective_at <= $2
         ORDER BY effective_at DESC, created_at DESC LIMIT 1`,
       [organizationId, now],
@@ -174,7 +174,7 @@ export async function proposeConsentWording(
     id = String(
       (
         await exec.query<Row>(
-          `INSERT INTO ue_authority_workaid_consent_text_proposals (organization_id, version, body, body_sha256, proposed_by)
+          `INSERT INTO public.ue_authority_workaid_consent_text_proposals (organization_id, version, body, body_sha256, proposed_by)
            VALUES ($1,$2,$3,encode(sha256(convert_to($3, 'UTF8')), 'hex'),$4) RETURNING id::text AS id`,
           [i.organizationId, wording.version, wording.body, i.proposerUserId],
         )
@@ -202,7 +202,7 @@ export async function listOpenConsentWordingProposals(
   const rows = (
     await exec.query<Row>(
       `SELECT id::text AS id, version, body, body_sha256, proposed_by, proposed_at
-         FROM ue_authority_workaid_consent_text_proposals
+         FROM public.ue_authority_workaid_consent_text_proposals
         WHERE organization_id = $1 AND adopted_at IS NULL AND withdrawn_at IS NULL
         ORDER BY proposed_at ASC, created_at ASC`,
       [i.organizationId],
@@ -235,7 +235,7 @@ export async function adoptConsentWording(
   const row = (
     await exec.query<Row>(
       `SELECT version, body, body_sha256, proposed_by, adopted_at, withdrawn_at
-         FROM ue_authority_workaid_consent_text_proposals
+         FROM public.ue_authority_workaid_consent_text_proposals
         WHERE organization_id = $1 AND id = $2`,
       [i.organizationId, i.proposalId],
     )
@@ -252,7 +252,7 @@ export async function adoptConsentWording(
     effectiveAt: now,
   })
   const updated = await exec.query(
-    `UPDATE ue_authority_workaid_consent_text_proposals
+    `UPDATE public.ue_authority_workaid_consent_text_proposals
         SET adopted_by = $3, adopted_at = $4, adopted_text_id = $5
       WHERE organization_id = $1 AND id = $2 AND adopted_at IS NULL AND withdrawn_at IS NULL
       RETURNING id`,
@@ -282,7 +282,7 @@ export async function withdrawConsentWordingProposal(
   await requireExecutiveOffice(exec, deps, i.organizationId, i.proposerUserId, 'withdraw')
   const row = (
     await exec.query<Row>(
-      `SELECT proposed_by, adopted_at, withdrawn_at FROM ue_authority_workaid_consent_text_proposals WHERE organization_id = $1 AND id = $2`,
+      `SELECT proposed_by, adopted_at, withdrawn_at FROM public.ue_authority_workaid_consent_text_proposals WHERE organization_id = $1 AND id = $2`,
       [i.organizationId, i.proposalId],
     )
   ).rows[0]
@@ -290,7 +290,7 @@ export async function withdrawConsentWordingProposal(
   if (row.adopted_at || row.withdrawn_at) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent wording proposal is already adopted or withdrawn')
   if (String(row.proposed_by) !== i.proposerUserId) throw new AuthorityStoreError('DENIED', 'WORDING_WITHDRAWAL_NOT_PROPOSER: only the proposer may withdraw this wording')
   const updated = await exec.query(
-    `UPDATE ue_authority_workaid_consent_text_proposals SET withdrawn_at = now(), withdrawn_by = $3
+    `UPDATE public.ue_authority_workaid_consent_text_proposals SET withdrawn_at = now(), withdrawn_by = $3
       WHERE organization_id = $1 AND id = $2 AND adopted_at IS NULL AND withdrawn_at IS NULL RETURNING id`,
     [i.organizationId, i.proposalId, i.proposerUserId],
   )
@@ -317,8 +317,8 @@ interface GrantRow {
 const GRANT_SELECT = `
   SELECT g.id::text AS grant_id, g.consent_id::text AS consent_id, g.matter_id::text AS matter_id, g.case_id::text AS case_id,
          g.member_user_id, g.text_version, c.categories, c.purpose, c.granted_at, c.expires_at, c.revoked_at
-    FROM ue_authority_workaid_consent_grants g
-    JOIN ue_authority_disclosure_consents c ON c.id = g.consent_id AND c.organization_id = g.organization_id`
+    FROM public.ue_authority_workaid_consent_grants g
+    JOIN public.ue_authority_disclosure_consents c ON c.id = g.consent_id AND c.organization_id = g.organization_id`
 
 function mapGrant(r: Row): GrantRow {
   return {
@@ -404,7 +404,7 @@ export async function grantWorkAidConsent(exec: SqlExecutor, deps: Deps, i: Gran
 
   const text = (
     await exec.query<Row>(
-      `SELECT id::text AS id, version, body_sha256, effective_at, retired_at FROM ue_authority_workaid_consent_texts WHERE organization_id = $1 AND version = $2`,
+      `SELECT id::text AS id, version, body_sha256, effective_at, retired_at FROM public.ue_authority_workaid_consent_texts WHERE organization_id = $1 AND version = $2`,
       [i.organizationId, i.textVersion],
     )
   ).rows[0]
@@ -417,9 +417,9 @@ export async function grantWorkAidConsent(exec: SqlExecutor, deps: Deps, i: Gran
     throw refuse('CASE_NOT_OWNED_BY_MEMBER', 'the member has no creator relationship to this case')
   }
   const busy = await exec.query(
-    `SELECT 1 FROM ue_authority_workaid_matters WHERE organization_id = $1 AND case_id = $2 AND withdrawn_at IS NULL
+    `SELECT 1 FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND case_id = $2 AND withdrawn_at IS NULL
      UNION ALL
-     SELECT 1 FROM ue_authority_workaid_consent_grants g JOIN ue_authority_disclosure_consents c ON c.id = g.consent_id
+     SELECT 1 FROM public.ue_authority_workaid_consent_grants g JOIN public.ue_authority_disclosure_consents c ON c.id = g.consent_id
       WHERE g.organization_id = $1 AND g.case_id = $2 AND c.revoked_at IS NULL AND c.expires_at > $3`,
     [i.organizationId, i.caseId, now],
   )
@@ -429,7 +429,7 @@ export async function grantWorkAidConsent(exec: SqlExecutor, deps: Deps, i: Gran
   const consentId = String(
     (
       await exec.query<Row>(
-        `INSERT INTO ue_authority_disclosure_consents
+        `INSERT INTO public.ue_authority_disclosure_consents
            (organization_id, member_user_id, matter_id, direction, issuer, issued_by, categories, recipient_user_id, purpose, granted_at, expires_at)
          VALUES ($1,$2,$3,'union_to_workaid','member',$2,$4::text[],NULL,$5,$6,$7) RETURNING id::text AS id`,
         [i.organizationId, i.memberUserId, matterId, categories, purpose, now, i.expiresAt],
@@ -437,7 +437,7 @@ export async function grantWorkAidConsent(exec: SqlExecutor, deps: Deps, i: Gran
     ).rows[0].id,
   )
   await exec.query(
-    `INSERT INTO ue_authority_workaid_consent_grants (organization_id, consent_id, matter_id, case_id, member_user_id, text_id, text_version, text_sha256)
+    `INSERT INTO public.ue_authority_workaid_consent_grants (organization_id, consent_id, matter_id, case_id, member_user_id, text_id, text_version, text_sha256)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
     [i.organizationId, consentId, matterId, i.caseId, i.memberUserId, String(text.id), i.textVersion, i.acknowledgedTextSha256],
   )
@@ -482,7 +482,7 @@ export async function listReferableWorkAidConsents(
     await exec.query<Row>(
       `${GRANT_SELECT}
         WHERE g.organization_id = $1 AND g.case_id = $2 AND c.revoked_at IS NULL AND c.expires_at > $3
-          AND NOT EXISTS (SELECT 1 FROM ue_authority_workaid_matters m WHERE m.id = g.matter_id)`,
+          AND NOT EXISTS (SELECT 1 FROM public.ue_authority_workaid_matters m WHERE m.id = g.matter_id)`,
       [i.organizationId, i.caseId, now],
     )
   ).rows.map(mapGrant)
@@ -576,7 +576,7 @@ function sameCategories(left: readonly WorkAidCategory[], right: readonly WorkAi
 async function loadReferralScope(exec: SqlExecutor, organizationId: string, matterId: string): Promise<{ status: ReferralScopeStatus; categories: WorkAidCategory[] }> {
   const storedRow = (
     await exec.query<Row>(
-      `SELECT referred_categories FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
+      `SELECT referred_categories FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
       [organizationId, matterId],
     )
   ).rows[0]
@@ -600,7 +600,7 @@ async function loadReferralScope(exec: SqlExecutor, organizationId: string, matt
 async function liveReleasedCategories(exec: SqlExecutor, organizationId: string, matterId: string): Promise<WorkAidCategory[]> {
   const rows = (
     await exec.query<Row>(
-      `SELECT categories FROM ue_authority_workaid_shares
+      `SELECT categories FROM public.ue_authority_workaid_shares
         WHERE organization_id = $1 AND matter_id = $2 AND invalidated_at IS NULL`,
       [organizationId, matterId],
     )
@@ -629,7 +629,7 @@ export async function listCaseWorkAidReferrals(
   const matters = (
     await exec.query<Row>(
       `SELECT id::text AS matter_id, referred_at, withdrawn_at, counsel_accepted_at
-         FROM ue_authority_workaid_matters
+         FROM public.ue_authority_workaid_matters
         WHERE organization_id = $1 AND case_id = $2
         ORDER BY referred_at DESC`,
       [i.organizationId, i.caseId],
@@ -678,7 +678,7 @@ export async function referMatterToWorkAid(
   await bindSessionActor(exec, i.referrerUserId, 'referrer')
   const grant = await loadGrantByMatter(exec, i.organizationId, i.matterId)
   if (!grant) throw new AuthorityStoreError('NOT_FOUND', 'no consent is on record for this matter in this organization')
-  const exists = (await exec.query(`SELECT 1 FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.matterId])).rows.length > 0
+  const exists = (await exec.query(`SELECT 1 FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.matterId])).rows.length > 0
   if (exists) throw new AuthorityStoreError('PRECONDITION', 'CASE_ALREADY_REFERRED: this matter has already been referred')
   let categories: WorkAidCategory[]
   try {
@@ -719,7 +719,7 @@ export async function authoriseWorkAidDocument(
   const id = String(
     (
       await exec.query<Row>(
-        `INSERT INTO ue_authority_workaid_document_auths (organization_id, matter_id, consent_id, document_id, classification, authorised_by, authorised_at, expires_at)
+        `INSERT INTO public.ue_authority_workaid_document_auths (organization_id, matter_id, consent_id, document_id, classification, authorised_by, authorised_at, expires_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id::text AS id`,
         [i.organizationId, i.matterId, grant.consentId, i.documentId, cls, i.memberUserId, now, expiresAt],
       )
@@ -744,16 +744,16 @@ export async function revokeWorkAidDocumentAuthorisation(
   requireUuids(i.organizationId, i.authorisationId)
   requirePrincipals(i.revokerUserId)
   await bindSessionActor(exec, i.revokerUserId, 'consenting member')
-  const a = (await exec.query<Row>(`SELECT matter_id::text AS matter_id, authorised_by FROM ue_authority_workaid_document_auths WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.authorisationId])).rows[0]
+  const a = (await exec.query<Row>(`SELECT matter_id::text AS matter_id, authorised_by FROM public.ue_authority_workaid_document_auths WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.authorisationId])).rows[0]
   if (!a) throw new AuthorityStoreError('NOT_FOUND', 'no document authorisation with this id in this organization')
   if (String(a.authorised_by) !== i.revokerUserId) throw refuse('NOT_THE_CONSENTING_MEMBER', 'only the consenting member may revoke a document authorisation')
   const r = await exec.query(
-    `UPDATE ue_authority_workaid_document_auths SET revoked_at = now(), revoked_by = $3 WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
+    `UPDATE public.ue_authority_workaid_document_auths SET revoked_at = now(), revoked_by = $3 WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
     [i.organizationId, i.authorisationId, i.revokerUserId],
   )
   if (r.rows.length !== 1) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the document authorisation is already revoked')
   const s = await exec.query(
-    `UPDATE ue_authority_workaid_shares SET invalidated_at = now(), invalidated_by = $3, invalidation_reason = 'document_authorisation_revoked'
+    `UPDATE public.ue_authority_workaid_shares SET invalidated_at = now(), invalidated_by = $3, invalidation_reason = 'document_authorisation_revoked'
       WHERE organization_id = $1 AND document_auth_id = $2 AND invalidated_at IS NULL RETURNING id`,
     [i.organizationId, i.authorisationId, i.revokerUserId],
   )
@@ -784,7 +784,7 @@ export async function createWorkAidShare(
   await bindSessionActor(exec, i.actorUserId, 'sharer')
   await requireReferralScopeColumn(exec)
   const now = clock(deps)
-  const matter = (await exec.query<Row>(`SELECT withdrawn_at FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.matterId])).rows[0]
+  const matter = (await exec.query<Row>(`SELECT withdrawn_at FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.matterId])).rows[0]
   if (!matter || matter.withdrawn_at) throw new AuthorityStoreError('NOT_FOUND', 'MATTER_NOT_FOUND: no live referral with this id')
   const grant = await loadGrantByMatter(exec, i.organizationId, i.matterId)
   if (!grant) throw new AuthorityStoreError('NOT_FOUND', 'MATTER_NOT_FOUND: no consent is on record for this matter')
@@ -820,7 +820,7 @@ export async function createWorkAidShare(
   for (const authId of docIds) {
     const a = (
       await exec.query<Row>(
-        `SELECT document_id::text AS document_id, expires_at, revoked_at FROM ue_authority_workaid_document_auths WHERE organization_id = $1 AND id = $2 AND matter_id = $3 AND consent_id = $4`,
+        `SELECT document_id::text AS document_id, expires_at, revoked_at FROM public.ue_authority_workaid_document_auths WHERE organization_id = $1 AND id = $2 AND matter_id = $3 AND consent_id = $4`,
         [i.organizationId, authId, i.matterId, grant.consentId],
       )
     ).rows[0]
@@ -837,7 +837,7 @@ export async function createWorkAidShare(
       String(
         (
           await exec.query<Row>(
-            `INSERT INTO ue_authority_workaid_shares (organization_id, matter_id, consent_id, kind, categories, created_by) VALUES ($1,$2,$3,'categories',$4::text[],$5) RETURNING id::text AS id`,
+            `INSERT INTO public.ue_authority_workaid_shares (organization_id, matter_id, consent_id, kind, categories, created_by) VALUES ($1,$2,$3,'categories',$4::text[],$5) RETURNING id::text AS id`,
             [i.organizationId, i.matterId, grant.consentId, plain, i.actorUserId],
           )
         ).rows[0].id,
@@ -849,7 +849,7 @@ export async function createWorkAidShare(
       String(
         (
           await exec.query<Row>(
-            `INSERT INTO ue_authority_workaid_shares (organization_id, matter_id, consent_id, kind, categories, document_auth_id, created_by)
+            `INSERT INTO public.ue_authority_workaid_shares (organization_id, matter_id, consent_id, kind, categories, document_auth_id, created_by)
              VALUES ($1,$2,$3,'document',ARRAY['documents']::text[],$4,$5) RETURNING id::text AS id`,
             [i.organizationId, i.matterId, grant.consentId, authId, i.actorUserId],
           )
@@ -889,21 +889,21 @@ export async function revokeWorkAidConsent(
   const grant = mapGrant(g)
   if (grant.memberUserId !== i.revokerUserId) throw refuse('NOT_THE_CONSENTING_MEMBER', 'only the consenting member may withdraw consent')
   const c = await exec.query(
-    `UPDATE ue_authority_disclosure_consents SET revoked_at = now(), revoked_by = $3 WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
+    `UPDATE public.ue_authority_disclosure_consents SET revoked_at = now(), revoked_by = $3 WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
     [i.organizationId, i.consentId, i.revokerUserId],
   )
   if (c.rows.length !== 1) throw new AuthorityStoreError('ALREADY_TERMINAL', 'the consent is already withdrawn')
   const docs = await exec.query(
-    `UPDATE ue_authority_workaid_document_auths SET revoked_at = now(), revoked_by = $3 WHERE organization_id = $1 AND consent_id = $2 AND revoked_at IS NULL RETURNING id`,
+    `UPDATE public.ue_authority_workaid_document_auths SET revoked_at = now(), revoked_by = $3 WHERE organization_id = $1 AND consent_id = $2 AND revoked_at IS NULL RETURNING id`,
     [i.organizationId, i.consentId, i.revokerUserId],
   )
   const shares = await exec.query(
-    `UPDATE ue_authority_workaid_shares SET invalidated_at = now(), invalidated_by = $3, invalidation_reason = 'consent_revoked'
+    `UPDATE public.ue_authority_workaid_shares SET invalidated_at = now(), invalidated_by = $3, invalidation_reason = 'consent_revoked'
       WHERE organization_id = $1 AND consent_id = $2 AND invalidated_at IS NULL RETURNING id`,
     [i.organizationId, i.consentId, i.revokerUserId],
   )
   const withdrawn = await exec.query(
-    `UPDATE ue_authority_workaid_matters SET withdrawn_at = now()
+    `UPDATE public.ue_authority_workaid_matters SET withdrawn_at = now()
       WHERE organization_id = $1 AND id = $2 AND counsel_accepted_at IS NULL AND withdrawn_at IS NULL RETURNING id`,
     [i.organizationId, grant.matterId],
   )
@@ -962,17 +962,17 @@ export async function listMemberWorkAidConsents(exec: SqlExecutor, deps: Deps, i
   const grants = (await exec.query<Row>(`${GRANT_SELECT} WHERE g.organization_id = $1 AND g.member_user_id = $2 ORDER BY g.created_at DESC`, [i.organizationId, i.memberUserId])).rows.map(mapGrant)
   const out: MemberWorkAidConsentView[] = []
   for (const g of grants) {
-    const m = (await exec.query<Row>(`SELECT counsel_accepted_at, withdrawn_at FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, g.matterId])).rows[0]
+    const m = (await exec.query<Row>(`SELECT counsel_accepted_at, withdrawn_at FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, g.matterId])).rows[0]
     const docs = (
       await exec.query<Row>(
-        `SELECT id::text AS id, document_id::text AS document_id, classification, expires_at, revoked_at FROM ue_authority_workaid_document_auths WHERE organization_id = $1 AND consent_id = $2 ORDER BY created_at`,
+        `SELECT id::text AS id, document_id::text AS document_id, classification, expires_at, revoked_at FROM public.ue_authority_workaid_document_auths WHERE organization_id = $1 AND consent_id = $2 ORDER BY created_at`,
         [i.organizationId, g.consentId],
       )
     ).rows
     const shares = (
       await exec.query<Row>(
         `SELECT id::text AS id, categories, created_at, invalidated_at, invalidation_reason
-           FROM ue_authority_workaid_shares
+           FROM public.ue_authority_workaid_shares
           WHERE organization_id = $1 AND consent_id = $2
           ORDER BY created_at`,
         [i.organizationId, g.consentId],
@@ -1037,7 +1037,7 @@ export async function readWorkAidCounselManifest(
   const grant = mapGrant(row)
   await requireCounselSession(exec, deps, { organizationId: i.organizationId, matterId: grant.matterId, claimedUserId: i.counselUserId })
   const now = clock(deps)
-  const matter = (await exec.query<Row>(`SELECT referred_at, withdrawn_at FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, grant.matterId])).rows[0]
+  const matter = (await exec.query<Row>(`SELECT referred_at, withdrawn_at FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`, [i.organizationId, grant.matterId])).rows[0]
   if (!matter || matter.withdrawn_at) throw refuse('COUNSEL_ACCESS_REFUSED', 'the matter is not referred or was withdrawn')
   if (!consentLive(grant, now)) throw refuse('CONSENT_NOT_LIVE', 'the member consent is revoked or expired')
 
@@ -1045,8 +1045,8 @@ export async function readWorkAidCounselManifest(
     await exec.query<Row>(
       `SELECT s.id::text AS id, s.kind, s.categories, s.document_auth_id::text AS document_auth_id,
               a.id::text AS auth_id, a.document_id::text AS document_id, a.classification, a.expires_at AS auth_expires_at, a.revoked_at AS auth_revoked_at
-         FROM ue_authority_workaid_shares s
-         LEFT JOIN ue_authority_workaid_document_auths a ON a.id = s.document_auth_id AND a.organization_id = s.organization_id
+         FROM public.ue_authority_workaid_shares s
+         LEFT JOIN public.ue_authority_workaid_document_auths a ON a.id = s.document_auth_id AND a.organization_id = s.organization_id
         WHERE s.organization_id = $1 AND s.matter_id = $2 AND s.consent_id = $3 AND s.invalidated_at IS NULL
         ORDER BY s.created_at`,
       [i.organizationId, grant.matterId, grant.consentId],
@@ -1069,7 +1069,7 @@ export async function readWorkAidCounselManifest(
     }
   }
 
-  await exec.query(`INSERT INTO ue_authority_workaid_counsel_access (organization_id, matter_id, counsel_user_id, shares_served) VALUES ($1,$2,$3,$4)`, [i.organizationId, grant.matterId, i.counselUserId, shares.length])
+  await exec.query(`INSERT INTO public.ue_authority_workaid_counsel_access (organization_id, matter_id, counsel_user_id, shares_served) VALUES ($1,$2,$3,$4)`, [i.organizationId, grant.matterId, i.counselUserId, shares.length])
   await auditAuthorityMutation(exec, {
     organizationId: i.organizationId,
     action: 'workaid.counsel_access',

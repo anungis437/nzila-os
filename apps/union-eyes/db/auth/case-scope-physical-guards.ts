@@ -1,15 +1,15 @@
 /** Current source-owned B002 protections. Prospective/forward-additive installation; no live backfill. */
 import type { PhysicalGuardContract } from './physical-guard-catalog';
-import { ACTIVE_RECUSAL_SQL } from '@/lib/authority/common';
-import { ROLE_CAPACITIES } from '@/lib/authority/capacity';
+import { ACTIVE_RECUSAL_SQL } from '../../lib/authority/common';
+import { ROLE_CAPACITIES } from '../../lib/authority/capacity';
 
 const eligibility = Object.entries(ROLE_CAPACITIES).map(([role, capacities]) =>
   `(user_management.auth_business_org_authorized(row_org,ARRAY['${role}']::text[]) AND r.issuer_capacities && ARRAY[${capacities.map(c => `'${c}'`).join(',')}]::text[])`).join(' OR ');
 const liveMandate = (alias: string) => `${alias}.status='active' AND ${alias}.revoked_at IS NULL
-  AND isfinite(${alias}.effective_at) AND isfinite(${alias}.expires_at) AND ${alias}.effective_at<=now() AND ${alias}.expires_at>now()
+  AND isfinite(${alias}.effective_at) AND isfinite(${alias}.expires_at) AND ${alias}.effective_at<=clock_timestamp() AND ${alias}.expires_at>clock_timestamp()
   AND (NOT ${alias}.requires_acceptance OR EXISTS(SELECT FROM ue_authority_acceptances a WHERE a.organization_id=${alias}.organization_id
     AND a.instrument_type='mandate' AND a.instrument_id=${alias}.id AND a.accepted_by=${alias}.principal_user_id
-    AND isfinite(a.accepted_at) AND a.accepted_at<=now()))`;
+    AND isfinite(a.accepted_at) AND a.accepted_at<=clock_timestamp()))`;
 const draftRoles = Object.entries(ROLE_CAPACITIES).filter(([, capacities]) => capacities.some(c => c === 'steward' || c === 'officer' || c === 'chief_steward')).map(([role]) => `'${role}'`).join(',');
 const supervisorRoles = Object.entries(ROLE_CAPACITIES).filter(([, capacities]) => capacities.some(c => c === 'officer' || c === 'chief_steward' || c === 'executive')).map(([role]) => `'${role}'`).join(',');
 const executiveRoles = Object.entries(ROLE_CAPACITIES).filter(([, capacities]) => capacities.includes('executive')).map(([role]) => `'${role}'`).join(',');
@@ -17,9 +17,12 @@ const draftAuthorized = `
  SELECT user_management.auth_business_org_authorized(row_org,ARRAY[${draftRoles}]::text[])
  AND EXISTS(SELECT FROM ue_authority_resource_relationships rr WHERE rr.organization_id=row_org AND rr.resource_type='case' AND rr.resource_id=row_case
    AND rr.principal_user_id=current_setting('app.current_user_id',true) AND rr.status='active' AND rr.revoked_at IS NULL
-   AND isfinite(rr.effective_at) AND rr.effective_at<=now() AND (rr.expires_at IS NULL OR (isfinite(rr.expires_at) AND rr.expires_at>now()))
+   AND isfinite(rr.effective_at) AND rr.effective_at<=clock_timestamp() AND (rr.expires_at IS NULL OR (isfinite(rr.expires_at) AND rr.expires_at>clock_timestamp()))
    AND (rr.relation IN ('owner','assignee') OR (rr.relation='collaborator' AND rr.origin='explicit' AND rr.granted_by IS NOT NULL
      AND rr.granted_by<>rr.principal_user_id AND 'draft_action'=ANY(rr.permissions))))
+ AND (SELECT count(DISTINCT pr.principal_user_id) FROM ue_authority_resource_relationships pr WHERE pr.organization_id=row_org AND pr.resource_type='case' AND pr.resource_id=row_case
+   AND pr.relation IN ('owner','assignee') AND pr.status='active' AND pr.revoked_at IS NULL AND isfinite(pr.effective_at) AND pr.effective_at<=clock_timestamp()
+   AND (pr.expires_at IS NULL OR (isfinite(pr.expires_at) AND pr.expires_at>clock_timestamp())))<=1
  AND NOT EXISTS(SELECT FROM ue_authority_recusals WHERE organization_id=row_org AND resource_type='case' AND resource_id=row_case
    AND principal_user_id=current_setting('app.current_user_id',true) AND ${ACTIVE_RECUSAL_SQL})
  AND NOT EXISTS(SELECT FROM case_respondents p JOIN case_authority_scopes s ON s.id=p.scope_id AND s.organization_id=p.organization_id
@@ -73,7 +76,7 @@ BEGIN
    OR NEW.mirror_recorded_by IS DISTINCT FROM OLD.mirror_recorded_by THEN
    IF OLD.grievance_mirror_id IS NOT NULL OR OLD.claim_id IS NULL OR OLD.grievance_id IS NOT NULL
      OR NEW.grievance_mirror_id IS DISTINCT FROM OLD.case_id OR NEW.mirror_recorded_by IS DISTINCT FROM actor
-     OR NEW.mirror_recorded_at IS NULL OR NOT isfinite(NEW.mirror_recorded_at) OR NEW.mirror_recorded_at>now()
+     OR NEW.mirror_recorded_at IS NULL OR NOT isfinite(NEW.mirror_recorded_at) OR NEW.mirror_recorded_at>clock_timestamp()
      OR (to_jsonb(NEW)-ARRAY['grievance_mirror_id','mirror_recorded_at','mirror_recorded_by','updated_at']) IS DISTINCT FROM
         (to_jsonb(OLD)-ARRAY['grievance_mirror_id','mirror_recorded_at','mirror_recorded_by','updated_at'])
      OR NOT ue_case_scope_draft_authorized(OLD.organization_id,OLD.case_id)
@@ -106,7 +109,7 @@ BEGIN
      RETURN NEW;
    END IF;
    IF OLD.applied_at IS NOT NULL OR (to_jsonb(NEW)-ARRAY['applied_at','applied_by','updated_at']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['applied_at','applied_by','updated_at'])
-     OR NEW.applied_by IS DISTINCT FROM actor OR NEW.applied_at IS NULL OR NOT isfinite(NEW.applied_at) OR NEW.applied_at>now() THEN
+     OR NEW.applied_by IS DISTINCT FROM actor OR NEW.applied_at IS NULL OR NOT isfinite(NEW.applied_at) OR NEW.applied_at>clock_timestamp() THEN
      RAISE EXCEPTION 'CASE_SCOPE_PROPOSAL_IMMUTABLE' USING ERRCODE='42501'; END IF;
    proposal:=NEW.id;
  ELSIF TG_TABLE_NAME='case_authority_scopes' THEN
@@ -117,12 +120,12 @@ BEGIN
  ELSE
    IF TG_OP='INSERT' THEN
      IF NEW.recorded_by IS DISTINCT FROM actor OR NEW.revoked_at IS NOT NULL OR NEW.revoked_by IS NOT NULL OR NEW.revoked_proposal_id IS NOT NULL
-       OR NOT isfinite(NEW.recorded_at) OR NEW.recorded_at>now() THEN RAISE EXCEPTION 'INVALID_CASE_RESPONDENT_ACTOR' USING ERRCODE='42501'; END IF;
+       OR NOT isfinite(NEW.recorded_at) OR NEW.recorded_at>clock_timestamp() THEN RAISE EXCEPTION 'INVALID_CASE_RESPONDENT_ACTOR' USING ERRCODE='42501'; END IF;
      proposal:=NEW.proposal_id;
    ELSE
      IF OLD.revoked_at IS NOT NULL OR (to_jsonb(NEW)-ARRAY['revoked_at','revoked_by','revoked_proposal_id','updated_at']) IS DISTINCT FROM
         (to_jsonb(OLD)-ARRAY['revoked_at','revoked_by','revoked_proposal_id','updated_at']) OR NEW.revoked_by IS DISTINCT FROM actor
-        OR NEW.revoked_at IS NULL OR NOT isfinite(NEW.revoked_at) OR NEW.revoked_at<NEW.recorded_at OR NEW.revoked_at>now() THEN
+        OR NEW.revoked_at IS NULL OR NOT isfinite(NEW.revoked_at) OR NEW.revoked_at<NEW.recorded_at OR NEW.revoked_at>clock_timestamp() THEN
        RAISE EXCEPTION 'CASE_RESPONDENT_HISTORY_IMMUTABLE' USING ERRCODE='42501'; END IF;
      proposal:=NEW.revoked_proposal_id;
    END IF;
@@ -196,10 +199,22 @@ BEGIN
  ELSE proposal:=CASE WHEN TG_OP='INSERT' THEN NEW.proposal_id ELSE NEW.revoked_proposal_id END;
  END IF;
  IF NOT EXISTS(SELECT FROM case_scope_proposals p JOIN case_authority_scopes cs ON cs.id=p.scope_id AND cs.organization_id=p.organization_id
+   JOIN ue_authority_issuance_rules r ON r.id=p.issuance_rule_id AND r.organization_id=p.organization_id
+   JOIN ue_authority_approval_requests ar ON ar.id=p.approval_request_id AND ar.organization_id=p.organization_id
    JOIN audit_logs a ON a.organization_id=p.organization_id AND a.action='case.scope.amended' AND a.resource_id=cs.case_id::text
      AND a.details->>'caseScopeProposalId'=p.id::text AND a.user_id=p.applied_by AND a.created_at>=p.applied_at
    WHERE p.organization_id=NEW.organization_id AND p.id=proposal AND p.applied_at IS NOT NULL AND isfinite(p.applied_at)
      AND cs.last_proposal_id=p.id AND cs.revision=p.expected_revision+1
+     AND ar.status='satisfied' AND ar.subject_type='case_scope' AND ar.subject_id=p.id AND ar.proposed_by=p.proposed_by
+     AND ar.required_approvals>=greatest(2,r.required_independent_approvals)
+     AND (SELECT count(DISTINCT d.authority_line_user_id) FROM ue_authority_approval_decisions d
+       JOIN LATERAL user_management.ue_authority_membership_rows(p.organization_id,ARRAY[d.authority_line_user_id::text]) u
+         ON u.user_id=d.authority_line_user_id AND u.member_active AND u.user_active AND u.lifecycle_state='active' AND u.role IN (${executiveRoles})
+       WHERE d.approval_request_id=ar.id AND d.decision='approved' AND d.delegation_id IS NULL AND d.approver_user_id=d.authority_line_user_id
+         AND d.authority_line_user_id NOT IN (p.proposed_by,p.applied_by) AND NOT d.authority_line_user_id=ANY(p.respondent_user_ids)
+         AND NOT EXISTS(SELECT FROM ue_authority_recusals WHERE organization_id=p.organization_id AND principal_user_id=d.authority_line_user_id
+           AND ((resource_type='approval_request' AND resource_id=ar.id) OR (resource_type='case' AND resource_id=cs.case_id)) AND ${ACTIVE_RECUSAL_SQL}))
+       >=greatest(2,r.required_independent_approvals)
      AND ue_case_scope_amendment_authorized(p.organization_id,cs.case_id,p.issuance_rule_id)) THEN
    RAISE EXCEPTION 'CASE_SCOPE_ATOMIC_AUDIT_AND_SETTLEMENT_REQUIRED' USING ERRCODE='23514'; END IF;
  RETURN NULL;
@@ -242,21 +257,21 @@ BEGIN
 END;
 `;
 const constraint = (table_name: string, name: string, type: string, definition: string) => ({ table_name, name, type, definition });
-const fk = (table: string, name: string, columns: string, target: string, targetColumns: string) => constraint(table, name, 'f', `FOREIGN KEY (${columns}) REFERENCES ${target}(${targetColumns})`);
+const fk = (table: string, name: string, columns: string, target: string, targetColumns: string) => constraint(table, name, 'f', `FOREIGN KEY (${columns}) REFERENCES ${target.includes('.') ? target : `public.${target}`}(${targetColumns})`);
 const triggers: PhysicalGuardContract['triggers'][number][] = [];
 for (const table of ['case_authority_scopes','case_scope_proposals','case_respondents']) {
   const name = `${table}_guard`;
   triggers.push({ table_name: table, name, function_name:'ue_case_scope_guard',tgtype:31,tgdeferrable:false,tginitdeferred:false,
-    definition:`CREATE TRIGGER ${name} BEFORE INSERT OR DELETE OR UPDATE ON public.${table} FOR EACH ROW EXECUTE FUNCTION ue_case_scope_guard()`,args_hex:'' });
+    definition:`CREATE TRIGGER ${name} BEFORE INSERT OR DELETE OR UPDATE ON public.${table} FOR EACH ROW EXECUTE FUNCTION public.ue_case_scope_guard()`,args_hex:'' });
   const auditName = `${table}_audit`;
   // A proposal draft requires its ordinary creation audit; settlement requires the deferred complete mutation audit.
   triggers.push({ table_name:table,name:auditName,function_name:'ue_case_scope_audit_guard',tgtype:21,tgdeferrable:true,tginitdeferred:true,
-    definition:`CREATE CONSTRAINT TRIGGER ${auditName} AFTER INSERT OR UPDATE ON public.${table} DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ue_case_scope_audit_guard()`,args_hex:'' });
+    definition:`CREATE CONSTRAINT TRIGGER ${auditName} AFTER INSERT OR UPDATE ON public.${table} DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.ue_case_scope_audit_guard()`,args_hex:'' });
 }
 for (const table of ['claims','grievances']) {
   const name=`${table}_canonical_subject_guard`;
   triggers.push({table_name:table,name,function_name:'ue_case_scope_parent_subject_guard',tgtype:31,tgdeferrable:false,tginitdeferred:false,
-    definition:`CREATE TRIGGER ${name} BEFORE INSERT OR DELETE OR UPDATE ON public.${table} FOR EACH ROW EXECUTE FUNCTION ue_case_scope_parent_subject_guard()`,args_hex:''});
+    definition:`CREATE TRIGGER ${name} BEFORE INSERT OR DELETE OR UPDATE ON public.${table} FOR EACH ROW EXECUTE FUNCTION public.ue_case_scope_parent_subject_guard()`,args_hex:''});
 }
 export const CASE_SCOPE_PHYSICAL_GUARDS = {
   source:'apps/union-eyes/db/auth/case-scope-physical-guards.ts',references:[],

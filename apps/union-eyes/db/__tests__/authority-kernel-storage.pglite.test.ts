@@ -156,8 +156,8 @@ describe('relationship, delegation, recusal and consent constraints', () => {
   it('a collaborator or privileged grant must be explicit, named and granted by someone else', async () => {
     const base = { organizationId: ORG, principalUserId: U.member, resourceType: 'case' as const, resourceId: newUuid(), effectiveAt: minutesAgo() }
     const ins = (o: Record<string, unknown>) => k.as(String(o.grantedBy ?? U.president))((t) => insertRelationship(t, { ...base, ...o } as never))
-    await expect(ins({ relation: 'collaborator', origin: 'derived' })).rejects.toThrow(/explicit_chk/)
-    await expect(ins({ relation: 'owner', origin: 'derived', privilegedAccess: true })).rejects.toThrow(/explicit_chk/)
+    await expect(ins({ relation: 'collaborator', origin: 'derived' })).rejects.toThrow(/derived subject relationships/)
+    await expect(ins({ relation: 'owner', origin: 'derived', privilegedAccess: true })).rejects.toThrow(/derived subject relationships/)
     await expect(ins({ relation: 'collaborator', origin: 'explicit', grantedBy: U.member })).rejects.toThrow(/explicit_chk/)
     await expect(ins({ relation: 'collaborator', origin: 'explicit', grantedBy: U.president })).resolves.toBeTruthy()
   })

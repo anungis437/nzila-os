@@ -167,6 +167,9 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
               'ALTER TABLE public.manifest_example ADD CONSTRAINT manifest_late_unique UNIQUE(later)',
               'CREATE VIEW public.manifest_view AS SELECT id,title FROM public.manifest_example',
               'CREATE UNIQUE INDEX manifest_composite_key ON public.manifest_example(id,title)',
+              'CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NULL',
+              'CREATE FUNCTION public.manifest_deferred_audit() RETURNS trigger LANGUAGE plpgsql SET search_path=pg_catalog,pg_temp AS $$BEGIN RETURN NEW; END$$; REVOKE ALL ON FUNCTION public.manifest_deferred_audit() FROM PUBLIC',
+              'CREATE CONSTRAINT TRIGGER manifest_late_audit AFTER INSERT ON public.manifest_example DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.manifest_deferred_audit()',
               'CREATE SCHEMA user_management',
               'CREATE TABLE user_management.manifest_declared(id integer PRIMARY KEY,created_at timestamp)',
               'CREATE TABLE public.manifest_defaults(id uuid NOT NULL DEFAULT gen_random_uuid(),created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP)',
@@ -209,7 +212,14 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
           sourceDigest: digest,
           columns: [],
           uniqueTogether: [['id', 'title']],
-          constraints: [[[], { name: 'manifest_composite_key', fields: ['id', 'title'] }]],
+          constraints: [
+            [[], { name: 'manifest_composite_key', fields: ['id', 'title'] }],
+            [[], { name: 'manifest_conditional_key', fields: ['id', 'title'] }],
+          ],
+          databaseConstraints: [{
+            name: 'manifest_conditional_key', kind: 'UniqueConstraint', deferredUniqueIndex: true,
+            sql: 'CREATE UNIQUE INDEX "manifest_conditional_key" ON "manifest_example" ("id", "title") WHERE "later" IS NULL',
+          }],
         })
         const reference = await database('reference')
         await reference.query('BEGIN')
@@ -249,6 +259,21 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
           execution: lateIndexExecution.order,
           basis: 'DDL_EVENT',
         })
+        const triggerExecution = trace.executions.find((entry) => entry.producer.sql.includes('CREATE CONSTRAINT TRIGGER manifest_late_audit'))!
+        const constraint = object('constraint:manifest_example.manifest_late_audit')
+        expect(constraint.CREATION_ORDER).toEqual({ execution: triggerExecution.order, basis: 'DDL_EVENT' })
+        expect(constraint.SOURCE_AUTHORITY[0].producerId).toBe(triggerExecution.producer.canonicalId)
+        expect(constraint.CREATION_ORDER.execution).toBeGreaterThan(object('relation:public.manifest_example').CREATION_ORDER.execution!)
+        // Without the exact trigger event, its older relation dependency cannot
+        // manufacture a producer or creation order for this constraint.
+        const missingConstraintTrace = {
+          ...trace,
+          events: trace.events.filter((event) => !(
+            event.order === triggerExecution.order && event.address.startsWith('pg_constraint:')
+          )),
+        }
+        expect((await buildNativeManifest(reference, plan, expected, missingConstraintTrace, { image, roleSql })).blockers)
+          .toContain('SOURCE_BINDING_UNRESOLVED:constraint:manifest_example.manifest_late_audit')
         expect(
           object('column_default:public.manifest_example.title').CREATION_ORDER.execution,
         ).toBeGreaterThan(object('column:public.manifest_example.title').CREATION_ORDER.execution!)
@@ -262,6 +287,12 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
         const fresh = await database('fresh')
         expect((await applyV2(fresh, plan, expected)).result).toBe('CREATED')
         expect((await applyV2(fresh, plan, expected)).result).toBe('NOOP')
+        await fresh.query('DROP INDEX public.manifest_conditional_key; CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NOT NULL')
+        expect((await verifyDeclaredSource(fresh, plan)).mismatches).toContain('CURRENT_MODEL_NAMED_CONSTRAINT_MISMATCH:manifest_example:manifest_conditional_key')
+        await fresh.query('DROP INDEX public.manifest_conditional_key; CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NULL')
+        await fresh.query('DROP INDEX public.manifest_composite_key')
+        expect((await verifyDeclaredSource(fresh, plan)).mismatches).toContain('CURRENT_MODEL_COMPOSITE_KEY_MISMATCH:manifest_example:id,title')
+        await fresh.query('CREATE UNIQUE INDEX manifest_composite_key ON public.manifest_example(id,title)')
         const initialized = await fresh.query(
           'INSERT INTO public.manifest_defaults DEFAULT VALUES RETURNING id,created_at',
         )

@@ -170,7 +170,7 @@ export const ENFORCEMENT_GEOMETRY_OVERRIDES: EnforcementGeometryOverride[] = [
     parentTable: "claims",
     provenance:
       `[${ROUND_REF}] db/schema/claims-schema.ts: claim_updates has no direct org column; claim_id is ` +
-      `its sole FK, referencing claims.claimId (claims is a BASELINE_0108_TABLES entry, already ` +
+      `the canonical tenant FK, referencing claims.id; optional transition_id records history origin only (claims is a BASELINE_0108_TABLES entry, already ` +
       `HIGH_CONFIDENCE_DIRECT organization_id).`,
   },
   {

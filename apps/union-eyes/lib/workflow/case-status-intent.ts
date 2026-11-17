@@ -41,3 +41,18 @@ export function verifyCaseStatusReceipt(value:unknown,intent:CaseStatusEmailInte
   const expected=sealCaseStatusReceipt(unsigned,key).seal
   return timingSafeEqual(Buffer.from(seal,'hex'),Buffer.from(expected,'hex'))?parsed.data:null
 }
+
+/** State-only copy; no case identifier, staff narrative or personal name enters the message. */
+export function renderCaseStatusNotification(status:CaseStatusEmailIntent['newStatus'],locale?:string|null):{subject:string;text:string} {
+  const checked=statuses.parse(status)
+  const french=/^fr(?:[-_]|$)/i.test(locale ?? '')
+  const labels:Record<CaseStatusEmailIntent['newStatus'],[string,string]>={
+    submitted:['Submitted','Soumis'],under_review:['Under review','En cours d’examen'],assigned:['Assigned','Attribué'],
+    investigation:['Investigation','Enquête'],pending_documentation:['Awaiting documentation','En attente de documents'],
+    resolved:['Resolved','Résolu'],rejected:['Rejected','Rejeté'],closed:['Closed','Fermé'],
+  }
+  return french ? {subject:'Le statut de votre dossier a été mis à jour',
+    text:`Nouveau statut de votre dossier : ${labels[checked][1]}. Connectez-vous à Union Eyes pour consulter votre dossier.`}
+    : {subject:'Your case status was updated',
+      text:`Your case status was updated to ${labels[checked][0]}. Sign in to Union Eyes to view your case.`}
+}

@@ -9,6 +9,8 @@
  */
 
 import { db } from '@/db/db';
+import {resolveCaseSurveyPrimary,authorizeCaseSurveyCreation,SurveyAttributionError} from './case-survey-primary';
+export {SurveyAttributionError} from './case-survey-primary';
 import { satisfactionSurveys, satisfactionSurveyResponded } from '@/db/schema';
 import { eq, and, avg, count, desc, sql, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
@@ -72,11 +74,12 @@ export class SurveyAlreadyAnsweredError extends Error {
  * the claim-closure workflow passes none and is recorded as the system.
  */
 export async function createSatisfactionSurvey(
-  data: Pick<NewSatisfactionSurvey, 'organizationId' | 'lroId'> & { claimId: string; memberId: string },
+  data: Pick<NewSatisfactionSurvey, 'organizationId'> & { claimId: string; memberId: string; lroId?:string },
   actorUserId?: string
 ): Promise<SatisfactionSurvey> {
   try {
     return await db.transaction(async (tx) => {
+      await authorizeCaseSurveyCreation(tx as unknown as RLSTx,data);
       // Check if survey already exists for this claim+member in this organization
       const existing = await tx.query.satisfactionSurveys.findFirst({
         where: and(
@@ -102,10 +105,12 @@ export async function createSatisfactionSurvey(
         throw new SurveyAlreadyAnsweredError();
       }
 
+      const attribution=await resolveCaseSurveyPrimary(tx as unknown as RLSTx,data);
       const [survey] = await tx
         .insert(satisfactionSurveys)
         .values({
           ...data,
+          lroId:attribution.primaryUserId,
           status: 'pending',
           sentAt: new Date(),
         })
@@ -117,14 +122,14 @@ export async function createSatisfactionSurvey(
         action: 'satisfaction.survey.create',
         resourceType: 'satisfaction_surveys',
         resourceId: survey.id,
-        details: { claimId: data.claimId, lroId: data.lroId },
+        details: { claimId: data.claimId, lroId: attribution.primaryUserId },
       });
 
       logger.info('Created satisfaction survey', { surveyId: survey.id, claimId: data.claimId });
       return survey;
     });
   } catch (error) {
-    if (error instanceof SurveyAlreadyAnsweredError) throw error;
+    if (error instanceof SurveyAlreadyAnsweredError || error instanceof SurveyAttributionError) throw error;
     logger.error('Error creating satisfaction survey', { error, data });
     throw new Error('Failed to create satisfaction survey');
   }

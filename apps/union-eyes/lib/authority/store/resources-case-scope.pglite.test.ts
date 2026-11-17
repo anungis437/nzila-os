@@ -52,7 +52,7 @@ describe('governed case scope and adverse-party fact loading',()=>{
       await f.pg.query('INSERT INTO public.case_respondents(organization_id,scope_id,respondent_user_id,recorded_at,recorded_by) VALUES($1,$2,$3,$4,$5)',[ORG,f.scopeId,U.chief,new Date(NOW.getTime()-1000),U.president])
       const authority=facts(U.chief,['chief_steward'],{relationships:[relationship({principalUserId:U.chief,resource:ref('case',f.id)})],mandates:[mandate({scope:{resourceIds:[f.id]}})]})
       expect(decide(f.req,authority,(await f.load())!.resource,NOW).reasons).toEqual(expect.arrayContaining([expect.objectContaining({code:'ADVERSE_PARTY'})]))
-      await f.pg.query('UPDATE public.case_respondents SET revoked_at=$1,revoked_by=$2',[new Date(NOW.getTime()+1000),U.president])
+      await f.pg.query('UPDATE public.case_respondents SET revoked_at=$1,revoked_by=$2,revoked_proposal_id=gen_random_uuid()',[new Date(NOW.getTime()+1000),U.president])
       expect(decide(f.req,authority,(await f.load())!.resource,NOW).effect).toBe('deny')
       await f.pg.query('UPDATE public.case_respondents SET revoked_at=$1',[NOW])
       expect(decide(f.req,authority,(await f.load())!.resource,NOW).effect).toBe('allow')
