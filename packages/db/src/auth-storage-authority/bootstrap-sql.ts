@@ -233,7 +233,6 @@ export function compileAuthBootstrapSql(options: {
         WHERE i.token_hash=${setting('token_hash')}
           AND a.is_active AND a.role='admin' AND u.is_active AND u.lifecycle_state='active') $auth$;
     ALTER FUNCTION ${inviterLive} OWNER TO ${inviteReader};
-    REVOKE CREATE ON SCHEMA user_management FROM ${inviteReader};
     REVOKE ALL ON FUNCTION ${inviterLive} FROM PUBLIC;
     GRANT EXECUTE ON FUNCTION ${inviterLive} TO ${q(roles.redemption)};
     GRANT SELECT (accepted_at, revoked_at) ON user_management.invites TO ${inviteReader};
@@ -290,6 +289,9 @@ export function compileAuthBootstrapSql(options: {
         RETURN NEW;
       END $auth$;
     ALTER FUNCTION user_management.auth_revoke_invites_on_membership_change() OWNER TO ${inviteReader};
+    -- Non-superuser ALTER OWNER requires the destination role's schema CREATE
+    -- until its final function ownership transfer; retain no such grant after.
+    REVOKE CREATE ON SCHEMA user_management FROM ${inviteReader};
     REVOKE ALL ON FUNCTION user_management.auth_revoke_invites_on_membership_change() FROM PUBLIC;
     GRANT EXECUTE ON FUNCTION user_management.auth_revoke_invites_on_membership_change() TO ${q(roles.system)}, ${q(roles.redemption)};
     CREATE TRIGGER auth_revoke_invites_on_membership_change
