@@ -1,0 +1,38 @@
+name: UE Step 1 materialize verified plan artifact
+on:
+  push:
+    branches: [agents/ue-step1-plan-regeneration-20261117]
+    paths: [.github/workflows/ue-step1-plan-materialize.yml]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.ref == 'refs/heads/agents/ue-step1-plan-regeneration-20261117'
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Materialize only the digest-verified generated plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/agents/ue-step1-plan-regeneration-20261117
+          path=docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json
+          test "$(git hash-object "$path")" = 0f7e5b8d739d666d0b9156322fc124e81391ad81
+          mkdir -p "$RUNNER_TEMP/step1-verified-plan"
+          gh run download 44143667749 --repo "$GITHUB_REPOSITORY" --name ue-step1-generated-plan-d7050fdd --dir "$RUNNER_TEMP/step1-verified-plan"
+          generated="$RUNNER_TEMP/step1-verified-plan/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json"
+          echo "34e756fdc7b9c509842b883dd408c22997848103411389c0cbb955ebffc49b19  $generated" | sha256sum -c -
+          cp "$generated" "$path"
+          git add -- "$path"
+          test "$(git diff --cached --name-only)" = "$path"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Materialize exact-source verified V2 plan artifact on isolated scratch branch'
+          git rev-parse HEAD
+          git hash-object "$path"
+          git push origin HEAD:refs/heads/agents/ue-step1-plan-regeneration-20261117
