@@ -1,0 +1,58 @@
+name: UE Step 1 read-only exact-source plan receipt
+on:
+  push:
+    branches:
+      - 'agents/ue-step1-plan-regeneration-20261117'
+permissions:
+  contents: read
+env:
+  UE_V2_PYTHON_IMAGE: python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: d7050fddc236af52dac758fc632f36b984a63c87
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Build the hash-locked wheelhouse using existing V2 provenance procedure
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheelhouse="$RUNNER_TEMP/ue-v2-wheelhouse"
+          mkdir -p "$wheelhouse"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$wheelhouse:/wheels" \
+            "$UE_V2_PYTHON_IMAGE" \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+              --require-hashes --no-deps --only-binary=:all: \
+              -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$wheelhouse"/*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$wheelhouse" >> "$GITHUB_ENV"
+      - name: Regenerate against exact source twice without modifying the repo
+        working-directory: apps/union-eyes
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
+        run: pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test
+      - name: Record generated plan digest and review-only patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          changed="$(git diff --name-only)"
+          test "$changed" = "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json"
+          sha256sum "$changed"
+          echo 'UE_STEP1_GENERATED_DIFF_BEGIN'
+          git --no-pager diff --no-color --unified=3 -- "$changed"
+          echo 'UE_STEP1_GENERATED_DIFF_END'
+      - name: Preserve exact generated plan bytes for verification
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-step1-generated-plan-d7050fdd
+          path: docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json
+          retention-days: 7
+          if-no-files-found: error
