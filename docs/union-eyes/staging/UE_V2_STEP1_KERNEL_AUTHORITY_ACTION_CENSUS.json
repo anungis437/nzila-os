@@ -1,0 +1,1522 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_KERNEL_AUTHORITY_ACTION_CENSUS",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "sourceInputs": {
+    "ontology": {
+      "path": "apps/union-eyes/lib/authority/ontology.ts",
+      "blobSha": "03c84ef2b64aa54a4dcaf70f396bd370c55c5ee5"
+    },
+    "capacity": {
+      "path": "apps/union-eyes/lib/authority/capacity.ts",
+      "blobSha": "9d37f273f8378108d57f13aa5fddaa22433d5948"
+    },
+    "kernel": {
+      "path": "apps/union-eyes/lib/authority/kernel.ts",
+      "blobSha": "070beae2c765850736f1da8bae6bf9174ecd932f"
+    },
+    "case": {
+      "path": "apps/union-eyes/lib/authority/policies/case.ts",
+      "blobSha": "821dc15e531b3938e9edf422dc5d15b651e696ff"
+    },
+    "common": {
+      "path": "apps/union-eyes/lib/authority/common.ts",
+      "blobSha": "69a85c6e6a125a2c44f6a8d499fccbc84796fa97"
+    },
+    "finance": {
+      "path": "apps/union-eyes/lib/authority/policies/finance.ts",
+      "blobSha": "5f430b25dd64fca0e07149d7ec9a9406c63263b1"
+    },
+    "governance": {
+      "path": "apps/union-eyes/lib/authority/policies/governance.ts",
+      "blobSha": "7fbe86ef17590067aef6e7115ee44915c5a29003"
+    },
+    "workaid": {
+      "path": "apps/union-eyes/lib/authority/policies/workaid.ts",
+      "blobSha": "8d0c208216f26b3c1508b9e27aa1df8867a16012"
+    },
+    "message": {
+      "path": "apps/union-eyes/lib/authority/policies/message.ts",
+      "blobSha": "d0d7d8509662d66854416d9a92b78031af79765d"
+    },
+    "election": {
+      "path": "apps/union-eyes/lib/authority/policies/election.ts",
+      "blobSha": "d08db5c845d19ebe2a0d1b1c8a403f38dd889d99"
+    },
+    "issuance": {
+      "path": "apps/union-eyes/lib/authority/issuance.ts",
+      "blobSha": "4cb3d6cb29eb6631de46cb118def45117c61534a"
+    },
+    "lifecycle": {
+      "path": "apps/union-eyes/lib/authority/store/lifecycle.ts",
+      "blobSha": "66801c4796825e2bc490ef25b08f0bb4a7b9575f"
+    },
+    "facts": {
+      "path": "apps/union-eyes/lib/authority/store/facts.ts",
+      "blobSha": "4975b54820ce030e4fcd541d9137e68d206bc629"
+    },
+    "subordinate": {
+      "path": "apps/union-eyes/lib/authority/subordinate-authority-register.ts",
+      "blobSha": "ad25e82324ea8b1f5cf1d175b23ddffe06ee6b20"
+    },
+    "exportRoute": {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+      "blobSha": "af62b70090a8ed477d8d433fc33900244fd05e3f"
+    },
+    "caseAdapter": {
+      "path": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "blobSha": "632bf273d78e94dc589cd7b2cf588184d025c0a9"
+    },
+    "roles": {
+      "path": "apps/union-eyes/lib/auth/roles.ts",
+      "blobSha": "1b412184d58a1dc2b51f0fab3ccdca67390051bd"
+    },
+    "external": {
+      "path": "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+      "blobSha": "87c954547185b15683e7b76401116dd6f6e79509"
+    }
+  },
+  "counts": {
+    "actions": 41,
+    "resources": 9,
+    "capacities": 10,
+    "appointmentOnly": 4,
+    "roles": 39,
+    "nonDelegable": 24,
+    "issuanceDomains": 9,
+    "issuanceOperations": 5,
+    "subordinateRecords": 19
+  },
+  "capacities": [
+    "member",
+    "steward",
+    "chief_steward",
+    "officer",
+    "executive",
+    "financial_officer",
+    "trustee",
+    "auditor",
+    "governance_reviewer",
+    "privacy_officer"
+  ],
+  "appointmentOnlyCapacities": [
+    "auditor",
+    "trustee",
+    "governance_reviewer",
+    "privacy_officer"
+  ],
+  "roles": [
+    {
+      "role": "app_owner",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "coo",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "cto",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "platform_lead",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "customer_success_director",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "support_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "data_analytics_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "billing_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "integration_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "compliance_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "security_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "support_agent",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "data_analyst",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "billing_specialist",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "integration_specialist",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "content_manager",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "training_coordinator",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "system_admin",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "clc_executive",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "clc_staff",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "fed_executive",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "fed_staff",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "national_officer",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "admin",
+      "kernelRoleCapacities": [
+        "member"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "president",
+      "kernelRoleCapacities": [
+        "member",
+        "officer",
+        "executive"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "vice_president",
+      "kernelRoleCapacities": [
+        "member",
+        "officer",
+        "executive"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "secretary_treasurer",
+      "kernelRoleCapacities": [
+        "member",
+        "officer",
+        "executive",
+        "financial_officer"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "chief_steward",
+      "kernelRoleCapacities": [
+        "member",
+        "steward",
+        "chief_steward"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "officer",
+      "kernelRoleCapacities": [
+        "member",
+        "officer"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "clerk",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "steward",
+      "kernelRoleCapacities": [
+        "member",
+        "steward"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "bargaining_committee",
+      "kernelRoleCapacities": [
+        "member",
+        "steward"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "health_safety_rep",
+      "kernelRoleCapacities": [
+        "member",
+        "steward"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "member",
+      "kernelRoleCapacities": [
+        "member"
+      ],
+      "admissionVerified": false
+    },
+    {
+      "role": "guest",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "congress_staff",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "federation_staff",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "union_rep",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    },
+    {
+      "role": "staff_rep",
+      "kernelRoleCapacities": [],
+      "admissionVerified": false
+    }
+  ],
+  "resources": [
+    "case",
+    "financial_transaction",
+    "member_financial_record",
+    "approval_request",
+    "governance_review",
+    "workaid_matter",
+    "message_thread",
+    "message_retention",
+    "council_election"
+  ],
+  "issuanceDomains": [
+    "supervisory",
+    "financial",
+    "governance_review",
+    "executive_office",
+    "emergency_access",
+    "platform_staff",
+    "delegation",
+    "case_assignment",
+    "recusal"
+  ],
+  "issuanceOperations": [
+    "issue",
+    "amend",
+    "suspend",
+    "revoke",
+    "lift"
+  ],
+  "issuanceNonDelegable": [
+    "finance:view",
+    "finance:prepare",
+    "finance:approve",
+    "finance:execute",
+    "finance:reconcile",
+    "finance:audit",
+    "case:read_privileged",
+    "case:disclose_to_member",
+    "case:export_sealed_evidence",
+    "case:close",
+    "review:monitor",
+    "review:access_evidence",
+    "review:issue_finding",
+    "review:request_corrective_action",
+    "review:enforce",
+    "review:verify_remediation",
+    "workaid:refer",
+    "workaid:receive_disclosure",
+    "workaid:read_counsel_material",
+    "message:place_legal_hold",
+    "message:release_legal_hold",
+    "message:adopt_retention",
+    "message:read_retention_policy",
+    "governance:supersede_certified_result"
+  ],
+  "actionRows": [
+    {
+      "action": "case:read",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C10",
+        "C12"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Member creator/represented relationship or authorized handler; scoped mandate/delegation/emergency with appropriate projection",
+      "negativeControl": "Unrelated member, adverse/recused, foreign org; internal fields suppressed for member projection",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:read_own_submission",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C12",
+        "C13"
+      ],
+      "actorCandidates": [
+        "A03"
+      ],
+      "sourceRule": "Live creator/represented relationship and loader-verified own nonprivileged submission to exact case",
+      "negativeControl": "Different uploader, wrong link, privileged document, expired relationship",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:read_internal",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C10",
+        "C13"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Handler relationship, collaborator named permission or valid scoped instrument; internal projection only as authorized",
+      "negativeControl": "Member read alone, unrelated/cross-tenant, confidential mandate lacking ceiling",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:read_third_party_restricted",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C13"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Primary handler or explicitly named collaborator/instrument power, classification bounds",
+      "negativeControl": "Ordinary internal-read alone or unscoped collaborator",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:read_privileged",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C13",
+        "C14"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Explicit independently issued privileged relationship; never counsel-controlled access",
+      "negativeControl": "Derived/self-granted relationship, ordinary mandate/delegation, counsel-controlled",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:comment",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C12",
+        "C17"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Own member relationship or authorized handler/collaborator; live valid power",
+      "negativeControl": "Foreign/recused, unrelated, wrong collaborator permission",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:write_notes",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C12"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Handler or explicitly named collaborator power; member projection excludes private notes",
+      "negativeControl": "Member-only or read-only grant; unauthorized disclosure",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:draft_action",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C16"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Handler or explicitly named collaborator power; action-specific authorization",
+      "negativeControl": "Comment permission cannot draft; draft does not authorize dispatch",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:upload_evidence",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C13"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Handler or explicit upload authority, document policy additionally applies",
+      "negativeControl": "Read-only grant, stale assignment, unsafe upload",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:modify_document",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C13",
+        "C15"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Handler or explicitly named modify power; document policy separately applies",
+      "negativeControl": "View/download-only grant; stale version",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:process_ocr",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C15"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Case processing entitlement separate from case visibility; OCR document policy adds classification and explicit grants",
+      "negativeControl": "Viewer only; unadopted member uploader policy; stale/privileged classification",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:disclose_to_member",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C12",
+        "C13"
+      ],
+      "actorCandidates": [
+        "A05",
+        "A06"
+      ],
+      "sourceRule": "Primary-handler relationship grants; collaborator forbidden; custom supervisory powers require hard-ceiling investigation",
+      "negativeControl": "Collaborator, member role, supervisor-only with custom power (open contradiction)",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:export_sealed_evidence",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C14"
+      ],
+      "actorCandidates": [
+        "A05",
+        "A06"
+      ],
+      "sourceRule": "Primary-handler relationship grants; collaborator forbidden; custom supervisory powers require hard-ceiling investigation",
+      "negativeControl": "Supervisor-only with custom export power; collaborator, unrelated, revoked, wrong tenant",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:close",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C11"
+      ],
+      "actorCandidates": [
+        "A05",
+        "A06"
+      ],
+      "sourceRule": "Primary-handler relationship grants; workflow state machine separately applies; custom supervisory powers require hard-ceiling investigation",
+      "negativeControl": "Collaborator, stale assignment, supervisor-only with custom close power",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:transition",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C08",
+        "C11"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "sourceRule": "Handler/explicit action grant; workflow controls may narrow action",
+      "negativeControl": "Invalid state edge; stale revision; read-only",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "case:assign",
+      "policy": "case",
+      "resource": "case",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C09",
+        "C10",
+        "C11"
+      ],
+      "actorCandidates": [
+        "A05",
+        "A06",
+        "A07",
+        "A09"
+      ],
+      "sourceRule": "Scoped assignment authority; issuance rule and target capacity; triage adapter may give separate authorized path",
+      "negativeControl": "Role only, missing executable protocol, adverse/recused target, workload contention",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "finance:view",
+      "policy": "finance",
+      "resource": [
+        "financial_transaction",
+        "member_financial_record"
+      ],
+      "scope": "EXCLUDED_POSITIVE_FINANCE_BOUNDARY_REQUIRED",
+      "links": [
+        "C22"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A11",
+        "A13"
+      ],
+      "sourceRule": "Action-specific transaction/account authority; own-subject view branch separate; no finance positive activation under base contract",
+      "negativeControl": "Role-only, absent mandate, foreign account, invalid amount/currency, duty conflict as applicable; base mandate/config denial",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/finance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "finance:prepare",
+      "policy": "finance",
+      "resource": "financial_transaction",
+      "scope": "EXCLUDED_POSITIVE_FINANCE_BOUNDARY_REQUIRED",
+      "links": [
+        "C22"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A11",
+        "A13"
+      ],
+      "sourceRule": "Action-specific transaction/account authority; own-subject view branch separate; no finance positive activation under base contract",
+      "negativeControl": "Role-only, absent mandate, foreign account, invalid amount/currency, duty conflict as applicable; base mandate/config denial",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/finance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "finance:approve",
+      "policy": "finance",
+      "resource": "financial_transaction",
+      "scope": "EXCLUDED_POSITIVE_FINANCE_BOUNDARY_REQUIRED",
+      "links": [
+        "C22"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A11",
+        "A13"
+      ],
+      "sourceRule": "Action-specific transaction/account authority; own-subject view branch separate; no finance positive activation under base contract",
+      "negativeControl": "Role-only, absent mandate, foreign account, invalid amount/currency, duty conflict as applicable; base mandate/config denial",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/finance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "finance:execute",
+      "policy": "finance",
+      "resource": "financial_transaction",
+      "scope": "EXCLUDED_POSITIVE_FINANCE_BOUNDARY_REQUIRED",
+      "links": [
+        "C22"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A11",
+        "A13"
+      ],
+      "sourceRule": "Action-specific transaction/account authority; own-subject view branch separate; no finance positive activation under base contract",
+      "negativeControl": "Role-only, absent mandate, foreign account, invalid amount/currency, duty conflict as applicable; base mandate/config denial",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/finance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "finance:reconcile",
+      "policy": "finance",
+      "resource": "financial_transaction",
+      "scope": "EXCLUDED_POSITIVE_FINANCE_BOUNDARY_REQUIRED",
+      "links": [
+        "C22"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A11",
+        "A13"
+      ],
+      "sourceRule": "Action-specific transaction/account authority; own-subject view branch separate; no finance positive activation under base contract",
+      "negativeControl": "Role-only, absent mandate, foreign account, invalid amount/currency, duty conflict as applicable; base mandate/config denial",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/finance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "finance:audit",
+      "policy": "finance",
+      "resource": "financial_transaction",
+      "scope": "EXCLUDED_POSITIVE_FINANCE_BOUNDARY_REQUIRED",
+      "links": [
+        "C22"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A11",
+        "A13"
+      ],
+      "sourceRule": "Action-specific transaction/account authority; own-subject view branch separate; no finance positive activation under base contract",
+      "negativeControl": "Role-only, absent mandate, foreign account, invalid amount/currency, duty conflict as applicable; base mandate/config denial",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/finance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "governance:approve",
+      "policy": "governance",
+      "resource": "approval_request",
+      "scope": "BASE_ADJACENT_EXACT_FEATURE_ADMISSION_REQUIRED",
+      "links": [
+        "C10",
+        "C16",
+        "C19"
+      ],
+      "actorCandidates": [
+        "A07",
+        "A10"
+      ],
+      "sourceRule": "Named eligible approver or live office approval mandate; valid low/medium-risk delegation counts delegator line",
+      "negativeControl": "Self-author, duplicate authority line, recusal, high-risk delegation or fewer than two independent approvals",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "governance:supersede_certified_result",
+      "policy": "election",
+      "resource": "council_election",
+      "scope": "ADJACENT_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "actorCandidates": [
+        "A07",
+        "A10"
+      ],
+      "sourceRule": "Named election, live governance mandate, third-party approver distinct from issuer and holder; no delegation",
+      "negativeControl": "Uncertified result, named candidate, self/issuer approval, wrong election",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/election.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "review:monitor",
+      "policy": "governance",
+      "resource": "governance_review",
+      "scope": "ACTION_SPECIFIC_GOVERNANCE_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C18",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Live governance-review mandate names exact review and monitor power; independent appointment; nondelegable",
+      "negativeControl": "Complainant/respondent, recusal, wrong review, missing power; no role-only access",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "review:access_evidence",
+      "policy": "governance",
+      "resource": "governance_review",
+      "scope": "ACTION_SPECIFIC_GOVERNANCE_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C18",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Live governance-review mandate names exact review and access_evidence power; independent appointment; nondelegable",
+      "negativeControl": "Complainant/respondent, recusal, wrong review, missing power; privileged evidence excluded",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "review:issue_finding",
+      "policy": "governance",
+      "resource": "governance_review",
+      "scope": "ACTION_SPECIFIC_GOVERNANCE_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C18",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Live governance-review mandate names exact review and issue_finding power; independent appointment; nondelegable",
+      "negativeControl": "Complainant/respondent, recusal, wrong review, missing power; no role-only access",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "review:request_corrective_action",
+      "policy": "governance",
+      "resource": "governance_review",
+      "scope": "ACTION_SPECIFIC_GOVERNANCE_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C18",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Live governance-review mandate names exact review and request_corrective_action power; independent appointment; nondelegable",
+      "negativeControl": "Complainant/respondent, recusal, wrong review, missing power; no role-only access",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "review:enforce",
+      "policy": "governance",
+      "resource": "governance_review",
+      "scope": "ACTION_SPECIFIC_GOVERNANCE_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C18",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Live governance-review mandate names exact review and enforce power; independent appointment; nondelegable",
+      "negativeControl": "Complainant/respondent, recusal, wrong review, missing power; no role-only access",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "review:verify_remediation",
+      "policy": "governance",
+      "resource": "governance_review",
+      "scope": "ACTION_SPECIFIC_GOVERNANCE_SCOPE_REVIEW",
+      "links": [
+        "C10",
+        "C18",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Live governance-review mandate names exact review and request_corrective_action power; independent appointment; nondelegable",
+      "negativeControl": "Complainant/respondent, recusal, wrong review, missing power; owner cannot verify own remediation",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/governance.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "workaid:refer",
+      "policy": "workaid",
+      "resource": "workaid_matter",
+      "scope": "UNION_SIDE_ADJACENT_EXTERNAL_ACTIVATION_DEFERRED",
+      "links": [
+        "C08",
+        "C12",
+        "C13"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A14"
+      ],
+      "sourceRule": "Active member creator or primary handler relationship plus live member consent for exact matter/categories",
+      "negativeControl": "Wrong issuer, revoked consent, overbroad categories, unassigned handler",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/workaid.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "workaid:receive_disclosure",
+      "policy": "workaid",
+      "resource": "workaid_matter",
+      "scope": "EXTERNAL_ACTIVATION_DEFERRED_BOUNDARY_REQUIRED",
+      "links": [
+        "C12",
+        "C13",
+        "C22"
+      ],
+      "actorCandidates": [
+        "A05",
+        "A14"
+      ],
+      "sourceRule": "Counsel-issued live disclosure for named recipient, matter, direction and categories; external verifier separate",
+      "negativeControl": "Member/union-authored consent cannot open counsel material; wrong named recipient, revoked",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/workaid.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "workaid:read_counsel_material",
+      "policy": "workaid",
+      "resource": "workaid_matter",
+      "scope": "UNCONDITIONAL_UNION_PRINCIPAL_DENIAL",
+      "links": [
+        "C13",
+        "C22"
+      ],
+      "actorCandidates": [
+        "A14",
+        "A20"
+      ],
+      "sourceRule": "Kernel refuses before evaluating facts; only separate counsel-controlled context could access counsel material",
+      "negativeControl": "All union-role/mandate/consent permutations deny; no content",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/workaid.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:read",
+      "policy": "message",
+      "resource": "message_thread",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C17"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "sourceRule": "Active member subject or assigned representative with eligible capacity; actual thread relation only, no delegation",
+      "negativeControl": "Unassigned staff, governance hold alone, admin-only title, closed reply, revoked membership",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:reply",
+      "policy": "message",
+      "resource": "message_thread",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C17"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "sourceRule": "Active member subject or assigned representative with eligible capacity; actual thread relation only, no delegation",
+      "negativeControl": "Unassigned staff, governance hold alone, admin-only title, closed reply, revoked membership",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:close",
+      "policy": "message",
+      "resource": "message_thread",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C17"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "sourceRule": "Active member subject or assigned representative with eligible capacity; actual thread relation only, no delegation",
+      "negativeControl": "Unassigned staff, governance hold alone, admin-only title, closed reply, revoked membership",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:archive",
+      "policy": "message",
+      "resource": "message_thread",
+      "scope": "BASE_ACTION_OR_AUTHORITY_DEPENDENCY",
+      "links": [
+        "C17"
+      ],
+      "actorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07",
+        "A08"
+      ],
+      "sourceRule": "Active member subject or assigned representative with eligible capacity; actual thread relation only, no delegation",
+      "negativeControl": "Unassigned staff, governance hold alone, admin-only title, closed reply, revoked membership",
+      "issuanceNonDelegable": false,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:place_legal_hold",
+      "policy": "message",
+      "resource": "message_thread",
+      "scope": "ADJACENT_GOVERNANCE_BOUNDARY",
+      "links": [
+        "C17",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Nondelegable live review mandate names exact thread and hold power; governance appointment distinct from participant",
+      "negativeControl": "Role-only, unrelated thread, delegation, recusal; hold does not confer read",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:release_legal_hold",
+      "policy": "message",
+      "resource": "message_thread",
+      "scope": "ADJACENT_GOVERNANCE_BOUNDARY",
+      "links": [
+        "C17",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Nondelegable live review mandate names exact thread and release power",
+      "negativeControl": "Place-only power, delegation, foreign thread; hold does not confer read",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:adopt_retention",
+      "policy": "message",
+      "resource": "message_retention",
+      "scope": "ADJACENT_GOVERNANCE_BOUNDARY",
+      "links": [
+        "C17",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Nondelegable governance mandate names organization retention record and adoption power",
+      "negativeControl": "Wrong organization, participant-only, delegation; no conversation contents",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "action": "message:read_retention_policy",
+      "policy": "message",
+      "resource": "message_retention",
+      "scope": "ADJACENT_GOVERNANCE_BOUNDARY",
+      "links": [
+        "C17",
+        "C19",
+        "C20"
+      ],
+      "actorCandidates": [
+        "A10"
+      ],
+      "sourceRule": "Nondelegable governance mandate names organization retention record and read power",
+      "negativeControl": "Adopt-only or participant-only, wrong organization, no conversation contents",
+      "issuanceNonDelegable": true,
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/ontology.ts",
+        "apps/union-eyes/lib/authority/kernel.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ],
+      "sourceScopeVerified": false,
+      "runtimeVerified": false
+    }
+  ],
+  "subordinateAuthorityIds": [
+    "mandates",
+    "delegations",
+    "resource-relationships",
+    "issuance-approvals",
+    "rule-adoption-approvals",
+    "counsel-engagements",
+    "external-counsel",
+    "workaid-referral",
+    "workaid-union-side-disclosure",
+    "triage-designations",
+    "external-representation",
+    "document-grants",
+    "legacy-case-access-assignments",
+    "api-keys",
+    "sessions",
+    "invite-tokens",
+    "mfa-challenges",
+    "first-factor-tokens",
+    "legacy-lineage-route-guard"
+  ],
+  "findings": [
+    {
+      "id": "S1-A01",
+      "state": "SOURCE_POLICY_CONTRADICTION_REPRODUCTION_REQUIRED",
+      "severity": "P0_CANDIDATE",
+      "detail": "Primary-only disclosure/export/close is enforced in relationship grants and nondelegable issuance catalog, but decideCase supervisory mandate branch accepts matching arbitrary power after scoped/capacity checks. assessMandate rejects read_privileged, not these primary-only powers. Default supervisory template omits all three; custom rule draft stores caller-provided allowedPowers, so default-template tests do not establish a universal ceiling. Export route calls findReadableCase with kernel action. Prove synthetic kernel outcome and real issuance/DB reachability separately before changing policy or asserting product exploitability.",
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/policies/case.ts",
+        "apps/union-eyes/lib/authority/common.ts",
+        "apps/union-eyes/lib/authority/issuance.ts",
+        "apps/union-eyes/lib/authority/store/lifecycle.ts",
+        "apps/union-eyes/lib/cases/case-authorization.ts",
+        "apps/union-eyes/app/api/cases/[caseId]/export/route.ts"
+      ],
+      "requiredControls": [
+        "primary-only action without owner/assignee",
+        "scoped custom supervisory power deliberately containing each primary-only power",
+        "custom issued vs stored/injected defensive fact",
+        "default template path",
+        "valid primary handler retained",
+        "delegated primary-only attempt",
+        "privileged and recusal variants"
+      ]
+    },
+    {
+      "id": "S1-A02",
+      "state": "SOURCE_MAPPING_GAP_VERIFY_INTENDED_CLERK_BOUNDARY",
+      "severity": "P1_SCOPE",
+      "detail": "clerk is tenant-local role but absent from ROLE_CAPACITIES. This may be deliberate for case rights; validate correspondence action-specific authority and deny no-capacity case/message reads. Do not add capacity merely to eliminate empty mapping.",
+      "sourceRefs": [
+        "apps/union-eyes/lib/auth/roles.ts",
+        "apps/union-eyes/lib/authority/capacity.ts",
+        "apps/union-eyes/lib/authority/policies/message.ts"
+      ]
+    },
+    {
+      "id": "S1-A03",
+      "state": "EXTERNAL_ACTOR_SUBDIVISION_REQUIRED",
+      "severity": "P0_BOUNDARY",
+      "detail": "Subordinate register distinguishes member-counsel, nonmember external counsel (verifier absent), and external representation with active matter-org membership in V2. Treat these as distinct authority contexts; no implied access from external title.",
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/subordinate-authority-register.ts",
+        "apps/union-eyes/lib/services/external-resource-authorization-service.ts"
+      ]
+    },
+    {
+      "id": "S1-A04",
+      "state": "INSTITUTIONAL_CONFIGURATION_NOT_PROVEN",
+      "severity": "P0_SCOPE",
+      "detail": "Four appointment-only capacities are earned through live mandates, never stored role; proposed issuance templates do not prove adopted rule or live mandate. All positive eligibility variants require fixture rule/instrument provenance.",
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/capacity.ts",
+        "apps/union-eyes/lib/authority/store/facts.ts",
+        "apps/union-eyes/lib/authority/issuance.ts",
+        "apps/union-eyes/lib/authority/store/lifecycle.ts"
+      ]
+    },
+    {
+      "id": "S1-A05",
+      "state": "SUBORDINATE_AUTHORITY_SOURCE_ONLY",
+      "severity": "P0_BOUNDARY",
+      "detail": "Existing subordinate revocation register includes enforced/fixed/layered/open/other lane classifications, not current deployment acceptance. Reconcile all consumers and source proofs with candidate-specific same-session revocation and worker/token contexts.",
+      "sourceRefs": [
+        "apps/union-eyes/lib/authority/subordinate-authority-register.ts"
+      ]
+    }
+  ],
+  "limits": [
+    "Source action enumeration only, not a full action/route/caller or actual tenant mandate closure.",
+    "Rows distinguish proposed base positive admission from denied/deferred/adjacent powers; no activation, issuance or production change.",
+    "Do not equate issuance nondelegable catalog with all runtime delegation denials: conversation participation separately refuses delegation.",
+    "Custom supervisory branch concern is source-derived, not confirmed on any deployment."
+  ]
+}
