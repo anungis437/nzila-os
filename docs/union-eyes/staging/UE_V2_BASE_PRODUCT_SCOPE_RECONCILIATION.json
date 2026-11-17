@@ -76,6 +76,50 @@
     "kernel": {
       "path": "apps/union-eyes/lib/authority/ontology.ts",
       "blobSha": "03c84ef2b64aa54a4dcaf70f396bd370c55c5ee5"
+    },
+    "roleEnum": {
+      "path": "apps/union-eyes/lib/auth/roles.ts",
+      "blobSha": "1b412184d58a1dc2b51f0fab3ccdca67390051bd"
+    },
+    "externalMiddleware": {
+      "path": "apps/union-eyes/lib/external-resource-middleware.ts",
+      "blobSha": "e9b73875156847f2851806c42007afb07871b737"
+    },
+    "externalGrant": {
+      "path": "apps/union-eyes/lib/services/external-document-grant-service.ts",
+      "blobSha": "7d2a316251fcab08d2d75260358065c5af4df49d"
+    },
+    "externalProjection": {
+      "path": "apps/union-eyes/app/api/external/grievances/[id]/route.ts",
+      "blobSha": "e0be734a0cdc38dc90adf5ee2dea07bb403d59b8"
+    },
+    "externalUpload": {
+      "path": "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
+      "blobSha": "17b1815c5b438b3316df9eee97013e84f6db07fd"
+    },
+    "counselBoundary": {
+      "path": "docs/union-eyes/convergence/UE-WORKAID-COUNSEL-BOUNDARY-CONTRACT.md",
+      "blobSha": "24462a4f949d23a57180e8525f752e5288f88b2b"
+    },
+    "workaidTrace": {
+      "path": "docs/union-eyes/workaid/02_REQUIREMENTS_TRACEABILITY.md",
+      "blobSha": "613685d5ea91579cf5ed4a955374c15328c63892"
+    },
+    "employerFirewall": {
+      "path": "apps/union-eyes/services/employer-non-interference-service.ts",
+      "blobSha": "cd3ceb0b7602f4e4d71d6aedb970d7395d862634"
+    },
+    "publicApplicant": {
+      "path": "apps/union-eyes/app/api/pilot/apply/route.ts",
+      "blobSha": "ef65e4a2ac9de0c7319a995070ad54e7ae659ace"
+    },
+    "federationExternal": {
+      "path": "tooling/scripts/lib/ue-gate0b8-federation-external-facts.mjs",
+      "blobSha": "03893cb95732f01e566e73890a8424e709c0e92b"
+    },
+    "icraPersona": {
+      "path": "apps/union-eyes/lib/icra/personas.ts",
+      "blobSha": "58b04c77ee75f1cc96f002b837ab49adab280fc3"
     }
   },
   "scopeVocabulary": {
@@ -145,6 +189,12 @@
       "area": "Legacy and dormant surfaces",
       "required": "Source-derived scope inventory, mandatory safe denial and truthful presentation of any reachable non-base action",
       "deferred": "No new capability merely to remove a 501 or clear historical program closure."
+    },
+    {
+      "area": "External and non-user stakeholders",
+      "required": "Existing external ingress/outbound recipient safety, identity/consent boundaries, employer firewall, explicit scoped grants, revoked access, service trust and actual controlled delivery proof",
+      "conditional": "Positive external representative/affiliate workflow, external auditors, public applicant and commercial signup according to adopted pilot/contract scope; no employer portal or generic witness/tribunal portal inferred",
+      "deferred": "WorkAid/counsel live execution and separately designed integrations"
     }
   ],
   "explicitUnknowns": [
@@ -154,7 +204,8 @@
     "The current source represents PR1264; open PR1266's directory and approved-letter outbox changes are not admitted or staged evidence. No final-candidate proof inherits historical acceptance.",
     "Product scope is not institutional activation: actual mandate/appointment/issuance rules require authorized source; test fixtures can use synthetic authority.",
     "Prior founder product ratification is not fabricated from historical proposals; exact subsequent ratification record was not located during this pass.",
-    "Historical institutional dossier 111 records includes earlier programme-specific decisions and blockers. These are indexed, not recertified or ratified; no duplicate institutional sign-off is requested."
+    "Historical institutional dossier 111 records includes earlier programme-specific decisions and blockers. These are indexed, not recertified or ratified; no duplicate institutional sign-off is requested.",
+    "Stakeholder universe was previously limited to persona families; 39 role values and 32 trust-boundary stakeholder families have now been enumerated. Dedicated external UI/API/action coverage, actual approved pilot scope, and direct vs recipient-only classification must be reconciled in Step 1 and consumed in Step 2/3."
   ],
   "baseFamilies": [
     {
@@ -7963,6 +8014,18 @@
       "CONDITIONAL": 17,
       "DEFERRED": 0,
       "EXCLUDED": 0
+    },
+    "stakeholderFamilies": {
+      "REQUIRED": 18,
+      "CONDITIONAL": 13,
+      "DEFERRED": 1,
+      "EXCLUDED": 0
+    },
+    "roleValues": {
+      "REQUIRED": 9,
+      "CONDITIONAL": 25,
+      "DEFERRED": 0,
+      "EXCLUDED": 5
     }
   },
   "historicalPilotScope": {
@@ -9854,5 +9917,705 @@
       "securityBoundaryRetained": true,
       "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
     }
-  ]
+  ],
+  "stakeholderCensus": {
+    "status": "FIRST_PASS_PROPOSED_PENDING_ACTION_LEVEL_RECONCILIATION",
+    "note": "Seven designed personas are not the complete stakeholder universe; 39 stored role values and distinct stakeholder trust boundaries overlap. No one-to-one account-count assumption. External recipient is different from authenticated external representative and external counsel. Positive feature scope separate from mandatory negative/security qualification.",
+    "roleValues": [
+      {
+        "id": "app_owner",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "coo",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "cto",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "platform_lead",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "customer_success_director",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "support_manager",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "data_analytics_manager",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "billing_manager",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "integration_manager",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "compliance_manager",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "security_manager",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "support_agent",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "data_analyst",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "billing_specialist",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "integration_specialist",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "content_manager",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "training_coordinator",
+        "group": "PLATFORM_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+      },
+      {
+        "id": "system_admin",
+        "group": "PLATFORM_OPERATOR",
+        "scope": "CONDITIONAL",
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+      },
+      {
+        "id": "clc_executive",
+        "group": "AFFILIATED_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+      },
+      {
+        "id": "clc_staff",
+        "group": "AFFILIATED_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+      },
+      {
+        "id": "fed_executive",
+        "group": "AFFILIATED_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+      },
+      {
+        "id": "fed_staff",
+        "group": "AFFILIATED_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+      },
+      {
+        "id": "national_officer",
+        "group": "AFFILIATED_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+      },
+      {
+        "id": "admin",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "president",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "vice_president",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "secretary_treasurer",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "chief_steward",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "officer",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "clerk",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "steward",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "bargaining_committee",
+        "group": "LOCAL_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Qualify enabled steward capacity and relevant case authority if assigned; no full specialty module inferred."
+      },
+      {
+        "id": "health_safety_rep",
+        "group": "LOCAL_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "boundary": "Qualify enabled steward capacity and relevant case authority if assigned; no full specialty module inferred."
+      },
+      {
+        "id": "member",
+        "group": "LOCAL_UNION",
+        "scope": "REQUIRED",
+        "boundary": "Distinct positive nonfinancial base responsibilities and relevant denials; do not derive authority from role label. Secretary-treasurer positive scope excludes union finance."
+      },
+      {
+        "id": "guest",
+        "group": "DEPRECATED_ALIAS",
+        "scope": "EXCLUDED",
+        "boundary": "No new assignment; old sessions/data handled safely, no permission escalation through compatibility alias."
+      },
+      {
+        "id": "congress_staff",
+        "group": "DEPRECATED_ALIAS",
+        "scope": "EXCLUDED",
+        "boundary": "No new assignment; old sessions/data handled safely, no permission escalation through compatibility alias."
+      },
+      {
+        "id": "federation_staff",
+        "group": "DEPRECATED_ALIAS",
+        "scope": "EXCLUDED",
+        "boundary": "No new assignment; old sessions/data handled safely, no permission escalation through compatibility alias."
+      },
+      {
+        "id": "union_rep",
+        "group": "DEPRECATED_ALIAS",
+        "scope": "EXCLUDED",
+        "boundary": "No new assignment; old sessions/data handled safely, no permission escalation through compatibility alias."
+      },
+      {
+        "id": "staff_rep",
+        "group": "DEPRECATED_ALIAS",
+        "scope": "EXCLUDED",
+        "boundary": "No new assignment; old sessions/data handled safely, no permission escalation through compatibility alias."
+      }
+    ],
+    "stakeholderFamilies": [
+      {
+        "id": "SA01",
+        "name": "Active member / represented member",
+        "kind": "LOCAL_MEMBER",
+        "scope": "REQUIRED",
+        "interfaceMode": "Member workspace",
+        "requiredBoundary": "Own-case, own evidence, messages, profile, privacy; distinguish member as subject, depositor and party.",
+        "sources": [
+          "roleEnum",
+          "base"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA02",
+        "name": "Anonymous visitor, prospect, assessment respondent",
+        "kind": "PUBLIC",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Public website/assessment if enabled",
+        "requiredBoundary": "No authentication assumption, PII consent and purpose, safe public output, rate limits; not automatic tenant access.",
+        "sources": [
+          "publicApplicant",
+          "icraPersona"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA03",
+        "name": "Pilot applicant, client champion, authorized customer signer / sponsor",
+        "kind": "COMMERCIAL",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Public intake/verified customer onboarding",
+        "requiredBoundary": "Verify identity, contact control, organization relationship and authority to accept terms; distinguish sales prospect from tenant admin. No fabricated metrics or signature.",
+        "sources": [
+          "publicApplicant",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA04",
+        "name": "Unredeemed invitee / first-time member",
+        "kind": "IDENTITY_LIFECYCLE",
+        "scope": "REQUIRED",
+        "interfaceMode": "Invitation, provider login and first case",
+        "requiredBoundary": "Token intended recipient, expiry, one-time redemption, correct membership, directory, contact and notification projections.",
+        "sources": [
+          "base",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA05",
+        "name": "Former, suspended, reinstated or departed member / staff",
+        "kind": "IDENTITY_LIFECYCLE",
+        "scope": "REQUIRED",
+        "interfaceMode": "Lifecycle subject, no separate workspace",
+        "requiredBoundary": "Retained record versus access, stale session and cached document/URL denial; authorized reinstatement and outgoing access removal.",
+        "sources": [
+          "base",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA06",
+        "name": "Steward, shop steward, workplace delegate",
+        "kind": "LOCAL_REPRESENTATION",
+        "scope": "REQUIRED",
+        "interfaceMode": "Scoped internal workbench",
+        "requiredBoundary": "Case relationship; role eligibility not blanket assignment, export or disclosure authority.",
+        "sources": [
+          "steward",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA07",
+        "name": "Representative / LRO / business agent / grievance officer",
+        "kind": "LOCAL_REPRESENTATION",
+        "scope": "REQUIRED",
+        "interfaceMode": "Scoped internal workbench",
+        "requiredBoundary": "Functional capacity with verified mapping; no fabricated stored role for job title.",
+        "sources": [
+          "representative",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA08",
+        "name": "Chief steward, senior representative, supervisor, temporary successor",
+        "kind": "LOCAL_REPRESENTATION",
+        "scope": "REQUIRED",
+        "interfaceMode": "Scoped supervision and handover",
+        "requiredBoundary": "Live scoped designation/mandate, separate assign/review/escalate authority, succession and revocation; institution must adopt real mandates.",
+        "sources": [
+          "historical",
+          "base"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA09",
+        "name": "Executive office-holder / president / vice-president / secretary-treasurer",
+        "kind": "LOCAL_EXECUTIVE",
+        "scope": "REQUIRED",
+        "interfaceMode": "Nonfinancial executive scope",
+        "requiredBoundary": "Office/term/approval authority distinct from title; leadership oversight does not imply full case visibility or finance power.",
+        "sources": [
+          "executive",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA10",
+        "name": "Organization administrator / membership administrator",
+        "kind": "LOCAL_ADMIN",
+        "scope": "REQUIRED",
+        "interfaceMode": "Tenant administration and onboarding",
+        "requiredBoundary": "Own organization and grant ceiling; never case-content entitlement solely from admin role.",
+        "sources": [
+          "base",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA11",
+        "name": "Administrative clerk / correspondence coordinator",
+        "kind": "LOCAL_OPERATIONS",
+        "scope": "REQUIRED",
+        "interfaceMode": "Scoped correspondence workflow",
+        "requiredBoundary": "Draft, approver, signer, dispatcher, recipient and receipt are distinct actions; no approval by title alone.",
+        "sources": [
+          "roleEnum",
+          "base"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA12",
+        "name": "Privacy officer / assigned information-rights handler",
+        "kind": "APPOINTMENT_OR_RELATIONSHIP",
+        "scope": "REQUIRED",
+        "interfaceMode": "Bounded privacy request workflow",
+        "requiredBoundary": "Appointment/assignment as actually supported; subject verification, restricted exports, no general privacy-request access from administrator title.",
+        "sources": [
+          "historical",
+          "base"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA13",
+        "name": "Governance reviewer, internal auditor, trustee (nonfinancial scope only)",
+        "kind": "APPOINTMENT",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Adopted oversight/audit and evidence",
+        "requiredBoundary": "Express scoped appointment, evidence class, recusal, no unilateral case mutation; financial trustee features excluded.",
+        "sources": [
+          "governance",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA14",
+        "name": "Committee members, bargaining and health-and-safety representatives",
+        "kind": "LOCAL_SPECIALTY",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Enabled base representation and adopted records",
+        "requiredBoundary": "Specialty title does not establish committee authority, privileged medical access or full specialist module.",
+        "sources": [
+          "roleEnum",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA15",
+        "name": "Unaffiliated external representative / staff representative from another organization",
+        "kind": "EXTERNAL_AUTHENTICATED",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Existing external matter/resource API, UI availability unverified",
+        "requiredBoundary": "Live representation authority plus exact matter and document grants; permitted projection/view/download/deposit only as separately authorized; expiry/revocation, wrong resource, wrong organization, internal-field non-disclosure. Boundary safety required now; positive scope must be explicitly reconciled, not blanket deferred.",
+        "sources": [
+          "externalMiddleware",
+          "externalGrant",
+          "externalProjection",
+          "externalUpload",
+          "federationExternal"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA16",
+        "name": "National union, federation, regional and congress officers/staff",
+        "kind": "AFFILIATED_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Own organization or explicit delegated external matter authority",
+        "requiredBoundary": "Affiliation, seniority and parent hierarchy confer no raw local access. Positive inter-organizational journeys only for adopted protocol; no rollup commitment.",
+        "sources": [
+          "roleEnum",
+          "representative",
+          "federationExternal"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA17",
+        "name": "WorkAid professional, external lawyer/counsel, paralegal, specialist caseworker",
+        "kind": "EXTERNAL_PROFESSIONAL",
+        "scope": "DEFERRED",
+        "interfaceMode": "Separate WorkAid/counsel identity and professional system; no verified UE counsel UI",
+        "requiredBoundary": "Union-side consent/referral/share/revoke boundaries protected. Counsel-side signed matter-bound assertions, verifier and issuer/key custody external; no impersonation, privileged disclosure or fabricated acceptance.",
+        "sources": [
+          "counselBoundary",
+          "workaidTrace"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA18",
+        "name": "Employer / management / HR / industrial-relations counterpart",
+        "kind": "EXTERNAL_COUNTERPART",
+        "scope": "REQUIRED",
+        "interfaceMode": "Authorized outbound correspondence or supplied record, not general portal account",
+        "requiredBoundary": "Required recipient-side letter delivery and employer/union data separation. No employer access to union-only records, directory, private notes or evidence. Any shared-data portal would require separate authority.",
+        "sources": [
+          "employerFirewall",
+          "base"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA19",
+        "name": "Respondent, adverse party, witness or third-party evidence contributor",
+        "kind": "EXTERNAL_OR_INTERNAL_PARTY",
+        "scope": "REQUIRED",
+        "interfaceMode": "Matter participant or data subject, not automatic workspace",
+        "requiredBoundary": "Test conflicts and adverse-party denials, restricted identity, justified handling and controlled evidence disclosure. Positive witness portal not established; recommendation only if adopted.",
+        "sources": [
+          "historical",
+          "governance"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA20",
+        "name": "Arbitrator, mediator, tribunal, labour board or regulatory authority",
+        "kind": "EXTERNAL_INSTITUTION",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Authorized evidence/correspondence recipient or offline institution; direct filing not established",
+        "requiredBoundary": "Separate dispatch, actual receipt, filing validity, decision and institutional authority; do not claim external integration, legal submission or decision absent receipt.",
+        "sources": [
+          "workaidTrace",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA21",
+        "name": "External auditor, assessor, privacy regulator or authorized investigator",
+        "kind": "EXTERNAL_ASSURANCE",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Purpose-bound authorized evidence transfer, no default tenant account",
+        "requiredBoundary": "Scoped export/review, identity and authorization verified, non-mutation, confidentiality; no independent human or regulator certification inferred.",
+        "sources": [
+          "governance",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA22",
+        "name": "Other approved recipient, respondent contact, designated third-party recipient",
+        "kind": "EXTERNAL_RECIPIENT",
+        "scope": "REQUIRED",
+        "interfaceMode": "Bounded delivery channel, no implicit login",
+        "requiredBoundary": "Individual copy, intended recipient and approved content, outbox idempotency, provider acceptance versus actual receipt, revocation where issued link supports it.",
+        "sources": [
+          "base",
+          "counselBoundary"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA23",
+        "name": "Platform founder, operations and system administration",
+        "kind": "PLATFORM",
+        "scope": "REQUIRED",
+        "interfaceMode": "Separate Nzila operating plane",
+        "requiredBoundary": "Approved operational mutations with audit and segregation from customer content, no blanket union role or invented independent founder.",
+        "sources": [
+          "roleEnum",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA24",
+        "name": "Customer success, onboarding/support personnel and technical support",
+        "kind": "PLATFORM",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Scoped operating roles",
+        "requiredBoundary": "Tenant support and onboarding permitted only under specific entitlement; no silent impersonation or universal content access.",
+        "sources": [
+          "roleEnum",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA25",
+        "name": "Platform security, compliance and authorized incident/evidence reviewer",
+        "kind": "PLATFORM",
+        "scope": "REQUIRED",
+        "interfaceMode": "Bounded telemetry/security operations",
+        "requiredBoundary": "Access to necessary source-backed security/operational evidence only, audited grants, restricted customer content.",
+        "sources": [
+          "roleEnum",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA26",
+        "name": "Platform commercial, billing and contract operations",
+        "kind": "PLATFORM",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Nzila contract/entitlement, not union finance",
+        "requiredBoundary": "Separate contractual authority, truthful subscription and billing; no union financial mandate or live payment requirement inferred.",
+        "sources": [
+          "roleEnum",
+          "publicApplicant"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA27",
+        "name": "Platform content/training and integration/analytics personnel",
+        "kind": "PLATFORM",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Only enabled platform-specific tasks",
+        "requiredBoundary": "No inherited customer data permissions; purposes and privileges separated.",
+        "sources": [
+          "roleEnum",
+          "historical"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA28",
+        "name": "Identity provider, email provider, file scanner/storage, background worker",
+        "kind": "MACHINE",
+        "scope": "REQUIRED",
+        "interfaceMode": "Service identities, signed callbacks and controlled credentials",
+        "requiredBoundary": "Narrow workload identity, tenant/replay/lease binding, signature verification, audit, exact outbox effects and operational failure recovery; not human roles.",
+        "sources": [
+          "base",
+          "physicalGuards"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA29",
+        "name": "External processor / connector, signing provider, third-party integration",
+        "kind": "MACHINE_EXTERNAL",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Only adopted provider interfaces",
+        "requiredBoundary": "Explicit data purpose and isolation, signature/secret custody, expiry/rotation/revocation, no inferred success or external transmission; WorkAid and other deferred providers remain inactive.",
+        "sources": [
+          "historical",
+          "counselBoundary"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA30",
+        "name": "Unauthorized stranger, spoofed provider, compromised or foreign principal",
+        "kind": "ADVERSARIAL",
+        "scope": "REQUIRED",
+        "interfaceMode": "Negative-control subject",
+        "requiredBoundary": "No authority or content leakage; test direct access, forgery, replay, privilege escalation, cross-tenant access, revoked and expired identity.",
+        "sources": [
+          "base",
+          "externalMiddleware",
+          "counselBoundary"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA31",
+        "name": "Synthetic test operator, controlled external inbox recipient and lifecycle fixture",
+        "kind": "QUALIFICATION_ONLY",
+        "scope": "REQUIRED",
+        "interfaceMode": "Synthetic qualification; not customer institutional authority",
+        "requiredBoundary": "Keep test principal, actual operator, controlled email receipt and data cleanup distinct. No separate invented independent reviewer or real-member mutation.",
+        "sources": [
+          "base",
+          "physicalGuards"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      },
+      {
+        "id": "SA32",
+        "name": "Training participant / event attendee / volunteer / retired member or non-member claimant",
+        "kind": "ADJACENT",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Product-scope question; no verified standalone UE base workspace",
+        "requiredBoundary": "If enabled or explicitly promised, define standing/relationship, consent and limited access. No automatic eligibility, membership or full events/training commitment.",
+        "sources": [
+          "historical",
+          "roleEnum"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+      }
+    ],
+    "provenanceLimits": [
+      "Witness, tribunal/arbitrator, regulator, training/retired/nonmember and similar categories are coverage hypotheses where no final base contract was recovered; inventory is not evidence of implemented portal or approved new product.",
+      "External representative APIs exist; whether a pilot requires positive external workflows is unresolved. Preserve safety of every reachable route even if positive scope excluded.",
+      "Full cross-organization authority, professional counsel, commercial integration and institutional real-world adoption are not granted by this document."
+    ]
+  }
 }
