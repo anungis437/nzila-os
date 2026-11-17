@@ -21,6 +21,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { sql, relations } from 'drizzle-orm'
+import { AUTH_EMAIL_PATTERN, authEmailSqlLiteral } from '../auth-email-check'
 
 // ── Schema ──────────────────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ export const authUsers = userManagementSchema.table(
   (table) => ({
     checkEmail: check(
       'valid_email',
-      sql`${table.email} ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`,
+      sql`${table.email} ~* ${sql.raw(authEmailSqlLiteral(AUTH_EMAIL_PATTERN))}`,
     ),
   }),
 )

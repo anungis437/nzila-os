@@ -1,0 +1,104 @@
+{
+  "status": "PASS_LOCAL_ONLY",
+  "recordedAt": "2026-11-17T05:08:26.020229+00:00",
+  "validationBaseHead": "c3b7349260d3736860f4faef5b72c20c68d3ce63",
+  "sourceUnchangedDuringChecks": true,
+  "requiredChecks": [
+    {
+      "command": "pnpm lint",
+      "startedAt": "2026-11-17T04:47:16.186735+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T04:49:38.738017+00:00",
+      "logSha256": "9dbf3bc707a919c787e225a7b35af127f1f3e49d73d5ac85d6d92431b4eae15b"
+    },
+    {
+      "command": "pnpm typecheck",
+      "startedAt": "2026-11-17T04:49:38.740297+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T04:54:13.027298+00:00",
+      "logSha256": "f639f49fb584bffd302cb6ef6e2f053fa897d245c5ecd1f0e31bc93efaff96ad"
+    },
+    {
+      "command": "pnpm test:fast",
+      "startedAt": "2026-11-17T04:54:13.032864+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T05:07:34.011081+00:00",
+      "logSha256": "721b6c0e0b901ca8fa5edae876782bcc082f77e6b2e0c2e19cb0f58026f50af4"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "startedAt": "2026-11-17T05:07:34.013025+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T05:07:45.441816+00:00",
+      "logSha256": "0e8f46dc9ca35a9f70c2bb3cc5b408b5e74765251d84fe6ea0b3e4633489bf69"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "startedAt": "2026-11-17T05:07:45.443778+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T05:08:18.550375+00:00",
+      "logSha256": "856d0728fbeda27d5fa27f5c5ad3ce80ff980b48beb1508027324d96c817035e"
+    }
+  ],
+  "fastTestSummary": [
+    "Test Files  3014 passed | 118 skipped (3132)",
+    "Tests  39429 passed | 1702 skipped (41144)",
+    "Duration  798.55s (tests 56%, import 27%, environment 11%, transform 5%)"
+  ],
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts",
+      "sha256": "80ba1323cae1ca1b90b3066f625db37d0fd40c980234ddb720a00d8e095abc73"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "sha256": "0e94e952a3fd1ce2305c056ca5c93d684d0426bf72d3343114e460dc121594b1"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "2f78f11eac0640c147df98fa6883b061b84f4918c625af62e9d8d7812f36073b"
+    },
+    {
+      "path": "packages/db/src/schema/auth.ts",
+      "sha256": "04a0b11d1edc2729e9eb2e1eebe80d860fc3e49268f34af8066da26043cd12e6"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_INVITATION_EMAIL_COMPATIBILITY.md",
+      "sha256": "d35a11c049b40d23a5180d3ec44e088074377f7f56b88fb61014d6a77725873b"
+    },
+    {
+      "path": "packages/db/src/__tests__/auth-email-check.test.ts",
+      "sha256": "c9ec17f74ad3282bcb5d4e89acd9c61551f21ed087b5c130c6be9c55af3d250c"
+    },
+    {
+      "path": "packages/db/src/auth-email-check.ts",
+      "sha256": "f9163efa745b299e07bd42a3443a13b55c640f39a42532581a84cc19b397f2a8"
+    }
+  ],
+  "focusedStorageEnvelope": {
+    "testsPassed": 13,
+    "logSha256": "ade28b0060d7462d98f87526a7ded9b1c6b52e3dcb4b6cb676760ff959c44b98",
+    "includedInFastTestCount": true
+  },
+  "nativeInvitation": {
+    "testsPassed": 15,
+    "newRegressionCases": 4,
+    "actualNativeExecution": true,
+    "disposableOwnedContainerRemoved": true,
+    "receiptSha256": "91906558015102e0d64981f873a9318e5124e1c4daf4fe5bfa36c121739be42d",
+    "logSha256": "24ffaa5aa8fba77bce4ae2d7efafe6aef28afd028154f60a6c41324a67cd7c5e",
+    "primaryOrAzureConnections": 0
+  },
+  "sourceCiAndNormalAdmission": "PENDING",
+  "stagingCompatibilityRepair": "NOT_EXECUTED",
+  "actualRecipientAcceptance": "FAIL_ON_PRIOR_CHECK_RETRY_PENDING_REPAIR",
+  "testTimeoutsThresholdsOrExclusionsChanged": false,
+  "stagingAcceptanceClaimed": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}
