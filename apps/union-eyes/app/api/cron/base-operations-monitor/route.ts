@@ -8,6 +8,7 @@ import { readinessPolicy } from '@/lib/operations/readiness-policy'
 import { probeBaseApplicationReadiness } from '@/lib/operations/base-application-probe'
 import { readReminderHealth, readLatestReminderReceipt, probeReminderMailProvider } from '@/lib/operations/reminder-health'
 import { withSystemContext } from '@/lib/db/with-rls-context'
+import { baseOperationalReport, emitBaseOperationalMonitor } from '@/lib/operations/base-monitor-telemetry'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -30,12 +31,10 @@ export const POST = withApi({ auth: { cron: true }, openapi: {
     measured(withSystemContext(tx => readReminderHealth(tx))),
     measured(withSystemContext(tx => readLatestReminderReceipt(tx)).then(receipt => probeReminderMailProvider(receipt))),
   ])
-  const checks = { ...azure, dependencies, audit, queue, mail }
-  const failures = Object.entries(checks).flatMap(([scope, result]) => result.state === 'ok' ? [] : [{ scope, reason: result.note }])
+  const report = baseOperationalReport({ ...azure, dependencies, audit, queue, mail })
   // Fixed, credential-free payload consumed by the external Azure monitor.
   // A stopped caller produces no heartbeat and is independently alertable.
-  console.info(JSON.stringify({ event: 'UE_BASE_OPERATIONAL_MONITOR_V1', sourceSha,
-    measuredAt: new Date().toISOString(), ok: failures.length === 0, checks }))
-  return jobResponse({ job: 'base-operations-monitor', attempted: Object.keys(checks).length,
-    succeeded: Object.keys(checks).length - failures.length, failures, details: { sourceSha, checks } })
+  emitBaseOperationalMonitor(sourceSha, report)
+  return jobResponse({ job: 'base-operations-monitor', attempted: report.attempted,
+    succeeded: report.succeeded, failures: report.failures, details: { sourceSha, checks: report.checks } })
 })

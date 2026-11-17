@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_LOCAL_REQUIRED_CHECKS_ONLY",
+  "recordedAt": "2026-11-17T11:39:03.647638+00:00",
+  "baseHeadSha": "d25d6b72d70d185ce5ee1c9cc9153dc187680265",
+  "baseMainSha": "89e62b494aa0ba3614719f498d7d87a836be4ad5",
+  "sourceUnchangedDuringChecks": true,
+  "requiredChecks": [
+    {
+      "command": "pnpm lint",
+      "startedAt": "2026-11-17T10:56:32.278154+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T11:16:18.749155+00:00",
+      "logSha256": "e77b5b521ba8ff32509699b918df54a2bfd24d7c52220732a82671ae4c94d212"
+    },
+    {
+      "command": "pnpm typecheck",
+      "startedAt": "2026-11-17T11:16:18.757874+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T11:20:37.141843+00:00",
+      "logSha256": "abf43139b63e9cba000ac547ef66878433f605df38b0ad73086d313b8fd9fe5a"
+    },
+    {
+      "command": "pnpm test:fast",
+      "startedAt": "2026-11-17T11:20:37.142909+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T11:37:33.899390+00:00",
+      "logSha256": "7070690101a87eb7eb90a3e89d0972ceb23e4c71dd42e8dc12ccaf6f99c83825"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "startedAt": "2026-11-17T11:37:33.918252+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T11:37:47.440792+00:00",
+      "logSha256": "c1b3e6bfaa7fff77e0d4b28a06c01cfdab14824035f8aac368b8c1705f053cc6"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "startedAt": "2026-11-17T11:37:47.447955+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-17T11:38:29.628126+00:00",
+      "logSha256": "47d6573df1f5144b9c4c1d21b52b3f932643a1ab14a4d7aa494037fe37ef16a7"
+    }
+  ],
+  "fastTestSummary": [
+    "Test Files  3021 passed | 119 skipped (3140)",
+    "Tests  39498 passed | 1708 skipped (41219)",
+    "Duration  1012.66s (tests 58%, import 26%, environment 11%, transform 4%)"
+  ],
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/app/api/cron/base-operations-monitor/route.ts",
+      "sha256": "36a265b959fa1c90ff2f636115d2c634e3c655dcc7a60fa6e9d06d3c362f1e45"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/base-monitor-telemetry.test.ts",
+      "sha256": "ef173e00ab2d39f4feec69f82a1706e827e81ddf82ad9112f588376763412505"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/base-monitor-telemetry.ts",
+      "sha256": "710aaa6ddd07c97984465568d4b49b1453cf9b62d9c7ef8131a7e3418f79cd85"
+    }
+  ],
+  "inheritedUnchangedSourceModules": [
+    {
+      "path": "apps/union-eyes/.env.example",
+      "sha256": "e3635b91b3d3929be2013433184b9e0092ba7c56cfa425b4015b653215d15ef4"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/leadership/__tests__/page.test.tsx",
+      "sha256": "9cb0cfec774238cdc6ac6e9f4db7f9dfa7698aa25fcaab5f3878a3b6eb73a268"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/leadership/page.tsx",
+      "sha256": "9f2af6bc146021f499834db52fbbf49802c184176705fa2ebd7f64b99b7ae74e"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/ready.route.test.ts",
+      "sha256": "1360588943e546bd44b5c8ddfaad702a4c50fd41853836eac8eb5b330ff23aed"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/daily-audit-seal/route.ts",
+      "sha256": "b9f79c6b0de64e532a33e07f2e2ca539cfc2773aad9cd7eb2ba1be945f83afba"
+    },
+    {
+      "path": "apps/union-eyes/app/api/ready/route.ts",
+      "sha256": "4bcc82c9fd65d9ad1288aa3f35098575d589639f1803e449259f8aaa2a42af36"
+    },
+    {
+      "path": "apps/union-eyes/components/leadership/__tests__/employer-trend-contract.test.tsx",
+      "sha256": "84f1b70ae8e3d1899d979c9a6d9b7786e6c59c65b9318652b91cf334c8d6e32b"
+    },
+    {
+      "path": "apps/union-eyes/components/leadership/employer-hotspots-table.tsx",
+      "sha256": "fe7eb11de117258ce6d74eb1523a62ebbc7bd0010af41be0e18a10c0eea38f1f"
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/audit-logger-canonical.test.ts",
+      "sha256": "90b8f43aedd9fef0911bdb9a058fa2d506e3be5334010cac5e6f0bd58e1dc4a9"
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/route-coverage-manifest.test.ts",
+      "sha256": "d273d199bd31464a33dfd0691017bf7e9d31148bcaf81d4cc86ed7763ffbc601"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit-logger.ts",
+      "sha256": "11e947b47356ea9a61076a21358829a92df7791e46a70635d5606c8b2e740945"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/__tests__/daily-audit-seal.test.ts",
+      "sha256": "28fef6909d3c618b88b261dcfaac21e8a75b9af594b45d7e10e48c0e7f7471b1"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/canonical-audit-chain.ts",
+      "sha256": "e416548b48bfd3cdbbafe51b09c7b2e9e4304d8791312034830a3700a62ad9fc"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/daily-audit-seal-runtime.ts",
+      "sha256": "584a571bec3dffd6cd62fa4d5dc73ef81d935cfd551bdcac6c3e215b1bf35ab6"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/daily-audit-seal-store.ts",
+      "sha256": "de6c6dbdb71309e110139dfccdbfada94508f1f16d2e45e55958d8ed364e4087"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/daily-audit-seal.ts",
+      "sha256": "d5e390d9fa33224e7e047ce9378d6a2f4b59d24c1d8cf55d35682daed607af49"
+    },
+    {
+      "path": "apps/union-eyes/lib/config/env-registry.ts",
+      "sha256": "1ae3a238289e50d7ab38826decc8aea2c5fb918b4861e90b952300f09c9b5161"
+    },
+    {
+      "path": "apps/union-eyes/lib/leadership/dashboard-contract.ts",
+      "sha256": "491062fd805aa66c076ba2b4706fdaab84fbce5d5734cec463fb6ce93be5b534"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/arm-operational-probes.test.ts",
+      "sha256": "c1b6cc9b413aabd8f189b9d5995455295912282c50c64a7f0820dded9aaea83c"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/arm-operational-probes.ts",
+      "sha256": "99daadc57f6bac16c19ff541513117d6fbf6ad425831faf7f3249ee2f5f4dd77"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/base-application-probe.test.ts",
+      "sha256": "f394cc10004ce38bccf2faa278449607e17cab7d1fcb35a9ebc6e1dc16f6bafd"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/base-application-probe.ts",
+      "sha256": "76f72ec83ff443ffab5cab72464a4895794cfd3b7fe61be8b90707c41e1464aa"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/readiness-policy.ts",
+      "sha256": "e05401e5db74b3cc0aca06f5e6cb7a2d8dff7622904a0faa1db4122985e8e17c"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/reminder-health.test.ts",
+      "sha256": "8af93f5c6a97b380a066e11632ec1daded0db3e2fcbf0b37c99a3a15c36cb7bd"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/reminder-health.ts",
+      "sha256": "58350f28694de5978bd3ce2963e033091bd51797cfd42078104cee74eb04883d"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/scanner-probe.test.ts",
+      "sha256": "779b755c895b447ebb9822743cc3bb8271ade55897c55c1de05b96646e5782fe"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/scheduled-jobs.json",
+      "sha256": "360a4181c3d382e35800cd53068825bffcd172e64cf8f47c8f5fe1b87a1908dd"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/service-probes.ts",
+      "sha256": "2a86bd6319f6056e44d52d500977bcecb3e15894ac0cabefd3b0d77e96a3ec0c"
+    },
+    {
+      "path": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "sha256": "799e3c78796022d0c0d5037ada7bd8bb1fca675d4293b31bcdffec502c4c542a"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/dashboard-kpi-service.ts",
+      "sha256": "e6f014f5878fe9b0dd5102b15584c932a30fea91ea3b49cf0042a9f3e67990af"
+    },
+    {
+      "path": "apps/union-eyes/messages/en.json",
+      "sha256": "7050172c1669f17b3a6bb9f1bb700af04c924ca1fe75247f9d427c5fd0cf74be"
+    },
+    {
+      "path": "apps/union-eyes/messages/fr.json",
+      "sha256": "a9d5b8e8c7ef61b104d36330e12e83e27aa84c81865b805ad62c568f9813f92e"
+    },
+    {
+      "path": "apps/union-eyes/reports/route-registry.json",
+      "sha256": "636bb1672ae2449f9c1ff8d41b890df5a4151f599d954346c94ea32c1b5ecdb6"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/daily-audit-seal-native.test.ts",
+      "sha256": "0ffc2982893e24962152a645c2bfe428a68e25dfcda7d36b50d08818c075efd8"
+    },
+    {
+      "path": "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+      "sha256": "16f057359ad54d1f8d88289179cdcf3e14c714bc63b63707846c2c1e82cb9319"
+    },
+    {
+      "path": "apps/union-eyes/scripts/runtime/env-census.ts",
+      "sha256": "236677a9a697fee591306a044e0e816f35fd0f4444136f472b9f9896dd9bb9c9"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "19198e8df134db125f0aa6bfe7ebd5b6e3b37fdf0c03ec8a04079119ada1ccae"
+    },
+    {
+      "path": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
+      "sha256": "a98e100688c3ee9b978e5cabbbc6486f069adba2c57f6a3461956ed2cea67ae4"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json",
+      "sha256": "1c574862b93eb3939305b0b20c8dac9eb4b56422cff3ba386f131e2b8feab0a1"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_BASE_OPERATIONAL_MONITORING.md",
+      "sha256": "49d545bf0cafd7f0d188482efabd879bd64bb1947d5ed6ea360f2445cd070913"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-invitation-email-compatibility-20261117/actual-staging-repair-v1.json",
+      "sha256": "97383477c08103b684dac80f050bf33147e2308e3a815aa8f86cd4e1371df231"
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/main.bicep",
+      "sha256": "62b156cd29df989d059cee214309a98033834dcf6307b7c12fd85964ded796ce"
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/alerts.bicep",
+      "sha256": "91d3b4665a1ce7059737c954a7922a0aba7a12aae29c8e616a98ceb032c9f6c4"
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/apps.bicep",
+      "sha256": "a05b1fcdca7c3ecf4acff7db70847b307634a1e8278695cd7d658fdd15d277df"
+    }
+  ],
+  "priorLocalProof": "local-validation-v1.json",
+  "localCheckReceiptSha256": "db5ab490050b7d4e2db88676d074ead53f4f7b70d63ab93a437d5eeb617823c8",
+  "focused": {
+    "summary": [
+      "Test Files  11 passed (11)",
+      "Tests  106 passed (106)",
+      "Duration  8.66s (environment 46%, import 37%, transform 13%, tests 3%)"
+    ],
+    "logSha256": "41e6266c9b250332d91149ecabd5c4bf25ccdf3aef5562dd7291522f44f968df"
+  },
+  "nativeAuditSeal": {
+    "testsPassed": 6,
+    "logSha256": "45ba983e39c450efc0e4417bfe91e5932128959020f15b787ebc282d5f8b1ef6",
+    "environment": "Owned disposable native PostgreSQL16 canonical V2 schema and real non-bypass roles"
+  },
+  "loggingRepair": {
+    "oldHeadSha": "d25d6b72d70d185ce5ee1c9cc9153dc187680265",
+    "oldCiFailures": "Both Pilot Contract Tests and UE Whole Contract Test Suite failed NO_CONSOLE_001 at monitor route line37; each had10114 passing and one failed assertion. Original logs retained.",
+    "behavior": "Approved structured logger emits flat production heartbeat consumed by the real external alert; missing required measurements fail closed."
+  },
+  "fullLocalContractAttempt": {
+    "status": "FAIL",
+    "passed": 10109,
+    "failed": 6,
+    "failureType": "Six original-budget timeouts in four files",
+    "logSha256": "a937f684f81b4e0123d11aaa5291516646fa000611282b3ef4090bbf946b3e59",
+    "isolatedRechecks": {
+      "status": "PASS_ISOLATED_RECHECKS_ORIGINAL_AGGREGATE_FAIL_RETAINED",
+      "originalAggregateStatus": "FAIL_6_TIMEOUTS_10109_PASSED",
+      "budgetsAndAssertionsUnchanged": true,
+      "parallelLocalQualificationJobs": false,
+      "startedAt": "2026-11-17T10:52:33.596495+00:00",
+      "checks": [
+        {
+          "file": "data-residency-runtime-verifier.test.ts",
+          "status": "PASS",
+          "exitCode": 0,
+          "logSha256": "5c4bbea1038b207e95d84c750359628cd933a93eee7e6bd705a5cf569d8f3436"
+        },
+        {
+          "file": "dead-deps.test.ts",
+          "status": "PASS",
+          "exitCode": 0,
+          "logSha256": "b0273a6f44ab4e877487a70c2d31b54399c297917588cb221e619ccadb358ae3"
+        },
+        {
+          "file": "generated-runtime-separation.test.ts",
+          "status": "PASS",
+          "exitCode": 0,
+          "logSha256": "dff94fdb60fa7fdfa327d572fdae86aa3bbdfe1285681246f8c1033bf9602a4d"
+        },
+        {
+          "file": "phantom-deps.test.ts",
+          "status": "PASS",
+          "exitCode": 0,
+          "logSha256": "7a15a89e238b5b371bdb42b97ed4ea4d1212366f0014a7304328889a313b4fe6"
+        }
+      ],
+      "productionAuthorized": false,
+      "finishedAt": "2026-11-17T10:54:08.338827+00:00"
+    },
+    "isolatedRechecksReplaceAggregateFailure": false
+  },
+  "stagingAcceptanceClaimed": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false,
+  "financeFeatureImplementation": false
+}
