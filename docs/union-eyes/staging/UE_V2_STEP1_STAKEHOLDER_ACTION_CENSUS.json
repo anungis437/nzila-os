@@ -481,7 +481,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 7,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -508,7 +512,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 3,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -534,7 +542,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 3,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -560,7 +572,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 3,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -586,9 +602,18 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 2,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "An organization administrator may save the representation protocol as pending; saved/display default is not executable.",
+        "Distinct administrator approval is required; editing clears prior approval."
+      ],
+      "additionalNegative": "Self-approval, unapproved/display protocol used as authority, stale revision and unauthorized approval."
     },
     {
       "id": "C06",
@@ -613,7 +638,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 9,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -643,7 +672,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 6,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -672,9 +705,17 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 24,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Live membership is necessary but insufficient; case-specific relationship or valid mandate/delegation controls actions.",
+        "Adverse party and active recusal deny; primary handler alone holds close/member-disclosure powers; privileged matters require explicit access."
+      ]
     },
     {
       "id": "C09",
@@ -699,9 +740,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 6,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Expertise and workload recommendation do not themselves issue authority; executable representation protocol and governing assignment authority remain required."
+      ]
     },
     {
       "id": "C10",
@@ -726,9 +774,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 9,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Actual accepted mandate or delegation must name the power and resource scope; supervisor role alone is insufficient."
+      ]
     },
     {
       "id": "C11",
@@ -753,9 +808,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 6,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Validate outgoing authority revocation separately from incoming acceptance; do not equate office title change with succession."
+      ]
     },
     {
       "id": "C12",
@@ -779,7 +841,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 13,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -808,9 +874,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 16,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Document access, download and processing are distinct permissions; external matter and document/version grants are independent of ordinary internal role."
+      ]
     },
     {
       "id": "C14",
@@ -827,8 +900,8 @@
         "A14",
         "A20"
       ],
-      "positiveScenario": "authorized EN/FR PDF and sealed JSON download, verify envelope and audit",
-      "negativeScenario": "foreign/unassigned; forbidden label; revoked grant; tamper; failure recovery",
+      "positiveScenario": "As a verified primary handler (including a senior representative only if independently qualified as primary), download sealed PDF and JSON in EN/FR and verify integrity, scope and audit.",
+      "negativeScenario": "Supervisor-only, collaborator-only, role-only and unrelated principal denied even with a high title; test restricted/privileged classification, revoked grant, tampering and failure recovery; no protected bytes or success audit, preserve security-denial evidence.",
       "requiredProof": [
         "source and deployed candidate binding",
         "actual UI/API method and authority decision",
@@ -836,9 +909,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 1,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "case:export_sealed_evidence is primary-handler-only; collaborator grant ceiling excludes it. Privileged classification independently limits access."
+      ]
     },
     {
       "id": "C15",
@@ -854,8 +934,8 @@
         "A20",
         "A04"
       ],
-      "positiveScenario": "extract real image/PDF, save draft, separate reviewer approves, publish exact version",
-      "negativeScenario": "self-review; stale version; unsafe source; unauthorized reader and rollback",
+      "positiveScenario": "As a case-authorized processor or explicit processing-grant holder, extract actual document bytes; save draft, distinct authorized human reviews and publishes the exact version. Test unlinked member uploads only under adopted own-upload processing policy.",
+      "negativeScenario": "View/download grant without processing power, unadopted member policy, classification ceiling, stale version, self-review, unauthorized publication and failure/rollback.",
       "requiredProof": [
         "source and deployed candidate binding",
         "actual UI/API method and authority decision",
@@ -863,9 +943,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 4,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "case:read_internal plus case:process_ocr or explicit canProcessOcr for linked documents; explicit processing grant or adopted uploader policy for unlinked documents; classification always applies."
+      ]
     },
     {
       "id": "C16",
@@ -892,7 +979,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 12,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -920,7 +1011,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 10,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -947,7 +1042,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 2,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -974,9 +1073,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 18,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Representation protocol author and approver are distinct; organization admin is not platform authority; platform role never independently expands access to private case content."
+      ]
     },
     {
       "id": "C20",
@@ -1001,7 +1107,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 8,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -1030,7 +1140,11 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 4,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
       "coverageComplete": false
     },
@@ -1066,9 +1180,16 @@
         "negative no-write/no-disclosure assertion",
         "retry/recovery and exact fixture cleanup"
       ],
-      "routeBindings": "UNRECONCILED",
+      "routeBindings": {
+        "state": "PATTERN_CANDIDATES_NOT_VERIFIED",
+        "count": 1,
+        "census": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+      },
       "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
-      "coverageComplete": false
+      "coverageComplete": false,
+      "authorityInvariants": [
+        "Denials make no unauthorized business mutation, disclosure or success audit; attributable security-denial audit may and should persist."
+      ]
     }
   ],
   "operationalAreas": [
@@ -1186,847 +1307,1404 @@
         "id": "UE-CASE-SEALED-EVIDENCE-EXPORT",
         "title": "Authorized case evidence PDF and sealed JSON download",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C14"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-AUTOMATIC-CASE-ASSIGNMENT",
         "title": "Automatic representative matching by recorded expertise and live workload",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C09"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ORGANIZATION-INVITATIONS",
         "title": "Organization administrator invitations, reissue, revocation and acceptance",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C01",
+          "C02",
+          "C03",
+          "C04",
+          "C06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ORGANIZATION-SETUP-CHECKLIST",
         "title": "Persistent organization setup checklist",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C05"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-MEMBERS-MERGE-BULK-EXPORT",
         "title": "Member merge, bulk and export actions",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CLAIMS-BULK",
         "title": "Bulk claim actions",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CLC-REMITTANCE-SUBMIT-EXPORT",
         "title": "CLC remittance submission and export",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CARBON-ACCOUNTING",
         "title": "Carbon accounting: dashboard, infrastructure monitoring and claim validation",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-TAX-DOCUMENTS",
         "title": "Tax slips, T106, RL-1 and COPE receipt generation",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-TAX-CRA-EXPORT",
         "title": "CRA tax export",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-COMMUNICATIONS-EXPORTS",
         "title": "Campaign, distribution-list and survey exports",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-ALERT-TEST-EXECUTION",
         "title": "Alert test execution",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "O08"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-ORG-HIERARCHY-SEED",
         "title": "Organization hierarchy seeding",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-MONTHLY-DUES",
         "title": "Monthly dues cron (main app)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-OVERDUE-NOTIFICATIONS",
         "title": "Overdue-notifications cron (main app)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "STALE_OR_ADJACENT_CONTRACT_RECONCILE",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-PROCESS-MESSAGES",
         "title": "Message-processing cron",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "STALE_OR_ADJACENT_CONTRACT_RECONCILE",
+        "actionOrOperationCandidates": [
+          "C17",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-PROCESS-NOTIFICATIONS",
         "title": "Notification-processing cron",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "STALE_OR_ADJACENT_CONTRACT_RECONCILE",
+        "actionOrOperationCandidates": [
+          "C17",
+          "C21",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-SCHEDULED-REPORTS",
         "title": "Scheduled-reports cron",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-DAILY-METRICS",
         "title": "Daily analytics metrics cron",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "O14",
+          "C18"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-BILLING-LIFECYCLE",
         "title": "Billing lifecycle cron (period, invoices, finalization, overdue state)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "SCHEDULE_REGISTRY_CONTRADICTION",
+        "actionOrOperationCandidates": [
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ADMIN-PILOT-STATUS",
         "title": "Pilot readiness aggregator (/api/admin/pilot-status)",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07",
+          "O13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DB-POSTGRES-PING",
         "title": "PostgreSQL round-trip probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-REALITY-DEMO-GUARD",
         "title": "Demo profile enforcement probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22",
+          "O13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SECRET-DATABASE-URL",
         "title": "DATABASE_URL presence probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SECRET-AUTH",
         "title": "AUTH_SECRET presence probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SECRET-ENTRA-TENANT",
         "title": "AZURE_AD_TENANT_ID presence probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DB-MIGRATIONS-APPLIED",
         "title": "Applied-migrations probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-TENANT-ISOLATION",
         "title": "Runtime tenant-isolation probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C07",
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-REDIS-PING",
         "title": "Redis reachability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_DEPENDENCY_IF_NOT_DEPLOYED",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DJANGO-SIDECAR-HEALTH",
         "title": "Django sidecar health probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_DEPENDENCY_IF_NOT_DEPLOYED",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-QUEUE-DEPTH",
         "title": "Job queue depth probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-WORKER-HEARTBEAT",
         "title": "Worker heartbeat probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CRON-FRESHNESS",
         "title": "Cron freshness probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-EMAIL-PROBE",
         "title": "E-mail deliverability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O01",
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SMS-PROBE",
         "title": "SMS deliverability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C17",
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CLAMAV-PROBE",
         "title": "Malware scanner reachability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-STORAGE-PROBE",
         "title": "Blob storage reachability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-PAYMENT-PROBE",
         "title": "Payment provider reachability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_DEPENDENCY_IF_NOT_DEPLOYED",
+        "actionOrOperationCandidates": [
+          "O07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SENTRY-PROBE",
         "title": "Error monitoring reachability probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O08"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SYNTHETIC-MONITORING",
         "title": "Synthetic monitoring probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O08"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-AUDIT-SEAL",
         "title": "Audit log tamper-seal probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O05"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-BACKUP-FRESHNESS",
         "title": "Backup freshness probe",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O04"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-RESTORE-PROOF",
         "title": "Restore drill probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O04",
+          "O15"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-REGISTRY-CONSISTENCY",
         "title": "Capability registry consistency probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEPLOYMENT-REVISION",
         "title": "Deployed revision alignment probe",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-BOC-EXCHANGE-RATE",
         "title": "Bank of Canada FX rate resolution",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEMO-SEPARATE-PACKAGE",
         "title": "Demo runtime is a separate npm package",
         "registryState": "REAL",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22",
+          "O13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-BUILD-OPERATIONAL-ISOLATION",
         "title": "Operational build carries no customer-specific demo content",
         "registryState": "REAL",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22",
+          "O13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DASH-REPORTS-INDEX",
         "title": "Reports dashboard index (/dashboard/reports) — REMOVED",
         "registryState": "REMOVED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "RETIRED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DASH-DEBUG",
         "title": "Developer debug page (/dashboard/debug) — dev-only",
         "registryState": "DISABLED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "DISABLED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEV-SENTRY-EXAMPLE",
         "title": "Sentry example page (/sentry-example-page) — REMOVED",
         "registryState": "REMOVED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "RETIRED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CASE-DEADLINE-MANAGEMENT",
         "title": "Staff-entered case and grievance deadline management",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-CORE",
         "title": "Deadline engine — core outbox schema",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-REMINDERS",
         "title": "Deadline engine — reminder scheduler",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-DELIVERY",
         "title": "Deadline engine — worker + at-least-once delivery",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-OVERDUE",
         "title": "Deadline engine — overdue detector",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-RECOVERY",
         "title": "Deadline engine — lease recovery + append-only audit",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-WORKER-CLAIM",
         "title": "Deadline engine — worker claim under FOR UPDATE SKIP LOCKED",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-EXECUTION-PERSISTENCE",
         "title": "Deadline engine — append-only execution rows",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-PROVIDER-ACCEPTANCE",
         "title": "Deadline engine — provider acceptance via Resend",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-DIRECT-DEAD-LETTER",
         "title": "Deadline engine — immediate dead-letter on synchronous permanent failure",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DUES-PORTAL-BALANCE",
         "title": "Member dues portal — balance summary (member's own view)",
         "registryState": "REAL",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DUES-PORTAL-PAYMENT-HISTORY",
         "title": "Member dues portal — payment history",
         "registryState": "REAL",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DUES-PORTAL-ISSUE-REPORTING",
         "title": "Member dues portal — deduction issue reporting",
         "registryState": "REAL",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DUES-PORTAL-DEDUCTIONS",
         "title": "Member dues portal — payroll deduction history",
         "registryState": "REAL",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DUES-DIRECT-PAYMENT",
         "title": "Member dues portal — direct Stripe payment / autopay / saved payment methods",
         "registryState": "DISABLED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DEADLINE-ASSIGNMENT-CONTINUITY",
         "title": "Deadline engine — recipient continuity across representative reassignment",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C21",
+          "O01",
+          "O06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CLAIM-DEADLINES-SURFACE",
         "title": "Claim deadlines (claim_deadlines table) — listed on Priorities, with no recipients, reminders, completion or extension",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "STALE_OR_ADJACENT_CONTRACT_RECONCILE",
+        "actionOrOperationCandidates": [
+          "C21"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CLAIM-ANONYMOUS-FILING",
         "title": "Claims — opt-in anonymous filing, member identity withheld from readers who are not representing the member",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C08",
+          "C12"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-DUES-CALCULATION-WORKFLOW",
         "title": "Monthly dues calculation (financial-service microservice)",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-DUES-REMINDER-SCHEDULER",
         "title": "Dues payment reminders (7-day / 1-day / overdue)",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ANALYTICS-SCHEDULED-REPORTS-UI",
         "title": "Scheduled reports admin UI",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-PRIVACY-INCIDENT-WORKFLOW",
         "title": "Privacy incident (breach) management",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-PRIVACY-DSAR-WORKFLOW",
         "title": "Information-rights (DSAR) request handling",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C20"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-PRIVACY-PROVINCIAL-CASES",
         "title": "Provincial / jurisdictional privacy cases",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-PRIVACY-BREACH-ASSESSMENT",
         "title": "Breach notification determination (PIPEDA / provincial)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-EMERGENCY-DECLARATION",
         "title": "Emergency declaration, break-glass activation, recovery and preparedness reporting",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-GOV-INDEPENDENT-REVIEW",
         "title": "Independent governance review workflow (intake → finding → verified remediation)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C10",
+          "C18",
+          "C20"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-GOV-ELECTION-VOTING-RESULTS",
         "title": "Council election vote casting, tabulation and published results",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-GOV-COUNCIL-ELECTION-RECORDS",
         "title": "Council election records (list, view, create)",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ORG-SHARING-SETTINGS",
         "title": "Organization data-sharing settings and access log",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C07",
+          "C19"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-MEMBERS-DIRECT-CREATE",
         "title": "Create a member record directly from the dashboard",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C01",
+          "C06"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-HS-CORRECTIVE-ACTIONS",
         "title": "Health & safety corrective-action tracking",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-HS-REPORT-EXPORT",
         "title": "Health & safety dashboard and inspection report PDF export",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ORG-MEMBERS-BULK-TRANSFER",
         "title": "Bulk transfer of members between organizations",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-DUES-ADMIN-PAYMENTS",
         "title": "Dues payments administration (list and detail)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-ORG-BULK-IMPORT",
         "title": "Bulk import of organizations",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ORGANIZER-IMPACT",
         "title": "Organizer impact measurement",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ORGANIZING-FIELD-NOTES",
         "title": "Organizing field notes",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-MOVEMENT-INSIGHTS-CONSENT-REVOCATION",
         "title": "Revocation of data-aggregation consent",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-MOVEMENT-INSIGHTS-CONSENT-GRANT",
         "title": "Granting data-aggregation consent",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-MOVEMENT-INSIGHTS-LEGISLATIVE-BRIEF",
         "title": "Legislative brief export (movement insights)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-MEMBER-CASE-TIMELINE",
         "title": "Member case timeline (/dashboard/member/timeline/[caseId])",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C12"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-BARGAINING-NEGOTIATION-DETAIL",
         "title": "Negotiation detail view (/dashboard/bargaining/negotiations/[id])",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-PILOT-TRAINING-GUIDES",
         "title": "Pilot training guides (/docs/guides/*)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-COMPLIANCE-CHARTER-STATUS",
         "title": "Charter compliance status and reporting deadlines (/dashboard/compliance)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-COMPLIANCE-POSTURE-REPORTING",
         "title": "Compliance score, regulatory status, risk assessment and downloadable compliance reports (/dashboard/compliance-admin)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-DOCUMENT-APPROVAL-WORKFLOW",
         "title": "Document approval workflow (reviewers, stages, approve and reject decisions)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C13",
+          "C15"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-DOCUMENT-TEMPLATE-AUTHORING",
         "title": "Document template authoring (create, edit, delete, usage counts)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C13"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ADMIN-SYSTEM-SETTINGS",
         "title": "Admin system settings",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C19"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ADMIN-SECURITY-OVERVIEW",
         "title": "Admin security overview",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C19",
+          "O07",
+          "O08"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ADMIN-REPORTS-HUB",
         "title": "Admin reports hub",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C18",
+          "C19"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ADMIN-SYSTEM-CACHE-CLEAR",
         "title": "Admin \"clear application cache\" action — REMOVED",
         "registryState": "REMOVED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "RETIRED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CLC-ANALYTICS-EXPORT",
         "title": "CLC analytics dashboard PDF export — REMOVED",
         "registryState": "REMOVED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "RETIRED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-UNION-BUDGETS-EXPENSES-VENDORS",
         "title": "Union budgets, expenses and vendors",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-STRIKE-FUNDS",
         "title": "Strike funds, stipends, disbursements, eligibility, picket lines",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-AFFILIATE-REMITTANCES",
         "title": "CLC / National / federation affiliate remittances",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-PENSION-TRUSTEE-ADMIN",
         "title": "Pension trustee appointment and administration",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-PENSION-REPORTS",
         "title": "Pension administration reports (T4A generation)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-PENSION-BENEFIT-ESTIMATE",
         "title": "Pension benefit estimate for a member",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-DUES-REPORTS",
         "title": "Dues reports (admin)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-DUES-BILLING-CYCLE-HISTORY",
         "title": "Billing cycle history (admin)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SURVEYS-RESPOND",
         "title": "Answering a survey",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ANALYTICS-OVERVIEW",
         "title": "Analytics overview console",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C18"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ANALYTICS-COMPARATIVE",
         "title": "Comparative analytics",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-CROSS-UNION-ANALYTICS",
         "title": "Cross-union analytics",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C18"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CLC-INTELLIGENCE",
         "title": "CLC labour intelligence",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-SOCIAL-MEDIA-UI",
         "title": "Social media management screens",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ANALYTICS-ENGAGEMENT-DASHBOARDS",
         "title": "Engagement, benchmark and communication analytics dashboards — REMOVED",
         "registryState": "REMOVED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "RETIRED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-CLC-AGED-RECEIVABLES",
         "title": "CLC aged receivables report — REMOVED",
         "registryState": "REMOVED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "RETIRED_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-FIN-EMPLOYER-REMITTANCE-INGESTION",
         "title": "Employer remittance upload (source preservation only)",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXCLUDED_FINANCE_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-REP-CASE-AUTHORITY-SCOPING",
         "title": "Representative case, member-directory and document authority scoping",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_ACTION",
+        "actionOrOperationCandidates": [
+          "C08",
+          "C10",
+          "C11",
+          "C12",
+          "C13",
+          "C14",
+          "C15"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-REP-PROTOCOL-GOVERNANCE",
         "title": "Representation protocol: administrator-saved, separately approved, audited",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_AUTHORITY_DEPENDENCY_REVIEW",
+        "actionOrOperationCandidates": [
+          "C05",
+          "C08",
+          "C09",
+          "C10",
+          "C19"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-SSO-SIGN-IN",
         "title": "Enterprise SSO sign-in, token exchange, provisioning and SCIM driven by a stored provider",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "STALE_OR_ADJACENT_CONTRACT_RECONCILE",
+        "actionOrOperationCandidates": [
+          "C01",
+          "C06",
+          "C07"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-EXT-INTEGRATION-SYNC",
         "title": "Integration synchronization driven by a stored api_integrations configuration",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-REP-MANDATE-RECUSAL-DELEGATION",
         "title": "Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_AUTHORITY_DEPENDENCY_REVIEW",
+        "actionOrOperationCandidates": [
+          "C07",
+          "C10",
+          "C11",
+          "C13",
+          "C14"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-WORKAID-SPECIALIST-REFERRAL",
         "title": "WorkAid specialist referral, acknowledgement and milestone integration",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C13",
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-WORKAID-UNION-SIDE-DISCLOSURE",
         "title": "WorkAid union-side consent, referral record, document authorisation and revocation",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C12",
+          "C13",
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-PLATFORM-USAGE-TELEMETRY",
         "title": "Platform usage telemetry: page views, sign-ins and feature adoption per organization",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "BASE_OPERATION",
+        "actionOrOperationCandidates": [
+          "O14"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-AI-SEMANTIC-SEARCH",
         "title": "Semantic search over the knowledge base: search, chatbot retrieval and exit-interview indexing (needs pgvector)",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C13",
+          "C22"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-GOVERNANCE-POLICY-LIFECYCLE",
         "title": "Policy lifecycle governance: governed policies, approval chains, conflicts, replay, events and snapshots",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [
+          "C10",
+          "C19"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-SMS-SEND",
         "title": "Sending SMS messages and campaigns",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C17"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-SMS-CONVERSATIONS",
         "title": "SMS inbox: marking conversations read and archiving them",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C17"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CHATBOT-MESSAGE-FEEDBACK",
         "title": "Chatbot message feedback (thumbs up / down)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CHATBOT-SESSION-ARCHIVE",
         "title": "Archive a chatbot session",
         "registryState": "LIMITED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CALENDAR-ATTENDEES-RECURRENCE",
         "title": "Calendar event attendees and recurrence",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CALENDAR-SYNC",
         "title": "External calendar synchronization (Google, Outlook)",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-CAMPAIGN-SEND",
         "title": "Sending and scheduling communication campaigns",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C17"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-ACTION-NOTIFICATION-DELIVERY-PREFERENCES",
         "title": "Notification content categories, digest frequency and quiet hours",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "EXPLICIT_DEFER_BOUNDARY",
+        "actionOrOperationCandidates": [
+          "C17"
+        ],
+        "scopeVerified": false
       },
       {
         "id": "UE-HS-INSPECTION-SCHEDULING",
         "title": "Health & safety inspection scheduling",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       },
       {
         "id": "UE-HS-ATTACHMENTS",
         "title": "Hazard photos and incident attachments",
         "registryState": "NOT_IMPLEMENTED",
-        "baseDisposition": "UNRECONCILED"
+        "baseDisposition": "ADJACENT_SCOPE_REVIEW",
+        "actionOrOperationCandidates": [],
+        "scopeVerified": false
       }
     ]
   },
@@ -2093,5 +2771,20 @@
     "Verify source inventory completeness against current route tree and server actions; preserve history and candidate provenance.",
     "Resolve candidate-summary versus serving-source record drift without promoting prior evidence.",
     "Verify exact positive/negative scenario definitions and coverage joins; zero unresolved scope or orphaned route/actor/action rows before Step 1 exit."
-  ]
+  ],
+  "reconciliation": {
+    "record": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json",
+    "coverageState": "TRIAGE_COMPLETE_FOR_SNAPSHOT_FINAL_VERIFICATION_OPEN",
+    "runtimeStatus": "NOT_EXECUTED",
+    "findings": [
+      "S1-G01",
+      "S1-G02",
+      "S1-G03",
+      "S1-G04",
+      "S1-G05",
+      "S1-G06",
+      "S1-G07",
+      "S1-G08"
+    ]
+  }
 }
