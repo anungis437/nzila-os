@@ -1,0 +1,620 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_BASE_ACTION_BINDING_CORRECTIONS",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "sourceInputs": [
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_STAKEHOLDER_ACTION_CENSUS.json",
+      "blobSha": "956ac8910aee8d51c69883246d21dfbb839917a8"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json"
+    }
+  ],
+  "corrections": [
+    {
+      "route": "admin/representation-protocol/route.ts",
+      "blobSha": "1ffa4f56d7e63cedf9f49a8c4e2b384127fe1bd8",
+      "methods": [
+        "GET",
+        "PUT",
+        "POST"
+      ],
+      "families": [
+        "C05",
+        "C19"
+      ],
+      "meaning": "Persistent protocol read, draft/save and independent approval; executable status affects C08/C09/C10 but is not itself assignment."
+    },
+    {
+      "route": "workbench/assign/route.ts",
+      "blobSha": "a391746a546418094e0148827a3e75e09d3d0fdb",
+      "methods": [
+        "POST"
+      ],
+      "families": [
+        "C08",
+        "C09",
+        "C10",
+        "C11"
+      ],
+      "meaning": "Manual assignment via case:assign, eligible canonical assignee and atomic history/audit. Does not establish automated matching or successor acceptance."
+    },
+    {
+      "route": "workbench/assigned/route.ts",
+      "blobSha": "1343880791947f7834c97c81eb5db5b64a2e7dfc",
+      "methods": [
+        "GET"
+      ],
+      "families": [
+        "C08",
+        "C10",
+        "C11"
+      ],
+      "meaning": "Actor-scoped assigned case queue, requested org mismatch denied. Pending obligation transfer still separately open."
+    },
+    {
+      "route": "users/me/organizations/route.ts",
+      "blobSha": "f762c1fd75928479eeec0990aec3827cf65a004a",
+      "methods": [
+        "GET"
+      ],
+      "families": [
+        "C06",
+        "C07"
+      ],
+      "meaning": "Own memberships across multiple organizations; system context is not cross-tenant content permission."
+    },
+    {
+      "route": "users/me/profile/route.ts",
+      "blobSha": "4d4f9b39ba4f79a0f6ab023b71dbdea444bfd93c",
+      "methods": [
+        "GET"
+      ],
+      "families": [
+        "C01",
+        "C06",
+        "C07",
+        "C20"
+      ],
+      "meaning": "Own canonical private actor/profile and membership projection; not proof of DSAR workflow."
+    },
+    {
+      "route": "messages/threads/[threadId]/assignment/route.ts",
+      "blobSha": "fff44af211b50954e99bd9652dba96b7b5a63d61",
+      "methods": [
+        "POST"
+      ],
+      "families": [
+        "C17",
+        "C11"
+      ],
+      "meaning": "Conversation assignment/reassignment/release under current assignee or triage designation; own conversation forbidden. Not case succession."
+    },
+    {
+      "route": "messages/threads/[threadId]/lifecycle/route.ts",
+      "blobSha": "ceea37c1c12ded17132d4bffc524a3de68eefda1",
+      "methods": [
+        "POST"
+      ],
+      "families": [
+        "C17"
+      ],
+      "meaning": "Close/archive by authorized participant/assignee; lifecycle and audit atomic."
+    },
+    {
+      "route": "messages/threads/[threadId]/legal-hold/route.ts",
+      "blobSha": "1b76436290371d9c1577a39bff5f2794d2a2dd51",
+      "methods": [
+        "POST"
+      ],
+      "families": [
+        "C17",
+        "C20"
+      ],
+      "meaning": "Governance mandate for exact conversation and action; boundary only until scope admission, hold grants no read."
+    },
+    {
+      "route": "elections/[id]/succession/route.ts",
+      "blobSha": "b7d29a17fc63a4b9bee5791aefe16d269f06c900",
+      "methods": [
+        "POST"
+      ],
+      "families": [],
+      "meaning": "Certified council election supersession, not case or office successor handoff. Remove from C11 positive candidates."
+    },
+    {
+      "route": "cron/daily-audit-seal/route.ts",
+      "blobSha": null,
+      "methods": [
+        "POST"
+      ],
+      "families": [],
+      "meaning": "Operational O05/O06; C22 is a cross-cutting invariant across every enabled action, not an independent audit-seal route."
+    }
+  ],
+  "perAction": [
+    {
+      "id": "C01",
+      "family": "Invitation to first case",
+      "previousPatternBindingCount": 7,
+      "candidateMethods": [
+        "GET cases/[caseId]/route.ts",
+        "GET cases/route.ts",
+        "GET users/me/profile/route.ts",
+        "PATCH cases/[caseId]/route.ts",
+        "POST auth/invite/accept/route.ts",
+        "POST auth/invite/create/route.ts",
+        "POST cases/intake/route.ts",
+        "POST cases/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C02",
+      "family": "Truthful invitation email status",
+      "previousPatternBindingCount": 3,
+      "candidateMethods": [
+        "GET auth/invite/manage/route.ts",
+        "POST auth/invite/create/route.ts",
+        "POST auth/invite/manage/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C03",
+      "family": "Invitation reissue and revocation",
+      "previousPatternBindingCount": 3,
+      "candidateMethods": [
+        "GET auth/invite/manage/route.ts",
+        "POST auth/invite/accept/route.ts",
+        "POST auth/invite/manage/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C04",
+      "family": "Organization-admin invitation entry",
+      "previousPatternBindingCount": 3,
+      "candidateMethods": [
+        "GET auth/invite/manage/route.ts",
+        "POST auth/invite/create/route.ts",
+        "POST auth/invite/manage/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C05",
+      "family": "Persistent organization setup",
+      "previousPatternBindingCount": 2,
+      "candidateMethods": [
+        "GET admin/representation-protocol/route.ts",
+        "GET pilot/onboarding/route.ts",
+        "PATCH pilot/onboarding/route.ts",
+        "POST admin/representation-protocol/route.ts",
+        "PUT admin/representation-protocol/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C06",
+      "family": "Membership and access lifecycle",
+      "previousPatternBindingCount": 9,
+      "candidateMethods": [
+        "DELETE admin/users/[userId]/route.ts",
+        "GET admin/users/route.ts",
+        "GET auth/invite/manage/route.ts",
+        "GET organizations/[id]/members/route.ts",
+        "GET profile/roles/route.ts",
+        "GET users/me/organizations/route.ts",
+        "GET users/me/profile/route.ts",
+        "POST auth/invite/manage/route.ts",
+        "POST organizations/[id]/members/route.ts",
+        "POST profile/roles/route.ts",
+        "PUT admin/users/[userId]/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C07",
+      "family": "Multiple capacity and active organization",
+      "previousPatternBindingCount": 6,
+      "candidateMethods": [
+        "GET cases/[caseId]/route.ts",
+        "GET organizations/current/route.ts",
+        "GET profile/roles/route.ts",
+        "GET users/me/organizations/route.ts",
+        "GET users/me/profile/route.ts",
+        "PATCH cases/[caseId]/route.ts",
+        "POST organizations/switch/route.ts",
+        "POST profile/roles/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C08",
+      "family": "Connected intake to closure",
+      "previousPatternBindingCount": 24,
+      "candidateMethods": [
+        "DELETE cases/[caseId]/evidence/route.ts",
+        "GET cases/[caseId]/audit/route.ts",
+        "GET cases/[caseId]/evidence/route.ts",
+        "GET cases/[caseId]/notes/route.ts",
+        "GET cases/[caseId]/route.ts",
+        "GET cases/[caseId]/timeline/route.ts",
+        "GET cases/route.ts",
+        "GET grievances/[id]/access/route.ts",
+        "GET grievances/[id]/route.ts",
+        "GET grievances/route.ts",
+        "GET workbench/assigned/route.ts",
+        "PATCH cases/[caseId]/route.ts",
+        "PATCH cases/[caseId]/transition/route.ts",
+        "PATCH grievances/[id]/access/route.ts",
+        "PATCH grievances/[id]/assign/route.ts",
+        "PATCH grievances/[id]/status/route.ts",
+        "POST cases/[caseId]/assign/route.ts",
+        "POST cases/[caseId]/escalate/route.ts",
+        "POST cases/[caseId]/evidence/route.ts",
+        "POST cases/[caseId]/notes/route.ts",
+        "POST cases/intake/route.ts",
+        "POST cases/route.ts",
+        "POST grievances/[id]/access/route.ts",
+        "POST grievances/[id]/convert/route.ts",
+        "POST grievances/route.ts",
+        "POST workbench/assign/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C09",
+      "family": "Automatic workload and expertise assignment",
+      "previousPatternBindingCount": 6,
+      "candidateMethods": [
+        "GET assignment-profiles/route.ts",
+        "GET grievances/workload/route.ts",
+        "PATCH grievances/[id]/assign/route.ts",
+        "POST cases/[caseId]/assign/route.ts",
+        "POST grievances/[id]/recommend-steward/route.ts",
+        "POST workbench/assign/route.ts",
+        "PUT assignment-profiles/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C10",
+      "family": "Senior representative supervision",
+      "previousPatternBindingCount": 9,
+      "candidateMethods": [
+        "GET cases/[caseId]/audit/route.ts",
+        "GET grievances/[id]/access/route.ts",
+        "GET reviews/route.ts",
+        "GET workbench/assigned/route.ts",
+        "PATCH grievances/[id]/access/route.ts",
+        "POST cases/[caseId]/assign/route.ts",
+        "POST cases/[caseId]/escalate/route.ts",
+        "POST grievances/[id]/access/route.ts",
+        "POST grievances/[id]/priority-override/route.ts",
+        "POST reviews/route.ts",
+        "POST workbench/assign/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C11",
+      "family": "Successor handoff",
+      "previousPatternBindingCount": 6,
+      "candidateMethods": [
+        "GET grievances/[id]/access/route.ts",
+        "GET workbench/assigned/route.ts",
+        "PATCH grievances/[id]/access/route.ts",
+        "PATCH grievances/[id]/assign/route.ts",
+        "POST cases/[caseId]/assign/route.ts",
+        "POST grievances/[id]/access/route.ts",
+        "POST messages/threads/[threadId]/assignment/route.ts",
+        "POST workbench/assign/route.ts"
+      ],
+      "removedFalsePositive": [
+        "POST elections/[id]/succession/route.ts"
+      ],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C12",
+      "family": "Member case follow-through",
+      "previousPatternBindingCount": 13,
+      "candidateMethods": [
+        "GET cases/[caseId]/deadlines/route.ts",
+        "GET cases/[caseId]/next-actions/route.ts",
+        "GET cases/[caseId]/notes/route.ts",
+        "GET cases/[caseId]/route.ts",
+        "GET cases/[caseId]/timeline/route.ts",
+        "GET cases/route.ts",
+        "GET reviews/route.ts",
+        "PATCH cases/[caseId]/deadlines/route.ts",
+        "PATCH cases/[caseId]/route.ts",
+        "POST cases/[caseId]/deadlines/route.ts",
+        "POST cases/[caseId]/notes/route.ts",
+        "POST cases/route.ts",
+        "POST reviews/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C13",
+      "family": "Role-specific document journey",
+      "previousPatternBindingCount": 16,
+      "candidateMethods": [
+        "DELETE cases/[caseId]/evidence/route.ts",
+        "GET cases/[caseId]/evidence/route.ts",
+        "GET documents/[id]/download/route.ts",
+        "GET documents/intakes/[id]/route.ts",
+        "GET documents/repository/[id]/route.ts",
+        "GET documents/repository/route.ts",
+        "GET grievances/[id]/related-documents/route.ts",
+        "PATCH documents/repository/[id]/route.ts",
+        "POST cases/[caseId]/evidence/route.ts",
+        "POST documents/intakes/[id]/cancel/route.ts",
+        "POST documents/intakes/route.ts",
+        "POST documents/repository/[id]/versions/route.ts",
+        "POST documents/repository/downloads/route.ts",
+        "POST documents/repository/route.ts",
+        "POST documents/upload/route.ts",
+        "POST grievances/[id]/documents/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C14",
+      "family": "User-facing sealed evidence export",
+      "previousPatternBindingCount": 1,
+      "candidateMethods": [
+        "GET cases/[caseId]/export/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C15",
+      "family": "OCR document extraction",
+      "previousPatternBindingCount": 4,
+      "candidateMethods": [
+        "GET documents/[id]/transcript/route.ts",
+        "POST documents/[id]/ocr/route.ts",
+        "POST documents/[id]/transcript/publish/route.ts",
+        "PUT documents/[id]/transcript/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C16",
+      "family": "Correspondence approval and dispatch",
+      "previousPatternBindingCount": 12,
+      "candidateMethods": [
+        "GET correspondence/[id]/route.ts",
+        "GET correspondence/route.ts",
+        "GET correspondence/signatures/route.ts",
+        "PATCH correspondence/[id]/route.ts",
+        "POST correspondence/[id]/approve/route.ts",
+        "POST correspondence/[id]/cancel/route.ts",
+        "POST correspondence/[id]/dispatch/route.ts",
+        "POST correspondence/[id]/revision/route.ts",
+        "POST correspondence/[id]/sign/route.ts",
+        "POST correspondence/[id]/submit/route.ts",
+        "POST correspondence/route.ts",
+        "POST correspondence/signatures/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C17",
+      "family": "Staff messaging and preferences",
+      "previousPatternBindingCount": 10,
+      "candidateMethods": [
+        "GET messages/threads/[threadId]/messages/route.ts",
+        "GET messages/threads/[threadId]/route.ts",
+        "GET messages/threads/route.ts",
+        "GET messaging/preferences/route.ts",
+        "GET notifications/preferences/route.ts",
+        "POST messages/threads/[threadId]/assignment/route.ts",
+        "POST messages/threads/[threadId]/legal-hold/route.ts",
+        "POST messages/threads/[threadId]/lifecycle/route.ts",
+        "POST messages/threads/[threadId]/messages/route.ts",
+        "POST messages/threads/[threadId]/read/route.ts",
+        "POST messages/threads/route.ts",
+        "POST messaging/preferences/route.ts",
+        "PUT notifications/preferences/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C18",
+      "family": "Leadership indicators and drill-down",
+      "previousPatternBindingCount": 2,
+      "candidateMethods": [
+        "GET dashboard/leadership/route.ts",
+        "GET organizations/[id]/analytics/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C19",
+      "family": "Organization administration and audit operations",
+      "previousPatternBindingCount": 18,
+      "candidateMethods": [
+        "DELETE admin/users/[userId]/route.ts",
+        "DELETE organizations/[id]/route.ts",
+        "GET admin/organizations/route.ts",
+        "GET admin/representation-protocol/route.ts",
+        "GET admin/users/route.ts",
+        "GET audits/[id]/route.ts",
+        "GET audits/route.ts",
+        "GET compliance/audit-logs/route.ts",
+        "GET organizations/[id]/access-logs/route.ts",
+        "GET organizations/[id]/members/route.ts",
+        "GET organizations/[id]/route.ts",
+        "GET organizations/route.ts",
+        "GET pilot/onboarding/route.ts",
+        "PATCH organizations/[id]/route.ts",
+        "PATCH pilot/onboarding/route.ts",
+        "POST admin/representation-protocol/route.ts",
+        "POST compliance/audit-logs/route.ts",
+        "POST organizations/[id]/members/route.ts",
+        "POST organizations/route.ts",
+        "PUT admin/representation-protocol/route.ts",
+        "PUT admin/users/[userId]/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C20",
+      "family": "Privacy request handling",
+      "previousPatternBindingCount": 8,
+      "candidateMethods": [
+        "DELETE privacy/consent/route.ts",
+        "GET privacy/consent/route.ts",
+        "GET privacy/dsar/[requestId]/route.ts",
+        "GET privacy/dsar/route.ts",
+        "GET users/me/profile/route.ts",
+        "POST messages/threads/[threadId]/legal-hold/route.ts",
+        "POST privacy/consent/route.ts",
+        "POST privacy/dsar/[requestId]/export/route.ts",
+        "POST privacy/dsar/[requestId]/route.ts",
+        "POST privacy/dsar/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C21",
+      "family": "Connected deadlines",
+      "previousPatternBindingCount": 4,
+      "candidateMethods": [
+        "GET cases/[caseId]/deadlines/route.ts",
+        "GET cases/[caseId]/next-actions/route.ts",
+        "PATCH cases/[caseId]/deadlines/route.ts",
+        "POST cases/[caseId]/deadlines/route.ts"
+      ],
+      "removedFalsePositive": [],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    },
+    {
+      "id": "C22",
+      "family": "Failure, concurrency and recovery coverage",
+      "previousPatternBindingCount": 1,
+      "candidateMethods": [],
+      "removedFalsePositive": [
+        "POST cron/daily-audit-seal/route.ts"
+      ],
+      "authorityState": "OPEN_TRANSITIVE_AND_ACTION_SPECIFIC_VERIFICATION",
+      "runtimeState": "NOT_EXECUTED"
+    }
+  ],
+  "crossCuttingC22": {
+    "appliesTo": [
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "C05",
+      "C06",
+      "C07",
+      "C08",
+      "C09",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15",
+      "C16",
+      "C17",
+      "C18",
+      "C19",
+      "C20",
+      "C21"
+    ],
+    "operationalFamilies": [
+      "O01",
+      "O02",
+      "O03",
+      "O04",
+      "O05",
+      "O06",
+      "O07",
+      "O08",
+      "O09",
+      "O10",
+      "O11",
+      "O12",
+      "O13",
+      "O14",
+      "O15"
+    ],
+    "requirements": [
+      "authorized success with exact durable result",
+      "unauthorized no business mutation or protected disclosure",
+      "atomic audit or appropriate denial evidence",
+      "retry/idempotency",
+      "stale/revoked identity and resource grants",
+      "partial failure and recovery",
+      "fixture lifecycle and cleanup"
+    ]
+  },
+  "openSemanticGaps": [
+    {
+      "id": "C11",
+      "detail": "No verified successor-acceptance endpoint established. Case assignment and conversation handoff are only partial dependencies; do not treat certified election supersession as C11 proof."
+    },
+    {
+      "id": "C05",
+      "detail": "Representation protocol approval is separate institutional configuration. No positive authority claimed for unadopted default."
+    },
+    {
+      "id": "C09",
+      "detail": "Manual workbench assignment does not prove automatic matching in claims or grievances."
+    }
+  ],
+  "limits": [
+    "This is an explicit correction to the prior pattern-only map, not certified final base scope.",
+    "Adjacent governance/legal-hold action candidate is a boundary requirement, not a new positive feature commitment."
+  ]
+}
