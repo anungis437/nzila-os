@@ -1929,7 +1929,7 @@
       "chooseSignature": "Signature",
       "sign": "Signer la lettre",
       "dispatchMethod": "Mode d’envoi",
-      "dispatch": "Marquer comme envoyée",
+      "dispatch": "Envoyer le courriel / consigner l’expédition",
       "dispatchMethods": {
         "email": "Courriel",
         "mail": "Courrier postal",
@@ -1947,8 +1947,17 @@
         "reopened": "Rouverte comme brouillon.",
         "signed": "Signée.",
         "dispatched": "Marquée comme envoyée.",
-        "signatureSaved": "Signature enregistrée."
+        "signatureSaved": "Signature enregistrée.",
+        "emailQueued": "Courriel en attente; l’acceptation du fournisseur est à confirmer.",
+        "emailAccepted": "Le fournisseur a accepté le courriel. La réception dans la boîte de réception reste distincte."
       }
+    },
+    "email": {
+      "queued": "Le courriel est en attente. La lettre sera marquée comme expédiée lorsque le fournisseur aura accepté chaque copie.",
+      "review_required": "Le courriel nécessite une vérification. Certaines copies peuvent déjà avoir été acceptées; ne renvoyez pas de copie hors de cette file.",
+      "unavailable": "Le statut du courriel n’a pas pu être confirmé. Vérifiez de nouveau avant d’envoyer ou d’annuler.",
+      "refresh": "Vérifier le statut du courriel",
+      "dispatchNote": "Le courriel contient le texte approuvé et le nom du signataire, dans une copie distincte pour chaque destinataire. Les pièces jointes ne sont pas prises en charge ici. Les autres méthodes consignent une livraison effectuée hors de Union Eyes."
     }
   },
   "contentPage": {

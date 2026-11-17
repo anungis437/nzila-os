@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const h = vi.hoisted(() => ({
   queue: [] as unknown[],
   audit: vi.fn(),
+  table: '', locked: false, lastLetter: [] as unknown[],
 }));
 
 function makeChain() {
@@ -12,8 +13,13 @@ function makeChain() {
   ]) {
     c[m] = vi.fn(() => c);
   }
+  c.from = vi.fn((table: {name:string}) => { h.table=table.name; return c; });
+  c.for = vi.fn(() => { h.locked=h.table === 'correspondence'; return c; });
   (c as { then: (resolve: (v: unknown) => void) => void }).then = (resolve) => {
-    resolve(h.queue.shift() ?? []);
+    if(h.locked){h.locked=false;resolve(h.lastLetter);return;}
+    const value=h.queue.shift() ?? [];
+    if(h.table === 'correspondence')h.lastLetter=value as unknown[];
+    resolve(value);
   };
   return c;
 }
@@ -25,6 +31,7 @@ vi.mock('@/db', () => ({
     select: vi.fn(() => chain),
     insert: vi.fn(() => chain),
     update: vi.fn(() => chain),
+    execute: vi.fn(async () => []),
   },
 }));
 
@@ -33,10 +40,13 @@ vi.mock('drizzle-orm', () => ({
   and: vi.fn(() => 'and'),
   desc: vi.fn(() => 'desc'),
   asc: vi.fn(() => 'asc'),
+  gte: vi.fn(() => 'gte'),
   sql: Object.assign(vi.fn(() => 'sql'), { raw: vi.fn(() => 'sql') }),
 }));
 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
+vi.mock('@/lib/correspondence/access',()=>({mayReadCorrespondence:async()=>true,requireCorrespondenceWrite:async()=>{}}));
+vi.mock('@/db/schema/domains/communications/notifications',()=>({notificationQueue:new Proxy({}, {get:(_t,p)=>p === 'name'?'notification_queue':String(p)})}));
 vi.mock('@/lib/db/with-rls-context', async () => ({
   withRLSContext: async (_org: unknown, fn: (tx: unknown) => Promise<unknown>) => fn((await import('@/db')).db),
 }));
@@ -46,7 +56,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 vi.mock('@/db/schema/domains/documents/correspondence', () => {
-  const t = (name: string) => new Proxy({}, { get: (_t, p) => `${name}.${String(p)}` });
+  const t = (name: string) => new Proxy({}, { get: (_t, p) => p === 'name'?name:`${name}.${String(p)}` });
   return {
     correspondence: t('correspondence'),
     correspondenceRecipients: t('correspondenceRecipients'),
@@ -77,6 +87,7 @@ import {
 
 beforeEach(() => {
   h.queue = [];
+  h.table='';h.locked=false;h.lastLetter=[];
   h.audit.mockReset();
   h.audit.mockResolvedValue(undefined);
 });
@@ -126,7 +137,7 @@ describe('correspondence-service', () => {
   });
 
   it('listCorrespondence returns rows with filters', async () => {
-    h.queue = [[{ id: 'c1' }]];
+    h.queue = [[{ id: 'c0' }, { id: 'cx' }, { id: 'c1' }]];
     const rows = await listCorrespondence({
       organizationId: 'o1',
       status: 'draft',
@@ -170,8 +181,8 @@ describe('correspondence-service', () => {
     h.queue = [[{ id: 'c1', status: 'approved' }], [{ id: 'c1', status: 'draft' }], [], []];
     expect((await requestRevision('c1', 'fix wording', { actorUserId: 'u1' })).status).toBe('draft');
 
-    h.queue = [[{ id: 'c1', status: 'signed', organizationId: 'o1', referenceNumber: 'LTR-1' }], [{ id: 'c1', status: 'dispatched' }], [], []];
-    expect((await dispatchCorrespondence('c1', { actorUserId: 'u1', dispatchMethod: 'email' })).status).toBe('dispatched');
+    h.queue = [[{ id: 'c1', status: 'signed', signedAt: new Date('2026-11-17T12:00:00Z'), organizationId: 'o1', referenceNumber: 'LTR-1' }], [], [{ id: 'c1', status: 'dispatched' }], [], []];
+    expect((await dispatchCorrespondence('c1', { actorUserId: 'u1', dispatchMethod: 'mail' })).status).toBe('dispatched');
 
     h.queue = [[{ id: 'c1', status: 'dispatched' }], [{ id: 'c1', status: 'delivered' }], [], []];
     expect((await confirmDelivery('c1', { actorUserId: 'u1' })).status).toBe('delivered');
@@ -204,8 +215,13 @@ describe('correspondence-service', () => {
     );
 
     h.audit.mockRejectedValue(new Error('audit down'));
-    h.queue = [[{ id: 'c1', status: 'signed', organizationId: 'o1', referenceNumber: 'LTR-1' }], [{ id: 'c1', status: 'dispatched' }], [], []];
-    await expect(dispatchCorrespondence('c1', { actorUserId: 'u1', dispatchMethod: 'email' })).rejects.toThrow('audit down');
+    h.queue = [[{ id: 'c1', status: 'signed', signedAt: new Date('2026-11-17T12:00:00Z'), organizationId: 'o1', referenceNumber: 'LTR-1' }], [], [{ id: 'c1', status: 'dispatched' }], [], []];
+    await expect(dispatchCorrespondence('c1', { actorUserId: 'u1', dispatchMethod: 'mail' })).rejects.toThrow('audit down');
+  });
+
+  it('cannot use the manual status transition to manufacture an email dispatch',async()=>{
+    await expect(dispatchCorrespondence('c1',{actorUserId:'u1',dispatchMethod:'email'})).rejects.toThrow('durable provider receipt');
+    expect(h.audit).not.toHaveBeenCalled();
   });
 
   it('the drafter cannot approve their own correspondence', async () => {

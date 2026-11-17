@@ -15,6 +15,8 @@ import { UserRole } from "@/lib/auth/roles";
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
 import { isDeployedRuntime } from '@/lib/runtime/production-guard';
+import { MemberDirectoryBootstrap } from '@/components/members/member-directory-bootstrap';
+import { hasDirectoryMembership } from '@/lib/members/own-directory-profile';
 import {
   ensureOrganizationMembership,
   isSeedMembershipLinkingAllowed,
@@ -40,7 +42,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     const context = await getCanonicalOrganizationContext({ expectedActorUserId: userId });
     const organizationProvince = await readOrganizationProvince(context.organizationId);
     return <OperationalShell userEmail={context.email}
-      userRole={context.role} organizationProvince={organizationProvince}>{children}<RetiredCapabilityNotice /></OperationalShell>;
+      userRole={context.role} organizationProvince={organizationProvince}>
+      <MemberDirectoryBootstrap enabled={hasDirectoryMembership(context.role)} scopeKey={`${context.organizationId}:${context.userId}`}>
+        {children}<RetiredCapabilityNotice />
+      </MemberDirectoryBootstrap></OperationalShell>;
   }
 
   const user = await currentUser();

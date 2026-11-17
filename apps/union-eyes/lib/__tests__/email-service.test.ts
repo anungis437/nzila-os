@@ -82,6 +82,27 @@ describe('email-service', () => {
     expect(result.messageId).toBe('msg-1');
   });
 
+  it('passes a stable outbox key to Resend and refuses a replay after its absolute window',async()=>{
+    mocks.mockSend.mockResolvedValue({data:{id:'stable-provider-message'},error:null});
+    const {sendResendEmail}=await import('../email-service');
+    const payload={from:'sender@example.invalid',to:'controlled@example.invalid',subject:'Approved',text:'Synthetic text'};
+    await sendResendEmail(payload,{idempotencyKey:'ue-letter/stable-key',disableRetry:true,notAfter:Date.now()+60_000});
+    expect(mocks.mockSend).toHaveBeenCalledWith(expect.objectContaining(payload),{idempotencyKey:'ue-letter/stable-key'});
+    mocks.mockSend.mockClear();
+    expect(await sendResendEmail(payload,{idempotencyKey:'ue-letter/stable-key',notAfter:Date.now()-1})).toMatchObject({success:false,code:'OUTBOX_WINDOW_ELAPSED'});
+    expect(mocks.mockSend).not.toHaveBeenCalled();
+  });
+
+  it('keeps provider content out of formal-letter errors and logs',async()=>{
+    mocks.mockSend.mockResolvedValue({data:null,error:{message:'recipient secret@example.invalid body private-text',statusCode:422}});
+    const {sendResendEmail}=await import('../email-service');
+    const result=await sendResendEmail({from:'sender@example.invalid',to:'controlled@example.invalid',subject:'Approved',text:'Synthetic'},
+      {sensitiveContent:true,disableRetry:true,idempotencyKey:'ue-letter/test'});
+    expect(result).toMatchObject({success:false,statusCode:422,error:'Provider rejected correspondence submission'});
+    expect(JSON.stringify(mocks.mockError.mock.calls)).not.toContain('secret@example.invalid');
+    expect(JSON.stringify(mocks.mockError.mock.calls)).not.toContain('private-text');
+  });
+
   it('sendEmail returns error from Resend', async () => {
     mocks.mockSend.mockResolvedValue({
       data: null,

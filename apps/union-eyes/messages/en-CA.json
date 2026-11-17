@@ -1929,7 +1929,7 @@
       "chooseSignature": "Signature",
       "sign": "Sign letter",
       "dispatchMethod": "How it was sent",
-      "dispatch": "Mark as dispatched",
+      "dispatch": "Send email / record dispatch",
       "dispatchMethods": {
         "email": "Email",
         "mail": "Mail",
@@ -1947,8 +1947,17 @@
         "reopened": "Reopened as a draft.",
         "signed": "Signed.",
         "dispatched": "Marked as dispatched.",
-        "signatureSaved": "Signature saved."
+        "signatureSaved": "Signature saved.",
+        "emailQueued": "Email queued; provider acceptance is pending.",
+        "emailAccepted": "The provider accepted the email. Inbox receipt is separate."
       }
+    },
+    "email": {
+      "queued": "Email is queued. The letter is not marked dispatched until the provider accepts every recipient copy.",
+      "review_required": "Email needs review. Some copies may already have been accepted; do not send another copy outside this queue.",
+      "unavailable": "Email status could not be confirmed. Check again before sending or cancelling.",
+      "refresh": "Check email status",
+      "dispatchNote": "Email sends the approved letter text and signer name in a separate copy to each recipient. Attachments are not supported by this delivery path. Other methods record delivery performed outside Union Eyes."
     }
   },
   "contentPage": {

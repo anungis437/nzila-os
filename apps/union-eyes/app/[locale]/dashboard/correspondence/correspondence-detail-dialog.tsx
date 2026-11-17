@@ -8,7 +8,7 @@
  * is read again afterwards, and what the dialog then shows is what the server holds.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiShapeError, readApiError } from "@/lib/client/api-envelope";
 import { renderTypedSignature } from "@/lib/correspondence/typed-signature";
+import {readCorrespondenceEmailStatus} from '@/lib/correspondence/email-status-client';
 import {
   DISPATCH_METHODS,
   actionsFor,
@@ -40,7 +41,7 @@ type LoadState =
   | { status: "failed"; reason: "unexpected" | "generic" }
   | { status: "ready"; letter: CorrespondenceDetail };
 
-type Done = "saved" | "claimed" | "submitted" | "approved" | "revisionRequested" | "cancelled" | "reopened" | "signed" | "dispatched" | "signatureSaved";
+type Done = "saved" | "claimed" | "submitted" | "approved" | "revisionRequested" | "cancelled" | "reopened" | "signed" | "dispatched" | "signatureSaved" | "emailQueued" | "emailAccepted";
 type ReasonFor = "revision" | "cancel" | "reopen";
 
 interface Props {
@@ -69,6 +70,10 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
   const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Done | null>(null);
+  const [emailState, setEmailState] = useState<'not_queued' | 'queued' | 'review_required' | 'accepted' | 'cancelled' | 'unavailable'>('not_queued');
+  const [emailRefresh, setEmailRefresh] = useState(0);
+  const onChangedRef=useRef(onChanged);
+  useEffect(()=>{onChangedRef.current=onChanged;},[onChanged]);
 
   const when = (value: Date) => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(value);
 
@@ -90,6 +95,27 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
     void load();
   }, [load]);
 
+  const letterStatus = state.status === 'ready' ? state.letter.status : null;
+  useEffect(() => {
+    if (letterStatus !== 'signed') return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let polls = 0;
+    const check = async () => {
+      try {
+        const response = await fetch(`/api/correspondence/${encodeURIComponent(letterId)}/email-status`, {method:'POST',cache:'no-store'});
+        if (!response.ok) throw new Error('Email status unavailable');
+        const {state:value}=readCorrespondenceEmailStatus(await response.json());
+        if (!active) return;
+        setEmailState(value);
+        if (value === 'accepted') { setDone('emailAccepted'); await load(); onChangedRef.current(); }
+        else if (value === 'queued' && ++polls < 12) timer = setTimeout(() => { void check(); },5000);
+      } catch { if (active) setEmailState('unavailable'); }
+    };
+    void check();
+    return () => { active = false; if (timer) clearTimeout(timer); };
+  }, [letterId,letterStatus,load,emailRefresh]);
+
   /** Sends one change to the server; true when it was accepted and the letter was read again. */
   const send = async (outcome: Done, path: string, method: "POST" | "PATCH", payload?: unknown): Promise<boolean> => {
     setWorking(true);
@@ -105,7 +131,9 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
         setError(await readApiError(response, t("actions.failed")));
         return false;
       }
-      setDone(outcome);
+      if (response.status === 202 && path === '/dispatch') {
+        setDone('emailQueued'); setEmailState('queued'); setEmailRefresh(n => n+1);
+      } else setDone(outcome);
       await load();
       onChanged();
       return true;
@@ -151,6 +179,7 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
 
   const { letter } = state;
   const actions = actionsFor(letter, viewer);
+  if (emailState !== 'not_queued' && emailState !== 'cancelled') { actions.dispatch = false; actions.cancel = false; }
 
   return (
     <>
@@ -247,6 +276,12 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
           <p role="status" className="text-sm text-green-700">
             {t(`actions.done.${done}`)}
           </p>
+        )}
+        {['queued','review_required','unavailable'].includes(emailState) && (
+          <div className="space-y-2" role="status">
+            <p className="text-sm">{t(`email.${emailState}`)}</p>
+            <Button type="button" variant="outline" onClick={() => setEmailRefresh(n => n+1)} disabled={working}>{t('email.refresh')}</Button>
+          </div>
         )}
         <NextStep letter={letter} actions={actions} viewer={viewer} working={working} send={send} onSignatureSaved={() => setDone("signatureSaved")} />
       </section>
@@ -408,6 +443,8 @@ function NextStep({ letter, actions, viewer, working, send, onSignatureSaved }: 
       {actions.sign && <SignStep letterWorking={working} send={send} onSignatureSaved={onSignatureSaved} />}
 
       {actions.dispatch && (
+        <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{t('email.dispatchNote')}</p>
         <div className="flex flex-wrap items-end gap-2">
           <div className="space-y-1">
             <Label htmlFor="letter-dispatch-method">{t("actions.dispatchMethod")}</Label>
@@ -422,6 +459,7 @@ function NextStep({ letter, actions, viewer, working, send, onSignatureSaved }: 
           <Button type="button" onClick={() => send("dispatched", "/dispatch", "POST", { dispatchMethod: method })} disabled={working}>
             {working ? t("actions.working") : t("actions.dispatch")}
           </Button>
+        </div>
         </div>
       )}
 

@@ -169,9 +169,8 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
  * imports no function whose name says it changes state.
  */
 export const READ_ONLY_POST_ROUTES = [
-  // Reads actual dependency, ARM, reminder and checkpoint measurements; emits
-  // console telemetry only. It creates no checkpoint or business row.
-  'cron/base-operations-monitor/route.ts',
+  // base-operations-monitor now also processes the audited letter outbox and
+  // is classified through that real service, rather than as a read-only POST.
   // POST is a guarded, explicit HTTP 501; no role repair or data mutation occurs.
   'admin/fix-super-admin-roles/route.ts',
   // POST answers HTTP 501 to a caller that passes the staging and signature gates: the deadline-engine proof is retired and writes nothing.

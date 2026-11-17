@@ -13,6 +13,8 @@ const m = vi.hoisted(() => ({
   enforceDecision: vi.fn(),
   createNarProofAdapter: vi.fn(),
   canonical: vi.fn(),
+  canonicalContact: vi.fn(),
+  ensureOwnDirectoryProfile: vi.fn(),
   canonicalProof: { createProof: vi.fn() },
   logger: {
     info: vi.fn(),
@@ -33,6 +35,8 @@ vi.mock('@/lib/cases/case-authorization', async (original) => ({
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: m.canonical }));
+vi.mock('@/lib/auth/canonical-context', () => ({ getCanonicalOrganizationContext: m.canonicalContact }));
+vi.mock('@/lib/members/own-directory-profile', () => ({ ensureOwnDirectoryProfile: m.ensureOwnDirectoryProfile }));
 vi.mock('@/lib/audit/canonical-nar-proof', () => ({
   canonicalNarProofAdapter: m.canonicalProof,
   createCanonicalNarProofAdapter: () => m.canonicalProof,
@@ -85,6 +89,10 @@ describe('cases/intake route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.canonical.mockReturnValue(false);
+    m.canonicalContact.mockImplementation(async (options) => ({ userId: options.expectedActorUserId,
+      organizationId: options.organizationId, role: 'member', email: 'member@example.invalid', firstName: 'Member', lastName: null,
+      isSystemAdmin: false }));
+    m.ensureOwnDirectoryProfile.mockResolvedValue({ memberId: 'directory-profile', created: true });
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.selectClaimRows.length = 0;
     m.auth.mockResolvedValue({ userId: 'user_1' });
@@ -258,6 +266,16 @@ describe('cases/intake route', () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
     expect(response.status).toBe(500);
+    expect(m.createClaim).not.toHaveBeenCalled();
+  });
+
+  it('refuses case creation when canonical contact projection cannot commit',async()=>{
+    m.canonical.mockReturnValue(true);
+    m.ensureOwnDirectoryProfile.mockRejectedValueOnce(new Error('mandatory member audit unavailable'));
+    const {POST}=await loadRoute();
+    const response=await POST(new Request('http://localhost/api/cases/intake',{method:'POST',body:'{}'}));
+    expect(response.status).toBe(500);
+    expect(m.ensureOwnDirectoryProfile).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({userId:'user_1',organizationId:'org_1'}));
     expect(m.createClaim).not.toHaveBeenCalled();
   });
 

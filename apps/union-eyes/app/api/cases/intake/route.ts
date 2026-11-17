@@ -32,6 +32,8 @@ import { auditRecords } from '@nzila/db/schema';
 import { desc } from 'drizzle-orm';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { canonicalNarProofAdapter, createCanonicalNarProofAdapter } from '@/lib/audit/canonical-nar-proof';
+import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
+import { ensureOwnDirectoryProfile } from '@/lib/members/own-directory-profile';
 
 export const dynamic = 'force-dynamic';
 
@@ -150,6 +152,8 @@ export async function POST(request: Request) {
     const idempotencyHash = createHash('sha256')
       .update(`${orgId}|${data.memberId}|${data.caseType}|${data.incidentDate}|${data.title}`)
       .digest('hex');
+    const directoryContact = canonical
+      ? await getCanonicalOrganizationContext({ expectedActorUserId: userId, organizationId: orgId }) : null;
 
     // 4c. Org-scoped duplicate check — runs inside withRLSContext to ensure
     //     RLS policies are active and cross-org leakage is impossible.
@@ -164,6 +168,7 @@ export async function POST(request: Request) {
           ),
         )
         .limit(1);
+      if (found && directoryContact) await ensureOwnDirectoryProfile(tx, directoryContact);
       return found ?? null;
     });
 
@@ -200,6 +205,7 @@ export async function POST(request: Request) {
     const { claim, canonicalDecision } = await withRLSContext(async (tx) => {
       // Filing is open to any active member of the organization; it opens a case for themselves and grants nothing else.
       await requireCaseFilingCapacity(tx, { userId, organizationId: orgId }, 'member');
+      if (directoryContact) await ensureOwnDirectoryProfile(tx, directoryContact);
       const newClaim = await createClaim(
         {
           organizationId: orgId,

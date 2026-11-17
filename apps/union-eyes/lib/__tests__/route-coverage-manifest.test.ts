@@ -152,7 +152,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
   })
 
   it('classifies the operational read separately from the canonical checkpoint that is itself the durable audit event', () => {
-    expect(fresh.find(entry => entry.route === 'cron/base-operations-monitor/route.ts')).toMatchObject({ audit: 'COMPUTE_ONLY' })
+    expect(fresh.find(entry => entry.route === 'cron/base-operations-monitor/route.ts')).toMatchObject({ audit: 'ATOMIC_SERVICE' })
     expect(fresh.find(entry => entry.route === 'cron/daily-audit-seal/route.ts')).toMatchObject({ audit: 'ATOMIC_SERVICE' })
     const runtime = readFileSync(join(ROOT, 'lib/audit/daily-audit-seal-runtime.ts'), 'utf8')
     const store = readFileSync(join(ROOT, 'lib/audit/daily-audit-seal-store.ts'), 'utf8')
