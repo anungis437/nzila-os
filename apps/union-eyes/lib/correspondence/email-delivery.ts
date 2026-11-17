@@ -7,11 +7,13 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { appendAuditEntry } from '@/lib/services/correspondence-service'
 import { ApiError } from '@/lib/api/errors'
 import { getFromEmail, sendResendEmail, type SendEmailResult } from '@/lib/email-service'
-import { correspondencePrincipal, requireCorrespondenceWrite } from './access'
+import { correspondencePrincipal, requireCorrespondenceWrite, requireCorrespondenceDisclosure } from './access'
 import { CORRESPONDENCE_EMAIL_PURPOSE, CORRESPONDENCE_EMAIL_LEASE_MS, CORRESPONDENCE_EMAIL_RETRY_WINDOW_MS,
   correspondenceEmailKey, correspondenceEmailHash, correspondenceEmailId, sealCorrespondenceEmail,
   verifiedCorrespondenceEmail, correspondenceEmailRetryAllowed, sealCorrespondenceEmailReceipt,
   verifiedCorrespondenceEmailReceipt, type CorrespondenceEmailIntent } from './email-intent'
+import { drizzleExecutor } from '@/lib/authority/store/route-adapter'
+import { issueQueuedCaseMailCapability,queuedCaseMailContext } from '@/lib/authority/store/queued-case-mail'
 import { verifiedCorrespondenceSignature, signedCorrespondenceDocumentHash } from './email-intent'
 
 type QueueRow = typeof notificationQueue.$inferSelect
@@ -82,7 +84,7 @@ export async function queueCorrespondenceEmail(id: string, organizationId: strin
     const [letter] = await tx.select().from(correspondence).where(and(
       eq(correspondence.id,id), eq(correspondence.organizationId,organizationId))).for('update')
     if (!letter) throw ApiError.notFound('Correspondence')
-    await requireCorrespondenceWrite(tx,letter,userId)
+    await requireCorrespondenceDisclosure(tx,letter,userId)
     if (letter.status !== 'signed' || !letter.signedAt || !letter.signedBy || !letter.signatureId
       || !letter.approvedBy || !letter.approvedAt) throw ApiError.conflict('Approve and sign the letter before sending email.')
     if (letter.attachments?.length || letter.signedPdfUrl || letter.signedPdfHash)
@@ -101,6 +103,13 @@ export async function queueCorrespondenceEmail(id: string, organizationId: strin
       if (existing) {
         const frozen = verifiedCorrespondenceEmail(existing.payload,existing,key)
         if (frozen.contentHash !== contentHash || frozen.mail.to !== to) throw ApiError.conflict('The existing email intent cannot be reused.')
+        if (!frozen.authorityCapability) {
+          if(frozen.queuedBy!==userId)throw ApiError.conflict('The original sender must revalidate this historical email intent before it can be sent.')
+          const authorityCapability=await issueQueuedCaseMailCapability(drizzleExecutor(tx),{queueId})
+          const {seal:_seal,...unsigned}=frozen
+          await tx.update(notificationQueue).set({payload:sealCorrespondenceEmail({...unsigned,authorityCapability},key)}).where(and(eq(notificationQueue.id,queueId),eq(notificationQueue.organizationId,organizationId)))
+          await persistAtomicAudit(tx,{organizationId,userId,action:'CORRESPONDENCE_EMAIL_AUTHORITY_BOUND',resourceType:'notification_queue',resourceId:queueId,details:{correspondenceId:id}})
+        }
         continue
       }
       const createdAt = new Date()
@@ -109,6 +118,9 @@ export async function queueCorrespondenceEmail(id: string, organizationId: strin
         createdAt:createdAt.toISOString(), recipientIds, mail:{ from:getFromEmail(),to,
           subject,text } },key)
       await tx.insert(notificationQueue).values({ id:queueId,organizationId,payload,createdAt,status:'pending',maxAttempts:'3' })
+      const authorityCapability=await issueQueuedCaseMailCapability(drizzleExecutor(tx),{queueId})
+      const {seal:_seal,...unsigned}=payload
+      await tx.update(notificationQueue).set({payload:sealCorrespondenceEmail({...unsigned,authorityCapability},key)}).where(and(eq(notificationQueue.id,queueId),eq(notificationQueue.organizationId,organizationId)))
       await persistAtomicAudit(tx,{ organizationId,userId,action:'CORRESPONDENCE_EMAIL_QUEUED',
         resourceType:'correspondence',resourceId:id,details:{ queueId,contentHash,recipientCount:recipientIds.length } })
     }
@@ -143,6 +155,21 @@ async function claimEmail(now: Date): Promise<{ row:QueueRow; intent:Corresponde
       await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_RECONCILIATION_REQUIRED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'review_required',{reason:'retry_boundary'})
       return null
+    }
+    // The system transport may execute only the live principal's bounded, database-minted intent.
+    if(!intent.authorityCapability) {
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_REVALIDATION_REQUIRED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await record(tx,row,'review_required',{reason:'authority_capability_required'});return null
+    }
+    const context=await queuedCaseMailContext(drizzleExecutor(tx),{queueId:row.id,capability:intent.authorityCapability})
+    const [letter]=await tx.select().from(correspondence).where(and(eq(correspondence.id,intent.correspondenceId),eq(correspondence.organizationId,intent.organizationId)))
+    let unchanged=false
+    if(context.allowed && letter?.status==='signed') {
+      try { unchanged=(await signedEmailMaterial(tx,letter,key)).contentHash===intent.contentHash } catch { unchanged=false }
+    }
+    if(!context.allowed || !unchanged) {
+      await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_OR_CONTENT_CHANGED',updatedAt:now}).where(eq(notificationQueue.id,row.id))
+      await record(tx,row,'suppressed',{reason:'authority_or_content_changed'});return null
     }
     const attempt = count+1
     await tx.update(notificationQueue).set({status:'processing',attemptCount:String(attempt),processedAt:now,

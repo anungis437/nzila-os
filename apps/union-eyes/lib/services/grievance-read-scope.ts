@@ -12,7 +12,7 @@ import { kernelCaseRelationshipScope } from '@/lib/authority/store/route-adapter
 export function grievanceRelationshipScope(userId: string): SQL {
   return sql`(
     ${grievances.createdBy}::text = ${userId}
-    OR ${grievances.grievantId}::text = ${userId}
+    OR ${grievances.representedMemberUserId} = ${userId}
     OR ${kernelCaseRelationshipScope(userId, dsql`${grievances.id}`, dsql`${grievances.organizationId}`)}
   )`;
 }
@@ -25,6 +25,7 @@ export function unassignedIntakeTriageScope(): SQL {
       SELECT 1 FROM ue_authority_resource_relationships r
        WHERE r.resource_type = 'case' AND r.resource_id = grievances.id AND r.organization_id = grievances.organization_id
          AND r.relation IN ('owner', 'assignee') AND r.status = 'active' AND r.revoked_at IS NULL
+         AND r.effective_at <= now()
          AND (r.expires_at IS NULL OR r.expires_at > now()))`)}
     AND ${grievances.isConfidential} IS NOT TRUE
   )`;

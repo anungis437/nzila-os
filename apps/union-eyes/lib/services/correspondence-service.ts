@@ -17,8 +17,8 @@ import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { ApiError } from "@/lib/api/errors";
 import { getActiveTenantDb } from '@/db/tenant-context-storage';
-import { mayReadCorrespondence, requireCorrespondenceWrite } from '@/lib/correspondence/access';
-import { notificationQueue } from '@/db/schema/domains/communications/notifications';
+import { mayReadCorrespondence, requireCorrespondenceWrite, requireCorrespondenceDisclosure } from '@/lib/correspondence/access';
+import { notificationQueue, notificationDeliveryLog } from '@/db/schema/domains/communications/notifications';
 import { CORRESPONDENCE_EMAIL_PURPOSE, correspondenceEmailKey, sealCorrespondenceSignature,
   signedCorrespondenceDocumentHash } from '@/lib/correspondence/email-intent';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
@@ -592,7 +592,10 @@ export async function dispatchCorrespondence(id: string, params: DispatchCorresp
     action: "CORRESPONDENCE_DISPATCHED",
     description: `Dispatched via ${params.dispatchMethod}`,
     metadata: { dispatchMethod: params.dispatchMethod },
-    guard: async (existing, tx) => { await protectQueuedEmail(tx, existing, false); },
+    guard: async (existing, tx) => {
+      await requireCorrespondenceDisclosure(tx,existing,params.actorUserId);
+      await protectQueuedEmail(tx, existing, false);
+    },
     set: {
       dispatchedAt: new Date(),
       dispatchedBy: params.actorUserId,
@@ -628,7 +631,8 @@ export async function cancelCorrespondence(id: string, reason: string, ctx: Tran
 }
 
 /** The parent is already locked. Cancellation is possible only before any
- * attempt; after a provider call starts the app cannot promise to unsend it. */
+ * attempt; a suppressed or invalid unattempted task is equally safe to retire.
+ * The append-only attempt ledger prevents a mutable queue counter from erasing a provider attempt. */
 async function protectQueuedEmail(tx: RLSTx, letter: CorrespondenceRow, cancel: boolean) {
   if (letter.status !== 'signed' || !letter.signedAt) return;
   const queued = await tx.select().from(notificationQueue).where(and(
@@ -637,7 +641,10 @@ async function protectQueuedEmail(tx: RLSTx, letter: CorrespondenceRow, cancel: 
     gte(notificationQueue.createdAt,letter.signedAt))).for('update');
   for (const task of queued) {
     if (task.errorMessage === 'CORRESPONDENCE_CANCELLED') continue;
-    if (!cancel || task.attemptCount !== '0' || task.status !== 'pending')
+    const [attempt]=await tx.select({id:notificationDeliveryLog.id}).from(notificationDeliveryLog).where(and(
+      eq(notificationDeliveryLog.organizationId,letter.organizationId),eq(notificationDeliveryLog.notificationId,task.id),
+      sql`${notificationDeliveryLog.event} IN ('attempted','accepted','unconfirmed','rejected','receipt_recovered')`)).limit(1);
+    if (!cancel || attempt || task.attemptCount !== '0' || !['pending','failed'].includes(task.status))
       throw ApiError.conflict('Email is queued or may already have been accepted. Reconcile its status before changing dispatch.');
     await tx.update(notificationQueue).set({status:'completed',completedAt:new Date(),updatedAt:new Date(),
       errorMessage:'CORRESPONDENCE_CANCELLED'}).where(and(eq(notificationQueue.id,task.id),eq(notificationQueue.organizationId,letter.organizationId)));

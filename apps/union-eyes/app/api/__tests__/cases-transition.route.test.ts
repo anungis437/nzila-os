@@ -183,7 +183,11 @@ describe('cases/[caseId]/transition route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ success: true, claimId: 'case_1', toStatus: 'settled' });
-    expect(m.persistAtomicAudit).toHaveBeenCalled();
+    const history=m.state.inserted.find(row=>row.updateType==='status_change')!;
+    expect(Object.keys(history).sort()).toEqual(['claimId','createdBy','isInternal','message','metadata','updateType','visibilityScope'].sort());
+    expect(history).toMatchObject({message:"Status changed from 'submitted' to 'resolved'",isInternal:false,visibilityScope:'member'});
+    expect(history.metadata).toEqual({previousStatus:'submitted',newStatus:'resolved'});
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({details:expect.objectContaining({reason:'Resolved in mediation'})}));
     expect(m.validateTransition).toHaveBeenCalledWith(expect.objectContaining({ assignedTo: 'agent_1', actorRole: 'steward' }));
   });
 

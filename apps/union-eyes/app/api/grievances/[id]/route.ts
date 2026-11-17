@@ -62,9 +62,6 @@ export const GET = withApi(
     });
 
     const internal = effectiveAccess.canViewCase;
-    if (!internal && grievance.createdBy !== userId && grievance.grievantId !== userId) {
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance.");
-    }
     if (!internal) await withRLSContext({ organizationId }, tx =>
       requireKernelCaseAction(tx, {userId,organizationId}, grievanceId, 'case:read'));
 

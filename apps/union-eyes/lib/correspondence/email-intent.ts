@@ -41,6 +41,8 @@ const emailIntentSchema = z.object({
   purpose: z.literal(CORRESPONDENCE_EMAIL_PURPOSE), version: z.literal(1),
   queueId: z.string().uuid(), organizationId: z.string().uuid(), correspondenceId: z.string().uuid(),
   queuedBy: z.string().min(1).max(255), queuedRole: z.string().min(1).max(100),
+  // Historical sealed intents remain readable; a worker cannot send one until the live actor binds its capability.
+  authorityCapability:z.string().min(32).max(512).optional(),
   contentHash: z.string().regex(/^[a-f0-9]{64}$/), createdAt: z.string().datetime(),
   recipientIds: z.array(z.string().uuid()).min(1).max(100),
   mail: z.object({ from: z.string().min(1).max(500), to: z.string().email().max(320),

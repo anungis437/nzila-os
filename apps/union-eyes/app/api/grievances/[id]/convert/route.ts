@@ -130,8 +130,7 @@ export const POST = withApi(
             isConfidential: intake.isConfidential === true,
             hasLegalImplications: intake.hasLegalImplications === true,
             // Retain the originating member separately from the staff converter's actual authorship.
-            grievantId: zUUID.safeParse(intake.grievantId ?? intake.createdBy).success
-              ? (intake.grievantId ?? intake.createdBy) : null,
+            representedMemberUserId: intake.representedMemberUserId ?? intake.createdBy,
             grievantName: intake.grievantName ?? null,
             grievantEmail: intake.grievantEmail ?? null,
             filedDate: new Date(),

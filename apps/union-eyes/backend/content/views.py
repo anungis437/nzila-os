@@ -237,10 +237,15 @@ class DocumentFoldersViewSet(viewsets.ModelViewSet):
 
 
 class DocumentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for Documents operations."""
+    """Retained generated adapter; the base application uses the dedicated Next.js paths.
+
+    Organization membership cannot substitute for case/document/recipient authority.
+    No business or machine caller of this generic Django adapter was found; keep it
+    contained until a reviewed consumer preserves the canonical boundary and audit.
+    """
     queryset = Documents.objects.all()
     serializer_class = DocumentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
@@ -258,10 +263,15 @@ class PublicContentViewSet(viewsets.ModelViewSet):
 
 
 class MemberDocumentsViewSet(viewsets.ModelViewSet):
-    """API endpoint for MemberDocuments operations."""
+    """Retained generated adapter; the base application uses the dedicated Next.js paths.
+
+    Organization membership cannot substitute for case/document/recipient authority.
+    No business or machine caller of this generic Django adapter was found; keep it
+    contained until a reviewed consumer preserves the canonical boundary and audit.
+    """
     queryset = MemberDocuments.objects.all()
     serializer_class = MemberDocumentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id', 'file_name', 'file_url', 'file_type', 'category']
     ordering_fields = ['created_at', 'updated_at']

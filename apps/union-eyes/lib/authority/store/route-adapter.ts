@@ -17,6 +17,8 @@ import { enforceAuthority, enforceCaseProjection, type EnforcementDeps } from '.
 import { activeMembershipSource } from './active-membership-source'
 import type { SqlExecutor } from './executor'
 
+export { decideCaseCapabilitiesBatch } from './case-read-batch'
+
 /**
  * A JS array travels as one Postgres array literal (drizzle would otherwise expand it into a parameter list). A Date travels
  * as its ISO instant: the postgres driver cannot serialise a Date handed to it through a raw, untyped parameter.

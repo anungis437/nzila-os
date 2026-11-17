@@ -4,7 +4,7 @@ vi.mock('@/lib/db/canonical-transaction-scope',()=>({canonicalTenantPrincipal:()
 vi.mock('@/lib/auth/canonical-bootstrap',()=>({currentStateContextEnabled:()=>true}))
 vi.mock('@/db/tenant-context-storage',()=>({getActiveTenantDb:()=>h.tx}))
 vi.mock('@/lib/authority/store/route-adapter',()=>({decideCase:h.decide}))
-import {mayReadCorrespondence,requireCorrespondenceWrite} from './access'
+import {mayReadCorrespondence,requireCorrespondenceWrite,requireCorrespondenceDisclosure} from './access'
 const letter={organizationId:'org-a',grievanceId:'case-a'}
 beforeEach(()=>{h.principal={userId:'staff-a',organizationId:'org-a',role:'steward',isSystemAdmin:false};h.decide.mockReset();h.decide.mockResolvedValue({effect:'deny'})})
 describe('case-specific correspondence authority',()=>{
@@ -28,4 +28,12 @@ describe('case-specific correspondence authority',()=>{
     await expect(requireCorrespondenceWrite({} as never,letter,'staff-a')).rejects.toThrow()
     expect(h.decide).not.toHaveBeenCalled()
   })
+  it('never treats drafting permission as formal member disclosure',async()=>{
+    h.decide.mockImplementation(async (_tx,request)=>({effect:request.action==='case:draft_action'?'allow':'deny'}))
+    await expect(requireCorrespondenceDisclosure(h.tx as never,letter,'staff-a')).rejects.toMatchObject({code:'FORBIDDEN'})
+    expect(h.decide).toHaveBeenLastCalledWith(h.tx,{userId:'staff-a',organizationId:'org-a',caseId:'case-a',action:'case:disclose_to_member'})
+    h.decide.mockResolvedValue({effect:'allow'})
+    await expect(requireCorrespondenceDisclosure(h.tx as never,letter,'staff-a')).resolves.toBeUndefined()
+  })
+
 })

@@ -20,6 +20,8 @@ import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
 import { platformDb } from '@nzila/db/platform';
 import { auditRecords } from '@nzila/db/schema';
 import { desc } from 'drizzle-orm';
+import { drizzleExecutor,kernelDeps } from '@/lib/authority/store/route-adapter';
+import { ensureCaseAuthorityScope,bindCaseGrievanceMirror } from '@/lib/authority/store/case-scope';
 import { getCaseActor, findReadableCase } from '@/lib/cases/case-authorization';
 
 export const dynamic = 'force-dynamic';
@@ -101,6 +103,7 @@ const escalateSchema = z.object({
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'steward' },
+    entitlement: 'grievance_case_suite',
     openapi: {
       tags: ['Cases'],
       summary: 'Escalate a claim to a formal grievance',
@@ -200,38 +203,49 @@ export const POST = withApi(
     // A refused case transition must undo the grievance and its event, so the work throws to roll the transaction back.
     const escalateInTransaction = async () => {
     return withRLSContext(async (tx) => {
+      const readable = await findReadableCase(tx,actor,caseId,true,'case:transition');
+      if(!readable)throw new EscalationRefused('The case is no longer available for escalation.');
+      const [lockedClaim]=await tx.select().from(claims).where(and(eq(claims.claimId,readable.claimId),eq(claims.organizationId,actor.organizationId))).limit(1).for('update');
+      if(!lockedClaim || ['resolved','closed'].includes(lockedClaim.status))throw new EscalationRefused('The case already changed state. Reload before escalating.');
+      const [existing]=await tx.select({id:grievances.id}).from(grievances).where(eq(grievances.id,lockedClaim.claimId)).limit(1);
+      if(existing)throw new EscalationRefused('A grievance already uses this case identity. Reconcile it before escalating.');
+      // The canonical parent stays the original claim. This empty binding grants no
+      // jurisdiction or party powers and cannot overwrite an adopted scope.
+      await ensureCaseAuthorityScope(drizzleExecutor(tx),kernelDeps,{organizationId:actor.organizationId,caseId:lockedClaim.claimId,actorUserId:actor.userId});
       const [g] = await tx
         .insert(grievances)
         .values({
-          grievanceNumber: `GRV-${Date.now()}`,
+          id: lockedClaim.claimId,
+          grievanceNumber: `GRV-${Date.now()}-${crypto.randomUUID().slice(0,8)}`,
           type: grievanceType as 'individual',
-          title: claim.description?.substring(0, 500) ?? 'Escalated from case queue',
-          description: claim.description ?? '',
-          priority: (priority ?? claim.priority ?? 'medium') as 'medium',
+          title: lockedClaim.description?.substring(0, 500) ?? 'Escalated from case queue',
+          description: lockedClaim.description ?? '',
+          priority: (priority ?? lockedClaim.priority ?? 'medium') as 'medium',
           status: 'filed',
-          grievantId: claim.memberId ? undefined : undefined,
-          grievantName: claim.memberId ?? undefined,
-          incidentDate: claim.incidentDate,
+          representedMemberUserId: lockedClaim.memberId,
+          incidentDate: lockedClaim.incidentDate,
           filedDate: new Date(),
           cbaArticle: cbaArticle ?? undefined,
           organizationId: orgId,
-          createdBy: ctx.userId ?? undefined,
+          createdBy: actor.userId,
           relatedGrievanceIds: undefined,
         })
         .returning();
+
+      await bindCaseGrievanceMirror(drizzleExecutor(tx),kernelDeps,{organizationId:actor.organizationId,caseId:lockedClaim.claimId,actorUserId:actor.userId});
 
       // Insert lifecycle event
       await tx.insert(grievanceEvents).values({
         grievanceId: g.id,
         eventType: 'created',
-        actorUserId: ctx.userId ?? '',
-        notes: `Escalated from case ${claim.claimNumber ?? caseId}. ${notes ?? ''}`.trim(),
+        actorUserId: actor.userId,
+        notes: `Escalated from case ${lockedClaim.claimNumber ?? caseId}.`,
       });
 
       const transitionResult = await updateClaimStatusById(
-        caseId,
+        lockedClaim.claimId,
         'resolved',
-        ctx.userId ?? 'system',
+        actor.userId,
         notes ?? 'Escalated to formal grievance',
         tx,
       );
@@ -241,7 +255,7 @@ export const POST = withApi(
       }
 
       // Store the link in the claim's metadata
-      const existingMeta = (claim.metadata as Record<string, unknown>) ?? {};
+      const existingMeta = (lockedClaim.metadata as Record<string, unknown>) ?? {};
       await tx
         .update(claims)
         .set({
@@ -251,21 +265,24 @@ export const POST = withApi(
             ...existingMeta,
             escalatedGrievanceId: g.id,
             escalatedGrievanceNumber: g.grievanceNumber,
+            escalationKernelIdentity: lockedClaim.claimId,
           },
         })
-        .where(and(eq(claims.claimId, caseId), eq(claims.organizationId, orgId)));
+        .where(and(eq(claims.claimId, lockedClaim.claimId), eq(claims.organizationId, orgId)));
 
       // The grievance, the claim's resolution and the audit record commit together.
       await persistAtomicAudit(tx, {
         organizationId: orgId,
-        userId: ctx.userId ?? 'system',
+        userId: actor.userId,
         action: 'case.escalate_to_grievance',
         resourceType: 'claims',
-        resourceId: caseId,
+        resourceId: lockedClaim.claimId,
         details: {
-          claimNumber: claim.claimNumber,
+          claimNumber: lockedClaim.claimNumber,
           grievanceId: g.id,
           grievanceNumber: g.grievanceNumber,
+          kernelIdentity: lockedClaim.claimId,
+          reason: notes ?? null,
         },
       });
 
@@ -311,7 +328,7 @@ export const POST = withApi(
     });
 
     return {
-      claim: { claimId: caseId, status: 'resolved', resolutionOutcome: 'escalated_to_grievance' },
+      claim: { claimId: claim.claimId, status: 'resolved', resolutionOutcome: 'escalated_to_grievance' },
       grievance: {
         id: grievance.id,
         grievanceNumber: grievance.grievanceNumber,

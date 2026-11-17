@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import postgres from 'postgres'
 import { drizzle } from 'drizzle-orm/postgres-js'
+import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { authenticatedOrgBindingSql, type AuthenticatedOrgBinding } from '@nzila/platform-auth/org-binding'
@@ -24,11 +25,22 @@ vi.mock('@/db',async()=>{
 })
 vi.mock('@/lib/db/with-rls-context',async()=>{
   const {getActiveTenantDb}=await import('../../db/tenant-context-storage')
-  return {withRLSContext:async (_context:unknown,fn:(tx:RLSTx)=>Promise<unknown>)=>{
+  return {withRLSContext:async (context:unknown,maybeFn?:(tx:RLSTx)=>Promise<unknown>)=>{
+    const fn=(typeof context==='function'?context:maybeFn) as (tx:RLSTx)=>Promise<unknown>;
     const tx=getActiveTenantDb();if(!tx)throw new Error('Native tenant transaction required');return fn(tx)},
     withSystemContext:async (fn:(tx:RLSTx)=>Promise<unknown>)=>h.system!(fn)}
 })
 vi.mock('@/lib/email-service',()=>({getFromEmail:()=> 'sender@example.invalid',sendResendEmail:h.send}))
+vi.mock('@/lib/api/framework',()=>({withApi:(_config:unknown,handler:unknown)=>handler}))
+vi.mock('@nzila/decision-core',()=>({enforceDecision:async()=>({allowed:true,decision:{id:'synthetic-native-proof'}})}))
+vi.mock('@nzila/nar',()=>({createNarProofAdapter:()=>({}),getNarSigningSecret:()=> 'synthetic-native-proof-key'}))
+vi.mock('@nzila/db/platform',()=>({platformDb:{}}))
+import { createClaim } from '../../db/queries/claims-queries'
+import { updateClaimStatus } from '../../lib/workflow-engine'
+import { grievances } from '../../db/schema/domains/claims/grievances'
+import { processCaseStatusEmails } from '../../lib/workflow/case-status-delivery'
+import { decideCaseCapabilities,decideCaseCapabilitiesBatch } from '../../lib/authority/store/route-adapter'
+import { POST as escalate } from '../../app/api/cases/[caseId]/escalate/route'
 import { ensureOwnDirectoryProfile } from '../../lib/members/own-directory-profile'
 import { queueCorrespondenceEmail, processCorrespondenceEmails, settleCorrespondenceEmail } from '../../lib/correspondence/email-delivery'
 import { cancelCorrespondence, signCorrespondence } from '../../lib/services/correspondence-service'
@@ -247,4 +259,113 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     const id=await signedLetter();await tenant(staff,()=>queueCorrespondenceEmail(id,org,staff));await processCorrespondenceEmails()
     expect(await tenant(staff,()=>settleCorrespondenceEmail(id,org,staff))).toMatchObject({state:'accepted'})
   })
+
+  const assignedClaim=async(subject=member)=>{
+    // Fixture preparation is privileged; every operation under test uses the authenticated runtime role.
+    const claim=await drizzlePg(fixture.seed).transaction(tx=>createClaim({organizationId:org,memberId:subject,claimType:'wage_dispute',
+      description:'Synthetic verified member narrative with enough investigation details',priority:'medium',status:'submitted'},tx as unknown as RLSTx))
+    await fixture.seed.query(`INSERT INTO public.ue_authority_resource_relationships
+      (id,organization_id,principal_user_id,resource_type,resource_id,relation,permissions,privileged_access,origin,granted_by,status,effective_at)
+      VALUES ($1,$2,$3,'case',$4,'assignee',ARRAY[]::text[],false,'explicit',$5,'active',now()-interval '1 minute')`,[randomUUID(),org,staff,claim.claimId,signer])
+    return claim
+  }
+  it('coalesces fresh case projections on real canonical roles without changing an action decision',async()=>{
+    const caseIds=(await Promise.all([assignedClaim(),assignedClaim(),assignedClaim()])).map(claim=>claim.claimId)
+    await tenant(staff,async tx=>{
+      let independentQueries=0,batchedQueries=0
+      const independent={execute:(query:Parameters<RLSTx['execute']>[0])=>{independentQueries++;return tx.execute(query)}}
+      const batched={execute:(query:Parameters<RLSTx['execute']>[0])=>{batchedQueries++;return tx.execute(query)}}
+      const summarize=(actions:Awaited<ReturnType<typeof decideCaseCapabilities>>)=>Object.fromEntries(Object.entries(actions)
+        .map(([action,decision])=>[action,{effect:decision.effect,scope:decision.scope,reasons:decision.reasons.map(reason=>reason.code)}]))
+      const expected=[]
+      for(const caseId of caseIds)expected.push([caseId,summarize(await decideCaseCapabilities(independent as RLSTx,{userId:staff,organizationId:org,caseId}))])
+      const actual=await decideCaseCapabilitiesBatch(batched as RLSTx,{userId:staff,organizationId:org,caseIds})
+      expect([...actual].map(([id,actions])=>[id,summarize(actions)])).toEqual(expected)
+      expect(batchedQueries).toBeLessThan(independentQueries/2)
+    })
+    await tenant(member,async tx=>{
+      const actual=await decideCaseCapabilitiesBatch(tx,{userId:member,organizationId:org,caseIds})
+      for(const actions of actual.values())expect(actions['case:read']).toMatchObject({effect:'allow',scope:{visibility:'member_visible'}})
+    })
+  })
+  const caseTasks=async(id:string)=>(await fixture.seed.query("SELECT id,status,attempt_count,error_message,payload FROM public.notification_queue WHERE payload->>'caseId'=$1 AND payload->>'purpose'='case_status_notification_v1'",[id])).rows
+  const advance=async(id:string)=>tenant(staff,tx=>updateClaimStatus(id,'under_review',staff,'Synthetic private strategy',tx))
+  it('commits state-only history and a durable notice, then submits outside tenant scope once across concurrent workers',async()=>{
+    const claim=await assignedClaim();expect((await advance(claim.claimNumber!)).success).toBe(true)
+    const history=(await fixture.seed.query("SELECT message,metadata,is_internal,visibility_scope FROM public.claim_updates WHERE claim_id=$1 AND update_type='status_change'",[claim.id])).rows
+    expect(history).toEqual([{message:"Status changed from 'submitted' to 'under_review'",metadata:{previousStatus:'submitted',newStatus:'under_review'},is_internal:false,visibility_scope:'member'}])
+    expect(JSON.stringify((await caseTasks(claim.claimId))[0].payload)).not.toContain('Synthetic private strategy')
+    h.send.mockImplementation(async()=>{expect(getActiveTenantDb()).toBeUndefined();return {success:true,messageId:randomUUID()}})
+    await Promise.all([processCaseStatusEmails(1),processCaseStatusEmails(1)])
+    expect(h.send).toHaveBeenCalledTimes(1);expect((await caseTasks(claim.claimId))[0].status).toBe('completed')
+    expect(h.send.mock.calls[0][0].text).not.toContain('Synthetic private strategy')
+    expect(h.send.mock.calls[0][1]).toMatchObject({idempotencyKey:`ue-case-status/${(await caseTasks(claim.claimId))[0].id}`,disableRetry:true})
+  })
+  it('suppresses a queued disclosure after primary access is revoked without a provider side effect',async()=>{
+    const claim=await assignedClaim();await advance(claim.claimNumber!)
+    await fixture.seed.query("UPDATE public.ue_authority_resource_relationships SET status='revoked',revoked_at=now(),revoked_by=$3 WHERE organization_id=$1 AND resource_id=$2",[org,claim.claimId,signer])
+    await processCaseStatusEmails();expect(h.send).not.toHaveBeenCalled()
+    expect((await caseTasks(claim.claimId))[0]).toMatchObject({status:'failed',error_message:'CASE_STATUS_AUTHORITY_REVOKED',attempt_count:'0'})
+  })
+  it('rolls the business state, history and queued notice back on mandatory audit failure',async()=>{
+    const claim=await assignedClaim()
+    await refusingAudit('case.transition',async()=>{
+      await expect(advance(claim.claimNumber!)).rejects.toThrow()
+      expect((await fixture.seed.query('SELECT status FROM public.claims WHERE claim_id=$1',[claim.claimId])).rows[0].status).toBe('submitted')
+      expect((await fixture.seed.query('SELECT count(*)::int AS n FROM public.claim_updates WHERE claim_id=$1',[claim.id])).rows[0].n).toBe(0)
+      expect(await caseTasks(claim.claimId)).toHaveLength(0);expect(h.send).not.toHaveBeenCalled()
+    })
+  })
+  it('does not admit mail during an authority-verifier outage and safely retries the still-pending task',async()=>{
+    const claim=await assignedClaim();await advance(claim.claimNumber!)
+    await fixture.seed.query('ALTER FUNCTION public.ue_queued_case_mail_context(uuid,text) RENAME TO ue_native_paused_case_mail_context')
+    try {await expect(processCaseStatusEmails()).rejects.toThrow('unavailable');expect(h.send).not.toHaveBeenCalled();expect((await caseTasks(claim.claimId))[0]).toMatchObject({status:'pending',attempt_count:'0'})}
+    finally{await fixture.seed.query('ALTER FUNCTION public.ue_native_paused_case_mail_context(uuid,text) RENAME TO ue_queued_case_mail_context')}
+    await processCaseStatusEmails();expect(h.send).toHaveBeenCalledTimes(1)
+  })
+  const mature=async(id:string)=>{
+    await fixture.seed.query('BEGIN')
+    try {
+      await fixture.seed.query('SET LOCAL session_replication_role=replica')
+      await fixture.seed.query("UPDATE public.claims SET status='investigation',status_changed_at=now()-interval '4 days',created_at=now()-interval '5 days' WHERE claim_id=$1",[id])
+      await fixture.seed.query('COMMIT')
+    }catch(error){await fixture.seed.query('ROLLBACK');throw error}
+  }
+  const escalateClaim=async(id:string)=>tenant(staff,()=>escalate({params:{caseId:id},userId:staff,organizationId:org,
+    request:new Request(`http://localhost/api/cases/${id}/escalate`,{method:'POST',body:JSON.stringify({notes:'Synthetic private escalation strategy'})})} as never))
+  it('preserves one logical case and canonical nonUUID member identity through concurrent escalation',async()=>{
+    const subject='native-canonical-member-'+randomUUID()
+    await fixture.seed.query('INSERT INTO user_management.users(user_id,email) VALUES ($1,$2)',[subject,`${subject}@example.invalid`])
+    await fixture.seed.query("INSERT INTO user_management.organization_users(user_id,organization_id,role) VALUES ($1,$2,'member')",[subject,org])
+    const claim=await assignedClaim(subject);await mature(claim.claimId)
+    const results=await Promise.all([escalateClaim(claim.claimId),escalateClaim(claim.claimId)])
+    expect(results.filter(v=>!(v instanceof Response))).toHaveLength(1)
+    const rows=(await fixture.seed.query('SELECT id,represented_member_user_id,grievant_id,created_by FROM public.grievances WHERE id=$1',[claim.claimId])).rows
+    expect(rows).toEqual([{id:claim.claimId,represented_member_user_id:subject,grievant_id:null,created_by:staff}])
+    const binding=(await fixture.seed.query('SELECT claim_id,grievance_id,grievance_mirror_id FROM public.case_authority_scopes WHERE case_id=$1',[claim.claimId])).rows[0]
+    expect(binding).toEqual({claim_id:claim.claimId,grievance_id:null,grievance_mirror_id:claim.claimId})
+    expect((await fixture.seed.query("SELECT count(*)::int AS n FROM public.audit_logs WHERE action='case.escalate_to_grievance' AND resource_id=$1",[claim.claimId])).rows[0].n).toBe(1)
+  })
+  it('refuses a pre-existing conflicting same-ID grievance without changing its subject, provenance or the claim',async()=>{
+    const claim=await assignedClaim();await mature(claim.claimId)
+    await drizzlePg(fixture.seed).transaction(async tx=>{
+      await tx.execute(sql`SET LOCAL session_replication_role=replica`)
+      await tx.insert(grievances).values({id:claim.claimId,organizationId:org,grievanceNumber:'GRV-CONFLICT-'+randomUUID(),type:'individual',status:'filed',priority:'medium',title:'Conflicting synthetic case',description:'Unrelated stored narrative',createdBy:signer,representedMemberUserId:signer})
+    })
+    const result=await escalateClaim(claim.claimId)
+    expect(result).toBeInstanceOf(Response);expect((result as Response).status).toBeGreaterThanOrEqual(400)
+    expect((await fixture.seed.query('SELECT represented_member_user_id,description FROM public.grievances WHERE id=$1',[claim.claimId])).rows[0]).toEqual({represented_member_user_id:signer,description:'Unrelated stored narrative'})
+    expect((await fixture.seed.query('SELECT status FROM public.claims WHERE claim_id=$1',[claim.claimId])).rows[0].status).toBe('investigation')
+    expect((await fixture.seed.query('SELECT count(*)::int AS n FROM public.case_authority_scopes WHERE case_id=$1',[claim.claimId])).rows[0].n).toBe(0)
+  })
+
+  it('retires an unattempted authority-suppressed letter through the existing cancellation workflow',async()=>{
+    const id=await signedLetter();await tenant(staff,()=>queueCorrespondenceEmail(id,org,staff))
+    await fixture.seed.query('UPDATE user_management.organization_users SET is_active=false WHERE organization_id=$1 AND user_id=$2',[org,staff])
+    try{await processCorrespondenceEmails();expect(h.send).not.toHaveBeenCalled();expect((await tasks(id))[0]).toMatchObject({status:'failed',attempt_count:'0'})}
+    finally{await fixture.seed.query('UPDATE user_management.organization_users SET is_active=true WHERE organization_id=$1 AND user_id=$2',[org,staff])}
+    await tenant(staff,()=>cancelCorrespondence(id,'Controlled authority-suppressed cancellation',{actorUserId:staff}))
+    expect((await tasks(id))[0]).toMatchObject({status:'completed',error_message:'CORRESPONDENCE_CANCELLED'})
+  })
+
 })

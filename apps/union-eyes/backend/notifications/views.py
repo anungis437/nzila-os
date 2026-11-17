@@ -247,10 +247,15 @@ class NotificationTrackingViewSet(viewsets.ModelViewSet):
 
 
 class InAppNotificationsViewSet(viewsets.ModelViewSet):
-    """API endpoint for InAppNotifications operations."""
+    """Retained generated adapter; the base application uses the dedicated Next.js paths.
+
+    Organization membership cannot substitute for case/document/recipient authority.
+    No business or machine caller of this generic Django adapter was found; keep it
+    contained until a reviewed consumer preserves the canonical boundary and audit.
+    """
     queryset = InAppNotifications.objects.all()
     serializer_class = InAppNotificationsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id']
     ordering_fields = ['created_at', 'updated_at']
@@ -290,20 +295,30 @@ class NotificationTemplatesViewSet(viewsets.ModelViewSet):
 
 
 class NotificationQueueViewSet(viewsets.ModelViewSet):
-    """API endpoint for NotificationQueue operations."""
+    """Retained generated adapter; the base application uses the dedicated Next.js paths.
+
+    Organization membership cannot substitute for case/document/recipient authority.
+    No business or machine caller of this generic Django adapter was found; keep it
+    contained until a reviewed consumer preserves the canonical boundary and audit.
+    """
     queryset = NotificationQueue.objects.all()
     serializer_class = NotificationQueueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
 
 
 class NotificationDeliveryLogViewSet(viewsets.ModelViewSet):
-    """API endpoint for NotificationDeliveryLog operations."""
+    """Retained generated adapter; the base application uses the dedicated Next.js paths.
+
+    Organization membership cannot substitute for case/document/recipient authority.
+    No business or machine caller of this generic Django adapter was found; keep it
+    contained until a reviewed consumer preserves the canonical boundary and audit.
+    """
     queryset = NotificationDeliveryLog.objects.all()
     serializer_class = NotificationDeliveryLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

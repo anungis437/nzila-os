@@ -22,9 +22,9 @@ export interface CaseListRow {
   updatedAt: Date;
   assignedTo: string | null;
   assignedAt: Date | null;
-  aiScore: number | string | null;
-  meritConfidence: number | string | null;
-  complexityScore: number | string | null;
+  aiScore?: number | string | null;
+  meritConfidence?: number | string | null;
+  complexityScore?: number | string | null;
   claimAmount: number | string | null;
   resolutionOutcome: string | null;
   resolvedAt: Date | null;
@@ -44,4 +44,15 @@ export interface CaseQueueRow {
   createdAt: Date;
   filedDate: Date | null;
   triageOnly: true;
+}
+
+/** Fixed member projection: newly added working-file fields do not become public by default. */
+const MEMBER_LIST_FIELDS = [
+  'claimId', 'claimNumber', 'organizationId', 'memberId', 'isAnonymous', 'claimType',
+  'status', 'priority', 'incidentDate', 'location', 'description', 'desiredOutcome',
+  'filedDate', 'createdAt', 'updatedAt', 'assignedTo', 'assignedAt', 'claimAmount',
+  'resolutionOutcome', 'resolvedAt', 'progress', 'memberName', 'memberEmail', 'assignedToName',
+] as const satisfies readonly (keyof CaseListRow)[];
+export function memberCaseListView(row: CaseListRow): CaseListRow {
+  return Object.fromEntries(MEMBER_LIST_FIELDS.map(key => [key, row[key]])) as unknown as CaseListRow;
 }

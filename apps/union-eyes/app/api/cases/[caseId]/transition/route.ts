@@ -149,20 +149,15 @@ export async function PATCH(
       await tx.insert(claimUpdates).values({
         claimId: claimHistoryReference(claim.claimId),
         updateType: 'status_change',
-        // Member-visible history must not contain the staff's transition reason:
-        // it may include confidential evidence, third-party identity or legal strategy.
-        // The reason remains in the restricted atomic audit. The separate evidence-pack
-        // bridge currently does not ingest its supplied artifacts and is not
-        // relied upon as proof of this confidential reason.
-        message: `Status changed: ${fromStatus} → ${toDbStatus}`,
+        // The member-visible history contains only persisted states. The restricted
+        // atomic audit below retains the reason and CUPE/FSM projections.
+        message: `Status changed from '${fromStatus}' to '${toDbStatus}'`,
         createdBy: userId,
         isInternal: false,
         visibilityScope: 'member',
         metadata: {
-          fromStatus,
-          toStatus: toDbStatus,
-          cupeFromStatus: cupeCurrentStatus,
-          cupeToStatus: targetStatus,
+          previousStatus: fromStatus,
+          newStatus: toDbStatus,
         },
       });
 
@@ -245,7 +240,7 @@ export async function PATCH(
       actionType: 'CASE_TRANSITIONED',
       orgId: orgId,
       actorId: userId,
-      artifacts: [{ type: 'case_transition', data: { caseId: result.claimId, from: result.cupeFromStatus, to: result.cupeToStatus, reason } }],
+      artifacts: [{ type: 'case_transition', data: { caseId: result.claimId, from: result.cupeFromStatus, to: result.cupeToStatus } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_TRANSITIONED' }))
 
     return NextResponse.json({

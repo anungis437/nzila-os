@@ -10,6 +10,7 @@ import { readReminderHealth, readLatestReminderReceipt, probeReminderMailProvide
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { baseOperationalReport, emitBaseOperationalMonitor } from '@/lib/operations/base-monitor-telemetry'
 import { processCorrespondenceEmails, readCorrespondenceQueueHealth } from '@/lib/correspondence/email-delivery'
+import { processCaseStatusEmails, readCaseStatusQueueHealth } from '@/lib/workflow/case-status-delivery'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -20,7 +21,9 @@ export const POST = withApi({ auth: { cron: true }, openapi: {
   if (readinessPolicy().profile !== 'union-eyes-v2-base') return NextResponse.json({ error: 'Base operational profile required' }, { status: 503 })
   const sourceSha = getBuildMetadata('union-eyes').gitSha
   let correspondenceWorkerOk = true
+  let caseStatusWorkerOk = true
   try { await processCorrespondenceEmails() } catch { correspondenceWorkerOk = false }
+  try { await processCaseStatusEmails() } catch { caseStatusWorkerOk = false }
   let azure
   try {
     azure = await probeAzureOperations(parseOperationalArmConfiguration(process.env.UE_OPERATIONS_ARM_CONFIGURATION), process.env.AZURE_CLIENT_ID ?? '')
@@ -34,8 +37,9 @@ export const POST = withApi({ auth: { cron: true }, openapi: {
     measured(withSystemContext(async tx => {
       const reminders = await readReminderHealth(tx)
       const letters = await readCorrespondenceQueueHealth(tx)
-      return { ...reminders, state: correspondenceWorkerOk && reminders.state === 'ok' && letters.state === 'ok' ? 'ok' as const : 'fail' as const,
-        note:'Measured reminder and correspondence queue age, leases and unresolved failures',letters }
+      const caseNotices = await readCaseStatusQueueHealth(tx)
+      return { ...reminders, state: correspondenceWorkerOk && caseStatusWorkerOk && reminders.state === 'ok' && letters.state === 'ok' && caseNotices.state === 'ok' ? 'ok' as const : 'fail' as const,
+        note:'Measured reminder, correspondence and case notification queue age, leases and unresolved failures',letters,caseNotices }
     })),
     measured(withSystemContext(tx => readLatestReminderReceipt(tx)).then(receipt => probeReminderMailProvider(receipt))),
   ])

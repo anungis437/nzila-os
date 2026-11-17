@@ -33,3 +33,11 @@ export async function requireCorrespondenceWrite(tx: RLSTx, row: { organizationI
   if (row.grievanceId && (await decideCase(tx, { userId: principal.userId, organizationId: row.organizationId,
     caseId: row.grievanceId, action: 'case:draft_action' })).effect !== 'allow') throw ApiError.notFound('Correspondence')
 }
+
+/** Formal release to a recipient is distinct from drafting, approval or signing. */
+export async function requireCorrespondenceDisclosure(tx: RLSTx, row: { organizationId: string; grievanceId: string | null }, actorUserId: string) {
+  await requireCorrespondenceWrite(tx, row, actorUserId)
+  if (!currentStateContextEnabled() || !row.grievanceId) return
+  if ((await decideCase(tx, { userId: actorUserId, organizationId: row.organizationId,
+    caseId: row.grievanceId, action: 'case:disclose_to_member' })).effect !== 'allow') throw ApiError.forbidden('Primary case-handler disclosure authority required.')
+}
