@@ -40,6 +40,7 @@ import {
   PROTOCOL_LRO_LED,
   PROTOCOL_STEWARD_LED,
   PROTOCOL_NATIONAL_REP_LED,
+  PROTOCOL_OFFICER_LED,
   resolveStoredProtocol,
   parseStoredProtocol,
 } from '../protocol-types';
@@ -137,10 +138,44 @@ describe('representation protocol execution status (P0-C)', () => {
     ['CAPE LRO-led', PROTOCOL_LRO_LED, 'lro'],
     ['CUPE national-rep-led', PROTOCOL_NATIONAL_REP_LED, 'national_rep'],
     ['steward-led local', PROTOCOL_STEWARD_LED, 'steward'],
+    ['officer-led local', PROTOCOL_OFFICER_LED, 'officer'],
   ])('an independently approved %s protocol is executable with its own authority', (_label, base, primary) => {
     const r = resolveStoredProtocol(approved(base));
     expect(r.executable).toBe(true);
     expect(r.protocol.primaryRepresentative).toBe(primary);
+  });
+
+  it.each([
+    ['invalid configuration time', { configuredAt: 'yesterday' }],
+    ['normalized-invalid calendar time', { configuredAt: '2026-02-30T00:00:00Z' }],
+    ['future configuration', { configuredAt: '2027-01-01T00:00:00Z' }],
+    ['future approval', { approvedAt: '2027-01-01T00:00:00Z' }],
+    ['approval before configuration', { approvedAt: '2026-09-30T00:00:00Z' }],
+    ['invalid approval timestamp', { approvedAt: '2026-10-02' }],
+    ['partial approval actor', { approvedBy: undefined }],
+    ['partial approval time', { approvedAt: undefined }],
+    ['null approval actor', { approvedBy: null }],
+    ['whitespace-obscured author', { configuredBy: 'admin-a ' }],
+    ['whitespace-obscured approver', { approvedBy: 'admin-a ' }],
+  ])('fails closed for %s on every selectable representation protocol', (_label, overrides) => {
+    const now = new Date('2026-11-17T00:00:00Z');
+    for (const base of [PROTOCOL_LRO_LED, PROTOCOL_NATIONAL_REP_LED, PROTOCOL_STEWARD_LED, PROTOCOL_OFFICER_LED]) {
+      const valid = approved(base);
+      expect(resolveStoredProtocol(valid, now).executable).toBe(true);
+      const corrupted = { ...valid, approval: { ...valid.approval, ...overrides } };
+      expect(resolveStoredProtocol(corrupted, now)).toMatchObject({ status: 'invalid', executable: false });
+    }
+  });
+
+  it('accepts server-generated millisecond UTC timestamps and rejects a partial stored approval without writing', async () => {
+    const now = new Date();
+    const configuredAt = new Date(now.getTime() - 1000).toISOString();
+    const value = { ...PROTOCOL_OFFICER_LED, approval: { configuredBy: 'admin-a', configuredAt, approvedBy: 'admin-b' } };
+    expect(resolveStoredProtocol({ ...value, approval: { ...value.approval, approvedAt: now.toISOString() } }, now).executable).toBe(true);
+    m.stored.value = value;
+    expect(await approveRepresentationProtocol('org', 'admin-c')).toMatchObject({ ok: false, code: 'NOT_FOUND' });
+    expect(m.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('requireExecutableRepresentationProtocol throws for default and unapproved, returns approved', async () => {
