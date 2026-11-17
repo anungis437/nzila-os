@@ -31,6 +31,7 @@ import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
+import { currentCanonicalRequest } from '@/lib/auth/canonical-request-scope'
 import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organization-selection'
 import { sanitizedBindingError } from '@/lib/db/binding-error'
 import { nestedCanonicalTenantScope, withCanonicalTenantScope } from './canonical-transaction-scope'
@@ -72,6 +73,17 @@ export type RLSTx = typeof db
  */
 const SYSTEM_ORG_CONTEXT = 'system'
 
+/** Resolve both fields from one verified source; request scope is server-only. */
+async function resolveRLSActor() {
+  const established = currentStateContextEnabled() ? currentCanonicalRequest() : null
+  if (established) return {
+    userId: established.profile.userId,
+    orgId: established.profile.organizationId,
+  }
+  const { userId, orgId } = await auth()
+  return { userId, orgId }
+}
+
 export async function withRLSContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T>
 export async function withRLSContext<T>(operation: () => Promise<T>): Promise<T>
 export async function withRLSContext<T>(
@@ -110,8 +122,7 @@ export async function withRLSContext<T>(
     explicitOrgId = raw
   }
 
-  // Get authenticated user from auth provider
-  const { userId, orgId: authOrgId } = await auth()
+  const { userId, orgId: authOrgId } = await resolveRLSActor()
 
   if (!userId) {
     throw new Error(

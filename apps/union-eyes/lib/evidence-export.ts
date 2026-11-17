@@ -12,7 +12,7 @@ import { createHmac } from 'crypto';
 import { createHash, timingSafeEqual } from 'crypto';
 import archiver from 'archiver';
 import { PassThrough } from 'stream';
-import { generatePDF } from '@/lib/utils/pdf-generator';
+import { renderSealedEvidencePdf } from '@/lib/utils/pdf-generator';
 
 /** Seal key — must be set in production; falls back for dev/test only. */
 function getSealKey(): string {
@@ -302,40 +302,10 @@ export async function buildEvidenceZip(pkg: EvidencePackage): Promise<Buffer> {
 }
 
 /**
- * Build a downloadable PDF summary for legal/operational review.
+ * Build a readable case package with the exact sealed envelope embedded as UTF-8 JSON.
+ * The printed seal authenticates the embedded records; it is not a PDF certificate signature.
  */
-export async function buildEvidencePdf(pkg: EvidencePackage): Promise<Buffer> {
-  const pack = pkg.pack;
-  return generatePDF({
-    title: `Case Evidence Summary - ${pack.caseId}`,
-    template: 'usage-report',
-    data: {
-      period: {
-        start: pack.exportedAt,
-        end: pkg.verification.verifiedAt,
-      },
-      claims: {
-        total: 1,
-        byStatus: {
-          current: String((pack.caseRecord.status as string | undefined) ?? 'unknown'),
-        },
-        byPriority: {
-          current: String((pack.caseRecord.priority as string | undefined) ?? 'unknown'),
-        },
-      },
-      grievances: {
-        total: Array.isArray(pack.notes) ? pack.notes.length : 0,
-        resolved: pack.auditTrail.filter((entry) => String(entry.action ?? '').includes('resolved')).length,
-      },
-      integrity: {
-        seal: pack.seal,
-        sealValid: pkg.verification.sealValid,
-      },
-    },
-    metadata: {
-      author: 'Nzila UnionEyes',
-      subject: `Evidence export ${pack.caseId}`,
-      keywords: 'evidence,defensibility,union-eyes',
-    },
-  });
+export async function buildEvidencePdf(pkg: EvidencePackage, locale: 'en-CA' | 'fr-CA' = 'en-CA'): Promise<Buffer> {
+  if (!pkg.verification.sealValid || !verifySeal(pkg.pack)) throw new Error('Evidence seal verification failed');
+  return renderSealedEvidencePdf(pkg, locale);
 }

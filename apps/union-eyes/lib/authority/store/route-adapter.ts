@@ -12,7 +12,7 @@ import { sql, type SQL } from 'drizzle-orm'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import type { Action, Decision } from '../ontology'
-import { enforceAuthority, type EnforcementDeps } from './enforce'
+import { enforceAuthority, enforceCaseProjection, type EnforcementDeps } from './enforce'
 import { activeMembershipSource } from './active-membership-source'
 import type { SqlExecutor } from './executor'
 
@@ -106,6 +106,16 @@ export function decideCase(tx: RLSTx, input: KernelCaseRequest, deps: Enforcemen
     },
     { authenticated: true },
   )
+}
+
+/** Read-only action controls for one case; later action routes authorize afresh. */
+export function decideCaseCapabilities(
+  tx: RLSTx,
+  input: Pick<KernelCaseRequest, 'userId' | 'organizationId' | 'caseId'>,
+) {
+  return enforceCaseProjection(drizzleExecutor(tx), kernelDeps, {
+    principalUserId: input.userId, organizationId: input.organizationId, caseId: input.caseId,
+  })
 }
 
 const dialect = new PgDialect()

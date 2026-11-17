@@ -2,6 +2,11 @@
  * Tests for evidence-export.ts
  */
 import { describe, it, expect } from 'vitest';
+import { PDFParse } from 'pdf-parse';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import {
   buildEvidencePack,
   buildEvidencePackage,
@@ -156,6 +161,32 @@ describe('evidence-export', () => {
       const pdf = await buildEvidencePdf(pkg);
       expect(Buffer.isBuffer(pdf)).toBe(true);
       expect(pdf.length).toBeGreaterThan(100);
+    });
+    it.each(['en-CA', 'fr-CA'] as const)('renders the seal and records and embeds the exact sealed envelope in %s', async locale => {
+      const pkg = buildEvidencePackage(sampleInput), pdf = await buildEvidencePdf(pkg, locale);
+      const parser = new PDFParse({ data: new Uint8Array(pdf) });
+      try {
+        const read = await parser.getText();
+        expect(read.text).toContain(locale === 'fr-CA' ? 'Dossier de preuves' : 'Case evidence package');
+        expect(read.text).toContain('First note');
+        expect(read.text.replace(/\s/g, '')).toContain(pkg.pack.seal);
+      } finally { await parser.destroy(); }
+      const folder = mkdtempSync(join(tmpdir(), 'ue-case-pdf-'));
+      try {
+        const file = join(folder, 'case.pdf'); writeFileSync(file, pdf, { mode: 0o600 });
+        const script = `import fs from 'node:fs'; import assert from 'node:assert/strict'; import {createRequire} from 'node:module'; import {pathToFileURL} from 'node:url';
+          const app=createRequire(process.argv[2]),dep=createRequire(app.resolve('pdf-parse'));const canvas=dep('@napi-rs/canvas');
+          for(const key of ['DOMMatrix','ImageData','Path2D'])globalThis[key]??=canvas[key];
+          const {getDocument}=await import(pathToFileURL(dep.resolve('pdfjs-dist/legacy/build/pdf.mjs')).href);
+          const doc=await getDocument({data:new Uint8Array(fs.readFileSync(process.argv[1])),isEvalSupported:false}).promise;
+          try{const files=await doc.getAttachments();assert(files?.['case-evidence.json']);assert.deepEqual(JSON.parse(Buffer.from(files['case-evidence.json'].content).toString('utf8')),JSON.parse(fs.readFileSync(0,'utf8')));console.log('EXACT_SEALED_ENVELOPE_ATTACHMENT_VERIFIED')}finally{await doc.destroy()}`;
+        const output = execFileSync(process.execPath, ['--input-type=module', '-e', script, file, resolve(__dirname, '../../package.json')], { input: JSON.stringify(pkg), encoding: 'utf8', timeout: 20000 });
+        expect(output).toContain('EXACT_SEALED_ENVELOPE_ATTACHMENT_VERIFIED');
+      } finally { rmSync(folder, { recursive: true, force: true }); }
+    });
+    it('refuses a tampered pack before generating a PDF', async () => {
+      const pkg = buildEvidencePackage(sampleInput); pkg.pack.notes.push({ text: 'Unsealed change' });
+      await expect(buildEvidencePdf(pkg)).rejects.toThrow('Evidence seal verification failed');
     });
   });
 });

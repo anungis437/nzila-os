@@ -8,7 +8,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLocale } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiErrorMessage, isRecord } from '@/lib/client/api-envelope';
 import { invitationCopy, invitationLocale, frenchInvitationErrors, type InvitationLocale } from './invitation-copy';
@@ -17,15 +16,15 @@ export default function InviteAcceptPage() {
   const router = useRouter();
   const params = useSearchParams();
   const token = params.get('token') ?? '';
-  const rootLocale = useLocale();
   const explicitLocale = invitationLocale(params.get('locale'));
-  const [locale, setLocale] = useState<InvitationLocale>(explicitLocale ?? invitationLocale(rootLocale) ?? 'en-CA');
+  // This public route sits outside the locale layout and its NextIntl provider.
+  const [locale, setLocale] = useState<InvitationLocale>(explicitLocale ?? 'en-CA');
   const t = invitationCopy[locale];
 
   useEffect(() => {
     const cookie = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/)?.[1];
-    setLocale(explicitLocale ?? invitationLocale(cookie) ?? (rootLocale.startsWith('fr') ? 'fr-CA' : invitationLocale(navigator.language.split('-')[0])) ?? 'en-CA');
-  }, [explicitLocale, rootLocale]);
+    setLocale(explicitLocale ?? invitationLocale(cookie) ?? invitationLocale(navigator.language.split('-')[0]) ?? 'en-CA');
+  }, [explicitLocale]);
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
 
   function changeLanguage(value: InvitationLocale) {

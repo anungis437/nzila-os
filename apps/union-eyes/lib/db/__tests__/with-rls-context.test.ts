@@ -94,6 +94,8 @@ import { tenantContextStorage } from '@/db/tenant-context-storage'
 import { db } from '@/db/db'
 import { systemDb } from '@/db/system-db'
 import { systemContextStorage, getActiveSystemDb } from '@/db/system-context-storage'
+import { withCanonicalRequestScope } from '@/lib/auth/canonical-request-scope'
+import { UserRole } from '@/lib/auth/roles'
 
 /* ── tests ──────────────────────────────────────────────────────────── */
 
@@ -132,6 +134,29 @@ describe('with-rls-context', () => {
   })
 
   describe('prospective current-state V2 context', () => {
+    it('uses the request-established actor without reauthenticating while retaining RLS attachment', async () => {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+      const binding = {
+        userId: 'user-1', organizationId: 'org-A', role: 'officer', isSystemAdmin: false,
+        sessionToken: 'synthetic-private', expiresAt: new Date(Date.now() + 30000),
+        authority: 'pg-session' as const,
+      }
+      const profile = {
+        userId: binding.userId, organizationId: binding.organizationId, role: UserRole.OFFICER,
+        isSystemAdmin: false, email: 'synthetic@example.invalid', firstName: null, lastName: null,
+      }
+      mocks.mockOrgBinding.mockImplementationOnce(async (_options, callback) => callback(binding))
+      await withCanonicalRequestScope(binding, profile, () =>
+        withRLSContext({ organizationId: binding.organizationId }, async tx => {
+          expect(tenantContextStorage.getStore()).toBe(tx)
+        }),
+      )
+      expect(mocks.mockAuth).not.toHaveBeenCalled()
+      expect(mocks.mockOrgBindingSql).toHaveBeenCalledWith(binding)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(tenantContextStorage.getStore()).toBeUndefined()
+    })
+
     it('reuses the verified outer bridge in a savepoint without rebinding or leaking the transaction', async () => {
       vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
       const binding = { userId: 'user-1', organizationId: 'org-A', sessionToken: 'synthetic-only' }

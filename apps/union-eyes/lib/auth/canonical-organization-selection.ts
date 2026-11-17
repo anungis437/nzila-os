@@ -23,6 +23,7 @@ import { organizations } from '@/db/schema-organizations'
 import { organizationWire } from '@/lib/organizations/organization-wire'
 import { recordOrganizationSelection, recordOrganizationSelectionOutcome } from './organization-selection-audit'
 import { canonicalMembershipRole } from './canonical-membership-role'
+import { currentCanonicalRequest } from './canonical-request-scope'
 import {
   CANONICAL_ORGANIZATION_AUTHORITY,
   CANONICAL_ORGANIZATION_HIERARCHY_SCOPE,
@@ -82,6 +83,8 @@ export async function withCanonicalOrganizationBinding<T>(
   options: AuthOrgBindingOptions,
   callback: (binding: AuthenticatedOrgBinding) => Promise<T>,
 ): Promise<T> {
+  const established = currentCanonicalRequest(options)
+  if (established) return callback(established.binding)
   const choices = await getCanonicalOrganizationChoices()
   const organizationId = options.organizationId?.toLowerCase() ?? choices.activeOrganizationId
   if (

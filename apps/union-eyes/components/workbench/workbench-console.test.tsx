@@ -20,7 +20,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); language.locale = 'en-CA'; l
 
 describe('workbench inline case access', () => {
   const ownedClaim = {
-    canAddNote: true, canTransition: true, canClose: true,
+    canAddNote: true, canTransition: true, canClose: true, canExportSealedEvidence: false,
     claimId: 'owned-case', claimNumber: 'CASE-01', organizationId: 'owned-org', memberId: 'owned-member',
     claimType: 'grievance_pay', status: 'assigned', priority: 'medium', description: 'Synthetic case summary',
     createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z',
@@ -63,6 +63,19 @@ describe('workbench inline case access', () => {
     await userEvent.keyboard(' ');
     expect(expand).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(screen.queryByText('Synthetic authorized note')).not.toBeInTheDocument());
+  });
+
+  it('uses the explicit export decision instead of closing permission to present the case-pack control', async () => {
+    serve({ claims: [{ ...ownedClaim, canClose: false, canExportSealedEvidence: true }] });
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    expect(await screen.findByRole('button', { name: 'Download sealed case pack (PDF)' })).toBeVisible();
+  });
+
+  it('does not advertise export merely because a returned case may be closed', async () => {
+    serve(); render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    expect(screen.queryByTestId('case-evidence-export')).not.toBeInTheDocument();
   });
 
   it('hides the staff collection link unless the server admits that destination', async () => {

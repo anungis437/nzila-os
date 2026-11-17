@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "chore/ue-ui-staging-binding-20261116",
-  "currentRepairRuntimeQualification": "FOLLOWUP_SOURCE_NORMAL_MERGE_PASS_BINDING_AND_EXACT_RUNTIME_ACTION_QUALIFICATION_PENDING",
+  "currentRepairBranch": "feat/ue-case-evidence-export-ui-20261116",
+  "currentRepairRuntimeQualification": "SOURCE41_PRIVACY_ACCOUNT_PROFILE_PASS_PUBLIC_INVITATION_AND_AUTHENTICATED_PERFORMANCE_FAILED_LOCAL_REPAIRS_AND_PDF_QUALIFICATION_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -26,9 +26,9 @@
     {
       "id": "C01",
       "action": "Invitation to first case",
-      "state": "PARTIAL_POSITIVE_JOURNEY_PROVEN",
-      "evidenceSummary": "Real T2 administrator invitation, explicit controlled-recipient confirmation of receipt/acceptance/dashboard/case-create/reopen, and independent durable accepted identity, active Member membership, saved case and same-actor case.intake_submitted audit. Account and case retained.",
-      "remaining": "Proposed-source positive and negative boundary requalification; re-opening remains user-attested, not independently browser-replayed.",
+      "state": "ACTUAL_STAGING_DEFECT_LOCAL_REPAIR_PENDING",
+      "evidenceSummary": "Real T2 administrator invitation, explicit controlled-recipient confirmation of receipt/acceptance/dashboard/case-create/reopen, and independent durable accepted identity, active Member membership, saved case and same-actor case.intake_submitted audit. Account and case retained. Actual source41 fresh native-invitation browser cohort crashed before acceptance; the public page required an absent NextIntl provider. Both unused owned invitations were revoked. Provider-independent local repair passes8 tests, including real missing-provider regression.",
+      "remaining": "Admit and deploy the repaired source; repeat real admin invitation, acceptance, identity/membership, first case, retry/refusal and audit boundaries. Earlier controlled-recipient confirmations remain historical evidence only.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -44,7 +44,8 @@
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
       "coverageFieldsComplete": false,
-      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
+      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-runtime-delta.json"
     },
     {
       "id": "C02",
@@ -299,9 +300,9 @@
     {
       "id": "C14",
       "action": "User-facing sealed evidence export",
-      "state": "STAGING_CONFIGURATION_REPAIR_QUALIFICATION_PENDING",
-      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey. Actual staging has no EVIDENCE_SEAL_KEY mapping although the export source requires it in production mode. The binding adds a dedicated staging-only named secret reference and access; the key was prepared without rotation or changing app environment. No HTTP success or failure is inferred from this observation.",
-      "remaining": "Browser control to authorized generated pack/download/verification and failure handling.",
+      "state": "BROWSER_PDF_IMPLEMENTED_LOCAL_PROOF_STAGING_PENDING",
+      "evidenceSummary": "The proposed change adds the workbench PDF/JSON controls, explicit live kernel export authority, readable sealed PDF with embedded exact JSON, independent browser byte/hash checks, bounded cancellation and failure handling. 74 focused tests, application TypeScript and 58 census tests passed. Full repository checks, CI and actual new-source browser/audit proof remain pending. The dedicated staging seal-key mapping is merged in PR #1257 but has not been deployed.",
+      "remaining": "Rerun full local checks and exact-source CI after public invitation and request-scope repairs; qualify the immutable Linux image including PDFKit fonts; perform actual authorized EN/FR workbench PDF download, embedded-envelope verification, durable audit, cross-tenant/unauthorized refusal and recovery on the deployed source.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -314,7 +315,8 @@
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
       "coverageFieldsComplete": false,
-      "proposedConfigurationEvidence": "evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json"
+      "proposedConfigurationEvidence": "evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json",
+      "proposedImplementationEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/local-source-review.json"
     },
     {
       "id": "C15",
@@ -422,15 +424,15 @@
     {
       "id": "C20",
       "action": "Privacy request handling",
-      "state": "IMPLEMENTED_LOCAL_PASS_STAGING_QUALIFICATION_PENDING",
-      "evidenceSummary": "Observed T2 privacy/dsar returns501. The proposed source implements subject-owned in-app requests and secure conversations, assigned-handler identity/scope review, reasoned responses/refusals, reviewed own-account downloads and exact-response acknowledgement or withdrawal. Actual local checks passed; legacy-snapshot PostgreSQL component proof retains its session/HTTP/audit harness limits. No combined-source deployed privacy pass is claimed.",
-      "remaining": "Qualify actual member profile-to-request and designated handler queue-to-response UI, subject/tenant/unassigned and stale denials, identity/scope review, actual download byte receipt, acknowledgement, withdrawal, refusal and durable audit/retention. Other information and rights require an appropriate actual handler response; no automatic erasure or legal conclusion.",
+      "state": "ACTUAL_SOURCE41_ACCOUNT_PROFILE_PASS_NEW_CANDIDATE_REQUALIFICATION_PENDING",
+      "evidenceSummary": "Actual source41 real Entra UI/HTTP passed43 checks: member profile-to-request; assigned handler identity/scope review, clarification, reasoned response/refusal; FR675-byte own-account download with exact-response acknowledgement; withdrawal; subject/tenant/unassigned/stale refusals. Three requests reached terminal states. Read-only durable verification recomputed all2409 organization audit records and confirmed owned handler designation revoked. Scope account_profile; no automatic erasure or broader legal conclusion.",
+      "remaining": "Repeat the qualified account_profile journey on the final corrected candidate; other rights require an appropriate actual handler response, without an automatic statutory-fulfilment claim.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
         "roleOrMandate": "Action-specific verification remains required"
       },
-      "ui": null,
+      "ui": "/dashboard/privacy",
       "apiMethods": null,
       "positiveDurableResult": null,
       "negativeMatrix": null,
@@ -440,7 +442,8 @@
       "ownerDecision": "Require in-app self-service",
       "requiredBeforeFullBaseStagingGo": true,
       "proposedSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
-      "sourceEvidence": "evidence/ue-v2-privacy-self-service-20261116/local-validation.json"
+      "sourceEvidence": "evidence/ue-v2-privacy-self-service-20261116/local-validation.json",
+      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-privacy-self-service.json"
     },
     {
       "id": "C21",
@@ -495,16 +498,18 @@
     {
       "id": "O02",
       "action": "Authenticated casework performance",
-      "state": "ACTUAL_STAGING_FAILED_REPAIR_PENDING",
-      "remaining": "Actual T2 authenticated profile failed declared latency and throughput at both stages with0HTTPerrors. Repeat unchanged profile on admitted proposed source; no public-route or component timing substitutes.",
-      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
+      "state": "ACTUAL_SOURCE41_FAILED_LOCAL_REPAIR_PENDING",
+      "remaining": "Actual unchanged source41 authenticated profile failed: concurrency1 p95 680.462ms,108/300 requests; concurrency5 p95 2275.315ms,449/3600 requests; zero HTTP errors. All owned authority retired, five same-session post-retirement404 checks passed, original profiles retained. One-bridge request repair remains local and unmeasured in staging. Repeat unchanged thresholds on the admitted repaired source; bounded load is not a full pilot soak. Workbench action projection also has a local fresh-per-case fact-load repair with independent kernel decisions; deployed timing and persona proof remain pending.",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
+      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-runtime-delta.json"
     },
     {
       "id": "O03",
       "action": "Sustained pilot workload",
-      "state": "ACTUAL_STAGING_FAILED_REPAIR_PENDING",
-      "remaining": "Actual T2 authenticated profile failed declared latency and throughput at both stages with0HTTPerrors. Repeat unchanged profile on admitted proposed source; no public-route or component timing substitutes.",
-      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
+      "state": "ACTUAL_SOURCE41_FAILED_LOCAL_REPAIR_PENDING",
+      "remaining": "Actual unchanged source41 authenticated profile failed: concurrency1 p95 680.462ms,108/300 requests; concurrency5 p95 2275.315ms,449/3600 requests; zero HTTP errors. All owned authority retired, five same-session post-retirement404 checks passed, original profiles retained. One-bridge request repair remains local and unmeasured in staging. Repeat unchanged thresholds on the admitted repaired source; bounded load is not a full pilot soak. Workbench action projection also has a local fresh-per-case fact-load repair with independent kernel decisions; deployed timing and persona proof remain pending.",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
+      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-runtime-delta.json"
     },
     {
       "id": "O04",

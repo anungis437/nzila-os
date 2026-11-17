@@ -1,0 +1,32 @@
+{
+  "status": "PASS_ACTUAL_PRIVACY_UI_HTTP_DURABLE_AUDIT_RETENTION",
+  "sourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "workflowSha": "beb67cf1f5219da572393340334540abd51ca276",
+  "browserReceiptSha256": "22aeab2a7c3edd9f12878b5ef647ffa9630e2ff57f06d6f1a932c6b1d4b1c4b6",
+  "durableReceiptSha256": "a97a5c24ad1810c7f4eda9f19c65f3f7260d6bd9452a018c077dd0b84d78a05b",
+  "scopesQualified": [
+    "account_profile"
+  ],
+  "requests": 3,
+  "broaderStatutoryAutomaticFulfilmentClaimed": false,
+  "productionAuthorized": false,
+  "fullBaseStagingGo": false,
+  "schemaVersion": 1,
+  "scope": "account_profile",
+  "actualBrowserChecks": 43,
+  "actualDownloadBytes": 675,
+  "actualDownloadSha256": "e69130d2097f959f5e7e8f481c8f2985c301f9f8ba2eee6b58230d024f46fa5d",
+  "canonicalAuditChain": {
+    "records": 2409,
+    "headHash": "74f372a5a4b27be68359ddb5ecde1aaf0f6b946e2435817428eee1575442e916",
+    "entireOrganizationChainRecomputedFromExactSource": true
+  },
+  "ownedHandlerDesignationRevoked": true,
+  "databaseMutationStatementsInReadback": 0,
+  "privilegeMutationStatementsInReadback": 0,
+  "requalificationOnNewCandidateRequired": true,
+  "limits": [
+    "No automatic erasure or all-rights fulfilment claim",
+    "Actual source41 proof is not relabelled as proof for a later candidate"
+  ]
+}

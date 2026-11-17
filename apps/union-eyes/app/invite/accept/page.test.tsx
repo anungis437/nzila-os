@@ -4,14 +4,40 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import '@testing-library/jest-dom/vitest';
 import InviteAcceptPage from './page';
 
-const nav = vi.hoisted(() => ({ replace: vi.fn(), locale: 'en-CA', params: 'token=invite-bearer' }));
+const nav = vi.hoisted(() => ({ replace: vi.fn(), params: 'token=invite-bearer' }));
 vi.mock('next/navigation', () => ({ useRouter: () => nav, useSearchParams: () => new URLSearchParams(nav.params) }));
-vi.mock('next-intl', () => ({ useLocale: () => nav.locale }));
+// This public route has no NextIntl provider; keep the real library so a context dependency fails here.
+vi.unmock('next-intl');
 const fetchMock = vi.fn();
-beforeEach(() => { nav.replace.mockReset(); nav.locale = 'en-CA'; nav.params = 'token=invite-bearer'; document.cookie = 'NEXT_LOCALE=; Path=/; Max-Age=0'; fetchMock.mockReset(); vi.stubGlobal('fetch', fetchMock); });
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+beforeEach(() => { nav.replace.mockReset(); nav.params = 'token=invite-bearer'; document.cookie = 'NEXT_LOCALE=; Path=/; Max-Age=0'; vi.spyOn(window.navigator, 'language', 'get').mockReturnValue('en-CA'); fetchMock.mockReset(); vi.stubGlobal('fetch', fetchMock); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('invitation acceptance and MFA', () => {
+  it('renders the standalone public route without an internationalization provider', () => {
+    render(<InviteAcceptPage />);
+    expect(screen.getByRole('heading', { name: 'Accept your invitation' })).toBeInTheDocument();
+    expect(document.documentElement.lang).toBe('en-CA');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('uses the browser language when no supported explicit locale or preference cookie is present', async () => {
+    vi.spyOn(window.navigator, 'language', 'get').mockReturnValue('fr-CA');
+    nav.params += '&locale=unsupported';
+    render(<InviteAcceptPage />);
+    expect(await screen.findByRole('heading', { name: 'Accepter votre invitation' })).toBeInTheDocument();
+    expect(document.documentElement.lang).toBe('fr-CA');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('honors the explicit invitation locale before a different cookie or browser preference', () => {
+    vi.spyOn(window.navigator, 'language', 'get').mockReturnValue('fr-CA');
+    document.cookie = 'NEXT_LOCALE=fr-CA; Path=/';
+    nav.params += '&locale=en-CA';
+    render(<InviteAcceptPage />);
+    expect(screen.getByRole('heading', { name: 'Accept your invitation' })).toBeInTheDocument();
+    expect(document.documentElement.lang).toBe('en-CA');
+  });
+
   it('waits for the required second factor before navigating', async () => {
     fetchMock.mockResolvedValueOnce(Response.json({ user: { id: 'u1' }, requiresMfa: true, challengeToken: 'mfa-challenge' }));
     render(<InviteAcceptPage />);

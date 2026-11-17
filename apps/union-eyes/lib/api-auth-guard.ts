@@ -67,6 +67,7 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { getCanonicalOrganizationContext, getCanonicalPasswordActor } from '@/lib/auth/canonical-context';
 import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding';
+import { currentCanonicalRequest } from '@/lib/auth/canonical-request-scope';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -511,6 +512,8 @@ async function membershipRoleInOwnContext(userId: string, organizationId: string
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {  if (currentStateContextEnabled()) {
+    const established = currentCanonicalRequest();
+    if (established) return canonicalAuthUser(established.profile);
     const passwordActor = await getCanonicalPasswordActor();
     if (passwordActor && !passwordActor.organizationId)
       return canonicalAuthUser({

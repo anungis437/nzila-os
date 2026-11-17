@@ -21,6 +21,9 @@ import { getCaseActor, findReadableCase, caseHistoryVisibility, caseAuthorizatio
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { readCanonicalCaseAudit } from '@/lib/cases/case-evidence-query'
 import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
+import { createHash } from 'node:crypto'
+
+const PRIVATE_EXPORT_HEADERS = { 'Cache-Control': 'private, no-store', Pragma: 'no-cache', 'X-Content-Type-Options': 'nosniff' }
 
 export async function GET(request: Request, { params }: { params: Promise<{ caseId: string }> }) {
   const { caseId: reference } = await params
@@ -33,6 +36,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
     const actor = await getCaseActor()
     const { userId, organizationId: orgId } = actor
     await requireEntitlement(orgId, 'grievance_case_suite')
+    const locale = url.searchParams.get('locale') ?? 'en-CA'
+    if (locale !== 'en-CA' && locale !== 'fr-CA') return NextResponse.json({ error: 'Unsupported export language' }, { status: 400 })
     const records = await withRLSContext(async (tx) => {
       // Exporting the case file, its internal notes and its audit trail is the primary handler's sealed-evidence power.
       const readable = await findReadableCase(tx, actor, reference, false, 'case:export_sealed_evidence')
@@ -81,6 +86,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
       )
     }
 
+    // Prepare the artifact before recording a successful preparation; audit failure still withholds every response byte.
+    const zip = format === 'zip' ? await buildEvidenceZip(packageEnvelope) : null
+    const pdf = format === 'pdf' ? await buildEvidencePdf(packageEnvelope, locale) : null
     await auditCaseExport({
       userId,
       organizationId: orgId,
@@ -94,9 +102,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
     })
 
     if (format === 'zip') {
-      const zip = await buildEvidenceZip(packageEnvelope)
-      return new NextResponse(new Uint8Array(zip), {
+      return new NextResponse(new Uint8Array(zip!), {
         headers: {
+          ...PRIVATE_EXPORT_HEADERS,
           'Content-Type': 'application/zip',
           'Content-Disposition': `attachment; filename="evidence-${caseId}.zip"`,
         },
@@ -104,11 +112,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
     }
 
     if (format === 'pdf') {
-      const pdf = await buildEvidencePdf(packageEnvelope)
-      return new NextResponse(new Uint8Array(pdf), {
+      return new NextResponse(new Uint8Array(pdf!), {
         headers: {
+          ...PRIVATE_EXPORT_HEADERS,
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="evidence-${caseId}.pdf"`,
+          'Content-Digest': `sha-256=:${createHash('sha256').update(pdf!).digest('base64')}:`,
+          'X-Evidence-Case-Id': caseId,
+          'X-Evidence-Organization-Id': orgId,
+          'X-Evidence-Actor-Id': userId,
+          'X-Evidence-Seal': pack.seal,
+          'X-Evidence-Seal-Verified': String(packageEnvelope.verification.sealValid),
+          'X-Evidence-Locale': locale,
         },
       })
     }
@@ -122,6 +137,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
         },
         {
           headers: {
+            ...PRIVATE_EXPORT_HEADERS,
             'Content-Disposition': `attachment; filename="evidence-${caseId}.json"`,
           },
         },
@@ -130,6 +146,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
 
     return NextResponse.json(pack, {
       headers: {
+        ...PRIVATE_EXPORT_HEADERS,
         'Content-Disposition': `attachment; filename="evidence-${caseId}.json"`,
       },
     })

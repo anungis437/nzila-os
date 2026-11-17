@@ -1,7 +1,7 @@
 import { and, or, sql } from 'drizzle-orm'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { caseReadScope, caseTriageQueueScope, type CaseActor } from './case-authorization'
-import { decideCase } from '@/lib/authority/store/route-adapter'
+import { decideCaseCapabilities } from '@/lib/authority/store/route-adapter'
 import { claimIdentitySelect } from './claim-identity'
 import { projectWorkbenchRow } from './workbench-projection'
 
@@ -26,9 +26,10 @@ export async function loadWorkbenchCases(tx: RLSTx, actor: CaseActor, status: st
   const visible = []
   for (const row of rows) {
     const who = { userId: actor.userId, organizationId: actor.organizationId, caseId: String(row.claimId) }
-    const read = await decideCase(tx, { ...who, action: 'case:read' })
+    const capabilities = await decideCaseCapabilities(tx, who)
+    const read = capabilities['case:read']
     const canAssign = !row.assignedTo && !['resolved','rejected','closed'].includes(String(row.status)) &&
-      (await decideCase(tx, { ...who, action: 'case:assign' })).effect === 'allow'
+      capabilities['case:assign'].effect === 'allow'
     if (read.effect === 'allow') {
       const detailResult = await tx.execute(sql`SELECT c.description,c.is_anonymous AS "isAnonymous",${claimIdentitySelect(actor,true)}
         FROM claims c LEFT JOIN organization_members m ON m.organization_id=c.organization_id AND m.user_id=c.member_id
@@ -36,11 +37,12 @@ export async function loadWorkbenchCases(tx: RLSTx, actor: CaseActor, status: st
       const details = Array.isArray(detailResult) ? detailResult : (detailResult as unknown as { rows: Record<string, unknown>[] }).rows
       const { triageEligible: _triage, ...metadata } = row
       if (details[0]) {
-        const allowed = async (action: 'case:comment' | 'case:write_notes' | 'case:transition' | 'case:close') =>
-          (await decideCase(tx,{ ...who,action })).effect === 'allow'
-        const canAddNote = await allowed('case:comment') && (read.scope.visibility === 'member_visible' || await allowed('case:write_notes'))
+        const allowed = (action: 'case:comment' | 'case:write_notes' | 'case:transition' | 'case:close' | 'case:export_sealed_evidence') =>
+          capabilities[action].effect === 'allow'
+        const canAddNote = allowed('case:comment') && (read.scope.visibility === 'member_visible' || allowed('case:write_notes'))
         visible.push(projectWorkbenchRow({ ...metadata,...details[0],canAddNote,
-          canTransition: await allowed('case:transition'),canClose: await allowed('case:close') }, 'case', canAssign))
+          canTransition: allowed('case:transition'),canClose: allowed('case:close'),
+          canExportSealedEvidence: allowed('case:export_sealed_evidence') }, 'case', canAssign))
       }
     } else if (row.triageEligible === true || canAssign) visible.push(projectWorkbenchRow(row, 'triage', canAssign))
   }

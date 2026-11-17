@@ -5,6 +5,7 @@ import { getAuthUser } from '@nzila/platform-auth/password'
 import { AuthOrgBindingError, type AuthOrgBindingOptions } from '@nzila/platform-auth/org-binding'
 import { canonicalMembershipRole } from './canonical-membership-role'
 import { withCanonicalOrganizationBinding } from './canonical-organization-selection'
+import { currentCanonicalRequest, withCanonicalRequestScope } from './canonical-request-scope'
 
 async function readCanonicalProfile(userId: string) {
   return withAuthContext({ phase: 'identity', userId }, async () => {
@@ -40,6 +41,8 @@ export async function getCanonicalPasswordActor() {
 }
 
 export async function getCanonicalOrganizationContext(options: AuthOrgBindingOptions = {}) {
+  const established = currentCanonicalRequest(options)
+  if (established) return { ...established.profile }
   return withCanonicalOrganizationBinding(options, async (binding) => {
     const profile = await readCanonicalProfile(binding.userId)
     const role = canonicalMembershipRole(binding.role, profile.isSystemAdmin)
@@ -49,5 +52,19 @@ export async function getCanonicalOrganizationContext(options: AuthOrgBindingOpt
       organizationId: binding.organizationId,
       role,
     }
+  })
+}
+
+/** Keep one live bridge through a short API request, including its transaction commit. */
+export async function withCanonicalApiContext<T>(operation: () => Promise<T>): Promise<T> {
+  if (currentCanonicalRequest()) return operation()
+  return withCanonicalOrganizationBinding({}, async (binding) => {
+    const profile = await readCanonicalProfile(binding.userId)
+    return withCanonicalRequestScope(binding, {
+      ...profile,
+      userId: binding.userId,
+      organizationId: binding.organizationId,
+      role: canonicalMembershipRole(binding.role, profile.isSystemAdmin),
+    }, operation)
   })
 }

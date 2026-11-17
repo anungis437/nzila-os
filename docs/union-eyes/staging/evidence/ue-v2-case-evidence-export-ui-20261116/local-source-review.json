@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "IMPLEMENTED_FOCUSED_LOCAL_PROOF_FULL_CHECKS_AND_STAGING_PENDING",
+  "recordedAt": "2026-11-16T23:28:52.334636+00:00",
+  "basedOnCommit": "d771da3a8ff03ae3ebec5d1cb05cb20942380ef0",
+  "applicationDeploymentPerformed": false,
+  "productionAuthorized": false,
+  "fullBaseStagingGo": false,
+  "financeFeaturesExcluded": true,
+  "behavior": [
+    "Explicit live case export capability in workbench; PDF default and JSON option in EN/FR",
+    "Fresh authorized request for each download; no cached link or retained case bytes",
+    "Real PDF readable records and printed server-verified HMAC seal; exact full UTF-8 sealed envelope embedded as case-evidence.json",
+    "Actual PDF SHA-256 and context checked in browser; JSON artifact bytes, counts and hashes independently checked",
+    "20 MiB bounded stream; cancellation on identity, organization, case or locale changes; denial and integrity errors visible",
+    "Generated artifact withheld if mandatory audit fails; private no-store responses",
+    "Existing PDFKit installed closure and standard font assets copied into standalone image with boundary checks"
+  ],
+  "limitations": [
+    "No certificate signature claim; browser never receives HMAC key",
+    "Preparation audit proves authorized artifact preparation, not successful browser save",
+    "No new dependency or lockfile change; Linux final immutable image and real browser journey pending",
+    "Source41 staging protocol tests JSON API only and cannot close C14"
+  ],
+  "focusedEvidence": [
+    {
+      "name": "focused-v3-pdf-complete.log",
+      "sha256": "34c99f6de17f6a55c707860b811057d513f7fad10e8bda0119a0350fa0a7c918",
+      "result": "74 tests in 7 files passed"
+    },
+    {
+      "name": "app-typecheck-v2.log",
+      "sha256": "d43e1e881c3566e034ecd94f7eadffb992063165c55eb5c6a411596df67c4772",
+      "result": "Application TypeScript passed"
+    },
+    {
+      "name": "census-v1.log",
+      "sha256": "fcc47ff867510c55e58566a7b8f22633d02db9ff554253a89e40a2f12d081dc4",
+      "result": "58 frontend and response census tests passed"
+    }
+  ],
+  "requiredLocalFive": "PENDING",
+  "newSourceCi": "PENDING",
+  "stagingBrowserAndDurableAudit": "PENDING"
+}
