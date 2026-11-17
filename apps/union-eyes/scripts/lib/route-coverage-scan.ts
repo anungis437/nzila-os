@@ -169,6 +169,9 @@ export const COMPUTE_ONLY_ROUTES: Record<string, string[]> = {
  * imports no function whose name says it changes state.
  */
 export const READ_ONLY_POST_ROUTES = [
+  // Reads actual dependency, ARM, reminder and checkpoint measurements; emits
+  // console telemetry only. It creates no checkpoint or business row.
+  'cron/base-operations-monitor/route.ts',
   // POST is a guarded, explicit HTTP 501; no role repair or data mutation occurs.
   'admin/fix-super-admin-roles/route.ts',
   // POST answers HTTP 501 to a caller that passes the staging and signature gates: the deadline-engine proof is retired and writes nothing.
@@ -316,6 +319,13 @@ function auditOf(route: string, source: string, guard: RouteGuard, mutating: boo
   if (BALLOT_SECRECY_EXEMPT_ROUTES.includes(route)) return 'EXEMPT_BALLOT_SECRECY'
   if (route in COMPUTE_ONLY_ROUTES || READ_ONLY_POST_ROUTES.includes(route)) return 'COMPUTE_ONLY'
   if (route in UNATTRIBUTABLE_WRITE_ROUTES) return 'EXEMPT_UNATTRIBUTABLE'
+  // The checkpoint IS a canonical audit row, not a detached business write.
+  // Keep this narrow delegation bound to its real service. The manifest
+  // regression verifies the shared executor, and native tests prove actual
+  // INSERT failure, rollback and concurrent retry identity on that schema.
+  if (route === 'cron/daily-audit-seal/route.ts' &&
+      /from ['"]@\/lib\/audit\/daily-audit-seal-runtime['"]/.test(source) &&
+      /await runDailyAuditSeals\(\)/.test(source)) return 'ATOMIC_SERVICE'
   // The legacy event item API delegates PATCH/DELETE to the canonical handler, whose tenant-locked
   // transaction commits its mutation and mandatory audit together. This is a narrow, pinned alias:
   // the manifest ratchet checks both the delegate and the canonical audited implementation.

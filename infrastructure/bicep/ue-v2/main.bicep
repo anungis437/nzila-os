@@ -396,6 +396,16 @@ resource pgExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@
 // ── Role assignments for the application identity ───────────────────────────
 var roleKvSecretsUser = '4633458b-17de-408a-b874-0445c86b69e6'
 var roleKvCryptoUser = '12338af0-0e69-4776-bea7-57ae8d297424'
+resource stagingBackupMetadataReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (env == 'staging' && deployApplications) {
+  name: guid(pgServer.id, appIdentity.id, 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
+  scope: pgServer
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
+    principalId: appIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+  dependsOn: [database]
+}
 // Production retains its existing scope. Staging uses named runtime-secret
 // scopes so its app identity cannot retrieve operator/bootstrap passwords.
 resource kvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (env == 'prod') {
@@ -523,6 +533,8 @@ module apps 'modules/apps.bicep' = if (deployApplications) {
     environmentDefaultDomain: acaEnvironmentDefaultDomain
     identityId: appIdentity.id
     identityClientId: appIdentity.properties.clientId
+    identityPrincipalId: appIdentity.properties.principalId
+    postgresResourceId: pgServer.id
     acrLoginServer: '${acrName}.azurecr.io'
     appImage: '${acrName}.azurecr.io/${appImageRepository}@${appImageDigest}'
     clamavImage: '${acrName}.azurecr.io/${clamavImageRepository}@${clamavImageDigest}'
@@ -565,6 +577,7 @@ module alerts 'modules/alerts.bicep' = if (deployApplications) {
     // A scale-to-zero workload legitimately has no replica; only alert when a minimum is configured.
     appReplicaAlert: appMinReplicas > 0
     clamavReplicaAlert: clamavMinReplicas > 0
+    baseOperationsMonitoring: env == 'staging'
     prefix: prefix
     tags: tags
   }

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getBuildMetadata, isReadyFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 import { evaluateCatalogAdmission } from '@/lib/operations/catalog-admission'
-import { probeQueue, probeStorage } from '@/lib/operations/service-probes'
+import { probeQueue, probeScanner, probeStorage } from '@/lib/operations/service-probes'
+import { readinessPolicy } from '@/lib/operations/readiness-policy'
 import { evaluateTestBypassGuard, readTestBypassGuardEnv } from '@/lib/reality/test-bypass-guard'
 
 const APP = 'union-eyes'
@@ -92,13 +93,15 @@ function checkCalendarTokenEncryptionReady(): boolean {
 }
 
 export async function GET() {
-  const requireDecisionProof = parseBoolEnv(process.env.READY_REQUIRE_DECISION_PROOF, false)
+  const policy = readinessPolicy()
+  const requireDecisionProof = policy.decisionProof
   const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
-  const requireStorage = parseBoolEnv(process.env.READY_REQUIRE_STORAGE, false)
-  const [database, queue, storage, catalogAuthority] = await Promise.all([
+  const requireStorage = policy.storage
+  const [database, queue, storage, scanner, catalogAuthority] = await Promise.all([
     checkDatabaseReady(),
     requireQueue ? checkQueueReady() : Promise.resolve(false),
     requireStorage ? checkStorageReady() : Promise.resolve<'unknown'>('unknown'),
+    policy.scanner ? probeScanner().then(result => result.state === 'ok') : Promise.resolve<'unknown'>('unknown'),
     checkCatalogReady(),
   ])
   const requireCalendarIntegrations = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_INTEGRATIONS, false)
@@ -115,11 +118,14 @@ export async function GET() {
   const checksInput: Record<string, boolean | 'unknown'> = {
     process: true,
     noTestBypass: testBypass.ok,
+    runtimeProfile: policy.valid,
     database,
     catalogAuthority,
     storage,
     thirdParty: 'unknown',
   }
+
+  if (policy.scanner) checksInput.scanner = scanner
 
   if (requireDecisionProof) {
     checksInput.decisionProof = await checkDecisionProofReady()
@@ -146,10 +152,12 @@ export async function GET() {
   const requiredChecks = [
     'process',
     'noTestBypass',
+    'runtimeProfile',
     'database',
     'catalogAuthority',
     ...(requireDecisionProof ? ['decisionProof'] : []),
     ...(requireStorage ? ['storage'] : []),
+    ...(policy.scanner ? ['scanner'] : []),
     ...(requireQueue ? ['queue'] : []),
     ...(requireCalendarIntegrations ? ['calendarIntegrations'] : []),
     ...(requireEmailDelivery ? ['emailDelivery'] : []),
@@ -161,6 +169,7 @@ export async function GET() {
     {
       ready,
       status: ready ? 'ready' : 'not_ready',
+      releaseProfile: policy.profile,
       ...getBuildMetadata(APP),
       checks,
       ...(testBypass.ok

@@ -37,7 +37,7 @@ const EXAMPLE = '.env.example'
 const VALIDATOR = 'lib/config/env-validation.ts'
 
 /** Files whose reads only validate, probe or declare variables: a variable read nowhere else is validated and never used. */
-export const CHECK_FILES: ReadonlySet<string> = new Set(['lib/config/env-validation.ts', 'lib/runtime/fail-closed.ts', 'lib/config/env-readiness.ts', 'app/api/ready/route.ts', 'app/api/health/route.ts', 'lib/pilot-admin-operational.ts', 'instrumentation.ts'])
+export const CHECK_FILES: ReadonlySet<string> = new Set(['lib/config/env-validation.ts', 'lib/runtime/fail-closed.ts', 'lib/config/env-readiness.ts', 'lib/operations/readiness-policy.ts', 'app/api/ready/route.ts', 'app/api/health/route.ts', 'lib/pilot-admin-operational.ts', 'instrumentation.ts'])
 export const CHECK_HELPERS: ReadonlySet<string> = new Set(['probeSecretPresence'])
 
 export interface EnvCensusReport {

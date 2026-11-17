@@ -5,7 +5,8 @@ import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 
-vi.mock('next-intl', () => ({ useLocale: () => 'en-CA', useTranslations: () => (key: string) => key }));
+const translate = vi.hoisted(() => (key: string) => key);
+vi.mock('next-intl', () => ({ useLocale: () => 'en-CA', useTranslations: () => translate }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
 vi.mock('@/components/ui/loading-skeleton-composer', () => ({ LoadingSkeletonComposer: () => <div>skeleton</div> }));
 vi.mock('@/components/leadership/kpi-cards', () => ({ KpiCards: () => <div>kpi-cards</div> }));
@@ -29,7 +30,7 @@ import LeadershipPage from '../page';
 
 const metrics = {
   kpi: { activeGrievances: 4, resolvedThisMonth: 2, avgTriageDays: 1.5, avgResolutionDays: 9, arbitrationCount: 1, overdueCases: 0, previousPeriod: null },
-  employers: [{ employerId: 'emp-1', employerName: 'Acme Corp', activeGrievances: 3, overdueCases: 0, resolvedThisQuarter: 1, topCategory: 'wages', avgResolutionDays: 8, trend: 'flat' }],
+  employers: [{ employerId: 'emp-1', employerName: 'Acme Corp', activeGrievances: 3, overdueCases: 0, resolvedThisQuarter: 1, topCategory: 'wages', avgResolutionDays: 8, trend: 'stable' }],
   trends: [],
   categories: [],
   stewards: [],
@@ -73,7 +74,7 @@ describe('leadership page', () => {
     expect(await screen.findByText('Requires officer role or above')).toBeInTheDocument();
 
     answer = ok(metrics);
-    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    await user.click(screen.getByRole('button', { name: 'errors.retry' }));
     expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
   });
 
@@ -81,12 +82,14 @@ describe('leadership page', () => {
     ['a body with no data', { success: true }],
     ['data that lacks the employers', { success: true, data: { ...metrics, employers: undefined } }],
     ['data that lacks the compliance summary', { success: true, data: { ...metrics, compliance: undefined } }],
+    ['an unknown employer trend', { success: true, data: { ...metrics, employers: [{ ...metrics.employers[0], trend: 'increasing' }] } }],
     ['metrics that are not wrapped in the envelope', metrics],
   ])('treats %s as an error instead of drawing a half-empty dashboard', async (_label, body) => {
     answer = { status: 200, body };
     render(<LeadershipPage />);
-    expect(await screen.findByText('Dashboard unavailable')).toBeInTheDocument();
-    expect(screen.getByText(/cannot read/)).toBeInTheDocument();
+    expect(await screen.findByText('errors.title')).toBeInTheDocument();
+    expect(screen.getByText('errors.invalidResponse')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.queryByText('kpi-cards')).toBeNull();
   });
 });

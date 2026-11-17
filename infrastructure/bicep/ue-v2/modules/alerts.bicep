@@ -13,12 +13,14 @@ param pgServerId string
 param appReplicaAlert bool = true
 @description('Alert when the scanner has no running replica. Off for a scale-to-zero scanner.')
 param clamavReplicaAlert bool = true
+@description('Staging-only base operational heartbeat, measured failures and missing-caller alert.')
+param baseOperationsMonitoring bool = false
 param prefix string
 param tags object = {}
 
 var base = 'ContainerAppConsoleLogs_CL | where ContainerAppName_s == "${appName}"'
 
-var logAlerts = [
+var existingLogAlerts = [
   {
     name: 'unexpected-5xx'
     severity: 1
@@ -76,6 +78,17 @@ var logAlerts = [
     threshold: 0
   }
 ]
+
+var logAlerts = concat(existingLogAlerts, baseOperationsMonitoring ? [
+  {
+    name: 'base-operations-unhealthy-or-stale'
+    severity: 1
+    description: 'The latest measured base backup/worker/audit/dependency check failed, or no real monitor heartbeat arrived in 15 minutes. Detects a stopped monitor too.'
+    query: '${base} | where TimeGenerated > ago(30m) | where Log_s has "UE_BASE_OPERATIONAL_MONITOR_V1" | extend j = parse_json(Log_s) | where tostring(j.event) == "UE_BASE_OPERATIONAL_MONITOR_V1" | extend Healthy = tobool(j.ok) | summarize arg_max(TimeGenerated, Healthy) | where isnull(TimeGenerated) or TimeGenerated < ago(15m) or Healthy != true'
+    window: 'PT30M'
+    threshold: 0
+  }
+] : [])
 
 resource logRules 'Microsoft.Insights/scheduledQueryRules@2023-12-01' = [for a in logAlerts: {
   name: '${prefix}-${a.name}'

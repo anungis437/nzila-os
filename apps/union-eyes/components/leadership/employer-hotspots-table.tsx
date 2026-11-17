@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import type { LeadershipEmployerTrend } from '@/lib/leadership/dashboard-contract';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ export interface EmployerHotspot {
   activeGrievances: number;
   resolvedThisQuarter: number;
   topCategory: string;
-  trend: "increasing" | "decreasing" | "stable";
+  trend: LeadershipEmployerTrend;
   avgResolutionDays: number;
   lastCommunicationDate?: string;
   overdueCases: number;
@@ -50,8 +51,8 @@ export interface EmployerHotspotsTableProps {
 const TrendBadge = ({ trend }: { trend: EmployerHotspot["trend"] }) => {
   const t = useTranslations("leadershipDashboard.employerHotspots.trend");
   const config = {
-    increasing: { icon: TrendingUp, label: t("increasing"), variant: "destructive" as const },
-    decreasing: { icon: TrendingDown, label: t("decreasing"), variant: "secondary" as const },
+    up: { icon: TrendingUp, label: t("increasing"), variant: "destructive" as const },
+    down: { icon: TrendingDown, label: t("decreasing"), variant: "secondary" as const },
     stable: { icon: Minus, label: t("stable"), variant: "outline" as const },
   };
   const { icon: Icon, label, variant } = config[trend];

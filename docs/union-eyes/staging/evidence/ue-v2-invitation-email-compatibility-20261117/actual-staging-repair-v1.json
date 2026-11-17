@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-17T08:14:56.815142+00:00",
+  "status": "QUALIFIED_PRIMARY_CHECK_REPAIR_APPLIED_RECIPIENT_RETRY_PENDING",
+  "change": "CHG-2026-0114",
+  "sourcePr": 1263,
+  "repairSourceSha": "b19f75e2a8071fab84ab4f2a85a863fe3e7c2389",
+  "repairMainSha": "89e62b494aa0ba3614719f498d7d87a836be4ad5",
+  "servingApplicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "servingWorkflowSha": "c3b7349260d3736860f4faef5b72c20c68d3ce63",
+  "appImageDigest": "sha256:1a518438d0af40871dd171824d1c7f8924c3cbca49041b996a8c501e8bfa1c3d",
+  "appImageRolloutPerformedForCheckRepair": false,
+  "sourceRegisteredChecks": 129,
+  "trustedRequiredChecks": 16,
+  "postMergeChecks": 94,
+  "localRequiredChecksPassed": 5,
+  "localFastTestsPassed": 39429,
+  "separateActualNativeInvitationTestsPassed": 15,
+  "primaryAppliedAt": "2026-11-17T06:43:12.710261Z",
+  "rootCause": "Application-valid tagged invitation address rejected by narrower live valid_email check; original transaction rolled back.",
+  "repair": "Validated atomic check replacement; original email alphabet preserved with plus and apostrophe added.",
+  "preservedPrimaryTables": 782,
+  "preservedMigrationLedgerEntries": 40,
+  "businessRowDmlPerformedByRepair": 0,
+  "persistentOwnerExecutionGrants": 0,
+  "existingAzureManagedAdminMembershipPreserved": true,
+  "originalInvitationUnusedAndNonRevokedAtReadback": true,
+  "humanRetryAndFirstCaseConfirmation": "PENDING",
+  "sourceBoundProofs": [
+    {
+      "name": "retainedCopyCycle",
+      "privateReceiptName": "clone-qualified-v2/cycle.json",
+      "sha256": "6d1a9bafd0541c17d19ee3aa51ad77338c29c02180ba10840b356be8fb88b495"
+    },
+    {
+      "name": "retainedCopyApply",
+      "privateReceiptName": "clone-qualified-v2/actual-apply.json",
+      "sha256": "fb1252e645a4316fbe1216df86e507fe0aa89fe45f0300644b29345f6e054f22"
+    },
+    {
+      "name": "primaryCycle",
+      "privateReceiptName": "primary-qualified-v2/cycle.json",
+      "sha256": "d03f5a60c3be98a3a40820a12be4e50ca8f9fe6559237c3e2c6985d09f56906b"
+    },
+    {
+      "name": "primaryApply",
+      "privateReceiptName": "primary-qualified-v2/actual-apply.json",
+      "sha256": "dffd9a4dba3bc606c29e924174df7c04826a9128cfee1b2f9e786fe81fbf7e49"
+    },
+    {
+      "name": "postRepairInvitationReadback",
+      "privateReceiptName": "actual-original-invitation-postrepair-readback-v1.json",
+      "sha256": "9d2f91f43c80a271c5a594b34892648f1851092b3214f940c9b44a9f2d9f63c8"
+    }
+  ],
+  "failedAttemptsPreserved": true,
+  "fullBaseStagingGo": false,
+  "financeFeaturesInScope": false,
+  "productionAuthorized": false
+}

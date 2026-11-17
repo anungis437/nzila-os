@@ -10,6 +10,7 @@ import { and, eq, gte, lt } from "drizzle-orm";
 import { cacheGet, cacheSet } from "@/lib/services/cache-service";
 import { ApiError } from "@/lib/api/errors";
 import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
+import type { LeadershipEmployerTrend } from '@/lib/leadership/dashboard-contract';
 
 export type DashboardTimeframe = "weekly" | "monthly" | "quarterly";
 
@@ -107,7 +108,7 @@ export interface LeadershipDashboardPayload {
     overdueCases: number;
     resolvedThisQuarter: number;
     topCategory: string;
-    trend: "up" | "down" | "stable";
+    trend: LeadershipEmployerTrend;
     avgResolutionDays: number;
     lastCommunicationDate?: string;
   }>;
@@ -892,7 +893,7 @@ function toAlertTitle(type: string, message: string | null): string {
   return trimmedMessage.length > 0 ? trimmedMessage : `${normalizedType} alert`;
 }
 
-function trendFromWindow(current: number, previous: number): "up" | "down" | "stable" {
+function trendFromWindow(current: number, previous: number): LeadershipEmployerTrend {
   if (current > previous) return "up";
   if (current < previous) return "down";
   return "stable";

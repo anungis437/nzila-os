@@ -2473,6 +2473,13 @@
     }
   },
   "leadershipPage": {
+    "errors": {
+      "title": "Tableau de bord indisponible",
+      "retry": "Réessayer",
+      "dataUnavailable": "Les données du tableau de bord sont indisponibles. Réessayez ou contactez le soutien.",
+      "invalidResponse": "Le service a renvoyé des données que ce tableau de bord ne peut pas afficher. Réessayez ou contactez le soutien.",
+      "connection": "Impossible de joindre le service du tableau de bord. Vérifiez votre connexion et réessayez."
+    },
     "title": "Tableau de bord du leadership",
     "subtitle": "Vue d'ensemble exécutive des opérations de griefs et de la conformité",
     "loading": "Chargement de la vue d'ensemble exécutive...",

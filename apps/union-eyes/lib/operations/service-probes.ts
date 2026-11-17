@@ -80,6 +80,34 @@ export async function probeQueue(): Promise<ProbeResult> {
   }
 }
 
+/** The adapter answers healthy only after clamd's real native PING returns PONG. */
+export async function probeScanner(): Promise<ProbeResult> {
+  const configured = process.env.CLAMAV_URL
+  if (!configured) return { state: 'degraded', note: 'The document scanner is not configured' }
+  const start = Date.now()
+  try {
+    const url = new URL(configured)
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+      return { state: 'fail', ms: elapsed(start), note: 'The document scanner configuration is invalid' }
+    }
+    url.pathname = `${url.pathname.replace(/\/$/, '')}/health`
+    const healthy = await within((async () => {
+      const response = await fetch(url.toString(), {
+        cache: 'no-store', signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+      })
+      if (!response.ok) return false
+      const body: unknown = await response.json()
+      return typeof body === 'object' && body !== null &&
+        'status' in body && body.status === 'ok' && 'clamd' in body && body.clamd === true
+    })(), PROBE_TIMEOUT_MS)
+    return healthy
+      ? { state: 'ok', ms: elapsed(start) }
+      : { state: 'fail', ms: elapsed(start), note: 'The document scanner is not ready' }
+  } catch {
+    return { state: 'fail', ms: elapsed(start), note: 'The document scanner could not be verified' }
+  }
+}
+
 /** Document storage: the Azure Blob container member documents are written to (the same default the document services use). */
 export async function probeStorage(): Promise<ProbeResult> {
   const start = Date.now()

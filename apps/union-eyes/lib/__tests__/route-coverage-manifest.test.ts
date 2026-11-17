@@ -151,6 +151,18 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
     expect(route).toMatchObject({ kernel: true, data: 'TENANT_TX', audit: 'ATOMIC_SERVICE' })
   })
 
+  it('classifies the operational read separately from the canonical checkpoint that is itself the durable audit event', () => {
+    expect(fresh.find(entry => entry.route === 'cron/base-operations-monitor/route.ts')).toMatchObject({ audit: 'COMPUTE_ONLY' })
+    expect(fresh.find(entry => entry.route === 'cron/daily-audit-seal/route.ts')).toMatchObject({ audit: 'ATOMIC_SERVICE' })
+    const runtime = readFileSync(join(ROOT, 'lib/audit/daily-audit-seal-runtime.ts'), 'utf8')
+    const store = readFileSync(join(ROOT, 'lib/audit/daily-audit-seal-store.ts'), 'utf8')
+    expect(runtime).toMatch(/withSystemContext\(async tx =>[\s\S]*?return sealAuditPartition\(tx,/)
+    expect(store).toMatch(/appendCanonicalPlatformAuditLog\(tx, entry, \{ recordId: seal.recordId \}\)/)
+    expect(store).toMatch(/appendCanonicalAuditLog\(tx, \{ \.\.\.entry, organizationId: input.organizationId \}, \{ recordId: seal.recordId \}\)/)
+    // There is no separate checkpoint table/state write to detach from audit.
+    expect(store).not.toMatch(/\bINSERT\s+INTO|\bUPDATE\s+public\.|\.insert\(|\.update\(/i)
+  })
+
   it('counts a platform-auth service as audited only while its audit record is mandatory, not best-effort', () => {
     const authSrc = join(__dirname, '..', '..', '..', '..', 'packages', 'platform-auth', 'src')
     for (const [name, { file, proof }] of Object.entries(AUTH_MANDATORY_AUDIT_SERVICES)) {

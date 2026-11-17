@@ -46,6 +46,7 @@ import {
 } from '@/components/leadership/leadership-export';
 import { logger } from '@/lib/logger';
 import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { isLeadershipEmployerTrend } from '@/lib/leadership/dashboard-contract';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function toDashboardData(body: unknown): DashboardData {
   const { kpi, employers, trends, categories, stewards, compliance } = payload;
   if (
     !isRecord(kpi) ||
-    !Array.isArray(employers) ||
+    !Array.isArray(employers) || !employers.every(employer => isRecord(employer) && isLeadershipEmployerTrend(employer.trend)) ||
     !Array.isArray(trends) ||
     !Array.isArray(categories) ||
     !Array.isArray(stewards) ||
@@ -100,19 +101,19 @@ export default function LeadershipPage() {
         setData(toDashboardData(await response.json()));
       } else {
         logger.warn('Leadership dashboard fetch failed', { status: response.status });
-        setError(await readApiError(response, 'Dashboard data unavailable — please try again or contact support.'));
+        setError(await readApiError(response, t('errors.dataUnavailable')));
       }
     } catch (err) {
       logger.error('Failed to load leadership dashboard', err);
       setError(
         err instanceof ApiShapeError
-          ? 'The dashboard service sent data this page cannot read. Try again or contact support.'
-          : 'Could not connect to the dashboard service. Check your connection and try again.',
+          ? t('errors.invalidResponse')
+          : t('errors.connection'),
       );
     } finally {
       setLoading(false);
     }
-  }, [timeframe]);
+  }, [timeframe, t]);
 
   useEffect(() => {
     fetchDashboard();
@@ -170,15 +171,16 @@ export default function LeadershipPage() {
   if (!data) {
     return (
       <div className="container mx-auto py-6">
+        <h1 className="mb-4 text-2xl font-bold">{t('title')}</h1>
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-            <p className="font-medium text-red-800">Dashboard unavailable</p>
+          <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-6">
+            <p className="font-medium text-red-800">{t('errors.title')}</p>
             <p className="mt-1 text-sm text-red-700">{error}</p>
             <button
               onClick={() => fetchDashboard()}
               className="mt-4 text-sm font-medium text-red-800 underline hover:text-red-900"
             >
-              Try again
+              {t('errors.retry')}
             </button>
           </div>
         ) : (

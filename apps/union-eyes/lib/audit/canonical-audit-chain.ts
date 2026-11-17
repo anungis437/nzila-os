@@ -96,7 +96,29 @@ export function canonicalAuditContentHash(input: {
  * tenant transaction. The per-organization advisory lock serializes chain heads and
  * created_at is assigned after the lock so chain order equals created_at order.
  */
-export async function appendCanonicalAuditLog(tx: RLSTx, entry: CanonicalAuditEntry) {
+export async function appendCanonicalAuditLog(
+  tx: RLSTx, entry: CanonicalAuditEntry, options?: { recordId: string },
+) {
+  return appendPartitionAuditLog(tx, entry, options)
+}
+
+/** Platform records require the dedicated SYSTEM connection. Tenant RLS cannot
+ * insert or read the NULL-organization partition. No authority is inferred
+ * from the supplied actor string. */
+export async function appendCanonicalPlatformAuditLog(
+  tx: RLSTx, entry: Omit<CanonicalAuditEntry, 'organizationId'>, options?: { recordId: string },
+) {
+  return appendPartitionAuditLog(tx, { ...entry, organizationId: null }, options)
+}
+
+async function appendPartitionAuditLog(
+  tx: RLSTx,
+  entry: Omit<CanonicalAuditEntry, 'organizationId'> & { organizationId: string | null },
+  options?: { recordId: string },
+) {
+  if (options && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(options.recordId)) {
+    throw new Error('UE_AUDIT_RECORD_ID_INVALID')
+  }
   const details = JSON.parse(JSON.stringify(entry.details)) as Record<string, unknown>
   const resourceId = entry.resourceId ?? null
   const userId = entry.userId ?? null
@@ -105,11 +127,14 @@ export async function appendCanonicalAuditLog(tx: RLSTx, entry: CanonicalAuditEn
   const ipAddress = entry.ipAddress && isIP(entry.ipAddress) ? entry.ipAddress : null
 
   await tx.execute(
-    sql`SELECT pg_advisory_xact_lock(hashtextextended(${`audit_logs:${entry.organizationId}`}, 0))`,
+    sql`SELECT pg_advisory_xact_lock(hashtextextended(${`audit_logs:${entry.organizationId ?? 'platform'}`}, 0))`,
   )
+  const partition = entry.organizationId === null
+    ? sql`organization_id IS NULL`
+    : sql`organization_id = ${entry.organizationId}::uuid`
   const latest = (await tx.execute(
     sql`SELECT content_hash FROM public.audit_logs
-        WHERE organization_id = ${entry.organizationId}::uuid
+        WHERE ${partition}
         ORDER BY created_at DESC, id DESC LIMIT 1`,
   )) as unknown as { content_hash: string | null }[]
   const previousHash = latest[0]?.content_hash ?? null
@@ -127,7 +152,7 @@ export async function appendCanonicalAuditLog(tx: RLSTx, entry: CanonicalAuditEn
     sql`INSERT INTO public.audit_logs
         (id, audit_id, created_at, updated_at, organization_id, action, resource_type, resource_id, user_id,
          ip_address, user_agent, details, changes, content_hash, previous_hash)
-        VALUES (${randomUUID()}::uuid, ${randomUUID()}::uuid, clock_timestamp(), clock_timestamp(), ${entry.organizationId}::uuid, ${action},
+        VALUES (${options?.recordId ?? randomUUID()}::uuid, ${randomUUID()}::uuid, clock_timestamp(), clock_timestamp(), ${entry.organizationId}::uuid, ${action},
           ${resourceType}, ${resourceId}, ${userId}, ${ipAddress}::inet, ${entry.userAgent ?? null},
           ${JSON.stringify(details)}::jsonb, '{}'::jsonb, ${contentHash}, ${previousHash})`,
   )

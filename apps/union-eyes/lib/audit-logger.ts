@@ -136,6 +136,31 @@ export interface AuditLogEntry {
 export async function auditLog(entry: AuditLogEntry): Promise<void> {
   const timestamp = new Date();
 
+  // Canonical platform/job summaries are durable too. Their NULL organization
+  // is an explicit SYSTEM-only partition, not a fabricated tenant identity.
+  if (!entry.organizationId && currentStateContextEnabled()) {
+    const { withSystemContext } = await import('./db/with-rls-context');
+    const { appendCanonicalPlatformAuditLog } = await import('./audit/canonical-audit-chain');
+    await withSystemContext(async (tx) => appendCanonicalPlatformAuditLog(tx, {
+      action: entry.action || entry.eventType,
+      resourceType: entry.resource || 'unknown',
+      resourceId: entry.resourceId,
+      userId: entry.userId,
+      ipAddress: entry.ipAddress,
+      userAgent: entry.userAgent,
+      details: {
+        eventType: entry.eventType,
+        severity: (entry.severity || AuditSeverity.MEDIUM).toLowerCase(),
+        outcome: entry.outcome || 'success',
+        errorMessage: entry.errorMessage,
+        metadata: entry.metadata,
+        details: entry.details,
+        timestamp: timestamp.toISOString(),
+      },
+    }));
+    return;
+  }
+
   // Canonical V2 persists to public.audit_logs (hash-chained, tenant RLS). A persistence
   // failure is deliberately NOT swallowed: the protected operation must fail safely.
   if (entry.organizationId && currentStateContextEnabled()) {
