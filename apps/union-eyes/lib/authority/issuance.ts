@@ -12,7 +12,8 @@
  * the exact issuance); this module additionally checks what only facts can show
  * (issuer capacity and mandate, membership, conflicts, segregation of duties).
  */
-import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity } from './common'
+import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity   hasPrimaryCaseHandlerOnlyPower,
+} from './common'
 import { dutyConflicts } from './policies/finance'
 import {
   POLICY_VERSION,
@@ -180,6 +181,10 @@ function result(
 
 function ruleIntegrityProblem(rule: IssuanceRule): string | null {
   if (rule.status !== 'active') return `rule is ${rule.status}`
+  if (rule.domain === 'supervisory' && (rule.operation === 'issue' || rule.operation === 'amend') &&
+      hasPrimaryCaseHandlerOnlyPower(rule.allowedPowers)) {
+    return 'supervisory issuance rule exceeds the primary case-handler-only ceiling'
+  }
   if (!rule.sourceInstrument || rule.sourceInstrument.trim() === '' || rule.sourceInstrument === PLACEHOLDER_INSTRUMENT) {
     return 'rule has no real institutional source instrument'
   }
