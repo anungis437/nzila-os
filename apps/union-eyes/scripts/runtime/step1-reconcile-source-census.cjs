@@ -32,7 +32,7 @@ const duplicateChecks={expectedFiles:uniq(expectedFileKeys),observedFiles:uniq(o
 const fileDelta={unclassified:minus(set(observedFileKeys),set(expectedFileKeys)),stale:minus(set(expectedFileKeys),set(observedFileKeys))}
 const methodDelta={unclassified:minus(set(observed),set(expected)),stale:minus(set(expected),set(observed))}
 const changedRouteBlobs=inventory.routeFiles.flatMap(x=>{
-  const sha=cp.execFileSync('git',['rev-parse',rev+':'+x.path],{cwd:root,encoding:'utf8'}).trim()
+  const sha=observedFileKeys.includes(x.path)?cp.execFileSync('git',['rev-parse',rev+':'+x.path],{cwd:root,encoding:'utf8'}).trim():null
   return sha===x.blobSha?[]:[{path:x.path,expected:x.blobSha,observed:sha}]
 })
 const declarationCandidates=[
