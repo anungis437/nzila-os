@@ -1,0 +1,1281 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_B",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "counts": {
+    "reviewedKeys": 26,
+    "remainingNewKeys": 14,
+    "sourceFiles": 16
+  },
+  "sources": [
+    {
+      "path": "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+      "blobSha": "457f6442affccf271571f9ac9f6790539acc8304",
+      "scope": "EMPLOYER_FINANCE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 4,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 5,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 6,
+          "statement": "import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';"
+        },
+        {
+          "line": 7,
+          "statement": "import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';"
+        },
+        {
+          "line": 12,
+          "statement": "export const POST = withApi({"
+        },
+        {
+          "line": 13,
+          "statement": "auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },"
+        },
+        {
+          "line": 14,
+          "statement": "body: z.object({ submissionAuthorityRef: z.string().min(1).max(255) }),"
+        },
+        {
+          "line": 17,
+          "statement": "if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');"
+        },
+        {
+          "line": 19,
+          "statement": "if (!key || key.length > 200) throw ApiError.badRequest('A bounded Idempotency-Key header is required');"
+        },
+        {
+          "line": 20,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 21,
+          "statement": "await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:execute', resourceId: params.id });"
+        },
+        {
+          "line": 26,
+          "statement": "if (!run || !run.immutableSnapshotLocked || !run.evidenceManifestHash) throw ApiError.conflict('A sealed remittance package is required');"
+        },
+        {
+          "line": 38,
+          "statement": "submissionAuthorityRef: body.submissionAuthorityRef,"
+        },
+        {
+          "line": 45,
+          "statement": "if (submission.packageDigest !== packageDigest || submission.submissionAuthorityRef !== body.submissionAuthorityRef) {"
+        },
+        {
+          "line": 46,
+          "statement": "throw ApiError.conflict('Idempotency-Key was already used for a different package or authority');"
+        },
+        {
+          "line": 48,
+          "statement": "await persistAtomicAudit(tx, {"
+        },
+        {
+          "line": 57,
+          "statement": "export const PATCH = withApi({"
+        },
+        {
+          "line": 58,
+          "statement": "auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },"
+        },
+        {
+          "line": 61,
+          "statement": "if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');"
+        },
+        {
+          "line": 62,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 63,
+          "statement": "await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:approve', resourceId: params.id });"
+        },
+        {
+          "line": 70,
+          "statement": "if (submission.submittedBy === userId) throw ApiError.forbidden('Submission reconciliation requires an independent approver');"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+      "blobSha": "9701bc4d73947c7fde07d300f3ead617cf86753b",
+      "scope": "EMPLOYER_DATA_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 11,
+          "statement": "* Deterministic and auditable, never guessed: the caller submits explicit, one-to-one"
+        },
+        {
+          "line": 23,
+          "statement": "import { FINANCIAL_MEMBER_DATA_ROLES } from \"@/lib/finance/financial-authority\";"
+        },
+        {
+          "line": 24,
+          "statement": "import { requireLiveFinancialMandate } from \"@/lib/finance/require-live-financial-mandate\";"
+        },
+        {
+          "line": 26,
+          "statement": "import { withRLSContext } from \"@/lib/db/with-rls-context\";"
+        },
+        {
+          "line": 40,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 42,
+          "statement": "auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },"
+        },
+        {
+          "line": 48,
+          "statement": "if (!organizationId || !userId) throw ApiError.badRequest(\"Organization context required\");"
+        },
+        {
+          "line": 51,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 59,
+          "statement": "await requireLiveFinancialMandate(tx, { organizationId, userId, action: \"finance:prepare\", employerId: batch.employerId ?? undefined });"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/equity/consent/route.ts",
+      "blobSha": "2ebd0ecda75136a852ba6ca398989b4f01b8b6ef",
+      "scope": "SPECIAL_CATEGORY_CONSENT_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 4,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 5,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 6,
+          "statement": "import { equityConsentNoticeVersions, equityPurposeConsents, equitySelfIdentificationRecords } from '@/db/schema';"
+        },
+        {
+          "line": 8,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 10,
+          "statement": "const grantSchema = z.object({ noticeVersionId: zUUID, granted: z.literal(true) }).strict();"
+        },
+        {
+          "line": 13,
+          "statement": "export const GET = withApi({ auth: { required: true, minRole: 'member' }, requireOrg: true, openapi: { tags: ['Equity'], summary: 'Read the reviewed equity notice and the caller consent state' } }, async ({ organizationId, userId }) => {"
+        },
+        {
+          "line": 14,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 15,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 17,
+          "statement": "const notices = await tx.select().from(equityConsentNoticeVersions).where(and(eq(equityConsentNoticeVersions.purpose, PURPOSE), eq(equityConsentNoticeVersions.status, 'reviewed'), lte(equityConsentNoticeVersions.effectiveFrom, now), or(isNull(equityConsentNoticeVersions.effectiveUntil), gt(equityConsentNoticeVersions.effectiveUntil, now)))).orderBy(desc(equityConsentNoticeVersions.version)).limit(2);"
+        },
+        {
+          "line": 18,
+          "statement": "if (notices.length !== 1) throw ApiError.capabilityUnavailable(notices.length ? 'Equity notice versions overlap; consent is unavailable' : 'No reviewed equity consent notice is active');"
+        },
+        {
+          "line": 19,
+          "statement": "const [consent] = await tx.select().from(equityPurposeConsents).where(and(eq(equityPurposeConsents.organizationId, organizationId), eq(equityPurposeConsents.subjectUserId, userId), eq(equityPurposeConsents.purpose, PURPOSE), eq(equityPurposeConsents.status, 'active'))).limit(1);"
+        },
+        {
+          "line": 20,
+          "statement": "return { notice: notices[0], consent: consent ?? null };"
+        },
+        {
+          "line": 24,
+          "statement": "export const POST = withApi({ auth: { required: true, minRole: 'member' }, requireOrg: true, body: grantSchema, openapi: { tags: ['Equity'], summary: 'Grant purpose-bound equity self-identification consent' } }, async ({ organizationId, userId, body }) => {"
+        },
+        {
+          "line": 25,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 26,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 28,
+          "statement": "const [notice] = await tx.select().from(equityConsentNoticeVersions).where(and(eq(equityConsentNoticeVersions.id, body.noticeVersionId), eq(equityConsentNoticeVersions.purpose, PURPOSE), eq(equityConsentNoticeVersions.status, 'reviewed'), lte(equityConsentNoticeVersions.effectiveFrom, now), or(isNull(equityConsentNoticeVersions.effectiveUntil), gt(equityConsentNoticeVersions.effectiveUntil, now)))).limit(1);"
+        },
+        {
+          "line": 29,
+          "statement": "if (!notice) throw ApiError.conflict('The consent notice is not the current reviewed notice');"
+        },
+        {
+          "line": 30,
+          "statement": "await tx.update(equityPurposeConsents).set({ status: 'expired', expiresAt: now }).where(and(eq(equityPurposeConsents.organizationId, organizationId), eq(equityPurposeConsents.subjectUserId, userId), eq(equityPurposeConsents.purpose, PURPOSE), eq(equityPurposeConsents.status, 'active')));"
+        },
+        {
+          "line": 31,
+          "statement": "const [consent] = await tx.insert(equityPurposeConsents).values({ organizationId, subjectUserId: userId, purpose: PURPOSE, noticeVersionId: notice.id, status: 'active' }).returning();"
+        },
+        {
+          "line": 32,
+          "statement": "await persistAtomicAudit(tx, { organizationId, userId, action: 'equity.consent.granted', resourceType: 'equity_purpose_consents', resourceId: consent.id, details: { purpose: PURPOSE, noticeVersionId: notice.id, noticeVersion: notice.version } });"
+        },
+        {
+          "line": 33,
+          "statement": "return { consent };"
+        },
+        {
+          "line": 37,
+          "statement": "export const DELETE = withApi({ auth: { required: true, minRole: 'member' }, requireOrg: true, body: withdrawSchema, openapi: { tags: ['Equity'], summary: 'Withdraw equity consent and erase the encrypted self-identification payload' } }, async ({ organizationId, userId, body }) => {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+      "blobSha": "2aa69a75ecd25fffbffd05d924ec9a197ae46b22",
+      "scope": "SPECIAL_CATEGORY_DISCLOSURE_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 4,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 5,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 6,
+          "statement": "import { equityDisclosureGrants, organizationMembers } from '@/db/schema';"
+        },
+        {
+          "line": 7,
+          "statement": "import { requireEquityDisclosureGrantAuthority } from '@/lib/equity/disclosure-authority';"
+        },
+        {
+          "line": 9,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 11,
+          "statement": "const createSchema = z.object({ granteeUserId: z.string().trim().min(1).max(255), expiresAt: z.string().datetime(), aggregateOnly: z.literal(true), minimumCellSize: z.number().int().min(10).max(100).default(10) }).strict();"
+        },
+        {
+          "line": 12,
+          "statement": "const revokeSchema = z.object({ grantId: zUUID }).strict();"
+        },
+        {
+          "line": 14,
+          "statement": "export const POST = withApi({ auth: { required: true, minRole: 'admin' }, requireOrg: true, body: createSchema, openapi: { tags: ['Equity'], summary: 'Grant time-bounded aggregate-only equity disclosure authority' } }, async ({ organizationId, userId, body }) => {"
+        },
+        {
+          "line": 15,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 16,
+          "statement": "if (body.granteeUserId === userId) throw ApiError.forbidden('Equity disclosure grants require a different grantor and grantee');"
+        },
+        {
+          "line": 19,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 20,
+          "statement": "const authority = await requireEquityDisclosureGrantAuthority(tx, { organizationId, userId });"
+        },
+        {
+          "line": 21,
+          "statement": "const [member] = await tx.select({ userId: organizationMembers.userId }).from(organizationMembers).where(and(eq(organizationMembers.organizationId, organizationId), eq(organizationMembers.userId, body.granteeUserId), eq(organizationMembers.status, 'active'), isNull(organizationMembers.deletedAt))).limit(1);"
+        },
+        {
+          "line": 22,
+          "statement": "if (!member) throw ApiError.badRequest('The grantee must be an active direct member of the organization');"
+        },
+        {
+          "line": 23,
+          "statement": "const [grant] = await tx.insert(equityDisclosureGrants).values({ organizationId, granteeUserId: body.granteeUserId, purpose: PURPOSE, aggregateOnly: true, minimumCellSize: body.minimumCellSize, grantedBy: userId, expiresAt }).returning();"
+        },
+        {
+          "line": 24,
+          "statement": "await persistAtomicAudit(tx, { organizationId, userId, action: 'equity.disclosure_grant.created', resourceType: 'equity_disclosure_grants', resourceId: grant.id, details: { granteeUserId: body.granteeUserId, purpose: PURPOSE, minimumCellSize: body.minimumCellSize, expiresAt: expiresAt.toISOString(), authorityMandateId: authority.mandateId } });"
+        },
+        {
+          "line": 25,
+          "statement": "return { grant };"
+        },
+        {
+          "line": 29,
+          "statement": "export const DELETE = withApi({ auth: { required: true, minRole: 'admin' }, requireOrg: true, body: revokeSchema, openapi: { tags: ['Equity'], summary: 'Revoke an equity disclosure grant' } }, async ({ organizationId, userId, body }) => {"
+        },
+        {
+          "line": 30,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 31,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 32,
+          "statement": "const authority = await requireEquityDisclosureGrantAuthority(tx, { organizationId, userId });"
+        },
+        {
+          "line": 33,
+          "statement": "const [grant] = await tx.update(equityDisclosureGrants).set({ revokedAt: new Date() }).where(and(eq(equityDisclosureGrants.id, body.grantId), eq(equityDisclosureGrants.organizationId, organizationId), isNull(equityDisclosureGrants.revokedAt))).returning();"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+      "blobSha": "445d2dd628b96660b654502fc5a3bd901c3086d2",
+      "scope": "ADJACENT_DOCUMENT_BOUNDARY",
+      "links": [
+        "C13",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 7,
+          "statement": "* The stored location is the object path without any signed-access token, so access is always granted at read time."
+        },
+        {
+          "line": 16,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 17,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 19,
+          "statement": "import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';"
+        },
+        {
+          "line": 24,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 25,
+          "statement": "export const runtime = 'nodejs';"
+        },
+        {
+          "line": 38,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 41,
+          "statement": "auth: { required: true, minRole: 'steward' },"
+        },
+        {
+          "line": 50,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 70,
+          "statement": "if (!(file instanceof File)) throw ApiError.badRequest('A file is required (multipart field \"file\")');"
+        },
+        {
+          "line": 72,
+          "statement": "if (!title) throw ApiError.badRequest('A title is required');"
+        },
+        {
+          "line": 92,
+          "statement": "const row = await withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 105,
+          "statement": "await persistAtomicAudit(tx, {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+      "blobSha": "042768c4372611b91f780253469e76e496ff0e2a",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 9,
+          "statement": "* identity change is migrated instead: an authorized reviewer explicitly records that a label now refers to the"
+        },
+        {
+          "line": 10,
+          "statement": "* same real-world concept as an existing one, with a reason. Never inferred; always this explicit, audited action."
+        },
+        {
+          "line": 13,
+          "statement": "* require re-verification. GET reports, for each active alias, what its target resolves to right now (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-"
+        },
+        {
+          "line": 16,
+          "statement": "* Requires: national_officer+ to create (the same reviewer floor as verified-dependency review and governance"
+        },
+        {
+          "line": 23,
+          "statement": "import { hasMinRole } from '@/lib/api-auth-guard';"
+        },
+        {
+          "line": 28,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 31,
+          "statement": "const NODE_ALIAS_AUTHOR_MIN_ROLE = 'national_officer';"
+        },
+        {
+          "line": 39,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 41,
+          "statement": "auth: { required: true, minRole: 'officer' },"
+        },
+        {
+          "line": 60,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 62,
+          "statement": "auth: { required: true, minRole: 'officer' },"
+        },
+        {
+          "line": 68,
+          "statement": "description: 'Records that aliasLabel refers to the same organizational concept as canonicalConceptLabel. Requires national_officer+. Supersedes, never deletes, any prior active alias for the same label.',"
+        },
+        {
+          "line": 72,
+          "statement": "if (!(await hasMinRole(NODE_ALIAS_AUTHOR_MIN_ROLE))) {"
+        },
+        {
+          "line": 73,
+          "statement": "throw ApiError.forbidden(`Recording a node identity alias requires at least ${NODE_ALIAS_AUTHOR_MIN_ROLE}`);"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+      "blobSha": "45aaf2562d31cb1f8ba7093c64219de5c1d33b81",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 4,
+          "statement": "* Verifying an external citation, or re-verifying one, requires externalAttestation: the reviewer's own written"
+        },
+        {
+          "line": 14,
+          "statement": "* Requires: national_officer+ (the same reviewer floor as governance reclassification approval), and never the"
+        },
+        {
+          "line": 21,
+          "statement": "import { hasMinRole } from '@/lib/api-auth-guard';"
+        },
+        {
+          "line": 29,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 50,
+          "statement": "export const PATCH = withApi("
+        },
+        {
+          "line": 52,
+          "statement": "auth: { required: true, minRole: 'officer' },"
+        },
+        {
+          "line": 58,
+          "statement": "description: 'Verifies or rejects a pending submission, re-verifies a stale verified record, or revokes a verified record. Requires national_officer+ and a reviewer distinct from the submitter; verifying an external citation requires externalAttestation.',"
+        },
+        {
+          "line": 63,
+          "statement": "throw ApiError.forbidden(`Reviewing dependency evidence requires at least ${VERIFIED_DEPENDENCY_REVIEWER_MIN_ROLE}`);"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+      "blobSha": "546ff11282f5e3266fe91367fe4efb4378179cf1",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 5,
+          "statement": "* This is the authenticated application surface for lib/knowledge-transfer/propagation/verified-dependency-store.ts"
+        },
+        {
+          "line": 10,
+          "statement": "* Requires: officer+ to submit or list."
+        },
+        {
+          "line": 22,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 34,
+          "statement": "responsibleAuthority: z.string().min(1).max(300),"
+        },
+        {
+          "line": 40,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 42,
+          "statement": "auth: { required: true, minRole: 'officer' },"
+        },
+        {
+          "line": 48,
+          "statement": "description: 'Lists the organization\\'s verified-dependency-evidence records, optionally filtered by status, each verified record with whether it is current right now (and its evidence tier) or requires re-verification (and why).',"
+        },
+        {
+          "line": 57,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 59,
+          "statement": "auth: { required: true, minRole: 'officer' },"
+        },
+        {
+          "line": 65,
+          "statement": "description: 'Submits a directional dependency for review, attributed to a named process/system and responsible authority. Starts pending_review.',"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+      "blobSha": "24e7e4681fc95863a98a78ac0a8d32567f1855be",
+      "scope": "SPECIALIZED_REP_BOUNDARY",
+      "links": [
+        "C08",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 6,
+          "statement": "* a missing resolution date. Dates come from the server clock and the transition is audited in the same transaction."
+        },
+        {
+          "line": 11,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 12,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 15,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 24,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 26,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 35,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 38,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 60,
+          "statement": "await persistAtomicAudit(tx, {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+      "blobSha": "2e44fc108a2bfd79550474547270dddeb2dd046c",
+      "scope": "SPECIALIZED_REP_BOUNDARY",
+      "links": [
+        "C08",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 11,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 12,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 15,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 17,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 19,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 27,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');"
+        },
+        {
+          "line": 29,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 57,
+          "statement": "await persistAtomicAudit(tx, {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+      "blobSha": "bc388c6a9b30637543b744c321d4cdc562fa292f",
+      "scope": "EXTERNAL_CREDENTIAL_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 2,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 5,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 7,
+          "statement": "export const POST = withApi({"
+        },
+        {
+          "line": 8,
+          "statement": "auth: { required: true, minRole: 'steward' },"
+        },
+        {
+          "line": 11,
+          "statement": "registry: { audience: 'steward', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },"
+        },
+        {
+          "line": 13,
+          "statement": "credential: await withRLSContext({ organizationId: organizationId!, userId: userId! }, (tx) =>"
+        },
+        {
+          "line": 18,
+          "statement": "export const DELETE = withApi({"
+        },
+        {
+          "line": 19,
+          "statement": "auth: { required: true, minRole: 'steward' },"
+        },
+        {
+          "line": 20,
+          "statement": "registry: { audience: 'steward', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },"
+        },
+        {
+          "line": 21,
+          "statement": "}, async ({ organizationId, userId }) => withRLSContext("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+      "blobSha": "392645ef694068621d3b60bdb63f078e5e695f8f",
+      "scope": "CALENDAR_ADJACENT",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 8,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 9,
+          "statement": "import { getRoleLevel, UserRole } from '@/lib/auth/roles';"
+        },
+        {
+          "line": 13,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 25,
+          "statement": "export const DELETE = withApi("
+        },
+        {
+          "line": 27,
+          "statement": "auth: { required: true, minRole: 'member' },"
+        },
+        {
+          "line": 32,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization membership required');"
+        },
+        {
+          "line": 34,
+          "statement": "const booking = await withRLSContext({ organizationId }, (tx) =>"
+        },
+        {
+          "line": 41,
+          "statement": "export const PATCH = withApi("
+        },
+        {
+          "line": 43,
+          "statement": "auth: { required: true, minRole: 'steward' },"
+        },
+        {
+          "line": 48,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization membership required');"
+        },
+        {
+          "line": 50,
+          "statement": "const booking = await withRLSContext({ organizationId }, (tx) =>"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "blobSha": "287dd314b8fb40bcb91a275228f4332ef051b9da",
+      "scope": "CALENDAR_ADJACENT",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 12,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 13,
+          "statement": "import { getRoleLevel, UserRole } from '@/lib/auth/roles';"
+        },
+        {
+          "line": 17,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 25,
+          "statement": "cateringRequired: z.boolean().optional(),"
+        },
+        {
+          "line": 37,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 39,
+          "statement": "auth: { required: true, minRole: 'member' },"
+        },
+        {
+          "line": 44,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization membership required');"
+        },
+        {
+          "line": 47,
+          "statement": "const bookings = await withRLSContext({ organizationId }, (tx) =>"
+        },
+        {
+          "line": 54,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 56,
+          "statement": "auth: { required: true, minRole: 'member' },"
+        },
+        {
+          "line": 61,
+          "statement": "if (!organizationId || !userId) throw ApiError.forbidden('Organization membership required');"
+        },
+        {
+          "line": 64,
+          "statement": "const booking = await withRLSContext({ organizationId }, (tx) =>"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "blobSha": "7a4530051b13b0037aa08000f7bfa1ac6fa512f2",
+      "scope": "DEVICE_IDENTITY_BOUNDARY",
+      "links": [
+        "C06",
+        "C07",
+        "O10"
+      ],
+      "signals": [
+        {
+          "line": 8,
+          "statement": "import { crudRoutes } from '@/lib/api/crud-factory';"
+        },
+        {
+          "line": 12,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 14,
+          "statement": "const { GET, PATCH, DELETE } = crudRoutes({"
+        },
+        {
+          "line": 17,
+          "statement": "tags: ['Auth'],"
+        },
+        {
+          "line": 27,
+          "statement": "// Reject before mutation; the factory retains tenant/owner guards and audit."
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+      "blobSha": "5e167b297dfd65b074ba8d3821c84075ee3d3f63",
+      "scope": "PUSH_BOUNDARY",
+      "links": [
+        "C17",
+        "O10"
+      ],
+      "signals": [
+        {
+          "line": 7,
+          "statement": "* provider no longer accepts switches the device off. Every attempt is audited with its outcome, never with the token."
+        },
+        {
+          "line": 11,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 12,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 16,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 21,
+          "statement": "export async function sendTestPush("
+        },
+        {
+          "line": 27,
+          "statement": "const [device] = await withRLSContext({ organizationId, userId }, (tx) =>"
+        },
+        {
+          "line": 38,
+          "statement": "await withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 43,
+          "statement": "await persistAtomicAudit(tx, {"
+        },
+        {
+          "line": 62,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 64,
+          "statement": "auth: { required: true, minRole: 'member' },"
+        },
+        {
+          "line": 72,
+          "statement": "if (!userId || !organizationId) throw ApiError.forbidden('Organization context required');"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+      "blobSha": "651b2f113d8d774248fbbdfba258063d0ef8ba86",
+      "scope": "OFFLINE_DEVICE_REVOCATION_BOUNDARY",
+      "links": [
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 9,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 10,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 14,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 16,
+          "statement": "export const DELETE = withApi("
+        },
+        {
+          "line": 18,
+          "statement": "auth: { required: true, minRole: 'member' },"
+        },
+        {
+          "line": 26,
+          "statement": "if (!userId || !organizationId) throw ApiError.badRequest('Auth context required');"
+        },
+        {
+          "line": 28,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 34,
+          "statement": "await persistAtomicAudit(tx, {"
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "key": "PATCH apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+      "path": "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+      "blobSha": "457f6442affccf271571f9ac9f6790539acc8304",
+      "scope": "EMPLOYER_FINANCE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+      "path": "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+      "blobSha": "457f6442affccf271571f9ac9f6790539acc8304",
+      "scope": "EMPLOYER_FINANCE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+      "path": "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+      "blobSha": "9701bc4d73947c7fde07d300f3ead617cf86753b",
+      "scope": "EMPLOYER_DATA_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/equity/consent/route.ts",
+      "path": "apps/union-eyes/app/api/equity/consent/route.ts",
+      "blobSha": "2ebd0ecda75136a852ba6ca398989b4f01b8b6ef",
+      "scope": "SPECIAL_CATEGORY_CONSENT_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/equity/consent/route.ts",
+      "path": "apps/union-eyes/app/api/equity/consent/route.ts",
+      "blobSha": "2ebd0ecda75136a852ba6ca398989b4f01b8b6ef",
+      "scope": "SPECIAL_CATEGORY_CONSENT_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/equity/consent/route.ts",
+      "path": "apps/union-eyes/app/api/equity/consent/route.ts",
+      "blobSha": "2ebd0ecda75136a852ba6ca398989b4f01b8b6ef",
+      "scope": "SPECIAL_CATEGORY_CONSENT_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+      "path": "apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+      "blobSha": "2aa69a75ecd25fffbffd05d924ec9a197ae46b22",
+      "scope": "SPECIAL_CATEGORY_DISCLOSURE_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+      "path": "apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+      "blobSha": "2aa69a75ecd25fffbffd05d924ec9a197ae46b22",
+      "scope": "SPECIAL_CATEGORY_DISCLOSURE_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+      "path": "apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+      "blobSha": "445d2dd628b96660b654502fc5a3bd901c3086d2",
+      "scope": "ADJACENT_DOCUMENT_BOUNDARY",
+      "links": [
+        "C13",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+      "path": "apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+      "blobSha": "042768c4372611b91f780253469e76e496ff0e2a",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+      "path": "apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+      "blobSha": "042768c4372611b91f780253469e76e496ff0e2a",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+      "blobSha": "45aaf2562d31cb1f8ba7093c64219de5c1d33b81",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+      "path": "apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+      "blobSha": "546ff11282f5e3266fe91367fe4efb4378179cf1",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+      "path": "apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+      "blobSha": "546ff11282f5e3266fe91367fe4efb4378179cf1",
+      "scope": "ADJACENT_KNOWLEDGE_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+      "path": "apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+      "blobSha": "24e7e4681fc95863a98a78ac0a8d32567f1855be",
+      "scope": "SPECIALIZED_REP_BOUNDARY",
+      "links": [
+        "C08",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+      "path": "apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+      "blobSha": "2e44fc108a2bfd79550474547270dddeb2dd046c",
+      "scope": "SPECIALIZED_REP_BOUNDARY",
+      "links": [
+        "C08",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+      "path": "apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+      "blobSha": "bc388c6a9b30637543b744c321d4cdc562fa292f",
+      "scope": "EXTERNAL_CREDENTIAL_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+      "path": "apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+      "blobSha": "bc388c6a9b30637543b744c321d4cdc562fa292f",
+      "scope": "EXTERNAL_CREDENTIAL_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+      "blobSha": "392645ef694068621d3b60bdb63f078e5e695f8f",
+      "scope": "CALENDAR_ADJACENT",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+      "blobSha": "392645ef694068621d3b60bdb63f078e5e695f8f",
+      "scope": "CALENDAR_ADJACENT",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "blobSha": "287dd314b8fb40bcb91a275228f4332ef051b9da",
+      "scope": "CALENDAR_ADJACENT",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "blobSha": "7a4530051b13b0037aa08000f7bfa1ac6fa512f2",
+      "scope": "DEVICE_IDENTITY_BOUNDARY",
+      "links": [
+        "C06",
+        "C07",
+        "O10"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "blobSha": "7a4530051b13b0037aa08000f7bfa1ac6fa512f2",
+      "scope": "DEVICE_IDENTITY_BOUNDARY",
+      "links": [
+        "C06",
+        "C07",
+        "O10"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+      "blobSha": "7a4530051b13b0037aa08000f7bfa1ac6fa512f2",
+      "scope": "DEVICE_IDENTITY_BOUNDARY",
+      "links": [
+        "C06",
+        "C07",
+        "O10"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+      "path": "apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+      "blobSha": "5e167b297dfd65b074ba8d3821c84075ee3d3f63",
+      "scope": "PUSH_BOUNDARY",
+      "links": [
+        "C17",
+        "O10"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+      "path": "apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+      "blobSha": "651b2f113d8d774248fbbdfba258063d0ef8ba86",
+      "scope": "OFFLINE_DEVICE_REVOCATION_BOUNDARY",
+      "links": [
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    }
+  ],
+  "remainingKeys": [
+    "POST apps/union-eyes/app/api/pension/benefits/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts",
+    "DELETE apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "PATCH apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "DELETE apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "GET apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+    "POST apps/union-eyes/app/api/social-media/posts/review/route.ts"
+  ],
+  "limits": "Exact source signals and candidate scope. Specialized roles, device revocation and consent are independent from generic role floor; no feature activation or sensitive data access."
+}
