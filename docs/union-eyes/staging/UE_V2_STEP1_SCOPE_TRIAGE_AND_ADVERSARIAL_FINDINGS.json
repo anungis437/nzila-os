@@ -59,6 +59,10 @@
     "residual": {
       "path": "docs/union-eyes/staging/UE_V2_BASE_RELEASE_RESIDUAL_QUALIFICATION_20261115.md",
       "blobSha": "1d25e8bacf8cdf912d1d57c5f29c41fa72aa7782"
+    },
+    "billingLifecycleRoute": {
+      "path": "apps/union-eyes/app/api/cron/billing-lifecycle/route.ts",
+      "blobSha": "e50d5f34d3339a1c19ad3c414824e52444c0c1e1"
     }
   },
   "limits": [
@@ -447,7 +451,8 @@
       ],
       "scopeEvidence": [
         "apps/union-eyes/lib/reality/capability-registry.ts",
-        "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json"
+        "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+        "apps/union-eyes/app/api/cron/billing-lifecycle/route.ts"
       ],
       "scopeVerified": false,
       "runtimeVerified": false
@@ -21464,12 +21469,13 @@
     {
       "id": "S1-G05",
       "severity": "P0",
-      "finding": "Registry labels billing lifecycle cron NOT_IMPLEMENTED while scheduled-jobs source lists billing-lifecycle. Commercial billing is separate from union-finance exclusion; schedule guard/handler and runtime policy must be inspected.",
+      "finding": "Registry marks billing-lifecycle cron NOT_IMPLEMENTED, but canonical scheduler includes it and the actual POST handler invokes platform-economics billing automation under cron authentication and live distinct-approver mandates. This is a verified source-level registry contradiction, not runtime proof or authorization to bill.",
       "evidence": [
         "apps/union-eyes/lib/reality/capability-registry.ts",
-        "apps/union-eyes/lib/operations/scheduled-jobs.json"
+        "apps/union-eyes/lib/operations/scheduled-jobs.json",
+        "apps/union-eyes/app/api/cron/billing-lifecycle/route.ts"
       ],
-      "correction": "Do not disable billing or claim live behavior solely from either record; verify source route, profile scheduling and runtime job outcome."
+      "correction": "Reconcile registry wording in a separate admitted application change after service and runtime review. Preserve separation of commercial subscription billing from excluded union finance; verify missing/inactive/expired/self-approved mandates, retry reservation, no duplicate invoice effects, and actual schedule profile. Never trigger real billing for this review."
     },
     {
       "id": "S1-G06",
