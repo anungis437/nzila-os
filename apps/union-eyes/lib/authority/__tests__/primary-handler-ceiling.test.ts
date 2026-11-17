@@ -85,6 +85,19 @@ describe('primary case-handler-only authority is a hard ceiling', () => {
     expect(assessDelegation(d, ORG, NOW).reasons.map(x => x.code)).toContain('NOT_ACCEPTED')
   })
 
+  it('constrains delegated case read to the delegator office mandate resource scope', () => {
+    const del = delegation({ delegateUserId: U.chief, actions: ['case:read'], resourceTypes: ['case'] })
+    const office = mandate({ kind: 'executive_office', principalUserId: U.president, grantedBy: U.other, powers: ['read'], scope: { resourceIds: [U.other] } })
+    const f = facts(U.chief, caps, {
+      memberships: [membership(U.chief, caps), membership(U.president, ['member', 'executive'])],
+      delegations: [del], mandates: [office],
+    })
+    const req = request(U.chief, 'case:read', resource, { delegationId: del.id })
+    expect(decide(req, f, caseFacts(), NOW).effect).toBe('deny')
+    const inScope = { ...office, scope: { resourceIds: [CASE_ID] } }
+    expect(decide(req, { ...f, mandates: [inScope] }, caseFacts(), NOW).effect).toBe('allow')
+  })
+
   it('retains legitimate scoped read and assignment powers', () => {
     for (const action of ['case:read','case:assign'] as const) {
       const m = mandate({powers:[action.split(':')[1]],scope:{resourceIds:[CASE_ID]}})
