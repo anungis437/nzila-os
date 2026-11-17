@@ -12,8 +12,7 @@
  * the exact issuance); this module additionally checks what only facts can show
  * (issuer capacity and mandate, membership, conflicts, segregation of duties).
  */
-import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity   hasPrimaryCaseHandlerOnlyPower,
-} from './common'
+import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower } from './common'
 import { dutyConflicts } from './policies/finance'
 import {
   POLICY_VERSION,
