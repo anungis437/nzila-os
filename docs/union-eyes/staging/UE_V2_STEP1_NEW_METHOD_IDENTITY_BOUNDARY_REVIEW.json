@@ -1,0 +1,601 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_NEW_METHOD_IDENTITY_BOUNDARY_REVIEW",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "counts": {
+    "reviewedKeys": 15,
+    "remainingNewKeys": 83,
+    "sourceFiles": 8
+  },
+  "sources": [
+    {
+      "path": "apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+      "blobSha": "c6699f96f6f8fa30f548c51e640dd607840c4680",
+      "scope": "IDENTITY_BASE",
+      "action": [
+        "C01",
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 7,
+          "statement": "export const { GET, POST } = handlers"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/sso/callback/route.ts",
+      "blobSha": "a729e51ba4cc2f66988dfe1c733a64db3b8494e9",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C01",
+        "C07",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 6,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 8,
+          "statement": "export async function GET(request: NextRequest) {"
+        },
+        {
+          "line": 19,
+          "statement": "userAgent: request.headers.get('user-agent'),"
+        },
+        {
+          "line": 23,
+          "statement": "return NextResponse.json({ error: 'SSO sign-in could not be completed' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/sso/start/route.ts",
+      "blobSha": "1b9f013467fc0466bf27f2deb1f61841bc0c7fa4",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C01",
+        "C07",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 6,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 9,
+          "statement": "export async function GET(request: NextRequest) {"
+        },
+        {
+          "line": 11,
+          "statement": "if (!UUID.test(providerId)) return NextResponse.json({ error: 'SSO provider is unavailable' }, { status: 404 })"
+        },
+        {
+          "line": 18,
+          "statement": "return NextResponse.json({ error: 'SSO provider is unavailable' }, { status: 404 })"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+      "blobSha": "b55c65926688ec3ba0c51023e8a45365c6c81ac6",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 14,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 21,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 26,
+          "statement": "export const PATCH = withApi("
+        },
+        {
+          "line": 28,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 46,
+          "statement": "if (patch.autoProvision === true) throw ApiError.notImplemented('SSO just-in-time provisioning is not implemented; a verified provider-subject binding is required');"
+        },
+        {
+          "line": 59,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        },
+        {
+          "line": 74,
+          "statement": "throw ApiError.notImplemented('Only the OIDC sign-in consumer is implemented');"
+        },
+        {
+          "line": 173,
+          "statement": "export const DELETE = withApi("
+        },
+        {
+          "line": 175,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 186,
+          "statement": "return withRLSContext({ organizationId, userId }, async (tx) => {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "blobSha": "13f6f8b3cfa7672764e89616f63168b33a13b66b",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 11,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 23,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 42,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 44,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 49,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 56,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 58,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 72,
+          "statement": "const rotated = await withRLSContext({ organizationId }, async (tx) => {"
+        },
+        {
+          "line": 107,
+          "statement": "export const DELETE = withApi("
+        },
+        {
+          "line": 109,
+          "statement": "auth: { required: true, minRole: 'admin' },"
+        },
+        {
+          "line": 114,
+          "statement": "return withRLSContext({ organizationId }, async (tx) => {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+      "blobSha": "49f51969e73b6c738b85e59e7143ad41cf467e17",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 10,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 12,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 14,
+          "statement": "auth: { machine: scimCaller },"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "blobSha": "0c86bb0cfc26d95d4479234b482b321ef4861a9c",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 16,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 24,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 36,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 38,
+          "statement": "auth: { machine: scimCaller },"
+        },
+        {
+          "line": 44,
+          "statement": "const member = await withSystemContext((tx) => getScimMember(tx, refOf(machine), id));"
+        },
+        {
+          "line": 50,
+          "statement": "export const PATCH = withApi("
+        },
+        {
+          "line": 52,
+          "statement": "auth: { machine: scimCaller },"
+        },
+        {
+          "line": 61,
+          "statement": "const { member } = await withSystemContext((tx) => applyScimUserChanges(tx, refOf(machine), id, changes, 'patch', trace));"
+        },
+        {
+          "line": 66,
+          "statement": "export const PUT = withApi("
+        },
+        {
+          "line": 68,
+          "statement": "auth: { machine: scimCaller },"
+        },
+        {
+          "line": 77,
+          "statement": "const { member } = await withSystemContext((tx) => applyScimUserChanges(tx, refOf(machine), id, changes, 'put', trace));"
+        },
+        {
+          "line": 82,
+          "statement": "export const DELETE = withApi("
+        },
+        {
+          "line": 84,
+          "statement": "auth: { machine: scimCaller },"
+        },
+        {
+          "line": 92,
+          "statement": "await withSystemContext((tx) => removeScimUser(tx, refOf(machine), id, trace));"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/admin/email-suppressions/route.ts",
+      "blobSha": "c6085e7a4cad8ba010a999b1094adb7d6c337b82",
+      "scope": "EMAIL_ADMIN_BOUNDARY",
+      "action": [
+        "C02",
+        "O01"
+      ],
+      "signals": [
+        {
+          "line": 15,
+          "statement": "import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';"
+        },
+        {
+          "line": 17,
+          "statement": "export const runtime = 'nodejs';"
+        },
+        {
+          "line": 18,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 25,
+          "statement": "export const POST = withSystemAdminAuth(async (request, context: BaseAuthContext) => {"
+        },
+        {
+          "line": 26,
+          "statement": "await requirePlatformStaffAuthority(context, 'platform.email_suppressions.manage');"
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "key": "POST apps/union-eyes/app/api/admin/email-suppressions/route.ts",
+      "path": "apps/union-eyes/app/api/admin/email-suppressions/route.ts",
+      "sourceBlob": "c6085e7a4cad8ba010a999b1094adb7d6c337b82",
+      "scope": "EMAIL_ADMIN_BOUNDARY",
+      "action": [
+        "C02",
+        "O01"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/auth/sso/callback/route.ts",
+      "path": "apps/union-eyes/app/api/auth/sso/callback/route.ts",
+      "sourceBlob": "a729e51ba4cc2f66988dfe1c733a64db3b8494e9",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C01",
+        "C07",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/auth/sso/start/route.ts",
+      "path": "apps/union-eyes/app/api/auth/sso/start/route.ts",
+      "sourceBlob": "1b9f013467fc0466bf27f2deb1f61841bc0c7fa4",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C01",
+        "C07",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+      "sourceBlob": "b55c65926688ec3ba0c51023e8a45365c6c81ac6",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+      "sourceBlob": "b55c65926688ec3ba0c51023e8a45365c6c81ac6",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "path": "apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "sourceBlob": "13f6f8b3cfa7672764e89616f63168b33a13b66b",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "path": "apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "sourceBlob": "13f6f8b3cfa7672764e89616f63168b33a13b66b",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "path": "apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+      "sourceBlob": "13f6f8b3cfa7672764e89616f63168b33a13b66b",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+      "sourceBlob": "49f51969e73b6c738b85e59e7143ad41cf467e17",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "sourceBlob": "0c86bb0cfc26d95d4479234b482b321ef4861a9c",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "sourceBlob": "0c86bb0cfc26d95d4479234b482b321ef4861a9c",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "sourceBlob": "0c86bb0cfc26d95d4479234b482b321ef4861a9c",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PUT apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "sourceBlob": "0c86bb0cfc26d95d4479234b482b321ef4861a9c",
+      "scope": "ENTERPRISE_IDENTITY_BOUNDARY",
+      "action": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+      "path": "apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+      "sourceBlob": "c6699f96f6f8fa30f548c51e640dd607840c4680",
+      "scope": "IDENTITY_BASE",
+      "action": [
+        "C01",
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+      "path": "apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+      "sourceBlob": "c6699f96f6f8fa30f548c51e640dd607840c4680",
+      "scope": "IDENTITY_BASE",
+      "action": [
+        "C01",
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    }
+  ],
+  "remainingKeys": [
+    "PATCH apps/union-eyes/app/api/analytics/insights/route.ts",
+    "GET apps/union-eyes/app/api/assurance/finance/ledger/route.ts",
+    "DELETE apps/union-eyes/app/api/billing/automation-mandate/route.ts",
+    "PATCH apps/union-eyes/app/api/billing/automation-mandate/route.ts",
+    "POST apps/union-eyes/app/api/billing/automation-mandate/route.ts",
+    "POST apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
+    "POST apps/union-eyes/app/api/chatbot/sessions/[sessionId]/archive/route.ts",
+    "GET apps/union-eyes/app/api/clause-library/[id]/versions/route.ts",
+    "POST apps/union-eyes/app/api/cnesst/pay-equity/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts",
+    "POST apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts",
+    "DELETE apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+    "PATCH apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+    "POST apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
+    "PATCH apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts",
+    "POST apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
+    "POST apps/union-eyes/app/api/compliance/evaluate/route.ts",
+    "POST apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+    "POST apps/union-eyes/app/api/cron/education-reminders/route.ts",
+    "POST apps/union-eyes/app/api/cron/equity-retention/route.ts",
+    "POST apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+    "POST apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+    "POST apps/union-eyes/app/api/cron/process-messages/route.ts",
+    "POST apps/union-eyes/app/api/cron/process-notifications/route.ts",
+    "POST apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+    "POST apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+    "DELETE apps/union-eyes/app/api/education/certifications/route.ts",
+    "PATCH apps/union-eyes/app/api/education/certifications/route.ts",
+    "DELETE apps/union-eyes/app/api/education/programs/route.ts",
+    "PATCH apps/union-eyes/app/api/education/programs/route.ts",
+    "GET apps/union-eyes/app/api/education/registrations/join/route.ts",
+    "DELETE apps/union-eyes/app/api/education/sessions/route.ts",
+    "PATCH apps/union-eyes/app/api/education/sessions/route.ts",
+    "PATCH apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+    "POST apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+    "POST apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+    "DELETE apps/union-eyes/app/api/equity/consent/route.ts",
+    "GET apps/union-eyes/app/api/equity/consent/route.ts",
+    "POST apps/union-eyes/app/api/equity/consent/route.ts",
+    "DELETE apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+    "POST apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+    "GET apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+    "PATCH apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+    "GET apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+    "POST apps/union-eyes/app/api/external/grievances/[id]/documents/intakes/route.ts",
+    "POST apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+    "DELETE apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+    "POST apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+    "DELETE apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+    "PATCH apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+    "POST apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+    "GET apps/union-eyes/app/api/metrics/prometheus/route.ts",
+    "DELETE apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "GET apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "PATCH apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "POST apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+    "DELETE apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+    "POST apps/union-eyes/app/api/pension/benefits/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts",
+    "GET apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+    "PATCH apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+    "POST apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+    "DELETE apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "PATCH apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "DELETE apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "GET apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+    "POST apps/union-eyes/app/api/social-media/posts/review/route.ts",
+    "GET apps/union-eyes/app/api/voice/disclosure/route.ts",
+    "DELETE apps/union-eyes/app/api/workbook/[id]/consent/route.ts",
+    "POST apps/union-eyes/app/api/workbook/checkout/redeem/route.ts",
+    "GET apps/union-eyes/app/(marketing)/app/route.ts",
+    "GET apps/union-eyes/app/[locale]/app/route.ts"
+  ],
+  "limits": "Source signals only. Base authentication and separately configured enterprise SSO/SCIM differ; neither an SSO route nor generic role label grants tenant authority."
+}
