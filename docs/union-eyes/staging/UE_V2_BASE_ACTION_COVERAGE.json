@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "recordedDate": "2026-11-16",
+  "recordedDate": "2026-11-17",
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "feat/ue-case-evidence-export-ui-20261116",
-  "currentRepairRuntimeQualification": "SOURCE41_PRIVACY_ACCOUNT_PROFILE_PASS_PUBLIC_INVITATION_AND_AUTHENTICATED_PERFORMANCE_FAILED_LOCAL_REPAIRS_AND_PDF_QUALIFICATION_PENDING",
+  "currentRepairBranch": "feat/ue-base-operational-monitoring-20261117",
+  "currentRepairRuntimeQualification": "CCC_APPLICATION_DEPLOYED_SEPARATE_EMAIL_CHECK_REPAIR_APPLIED_RECIPIENT_RETRY_AND_REMAINING_BASE_PROOFS_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -26,9 +26,9 @@
     {
       "id": "C01",
       "action": "Invitation to first case",
-      "state": "ACTUAL_STAGING_DEFECT_LOCAL_REPAIR_PENDING",
-      "evidenceSummary": "Real T2 administrator invitation, explicit controlled-recipient confirmation of receipt/acceptance/dashboard/case-create/reopen, and independent durable accepted identity, active Member membership, saved case and same-actor case.intake_submitted audit. Account and case retained. Actual source41 fresh native-invitation browser cohort crashed before acceptance; the public page required an absent NextIntl provider. Both unused owned invitations were revoked. Provider-independent local repair passes8 tests, including real missing-provider regression.",
-      "remaining": "Admit and deploy the repaired source; repeat real admin invitation, acceptance, identity/membership, first case, retry/refusal and audit boundaries. Earlier controlled-recipient confirmations remain historical evidence only.",
+      "state": "REPAIR_APPLIED_RECIPIENT_RETRY_PENDING",
+      "evidenceSummary": "Real T2 administrator invitation, explicit controlled-recipient confirmation of receipt/acceptance/dashboard/case-create/reopen, and independent durable accepted identity, active Member membership, saved case and same-actor case.intake_submitted audit. Account and case retained. Actual source41 fresh native-invitation browser cohort crashed before acceptance; the public page required an absent NextIntl provider. Both unused owned invitations were revoked. Provider-independent local repair passes8 tests, including real missing-provider regression. Corrected CCC public invitation render passed EN/FR desktop/mobile. Controlled recipient reached the form, but actual acceptance hit the live narrower email check. PR1263 qualified and repaired that check; readback proves original invitation unused and nonrevoked. Recipient retry is pending.",
+      "remaining": "Confirm original recipient acceptance/dashboard/first-case/reopen and independently read accepted identity, active membership, saved case and audit. Preserve inviter admin access until corroborated. Complete fresh retry/refusal and cleanup boundaries without resetting existing accounts.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -45,7 +45,8 @@
       "retryRecoveryAndCleanup": null,
       "coverageFieldsComplete": false,
       "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
-      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-runtime-delta.json"
+      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-runtime-delta.json",
+      "observedDatabaseRepairEvidence": "evidence/ue-v2-invitation-email-compatibility-20261117/actual-staging-repair-v1.json"
     },
     {
       "id": "C02",
@@ -386,16 +387,18 @@
     {
       "id": "C18",
       "action": "Leadership indicators and drill-down",
-      "state": "NAVIGATION_ONLY",
-      "evidenceSummary": "Officer/executive destination access was exercised; metric content and drill-down were not thereby certified.",
+      "state": "SOURCE_CONTRACT_REPAIR_RUNTIME_PENDING",
+      "evidenceSummary": "Navigation-only evidence was insufficient. A real producer-to-table component test reproduced crashes for up/down employer trends in English and French (four failures; stable variants passed). Shared producer/consumer trend values, payload validation and localized error/retry presentation are repaired in source; fresh deployed accuracy/authority proof is pending.",
       "remaining": "Accurate scoped counts, freshness, authorized drill-down and inaccessible-source states.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
         "roleOrMandate": "Action-specific verification remains required"
       },
-      "ui": null,
-      "apiMethods": null,
+      "ui": "/dashboard/leadership",
+      "apiMethods": [
+        "GET /api/dashboard/leadership"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -629,5 +632,8 @@
       }
     }
   ],
-  "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
+  "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
+  "currentlyServingApplicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "currentlyServingWorkflowSha": "c3b7349260d3736860f4faef5b72c20c68d3ce63",
+  "separateDatabaseCompatibilityRepairSourceSha": "b19f75e2a8071fab84ab4f2a85a863fe3e7c2389"
 }

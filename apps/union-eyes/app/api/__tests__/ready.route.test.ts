@@ -33,6 +33,9 @@ describe('ready route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env.READY_REQUIRE_DECISION_PROOF;
+    delete process.env.UE_RELEASE_PROFILE;
+    delete process.env.READY_REQUIRE_SCANNER;
+    delete process.env.CLAMAV_URL;
     m.getNarSigningSecret.mockResolvedValue('owned-test-proof-signing-material-32-characters');
     delete process.env.READY_REQUIRE_QUEUE;
     delete process.env.READY_REQUIRE_STORAGE;
@@ -71,6 +74,45 @@ describe('ready route', () => {
     }
     m.getNarSigningSecret.mockRejectedValue(new Error('key unavailable'));
     expect((await GET()).status).toBe(503);
+  });
+
+  it('measures the base release document container, actual scanner health and signing key', async () => {
+    process.env.UE_RELEASE_PROFILE = 'union-eyes-v2-base';
+    process.env.CLAMAV_URL = 'http://owned-scanner.internal';
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ status: 'ok', clamd: true }) })));
+    const { GET } = await loadRoute();
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      releaseProfile: 'union-eyes-v2-base',
+      checks: { runtimeProfile: true, storage: true, scanner: true, decisionProof: true, thirdParty: 'unknown' },
+    });
+    expect(m.containerExists).toHaveBeenCalledOnce();
+    expect(m.getNarSigningSecret).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledExactlyOnceWith('http://owned-scanner.internal/health', expect.objectContaining({ cache: 'no-store', signal: expect.any(AbortSignal) }));
+  });
+
+  it.each(['storage', 'scanner', 'decisionProof'])('cannot disable required base %s with an older optional flag', async (dependency) => {
+    process.env.UE_RELEASE_PROFILE = 'union-eyes-v2-base';
+    process.env.READY_REQUIRE_STORAGE = 'false';
+    process.env.READY_REQUIRE_SCANNER = 'false';
+    process.env.READY_REQUIRE_DECISION_PROOF = 'false';
+    process.env.CLAMAV_URL = 'http://owned-scanner.internal';
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ status: 'ok', clamd: dependency !== 'scanner' }) })));
+    if (dependency === 'storage') m.containerExists.mockResolvedValue(false);
+    if (dependency === 'decisionProof') m.getNarSigningSecret.mockRejectedValue(new Error('unavailable'));
+    const { GET } = await loadRoute();
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect((await response.json()).checks[dependency]).toBe(false);
+  });
+
+  it('refuses an unknown declared release profile instead of falling back to optional checks', async () => {
+    process.env.UE_RELEASE_PROFILE = 'unknown-profile';
+    const { GET } = await loadRoute();
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ releaseProfile: 'invalid', checks: { runtimeProfile: false } });
   });
 
   it('returns 503 when connectivity passes but catalog authority is rejected', async () => {

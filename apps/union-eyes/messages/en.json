@@ -2479,6 +2479,13 @@
     }
   },
   "leadershipPage": {
+    "errors": {
+      "title": "Dashboard unavailable",
+      "retry": "Try again",
+      "dataUnavailable": "Dashboard data unavailable — please try again or contact support.",
+      "invalidResponse": "The dashboard service sent data this page cannot read. Try again or contact support.",
+      "connection": "Could not connect to the dashboard service. Check your connection and try again."
+    },
     "title": "Leadership Dashboard",
     "subtitle": "Executive overview of grievance operations and compliance",
     "loading": "Loading executive overview...",

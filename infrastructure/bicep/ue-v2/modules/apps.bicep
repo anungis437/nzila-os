@@ -5,6 +5,8 @@ param environmentId string
 param environmentDefaultDomain string
 param identityId string
 param identityClientId string
+param identityPrincipalId string
+param postgresResourceId string
 param acrLoginServer string
 param appImage string
 param clamavImage string
@@ -68,6 +70,8 @@ var authSystemEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-database-url' }
 ]
 var stagingEnvironment = deploymentEnvironment == 'staging' ? [
+  { name: 'UE_RELEASE_PROFILE', value: 'union-eyes-v2-base' }
+  { name: 'UE_OPERATIONS_ARM_CONFIGURATION', value: string(operationalArmConfiguration) }
   { name: 'TARGET_ENVIRONMENT', value: 'staging' }
   { name: 'UE_APP_URL', value: appUrl }
   { name: 'UE_MARKETING_URL', value: effectiveSiteUrl }
@@ -251,7 +255,15 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 // Scheduled jobs: one Container Apps schedule job per entry of the manifest (apps/union-eyes/lib/operations/scheduled-jobs.json).
 // Every job POSTs its route with the shared cron secret; `curl -f` makes a non-2xx answer fail the job run, so a job that failed
 // is visible as a failed execution instead of a silent success. The manifest is the only place a schedule is declared.
-var scheduledJobs = loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json').jobs
+var allScheduledJobs = loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json').jobs
+var scheduledJobs = filter(allScheduledJobs, job => contains(union({ environments: ['staging', 'prod'] }, job).environments, deploymentEnvironment))
+var baseWorkerCodes = ['dlrem', 'dlovd', 'alert', 'sla', 'reap', 'sigexp']
+var baseWorkers = filter(scheduledJobs, job => contains(baseWorkerCodes, job.code))
+var operationalJobs = [for job in baseWorkers: {
+  code: job.code
+  resourceId: resourceId('Microsoft.App/jobs', contains(job, 'legacyJobSuffix') ? '${take(prefix, 32 - length(job.legacyJobSuffix) - 1)}-${job.legacyJobSuffix}' : '${take(prefix, 18)}-${job.code}')
+}]
+var operationalArmConfiguration = { postgresResourceId: postgresResourceId, jobs: operationalJobs }
 
 resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
   // Keep existing names when they fit. A legacy suffix must also budget the prefix against the 32-character limit.
@@ -287,6 +299,18 @@ resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
         }
       ]
     }
+  }
+}]
+
+// ARM metadata only, scoped to each of the six existing core jobs. This is
+// not a database privilege or a resource-group/subscription Reader grant.
+resource coreJobMetadataReaders 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (job, index) in scheduledJobs: if (deploymentEnvironment == 'staging' && contains(baseWorkerCodes, job.code)) {
+  name: guid(cronJobs[index].id, identityId, 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
+  scope: cronJobs[index]
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
+    principalId: identityPrincipalId
+    principalType: 'ServicePrincipal'
   }
 }]
 output appName string = app.name

@@ -3,12 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const enabled = vi.hoisted(() => vi.fn(() => true))
 const withRLS = vi.hoisted(() => vi.fn())
 const append = vi.hoisted(() => vi.fn())
+const withSystem = vi.hoisted(() => vi.fn())
+const appendPlatform = vi.hoisted(() => vi.fn())
 const legacyInsert = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: enabled }))
 vi.mock('../auth/canonical-bootstrap', () => ({ currentStateContextEnabled: enabled }))
-vi.mock('../db/with-rls-context', () => ({ withRLSContext: withRLS }))
-vi.mock('../audit/canonical-audit-chain', () => ({ appendCanonicalAuditLog: append }))
+vi.mock('../db/with-rls-context', () => ({ withRLSContext: withRLS, withSystemContext: withSystem }))
+vi.mock('../audit/canonical-audit-chain', () => ({ appendCanonicalAuditLog: append, appendCanonicalPlatformAuditLog: appendPlatform }))
 vi.mock('@/db', () => ({ db: { insert: legacyInsert } }))
 vi.mock('../logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -24,6 +26,7 @@ describe('auditLog canonical V2 persistence', () => {
       operation({ tx: true }),
     )
     append.mockResolvedValue({ contentHash: 'h', previousHash: null })
+    withSystem.mockImplementation(async (operation: (tx: unknown) => unknown) => operation({ system: true }))
   })
 
   it('writes the canonical chain under the entry organization and never touches the excluded legacy relation', async () => {
@@ -64,9 +67,15 @@ describe('auditLog canonical V2 persistence', () => {
     ).rejects.toThrow('audit persistence failed')
   })
 
-  it('only logs when no organization is attributed', async () => {
+  it('persists unattributed platform events on the dedicated SYSTEM connection', async () => {
     await auditLog({ eventType: AuditEventType.AUTH_FAILED })
     expect(withRLS).not.toHaveBeenCalled()
     expect(append).not.toHaveBeenCalled()
+    expect(appendPlatform).toHaveBeenCalledWith({ system: true }, expect.objectContaining({ action: AuditEventType.AUTH_FAILED }))
+  })
+
+  it('propagates a failed platform audit write', async () => {
+    appendPlatform.mockRejectedValueOnce(new Error('platform audit failed'))
+    await expect(auditLog({ eventType: AuditEventType.AUTH_FAILED })).rejects.toThrow('platform audit failed')
   })
 })
