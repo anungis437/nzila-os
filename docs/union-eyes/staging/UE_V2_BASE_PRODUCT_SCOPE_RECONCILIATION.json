@@ -52,6 +52,30 @@
     "ratification": {
       "path": "docs/union-eyes/convergence/register/ue-product-ratification-dossier-0c4.json",
       "blobSha": "edec50e4cc7232a35d8a606042232210ddfc424d"
+    },
+    "institutional": {
+      "path": "docs/union-eyes/convergence/register/ue-institutional-decision-dossier-0c4.json",
+      "blobSha": "a91480f89c5f2b8e329d72970a1f9cd52a116963"
+    },
+    "proposedDecisions": {
+      "path": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-decisions.json",
+      "blobSha": "7a295cda2a9c0c46f74b5705922ebb3c1a072e90"
+    },
+    "physicalGuards": {
+      "path": "docs/union-eyes/staging/UE_V2_AUTHORITY_PHYSICAL_GUARDS.md",
+      "blobSha": "aef55081a538e868d7ba2c4c1ec3cb59bb044b3c"
+    },
+    "ownerAuthorization": {
+      "path": "ops/change-records/CHG-2026-0114.founder-authorization.md",
+      "blobSha": "f104ac8fdd6fa067a359ed383d70af214b9de596"
+    },
+    "stories": {
+      "path": "docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md",
+      "blobSha": "2cc0e8c866389189ecf4fe18fbc2ac577d2db32b"
+    },
+    "kernel": {
+      "path": "apps/union-eyes/lib/authority/ontology.ts",
+      "blobSha": "03c84ef2b64aa54a4dcaf70f396bd370c55c5ee5"
     }
   },
   "scopeVocabulary": {
@@ -116,6 +140,11 @@
     {
       "area": "Broader products",
       "deferred": "WorkAid external specialist execution, advanced analytics/AI, campaigns/SMS, specialized OHS/organizing/dispatch/education, cross-federation and full institutional governance products unless explicitly adopted"
+    },
+    {
+      "area": "Legacy and dormant surfaces",
+      "required": "Source-derived scope inventory, mandatory safe denial and truthful presentation of any reachable non-base action",
+      "deferred": "No new capability merely to remove a 501 or clear historical program closure."
     }
   ],
   "explicitUnknowns": [
@@ -124,7 +153,8 @@
     "Mixed capability records must be split into their required base slice and deferred/conditional extensions during reconciliation; do not mark full capability delivered based on one slice.",
     "The current source represents PR1264; open PR1266's directory and approved-letter outbox changes are not admitted or staged evidence. No final-candidate proof inherits historical acceptance.",
     "Product scope is not institutional activation: actual mandate/appointment/issuance rules require authorized source; test fixtures can use synthetic authority.",
-    "Prior founder product ratification is not fabricated from historical proposals; exact subsequent ratification record was not located during this pass."
+    "Prior founder product ratification is not fabricated from historical proposals; exact subsequent ratification record was not located during this pass.",
+    "Historical institutional dossier 111 records includes earlier programme-specific decisions and blockers. These are indexed, not recertified or ratified; no duplicate institutional sign-off is requested."
   ],
   "baseFamilies": [
     {
@@ -440,7 +470,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Provider migration aliases/legacy Webhook remain compatible only where necessary; no new Clerk or Whop workflow requirement."
     },
     {
       "id": "UE-CAP-A-007",
@@ -449,7 +480,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "EXTERNAL_GATE",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Credential-exposure containment and reachable-route safety required; retiring or onboarding the externally owned sender remains conditional on verified integration."
     },
     {
       "id": "UE-CAP-B-001",
@@ -476,7 +508,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Both claim and formal grievance paths must be correct and coherent; do not force a new destructive entity migration solely to close an older design ledger."
     },
     {
       "id": "UE-CAP-D-001",
@@ -539,7 +572,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "EXTERNAL_GATE",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Member-visible classification enforcement is required; actual institutional label instrument must be provided by the union, not assumed by the platform."
     },
     {
       "id": "UE-CAP-G-001",
@@ -584,7 +618,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Every reachable unavailable operation must refuse honestly; implement only the stubs supporting explicit base actions."
     },
     {
       "id": "UE-CAP-H-003",
@@ -629,7 +664,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Core casework and enabled persona actions required; the complete frozen persona ceilings are not base commitment."
     },
     {
       "id": "UE-CAP-J-001",
@@ -683,7 +719,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Global schema-census workstream preserved separately; present base resource/tenancy invariants are required."
     },
     {
       "id": "UE-CAP-K-005",
@@ -719,7 +756,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required here means base-facing and reachable-route safety classification; formal global route-ratchet and 777 closure remain separate. Do not reopen all engineering scope."
     },
     {
       "id": "UE-CAP-K-009",
@@ -728,7 +766,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "No election product commitment; any reachable voting mutations must remain safe and truthful."
     },
     {
       "id": "UE-CAP-K-010",
@@ -746,7 +785,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Applicable review/audit and clone safety are required; election and broader review activation conditional."
     },
     {
       "id": "UE-CAP-K-004",
@@ -764,7 +804,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Member representation request/complaint and adopted review channel only; full independent governance review is a separate scope question."
     },
     {
       "id": "UE-OMIT-M04-MEMBER-REQUESTS",
@@ -773,7 +814,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Own status/history and follow-through required; separate withdraw/clarify/acknowledge/review-request mutations must be reconciled to enabled case scope."
     },
     {
       "id": "UE-OMIT-M04-LEGAL-DEADLINE",
@@ -800,7 +842,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Founder-required in-app privacy request/verification/handler response/export when supported/acknowledgement; separate breach-management and automatic legal fulfilment not implied."
     },
     {
       "id": "UE-OMIT-MAIN-APP-CRONS",
@@ -809,7 +852,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Core deadline/overdue/notification jobs and required operational jobs only; legacy or finance jobs must not be enabled to fill a historical list."
     },
     {
       "id": "UE-OMIT-A11Y-BILINGUAL",
@@ -845,7 +889,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "SOURCE_UNSPECIFIED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Recover or reference the owner-approved scoped contract where available; original missing document is not recreated as historical fact."
     },
     {
       "id": "UE-OMIT-DELIVERY-EVIDENCE",
@@ -863,7 +908,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "SOURCE_UNSPECIFIED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Use adopted scope and recovered/proposed actions as traceable inputs, not an invented original."
     },
     {
       "id": "UE-OMIT-REP-CORRESPONDENCE",
@@ -890,7 +936,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "historicalSourceState": "SOURCE_UNSPECIFIED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Every exposed operation accounted for; Step 2 identifies explicit scope and retirement, not a requirement to build every dormant route."
     },
     {
       "id": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
@@ -899,7 +946,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "No advanced advisory feature requirement; enforce gating/consent/privacy and honest outputs if any route remains enabled."
     },
     {
       "id": "UE-OMIT-AUDIT-LOG-VISIBILITY",
@@ -917,7 +965,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Only enabled and narrowly authorized base platform operations; no implied content or unrestricted admin authority."
     },
     {
       "id": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
@@ -935,7 +984,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Approved-letter signing and sealed evidence required; full generic signing infrastructure/provider is conditional."
     },
     {
       "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
@@ -962,7 +1012,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case-linked agreement and bargaining context required; full negotiations/proposals/ratification scope requires explicit decision."
     },
     {
       "id": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
@@ -971,7 +1022,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Read access to approved knowledge where used by case workflow; publishing/advanced library separate."
     },
     {
       "id": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
@@ -980,7 +1032,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Nzila entitlement/subscription separate from union finance. Confirm first-client commercial activation path; no automatic payment feature mandate."
     },
     {
       "id": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
@@ -1025,7 +1078,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Authoritative basic agreement access required; shared intelligent dataset ownership/ingestion separate."
     },
     {
       "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
@@ -1034,7 +1088,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Only base reference/lookup and minimum data management needed for casework; full negotiation and shared dataset products not implied."
     },
     {
       "id": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
@@ -1043,7 +1098,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Local authorized clause lookup required; cross-tenant sharing/publishing conditional and deny by default."
     },
     {
       "id": "UE-OMIT-OHS-REGULATORY-RECORDS",
@@ -1070,7 +1126,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Only adopted governance records and their confidentiality if enabled; full committee-management product separate."
     },
     {
       "id": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
@@ -1124,7 +1181,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Useful approved help/guidance required; editorial approval pipeline conditional."
     },
     {
       "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
@@ -1133,7 +1191,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Accurate case-linked employer/workplace and required correspondence; broader employer relations module separate."
     },
     {
       "id": "UE-OMIT-COMPLIANCE-ASSURANCE",
@@ -1142,7 +1201,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Actual security/privacy controls and true read models required; statutory certification or broader compliance engine not assumed."
     },
     {
       "id": "UE-OMIT-COPE-POLITICAL-ACTION",
@@ -1232,7 +1292,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Responsive app and in-app notice preferences required; device registration, native client and push conditional."
     },
     {
       "id": "UE-OMIT-ORGANIZATION-ONBOARDING",
@@ -1268,7 +1329,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Scoped organization activation and entitlement boundary must work; marketing/conversion automation separate."
     },
     {
       "id": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
@@ -1295,7 +1357,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case/letter signing as adopted, never invent provider acceptance; generic e-signature document request workflows conditional."
     },
     {
       "id": "UE-OMIT-SOCIAL-MEDIA-PUBLISHING",
@@ -1313,7 +1376,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Bounded case/worksite representation context and authorized contact data; institutional office appointment not inferred."
     },
     {
       "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
@@ -1322,7 +1386,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required only as authoritative case/org scope and necessary setup/reference data; broader standalone registry product not assumed."
     },
     {
       "id": "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS",
@@ -1349,7 +1414,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "historicalSourceState": "PARTIAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Truthful base leadership indicators required; new target authoring/alert products conditional."
     },
     {
       "id": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
@@ -1396,7 +1462,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case-file PDF/JSON only with primary-handler export decision and cryptographic verification; generic export excluded."
     },
     {
       "id": "UE-AUTOMATIC-CASE-ASSIGNMENT",
@@ -1414,7 +1481,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "New member must appear in correct directory/contact/assignment and reminder projections; invitation receipt/first case alone insufficient."
     },
     {
       "id": "UE-ORGANIZATION-SETUP-CHECKLIST",
@@ -1495,7 +1563,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Actual external fault/recovery and test alert proof required; a generic admin test button is not required."
     },
     {
       "id": "UE-ACTION-ORG-HIERARCHY-SEED",
@@ -1522,7 +1591,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Formal-grievance overdue continuity required through actual core scheduler; legacy cron not automatically revived."
     },
     {
       "id": "UE-CRON-PROCESS-MESSAGES",
@@ -1531,7 +1601,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Enabled message persistence and required notices must work; legacy processing endpoint only if used by actual architecture."
     },
     {
       "id": "UE-CRON-PROCESS-NOTIFICATIONS",
@@ -1540,7 +1611,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required delivered in-app/formal reminder paths; legacy all-channel processor not implied."
     },
     {
       "id": "UE-CRON-SCHEDULED-REPORTS",
@@ -1558,7 +1630,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Accurate base leadership indicators required; nightly analytics pipeline if required by data contract."
     },
     {
       "id": "UE-CRON-BILLING-LIFECYCLE",
@@ -1567,7 +1640,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Commercial subscription scope conditional, distinct from excluded union finance."
     },
     {
       "id": "UE-ADMIN-PILOT-STATUS",
@@ -1603,7 +1677,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Check actual usable secret/binding without exposing value, not presence alone."
     },
     {
       "id": "UE-SECRET-AUTH",
@@ -1612,7 +1687,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Check required authentication configuration without leaking secrets; actual provider/session proof required."
     },
     {
       "id": "UE-SECRET-ENTRA-TENANT",
@@ -1621,7 +1697,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Check required actual provider identity configuration; not presence-only certification."
     },
     {
       "id": "UE-DB-MIGRATIONS-APPLIED",
@@ -1648,7 +1725,8 @@
       "reason": "Explicit exclusion from positive base feature delivery; applicable security controls still required.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Not a dependency of declared base operational profile; do not provision to satisfy legacy registry."
     },
     {
       "id": "UE-DJANGO-SIDECAR-HEALTH",
@@ -1657,7 +1735,8 @@
       "reason": "Explicit exclusion from positive base feature delivery; applicable security controls still required.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Not a dependency of declared base operational profile; do not provision to satisfy legacy registry."
     },
     {
       "id": "UE-QUEUE-DEPTH",
@@ -1729,7 +1808,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "No union payment dependency; if commercial subscription provider is actually required, qualify only that separately."
     },
     {
       "id": "UE-SENTRY-PROBE",
@@ -1738,7 +1818,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required real error/alert visibility; only deployed monitoring provider(s) must be measured."
     },
     {
       "id": "UE-SYNTHETIC-MONITORING",
@@ -1873,7 +1954,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Formal grievance only for accepted scheduler. No intake reminder feature implied."
     },
     {
       "id": "UE-DEADLINE-DELIVERY",
@@ -1882,7 +1964,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Formal grievance only for accepted worker, provider acceptance is not inbox receipt."
     },
     {
       "id": "UE-DEADLINE-OVERDUE",
@@ -1945,7 +2028,8 @@
       "reason": "Explicit exclusion from positive base feature delivery; applicable security controls still required.",
       "sourceState": "REAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Union finance positive qualification excluded. If existing authorized read-only data reflection remains visible, do not fabricate or leak."
     },
     {
       "id": "UE-DUES-PORTAL-ISSUE-REPORTING",
@@ -1954,7 +2038,8 @@
       "reason": "Explicit exclusion from positive base feature delivery; applicable security controls still required.",
       "sourceState": "REAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Union finance positive qualification excluded; any reachable action remains subject to truthful scope and sensitive-data rules."
     },
     {
       "id": "UE-DUES-PORTAL-DEDUCTIONS",
@@ -1963,7 +2048,8 @@
       "reason": "Explicit exclusion from positive base feature delivery; applicable security controls still required.",
       "sourceState": "REAL",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Union finance positive qualification excluded; any retained read-only reflection must not leak or invent."
     },
     {
       "id": "UE-DUES-DIRECT-PAYMENT",
@@ -1990,7 +2076,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required manual intake deadline create/reschedule/complete/cancel and authorized views; historical registry title is stale. Intake emails and automatic legal calculations remain deferred."
     },
     {
       "id": "UE-CLAIM-ANONYMOUS-FILING",
@@ -1999,7 +2086,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Preserve applicable privacy/identity restrictions; anonymous filing positive workflow only where enabled/adopted."
     },
     {
       "id": "UE-FIN-DUES-CALCULATION-WORKFLOW",
@@ -2035,7 +2123,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Privacy incident response/privacy controls required operationally; full in-app incident workflow separate unless adopted."
     },
     {
       "id": "UE-PRIVACY-DSAR-WORKFLOW",
@@ -2044,7 +2133,8 @@
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required founder-approved in-app self-service, not automatic statutory fulfilment of every request type."
     },
     {
       "id": "UE-PRIVACY-PROVINCIAL-CASES",
@@ -2053,7 +2143,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Comply with applicable jurisdiction and avoid false jurisdiction claims; separate provincial workflow only if adopted."
     },
     {
       "id": "UE-PRIVACY-BREACH-ASSESSMENT",
@@ -2062,7 +2153,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Do not automate statutory determinations without authoritative process; operational incident handling remains required."
     },
     {
       "id": "UE-EMERGENCY-DECLARATION",
@@ -2071,7 +2163,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Emergency-access denial and any enabled scoped/read-only grant safety required; full disaster declaration/preparedness product not assumed."
     },
     {
       "id": "UE-GOV-INDEPENDENT-REVIEW",
@@ -2080,7 +2173,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Qualify only enabled, explicitly adopted independent review functions; test no appointment/title bypass. Full review lifecycle needs scope resolution."
     },
     {
       "id": "UE-GOV-ELECTION-VOTING-RESULTS",
@@ -2098,7 +2192,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Non-exposed or bounded records only if adopted; no council ballot/certification expansion."
     },
     {
       "id": "UE-ORG-SHARING-SETTINGS",
@@ -2224,7 +2319,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Agreement/clauses needed for casework; standalone negotiations detail conditional, no false affordance."
     },
     {
       "id": "UE-PILOT-TRAINING-GUIDES",
@@ -2233,7 +2329,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "First-run guidance/help required; historical guide publication/in-app training product conditional."
     },
     {
       "id": "UE-COMPLIANCE-CHARTER-STATUS",
@@ -2242,7 +2339,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Truthful institutional reference/compliance states only where adopted; no implied regulatory certification."
     },
     {
       "id": "UE-COMPLIANCE-POSTURE-REPORTING",
@@ -2251,7 +2349,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required security/privacy and accurate metrics distinct from broader compliance score/report product."
     },
     {
       "id": "UE-DOCUMENT-APPROVAL-WORKFLOW",
@@ -2278,7 +2377,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Tenant setup/admin required; general system settings console conditional."
     },
     {
       "id": "UE-ADMIN-SECURITY-OVERVIEW",
@@ -2287,7 +2387,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Base operational monitoring/security evidence required; specific separate security overview conditional."
     },
     {
       "id": "UE-ADMIN-REPORTS-HUB",
@@ -2296,7 +2397,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Leadership/audit read models and evidence required; generic reports hub conditional."
     },
     {
       "id": "UE-ADMIN-SYSTEM-CACHE-CLEAR",
@@ -2512,7 +2614,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Actual policy enforcement for all relevant case actions required. Institution-specific issuance/appointment/recusal workflow beyond enabled scope conditional; no role-title bypass."
     },
     {
       "id": "UE-WORKAID-SPECIALIST-REFERRAL",
@@ -2539,7 +2642,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required technical telemetry; pilot outcome/adoption metrics only to agreed purpose and scope."
     },
     {
       "id": "UE-AI-SEMANTIC-SEARCH",
@@ -2557,7 +2661,8 @@
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "sourceState": "NOT_IMPLEMENTED",
       "needsScopeResolution": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case governance and adopted policy authority controls required; full policy workflow/activation conditional."
     },
     {
       "id": "UE-ACTION-SMS-SEND",
@@ -2726,14 +2831,15 @@
     {
       "id": "M07",
       "title": "My Union",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "member",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Own union/member relationship and profile facts required. Benefits, dues, events, voting/participation and digital card are not thereby adopted."
     },
     {
       "id": "M08",
@@ -3098,14 +3204,15 @@
     {
       "id": "REP-ACT-21",
       "title": "Resolution, closure, transfer with continuity",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "representative",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-B-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Connected resolution, closure and case handoff required; broader institutional succession specifically conditional."
     },
     {
       "id": "REP-ACT-22",
@@ -3158,14 +3265,15 @@
     {
       "id": "R01",
       "title": "Identity and mandates",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "representative",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Identity and live mandate/case relationship safety are required; issuing real institutional mandates is separate."
     },
     {
       "id": "R02",
@@ -3266,14 +3374,15 @@
     {
       "id": "R10",
       "title": "Member updates and notices",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "representative",
       "historicalDefinition": "GROUPED_ONLY",
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Enabled member status/notification updates required; advanced channels/automatic legal conclusions separate."
     },
     {
       "id": "R11",
@@ -3566,14 +3675,15 @@
     {
       "id": "SR11",
       "title": "SR11",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "senior-representative",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-B-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case successor continuity and outgoing access revocation required; full office transition product conditional."
     },
     {
       "id": "SR12",
@@ -3950,26 +4060,28 @@
     {
       "id": "O21",
       "title": "Risk, compliance, privacy and institutional accountability",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "officer-executive",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Truthful base confidentiality, privacy, risk and operational accountability; no compliance certification or full governance platform implied."
     },
     {
       "id": "O22",
       "title": "Authorized institutional reporting and evidence",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "officer-executive",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Scoped accurate leadership reporting and permitted case evidence; broader institutional report/export products separate."
     },
     {
       "id": "O23",
@@ -4701,7 +4813,8 @@
       "capabilityId": "UE-CAP-G-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required confidentiality and authorized sharing enforcement; external specialist disclosure and other new integrations separate."
     },
     {
       "id": "G20",
@@ -4725,7 +4838,8 @@
       "capabilityId": "UE-CAP-D-003",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Financial/trustee assurance product excluded; non-financial auditor, provenance and evidence scope remain required under G22–G23."
     },
     {
       "id": "G22",
@@ -5347,14 +5461,15 @@
     {
       "id": "STW-ACT-33",
       "title": "Prepare a handoff summary",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "steward",
       "sourceStatus": "PROPOSED_NOT_ADOPTED",
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case handoff record and obligation continuity are base requirements. A separate institutional office handover product is not implied."
     },
     {
       "id": "STW-ACT-34",
@@ -5895,8 +6010,8 @@
     {
       "id": "REP-ACT-21",
       "title": "Resolution, closure, transfer with continuity",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "representative",
       "sourceStatus": "PROPOSED_NOT_ADOPTED",
       "institutionalDecisionIds": [
@@ -5906,7 +6021,8 @@
       ],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Connected resolution, closure and case handoff required; broader institutional succession specifically conditional."
     },
     {
       "id": "REP-ACT-22",
@@ -5968,14 +6084,15 @@
     {
       "id": "R01",
       "title": "Identity and mandates",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "representative",
       "sourceStatus": "PROPOSED_NOT_ADOPTED",
       "institutionalDecisionIds": [],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Identity and live mandate/case relationship safety are required; issuing real institutional mandates is separate."
     },
     {
       "id": "R02",
@@ -6086,8 +6203,8 @@
     {
       "id": "R10",
       "title": "Member updates and notices",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "representative",
       "sourceStatus": "PROPOSED_NOT_ADOPTED",
       "institutionalDecisionIds": [
@@ -6095,7 +6212,8 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Enabled member status/notification updates required; advanced channels/automatic legal conclusions separate."
     },
     {
       "id": "R11",
@@ -7250,7 +7368,7 @@
       "topic": "Reports dashboard index",
       "reason": "The capability registry records /dashboard/reports as REMOVED. Gate 0 does not restore it.",
       "evidence": "apps/union-eyes/lib/reality/capability-registry.ts reports dashboard index",
-      "scope": "DEFERRED"
+      "scope": "EXCLUDED"
     },
     {
       "id": "UE-SCOPE-WORKAID-SYNTHETIC-JOURNEYS",
@@ -7385,232 +7503,370 @@
     {
       "id": "DEC-PD-01",
       "title": "Steward as a distinct persona",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT_DESIGN"
     },
     {
       "id": "DEC-PD-02",
       "title": "Steward navigation",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "REVISE"
     },
     {
       "id": "DEC-PD-03",
       "title": "Default visibility of working notes",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT"
     },
     {
       "id": "DEC-PD-04",
       "title": "Intake classification",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "REVISE"
     },
     {
       "id": "DEC-PD-05",
       "title": "Assignment acknowledgement and handoff summary",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT"
     },
     {
       "id": "DEC-PD-06",
       "title": "Representative R-domain meanings",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT_AS_PROPOSED_TAXONOMY"
     },
     {
       "id": "DEC-PD-07",
       "title": "R18 status vocabulary",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT"
     },
     {
       "id": "DEC-PD-08",
       "title": "Journeys A–G acceptance form",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT_AS_TEST_DESIGNS"
     },
     {
       "id": "DEC-PD-09",
       "title": "Financial Officer domain map",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT_AS_PROPOSED_TAXONOMY"
     },
     {
       "id": "DEC-PD-10",
       "title": "Financial navigation names",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "REVISE"
     },
     {
       "id": "DEC-PD-11",
       "title": "Financial journeys FJ01–FJ10",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "REVISE"
     },
     {
       "id": "DEC-PD-12",
       "title": "Deadline extension workflow",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT"
     },
     {
       "id": "DEC-PD-13",
       "title": "Financial reporting scope",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT_WITH_CONTROLS"
     },
     {
       "id": "DEC-PD-14",
       "title": "Organization scenario coverage",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "PRODUCT_DESIGN",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": "ACCEPT_AS_SCENARIO_HYPOTHESES"
     },
     {
       "id": "DEC-IA-01",
       "title": "Who holds a triage designation",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-02",
       "title": "Self-assignment from triage",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-03",
       "title": "Who may assign or route cases",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-04",
       "title": "Who may close a case",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-05",
       "title": "Member-disclosable labels",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-06",
       "title": "Privileged-matter access grants",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-07",
       "title": "Recusal lifting and conflict adjudication",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-08",
       "title": "Temporary delegation, substitute coverage and succession",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-09",
       "title": "Senior review and approval authority",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-10",
       "title": "Territory and bargaining-unit mandates per operating model",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-11",
       "title": "Representation protocol approval",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-12",
       "title": "WorkAid referral authority and consent wording",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-13",
       "title": "Deadline extension approval",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-14",
       "title": "Correspondence approval, signature and dispatch",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-15",
       "title": "Conversation legal hold and retention",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-16",
       "title": "Financial mandate issuance rule",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-17",
       "title": "Delegation of financial duties",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-18",
       "title": "Monetary limits and required approvals",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-19",
       "title": "Expenditure approval policy",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-20",
       "title": "Payment execution and rails",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-21",
       "title": "Reconciliation authority",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-22",
       "title": "Trustee authority and administration",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-23",
       "title": "Auditor appointment and access scope",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-24",
       "title": "Strike and restricted funds authority",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-25",
       "title": "Affiliate remittance and per-capita authority",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-26",
       "title": "Pension and benefit financial administration",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-27",
       "title": "Dues data access for presidents and administrators",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-28",
       "title": "Financial succession and revocation",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-29",
       "title": "External accounting export and retention",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-30",
       "title": "Tax slip issuance authority",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-31",
       "title": "Financial adoption by organization",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-IA-32",
       "title": "Steward role scope per organization",
-      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION"
+      "disposition": "RECONCILE_EXISTING_OWNER_OR_INSTITUTIONAL_DECISION_NO_NEW_ADOPTION",
+      "type": "INSTITUTIONAL_AUTHORITY",
+      "sourceStatus": "OUTSTANDING",
+      "recommendation": null
     },
     {
       "id": "DEC-PD-0C2-01",
@@ -7685,16 +7941,1918 @@
       "EXCLUDED": 30
     },
     "historicalPersonas": {
-      "REQUIRED": 58,
-      "CONDITIONAL": 69,
+      "REQUIRED": 65,
+      "CONDITIONAL": 62,
       "DEFERRED": 13,
       "EXCLUDED": 42
     },
     "proposed": {
-      "REQUIRED": 86,
-      "CONDITIONAL": 34,
+      "REQUIRED": 90,
+      "CONDITIONAL": 30,
       "DEFERRED": 7,
       "EXCLUDED": 50
+    },
+    "authorityActions": {
+      "REQUIRED": 20,
+      "CONDITIONAL": 12,
+      "DEFERRED": 3,
+      "EXCLUDED": 6
+    },
+    "historicalStories": {
+      "REQUIRED": 45,
+      "CONDITIONAL": 17,
+      "DEFERRED": 0,
+      "EXCLUDED": 0
     }
-  }
+  },
+  "historicalPilotScope": {
+    "included": [
+      {
+        "id": "Case / Grievance filing",
+        "scope": "REQUIRED",
+        "baseFamily": "C08",
+        "scopeBoundary": "Required; genuine formal filing and persisted lifecycle, no false legal filing conclusion."
+      },
+      {
+        "id": "Case intake (idempotent)",
+        "scope": "REQUIRED",
+        "baseFamily": "C08",
+        "scopeBoundary": "Required; same-tenant identity, replay and durable intake."
+      },
+      {
+        "id": "Case assignment engine",
+        "scope": "REQUIRED",
+        "baseFamily": "C09",
+        "scopeBoundary": "Required; founder requires automatic workload/expertise matching in addition to manual assignment."
+      },
+      {
+        "id": "Evidence export + sealing",
+        "scope": "REQUIRED",
+        "baseFamily": "C14",
+        "scopeBoundary": "Required; authorized downloadable PDF and exact sealed evidence verification, not server seal alone."
+      },
+      {
+        "id": "File upload (DMS)",
+        "scope": "REQUIRED",
+        "baseFamily": "C13",
+        "scopeBoundary": "Required; exact bytes, scanner, access and revocation."
+      },
+      {
+        "id": "Document OCR",
+        "scope": "REQUIRED",
+        "baseFamily": "C15",
+        "scopeBoundary": "Required; authorized extraction and distinct human review, exact version and publication."
+      },
+      {
+        "id": "Hash-chained audit trail",
+        "scope": "REQUIRED",
+        "baseFamily": "C22/O05",
+        "scopeBoundary": "Required; atomic audit integrity and checkpoint proof."
+      },
+      {
+        "id": "Steward workbench (queue view)",
+        "scope": "REQUIRED",
+        "baseFamily": "C08/C10/C21",
+        "scopeBoundary": "Required; actor-scoped queue and real action access."
+      },
+      {
+        "id": "Leadership dashboard (ED view)",
+        "scope": "REQUIRED",
+        "baseFamily": "C18",
+        "scopeBoundary": "Required; truthful scoped aggregates, authorized drill-down where exposed."
+      },
+      {
+        "id": "RBAC / multi-role per org",
+        "scope": "REQUIRED",
+        "baseFamily": "C06/C07",
+        "scopeBoundary": "Required; role/capacity eligibility plus resource authority; enabled combinations only."
+      },
+      {
+        "id": "Setup checklist / first-run UX",
+        "scope": "REQUIRED",
+        "baseFamily": "C01–C05",
+        "scopeBoundary": "Required; persistent, actual completion and first case."
+      },
+      {
+        "id": "Auth (NextAuth + Argon2id)",
+        "scope": "REQUIRED",
+        "baseFamily": "C01/C06/C07/C22",
+        "scopeBoundary": "Required outcome; obsolete historical auth implementation is replaced by current real Entra/session/provider binding. Do not rebuild NextAuth."
+      },
+      {
+        "id": "Correlation-ID instrumentation",
+        "scope": "REQUIRED",
+        "baseFamily": "C22/O06/O08",
+        "scopeBoundary": "Required for deployed base stack; illustrative legacy TS/Django parity is not authority to deploy Django."
+      }
+    ],
+    "excluded": [
+      {
+        "id": "Finance / dues persistence",
+        "scope": "EXCLUDED",
+        "scopeBoundary": "Native finance remains excluded; sensitive routes must fail closed; authorized read-only reflection is conditional if retained."
+      },
+      {
+        "id": "Pattern detection / ML predictions",
+        "scope": "DEFERRED",
+        "scopeBoundary": "Separate advanced capability; only truthful enabled base reporting."
+      },
+      {
+        "id": "Admin console (full)",
+        "scope": "CONDITIONAL",
+        "scopeBoundary": "No full historical admin-suite requirement. New base admin setup, invitations, membership lifecycle, contact/directory and access removal are required (C01–C06/C19)."
+      },
+      {
+        "id": "Taxonomy management",
+        "scope": "DEFERRED",
+        "scopeBoundary": "Only case classification/reference data actually necessary for base workflows is required."
+      },
+      {
+        "id": "CSV bulk export",
+        "scope": "DEFERRED",
+        "scopeBoundary": "General bulk export deferred; scoped case evidence PDF/JSON is separately required."
+      },
+      {
+        "id": "API public endpoints (third-party integrations)",
+        "scope": "DEFERRED",
+        "scopeBoundary": "External integration products deferred; actual auth, health and signed callback boundaries are required."
+      },
+      {
+        "id": "Multi-org cross-access",
+        "scope": "EXCLUDED",
+        "scopeBoundary": "No single-local pilot cross-organization raw access; secondary synthetic tenant is a mandatory isolation test. Explicitly authorized future cross-org protocols separate."
+      },
+      {
+        "id": "Tier 2 apps (Zonga, ABR, etc.)",
+        "scope": "EXCLUDED",
+        "scopeBoundary": "Different products. No Union Eyes base commitment."
+      }
+    ],
+    "historicalParameters": {
+      "pilotOrganizations": 1,
+      "worksitesUpTo": 5,
+      "membersUpTo": 200,
+      "dataResidency": "Azure Canada Central",
+      "duration": "90 days or mutual extension",
+      "realData": "DPA signed and conditions met"
+    },
+    "note": "Historical parameters are baseline planning context, not independently a current performance target or a live-data authorization."
+  },
+  "institutionalDecisionInventory": {
+    "note": "Historical dossier indexed in full. Neither original outstanding labels nor original release-blocking decisions determine current scoped base status without reconciliation. No institutional authority or resolution is invented.",
+    "sourceTotals": {
+      "institutionalDecisions": 111,
+      "byTheme": {
+        "CARBON_SCOPE": 1,
+        "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY": 31,
+        "CROSS_ORGANIZATION_DISCLOSURE": 17,
+        "EXTERNAL_PROCESSOR_AND_CONSENT": 9,
+        "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS": 17,
+        "OTHER": 36
+      },
+      "byFamily": {
+        "BASELINE_INSTITUTIONAL_AUTHORITY": 32,
+        "INVENTORY_INSTITUTIONAL": 79
+      },
+      "requiredBeforeCertification": 1,
+      "deferredNonAuthorizing": 110,
+      "deferredAndReleaseBlocking": 49,
+      "adopted": 0,
+      "grantsInstitutionalAuthority": 0
+    },
+    "records": [
+      {
+        "id": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CARBON_SCOPE",
+        "question": "Does the platform operator or an organization own carbon accounting, and which measured data source, if any, may back an emissions figure or a neutrality claim?",
+        "historicalScopeLockDisposition": "REQUIRED_BEFORE_CERTIFICATION",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-25",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Who may prepare, approve and submit remittances to a central or affiliated body?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ARBITRATION-PRECEDENT-LIBRARY-AUDIENCE-AND-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which arbitration decisions and organization-contributed precedents may be read by members of which organizations, which offices may add a decision to the shared library or change what an organization contributed, how is a decision marked public or restricted and who reviews it before it is shared, and may an organization withdraw a contribution?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "What may a federation see of its affiliates (member counts, per-capita remittances, meeting records, grievance benchmarks), who in the federation may see it, how is the parent and child relationship between a federation organization and an affiliate established and verified, and what minimum group size suppresses a published grievance statistic?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-IDENTITY-FEDERATION-ADMINISTRATOR",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which office may register, change and remove an external SAML or OIDC identity provider for an organization, how is the organization shown to own the identity domain the provider asserts, and which provider groups may confer which tenant roles?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "What may an organization being onboarded see of other organizations (the federations and congresses it could join, the member counts of its peers, the clauses other organizations shared), and is any of it a declared public directory or does each item need the other organization to opt in?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ONBOARDING-RECOMMENDATION-BASIS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "What data and what institutional rule may an onboarding suggestion (a parent federation match, a peer benchmark, a national average, a recommended feature or integration, a suggested limit) rest on, and how must a suggestion that rests on a fallback or a literal be labelled?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-BILLING-AND-REMITTANCE-SETTINGS-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which of the keys held in the settings JSON of an organization (the per-capita rate and remittance day that set what it owes its parent body, the credit balance and renewal date that meter its use of metered features, the telephone number by which inbound text messages are attributed to it, branding, security policy and integration values) may the administrator of that organization write, which keys may only the platform operator or the parent body write, and which values must the software enforce when it saves them?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which office of an organization may change its profile, contact details, settings, parent affiliation and lifecycle status (including archiving the organization), who verifies a change of parent, and which fields of an organization record (contacts, billing contact, settings, member counts, hierarchy position) may a signed-in user of another organization read?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-SHARING-SETTINGS-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which office of an organization decides what it shares with its federation, sector, province and the congress (clauses, precedents, anonymization, approval and approver role), may a federation change those settings for an affiliate, and which offices may read the log of other organizations that accessed the resources of the organization?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZING-CAMPAIGN-DATA-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which offices of an organization may read an organizing campaign (target employer, workplace, strategy, employer vulnerabilities, organizing team, card and contact counts, election figures), may a member who is not on the organizing team or a steward read it, may a federation or a staff representative of another organization read it, and which fields of a campaign must stay restricted to the organizing team because disclosure to an employer exposes workers and organizers to retaliation?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PILOT-REFERENCE-AND-CASE-STUDY-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Whose attestation and consent are required before a pilot testimonial, case study, time-saved figure or benchmark record is generated, stored or shown outside the pilot organization, and what basis may its figures rest on?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PILOT-USAGE-SIGNAL-READERS-AND-BASIS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Who may read per-user pilot usage telemetry, champion lists, friction lists and conversion signals for an organization, may the platform read them across organizations, and what events may the signals rest on given that clients assert them?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PLATFORM-CONTRACT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which organization office may read the commercial terms of, pause, resume or cancel the organization platform subscription, and which of those acts belong to the platform operator?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PLATFORM-RECONCILIATION-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which offices may run a platform reconciliation, view its runs and exceptions and resolve or write off an exception, what makes a resolution or write-off valid (second approver, evidence, ledger entry), how is a run repeated or corrected, and is reconciliation of the organization platform billing a duty of the union or of the platform operator?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PLATFORM-STAFF-MANDATE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which platform staff may read across organizations or operate shared platform services, under what mandate, scope, expiry and audit?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-STEWARD-DIRECTORY-AND-APPOINTMENT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which office appoints, confirms and ends a steward of an organization, which of the fields held about a steward (type, unit and worksite coverage, tenure, appointer, work phone, personal phone, preferred contact method, availability notes, notes and the grievance a case-based assignment points at) may a member who is not a steward read, which may only stewards and officers read, and does an assignment row, the organization role title steward or the kernel mandate decide who acts as a steward?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-TAX-SLIP-AND-RECEIPT-ISSUER-AND-SOURCE-RECORDS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CROSS_ORGANIZATION_DISCLOSURE",
+        "question": "Which office issues the tax documents an organization or a member relies on (the T4A and CRA export, the RL-1 slip, the T106 information return of related-party transactions, the receipt for a political contribution), from which stored records is each document computed, which readers may see the remittance ledger a document is drawn from, and may a member who is not an officer read the amounts the organization remits to its parent body?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-01",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which staff may hold a case-triage designation, for how long, and who grants it?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-02",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "May a triage designee take ownership of an unassigned case, and under what protocol per operating model?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-03",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices may assign or route a case, over which unit or territory?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-04",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Who may close a case, and in which states?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-05",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which document and record labels may be disclosed to a member, and who defines a third party?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-06",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Who may grant an independent privileged-access relationship, and on what record?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-15",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Who may place or release a legal hold, and who adopts the retention policy?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-29",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Who may export to an external accounting system, and what retention rule applies?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which capability and which organization office own newsletter campaigns, recipients and delivery status, and is campaign delivery status a billing or a communications obligation?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Who owns the CUPE vocabulary (case types, priority service-level hours, severity legal flags, role permission flags and the status transitions with the roles allowed to make them), is it a published institutional standard or a development default, how does a role named in it (chief steward, business agent) relate to the roles the application enforces, and who approves a change?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EDUCATION-CERTIFICATION-ISSUING-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which office may mark a registration completed, issue a certificate or certification number, verify a certification and revoke it, and what evidence of completion must exist first?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EDUCATION-TRAINING-RECORD-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices may read the training registrations, completions, certifications and session details (meeting access codes, budgets, accommodation) of other members of an organization, and may a member see a session they are not registered for?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ESIGNATURE-REQUEST-AUTHORITY-SIGNER-IDENTITY-AND-LEGAL-VALIDITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices of a union may send a document for signature in its name and to which recipients, what identity proof binds a signer (a platform account, a verified e-mail address, a provider authentication) to the person whose name the audit trail states, what legal validity the union claims for a signature recorded in the platform or at a provider, and what makes the audit trail evidence (a sealed, verifiable record rather than an editable table)?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices may read analytics, topic maps, single-source flags and event notes derived from exit interviews classified privileged, legal_sensitive or executive_confidential, and must such interviews be excluded from, or redacted in, the aggregates that a steward or officer reads?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-RECORD-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices may read the full text, attached documents and transcripts, event notes and AI summary of an exit interview at each sensitivity level, is the consent of the retiring member a precondition of publication, of reading and of any model or search use, who may record that consent or its withdrawal on the retiree behalf, and who owns the knowledge archive that the published copy lives in?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EXTERNAL-REPRESENTATIVE-DOCUMENT-DEPOSIT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which files may an outside representative deposit on a grievance, through which intake that scans and sizes the file, and which office reviews a deposited file before it joins the case record and before any other party can see it?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ICRA-PSEUDONYMOUS-DATA-LIFECYCLE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "How long may a pseudonymous ICRA assessment, its free-text notes, its consent record and its organization context be kept, who may erase them, and must a respondent be able to withdraw an assessment that they started?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-MEMBER-DUES-SELF-SERVICE-COLLECTION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Does the union collect membership dues from members through the application by card, which processor account receives the funds and whose merchant account it is, how is a payment applied to the dues ledger and to a balance that is paid through other channels at the same time, what receipt or refund path applies, and what member data may be sent to the processor?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-MEMBER-LOCATION-PROCESSING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "For which purposes may the union collect a member precise position, which office may read an individual position or a geofence entry, how is a consent bound to a purpose, an organization and a strike or event, and which office owns the retention and the erasure of the points a member produced without an active consent?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-MEMBER-PORTAL-DOCUMENT-INTAKE-AND-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which documents may the union publish to members through a member portal, which office may deposit or publish one, what file types, size limits, scanning and storage rules apply to a deposited file, which members or roles may read each document, and how long is it retained?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ML-EXTERNAL-QUERY-DISCLOSURE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "What organization, member and case information may be sent to the external AI query service, who may ask it questions, and how is the answer it returns recorded and reviewed before it is relied on?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ML-MEMBER-RISK-SCORING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "May the union score individual members for churn risk from their case history, which office may read and act on a named member score, what must members be told, and how long may a score and its case-derived features be kept?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-OHS-ANONYMOUS-REPORT-IDENTITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Does the union offer anonymous reporting of incidents and hazards, which offices may learn the identity of an anonymous reporter, and where is that identity kept (the record, the audit trail or neither)?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PILOT-APPLICANT-ORGANIZATION-VERIFICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "What proof binds an anonymous pilot applicant to an organization, which office may attest that binding, and what access, if any, may an applicant-typed organization claim give the stewards of that organization before the binding exists?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PLATFORM-MARKETING-CONTENT-OWNER-AND-APPROVAL",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which office owns the testimonials and case studies shown on the public proof page, who approves a testimonial for publication and with what evidence of the speaker consent, may an administrator of one organization edit or delete content that every visitor sees, and may a signed-in member read a testimonial that is not approved or not public?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-POLITICAL-DATA-HANDLING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Does the union hold voter support levels, canvassing notes and elected-official contact records, who may read them, and under which privacy and political-finance rules?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-REPRESENTATION-AUTHORITY-SOURCE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Does the approved per-organization representation protocol, or the kernel issuance model, decide who holds representation authority over a case?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-SATISFACTION-RATING-READERS-AND-RESPONDENT-ANONYMITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices may read the satisfaction ratings that members give their representative (an individual representative, the ranking of every representative, the free text), is a rating published when only one or two members have answered, and does a member who asks to answer anonymously stay unidentifiable to the representative and to the stewards who read the figures?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-VOICE-RECORDING-CONSENT-RETENTION-AND-PROCESSOR",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "May a recording of a member or steward describing a claim be sent to an external speech service, on whose consent, under which processor agreement and in which region, is the recording or its transcript retained or discarded, who may transcribe, and is each transcription counted, limited and recorded?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-WCB-CLAIM-AND-ASSESSMENT-READERS-AND-WRITERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "Which offices may read and change the workers compensation claim of a member (injury, medical and prognosis detail, benefits paid, appeal dates, the union representative) and the premium assessment the organization receives from the board, does the representative who holds the member case decide who sees a claim, may a steward read the organization premium and payroll figures, and which board filings must the software itself submit?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-WORKBOOK-PSEUDONYMOUS-DATA-LIFECYCLE-CONSENT-AND-PROCESSOR",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "CASE_MEMBER_DOCUMENT_CONFIDENTIALITY",
+        "question": "On what consent, notice and retention does the institution keep a pseudonymous workbook and the names, roles and free-text notes of the people it describes, which payment processor may receive the workbook identifier, and when is an unclaimed workbook deleted?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-16",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who may issue, approve and hold a financial mandate, and what is the rule where fewer than three eligible people exist?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-17",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "May any financial duty be delegated, and by whom?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-20",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who may execute a payment, and are scheduled or card payment rails authorized?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-23",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who appoints an auditor, and what accounts, periods and records may the auditor reach?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-26",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who administers pension and benefit finance, and who approves contributions and benefit payments?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-27",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Do presidents and administrators receive any access to member dues data, through a mandate store or an interim allow-list?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-28",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "What happens to financial mandates when an office-holder leaves, is suspended or is replaced?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-30",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who may issue tax slips and receipts, and under which registration?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-31",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which organizations adopt the financial baseline and when, given that institutions differ?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-AUDIT-HISTORY-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which roles may read the organization audit history, and which fields must be withheld from each?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-CONTEXT-SELECTION-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which memberships (active, suspended, removed), which organization states (active, inactive, suspended, archived) and which platform authority permit a user to select an organization as the working context of a session, and is each selection an audited event?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PENSION-ADMINISTRATION-AND-TRUSTEE-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which offices may create, change and wind up a pension plan, enrol a member, record a contribution, issue a tax record and decide a benefit claim, which trustees or administrators hold that fiduciary authority, who may read plan funding figures, the enrolment list, retirement eligibility and the minutes of trustee meetings, and how is a member eligible to retire determined?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PILOT-COMMERCIAL-AGREEMENT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who may approve the commercial terms of a pilot, what acceptance by the applicant organization must exist before a contract, an invoice or a subscription is created for it, and what may the system record as signed or issued?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-REPORT-SOURCE-DATA-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which offices may reproduce member and claim columns (member email, claimant and assignee identifiers, claim status and dates, dues amounts) in a free-form report, which columns are releasable at all, and what must be recorded and suppressed when a report returns them?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-REWARDS-PROGRAM-AUTOMATION-EXPIRY-AND-EXPORT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which rewards are awarded automatically (work anniversaries, scheduled awards), under what rule and at what credit amount, how often may the scheduler run and what makes a run safe to repeat, do credits expire and who is told before they do, and which offices may export the awards, wallet ledger and budgets of an organization?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-SCHEDULED-REPORT-RECIPIENTS-AND-DELIVERY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Who may schedule a report for recurring delivery, which recipients (members, officers, addresses outside the union) and formats are allowed, who approves delivery of member or claim data outside the application, and what is the stop and audit rule for a schedule?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "FINANCIAL_MANDATE_AND_SENSITIVE_RECORDS",
+        "question": "Which staff are eligible for a messages designation and which for a cases designation, is the eligibility rule the same for both scopes, and is the end of a lapsed designation recorded as an audited decision of a person or as a system event?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-10",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "How are unit, territory and respondent scope assigned in each operating model?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-12",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "Who may authorize a referral, and what consent wording does the institution adopt?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-MODEL-PROCESSING-CONSENT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "May exit-interview content (titles, topics, risk flags, roles and years of service) be sent to a model provider for an organization-wide analysis, which sensitivity levels are excluded, and does retiree consent or an office approval have to exist first?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-INTEGRATION-CONTROL-PLANE-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "Which office of an organization may configure, activate and run an external provider integration, and who holds and rotates the credential material that the integration uses?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "May an existing membership row be re-bound to a new sign-in identity because the e-mail address matches, who verifies that the address belongs to the person, may a row already bound to another identity be re-bound, and what record is kept of the re-binding?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZING-SUPPORT-RECORD-AND-OUTREACH-CONSENT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "Who holds the signed authorization cards and the identities of the workers who signed or lead the organizing committee, who may count them and state a support percentage, which consent a worker gives before being contacted or enrolled in an outreach sequence by email or text, and how is the count that a filing relies on proved?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-REWARDS-REDEMPTION-PROVIDER-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "Which shop and which office decide that a reward redemption was ordered, fulfilled or refunded, and may a refund return the full credit amount or only the amount the shop refunded?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "Which credential does an identity provider present to provision users into an organization (a long-lived bearer token held by whom, with what expiry and rotation), which identity attribute (userName, external id or subject) is the stable key of a provisioned person, what does a deprovision do (suspend, archive or delete the membership), which provider groups may confer which organization role, and who may read the provisioning log?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-SOCIAL-MEDIA-PUBLISHING-AUTHORITY-AND-CREDENTIAL-CUSTODY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "EXTERNAL_PROCESSOR_AND_CONSENT",
+        "question": "Which office of a union may connect, replace and remove its public social media accounts and hold their credentials, who may publish, schedule and delete a post in the union name and what approval, classification and member-consent check precedes publication, which analytics may members read, and how must the platform credentials be held and revoked?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-07",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who may lift a recusal, and who decides a contested conflict of interest?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-08",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Which offices may delegate which actions, for how long, and who succeeds an absent or departed handler?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-09",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who may review or approve an escalation, and is a decision distinct from a recommendation?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-11",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who approves a representation protocol, and what is the rule for an organization with one administrator?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-13",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who may grant an extension to a contractual or legal deadline?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-14",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who may approve, sign and dispatch correspondence on the union’s behalf?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-18",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "What monetary limit applies to each duty and account, and how many independent approvals does each class of transaction need?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-19",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "What thresholds, categories and dual-approval rules govern an expense or disbursement?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-21",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who may reconcile, and what independence from execution does the institution require?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-22",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "What authority do trustees hold, and who administers the trustee register?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-24",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Who may establish, spend from and report on a strike or restricted fund, and who decides stipend eligibility?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "DEC-IA-32",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "theme": "OTHER",
+        "question": "Which actions a steward holds in each organization, given the protocol each adopts?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office holds the register of bargaining units and worksites (certification number, body and dates, chief steward, bargaining chair, composition, site manager contact), which of those fields may a member who is not a steward or officer read, who may create, change and archive a register row, and must every employer, worksite and steward identifier a row names be verified as belonging to the same organization?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office owns the organization business-continuity, archive and succession (inheritance) records, what do those records contain, who may read them and how long must they be kept?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-COMPLIANCE-DETERMINATION-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office may state that a deadline, quorum or certification threshold is met, and from which governed source of statutory parameters?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-DISPATCH-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office may open an employer request for workers and assign members to it, and which rules (seniority, rotation, availability, skills) bind the assignment?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EQUITY-DATA-STEWARD",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office of the union holds equity self-identification answers, who may read an individual answer and who only aggregates, what minimum group size suppresses a published count, how long an answer is kept and how Indigenous data governance (ownership, control, access, possession) is honoured?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-AUDIENCE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which offices may read topic graphs, expertise and dependency analyses, resilience indexes and succession reports computed from exit interviews, and does a derived figure or label inherit the reader floor of the most sensitive interview it was computed from?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ICRA-PAID-ASSESSMENT-CLAIM-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office of an organization may claim a purchased ICRA assessment into the tenant, must that office be the purchaser, and what does each paid report tier deliver once claimed?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ICRA-REPORT-REVIEW-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office may approve or reject the narrative slot of an ICRA report before it is shown or sent, and how is that decision attributed to a person?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-KNOWLEDGE-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Who may mark a knowledge-base row or collective agreement is_public, and what review precedes publication beyond the organization?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-KPI-TARGET-OWNER-AND-CALCULATION-RULE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office owns the key performance targets of an organization (who may create one, who may see its calculation and alert recipients, who may switch it off), which stored measurements are the source of each target (the data source and calculation a target declares), and in which direction is a threshold crossed (does a lower figure or a higher figure make a target critical)?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "What is the disposition of the legacy compatibility and diagnostic routes (the /api/v2 mirror catch-all, the legacy tenant current wrapper and the Django auth-gate test): are they removed, answered with 410 Gone or 501 for every method, or kept for a stated period, and may a diagnostic route that forwards the session token to a backend ship in a production build?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which offices may address an in-app or push notification to one member or to a group of members, in whose name does it appear to the recipient, may a member opt out of push and in-app notices by class, and which office owns the registry of member devices, including what happens to a device row when the device passes to another account or the member leaves the organization?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-OBSERVABILITY-ALERT-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Is observability alerting an organization-administration, platform-operations or security-monitoring obligation, and who may read its alerts?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-OHS-INCIDENT-RECORD-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which offices of the union may read the injured-person, injury, treatment, witness, investigation and compensation-claim fields of a workplace incident, the reporter and assignee fields of a hazard report and the issuance records of PPE, and does any member below the health and safety representative floor read an incident or a hazard report by id?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ONBOARDING-EVENT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Who may attest that an organization was created, a user was invited or a role was assigned during onboarding, must the attestation be produced by the action itself and not asserted by a caller, and who reads those events?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office of an organization may add a person to the organization and assign an organization role, may that office grant a role above its own, does the person have to accept before the membership is active, and which offices may read the full roster with contact details and membership numbers?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-ORGANIZING-REGULATORY-FILING-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office of a union may prepare, approve and sign a certification application or other filing with a labour board or the NLRB, who attests the unit description, the showing of interest and the card count that the filing states, who transmits the filing and records the receipt, and may a draft form carry legal text that the software, rather than counsel, supplies?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PILOT-DEMO-RUNTIME-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Who may seed demo data, purge it and bootstrap or reset a pilot organization, in which runtimes, and may fictional records live in the same tables as the real records of a pilot organization?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-PLATFORM-REVENUE-METRICS-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which platform office owns the monthly recurring revenue, churn and unit-economics figures of the platform subscriptions, which stored source (the subscription event log or the monthly snapshot table) is authoritative for each figure, and who may read them?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Who may read the background queue health of Union Eyes (the pending and failed job counts, and the identifier and name of the recent failed tasks), which credential does the control plane present, and is a failed task name or error text an operator-only figure?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-REPORT-DEFINITION-READERS-AND-SHARING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Who may read, edit, publish or share a saved report definition of an organization (its author only, offices the institution names, every member), what does the is_public flag mean, and may a definition that embeds filter values about members be visible to every member?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-SECURITY-EVENT-READERS-AND-AUTHORSHIP",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which offices may read the security events of an organization (authentication, authorization, data access, configuration and suspicious activity, with the source address and user agent), may a person or a process other than the platform record or resolve an event, and how is an event shown not to have been authored or edited by the person it concerns?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-SUPPORT-AND-STORAGE-FIGURES-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Which office owns the support desk figures (ticket metrics, response and resolution time against a service-level target) and the storage figures (bytes used, quota and the cleanup of files nobody references) of an organization, which stored records are the source of each figure, and who may read them and trigger a cleanup that removes files?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "YES",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      },
+      {
+        "id": "UE-INST-WORKBOOK-CLAIM-AND-SAME-ORGANIZATION-PEER-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "theme": "OTHER",
+        "question": "Who may claim a paid workbook into an organization, may any member of that organization (whatever their role) read, change and delete its memory holders and export it, and what authority does a person who holds only the workbook identifier keep over an unclaimed workbook?",
+        "historicalScopeLockDisposition": "DEFERRED_NON_AUTHORIZING",
+        "historicalReleaseBlocking": "CONDITIONAL",
+        "sourceAdopted": false,
+        "currentTreatment": "RECONCILE_EXISTING_DECISION; applicable enabled authority stays fail-closed until backed by adopted instrument; deferred feature remains dormant"
+      }
+    ]
+  },
+  "historicalStoryIndex": [
+    {
+      "id": "AUTH-LOGIN-SUCCESS",
+      "baseFamily": "C01/C06/C07/C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUTH-LOGIN-FAILURE",
+      "baseFamily": "C01/C06/C07/C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUTH-EXPIRED-SESSION-BEHAVIOR",
+      "baseFamily": "C01/C06/C07/C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUTH-UNAUTHENTICATED-ACCESS-DENIED",
+      "baseFamily": "C01/C06/C07/C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUTH-ROLE-BASED-LANDING",
+      "baseFamily": "C01/C06/C07/C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-SUBMIT-INTAKE",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-CREATE-GRIEVANCE-CASE",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-VIEW-OWN-CASE",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-CANNOT-VIEW-RESTRICTED-CASE",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-UPLOAD-DOCUMENT",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-VIEW-ALLOWED-DOCUMENT",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "MEMBER-CANNOT-VIEW-WRONG-ORG-DOCUMENT",
+      "baseFamily": "C12/C13/C08",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "STEWARD-REVIEW-CASE",
+      "baseFamily": "C08/C10/C12",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "STEWARD-COMMENT-ANNOTATE",
+      "baseFamily": "C08/C10/C12",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "STEWARD-UPDATE-ALLOWED-FIELDS",
+      "baseFamily": "C08/C10/C12",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "STEWARD-REQUEST-ESCALATION",
+      "baseFamily": "C08/C10/C12",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "STEWARD-CANNOT-PERFORM-ADMIN-ACTION",
+      "baseFamily": "C08/C10/C12",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "ADMIN-ASSIGN-CASE",
+      "baseFamily": "C06/C09/C19",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "ADMIN-REASSIGN-CASE",
+      "baseFamily": "C06/C09/C19",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "ADMIN-CHANGE-CASE-STATE",
+      "baseFamily": "C06/C09/C19",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "ADMIN-RESOLVE-CASE",
+      "baseFamily": "C06/C09/C19",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "ADMIN-MANAGE-PERMITTED-USERS",
+      "baseFamily": "C06/C09/C19",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "ADMIN-CANNOT-BYPASS-AUDIT",
+      "baseFamily": "C06/C09/C19",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDITOR-VIEW-AUDIT-TRAIL",
+      "baseFamily": "C19/C14",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDITOR-VERIFY-NAR-PROOF",
+      "baseFamily": "C19/C14",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDITOR-EXPORT-AUDIT-PACK",
+      "baseFamily": "C19/C14",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDITOR-CANNOT-MUTATE-CASE",
+      "baseFamily": "C19/C14",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDITOR-CANNOT-CHANGE-ROLES",
+      "baseFamily": "C19/C14",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDITOR-CANNOT-ACCESS-WRONG-ORG",
+      "baseFamily": "C19/C14",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "EXTERNAL-TESTER-ISOLATED-ORG-ONLY",
+      "baseFamily": "C07/C19/C22",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "EXTERNAL-TESTER-COMPLETE-ALLOWED-UX-FLOWS",
+      "baseFamily": "C07/C19/C22",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "EXTERNAL-TESTER-CANNOT-ACCESS-PRODLIKE-ORG",
+      "baseFamily": "C07/C19/C22",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "EXTERNAL-TESTER-CANNOT-ACCESS-PLATFORM-ADMIN",
+      "baseFamily": "C07/C19/C22",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "EXTERNAL-TESTER-CANNOT-EXPORT-CROSS-ORG-AUDIT",
+      "baseFamily": "C07/C19/C22",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "EXTERNAL-TESTER-ACTIONS-AUDITABLE",
+      "baseFamily": "C07/C19/C22",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CASE-LIFECYCLE-DRAFT-TO-SUBMITTED",
+      "baseFamily": "C08/C11",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CASE-LIFECYCLE-SUBMITTED-TO-ASSIGNED",
+      "baseFamily": "C08/C11",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CASE-LIFECYCLE-ASSIGNED-TO-ESCALATED",
+      "baseFamily": "C08/C11",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CASE-LIFECYCLE-ESCALATED-TO-RESOLVED",
+      "baseFamily": "C08/C11",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CASE-LIFECYCLE-INVALID-TRANSITIONS-FAIL",
+      "baseFamily": "C08/C11",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CASE-LIFECYCLE-RESOLVED-TERMINAL",
+      "baseFamily": "C08/C11",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDIT-MUTATION-CREATES-DECISION-OR-DELEGATION",
+      "baseFamily": "C14/C19/C22/O05",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDIT-NAR-VERIFY",
+      "baseFamily": "C14/C19/C22/O05",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDIT-UNAUTHORIZED-EXPORT-DENIED",
+      "baseFamily": "C14/C19/C22/O05",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDIT-WRONG-ORG-ACCESS-DENIED",
+      "baseFamily": "C14/C19/C22/O05",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "AUDIT-READONLY-MUTATION-DENIAL",
+      "baseFamily": "C14/C19/C22/O05",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "INTELLIGENCE-METRICS-GATED",
+      "baseFamily": "C18/O13",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "INTELLIGENCE-POLICY-INSIGHTS-GATED",
+      "baseFamily": "C18/O13",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "INTELLIGENCE-BENCHMARK-GATED",
+      "baseFamily": "C18/O13",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "INTELLIGENCE-PIPELINE-HEALTH-RESTRICTED",
+      "baseFamily": "C18/O13",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "INTELLIGENCE-STALE-DATA-SURFACED",
+      "baseFamily": "C18/O13",
+      "scope": "CONDITIONAL",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-MALFORMED-PAYLOAD",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-MISSING-PERMISSION",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-WRONG-ORG-ACCESS",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-SUSPENDED-USER-BEHAVIOR",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-UNAUTHORIZED-EXPORT",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-UNAUTHORIZED-MUTATION",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "NEG-ATTEMPTED-ROLE-ESCALATION",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CONCURRENCY-ASSIGNMENT-RACE",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CONCURRENCY-ESCALATION-RACE",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CONCURRENCY-STALE-UPDATE",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    },
+    {
+      "id": "CONCURRENCY-DOUBLE-SUBMIT",
+      "baseFamily": "C22",
+      "scope": "REQUIRED",
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+    }
+  ],
+  "authorityActionIndex": [
+    {
+      "id": "case:read",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:read_own_submission",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:read_internal",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:read_third_party_restricted",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:read_privileged",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:comment",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:write_notes",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:draft_action",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:upload_evidence",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:modify_document",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:process_ocr",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:disclose_to_member",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:export_sealed_evidence",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:close",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:transition",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "case:assign",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "finance:view",
+      "scope": "EXCLUDED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "finance:prepare",
+      "scope": "EXCLUDED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "finance:approve",
+      "scope": "EXCLUDED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "finance:execute",
+      "scope": "EXCLUDED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "finance:reconcile",
+      "scope": "EXCLUDED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "finance:audit",
+      "scope": "EXCLUDED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "governance:approve",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "governance:supersede_certified_result",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "review:monitor",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "review:access_evidence",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "review:issue_finding",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "review:request_corrective_action",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "review:enforce",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "review:verify_remediation",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "workaid:refer",
+      "scope": "DEFERRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "workaid:receive_disclosure",
+      "scope": "DEFERRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "workaid:read_counsel_material",
+      "scope": "DEFERRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:read",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:reply",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:close",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:archive",
+      "scope": "REQUIRED",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:place_legal_hold",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:release_legal_hold",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:adopt_retention",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    },
+    {
+      "id": "message:read_retention_policy",
+      "scope": "CONDITIONAL",
+      "securityBoundaryRetained": true,
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+    }
+  ]
 }
