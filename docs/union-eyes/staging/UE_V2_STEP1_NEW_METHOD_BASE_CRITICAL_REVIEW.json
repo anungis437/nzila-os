@@ -1,0 +1,618 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_NEW_METHOD_BASE_CRITICAL_REVIEW",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "counts": {
+    "newHistoricalKeys": 112,
+    "reviewedKeys": 14,
+    "remainingNewKeys": 98,
+    "sourceFiles": 9
+  },
+  "sources": [
+    {
+      "path": "apps/union-eyes/app/api/assignment-profiles/route.ts",
+      "blobSha": "1b97703406a957aa84b6d11959952fdd7f363293",
+      "targets": [
+        "C09"
+      ],
+      "signals": [
+        {
+          "line": 2,
+          "statement": "import { withOrganizationAuth } from '@/lib/organization-middleware'"
+        },
+        {
+          "line": 4,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context'"
+        },
+        {
+          "line": 8,
+          "statement": "import { requireMatchingProfileAdmin, saveAssignmentProfile } from '@/lib/cases/assignment-profiles'"
+        },
+        {
+          "line": 18,
+          "statement": "export const GET = withOrganizationAuth(async (_request, context) => {"
+        },
+        {
+          "line": 20,
+          "statement": "return NextResponse.json({ error: 'Forbidden' }, { status: 403 })"
+        },
+        {
+          "line": 23,
+          "statement": "return await withRLSContext(async tx => {"
+        },
+        {
+          "line": 24,
+          "statement": "await requireMatchingProfileAdmin(tx, context)"
+        },
+        {
+          "line": 44,
+          "statement": "export const PUT = withOrganizationAuth(async (request, context) => {"
+        },
+        {
+          "line": 46,
+          "statement": "return NextResponse.json({ error: 'Forbidden' }, { status: 403 })"
+        },
+        {
+          "line": 50,
+          "statement": "return await withRLSContext(async tx => NextResponse.json(await saveAssignmentProfile(tx, context, parsed.data)))"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/invite/manage/route.ts",
+      "blobSha": "f12c90636d59505f4642a8b4ed5e3f2502ad76c5",
+      "targets": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06"
+      ],
+      "signals": [
+        {
+          "line": 3,
+          "statement": "import { withOrganizationAuth } from '@/lib/organization-middleware'"
+        },
+        {
+          "line": 9,
+          "statement": "export const GET = withOrganizationAuth(async (_request, context) => {"
+        },
+        {
+          "line": 11,
+          "statement": "return NextResponse.json({ error: 'Forbidden' }, { status: 403 })"
+        },
+        {
+          "line": 15,
+          "statement": "export const POST = withOrganizationAuth(async (request, context) => {"
+        },
+        {
+          "line": 17,
+          "statement": "return NextResponse.json({ error: 'Forbidden' }, { status: 403 })"
+        },
+        {
+          "line": 29,
+          "statement": "if (!result.success) return NextResponse.json({ error: result.error }, { status: 409 })"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "blobSha": "4d5433f73fbb6aee3cac7468bb4c63e6473cebd0",
+      "targets": [
+        "C21"
+      ],
+      "signals": [
+        {
+          "line": 2,
+          "statement": "import { withRLSContext } from '@/lib/db/with-rls-context'"
+        },
+        {
+          "line": 3,
+          "statement": "import { getCaseActor, caseAuthorizationResponse } from '@/lib/cases/case-authorization'"
+        },
+        {
+          "line": 11,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 15,
+          "statement": "const actor = await getCaseActor()"
+        },
+        {
+          "line": 18,
+          "statement": "if (method === 'GET') return NextResponse.json(await withRLSContext(tx => listCaseDeadlines(tx, actor, caseId)))"
+        },
+        {
+          "line": 24,
+          "statement": "const result = await withRLSContext(tx => createCaseDeadline(tx, actor, caseId, parsed.data))"
+        },
+        {
+          "line": 29,
+          "statement": "return NextResponse.json(await withRLSContext(tx => changeCaseDeadline(tx, actor, caseId, parsed.data)))"
+        },
+        {
+          "line": 31,
+          "statement": "if (error instanceof ApiError && error.code === 'CONFLICT') return NextResponse.json({ error: 'CONFLICT' }, { status: 409 })"
+        },
+        {
+          "line": 32,
+          "statement": "if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') return NextResponse.json({ error: 'CONFLICT' }, { status: 409 })"
+        },
+        {
+          "line": 39,
+          "statement": "export const GET = (request: Request, context: Context) => handle(request, context, 'GET')"
+        },
+        {
+          "line": 40,
+          "statement": "export const POST = (request: Request, context: Context) => handle(request, context, 'POST')"
+        },
+        {
+          "line": 41,
+          "statement": "export const PATCH = (request: Request, context: Context) => handle(request, context, 'PATCH')"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/base-operations-monitor/route.ts",
+      "blobSha": "f403d6a6eb05b23ba16bc97b3ad79fac1fefe80b",
+      "targets": [
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O13"
+      ],
+      "signals": [
+        {
+          "line": 10,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context'"
+        },
+        {
+          "line": 13,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 14,
+          "statement": "export const maxDuration = 300"
+        },
+        {
+          "line": 16,
+          "statement": "export const POST = withApi({ auth: { cron: true }, openapi: {"
+        },
+        {
+          "line": 31,
+          "statement": "measured(withSystemContext(tx => readReminderHealth(tx))),"
+        },
+        {
+          "line": 32,
+          "statement": "measured(withSystemContext(tx => readLatestReminderReceipt(tx)).then(receipt => probeReminderMailProvider(receipt))),"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/daily-audit-seal/route.ts",
+      "blobSha": "e194b1c69b51ebd52aab6aa863a2bfe128b9fdac",
+      "targets": [
+        "O05",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 7,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 8,
+          "statement": "export const maxDuration = 300"
+        },
+        {
+          "line": 9,
+          "statement": "export const POST = withApi({ auth: { cron: true }, openapi: {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/deadline-overdue/route.ts",
+      "blobSha": "2fa923315aabc998654388c39a3aa55e9797a4d1",
+      "targets": [
+        "C21",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 14,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context'"
+        },
+        {
+          "line": 20,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 21,
+          "statement": "export const maxDuration = 60"
+        },
+        {
+          "line": 33,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 35,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 47,
+          "statement": "const overdueRows = (await withSystemContext((tx) =>"
+        },
+        {
+          "line": 81,
+          "statement": "const result = await withSystemContext(async (tx) => {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/deadline-reminders/route.ts",
+      "blobSha": "4c444bd266dc134de8c1489b54f66d4b4bee8325",
+      "targets": [
+        "C21",
+        "O01",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 11,
+          "statement": "* Auth: `withApi({ auth: { cron: true } })` requires `x-cron-secret` or a"
+        },
+        {
+          "line": 16,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context'"
+        },
+        {
+          "line": 19,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 20,
+          "statement": "export const maxDuration = 60"
+        },
+        {
+          "line": 22,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 24,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 32,
+          "statement": "const result = await withSystemContext(() => runDeadlineReminderWorker())"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/dsar/[requestId]/export/route.ts",
+      "blobSha": "4a6882cc19d454ede66f9fb6fe8723af71e0bf00",
+      "targets": [
+        "C20"
+      ],
+      "signals": [
+        {
+          "line": 8,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 10,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 11,
+          "statement": "{ auth: { required: true, minRole: 'member' }, rlsOrgContext: false,"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/dsar/[requestId]/route.ts",
+      "blobSha": "ba524aba115fbf307788dce8e5f84d73e3c0739c",
+      "targets": [
+        "C20"
+      ],
+      "signals": [
+        {
+          "line": 7,
+          "statement": "export const dynamic = 'force-dynamic'"
+        },
+        {
+          "line": 9,
+          "statement": "export const GET = withApi("
+        },
+        {
+          "line": 10,
+          "statement": "{ auth: { required: true, minRole: 'member' }, rlsOrgContext: false,"
+        },
+        {
+          "line": 18,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 19,
+          "statement": "{ auth: { required: true, minRole: 'member' }, rlsOrgContext: false, body: privacyAcknowledgementInput,"
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "key": "GET apps/union-eyes/app/api/assignment-profiles/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/assignment-profiles/route.ts",
+      "sourceBlob": "1b97703406a957aa84b6d11959952fdd7f363293",
+      "candidate": [
+        "C09"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PUT apps/union-eyes/app/api/assignment-profiles/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/assignment-profiles/route.ts",
+      "sourceBlob": "1b97703406a957aa84b6d11959952fdd7f363293",
+      "candidate": [
+        "C09"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/auth/invite/manage/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/auth/invite/manage/route.ts",
+      "sourceBlob": "f12c90636d59505f4642a8b4ed5e3f2502ad76c5",
+      "candidate": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/auth/invite/manage/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/auth/invite/manage/route.ts",
+      "sourceBlob": "f12c90636d59505f4642a8b4ed5e3f2502ad76c5",
+      "candidate": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "sourceBlob": "4d5433f73fbb6aee3cac7468bb4c63e6473cebd0",
+      "candidate": [
+        "C21"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "sourceBlob": "4d5433f73fbb6aee3cac7468bb4c63e6473cebd0",
+      "candidate": [
+        "C21"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cases/[caseId]/deadlines/route.ts",
+      "sourceBlob": "4d5433f73fbb6aee3cac7468bb4c63e6473cebd0",
+      "candidate": [
+        "C21"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/base-operations-monitor/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cron/base-operations-monitor/route.ts",
+      "sourceBlob": "f403d6a6eb05b23ba16bc97b3ad79fac1fefe80b",
+      "candidate": [
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O13"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/daily-audit-seal/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cron/daily-audit-seal/route.ts",
+      "sourceBlob": "e194b1c69b51ebd52aab6aa863a2bfe128b9fdac",
+      "candidate": [
+        "O05",
+        "O06"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/deadline-overdue/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cron/deadline-overdue/route.ts",
+      "sourceBlob": "2fa923315aabc998654388c39a3aa55e9797a4d1",
+      "candidate": [
+        "C21",
+        "O06"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/deadline-reminders/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/cron/deadline-reminders/route.ts",
+      "sourceBlob": "4c444bd266dc134de8c1489b54f66d4b4bee8325",
+      "candidate": [
+        "C21",
+        "O01",
+        "O06"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/privacy/dsar/[requestId]/export/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/privacy/dsar/[requestId]/export/route.ts",
+      "sourceBlob": "4a6882cc19d454ede66f9fb6fe8723af71e0bf00",
+      "candidate": [
+        "C20"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/privacy/dsar/[requestId]/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/privacy/dsar/[requestId]/route.ts",
+      "sourceBlob": "ba524aba115fbf307788dce8e5f84d73e3c0739c",
+      "candidate": [
+        "C20"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/privacy/dsar/[requestId]/route.ts",
+      "sourcePath": "apps/union-eyes/app/api/privacy/dsar/[requestId]/route.ts",
+      "sourceBlob": "ba524aba115fbf307788dce8e5f84d73e3c0739c",
+      "candidate": [
+        "C20"
+      ],
+      "scopeClass": "BASE_ACTION_OR_OPERATION_SOURCE_REVIEW",
+      "authorityClosure": false,
+      "runtimeVerified": false
+    }
+  ],
+  "remainingKeys": [
+    "POST apps/union-eyes/app/api/admin/email-suppressions/route.ts",
+    "PATCH apps/union-eyes/app/api/analytics/insights/route.ts",
+    "GET apps/union-eyes/app/api/assurance/finance/ledger/route.ts",
+    "GET apps/union-eyes/app/api/auth/sso/callback/route.ts",
+    "GET apps/union-eyes/app/api/auth/sso/start/route.ts",
+    "DELETE apps/union-eyes/app/api/billing/automation-mandate/route.ts",
+    "PATCH apps/union-eyes/app/api/billing/automation-mandate/route.ts",
+    "POST apps/union-eyes/app/api/billing/automation-mandate/route.ts",
+    "POST apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
+    "POST apps/union-eyes/app/api/chatbot/sessions/[sessionId]/archive/route.ts",
+    "GET apps/union-eyes/app/api/clause-library/[id]/versions/route.ts",
+    "POST apps/union-eyes/app/api/cnesst/pay-equity/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts",
+    "POST apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts",
+    "DELETE apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+    "PATCH apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+    "POST apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
+    "PATCH apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts",
+    "POST apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
+    "POST apps/union-eyes/app/api/compliance/evaluate/route.ts",
+    "POST apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+    "POST apps/union-eyes/app/api/cron/education-reminders/route.ts",
+    "POST apps/union-eyes/app/api/cron/equity-retention/route.ts",
+    "POST apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+    "POST apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+    "POST apps/union-eyes/app/api/cron/process-messages/route.ts",
+    "POST apps/union-eyes/app/api/cron/process-notifications/route.ts",
+    "POST apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+    "POST apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+    "DELETE apps/union-eyes/app/api/education/certifications/route.ts",
+    "PATCH apps/union-eyes/app/api/education/certifications/route.ts",
+    "DELETE apps/union-eyes/app/api/education/programs/route.ts",
+    "PATCH apps/union-eyes/app/api/education/programs/route.ts",
+    "GET apps/union-eyes/app/api/education/registrations/join/route.ts",
+    "DELETE apps/union-eyes/app/api/education/sessions/route.ts",
+    "PATCH apps/union-eyes/app/api/education/sessions/route.ts",
+    "PATCH apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+    "POST apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+    "POST apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+    "DELETE apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+    "PATCH apps/union-eyes/app/api/enterprise/sso/providers/[id]/route.ts",
+    "DELETE apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+    "GET apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+    "POST apps/union-eyes/app/api/enterprise/sso/scim-token/route.ts",
+    "DELETE apps/union-eyes/app/api/equity/consent/route.ts",
+    "GET apps/union-eyes/app/api/equity/consent/route.ts",
+    "POST apps/union-eyes/app/api/equity/consent/route.ts",
+    "DELETE apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+    "POST apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+    "GET apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+    "PATCH apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+    "GET apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+    "POST apps/union-eyes/app/api/external/grievances/[id]/documents/intakes/route.ts",
+    "POST apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+    "DELETE apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+    "POST apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+    "DELETE apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+    "PATCH apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+    "POST apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+    "GET apps/union-eyes/app/api/metrics/prometheus/route.ts",
+    "DELETE apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "GET apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "PATCH apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "POST apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+    "DELETE apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+    "POST apps/union-eyes/app/api/pension/benefits/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts",
+    "GET apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+    "PATCH apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+    "POST apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+    "DELETE apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "PATCH apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "DELETE apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "GET apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "GET apps/union-eyes/app/api/scim/v2/[organizationId]/ServiceProviderConfig/route.ts",
+    "DELETE apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+    "GET apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+    "PATCH apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+    "PUT apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+    "POST apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+    "POST apps/union-eyes/app/api/social-media/posts/review/route.ts",
+    "GET apps/union-eyes/app/api/voice/disclosure/route.ts",
+    "DELETE apps/union-eyes/app/api/workbook/[id]/consent/route.ts",
+    "POST apps/union-eyes/app/api/workbook/checkout/redeem/route.ts",
+    "GET apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+    "POST apps/union-eyes/app/api/auth/[...nextauth]/route.ts",
+    "GET apps/union-eyes/app/(marketing)/app/route.ts",
+    "GET apps/union-eyes/app/[locale]/app/route.ts"
+  ],
+  "limitation": "Current exact source bodies read; control signals are not transitive permission proof. These are base-contract candidate joins, not new feature admissions."
+}
