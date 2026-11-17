@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_ADDITIONAL_SOURCE_DERIVED_ACTOR_VARIANTS",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "sourceInputs": [
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_SUBORDINATE_AUTHORITY_AND_ACTOR_VARIANTS.json",
+      "blobSha": "ff86368013caec5ccb7ba049bf2c5277a8b9ff15"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_OWNERSHIP_DELTA_STATIC_VALIDATION.json",
+      "blobSha": "3ba9b3c8d4de2b0a1351d6ff145c89ead27e9835"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_IDENTITY_BOUNDARY_REVIEW.json",
+      "blobSha": "5c3b5e7e261b97f4b8f8bfe28d6e8e72a5f61ea6"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_A.json",
+      "blobSha": "9db0e3c47f8ced03ae4fe1e3e104599997aba43b"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_B.json",
+      "blobSha": "4a263938d5fcb78df9c652c9f06d0cfdc82cbf74"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_C.json",
+      "blobSha": "bfda6ec8f61733f946905bb2bbf454dfa755e9a3"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_STAKEHOLDER_ACTION_CENSUS.json",
+      "blobSha": "956ac8910aee8d51c69883246d21dfbb839917a8"
+    }
+  ],
+  "counts": {
+    "parentCategories": 20,
+    "priorVariants": 11,
+    "newVariants": 13,
+    "totalVariants": 24
+  },
+  "variants": [
+    {
+      "id": "A17.2",
+      "parent": "A17",
+      "actor": "SCIM provisioning machine principal",
+      "sourcePath": "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/[id]/route.ts",
+      "sourceBlob": "0c86bb0cfc26d95d4479234b482b321ef4861a9c",
+      "basis": "Machine credential scoped to organization, not user session; system-context execution must preserve exact bound tenant and lifecycle permissions.",
+      "negative": "Rotated/revoked credential, mismatched organization path, disabled provider, unauthorized lifecycle mutation; no other tenant effects.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A02.1",
+      "parent": "A02",
+      "actor": "Enterprise OIDC provider-bound user",
+      "sourcePath": "apps/union-eyes/app/api/auth/sso/callback/route.ts",
+      "sourceBlob": "a729e51ba4cc2f66988dfe1c733a64db3b8494e9",
+      "basis": "Verified provider-subject binding and target organization; normal invited identity is distinct from configured enterprise SSO.",
+      "negative": "Missing or stale provider binding, state replay, wrong organization; no implicit just-in-time provisioning.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A01.1",
+      "parent": "A01",
+      "actor": "Anonymous survey respondent with response capability",
+      "sourcePath": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
+      "sourceBlob": "5832f27cc60c4ceb45d11ff6e50ff4f7a99b79a0",
+      "basis": "Response-specific authority distinct from survey id, tenant member and generic public visitor.",
+      "negative": "Bare response id, stolen or expired capability, wrong survey/organization; no response write.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A15.1",
+      "parent": "A15",
+      "actor": "Commercial pilot applicant or organization signatory",
+      "sourcePath": "apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts",
+      "sourceBlob": "779fbf2210fd60c2881f5b81182e5ac62a68bc19",
+      "basis": "Applicant ownership and separately attested organization administration/signatory authority.",
+      "negative": "Unrelated applicant, wrong offer/organization, stale offer, unsupported authority evidence.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A13.1",
+      "parent": "A13",
+      "actor": "Nzila platform commercial/assessment operator",
+      "sourcePath": "apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+      "sourceBlob": "4f179569a3a4ac033eb0db12b2fd6d3616196d22",
+      "basis": "Explicit platform pilot authority or admitted applicant/organization context; platform title alone is not a general customer-data entitlement.",
+      "negative": "Wrong institution/application, revoked platform mandate, self-approval or forbidden scope.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A16.1",
+      "parent": "A16",
+      "actor": "Equity self-identification data subject",
+      "sourcePath": "apps/union-eyes/app/api/equity/consent/route.ts",
+      "sourceBlob": "2ebd0ecda75136a852ba6ca398989b4f01b8b6ef",
+      "basis": "Specific purpose consent and own subject relationship; unrelated to generic membership disclosure.",
+      "negative": "Revoked, expired or changed purpose consent; unrelated subject and unrestricted export denied.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A10.2",
+      "parent": "A10",
+      "actor": "Authority holder for special-category disclosure grants",
+      "sourcePath": "apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+      "sourceBlob": "2aa69a75ecd25fffbffd05d924ec9a197ae46b22",
+      "basis": "Separate equity disclosure grant authority; purpose and recipient-specific scope.",
+      "negative": "Role-only or foreign-tenant issuer, wrong recipient or purpose; revocation enforced.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A17.3",
+      "parent": "A17",
+      "actor": "Registered mobile device and push transport",
+      "sourcePath": "apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+      "sourceBlob": "5e167b297dfd65b074ba8d3821c84075ee3d3f63",
+      "basis": "Device-to-principal/organization binding, actual provider receipt or truthful failure; not independent session authority.",
+      "negative": "Other user's device, removed device, invalid provider token, no disclosure of raw token.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A15.2",
+      "parent": "A15",
+      "actor": "Employer data integration or remittance submitter",
+      "sourcePath": "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+      "sourceBlob": "457f6442affccf271571f9ac9f6790539acc8304",
+      "basis": "Exact employer/organization transaction scope plus real financial mandate for restricted action; no positive finance activation in base.",
+      "negative": "Unbound employer, missing mandate, wrong remittance run, replay and tenant mismatch.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A11.1",
+      "parent": "A11",
+      "actor": "Pension trustee with transaction-specific powers",
+      "sourcePath": "apps/union-eyes/app/api/pension/benefits/[id]/transition/route.ts",
+      "sourceBlob": "e8ec1423e6bc9f1645f48f3e41b97c3c64aeda6f",
+      "basis": "Live pension trustee mandate plus resource/action/state transition; job title is insufficient.",
+      "negative": "Role-only, expired mandate, foreign benefit, forbidden transition; base financial boundary retained.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A10.3",
+      "parent": "A10",
+      "actor": "Shared precedent publication reviewer",
+      "sourcePath": "apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts",
+      "sourceBlob": "610fefd24205684a6ea19313e86d27b8cc3d64c4",
+      "basis": "Separate institution-designated reviewer authority, redaction and consent conditions; source describes refusal until designated.",
+      "negative": "No designation, author reviewing own material, missing consent/redaction; no content promoted to shared library.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A07.1",
+      "parent": "A07",
+      "actor": "Organization publication approver",
+      "sourcePath": "apps/union-eyes/app/api/social-media/posts/review/route.ts",
+      "sourceBlob": "9dfc50864dc52458b9a768d57f98e010154823ba",
+      "basis": "Distinct authorized officer approval of another officer's draft, scoped organization.",
+      "negative": "Self-review, wrong organization, stale draft, failed audit; no publication.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    },
+    {
+      "id": "A11.2",
+      "parent": "A11",
+      "actor": "Sensitive report-field grant issuer or recipient",
+      "sourcePath": "apps/union-eyes/app/api/reports/field-grants/route.ts",
+      "sourceBlob": "62db49cb18c50f52cd9b1b5142280626d8791190",
+      "basis": "Action-specific financial mandate and exact recipient/field scope, independent of report visibility.",
+      "negative": "Foreign report/field, no mandate, revoked grant; no protected field disclosure.",
+      "scopeState": "CANDIDATE_BOUNDARY_NOT_POSITIVE_ADMISSION",
+      "runtimeVerified": false
+    }
+  ],
+  "checks": {
+    "uniqueActorIds": true,
+    "allParentsExist": true,
+    "allSourceBlobsPresent": true,
+    "noImplicitAdmission": true
+  },
+  "limits": [
+    "These are authority contexts, not newly admitted users/roles or new positive base release commitments.",
+    "Rule applicability and concrete fixtures remain unverified; the goal is to make specialized and external negative boundaries visible."
+  ]
+}
