@@ -73,6 +73,17 @@ export type RLSTx = typeof db
  */
 const SYSTEM_ORG_CONTEXT = 'system'
 
+/** Resolve both fields from one verified source; request scope is server-only. */
+async function resolveRLSActor() {
+  const established = currentStateContextEnabled() ? currentCanonicalRequest() : null
+  if (established) return {
+    userId: established.profile.userId,
+    orgId: established.profile.organizationId,
+  }
+  const { userId, orgId } = await auth()
+  return { userId, orgId }
+}
+
 export async function withRLSContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T>
 export async function withRLSContext<T>(operation: () => Promise<T>): Promise<T>
 export async function withRLSContext<T>(
@@ -111,11 +122,7 @@ export async function withRLSContext<T>(
     explicitOrgId = raw
   }
 
-  // Get authenticated user from auth provider
-  const established = currentStateContextEnabled() ? currentCanonicalRequest() : null
-  const { userId, orgId: authOrgId } = established
-    ? { userId: established.profile.userId, orgId: established.profile.organizationId }
-    : await auth()
+  const { userId, orgId: authOrgId } = await resolveRLSActor()
 
   if (!userId) {
     throw new Error(

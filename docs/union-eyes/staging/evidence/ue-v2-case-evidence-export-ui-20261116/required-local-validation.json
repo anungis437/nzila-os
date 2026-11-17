@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
   "status": "PASS_REQUIRED_LOCAL_FIVE_EXACT_IMPLEMENTATION_INPUTS_NOT_STAGING",
-  "recordedAt": "2026-11-17T01:41:42.741377+00:00",
-  "baseHead": "48d122d72c2fc5c0be561d52092fe0125037741b",
-  "privateReceiptSha256": "dd52b5c68752142e5768957083f2979b6de1ebc023b68e659d3d1ceb33223395",
+  "recordedAt": "2026-11-17T02:14:46.505870+00:00",
+  "baseHead": "fa50fc017f33ab3baaba54c66aaa6cd2c0b58b31",
+  "privateReceiptSha256": "9f6849c3366c29d3021a80df76ec86d9020cc4e40a014ff67a685fce1d4b7557",
   "exactInputCount": 95,
   "sourceModules": [
     {
@@ -232,7 +232,7 @@
     },
     {
       "path": "apps/union-eyes/lib/db/with-rls-context.ts",
-      "sha256": "cf18681be3ab9cbcfe15192c871c68ae70cee4af6c639ca644981b1143a1d1cb"
+      "sha256": "22d6df67ae00ab205120b26150b65f27504c86f74b9ddf6d4aacfddf80315b06"
     },
     {
       "path": "apps/union-eyes/lib/documents/ocr-extract.ts",
@@ -320,7 +320,7 @@
     },
     {
       "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
-      "sha256": "cf38314040e4013837d0d75797e408dcb01540227762c62dc50d55d78a56595f"
+      "sha256": "b683203e8cc2f752b63f9c735083412745155a87e64786855669ed93811d2cda"
     },
     {
       "path": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
@@ -348,7 +348,7 @@
     },
     {
       "path": "docs/union-eyes/staging/evidence/ue-v2-case-evidence-export-ui-20261116/request-scope-local-review.json",
-      "sha256": "6af16e25e72b68851d14e544881225b30f6a86baa2d460926bb95d4cf7c2d790"
+      "sha256": "87afb6b7822c9f3300e4e36dbe70664587eed56d7c485d565a1737fa127f22c3"
     },
     {
       "path": "infrastructure/bicep/ue-v2/main.bicep",
@@ -390,50 +390,50 @@
   "commands": [
     {
       "command": "pnpm lint",
-      "startedAt": "2026-11-17T01:24:07.328348+00:00",
+      "startedAt": "2026-11-17T01:55:49.022791+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T01:26:00.421972+00:00",
-      "logSha256": "a35acf633a3298d31beb198af11bb0399e38eb0ace8857a5bac1e35fc629b18d"
+      "finishedAt": "2026-11-17T01:57:54.478451+00:00",
+      "logSha256": "77bce87971456dd99c42f43471d98c675731dc1e4df32a534cd5e1ab5e4d96f9"
     },
     {
       "command": "pnpm typecheck",
-      "startedAt": "2026-11-17T01:26:00.427150+00:00",
+      "startedAt": "2026-11-17T01:57:54.484875+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T01:28:45.311639+00:00",
-      "logSha256": "65a7e18e17650e8fab6d64dda68f9d4aac9a7b2bb270f924a7ceb840ba609a6b"
+      "finishedAt": "2026-11-17T02:01:14.880152+00:00",
+      "logSha256": "12fa69423e149a5ac889dcce8ba5073e1df5945fcd538f78c1581837bb46d24d"
     },
     {
       "command": "pnpm test:fast",
-      "startedAt": "2026-11-17T01:28:45.321601+00:00",
+      "startedAt": "2026-11-17T02:01:14.881835+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T01:40:47.985727+00:00",
-      "logSha256": "480bf7c98e23738493bdaf6a4f410660026b44f4c1486ecb1f46c0266c3652f5"
+      "finishedAt": "2026-11-17T02:13:47.820060+00:00",
+      "logSha256": "37d62ee329c2ca754d0212bb2687334f0a65e6b78c3790c98e2bca7a9562e5ba"
     },
     {
       "command": "pnpm validate:docs",
-      "startedAt": "2026-11-17T01:40:47.993747+00:00",
+      "startedAt": "2026-11-17T02:13:47.836953+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T01:40:56.946235+00:00",
+      "finishedAt": "2026-11-17T02:13:57.731902+00:00",
       "logSha256": "989fff88804727e827012ed3d8ceeffe4a2f6f03554f5f6d1ce786c7f9628a98"
     },
     {
       "command": "pnpm governance:audit",
-      "startedAt": "2026-11-17T01:40:56.964115+00:00",
+      "startedAt": "2026-11-17T02:13:57.739510+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T01:41:34.661291+00:00",
-      "logSha256": "59505e7f486f904fa5562887056e8dc893b9bbb3fb116b261cb2ce75f417899e"
+      "finishedAt": "2026-11-17T02:14:33.936750+00:00",
+      "logSha256": "f0a058c90c022cd318bd6591aacf32a9141e09a7e25ca834c2af5c90289ec59b"
     }
   ],
   "focusedRootRepairTests": {
-    "tests": 123,
-    "files": 8,
+    "tests": 129,
+    "files": 9,
     "status": "PASS",
-    "logSha256": "bc58b859711854ae1fad4f4c6c02063c77cf162d0221721811b7eee63d580173"
+    "logSha256": "97332f0f547bac7af43238227619672d27e90a95da2311561a155381672b0e64"
   },
   "priorPdfFocusedTests": {
     "tests": 96,

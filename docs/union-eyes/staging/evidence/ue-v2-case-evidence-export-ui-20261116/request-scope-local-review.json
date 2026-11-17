@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "123_FOCUSED_TESTS_PASS_REQUIRED5_AND_STAGING_PENDING",
-  "basedOnCommit": "48d122d72c2fc5c0be561d52092fe0125037741b",
+  "status": "129_FOCUSED_AND_UNCHANGED_INV32_TESTS_PASS_FRESH_LOCAL5_AND_CI_PENDING",
+  "basedOnCommit": "fa50fc017f33ab3baaba54c66aaa6cd2c0b58b31",
   "scope": "Short case detail GET and assigned-workbench GET only; one verified callback-scoped bridge and profile kept through RLS transaction commit. Other routes retain their existing independent scoped operations.",
   "invariants": [
     "No cross-request authority cache",
@@ -11,8 +11,8 @@
     "Database authenticated bridge, parent-session, live RLS and resource kernel checks unchanged",
     "Pool limits, load thresholds, dependencies, SQL and grants unchanged"
   ],
-  "focusedReceiptSha256": "bc58b859711854ae1fad4f4c6c02063c77cf162d0221721811b7eee63d580173",
-  "canonicalPlanReviewSha256": "dfc2835c55549d28cacf57edc4bb4246810c11763dcb9e5e6e16e22486fc7f3a",
+  "focusedReceiptSha256": "97332f0f547bac7af43238227619672d27e90a95da2311561a155381672b0e64",
+  "canonicalPlanReviewSha256": "27e1c015f36770efb8da558e92c2526b0d6d0526e43bbe98acbaf318e4d2cf32",
   "actualStagingPerformanceRemediationClaimed": false,
   "productionAuthorized": false,
   "fullBaseStagingGo": false,
@@ -20,5 +20,13 @@
     "scope": "Each case gets one fresh authoritative fact/resource load, then all7 separate unchanged-kernel action decisions. No reuse between cases or calls; action endpoints reauthorize independently.",
     "actualComponentResult": "PGlite equality against7 independent authoritative loads across member/handler/supervisor/unassigned/privileged/foreign/missing/recused/expired cases; forged principal and loader failure deny every action.",
     "queryReduction": "At least fivefold fewer actual SQL queries per case projection in the local component test. No HTTP latency pass inferred."
+  },
+  "ciContractCorrection": {
+    "originalCandidate": "fa50fc017f33ab3baaba54c66aaa6cd2c0b58b31",
+    "originalFailures": "Pilot Contract Tests and UE Whole Contract Test Suite: one unchanged INV32 static direct-await-auth destructuring expectation.",
+    "repair": "Shared resolveRLSActor explicitly returns both identity fields from either the verified server request scope or actual provider auth(). No trust-boundary or behavior change.",
+    "contractFileUnchanged": true,
+    "allFocusedTests": 129,
+    "fullLocalAndExactHeadCiRequalificationRequired": true
   }
 }
