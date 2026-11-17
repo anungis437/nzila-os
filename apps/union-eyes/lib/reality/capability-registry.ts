@@ -95,6 +95,19 @@ export interface Capability {
  */
 export const CAPABILITY_REGISTRY: readonly Capability[] = [
   {
+    id: 'UE-CASE-SEALED-EVIDENCE-EXPORT',
+    title: 'Authorized case evidence PDF and sealed JSON download',
+    state: 'LIMITED',
+    ownedBy: ['app/api/cases/[caseId]/export/route.ts', 'lib/evidence-export.ts', 'lib/utils/pdf-generator.ts', 'lib/cases/case-evidence-export-client.ts', 'components/claims/case-evidence-export.tsx', 'components/workbench/workbench-console.tsx'],
+    evidence: [
+      'lib/__tests__/evidence-export.test.ts — real PDF text, printed HMAC seal and independently parsed embedded exact sealed JSON envelope in EN/FR; tampering refused',
+      'app/api/__tests__/cases-caseId-export.route.test.ts — fresh kernel authorization, mandatory preparation audit, private response and actual PDF byte digest',
+      'lib/cases/case-evidence-export-client.test.ts; components/claims/case-evidence-export.test.tsx; components/workbench/workbench-console.test.tsx — explicit export authority, bounded verified download, denial, context cancellation and bilingual controls',
+    ],
+    targetWave: 0,
+    notes: 'Local implementation only. The workbench uses the live case:export_sealed_evidence decision, with no rank or close-permission inference. PDF contains readable records, the server-verified HMAC seal and an embedded exact UTF-8 JSON envelope; this is not a PDF certificate signature. The browser independently checks file SHA-256 and context before download, but cannot verify the secret HMAC. JSON verifies artifact hashes and server seal result. Exact-source CI, Linux PDFKit/font packaging, authorized staging browser download, durable audit and refusal/recovery evidence remain pending. No staging acceptance claim.',
+  },
+  {
     id: 'UE-AUTOMATIC-CASE-ASSIGNMENT',
     title: 'Automatic representative matching by recorded expertise and live workload',
     state: 'LIMITED',

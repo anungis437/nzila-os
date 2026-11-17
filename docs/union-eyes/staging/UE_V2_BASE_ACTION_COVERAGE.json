@@ -299,9 +299,9 @@
     {
       "id": "C14",
       "action": "User-facing sealed evidence export",
-      "state": "STAGING_CONFIGURATION_REPAIR_QUALIFICATION_PENDING",
-      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey. Actual staging has no EVIDENCE_SEAL_KEY mapping although the export source requires it in production mode. The binding adds a dedicated staging-only named secret reference and access; the key was prepared without rotation or changing app environment. No HTTP success or failure is inferred from this observation.",
-      "remaining": "Browser control to authorized generated pack/download/verification and failure handling.",
+      "state": "BROWSER_PDF_IMPLEMENTED_LOCAL_PROOF_STAGING_PENDING",
+      "evidenceSummary": "The proposed change adds the workbench PDF/JSON controls, explicit live kernel export authority, readable sealed PDF with embedded exact JSON, independent browser byte/hash checks, bounded cancellation and failure handling. 74 focused tests, application TypeScript and 58 census tests passed. Full repository checks, CI and actual new-source browser/audit proof remain pending. The dedicated staging seal-key mapping is merged in PR #1257 but has not been deployed.",
+      "remaining": "Pass full local checks and exact-source CI; qualify the immutable Linux image including PDFKit fonts; perform actual authorized EN/FR workbench PDF download, embedded-envelope verification, durable audit, cross-tenant/unauthorized refusal and recovery on the deployed source.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -314,7 +314,8 @@
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
       "coverageFieldsComplete": false,
-      "proposedConfigurationEvidence": "evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json"
+      "proposedConfigurationEvidence": "evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json",
+      "proposedImplementationEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/local-source-review.json"
     },
     {
       "id": "C15",

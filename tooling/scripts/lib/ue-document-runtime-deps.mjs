@@ -59,7 +59,7 @@ export function copyDocumentRuntimeDependencies({ root, standaloneDirectory }) {
     for (const name of Object.keys(pkg.metadata.optionalDependencies ?? {}).sort()) visit(locate(pkg.directory, name, true))
   }
 
-  for (const name of ['pdf-parse', 'tesseract.js']) visit(locate(join(root, 'apps/union-eyes'), name))
+  for (const name of ['pdf-parse', 'tesseract.js', 'pdfkit']) visit(locate(join(root, 'apps/union-eyes'), name))
   const report = { schema: 'ue-document-runtime-dependencies/v1', packages: [...visited.values()].sort((a, b) => a.path.localeCompare(b.path)) }
   writeFileSync(join(standaloneDirectory, 'ue-document-runtime-dependencies.json'), JSON.stringify(report, null, 2) + '\n')
   return report
@@ -72,6 +72,11 @@ export function verifyDocumentRuntimeDependencies(standaloneDirectory, report) {
   const pdfRequire = createRequire(join(standaloneDirectory, pdf.path, 'package.json'))
   assert(typeof pdfRequire('@napi-rs/canvas').DOMMatrix === 'function', 'Native PDF canvas cannot load')
   assert(typeof appRequire('tesseract.js').createWorker === 'function', 'OCR runtime cannot load')
+  assert(typeof appRequire('pdfkit') === 'function', 'PDF export runtime cannot load')
+  const pdfkit = report.packages.find(pkg => pkg.name === 'pdfkit')
+  for (const font of ['Helvetica', 'Helvetica-Bold', 'Courier']) {
+    assert(pdfkit && existsSync(join(standaloneDirectory, pdfkit.path, 'js/data/' + font + '.afm')), 'PDF export font asset missing')
+  }
   const worker = report.packages.find(pkg => pkg.name === 'tesseract.js')
   const core = report.packages.find(pkg => pkg.name === 'tesseract.js-core')
   assert(worker && existsSync(join(standaloneDirectory, worker.path, 'src/worker-script/node/index.js')), 'OCR worker script missing')

@@ -1,0 +1,23 @@
+{
+  "status": "ROOT_CAUSE_REPAIRED_FOCUSED96_PASS_FULL_LOCAL_FIVE_RERUN_PENDING",
+  "recordedAt": "2026-11-16T23:53:23.253251+00:00",
+  "precedingFullSuite": {
+    "passedTests": 39387,
+    "failedTests": 1,
+    "skippedTests": 1698,
+    "failure": "orphan-census dead library count377 exceeded unchanged376 ceiling",
+    "receiptSha256": "6d9f4f8cc3448a2bc2146f7c111ee51f3f3a0939677b29c72a8b32b8c22a7478"
+  },
+  "rootCause": "The previous generic PDF utility lost its last reachable application caller when the misleading usage-report evidence PDF was replaced. The new browser helper is reachable.",
+  "repair": "The real sealed-record PDF renderer now lives in the existing PDF utility and is called by the evidence service after HMAC verification. Existing report helpers and finance code remain unchanged.",
+  "focusedVerification": {
+    "passedTests": 96,
+    "passedFiles": 8,
+    "includesRealPdfAndUnchangedOrphanGate": true,
+    "logSha256": "38e58096c579d60b0e163d6f8f7cfbf44966778ff064a1cef4e38166c007c073"
+  },
+  "testThresholdsOrExclusionsChanged": false,
+  "financeFeaturesImplemented": false,
+  "stagingAcceptanceClaimed": false,
+  "productionAuthorized": false
+}

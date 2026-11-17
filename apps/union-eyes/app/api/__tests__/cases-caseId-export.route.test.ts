@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
 
 const m = vi.hoisted(() => ({
   canonical: false,
@@ -119,6 +120,7 @@ describe('cases/[caseId]/export route', () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
     expect(payload).toMatchObject({ manifest: { version: 1 }, pack: { caseId: 'case-1' }, verification: { hash: 'abc' } });
     expect(m.auditCaseExport).toHaveBeenCalledWith(expect.objectContaining({ format: 'json' }));
   });
@@ -130,7 +132,36 @@ describe('cases/[caseId]/export route', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('application/zip');
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
     expect(m.buildEvidenceZip).toHaveBeenCalled();
+  });
+  it('withholds the prepared pack when its mandatory export audit fails', async () => {
+    const { GET } = await loadRoute();
+    m.auditCaseExport.mockRejectedValueOnce(new Error('Synthetic audit failure'));
+    const response = await GET(new Request('http://localhost/api/cases/case-1/export?envelope=true'), { params: Promise.resolve({ caseId: 'case-1' }) });
+    expect(response.status).toBe(500);
+    expect(response.headers.has('Content-Disposition')).toBe(false);
+    expect(await response.json()).not.toHaveProperty('pack');
+  });
+  it('binds the PDF digest, server seal, actor, case, organization and selected language to the actual response', async () => {
+    const { GET } = await loadRoute();
+    const bytes = Buffer.from('%PDF-1.7\nSynthetic PDF fixture\n%%EOF');
+    m.buildEvidencePackage.mockReturnValueOnce({ pack: { caseId: 'case-1', seal: 'b'.repeat(64) }, verification: { sealValid: true }, manifest: {} });
+    m.buildEvidencePdf.mockResolvedValueOnce(bytes);
+    const response = await GET(new Request('http://localhost/api/cases/case-1/export?format=pdf&locale=fr-CA'), { params: Promise.resolve({ caseId: 'case-1' }) });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toBe('application/pdf');
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+    expect(response.headers.get('Content-Digest')).toBe(`sha-256=:${createHash('sha256').update(bytes).digest('base64')}:`);
+    for (const [name, value] of Object.entries({ 'X-Evidence-Case-Id': 'case-1', 'X-Evidence-Organization-Id': 'org-1', 'X-Evidence-Actor-Id': 'user-1', 'X-Evidence-Locale': 'fr-CA', 'X-Evidence-Seal-Verified': 'true', 'X-Evidence-Seal': 'b'.repeat(64) })) expect(response.headers.get(name)).toBe(value);
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+    expect(m.buildEvidencePdf).toHaveBeenCalledWith(expect.anything(), 'fr-CA');
+    expect(m.buildEvidencePdf.mock.invocationCallOrder[0]).toBeLessThan(m.auditCaseExport.mock.invocationCallOrder[0]);
+  });
+  it('does not record a successful export preparation when PDF generation fails', async () => {
+    const { GET } = await loadRoute(); m.buildEvidencePdf.mockRejectedValueOnce(new Error('Synthetic renderer failure'));
+    const response = await GET(new Request('http://localhost/api/cases/case-1/export?format=pdf'), { params: Promise.resolve({ caseId: 'case-1' }) });
+    expect(response.status).toBe(500); expect(m.auditCaseExport).not.toHaveBeenCalled(); expect(response.headers.has('Content-Disposition')).toBe(false);
   });
   it('denies member export on the kernel decision before reading any case or audit data', async () => {
     const { GET } = await loadRoute();

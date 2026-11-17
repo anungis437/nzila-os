@@ -1,6 +1,7 @@
 "use client";
 
 import { CaseDeadlines } from '@/components/claims/case-deadlines';
+import { CaseEvidenceExport } from '@/components/claims/case-evidence-export';
 
 import React from 'react';
 /**
@@ -56,6 +57,7 @@ interface DbClaim {
   canAddNote?: boolean;
   canTransition?: boolean;
   canClose?: boolean;
+  canExportSealedEvidence?: boolean;
   claimType: string;
   status: string;
   priority: string;
@@ -85,6 +87,7 @@ type CaseNotes = { status: 'loading' } | { status: 'ready'; notes: string[] } | 
 interface Case {
   id: string;
   claimId: string;
+  organizationId: string;
   title: string;
   description: string;
   status: CaseStatus;
@@ -103,6 +106,7 @@ interface Case {
   canAddNote: boolean;
   canTransition: boolean;
   canClose: boolean;
+  canExportSealedEvidence: boolean;
 }
 
 // Map database claim types to UI-friendly labels
@@ -157,11 +161,13 @@ const mapDbClaimToCase = (claim: DbClaim, t: (key: string) => string): Case => (
   // the nullable business number remains unchanged in storage and the API.
   id: claim.claimNumber || claim.claimId,
   claimId: claim.claimId,
+  organizationId: claim.organizationId,
   triage: claim.access === 'triage',
   canAssign: claim.canAssign === true,
   canAddNote: claim.canAddNote === true,
   canTransition: claim.canTransition === true,
   canClose: claim.canClose === true,
+  canExportSealedEvidence: claim.canExportSealedEvidence === true,
   title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
   description: claim.description ?? '',
   status: mapDbStatusToUi(claim.status),
@@ -946,6 +952,10 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
                               {/* Case Notes */}
                               <CaseNotesPanel state={caseNotes[caseItem.claimId]} />
                               <div className="mb-6"><CaseDeadlines caseId={caseItem.claimId} /></div>
+                              {organizationId && user?.id && caseItem.organizationId === organizationId &&
+                                <CaseEvidenceExport key={`${organizationId}:${user.id}:${caseItem.claimId}`}
+                                  caseId={caseItem.claimId} organizationId={organizationId} actorId={user.id}
+                                  allowed={caseItem.canExportSealedEvidence} />}
 
                               {/* Add Note */}
                               {caseItem.canAddNote && <div className="mb-6">

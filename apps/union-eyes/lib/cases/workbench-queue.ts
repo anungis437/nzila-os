@@ -36,11 +36,12 @@ export async function loadWorkbenchCases(tx: RLSTx, actor: CaseActor, status: st
       const details = Array.isArray(detailResult) ? detailResult : (detailResult as unknown as { rows: Record<string, unknown>[] }).rows
       const { triageEligible: _triage, ...metadata } = row
       if (details[0]) {
-        const allowed = async (action: 'case:comment' | 'case:write_notes' | 'case:transition' | 'case:close') =>
+        const allowed = async (action: 'case:comment' | 'case:write_notes' | 'case:transition' | 'case:close' | 'case:export_sealed_evidence') =>
           (await decideCase(tx,{ ...who,action })).effect === 'allow'
         const canAddNote = await allowed('case:comment') && (read.scope.visibility === 'member_visible' || await allowed('case:write_notes'))
         visible.push(projectWorkbenchRow({ ...metadata,...details[0],canAddNote,
-          canTransition: await allowed('case:transition'),canClose: await allowed('case:close') }, 'case', canAssign))
+          canTransition: await allowed('case:transition'),canClose: await allowed('case:close'),
+          canExportSealedEvidence: await allowed('case:export_sealed_evidence') }, 'case', canAssign))
       }
     } else if (row.triageEligible === true || canAssign) visible.push(projectWorkbenchRow(row, 'triage', canAssign))
   }

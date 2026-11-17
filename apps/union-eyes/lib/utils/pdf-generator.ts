@@ -6,6 +6,7 @@
  */
 
 import PDFDocument from 'pdfkit';
+import type { EvidencePackage } from '../evidence-export';
 
 // ============================================================================
 // TYPES
@@ -404,3 +405,40 @@ export const __testInternals = {
 
 export default generatePDF;
 
+
+/** Render records already authenticated by the evidence service; access and HMAC checks stay with that caller. */
+export async function renderSealedEvidencePdf(pkg: EvidencePackage, locale: 'en-CA' | 'fr-CA' = 'en-CA'): Promise<Buffer> {
+  const text = locale === 'fr-CA' ? {
+    title: 'Dossier de preuves', case: 'Dossier', organization: 'Organisation', actor: 'Exporté par', generated: 'Date de création',
+    seal: 'Sceau HMAC-SHA256 vérifié par le serveur', records: 'Données du dossier', notes: 'Notes', audit: 'Piste d’audit',
+    attachment: 'Le fichier joint case-evidence.json contient les données complètes et le manifeste de vérification. Le texte JSON ci-dessous conserve les caractères Unicode sous forme échappée.',
+  } : {
+    title: 'Case evidence package', case: 'Case', organization: 'Organization', actor: 'Exported by', generated: 'Generated at',
+    seal: 'HMAC-SHA256 seal verified by the server', records: 'Case record', notes: 'Notes', audit: 'Audit trail',
+    attachment: 'The embedded case-evidence.json contains the full records and verification manifest. The printed JSON preserves Unicode characters using escapes.',
+  };
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: 'A4', margin: 48, pdfVersion: '1.7', info: {
+      Title: `${text.title} - ${pkg.pack.caseId}`, Author: 'Union Eyes', Subject: `${text.case}: ${pkg.pack.caseId}`,
+    } });
+    const chunks: Buffer[] = [];
+    doc.on('data', chunk => chunks.push(Buffer.from(chunk)));
+    doc.on('error', reject);
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    try {
+      doc.file(Buffer.from(JSON.stringify(pkg, null, 2), 'utf8'), { name: 'case-evidence.json', type: 'application/json', description: 'Sealed case records and verification manifest' });
+      doc.font('Helvetica-Bold').fontSize(18).text(text.title);
+      doc.moveDown().font('Helvetica').fontSize(10);
+      for (const [label, value] of [[text.case, pkg.pack.caseId], [text.organization, pkg.pack.organizationId], [text.actor, pkg.pack.exportedBy], [text.generated, pkg.pack.exportedAt]]) doc.text(`${label}: ${value}`);
+      doc.moveDown().font('Helvetica-Bold').text(text.seal);
+      doc.font('Courier').fontSize(8).text(pkg.pack.seal);
+      doc.moveDown().font('Helvetica').fontSize(9).text(text.attachment);
+      for (const [label, value] of [[text.records, pkg.pack.caseRecord], [text.notes, pkg.pack.notes], [text.audit, pkg.pack.auditTrail]]) {
+        doc.moveDown().font('Helvetica-Bold').fontSize(12).text(String(label));
+        const rendered = JSON.stringify(value, null, 2).replace(/[^\x20-\x7e\n\r\t]/g, character => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`);
+        doc.font('Courier').fontSize(8).text(rendered);
+      }
+      doc.end();
+    } catch (error) { doc.destroy(); reject(error); }
+  });
+}
