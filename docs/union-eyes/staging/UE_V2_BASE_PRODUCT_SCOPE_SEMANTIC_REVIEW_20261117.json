@@ -5812,8 +5812,8 @@
       "id": "S1-A01",
       "state": "REMEDIATION_CANDIDATE_CI_NOT_GREEN",
       "pr": 1268,
-      "head": "f4660fa6b63d744ae33241eafaed2123e7acb9b7",
-      "observed": "Exact f4660fa6 head: native PostgreSQL 15/16, security regression, full application regression and bootstrap provenance workflows passed. GA and Governance Gate dependency audits failed on the same unwaived advisory 1247710. Browser/HTTP, general CI and other running checks not established complete at observation.",
+      "head": "d7050fddc236af52dac758fc632f36b984a63c87",
+      "observed": "Previous f4660fa6 candidate passed native PostgreSQL 15/16, full regression, E2E, CI, security regression and V2 bootstrap provenance; its GA/Governance dependency failures remained. NEW candidate d7050fdd contains two additional storage checks, a low-level writer guard and strictly validated representation-protocol approval provenance; latest observed security regression passed but GA, Governance, Security Design Review and bootstrap provenance were red; other exact-head checks still running.",
       "required": "No published upstream patched version identified. Verify actual dependency graph and either remove/replace vulnerable paths or validate a controlled upstream-compatible fix; regenerate and verify lockfile in an actual checkout. Exact-candidate audit and all CI must pass; no waiver or optimistic version bump.",
       "advisory": {
         "id": "GHSA-fc5q-39xc-vjpf",
@@ -5823,16 +5823,95 @@
         "patchedVersion": "None listed at review",
         "cvss": 8.7
       },
-      "furtherReview": "Source candidate tests enforce nondelegable action list against supervisory, collaborator and executive delegation paths. Independently verify owner/assignee origin and uniqueness at both fact loading and physical storage, direct caller paths, and explicit emergency grant denials; no live exploit inferred from pure-policy inspection."
+      "furtherReview": "Source candidate tests enforce nondelegable action list against supervisory, collaborator and executive delegation paths. Independently verify owner/assignee origin and uniqueness at both fact loading and physical storage, direct caller paths, and explicit emergency grant denials; no live exploit inferred from pure-policy inspection.",
+      "dependencyGraph": {
+        "lockBlob": "2d12e4d9f491c94a8c7eb72436dbb71eeee99119",
+        "versions": [
+          "4.0.4",
+          "4.0.7"
+        ],
+        "resolvedParentSnapshotEntries": 22,
+        "parentPackages": [
+          "@parcel/watcher",
+          "@rollup/plugin-commonjs",
+          "@rollup/pluginutils",
+          "anymatch",
+          "fdir",
+          "jest-util",
+          "micromatch",
+          "tinyglobby",
+          "vite",
+          "vitest"
+        ],
+        "rootOverride": ">=4.0.4",
+        "disposition": "No published fixed version identified; Do not waive or falsely relabel a patched dependency. Remove/replace all vulnerable paths or use validated upstream-compatible remediation and true package provenance; rerun exact lock audit."
+      },
+      "physicalCandidate": {
+        "commit": "bb9ff6d89d4631e2545192c95b4c1ca79f5cfcfd",
+        "constraints": [
+          "ue_authority_rule_primary_handler_ceiling_chk",
+          "ue_authority_mandates_primary_handler_ceiling_chk"
+        ],
+        "scope": "Active supervisory issue/amend rules and active supervisory mandates; both prefixed and unprefixed spellings of disclosure, sealed export and closure; preserve historical rows, fail on contaminated active rows. Low-level insertMandate guard, disposable database negative/positive tests. No migration history rewrite and no runtime database mutation.",
+        "qualification": "NEW_EXACT_HEAD_TESTS_PENDING"
+      },
+      "generatedPlan": {
+        "sourceCandidate": "d7050fddc236af52dac758fc632f36b984a63c87",
+        "readOnlyRun": 44143667749,
+        "job": 134252873695,
+        "artifact": 14354883811,
+        "artifactName": "ue-step1-generated-plan-d7050fdd",
+        "sha256": "34e756fdc7b9c509842b883dd408c22997848103411389c0cbb955ebffc49b19",
+        "state": "DETERMINISTIC_GENERATION_AND_INDEPENDENT_HASH_VERIFIED_TRANSFER_PENDING",
+        "scratchBranch": "agents/ue-step1-plan-regeneration-20261117",
+        "scratchMaterializationWorkflowCommit": "b48bdda1577cda2fc9d250c2a1f5ec3175bc4fab",
+        "note": "The connector rejected the 9,981,459-character plan upload. Isolated workflow may materialize only the digest-pinned artifact on the scratch branch; no deployment, PR or main-branch write by the workflow. Only the resulting plan blob may be transferred to the remediation branch by a guarded ref update."
+      }
     },
     {
       "id": "S1-HIST",
-      "state": "OPEN",
-      "required": "Requalify historical authority source-change obligations against current candidate, not prior test success."
+      "state": "SOURCE_RECHECK_ADVANCED_RUNTIME_NOT_CLOSED",
+      "required": "Requalify historical authority source-change obligations against current candidate, not prior test success.",
+      "observed": {
+        "historicalEvidenceBlob": "2b16ced40771c3e7feaf88b8a1e690def83fdf56",
+        "sourceReviewHead": "d7050fddc236af52dac758fc632f36b984a63c87",
+        "reconciliations": [
+          {
+            "subject": "Identity",
+            "source": "apps/union-eyes/lib/authority/store/platform-identity.ts",
+            "blob": "c9bc13bae18824793832c0be6e88e4fca3fc1ea7",
+            "finding": "Verified active organization binding and reader definer present; prove on exact V2 runtime."
+          },
+          {
+            "subject": "Case facts",
+            "source": "apps/union-eyes/lib/authority/store/resources.ts",
+            "blob": "6eaa195b99e50c1b2a4b91969b099842b3279736",
+            "finding": "Same-org grievance then claim lookup; explicit creator/represented-member, counsel accepted. unitId maps organization, territory null, adverseUserIds empty: source coverage gap, do not invent facts."
+          },
+          {
+            "subject": "Document classifications",
+            "source": "apps/union-eyes/lib/authority/document-class.ts",
+            "blob": "e9d32795308a5e09c719a9fe285c9840de58c262",
+            "finding": "Default approval null and member-disclosable labels empty; require institution-approved dispositions where offered, no manufactured approval."
+          },
+          {
+            "subject": "Ownership conflict",
+            "source": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+            "blob": "bc1d9a8a484a072871b15be4f6b74cab3da8b92f",
+            "finding": "Active uniqueness includes principal and relation, not a single primary per case; prove conflicting primary records, direct paths and assignment concurrency in context; no exploit claim."
+          },
+          {
+            "subject": "Fact loading",
+            "source": "apps/union-eyes/lib/authority/store/facts.ts",
+            "blob": "4975b54820ce030e4fcd541d9137e68d206bc629",
+            "finding": "Relationships loaded per principal; review cross-principal conflicts and derived fixture versus real origin explicitly."
+          }
+        ]
+      }
     },
     {
       "id": "S1-TRANSITIVE",
-      "state": "OPEN",
+      "state": "SUBORDINATE_AUTHORITY_AND_LEGACY_SOURCE_REVIEW_ADVANCED",
       "required": "Verify transitive non-HTTP execution, worker/queue/cron/webhook, storage, direct DB, server action and service paths; negative tests for confused deputy and bypass.",
       "historicalEvidence": {
         "source": "docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.md",
@@ -5844,21 +5923,44 @@
         "beatScheduleEntries": 12,
         "conservativeReachablePythonMutationCallers": 142,
         "caution": "Historical discovery denominators only, not current source coverage or mutually additive; unresolved dynamic SQL and transitive paths require exact-source reconciliation."
+      },
+      "currentEvidence": {
+        "source": "apps/union-eyes/lib/authority/subordinate-authority-register.ts",
+        "blob": "ad25e82324ea8b1f5cf1d175b23ddffe06ee6b20",
+        "records": 19,
+        "limitations": "Layered external representation requires same-organization membership; native triage predicate evidence historical; external counsel verifier not established. Reconcile consumers, explicit non-live dispositions and worker/direct-call reachability before qualification. Legacy assignment engine and workflow automation engine classified latent unreachable by claims-continuity storage authority; search found only test/legacy call references, no current production caller proven. Reverify exact source reachability rather than infer a live exploit or reactivate legacy code."
       }
     },
     {
       "id": "S1-CONFIG",
-      "state": "OPEN",
-      "required": "Validate all actually advertised protocol and institution variants, separately positive and negative, including mixed capacities, small local, substitute and external organization."
+      "state": "APPROVAL_PROVENANCE_CANDIDATE_TESTS_PENDING",
+      "required": "Validate all actually advertised protocol and institution variants, separately positive and negative, including mixed capacities, small local, substitute and external organization.",
+      "candidate": {
+        "commit": "d7050fddc236af52dac758fc632f36b984a63c87",
+        "scope": "Strict canonical UTC instants, reject future dates and approval before configuration; canonical nonblank principal strings; fail closed on partial or malformed provenance and self-approval; tests across steward, lro, national_rep and officer presets, including 11 invalid cases and no-write checks.",
+        "residual": "Prove all four through actual gates; review stale approval target binding and independently approved institution configuration. External org and mixed capacity are not equivalent to a tenant membership. No real approval or mandate issued."
+      }
     },
     {
       "id": "S1-CAP",
-      "state": "OPEN",
-      "required": "Finalize each capability's disposition against current source and explicit offered behavior; conditional review here is scope semantics, not release verification."
+      "state": "BASELINE_SOURCE_PINS_VERIFIED_FINAL_CANDIDATE_RECONCILIATION_OPEN",
+      "required": "Finalize each capability's disposition against current source and explicit offered behavior; conditional review here is scope semantics, not release verification.",
+      "pinReadback": {
+        "baseline": "8147ae480bb8ff0ab815b615fab67192728883e0",
+        "baselineTree": "dc05562547002864404e7e879328e6e99c4d1f6a",
+        "baselineTreeEntries": 28833,
+        "intermediateCandidate": "bb9ff6d89d4631e2545192c95b4c1ca79f5cfcfd",
+        "candidateTree": "083c9bc119613c3bba0d89dabaaee66f47a994e0",
+        "candidateTreeEntries": 28834,
+        "pinsVerified": 57,
+        "baselineMismatches": 0,
+        "intermediateMismatches": 0,
+        "finalQualification": "Later d7050fdd intentionally changes pinned representation protocol-types source; reconcile this expected delta and all final candidate bytes, do not overwrite historical baseline pins."
+      }
     },
     {
       "id": "S1-FINAL",
-      "state": "OPEN",
+      "state": "HELD_PENDING_REMAINING_EVIDENCE",
       "required": "Extreme adversarial certification on exact final committed bytes; no new gate, consume existing action ledger."
     }
   ],
@@ -5866,5 +5968,21 @@
   "noDeployment": true,
   "noLiveMutation": true,
   "noInstitutionalAuthorityIssued": true,
-  "step2Authorized": false
+  "step2Authorized": false,
+  "step1ExecutionContinuation": {
+    "recordedDate": "2026-11-17",
+    "scopePR": 1267,
+    "remediationPR": 1268,
+    "sourceChanges": [
+      "bb9ff6d89d4631e2545192c95b4c1ca79f5cfcfd",
+      "d7050fddc236af52dac758fc632f36b984a63c87"
+    ],
+    "disposition": "STEP_1_OPEN_STEP_2_HELD",
+    "noWaiver": true,
+    "noMerge": true,
+    "noDeployment": true,
+    "noLiveMutation": true,
+    "noInstitutionalAuthorityIssued": true,
+    "limitations": "Repository connector plus isolated CI, not an executable local monorepo or credentialed staging session. No prior CI pass inherited by later candidate. Positive feature exclusions remain unchanged."
+  }
 }
