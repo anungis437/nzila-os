@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "recordedDate": "2026-11-17",
   "baselineRepositorySha": "8147ae480bb8ff0ab815b615fab67192728883e0",
-  "status": "PRODUCT_SCOPE_FIRST_PASS_PENDING_BOUNDARY_RECONCILIATION",
+  "status": "PRODUCT_SCOPE_CENSUS_MAPPED_PENDING_SCOPE_DECISIONS_AND_SOURCE_CENSUS",
   "purpose": "Step 1 input to the single existing UE_V2_BASE_ACTION_COVERAGE ledger; not a second release gate. Scope classification is separate from implementation and runtime evidence.",
   "sourceBlobs": {
     "historical": {
@@ -156,6 +156,26 @@
     "offerStack": {
       "path": "docs/categories/stakeholders/gtm/OFFER_STACK_AND_PACKAGING.md",
       "blobSha": "bb1ba79a7f3360e7da9a5568f5b98d420293234e"
+    },
+    "externalIntake": {
+      "path": "apps/union-eyes/app/api/external/grievances/[id]/documents/intakes/route.ts",
+      "blobSha": "b7d5bcae0340cfe73f17345cc6b8fec6705c4a0c"
+    },
+    "externalDownload": {
+      "path": "apps/union-eyes/app/api/external/documents/[id]/download/route.ts",
+      "blobSha": "ac8d2b1f68e1375faaa8899c2fe2733b8fe4a5a5"
+    },
+    "externalList": {
+      "path": "apps/union-eyes/app/api/external/grievances/[id]/documents/route.ts",
+      "blobSha": "627922e6e46f5fab56e733291dde299a205c3ff8"
+    },
+    "externalMetadata": {
+      "path": "apps/union-eyes/app/api/external/documents/[id]/route.ts",
+      "blobSha": "b39c72a0d9caf071c7a218f60a880f02ab1c211c"
+    },
+    "protocolService": {
+      "path": "apps/union-eyes/lib/representation/protocol-service.ts",
+      "blobSha": "419b49d0222ff8ab9c730afe99f4d76284831304"
     }
   },
   "scopeVocabulary": {
@@ -241,7 +261,8 @@
     "Product scope is not institutional activation: actual mandate/appointment/issuance rules require authorized source; test fixtures can use synthetic authority.",
     "Prior founder product ratification is not fabricated from historical proposals; exact subsequent ratification record was not located during this pass.",
     "Historical institutional dossier 111 records includes earlier programme-specific decisions and blockers. These are indexed, not recertified or ratified; no duplicate institutional sign-off is requested.",
-    "Stakeholder universe was previously limited to persona families; 39 role values and 32 trust-boundary stakeholder families have now been enumerated. Dedicated external UI/API/action coverage, actual approved pilot scope, and direct vs recipient-only classification must be reconciled in Step 1 and consumed in Step 2/3."
+    "Stakeholder universe was previously limited to persona families; 39 role values and 32 trust-boundary stakeholder families have now been enumerated. Dedicated external UI/API/action coverage, actual approved pilot scope, and direct vs recipient-only classification must be reconciled in Step 1 and consumed in Step 2/3.",
+    "Prior conversation evidence indicates earlier Member 2.1 and Representative 2.2 design freezes and architectural models. Later reconstructed baseline records remain proposal-only in repository. No exact artifact-level ratification of reconstructed records established. Historical client examples are not actual adopted customer protocols or customer acceptance."
   ],
   "baseFamilies": [
     {
@@ -459,14 +480,18 @@
       "title": "Full-traffic failover",
       "scope": "CONDITIONAL",
       "reason": "Existing operational ledger; qualification scope follows declared release level.",
-      "state": "DEFERRED_SEPARATE_AUTHORITY"
+      "state": "DEFERRED_SEPARATE_AUTHORITY",
+      "scopeBoundaryCluster": "SB09",
+      "scopeBoundary": "Full-traffic failover only at agreed release level; bounded recovery and restore already required."
     },
     {
       "id": "O10",
       "title": "Physical devices and browser engines",
       "scope": "CONDITIONAL",
       "reason": "Existing operational ledger; qualification scope follows declared release level.",
-      "state": "UNVERIFIED_SEPARATE_RELEASE_LEVEL"
+      "state": "UNVERIFIED_SEPARATE_RELEASE_LEVEL",
+      "scopeBoundaryCluster": "SB09",
+      "scopeBoundary": "Physical device/extra browser-engine certification according to declared targets; EN/FR responsive functional and accessibility core required."
     },
     {
       "id": "O11",
@@ -494,14 +519,18 @@
       "title": "Pilot outcomes and telemetry",
       "scope": "CONDITIONAL",
       "reason": "Existing operational ledger; qualification scope follows declared release level.",
-      "state": "UNVERIFIED_PRODUCT_BOUNDARY"
+      "state": "UNVERIFIED_PRODUCT_BOUNDARY",
+      "scopeBoundaryCluster": "SB09",
+      "scopeBoundary": "Actual pilot outcome measurement and non-fabricated reporting required by pilot programme; specific telemetry and automation conditional on agreed success criteria."
     },
     {
       "id": "O15",
       "title": "Incident and periodic restore cadence",
       "scope": "CONDITIONAL",
       "reason": "Existing operational ledger; qualification scope follows declared release level.",
-      "state": "DEFERRED_OPERATING_CADENCE"
+      "state": "DEFERRED_OPERATING_CADENCE",
+      "scopeBoundaryCluster": "SB09",
+      "scopeBoundary": "Operational incident response and recovery ownership required; periodic actual restoration rehearsal cadence according to contracted service level."
     }
   ],
   "historicalCapabilities": [
@@ -3106,7 +3135,10 @@
       "capabilityId": "UE-CAP-B-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-06",
@@ -3154,7 +3186,10 @@
       "capabilityId": "UE-CAP-B-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-10",
@@ -3214,7 +3249,10 @@
       "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB06",
+      "scopeBoundary": "Additional conversation queues, matter-grant management, formal hold/release and retention-policy adoption, where institution actually authorizes action.",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     },
     {
       "id": "REP-ACT-15",
@@ -3250,7 +3288,10 @@
       "capabilityId": "UE-CAP-F-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB02",
+      "scopeBoundary": "Specific legal-hold/adoption workflows, broader retention policy editor, privilege grant issuance and specialized record publishing require adopted authority.",
+      "activationCondition": "Positive workflow only if explicitly enabled or necessary for base; preservation and non-disclosure always."
     },
     {
       "id": "REP-ACT-18",
@@ -3286,7 +3327,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-21",
@@ -3311,7 +3355,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-23",
@@ -3396,7 +3443,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "R05",
@@ -3408,7 +3458,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "R06",
@@ -3505,7 +3558,10 @@
       "capabilityId": "UE-CAP-F-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB02",
+      "scopeBoundary": "Specific legal-hold/adoption workflows, broader retention policy editor, privilege grant issuance and specialized record publishing require adopted authority.",
+      "activationCondition": "Positive workflow only if explicitly enabled or necessary for base; preservation and non-disclosure always."
     },
     {
       "id": "R14",
@@ -3541,7 +3597,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R17",
@@ -3553,7 +3612,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R18",
@@ -3577,7 +3639,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R20",
@@ -3589,7 +3654,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R21",
@@ -3601,7 +3669,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Actual hearing-related case deadlines, documents and authorized correspondence where used; no full hearings scheduling, tribunal integration or official filings.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R22",
@@ -3613,7 +3684,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "R23",
@@ -3625,7 +3699,10 @@
       "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": true,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R24",
@@ -3653,7 +3730,10 @@
       "sourceGroup": [
         "SR01"
       ],
-      "historicalGroupFinding": "No supervisory mandate/delegation store exists (`db/schema` has no delegation, mandate or supervisory-grant table). Effective mandate cannot be evaluated."
+      "historicalGroupFinding": "No supervisory mandate/delegation store exists (`db/schema` has no delegation, mandate or supervisory-grant table). Effective mandate cannot be evaluated.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR02",
@@ -3724,7 +3804,10 @@
         "SR07"
       ],
       "historicalGroupFinding": "No independent approval workflow engine found for supervisory decisions; `case_assign`/`case_transition` are role-level checks, not delegated decisions.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR06",
@@ -3743,7 +3826,10 @@
         "SR07"
       ],
       "historicalGroupFinding": "No independent approval workflow engine found for supervisory decisions; `case_assign`/`case_transition` are role-level checks, not delegated decisions.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR07",
@@ -3762,7 +3848,10 @@
         "SR07"
       ],
       "historicalGroupFinding": "No independent approval workflow engine found for supervisory decisions; `case_assign`/`case_transition` are role-level checks, not delegated decisions.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR08",
@@ -3780,7 +3869,10 @@
         "SR09"
       ],
       "historicalGroupFinding": "`recusal_tracking` schema exists but is not wired into case access or assignment. Only the party-conflict check below is enforced.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR09",
@@ -3798,7 +3890,10 @@
         "SR09"
       ],
       "historicalGroupFinding": "`recusal_tracking` schema exists but is not wired into case access or assignment. Only the party-conflict check below is enforced.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR10",
@@ -3871,7 +3966,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR15",
@@ -3895,7 +3993,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR16",
@@ -3919,7 +4020,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR17",
@@ -3943,7 +4047,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR18",
@@ -3967,7 +4074,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR19",
@@ -3991,7 +4101,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR20",
@@ -4015,7 +4128,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR21",
@@ -4039,7 +4155,10 @@
         "SR21"
       ],
       "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
-      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning.",
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "SR14",
@@ -4083,7 +4202,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "O02",
@@ -4131,7 +4253,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "O06",
@@ -4143,7 +4268,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "O07",
@@ -4155,7 +4283,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "O08",
@@ -4167,7 +4298,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "O09",
@@ -4191,7 +4325,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "O11",
@@ -4203,7 +4340,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Agreement reference and case-specific authorized correspondence are in scope; no full ratification and collective agreement signing system.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "O12",
@@ -4263,7 +4403,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Membership lifecycle and restriction enforcement required; separate appeals and eligibility rules engine conditional.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "O17",
@@ -4311,7 +4454,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "O21",
@@ -4349,7 +4495,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "O24",
@@ -4361,7 +4510,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "O25",
@@ -4373,7 +4525,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "O26",
@@ -4853,7 +5008,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "G02",
@@ -4865,7 +5023,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G03",
@@ -4877,7 +5038,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G04",
@@ -4889,7 +5053,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "G05",
@@ -4901,7 +5068,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G06",
@@ -4913,7 +5083,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G07",
@@ -4925,7 +5098,10 @@
       "capabilityId": "UE-CAP-REVIEW-INTAKE",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G08",
@@ -4937,7 +5113,10 @@
       "capabilityId": "UE-CAP-REVIEW-INTAKE",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G09",
@@ -4949,7 +5128,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "G10",
@@ -4961,7 +5143,10 @@
       "capabilityId": "UE-CAP-B-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "G11",
@@ -4997,7 +5182,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G14",
@@ -5009,7 +5197,10 @@
       "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G15",
@@ -5021,7 +5212,10 @@
       "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Self-service information-rights request, authorized handler response/export/acknowledgement is explicitly required at C20; broader automation and every statutory request subtype not implied.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G16",
@@ -5033,7 +5227,10 @@
       "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G17",
@@ -5057,7 +5254,10 @@
       "capabilityId": "UE-CAP-F-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB02",
+      "scopeBoundary": "Specific legal-hold/adoption workflows, broader retention policy editor, privilege grant issuance and specialized record publishing require adopted authority.",
+      "activationCondition": "Positive workflow only if explicitly enabled or necessary for base; preservation and non-disclosure always."
     },
     {
       "id": "G19",
@@ -5070,7 +5270,9 @@
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
       "securityBoundaryRetained": true,
-      "scopeBoundary": "Required confidentiality and authorized sharing enforcement; external specialist disclosure and other new integrations separate."
+      "scopeBoundary": "Required confidentiality and authorized sharing enforcement; external specialist disclosure and other new integrations separate.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G20",
@@ -5082,7 +5284,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G21",
@@ -5131,7 +5336,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G25",
@@ -5143,7 +5351,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB05",
+      "scopeBoundary": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G26",
@@ -5191,7 +5402,10 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB04",
+      "scopeBoundary": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "activationCondition": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
     },
     {
       "id": "G30",
@@ -5344,7 +5558,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-05",
@@ -5358,7 +5575,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-06",
@@ -5436,7 +5656,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-12",
@@ -5540,7 +5763,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-20",
@@ -5552,7 +5778,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-21",
@@ -5590,7 +5819,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Manual authorized rescheduling required. Separate extension request/approval engine conditional; no automatic legal dates.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-24",
@@ -5654,7 +5886,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-29",
@@ -5668,7 +5903,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB06",
+      "scopeBoundary": "Additional conversation queues, matter-grant management, formal hold/release and retention-policy adoption, where institution actually authorizes action.",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     },
     {
       "id": "STW-ACT-30",
@@ -5683,7 +5921,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-31",
@@ -5698,7 +5939,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "STW-ACT-32",
@@ -5773,7 +6017,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "STW-ACT-38",
@@ -6067,7 +6314,10 @@
       ],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-06",
@@ -6119,7 +6369,10 @@
       ],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-10",
@@ -6181,7 +6434,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB06",
+      "scopeBoundary": "Additional conversation queues, matter-grant management, formal hold/release and retention-policy adoption, where institution actually authorizes action.",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     },
     {
       "id": "REP-ACT-15",
@@ -6219,7 +6475,10 @@
       ],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB02",
+      "scopeBoundary": "Specific legal-hold/adoption workflows, broader retention policy editor, privilege grant issuance and specialized record publishing require adopted authority.",
+      "activationCondition": "Positive workflow only if explicitly enabled or necessary for base; preservation and non-disclosure always."
     },
     {
       "id": "REP-ACT-18",
@@ -6261,7 +6520,10 @@
       ],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-21",
@@ -6295,7 +6557,10 @@
       ],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "ACTION",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-ACT-23",
@@ -6384,7 +6649,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_GROUP",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "R05",
@@ -6398,7 +6666,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_GROUP",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "R06",
@@ -6507,7 +6778,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "HISTORICAL_TITLE_WITH_NEW_SPECIFICATION",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB02",
+      "scopeBoundary": "Specific legal-hold/adoption workflows, broader retention policy editor, privilege grant issuance and specialized record publishing require adopted authority.",
+      "activationCondition": "Positive workflow only if explicitly enabled or necessary for base; preservation and non-disclosure always."
     },
     {
       "id": "R14",
@@ -6547,7 +6821,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R17",
@@ -6559,7 +6836,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R18",
@@ -6585,7 +6865,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R20",
@@ -6597,7 +6880,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R21",
@@ -6609,7 +6895,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Actual hearing-related case deadlines, documents and authorized correspondence where used; no full hearings scheduling, tribunal integration or official filings.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R22",
@@ -6626,7 +6915,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "R23",
@@ -6638,7 +6930,10 @@
       "institutionalDecisionIds": [],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_STATUS",
       "sourceContractKind": "DOMAIN",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB03",
+      "scopeBoundary": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "activationCondition": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
     },
     {
       "id": "R24",
@@ -6695,7 +6990,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_GROUP",
       "sourceContractKind": "JOURNEY",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-JRN-D",
@@ -6738,7 +7036,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_GROUP",
       "sourceContractKind": "JOURNEY",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB01",
+      "scopeBoundary": "Manual deadline lifecycle and formal-grievance overdue/reminders required; broader extension approvals and intake email reminders separate.",
+      "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
     },
     {
       "id": "REP-JRN-G",
@@ -6812,7 +7113,10 @@
       ],
       "definitionOrigin": "NEW_DESIGN_UNDER_HISTORICAL_GROUP",
       "sourceContractKind": "SCENARIO",
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundaryCluster": "SB07",
+      "scopeBoundary": "Separate steward/LRO/national/officer positive paths and small-local/territory/cross-org variants if offered; live adoption remains union-owned.",
+      "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
     },
     {
       "id": "FO-NAV-1",
@@ -9644,73 +9948,97 @@
       "id": "AUDITOR-VIEW-AUDIT-TRAIL",
       "baseFamily": "C19/C14",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Negative scope/nonmutation always when reachable; positive audit read/export under actual approved audit capacity."
     },
     {
       "id": "AUDITOR-VERIFY-NAR-PROOF",
       "baseFamily": "C19/C14",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Negative scope/nonmutation always when reachable; positive audit read/export under actual approved audit capacity."
     },
     {
       "id": "AUDITOR-EXPORT-AUDIT-PACK",
       "baseFamily": "C19/C14",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Negative scope/nonmutation always when reachable; positive audit read/export under actual approved audit capacity."
     },
     {
       "id": "AUDITOR-CANNOT-MUTATE-CASE",
       "baseFamily": "C19/C14",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Negative scope/nonmutation always when reachable; positive audit read/export under actual approved audit capacity."
     },
     {
       "id": "AUDITOR-CANNOT-CHANGE-ROLES",
       "baseFamily": "C19/C14",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Negative scope/nonmutation always when reachable; positive audit read/export under actual approved audit capacity."
     },
     {
       "id": "AUDITOR-CANNOT-ACCESS-WRONG-ORG",
       "baseFamily": "C19/C14",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Negative scope/nonmutation always when reachable; positive audit read/export under actual approved audit capacity."
     },
     {
       "id": "EXTERNAL-TESTER-ISOLATED-ORG-ONLY",
       "baseFamily": "C07/C19/C22",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Mandatory synthetic isolation and test actor denial; positive external tester workspace conditional on pilot programme."
     },
     {
       "id": "EXTERNAL-TESTER-COMPLETE-ALLOWED-UX-FLOWS",
       "baseFamily": "C07/C19/C22",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Mandatory synthetic isolation and test actor denial; positive external tester workspace conditional on pilot programme."
     },
     {
       "id": "EXTERNAL-TESTER-CANNOT-ACCESS-PRODLIKE-ORG",
       "baseFamily": "C07/C19/C22",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Mandatory synthetic isolation and test actor denial; positive external tester workspace conditional on pilot programme."
     },
     {
       "id": "EXTERNAL-TESTER-CANNOT-ACCESS-PLATFORM-ADMIN",
       "baseFamily": "C07/C19/C22",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Mandatory synthetic isolation and test actor denial; positive external tester workspace conditional on pilot programme."
     },
     {
       "id": "EXTERNAL-TESTER-CANNOT-EXPORT-CROSS-ORG-AUDIT",
       "baseFamily": "C07/C19/C22",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Mandatory synthetic isolation and test actor denial; positive external tester workspace conditional on pilot programme."
     },
     {
       "id": "EXTERNAL-TESTER-ACTIONS-AUDITABLE",
       "baseFamily": "C07/C19/C22",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "Mandatory synthetic isolation and test actor denial; positive external tester workspace conditional on pilot programme."
     },
     {
       "id": "CASE-LIFECYCLE-DRAFT-TO-SUBMITTED",
@@ -9782,31 +10110,41 @@
       "id": "INTELLIGENCE-METRICS-GATED",
       "baseFamily": "C18/O13",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB03",
+      "activationCondition": "Truthful required metrics; separate intelligence/benchmark capability only if offered."
     },
     {
       "id": "INTELLIGENCE-POLICY-INSIGHTS-GATED",
       "baseFamily": "C18/O13",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB03",
+      "activationCondition": "Truthful required metrics; separate intelligence/benchmark capability only if offered."
     },
     {
       "id": "INTELLIGENCE-BENCHMARK-GATED",
       "baseFamily": "C18/O13",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB03",
+      "activationCondition": "Truthful required metrics; separate intelligence/benchmark capability only if offered."
     },
     {
       "id": "INTELLIGENCE-PIPELINE-HEALTH-RESTRICTED",
       "baseFamily": "C18/O13",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB03",
+      "activationCondition": "Truthful required metrics; separate intelligence/benchmark capability only if offered."
     },
     {
       "id": "INTELLIGENCE-STALE-DATA-SURFACED",
       "baseFamily": "C18/O13",
       "scope": "CONDITIONAL",
-      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred."
+      "scopeBoundary": "Historical scenario intent only; replace obsolete route/role assumptions with actual current Entra, membership, kernel and applicable base authority; no historical pass transferred.",
+      "scopeBoundaryCluster": "SB03",
+      "activationCondition": "Truthful required metrics; separate intelligence/benchmark capability only if offered."
     },
     {
       "id": "NEG-MALFORMED-PAYLOAD",
@@ -10012,49 +10350,65 @@
       "id": "governance:approve",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "governance:supersede_certified_result",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "review:monitor",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "review:access_evidence",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "review:issue_finding",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "review:request_corrective_action",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "review:enforce",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "review:verify_remediation",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "workaid:refer",
@@ -10102,25 +10456,33 @@
       "id": "message:place_legal_hold",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB06",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     },
     {
       "id": "message:release_legal_hold",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB06",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     },
     {
       "id": "message:adopt_retention",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB06",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     },
     {
       "id": "message:read_retention_policy",
       "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundaryCluster": "SB06",
+      "activationCondition": "Core delivery required; positive specialized authorities only when enabled."
     }
   ],
   "stakeholderCensus": {
@@ -10131,139 +10493,162 @@
         "id": "app_owner",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "coo",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "cto",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "platform_lead",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "customer_success_director",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "support_manager",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "data_analytics_manager",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "billing_manager",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "integration_manager",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "compliance_manager",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "security_manager",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "support_agent",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "data_analyst",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "billing_specialist",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "integration_specialist",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "content_manager",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "training_coordinator",
         "group": "PLATFORM_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement."
+        "boundary": "Only enabled operational, commercial, integration or resource functions; no raw cross-tenant data entitlement.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "system_admin",
         "group": "PLATFORM_OPERATOR",
         "scope": "CONDITIONAL",
-        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title."
+        "boundary": "Required base operating functions need a scoped authorized actor; role title alone grants no customer content. Distinct controls tested, not one account per title.",
+        "activationCondition": "Only enabled operational/content/contract/provider tasks under distinct least-privilege authority; account count derives from action matrix."
       },
       {
         "id": "clc_executive",
         "group": "AFFILIATED_INSTITUTION",
         "scope": "CONDITIONAL",
-        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot.",
+        "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
       },
       {
         "id": "clc_staff",
         "group": "AFFILIATED_INSTITUTION",
         "scope": "CONDITIONAL",
-        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot.",
+        "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
       },
       {
         "id": "fed_executive",
         "group": "AFFILIATED_INSTITUTION",
         "scope": "CONDITIONAL",
-        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot.",
+        "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
       },
       {
         "id": "fed_staff",
         "group": "AFFILIATED_INSTITUTION",
         "scope": "CONDITIONAL",
-        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot.",
+        "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
       },
       {
         "id": "national_officer",
         "group": "AFFILIATED_INSTITUTION",
         "scope": "CONDITIONAL",
-        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot."
+        "boundary": "No implicit local authority. Cross-organization matter-specific mandates/grants where adopted; broad rollups outside initial single-local pilot.",
+        "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
       },
       {
         "id": "admin",
@@ -10317,13 +10702,15 @@
         "id": "bargaining_committee",
         "group": "LOCAL_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Qualify enabled steward capacity and relevant case authority if assigned; no full specialty module inferred."
+        "boundary": "Qualify enabled steward capacity and relevant case authority if assigned; no full specialty module inferred.",
+        "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
       },
       {
         "id": "health_safety_rep",
         "group": "LOCAL_SPECIALTY",
         "scope": "CONDITIONAL",
-        "boundary": "Qualify enabled steward capacity and relevant case authority if assigned; no full specialty module inferred."
+        "boundary": "Qualify enabled steward capacity and relevant case authority if assigned; no full specialty module inferred.",
+        "activationCondition": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
       },
       {
         "id": "member",
@@ -10635,7 +11022,13 @@
           "L12",
           "L15"
         ],
-        "activationCondition": "Audit and applicable base oversight required; positive review/appointment/investigation only if adopted; no full independent-governance suite."
+        "activationCondition": "Audit and applicable base oversight required; positive review/appointment/investigation only if adopted; no full independent-governance suite.",
+        "capacityVariants": [
+          "Appointed governance reviewer",
+          "Internal auditor",
+          "Nonfinancial trustee oversight only",
+          "Independent investigation subject or reviewer where adopted"
+        ]
       },
       {
         "id": "SA14",
@@ -10761,6 +11154,12 @@
           "L10",
           "L11",
           "L12"
+        ],
+        "capacityVariants": [
+          "Protected witness or evidence contributor",
+          "Respondent/adverse party",
+          "Authorized assisting person/interpreter or proxy — possible only if separately verified and scoped; no existing portal asserted",
+          "Same individual may be member, employee or representative and also conflicted in one matter"
         ]
       },
       {
@@ -11024,7 +11423,13 @@
         "lifecycleIds": [
           "L06"
         ],
-        "activationCondition": "Require eligibility/own-data access where adopted; no assumed volunteer/event/training/nonmember module."
+        "activationCondition": "Require eligibility/own-data access where adopted; no assumed volunteer/event/training/nonmember module.",
+        "capacityVariants": [
+          "Former or retired member",
+          "Nonmember claimant where standing established",
+          "Dependent/beneficiary/authorized proxy only where relevant to approved product and legal relationship",
+          "Volunteer, event or training participant; adjacent product"
+        ]
       }
     ],
     "provenanceLimits": [
@@ -11458,5 +11863,219 @@
       "INHERITED_FROM_CALLER": 13
     },
     "note": "Historical source actor map explicitly says NOT_PROVEN. Matched textual records are not a current caller denominator, not distinct stakeholders, and not qualified. Step 2 must regenerate exact source paths including worker/webhook, server actions and public challenge ingress."
+  },
+  "externalCollaborationScope": {
+    "status": "SOURCE_CONFIRMED_POSITIVE_QUALIFICATION_UNVERIFIED",
+    "recommendation": "Treat bounded external representation as a distinct base product capability for any offered model depending on it; do not defer with WorkAid. Qualify a complete synthetic grant-to-revocation journey, or withhold the positive feature explicitly from the offered product until qualified. Reachable-route security is mandatory either way.",
+    "operations": [
+      {
+        "method": "GET",
+        "route": "/api/external/grievances/[id]",
+        "source": "externalProjection",
+        "productOutcome": "Approved matter projection, not internal description",
+        "authority": "Matter-specific view grant and organization/representative binding"
+      },
+      {
+        "method": "GET",
+        "route": "/api/external/grievances/[id]/documents",
+        "source": "externalList",
+        "productOutcome": "Only granted active document metadata",
+        "authority": "Active matter and document view grants; zero unrelated items"
+      },
+      {
+        "method": "POST",
+        "route": "/api/external/grievances/[id]/documents/intakes",
+        "source": "externalIntake",
+        "productOutcome": "Scanned intake with server-issued key, checksum and bound actor/matter",
+        "authority": "Upload permission, content validation, scanner failure blocks"
+      },
+      {
+        "method": "POST",
+        "route": "/api/external/grievances/[id]/documents/upload",
+        "source": "externalUpload",
+        "productOutcome": "Consume valid intake and persist linked version, copied restricted grant and audit",
+        "authority": "Original actor, organization, matter, expiry, replay and no arbitrary blob adoption"
+      },
+      {
+        "method": "GET",
+        "route": "/api/external/documents/[id]",
+        "source": "externalMetadata",
+        "productOutcome": "Permitted document metadata",
+        "authority": "Document-specific grant and matter link; foreign or expired deny"
+      },
+      {
+        "method": "GET",
+        "route": "/api/external/documents/[id]/download",
+        "source": "externalDownload",
+        "productOutcome": "Exact pinned-version bytes with pre-release access audit",
+        "authority": "Separate download permission, recheck expiry/revocation and version; no anonymous bearer URL or new-version expansion"
+      }
+    ],
+    "journey": [
+      "Verified external capacity and organization",
+      "Matter-specific authority issued under adopted or synthetic fixture rules",
+      "Explicit document/version grant separate from matter visibility",
+      "Approved external projection",
+      "Optional permitted upload intake and consume",
+      "Approved metadata and exact-byte download",
+      "Access audit",
+      "Revocation/expiry including stale grants"
+    ],
+    "mandatoryDenials": [
+      "No grant",
+      "Wrong external organization",
+      "Wrong matter",
+      "Wrong document/version",
+      "Expired/revoked grant",
+      "Upload without deposit permission",
+      "Unscanned or replayed intake",
+      "Internal notes/privileged material",
+      "Cross-tenant directory or blanket case listing"
+    ],
+    "notImplied": [
+      "Existing external user portal",
+      "Full external grievance filing/assignment/closure",
+      "External correspondence dispatch power",
+      "Counsel professional authority",
+      "Full federation data access",
+      "Live customer adoption"
+    ]
+  },
+  "conditionalScopeClusters": {
+    "SB01": {
+      "title": "Core casework and capacity",
+      "required": "Own and assigned case queues, assessment and triage where base intake needs it, filing, transition, closure, assignment acknowledgment and supervision, scoped case handoff, member-readable status, evidence and deadline continuity.",
+      "conditional": "Self-assignment, additional collaborator grants, senior approval workflows, separate closure proposal, temporary delegation only under actual enabled protocol. Never duplicate authority from role label.",
+      "trigger": "Required positive action when promised or used by enabled base workflow; otherwise withheld. Relevant negative boundaries mandatory."
+    },
+    "SB02": {
+      "title": "Evidence and records",
+      "required": "Document/version custody, classification, authorized metadata and bytes, OCR review and sealed exports, durable access/audit and retention boundary.",
+      "conditional": "Specific legal-hold/adoption workflows, broader retention policy editor, privilege grant issuance and specialized record publishing require adopted authority.",
+      "trigger": "Positive workflow only if explicitly enabled or necessary for base; preservation and non-disclosure always."
+    },
+    "SB03": {
+      "title": "Knowledge and context",
+      "required": "Authoritative agreement/clause/context and guidance needed for representation; truthful workload and outcomes from actual source.",
+      "conditional": "Precedent publishing, AI clause suggestion, standalone hearing scheduler, advanced analytics, full reference management or shared datasets.",
+      "trigger": "Only enabled product capability or actual base dependency; no whole adjacent module inferred."
+    },
+    "SB04": {
+      "title": "Executive and supervisory authority",
+      "required": "Verified scope and actual case assignment/review authority, conflicts and revocation, appropriate nonfinancial executive oversight.",
+      "conditional": "Institutional office/term register, broad decision lifecycle, committee management and full succession require adopted organization context and positive product obligation.",
+      "trigger": "Positive adopted base action only; no institution power invented; scope/recusal/denial always."
+    },
+    "SB05": {
+      "title": "Institutional governance and assurance",
+      "required": "Applicable oversight, nonfinancial audit integrity, privacy controls, information-rights self-service, controlled export, authorized sharing, records and failure visibility.",
+      "conditional": "Independent investigations, complaints/appeals, corrective actions, formal policy lifecycle, quorum/meeting approval and regulator-specific workflows only to explicitly agreed scope.",
+      "trigger": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
+    },
+    "SB06": {
+      "title": "Communications",
+      "required": "Authorized correspondence and in-app conversation, correct participants, actual dispatch and controlled receipt, truthful delivery, privacy and retention protection.",
+      "conditional": "Additional conversation queues, matter-grant management, formal hold/release and retention-policy adoption, where institution actually authorizes action.",
+      "trigger": "Core delivery required; positive specialized authorities only when enabled."
+    },
+    "SB07": {
+      "title": "Representation model variants",
+      "required": "Product must not expose unsupported selectable protocol. Pilot actual protocol and external grant safety required.",
+      "conditional": "Separate steward/LRO/national/officer positive paths and small-local/territory/cross-org variants if offered; live adoption remains union-owned.",
+      "trigger": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
+    },
+    "SB08": {
+      "title": "Commercial and public lifecycle",
+      "required": "Verified buyer and customer authority, truthful offering, scoped tenant creation, entitlements, onboarding and exit.",
+      "conditional": "Public assessment acquisition, self-service checkout, automated contract/payment, CRM and broader commercial tooling.",
+      "trigger": "Agreed current offer and actual channel; offline verified process acceptable unless automation promised."
+    },
+    "SB09": {
+      "title": "Operational service level",
+      "required": "Real dependency and security monitoring, declared performance, restore evidence, meaningful responsive and bilingual accessibility checks, scoped operational incident handling.",
+      "conditional": "Full-traffic failover, physical device/extra engine certification, ongoing operational cadence and independently declared pilot KPI telemetry targets.",
+      "trigger": "Specific release/service-level commitment; no invented contractual threshold."
+    }
+  },
+  "scopeDecisions": [
+    {
+      "id": "SC01",
+      "decision": "Offer envelope vs first-client envelope",
+      "recommendation": "Qualify every advertised/selectable protocol; actual first customer selects its approved model; no invented client approval.",
+      "status": "RECOMMENDED_NOT_RATIFIED",
+      "evidence": [
+        "protocols",
+        "protocolService",
+        "representative"
+      ]
+    },
+    {
+      "id": "SC02",
+      "decision": "Bounded external representative capability",
+      "recommendation": "Include grant, scoped matter view, document metadata/deposit/download and revocation wherever representation model requires an external actor. Treat independently from WorkAid.",
+      "status": "RECOMMENDED_NOT_RATIFIED",
+      "evidence": [
+        "externalMiddleware",
+        "externalIntake",
+        "externalDownload",
+        "externalGrant"
+      ]
+    },
+    {
+      "id": "SC03",
+      "decision": "Independent governance extent",
+      "recommendation": "Required case governance, authority, audit, privacy request and nonfinancial scoped oversight. Full investigations/elections/policy suite separately adopted.",
+      "status": "RECOMMENDED_NOT_RATIFIED",
+      "evidence": [
+        "governance",
+        "physicalGuards",
+        "base"
+      ]
+    },
+    {
+      "id": "SC04",
+      "decision": "Commercial automation extent",
+      "recommendation": "Require working acquisition-to-tenant/entitlement/first-use and offboarding process. Automated public acquisition, starter-product purchase/CRM/contract/invoice only if current offer actually promises it.",
+      "status": "RECOMMENDED_NOT_RATIFIED",
+      "evidence": [
+        "commercialPilot",
+        "revenuePlaybook",
+        "publicApplicant"
+      ]
+    },
+    {
+      "id": "SC05",
+      "decision": "Reconstructed persona and grouped historical IDs",
+      "recommendation": "Reference previously approved design intent where verified. Never mark 0C2 proposed baselines adopted from broad founder instruction; preserve missing source/grouped ID uncertainty, specify current base actions from actual source in Step 2.",
+      "status": "EVIDENCE_RECONCILIATION_REQUIRED",
+      "evidence": [
+        "ratification",
+        "steward",
+        "representative",
+        "senior"
+      ]
+    },
+    {
+      "id": "SC06",
+      "decision": "Operating tier and client readiness",
+      "recommendation": "Declare actual pilot cohort, expected load, browser/device/accessibility target, email and recovery objectives, data migration, exit and operational cadence; use prior pilot programme as historical reference, not a new live-data authorization.",
+      "status": "RECOMMENDED_NOT_RATIFIED",
+      "evidence": [
+        "pilot",
+        "commercialPilot",
+        "base"
+      ]
+    }
+  ],
+  "step1Verification": {
+    "scopeInventory": "Census records classified; conditional rows carry scope rationale or trigger. Counts describe overlapping source records.",
+    "remaining": [
+      "SC01–SC06 scope decisions remain recommended/need exact evidence; this is not product ratification.",
+      "Product route/UI operation census in Step 2 may identify newly discovered scope, which must be fed back into this record rather than assumed required.",
+      "No evidence of current active first-client approved protocol, current offer terms, actual governance appointment or independent institutional adoption."
+    ],
+    "applicationChanges": false,
+    "stagingChanges": false,
+    "releaseStatusChanged": false
   }
 }
