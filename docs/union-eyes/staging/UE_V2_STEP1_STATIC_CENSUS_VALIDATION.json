@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_STATIC_CENSUS_VALIDATION_RECEIPT",
+  "scope": "Read-only connector-backed record validation; no application code execution, CI or runtime acceptance.",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "inputs": [
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_STAKEHOLDER_ACTION_CENSUS.json",
+      "blobSha": "956ac8910aee8d51c69883246d21dfbb839917a8"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_ROUTE_METHOD_CENSUS.json",
+      "blobSha": "4f49309be6dd81922bdbf7cc7ccc0477c35156de"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json",
+      "blobSha": "cacebf35376f88c0cc370f7b146f848312fbf109"
+    }
+  ],
+  "checks": {
+    "uniqueRoles": true,
+    "uniqueActors": true,
+    "uniqueActions": true,
+    "uniqueCaps": true,
+    "uniqueRouteMethods": true,
+    "routeSetExact": true,
+    "capSetExact": true,
+    "validActionRefs": true,
+    "validActorRefs": true,
+    "noUnassignedQueues": true,
+    "jobManifestJoin": true,
+    "noFalseRuntimePass": true,
+    "noStep2Advance": true,
+    "actionCountsMatch": true
+  },
+  "negativeControlChecks": [
+    {
+      "name": "missing_route",
+      "expectedRejectedBy": "routeSetExact",
+      "rejected": true
+    },
+    {
+      "name": "duplicate_route",
+      "expectedRejectedBy": "uniqueRouteMethods",
+      "rejected": true
+    },
+    {
+      "name": "missing_capability",
+      "expectedRejectedBy": "capSetExact",
+      "rejected": true
+    },
+    {
+      "name": "duplicate_capability",
+      "expectedRejectedBy": "uniqueCaps",
+      "rejected": true
+    },
+    {
+      "name": "unknown_action",
+      "expectedRejectedBy": "validActionRefs",
+      "rejected": true
+    },
+    {
+      "name": "unknown_actor",
+      "expectedRejectedBy": "validActorRefs",
+      "rejected": true
+    },
+    {
+      "name": "unassigned_queue",
+      "expectedRejectedBy": "noUnassignedQueues",
+      "rejected": true
+    },
+    {
+      "name": "invalid_job_route",
+      "expectedRejectedBy": "jobManifestJoin",
+      "rejected": true
+    },
+    {
+      "name": "fabricated_runtime_pass",
+      "expectedRejectedBy": "noFalseRuntimePass",
+      "rejected": true
+    },
+    {
+      "name": "premature_step2",
+      "expectedRejectedBy": "noStep2Advance",
+      "rejected": true
+    }
+  ],
+  "staticChecksPassed": 14,
+  "staticChecksTotal": 14,
+  "negativeControlsRejected": 10,
+  "negativeControlsTotal": 10,
+  "limitations": [
+    "Set consistency is against recorded manifests, not an independently regenerated source-tree denominator.",
+    "No enabled-scope decision or runtime verification is implied.",
+    "Institution-specific fixture grants, current route methods, caller reachability and deployed evidence remain open."
+  ]
+}
