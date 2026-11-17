@@ -228,6 +228,10 @@
     "canonicalDecisionIndex": {
       "path": "docs/union-eyes/convergence/register/ue-decision-index-0c3.json",
       "blobSha": "1d2268dda4721116ea35e7e5b34dcb1a2ea93be8"
+    },
+    "platformStaffDecision": {
+      "path": "docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md",
+      "blobSha": "338a0af22ab67b04d3e1356022335f7405b7f467"
     }
   },
   "scopeVocabulary": {
@@ -316,7 +320,8 @@
     "Stakeholder universe was previously limited to persona families; 39 role values and 32 trust-boundary stakeholder families have now been enumerated. Dedicated external UI/API/action coverage, actual approved pilot scope, and direct vs recipient-only classification must be reconciled in Step 1 and consumed in Step 2/3.",
     "Prior conversation evidence indicates earlier Member 2.1 and Representative 2.2 design freezes and architectural models. Later reconstructed baseline records remain proposal-only in repository. No exact artifact-level ratification of reconstructed records established. Historical client examples are not actual adopted customer protocols or customer acceptance.",
     "Final adversarial review corrected mixed governance G21/G28, external O18/G26 and conditional privileged-read actions; broadened stakeholder census to 35 (procurement/legal/IT, case support and data migration). Earlier counts and scope claims remain historical. Defined design/offer requirements are not runtime proof.",
-    "Current approved commercial offer/prices and actual customer agreement/representation model, migration inputs and service targets not established from repository sources. No client contract or live legal authority assumed."
+    "Current approved commercial offer/prices and actual customer agreement/representation model, migration inputs and service targets not established from repository sources. No client contract or live legal authority assumed.",
+    "Scope verification caught one registry entry omitted by quote-sensitive extraction. All 141 identifiers are now accounted for; read-only balance reflection is conditional and no finance feature activation is implied."
   ],
   "baseFamilies": [
     {
@@ -2190,6 +2195,16 @@
       "sourceState": "LIMITED",
       "needsScopeResolution": false,
       "securityBoundaryRetained": true
+    },
+    {
+      "id": "UE-DUES-PORTAL-BALANCE",
+      "title": "Member dues portal — balance summary (member's own view)",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "sourceState": "REAL",
+      "needsScopeResolution": false,
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Existing authorized member-only read-only reflection, if retained. Source computes over posted records; never invent zero or paid-up from no data. No native union dues collection/calculation workflow, ledger creation, payment, reconciliation or Financial Officer 2.1 feature mandate. Required safety and truthful states even when positive scope absent."
     },
     {
       "id": "UE-DUES-PORTAL-PAYMENT-HISTORY",
@@ -8589,7 +8604,7 @@
     },
     "registry": {
       "REQUIRED": 41,
-      "CONDITIONAL": 25,
+      "CONDITIONAL": 26,
       "DEFERRED": 44,
       "EXCLUDED": 30
     },
@@ -8634,6 +8649,12 @@
       "CONDITIONAL": 3,
       "DEFERRED": 1,
       "EXCLUDED": 0
+    },
+    "canonicalDecisionApplicability": {
+      "REQUIRED": 12,
+      "CONDITIONAL": 74,
+      "DEFERRED": 27,
+      "EXCLUDED": 25
     }
   },
   "historicalPilotScope": {
@@ -12305,11 +12326,38 @@
       "Exact historical reconstructed persona ratification and grouped SR atomic source definitions unresolved; no historical fact invented. Step 2/3 map actual enabled business actions; no unconditional claim of exhaustive inventory before source census.",
       "Actual customer configuration, service tier, commercial commitments and adopted authority remain external facts; only their applicable positive workflow depends on verification. Mandatory security and truthfulness coverage proceeds.",
       "Step 2 source discovery can reopen scope for newly identified enabled or marketed actions. No silent scope drop.",
-      "Reverify all source-blob bindings and semantic dispositions; reconcile current commercial scope, prior owner decision artifacts, grouped persona source gaps and release-operating targets. Canonical 138 decision IDs now indexed; indexing is not adoption or individual adjudication."
+      "Reverify all source-blob bindings and semantic dispositions; reconcile current commercial scope, prior owner decision artifacts, grouped persona source gaps and release-operating targets. Canonical 138 decision IDs now indexed; indexing is not adoption or individual adjudication.",
+      "Verify decision-specific substantive dispositions with existing signed product/default records where recoverable; historical decision applicability is not authorization.",
+      "Validate scope semantics for all conditional/mixed records and stakeholder operating models, actual offer and selected release targets; Step 2 remains held."
     ],
     "applicationChanges": false,
     "stagingChanges": false,
-    "releaseStatusChanged": false
+    "releaseStatusChanged": false,
+    "sourcePinAudit": {
+      "baseline": "8147ae480bb8ff0ab815b615fab67192728883e0",
+      "filesVerified": 56,
+      "exceptions": 0,
+      "additionalSource": "platformStaffDecision retrieved directly at same baseline; recorded blob identity independently of prior 56-source batch",
+      "note": "Hash equality verifies cited source provenance, not semantic correctness."
+    },
+    "sourceIdentifierAudit": {
+      "historicalCapabilities": 111,
+      "historicalPersonaIdentifiers": 182,
+      "registryCapabilities": 141,
+      "baseFamilies": 37,
+      "storedRoles": 39,
+      "authorityActions": 41,
+      "canonicalDecisions": 138,
+      "reconstructedContracts": {
+        "steward": 55,
+        "representative": 67,
+        "financialOfficer": 55
+      },
+      "corrections": [
+        "Three PDR records missing from previous decision inventory now accounted for",
+        "UE-DUES-PORTAL-BALANCE missed by single-quote title extraction; complete ID-based comparison corrected it"
+      ]
+    }
   },
   "commercialCommitmentMatrix": {
     "status": "SCOPE_REVIEWED_NOT_RUNTIME_QUALIFIED",
@@ -12772,6 +12820,2268 @@
       "PDR-0C2-REPRESENTATIVE-V1",
       "PDR-0C2-STEWARD-V1"
     ],
-    "note": "Canonical October 27 index is historical; all 138 now represented in combined inventory, 32 overlap earlier extracted inventories. Prior October 29/30 founder sign-off and assistant-reported 138 decision records are not proof of a matching committed artifact. No duplicate sign-off requested and no union adoption implied."
+    "note": "All 138 canonical records represented once in scopeApplicability. Historical state retained; earlier owner acceptance reported in October conversation, exact later committed decision text not established. Applicability is a product-scope assessment, not a decision's adoption or closure.",
+    "scopeApplicability": [
+      {
+        "id": "UE-INST-ARBITRATION-PRECEDENT-LIBRARY-AUDIENCE-AND-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ARBITRATION-PRECEDENT-LIBRARY-AUDIENCE-AND-PUBLICATION",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-AUDIT-HISTORY-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-AUDIT-HISTORY-READERS",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+          "UE-OMIT-AUDIT-LOG-VISIBILITY",
+          "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+          "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+          "UE-OMIT-MEMBER-POLLS-AND-SURVEYS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL",
+          "REQUIRED",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-F-002",
+          "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED",
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-CARBON-ACCOUNTING-SCOPE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-H-001",
+          "UE-OMIT-ROUTE-DOMAIN-SCOPE"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+          "UE-OMIT-COMMUNICATIONS-CAMPAIGN-DELIVERY",
+          "UE-OMIT-COMMUNICATIONS-SMS",
+          "UE-OMIT-COMMUNICATIONS-TRACKING-AND-UNSUBSCRIBE",
+          "UE-OMIT-DELIVERY-EVIDENCE"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED",
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-COMPLIANCE-DETERMINATION-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-COMPLIANCE-DETERMINATION-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-COMPLIANCE-ASSURANCE"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-DISPATCH-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-DISPATCH-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-DISPATCH-HALL"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EDUCATION-CERTIFICATION-ISSUING-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EDUCATION-CERTIFICATION-ISSUING-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EDUCATION-TRAINING-RECORD-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EDUCATION-TRAINING-RECORD-READERS",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-EDUCATION-AND-TRAINING-RECORDS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EQUITY-DATA-STEWARD",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EQUITY-DATA-STEWARD",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-EQUITY-SELF-IDENTIFICATION"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ESIGNATURE-REQUEST-AUTHORITY-SIGNER-IDENTITY-AND-LEGAL-VALIDITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ESIGNATURE-REQUEST-AUTHORITY-SIGNER-IDENTITY-AND-LEGAL-VALIDITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-AUDIENCE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-AUDIENCE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+          "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EXIT-INTERVIEW-DERIVED-ANALYTICS-READERS",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-MODEL-PROCESSING-CONSENT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EXIT-INTERVIEW-MODEL-PROCESSING-CONSENT",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+          "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EXIT-INTERVIEW-RECORD-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EXIT-INTERVIEW-RECORD-READERS",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+          "UE-OMIT-EXIT-INTERVIEW-COGNITION-ANALYTICS",
+          "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-EXTERNAL-REPRESENTATIVE-DOCUMENT-DEPOSIT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-EXTERNAL-REPRESENTATIVE-DOCUMENT-DEPOSIT",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-F-002"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+          "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ICRA-PAID-ASSESSMENT-CLAIM-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ICRA-PAID-ASSESSMENT-CLAIM-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ICRA-PUBLIC-ASSESSMENT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ICRA-PSEUDONYMOUS-DATA-LIFECYCLE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ICRA-PSEUDONYMOUS-DATA-LIFECYCLE",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ICRA-PUBLIC-ASSESSMENT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ICRA-REPORT-REVIEW-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ICRA-REPORT-REVIEW-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ICRA-PUBLIC-ASSESSMENT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-IDENTITY-FEDERATION-ADMINISTRATOR",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-IDENTITY-FEDERATION-ADMINISTRATOR",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-INTEGRATION-CONTROL-PLANE-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-INTEGRATION-CONTROL-PLANE-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-CALENDAR-AND-PROVIDER-CONNECTIONS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-KNOWLEDGE-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-KNOWLEDGE-PUBLICATION",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-I-001",
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+          "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+          "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+          "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+          "UE-OMIT-EXIT-INTERVIEW-KNOWLEDGE-TRANSFER"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-KPI-TARGET-OWNER-AND-CALCULATION-RULE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-KPI-TARGET-OWNER-AND-CALCULATION-RULE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-KPI-TARGET-CONFIGURATION"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-MEMBER-DUES-SELF-SERVICE-COLLECTION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-MEMBER-DUES-SELF-SERVICE-COLLECTION",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-MEMBER-DUES-SELF-SERVICE"
+        ],
+        "linkedCapabilityScopes": [
+          "EXCLUDED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-MEMBER-LOCATION-PROCESSING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-MEMBER-LOCATION-PROCESSING",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PRIVACY-RIGHTS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-MEMBER-PORTAL-DOCUMENT-INTAKE-AND-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-MEMBER-PORTAL-DOCUMENT-INTAKE-AND-PUBLICATION",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-CONTENT-LIBRARY-EDITORIAL"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-A-003"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ML-EXTERNAL-QUERY-DISCLOSURE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ML-EXTERNAL-QUERY-DISCLOSURE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ML-MEMBER-RISK-SCORING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ML-MEMBER-RISK-SCORING",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AI-ADVISORY-GOVERNANCE"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-OBSERVABILITY-ALERT-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-OBSERVABILITY-ALERT-OWNER",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-OHS-ANONYMOUS-REPORT-IDENTITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-OHS-ANONYMOUS-REPORT-IDENTITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-OHS-REGULATORY-RECORDS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-OHS-INCIDENT-RECORD-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-OHS-INCIDENT-RECORD-READERS",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-OHS-REGULATORY-RECORDS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "UE-OMIT-ORGANIZATION-ONBOARDING"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ONBOARDING-EVENT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ONBOARDING-EVENT-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "UE-OMIT-ORGANIZATION-ONBOARDING"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ONBOARDING-RECOMMENDATION-BASIS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ONBOARDING-RECOMMENDATION-BASIS",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZATION-ONBOARDING"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-BILLING-AND-REMITTANCE-SETTINGS-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZATION-BILLING-AND-REMITTANCE-SETTINGS-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-CONTEXT-SELECTION-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZATION-CONTEXT-SELECTION-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED",
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-A-003",
+          "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED",
+          "DEFERRED",
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZATION-SHARING-SETTINGS-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZATION-SHARING-SETTINGS-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+          "UE-OMIT-CLAUSE-LIBRARY-SHARING"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZING-CAMPAIGN-DATA-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZING-CAMPAIGN-DATA-READERS",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZING-CAMPAIGNS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZING-REGULATORY-FILING-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZING-REGULATORY-FILING-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZING-CAMPAIGNS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-ORGANIZING-SUPPORT-RECORD-AND-OUTREACH-CONSENT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-ORGANIZING-SUPPORT-RECORD-AND-OUTREACH-CONSENT",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ORGANIZING-CAMPAIGNS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PENSION-ADMINISTRATION-AND-TRUSTEE-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PENSION-ADMINISTRATION-AND-TRUSTEE-AUTHORITY",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-D-003"
+        ],
+        "linkedCapabilityScopes": [
+          "EXCLUDED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PILOT-APPLICANT-ORGANIZATION-VERIFICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PILOT-APPLICANT-ORGANIZATION-VERIFICATION",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PILOT-COMMERCIAL-AGREEMENT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PILOT-COMMERCIAL-AGREEMENT-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PILOT-DEMO-RUNTIME-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PILOT-DEMO-RUNTIME-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PILOT-PROGRAM-OPERATIONS"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PILOT-REFERENCE-AND-CASE-STUDY-PUBLICATION",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PILOT-REFERENCE-AND-CASE-STUDY-PUBLICATION",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PILOT-USAGE-SIGNAL-READERS-AND-BASIS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PILOT-USAGE-SIGNAL-READERS-AND-BASIS",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+          "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PLATFORM-CONTRACT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PLATFORM-CONTRACT-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+          "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+          "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL",
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PLATFORM-MARKETING-CONTENT-OWNER-AND-APPROVAL",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PLATFORM-MARKETING-CONTENT-OWNER-AND-APPROVAL",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PLATFORM-MARKETING-TESTIMONIALS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PLATFORM-RECONCILIATION-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PLATFORM-RECONCILIATION-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PLATFORM-REVENUE-METRICS-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PLATFORM-REVENUE-METRICS-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-PLATFORM-STAFF-MANDATE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-PLATFORM-STAFF-MANDATE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-A-003",
+          "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+          "UE-OMIT-CBA-INTELLIGENCE-DATASET",
+          "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+          "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+          "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+          "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+          "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED",
+          "CONDITIONAL",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-POLITICAL-DATA-HANDLING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-POLITICAL-DATA-HANDLING",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-COPE-POLITICAL-ACTION"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-PLATFORM-OPERATOR-CONTROLS"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-REPORT-DEFINITION-READERS-AND-SHARING",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-REPORT-DEFINITION-READERS-AND-SHARING",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-REPORT-SOURCE-DATA-READERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-REPORT-SOURCE-DATA-READERS",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-REPRESENTATION-AUTHORITY-SOURCE",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-REPRESENTATION-AUTHORITY-SOURCE",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-CAP-B-001",
+          "UE-CAP-F-002",
+          "UE-OMIT-MEMBER-POLLS-AND-SURVEYS",
+          "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED",
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-REWARDS-PROGRAM-AUTOMATION-EXPIRY-AND-EXPORT",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-REWARDS-PROGRAM-AUTOMATION-EXPIRY-AND-EXPORT",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-REWARDS-REDEMPTION-PROVIDER-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-REWARDS-REDEMPTION-PROVIDER-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-REWARDS-REDEMPTION-FULFILMENT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-SATISFACTION-RATING-READERS-AND-RESPONDENT-ANONYMITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-SATISFACTION-RATING-READERS-AND-RESPONDENT-ANONYMITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-MEMBER-POLLS-AND-SURVEYS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-SCHEDULED-REPORT-RECIPIENTS-AND-DELIVERY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-SCHEDULED-REPORT-RECIPIENTS-AND-DELIVERY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-SCIM-PROVISIONING-CREDENTIAL-AND-DEPROVISIONING-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-SECURITY-EVENT-READERS-AND-AUTHORSHIP",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-SECURITY-EVENT-READERS-AND-AUTHORSHIP",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-AUDIT-LOG-VISIBILITY"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-SOCIAL-MEDIA-PUBLISHING-AUTHORITY-AND-CREDENTIAL-CUSTODY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-SOCIAL-MEDIA-PUBLISHING-AUTHORITY-AND-CREDENTIAL-CUSTODY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+          "UE-OMIT-SOCIAL-MEDIA-PUBLISHING"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-STEWARD-DIRECTORY-AND-APPOINTMENT-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-STEWARD-DIRECTORY-AND-APPOINTMENT-AUTHORITY",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-SUPPORT-AND-STORAGE-FIGURES-OWNER",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-SUPPORT-AND-STORAGE-FIGURES-OWNER",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+          "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS"
+        ],
+        "linkedCapabilityScopes": [
+          "CONDITIONAL"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-TAX-SLIP-AND-RECEIPT-ISSUER-AND-SOURCE-RECORDS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-TAX-SLIP-AND-RECEIPT-ISSUER-AND-SOURCE-RECORDS",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-FINANCE-UNAVAILABLE"
+        ],
+        "linkedCapabilityScopes": [
+          "EXCLUDED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+        ],
+        "linkedCapabilityScopes": [
+          "REQUIRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-VOICE-RECORDING-CONSENT-RETENTION-AND-PROCESSOR",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-VOICE-RECORDING-CONSENT-RETENTION-AND-PROCESSOR",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-VOICE-TRANSCRIPTION"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-WCB-CLAIM-AND-ASSESSMENT-READERS-AND-WRITERS",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-WCB-CLAIM-AND-ASSESSMENT-READERS-AND-WRITERS",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-WCB-CLAIMS-AND-EMPLOYER-ASSESSMENTS"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-WORKBOOK-CLAIM-AND-SAME-ORGANIZATION-PEER-AUTHORITY",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-WORKBOOK-CLAIM-AND-SAME-ORGANIZATION-PEER-AUTHORITY",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "UE-INST-WORKBOOK-PSEUDONYMOUS-DATA-LIFECYCLE-CONSENT-AND-PROCESSOR",
+        "family": "INVENTORY_INSTITUTIONAL",
+        "title": "UE-INST-WORKBOOK-PSEUDONYMOUS-DATA-LIFECYCLE-CONSENT-AND-PROCESSOR",
+        "scope": "DEFERRED",
+        "scopeRationale": "Derived applicability from linked historical capability scope; institutional adoption remains distinct. Required enabled base outcome and safe denials remain mandatory; no new activation.",
+        "linkedCapabilities": [
+          "UE-OMIT-GOVERNANCE-WORKBOOK-PRODUCT"
+        ],
+        "linkedCapabilityScopes": [
+          "DEFERRED"
+        ],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-01",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Who holds a triage designation",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-02",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Self-assignment from triage",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-03",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Who may assign or route cases",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-04",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Who may close a case",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-05",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Member-disclosable labels",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-06",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Privileged-matter access grants",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Non-disclosure mandatory; privileged matter positive access only with actual explicit supported authority, counsel-controlled material excluded.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-07",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Recusal lifting and conflict adjudication",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-08",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Temporary delegation, substitute coverage and succession",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-09",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Senior review and approval authority",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-10",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Territory and bargaining-unit mandates per operating model",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-11",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Representation protocol approval",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-12",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "WorkAid referral authority and consent wording",
+        "scope": "DEFERRED",
+        "scopeRationale": "WorkAid positive referral integration outside base; preserve referral/share/consent/privilege safety.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-13",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Deadline extension approval",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-14",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Correspondence approval, signature and dispatch",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-15",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Conversation legal hold and retention",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-16",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Financial mandate issuance rule",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-17",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Delegation of financial duties",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-18",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Monetary limits and required approvals",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-19",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Expenditure approval policy",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-20",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Payment execution and rails",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-21",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Reconciliation authority",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-22",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Trustee authority and administration",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-23",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Auditor appointment and access scope",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-24",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Strike and restricted funds authority",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-25",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Affiliate remittance and per-capita authority",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-26",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Pension and benefit financial administration",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-27",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Dues data access for presidents and administrators",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Retained read-only authorized dues reflection only; deny unintended role or cross-org access, no finance expansion.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-28",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Financial succession and revocation",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-29",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "External accounting export and retention",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-30",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Tax slip issuance authority",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-31",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Financial adoption by organization",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Union finance/dues positive operations excluded; no financial authority implied, enforce confidentiality/refusals.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-IA-32",
+        "family": "BASELINE_INSTITUTIONAL_AUTHORITY",
+        "title": "Steward role scope per organization",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Required core behavior and denial; positive mandate/approval/classification/appointment variants depend on union's adopted instrument. Do not activate authority based on defaults.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "INSTITUTION_TO_BE_NAMED",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-01",
+        "family": "BASELINE_PRODUCT",
+        "title": "Steward as a distinct persona",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-02",
+        "family": "BASELINE_PRODUCT",
+        "title": "Steward navigation",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-03",
+        "family": "BASELINE_PRODUCT",
+        "title": "Default visibility of working notes",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-04",
+        "family": "BASELINE_PRODUCT",
+        "title": "Intake classification",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-05",
+        "family": "BASELINE_PRODUCT",
+        "title": "Assignment acknowledgement and handoff summary",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-06",
+        "family": "BASELINE_PRODUCT",
+        "title": "Representative R-domain meanings",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-07",
+        "family": "BASELINE_PRODUCT",
+        "title": "R18 status vocabulary",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-08",
+        "family": "BASELINE_PRODUCT",
+        "title": "Journeys A–G acceptance form",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-09",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial Officer domain map",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-10",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial navigation names",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-11",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial journeys FJ01–FJ10",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-12",
+        "family": "BASELINE_PRODUCT",
+        "title": "Deadline extension workflow",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Core deadline/representation and access safety required. Additional approved extension, cover, territory and cross-org models must be qualified when advertised/selectable or customer needs them.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-13",
+        "family": "BASELINE_PRODUCT",
+        "title": "Financial reporting scope",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-14",
+        "family": "BASELINE_PRODUCT",
+        "title": "Organization scenario coverage",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Core deadline/representation and access safety required. Additional approved extension, cover, territory and cross-org models must be qualified when advertised/selectable or customer needs them.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-01",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Steward access when a relationship or the platform role ends",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-02",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Steward scope across federations, locals and territories",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Core deadline/representation and access safety required. Additional approved extension, cover, territory and cross-org models must be qualified when advertised/selectable or customer needs them.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-03",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Steward absence cover and substitution",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Core deadline/representation and access safety required. Additional approved extension, cover, territory and cross-org models must be qualified when advertised/selectable or customer needs them.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-04",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Representative scope across federations and affiliated organizations",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Core deadline/representation and access safety required. Additional approved extension, cover, territory and cross-org models must be qualified when advertised/selectable or customer needs them.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-05",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Explicit denial of financial authority for the representative",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-06",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Former representative access and mandate termination",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-07",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Finance scope across affiliates and multiple organizations",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-08",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Absent mandate holder without delegation",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-09",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Financial notifications and workflow transitions",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "DEC-PD-0C2-10",
+        "family": "GATE_0C2_PRODUCT",
+        "title": "Order of product acceptance and the Steward structure",
+        "scope": "REQUIRED",
+        "scopeRationale": "Product-design relationship to enabled base representation, truthful status, privacy, layout, case continuity and nonfinancial refusal; prior owner sign-off reported but exact original decision-by-decision text not verified. Do not invent replacement ratification.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "OUTSTANDING",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "PDR-0C2-FINANCIAL-OFFICER-V1",
+        "family": "PERSONA_RATIFICATION",
+        "title": "Ratification of UE-FINANCIAL-OFFICER-PROPOSED-CANONICAL-2.1-R1",
+        "scope": "EXCLUDED",
+        "scopeRationale": "Financial Officer 2.1 and native union finance not base positive release obligations; historical disposition and hard negatives preserved.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "PROPOSED_FOR_RATIFICATION",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "PDR-0C2-REPRESENTATIVE-V1",
+        "family": "PERSONA_RATIFICATION",
+        "title": "Ratification of UE-REPRESENTATIVE-PROPOSED-CANONICAL-2.2-R1",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Base representation responsibilities required; exact historical reconstructed full-spec adoption record unverified. Use working scope and preserve record provenance rather than remand all product work.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "PROPOSED_FOR_RATIFICATION",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      },
+      {
+        "id": "PDR-0C2-STEWARD-V1",
+        "family": "PERSONA_RATIFICATION",
+        "title": "Ratification of UE-STEWARD-PROPOSED-CANONICAL-R1",
+        "scope": "CONDITIONAL",
+        "scopeRationale": "Base representation responsibilities required; exact historical reconstructed full-spec adoption record unverified. Use working scope and preserve record provenance rather than remand all product work.",
+        "linkedCapabilities": [],
+        "linkedCapabilityScopes": [],
+        "historicalState": "PROPOSED_FOR_RATIFICATION",
+        "historicalOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+        "adoptedInHistoricalIndex": false,
+        "requiredDenialsRetained": true
+      }
+    ]
+  },
+  "scopeAxesVerification": {
+    "capacities": [
+      "member",
+      "steward",
+      "chief_steward",
+      "officer",
+      "executive",
+      "financial_officer",
+      "trustee",
+      "auditor",
+      "governance_reviewer",
+      "privacy_officer"
+    ],
+    "membershipStates": [
+      "active",
+      "pending",
+      "suspended",
+      "inactive",
+      "revoked"
+    ],
+    "navExperienceRoles": [
+      {
+        "name": "ADMIN_ROLES",
+        "roles": [
+          "app_owner",
+          "system_admin",
+          "admin",
+          "platform_lead",
+          "integration_manager",
+          "billing_manager",
+          "data_analytics_manager"
+        ]
+      },
+      {
+        "name": "GOVERNANCE_ROLES",
+        "roles": [
+          "governance",
+          "compliance_manager",
+          "security_manager",
+          "clc_executive",
+          "fed_executive"
+        ]
+      },
+      {
+        "name": "EXECUTIVE_ROLES",
+        "roles": [
+          "app_owner",
+          "coo",
+          "cto",
+          "customer_success_director",
+          "president",
+          "vice_president",
+          "secretary_treasurer",
+          "officer",
+          "national_officer"
+        ]
+      },
+      {
+        "name": "STAFF_ROLES",
+        "roles": [
+          "steward",
+          "chief_steward",
+          "bargaining_committee",
+          "health_safety_rep",
+          "clerk",
+          "support_manager",
+          "support_agent",
+          "data_analyst",
+          "billing_specialist",
+          "integration_specialist",
+          "content_manager",
+          "training_coordinator",
+          "clc_staff",
+          "fed_staff",
+          "congress_staff",
+          "federation_staff"
+        ]
+      }
+    ],
+    "nonEnumNavigationValues": [
+      "governance"
+    ],
+    "notes": [
+      "Stored role enum, authority-kernel capacity, institutional appointment, external representative authority and UI experience are distinct. The 'governance' navigation string is not a stored UserRole and must not be seeded as a new role.",
+      "The platform_staff mandate kind is structural only in the pinned decision record; existing narrow platform-admin identity-based audited projections are distinct. Do not grant a new platform-wide read mandate or require a fabricated second founder. Any positive mandate-based cross-tenant workflow depends on an actual Nzila-level instrument and legitimate issuance path. Existing customer content and cross-tenant denials remain mandatory.",
+      "Membership state and authority changes are part of required product lifecycle. No account count inferred."
+    ]
   }
 }
