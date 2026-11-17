@@ -120,6 +120,42 @@
     "icraPersona": {
       "path": "apps/union-eyes/lib/icra/personas.ts",
       "blobSha": "58b04c77ee75f1cc96f002b837ab49adab280fc3"
+    },
+    "senior": {
+      "path": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "blobSha": "41369d2887ba2acc600c69d6a2c236960dd90080"
+    },
+    "member": {
+      "path": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "blobSha": "4a01c8722acc796d52df0ced47f0621332f708f6"
+    },
+    "protocols": {
+      "path": "apps/union-eyes/lib/representation/protocol-types.ts",
+      "blobSha": "d3316af267b3e23ed62456e06f402eb55d970c8f"
+    },
+    "actorMap": {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.md",
+      "blobSha": "2c7b6bda006cf78e45ecc2209df37dffd16a3468"
+    },
+    "mutatingCallers": {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_MUTATING_CALLER_INVENTORY.md",
+      "blobSha": "b38b38c94044bf6a03430a214f4bab533b74bb2d"
+    },
+    "commercialPilot": {
+      "path": "reports/commercialization/union-eyes-pilot-program.md",
+      "blobSha": "00d2b3bef321808fbbc0e94d96595dd3bb27c8e7"
+    },
+    "commercialAudit": {
+      "path": "reports/commercialization/union-eyes-commercialization-audit.md",
+      "blobSha": "ac7307418314b90edf555620d350d57b83739a16"
+    },
+    "revenuePlaybook": {
+      "path": "docs/categories/stakeholders/buyers/union-eyes-revenue-playbook.md",
+      "blobSha": "83cc202037d7f1ce4d9dee2699f4502b1622ad31"
+    },
+    "offerStack": {
+      "path": "docs/categories/stakeholders/gtm/OFFER_STACK_AND_PACKAGING.md",
+      "blobSha": "bb1ba79a7f3360e7da9a5568f5b98d420293234e"
     }
   },
   "scopeVocabulary": {
@@ -3605,7 +3641,7 @@
     },
     {
       "id": "SR01",
-      "title": "SR01",
+      "title": "Supervisory mandate",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3613,11 +3649,15 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR01"
+      ],
+      "historicalGroupFinding": "No supervisory mandate/delegation store exists (`db/schema` has no delegation, mandate or supervisory-grant table). Effective mandate cannot be evaluated."
     },
     {
       "id": "SR02",
-      "title": "SR02",
+      "title": "Grouped supervisory domain — SR02, SR03",
       "scope": "REQUIRED",
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "senior-representative",
@@ -3625,11 +3665,17 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR02",
+        "SR03"
+      ],
+      "historicalGroupFinding": "Role-gated `case_read_any` (level ≥ 2) reads; no scoped queue-oversight authority or intake-distribution workflow verified.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR03",
-      "title": "SR03",
+      "title": "Grouped supervisory domain — SR02, SR03",
       "scope": "REQUIRED",
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "senior-representative",
@@ -3637,95 +3683,17 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR02",
+        "SR03"
+      ],
+      "historicalGroupFinding": "Role-gated `case_read_any` (level ≥ 2) reads; no scoped queue-oversight authority or intake-distribution workflow verified.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR04",
-      "title": "SR04",
-      "scope": "REQUIRED",
-      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-CAP-B-001",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR05",
-      "title": "SR05",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR06",
-      "title": "SR06",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR07",
-      "title": "SR07",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR08",
-      "title": "SR08",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR09",
-      "title": "SR09",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-CAP-I-001",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR10",
-      "title": "SR10",
-      "scope": "REQUIRED",
-      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
-      "persona": "senior-representative",
-      "historicalDefinition": "INDIVIDUAL",
-      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
-      "mandatoryInHistoricalProgram": true,
-      "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
-    },
-    {
-      "id": "SR11",
-      "title": "SR11",
+      "title": "Assignment",
       "scope": "REQUIRED",
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "senior-representative",
@@ -3734,11 +3702,140 @@
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
       "securityBoundaryRetained": true,
-      "scopeBoundary": "Case successor continuity and outgoing access revocation required; full office transition product conditional."
+      "sourceGroup": [
+        "SR04"
+      ],
+      "historicalGroupFinding": "`POST /api/cases/[caseId]/assign` persists assignment + staff note atomically; no acceptance, obligation carry-over or workload-balancing rules."
+    },
+    {
+      "id": "SR05",
+      "title": "Grouped supervisory domain — SR05, SR06, SR07",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR05",
+        "SR06",
+        "SR07"
+      ],
+      "historicalGroupFinding": "No independent approval workflow engine found for supervisory decisions; `case_assign`/`case_transition` are role-level checks, not delegated decisions.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+    },
+    {
+      "id": "SR06",
+      "title": "Grouped supervisory domain — SR05, SR06, SR07",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR05",
+        "SR06",
+        "SR07"
+      ],
+      "historicalGroupFinding": "No independent approval workflow engine found for supervisory decisions; `case_assign`/`case_transition` are role-level checks, not delegated decisions.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+    },
+    {
+      "id": "SR07",
+      "title": "Grouped supervisory domain — SR05, SR06, SR07",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR05",
+        "SR06",
+        "SR07"
+      ],
+      "historicalGroupFinding": "No independent approval workflow engine found for supervisory decisions; `case_assign`/`case_transition` are role-level checks, not delegated decisions.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+    },
+    {
+      "id": "SR08",
+      "title": "Grouped supervisory domain — SR08, SR09",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR08",
+        "SR09"
+      ],
+      "historicalGroupFinding": "`recusal_tracking` schema exists but is not wired into case access or assignment. Only the party-conflict check below is enforced.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+    },
+    {
+      "id": "SR09",
+      "title": "Grouped supervisory domain — SR08, SR09",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR08",
+        "SR09"
+      ],
+      "historicalGroupFinding": "`recusal_tracking` schema exists but is not wired into case access or assignment. Only the party-conflict check below is enforced.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
+    },
+    {
+      "id": "SR10",
+      "title": "Deadline oversight",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR10"
+      ],
+      "historicalGroupFinding": "Deadline engine exists; file 25 records overdue processing as unproven."
+    },
+    {
+      "id": "SR11",
+      "title": "Successor continuity",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
+      "persona": "senior-representative",
+      "historicalDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatoryInHistoricalProgram": true,
+      "interpretationFromProposedSource": false,
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Case successor continuity and outgoing access revocation required; full office transition product conditional.",
+      "sourceGroup": [
+        "SR11"
+      ],
+      "historicalGroupFinding": "Primary-owner change revokes read scope implicitly (reads are scoped by `assignedTo`); successor acceptance, obligation and communication transfer are not implemented."
     },
     {
       "id": "SR12",
-      "title": "SR12",
+      "title": "Case-access grants",
       "scope": "REQUIRED",
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "senior-representative",
@@ -3746,11 +3843,15 @@
       "capabilityId": "UE-CAP-F-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR12"
+      ],
+      "historicalGroupFinding": "Case-access grants now require case-management authority (section 6). Sealed/medical document grants are unchanged."
     },
     {
       "id": "SR13",
-      "title": "SR13",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3758,11 +3859,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR15",
-      "title": "SR15",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3770,11 +3883,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR16",
-      "title": "SR16",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3782,11 +3907,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR17",
-      "title": "SR17",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3794,11 +3931,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR18",
-      "title": "SR18",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3806,11 +3955,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR19",
-      "title": "SR19",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3818,11 +3979,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR20",
-      "title": "SR20",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3830,11 +4003,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR21",
-      "title": "SR21",
+      "title": "Grouped supervisory domain — SR13, SR15, SR16, SR17, SR18, SR19, SR20, SR21",
       "scope": "CONDITIONAL",
       "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "senior-representative",
@@ -3842,11 +4027,23 @@
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR13",
+        "SR15",
+        "SR16",
+        "SR17",
+        "SR18",
+        "SR19",
+        "SR20",
+        "SR21"
+      ],
+      "historicalGroupFinding": "No supervisory engine, route or persistence verified in this slice.",
+      "definitionLimit": "Source provides shared disposition, not individual title. No fabricated atomic meaning."
     },
     {
       "id": "SR14",
-      "title": "SR14",
+      "title": "WorkAid integration",
       "scope": "DEFERRED",
       "reason": "Separate product increment; preserve security, truthful unavailability and non-regression if route remains reachable.",
       "persona": "senior-representative",
@@ -3854,11 +4051,15 @@
       "capabilityId": "UE-CAP-G-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR14"
+      ],
+      "historicalGroupFinding": "No WorkAid referral code exists in `app/api`, `lib` or `db/schema`. The WorkAid prep branch was not imported. No Clio/WSIB integration was fabricated."
     },
     {
       "id": "SR22",
-      "title": "SR22",
+      "title": "Bilingual, responsive and accessible workflows",
       "scope": "REQUIRED",
       "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "senior-representative",
@@ -3866,7 +4067,11 @@
       "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "sourceGroup": [
+        "SR22"
+      ],
+      "historicalGroupFinding": "Not exercised. The one UI change adds an English-only alert in `grievance-detail-console.tsx`, which is already English-only there; EN/FR parity is not established."
     },
     {
       "id": "O01",
@@ -10170,7 +10375,16 @@
           "base"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L04",
+          "L06",
+          "L08",
+          "L09",
+          "L11",
+          "L12",
+          "L15"
+        ]
       },
       {
         "id": "SA02",
@@ -10184,7 +10398,11 @@
           "icraPersona"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L01"
+        ],
+        "activationCondition": "Public transactional intake only if actual acquisition surface is offered; privacy and no unsolicited tenant binding always."
       },
       {
         "id": "SA03",
@@ -10198,7 +10416,15 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L01",
+          "L02",
+          "L03",
+          "L14",
+          "L15"
+        ],
+        "activationCondition": "Required actor relationship for first client; automation optional. No commercial record without proven contact/authority."
       },
       {
         "id": "SA04",
@@ -10212,7 +10438,10 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L04"
+        ]
       },
       {
         "id": "SA05",
@@ -10226,7 +10455,12 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L11",
+          "L15"
+        ]
       },
       {
         "id": "SA06",
@@ -10240,7 +10474,15 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L06",
+          "L07",
+          "L08",
+          "L09",
+          "L11"
+        ]
       },
       {
         "id": "SA07",
@@ -10254,7 +10496,16 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L06",
+          "L07",
+          "L08",
+          "L09",
+          "L10",
+          "L11"
+        ]
       },
       {
         "id": "SA08",
@@ -10268,7 +10519,16 @@
           "base"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L06",
+          "L07",
+          "L08",
+          "L09",
+          "L10",
+          "L11"
+        ]
       },
       {
         "id": "SA09",
@@ -10282,7 +10542,19 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L02",
+          "L03",
+          "L05",
+          "L07",
+          "L09",
+          "L10",
+          "L11",
+          "L12",
+          "L14",
+          "L15"
+        ]
       },
       {
         "id": "SA10",
@@ -10296,7 +10568,15 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L03",
+          "L04",
+          "L05",
+          "L12",
+          "L13",
+          "L15"
+        ]
       },
       {
         "id": "SA11",
@@ -10310,7 +10590,11 @@
           "base"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L04",
+          "L09"
+        ]
       },
       {
         "id": "SA12",
@@ -10324,7 +10608,13 @@
           "base"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L08",
+          "L12",
+          "L15"
+        ]
       },
       {
         "id": "SA13",
@@ -10338,7 +10628,14 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L10",
+          "L12",
+          "L15"
+        ],
+        "activationCondition": "Audit and applicable base oversight required; positive review/appointment/investigation only if adopted; no full independent-governance suite."
       },
       {
         "id": "SA14",
@@ -10352,7 +10649,12 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L05",
+          "L07"
+        ],
+        "activationCondition": "Scoped base capacity when enabled; specialized module positive actions require separate decision."
       },
       {
         "id": "SA15",
@@ -10369,7 +10671,16 @@
           "federationExternal"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L07",
+          "L08",
+          "L09",
+          "L10",
+          "L11",
+          "L15"
+        ],
+        "activationCondition": "Safety of reachable API is required; positive grant/view/download/deposit becomes required if sold or needed by enabled model. Customer consent and external organization grant are not optional for actual share."
       },
       {
         "id": "SA16",
@@ -10384,7 +10695,13 @@
           "federationExternal"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L07",
+          "L10",
+          "L15"
+        ],
+        "activationCondition": "Positive own-org or explicit matter grant if the model uses national/federation actor; hierarchy not authorization."
       },
       {
         "id": "SA17",
@@ -10398,7 +10715,12 @@
           "workaidTrace"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L08",
+          "L09",
+          "L10"
+        ]
       },
       {
         "id": "SA18",
@@ -10412,7 +10734,11 @@
           "base"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L09",
+          "L10"
+        ]
       },
       {
         "id": "SA19",
@@ -10426,7 +10752,16 @@
           "governance"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L06",
+          "L07",
+          "L08",
+          "L09",
+          "L10",
+          "L11",
+          "L12"
+        ]
       },
       {
         "id": "SA20",
@@ -10440,7 +10775,12 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L09",
+          "L10"
+        ],
+        "activationCondition": "Recipient-side evidence and honest transmission states if used by base correspondence; direct filing/official decision integration separate."
       },
       {
         "id": "SA21",
@@ -10454,7 +10794,14 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L02",
+          "L10",
+          "L12",
+          "L15"
+        ],
+        "activationCondition": "Controlled audit/export and disclosure when required by existing legal or contractual process; no blanket portal or certification."
       },
       {
         "id": "SA22",
@@ -10468,7 +10815,12 @@
           "counselBoundary"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L09",
+          "L10",
+          "L11"
+        ]
       },
       {
         "id": "SA23",
@@ -10482,7 +10834,14 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L02",
+          "L03",
+          "L13",
+          "L14",
+          "L15"
+        ]
       },
       {
         "id": "SA24",
@@ -10496,7 +10855,15 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L01",
+          "L03",
+          "L04",
+          "L13",
+          "L14"
+        ],
+        "activationCondition": "Support and onboarding function required; separate named app role optional if existing authorized operator covers same permission class."
       },
       {
         "id": "SA25",
@@ -10510,7 +10877,13 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L03",
+          "L12",
+          "L13",
+          "L15"
+        ]
       },
       {
         "id": "SA26",
@@ -10524,7 +10897,14 @@
           "publicApplicant"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L01",
+          "L02",
+          "L14",
+          "L15"
+        ],
+        "activationCondition": "First-client commercial authority and bounded entitlement required; native checkout, automated invoice/payment and broader billing dashboard separate."
       },
       {
         "id": "SA27",
@@ -10538,7 +10918,12 @@
           "historical"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L13",
+          "L14"
+        ],
+        "activationCondition": "Only actual enabled integration, guidance and training operations needed for base; no analytics raw customer content."
       },
       {
         "id": "SA28",
@@ -10552,7 +10937,15 @@
           "physicalGuards"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L03",
+          "L04",
+          "L08",
+          "L09",
+          "L13",
+          "L15"
+        ]
       },
       {
         "id": "SA29",
@@ -10566,7 +10959,14 @@
           "counselBoundary"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L08",
+          "L10",
+          "L13",
+          "L15"
+        ],
+        "activationCondition": "Real deployed provider safety required, optional provider feature only upon actual adoption."
       },
       {
         "id": "SA30",
@@ -10581,7 +10981,13 @@
           "counselBoundary"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L01",
+          "L05",
+          "L12",
+          "L16"
+        ]
       },
       {
         "id": "SA31",
@@ -10595,7 +11001,12 @@
           "physicalGuards"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L04",
+          "L13",
+          "L16"
+        ]
       },
       {
         "id": "SA32",
@@ -10609,7 +11020,11 @@
           "roleEnum"
         ],
         "securityBoundaryRetained": true,
-        "scopeStatus": "PROPOSED_FOR_RECONCILIATION"
+        "scopeStatus": "PROPOSED_FOR_RECONCILIATION",
+        "lifecycleIds": [
+          "L06"
+        ],
+        "activationCondition": "Require eligibility/own-data access where adopted; no assumed volunteer/event/training/nonmember module."
       }
     ],
     "provenanceLimits": [
@@ -10617,5 +11032,431 @@
       "External representative APIs exist; whether a pilot requires positive external workflows is unresolved. Preserve safety of every reachable route even if positive scope excluded.",
       "Full cross-organization authority, professional counsel, commercial integration and institutional real-world adoption are not granted by this document."
     ]
+  },
+  "operatingModelScope": {
+    "status": "RECOMMENDED_PRODUCT_BOUNDARY_NOT_CUSTOMER_ADOPTION",
+    "productEnvelope": "Every advertised/selectable representation protocol must have working positive and negative behavior before being represented as supported. If not qualified, unavailable with accurate product presentation. Support of a protocol is not adoption of that protocol by a real union.",
+    "firstClientEnvelope": "Select actual approved per-organization protocol and its mandatory workflow variants; current first-client operating configuration is not verified here. Single-local footprint does not waive external matter grant or adverse-party safety.",
+    "presets": [
+      {
+        "id": "steward",
+        "preset": "PROTOCOL_STEWARD_LED",
+        "primaryAssignmentRole": "steward",
+        "stewardPermissionFlags": {
+          "canFileGrievance": true,
+          "canRepresent": true,
+          "canBeAssigned": true,
+          "canContactEmployer": true,
+          "canEscalate": true
+        },
+        "minimumFilingRole": "steward",
+        "minimumRepresentationRole": "steward",
+        "scope": "CONDITIONAL",
+        "condition": "Required positive qualification if selectable/advertised, or if actual pilot protocol uses it; all unsafe paths refused regardless.",
+        "boundary": "Traditional local model. Positive assigned steward capability is scoped by relationship and approved protocol."
+      },
+      {
+        "id": "lro",
+        "preset": "PROTOCOL_LRO_LED",
+        "primaryAssignmentRole": "labor_relations_officer",
+        "stewardPermissionFlags": {
+          "canFileGrievance": false,
+          "canRepresent": false,
+          "canBeAssigned": false,
+          "canContactEmployer": false,
+          "canEscalate": false
+        },
+        "minimumFilingRole": "officer",
+        "minimumRepresentationRole": "officer",
+        "scope": "CONDITIONAL",
+        "condition": "Required positive qualification if selectable/advertised, or if actual pilot protocol uses it; all unsafe paths refused regardless.",
+        "boundary": "CAPE-style preset; workplace contact steward restricted. Dedicated LRO-led positive and steward hard-negative cases required if offered."
+      },
+      {
+        "id": "national_rep",
+        "preset": "PROTOCOL_NATIONAL_REP_LED",
+        "primaryAssignmentRole": "national_representative",
+        "stewardPermissionFlags": {
+          "canFileGrievance": false,
+          "canRepresent": false,
+          "canBeAssigned": false,
+          "canContactEmployer": true,
+          "canEscalate": false
+        },
+        "minimumFilingRole": "national_officer",
+        "minimumRepresentationRole": "national_officer",
+        "scope": "CONDITIONAL",
+        "condition": "Required positive qualification if selectable/advertised, or if actual pilot protocol uses it; all unsafe paths refused regardless.",
+        "boundary": "CUPE-style preset; national representative formally files and handles cases, steward liaison only. External mandate if operating across organizations; not implicit federation access."
+      },
+      {
+        "id": "officer",
+        "preset": "PROTOCOL_OFFICER_LED",
+        "primaryAssignmentRole": "primary_officer",
+        "stewardPermissionFlags": {
+          "canFileGrievance": false,
+          "canRepresent": false,
+          "canBeAssigned": true,
+          "canContactEmployer": true,
+          "canEscalate": false
+        },
+        "minimumFilingRole": "officer",
+        "minimumRepresentationRole": "officer",
+        "scope": "CONDITIONAL",
+        "condition": "Required positive qualification if selectable/advertised, or if actual pilot protocol uses it; all unsafe paths refused regardless.",
+        "boundary": "Officer-led model; stewardship can be secondary where allowed; canBeAssigned does not by itself authorize primary assignment."
+      }
+    ],
+    "crossCuttingVariants": [
+      {
+        "id": "PM01",
+        "name": "Single local with separate handler and supervisor",
+        "scope": "REQUIRED",
+        "boundary": "Local casework and scoped independent business approval only where actual institutional rule requires."
+      },
+      {
+        "id": "PM02",
+        "name": "Small local, multiple capacities / absent office-holder",
+        "scope": "CONDITIONAL",
+        "boundary": "If enabled: deny self-approval and conflicts, separate capacities; fail closed where no eligible approver, do not invent humans or bypass real union rules."
+      },
+      {
+        "id": "PM03",
+        "name": "Cross-local / national representative working one matter",
+        "scope": "CONDITIONAL",
+        "boundary": "Scoped matter/document grant, no blanket cross-tenant membership or rollup. Positive external representation must be qualified if required by protocol."
+      },
+      {
+        "id": "PM04",
+        "name": "Territory / bargaining unit / workplace restrictions",
+        "scope": "CONDITIONAL",
+        "boundary": "Where configured, matching unit/territory required. Always refuse wrong or indeterminate scope for a restricted mandate."
+      },
+      {
+        "id": "PM05",
+        "name": "Multi-affiliate executive reporting and federation analytics",
+        "scope": "DEFERRED",
+        "boundary": "No expansion from single local. Explicit later governed sharing/aggregation."
+      },
+      {
+        "id": "PM06",
+        "name": "Protocol missing, malformed, pending, legacy or self-approved",
+        "scope": "REQUIRED",
+        "boundary": "Display default is not executable authority; refuse authority-bearing actions until actual adopted protocol."
+      },
+      {
+        "id": "PM07",
+        "name": "Protocol change, expiry or withdrawal",
+        "scope": "REQUIRED",
+        "boundary": "Re-evaluate active authority and preserve evidence; no transfer of previously authorized grants to a new context without authority."
+      }
+    ]
+  },
+  "stakeholderLifecycle": {
+    "status": "MAPPED_FIRST_PASS",
+    "stages": [
+      {
+        "id": "L01",
+        "title": "Discovery and public intake",
+        "stakeholders": [
+          "SA02",
+          "SA03",
+          "SA26",
+          "SA24",
+          "SA30"
+        ],
+        "scope": "CONDITIONAL",
+        "boundary": "Public assessment/pilot application if enabled, consent and control of contact, no asserted ownership or unsupported readiness metric. Separate adjacent acquisition products."
+      },
+      {
+        "id": "L02",
+        "title": "Fit and pilot agreement",
+        "stakeholders": [
+          "SA03",
+          "SA09",
+          "SA26",
+          "SA23",
+          "SA21"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Named sponsor, scope/contract/DPA and authorized plan. May be handled through verified external process; no required new automated payment rail or e-sign feature."
+      },
+      {
+        "id": "L03",
+        "title": "Tenant activation and configuration",
+        "stakeholders": [
+          "SA03",
+          "SA09",
+          "SA10",
+          "SA23",
+          "SA24",
+          "SA25",
+          "SA28"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Correct tenant, protocol approval, worksite/reference configuration, setup checklist, demonstrably true readiness, no synthetic records in real data."
+      },
+      {
+        "id": "L04",
+        "title": "Membership entry and first value",
+        "stakeholders": [
+          "SA04",
+          "SA01",
+          "SA10",
+          "SA11",
+          "SA24",
+          "SA28",
+          "SA31"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Invitation to inbox, redemption, directory/contact membership alignment, first authorized business action and setup progress."
+      },
+      {
+        "id": "L05",
+        "title": "Membership and authority change",
+        "stakeholders": [
+          "SA05",
+          "SA06",
+          "SA07",
+          "SA08",
+          "SA09",
+          "SA10",
+          "SA12",
+          "SA13",
+          "SA14",
+          "SA30"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Promotion, assignment eligibility, temporary grants, suspension, reactivation, capacity, recusal and expiry. Actual institutional authority remains adoption-bound."
+      },
+      {
+        "id": "L06",
+        "title": "Member service and intake",
+        "stakeholders": [
+          "SA01",
+          "SA06",
+          "SA07",
+          "SA08",
+          "SA19",
+          "SA32"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Own intake, assistance, status and intake-to-case or alternate outcome; nonmember/retiree eligibility conditional."
+      },
+      {
+        "id": "L07",
+        "title": "Assignment and representation",
+        "stakeholders": [
+          "SA06",
+          "SA07",
+          "SA08",
+          "SA09",
+          "SA14",
+          "SA15",
+          "SA16",
+          "SA19"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Assigned/eligible handler, actual automatic matching, supervision, protocol-specific and scoped external boundaries, no adverse or foreign access."
+      },
+      {
+        "id": "L08",
+        "title": "Evidence acquisition and analysis",
+        "stakeholders": [
+          "SA01",
+          "SA06",
+          "SA07",
+          "SA08",
+          "SA12",
+          "SA15",
+          "SA17",
+          "SA19",
+          "SA28",
+          "SA29"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Authorized upload, scan, OCR, review, evidence classification and versioning; external contributor workflows only if explicitly granted; counsel-controlled excluded."
+      },
+      {
+        "id": "L09",
+        "title": "Communication and deadlines",
+        "stakeholders": [
+          "SA01",
+          "SA06",
+          "SA07",
+          "SA08",
+          "SA09",
+          "SA11",
+          "SA15",
+          "SA17",
+          "SA18",
+          "SA19",
+          "SA20",
+          "SA22",
+          "SA28"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Messages, approved letters with actual dispatch, recipient delivery, deadlines, reminder worker and recovery. Direct statutory/tribunal submissions not inferred."
+      },
+      {
+        "id": "L10",
+        "title": "External collaboration and escalation",
+        "stakeholders": [
+          "SA07",
+          "SA08",
+          "SA09",
+          "SA13",
+          "SA15",
+          "SA16",
+          "SA17",
+          "SA18",
+          "SA19",
+          "SA20",
+          "SA21",
+          "SA22",
+          "SA29"
+        ],
+        "scope": "CONDITIONAL",
+        "boundary": "Existing external matter API safety mandatory. Positive representation grant and external workflow depends on supported protocol and product decision; WorkAid/counsel separately deferred."
+      },
+      {
+        "id": "L11",
+        "title": "Resolution, handoff and closure",
+        "stakeholders": [
+          "SA01",
+          "SA05",
+          "SA06",
+          "SA07",
+          "SA08",
+          "SA09",
+          "SA15",
+          "SA19",
+          "SA22"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Valid closure, member projection, successor acceptance/access revocation and retained deadlines/evidence. No external legal decision inferred."
+      },
+      {
+        "id": "L12",
+        "title": "Governance, privacy and assurance",
+        "stakeholders": [
+          "SA01",
+          "SA09",
+          "SA10",
+          "SA12",
+          "SA13",
+          "SA19",
+          "SA21",
+          "SA25",
+          "SA30"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Base confidentiality/audit, privacy request through acknowledgement, authorized review/evidence. Independent investigations/elections/extra regulator portal conditional or deferred."
+      },
+      {
+        "id": "L13",
+        "title": "Operational support and resilience",
+        "stakeholders": [
+          "SA10",
+          "SA23",
+          "SA24",
+          "SA25",
+          "SA27",
+          "SA28",
+          "SA29",
+          "SA31"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Support access scope, dependency monitoring, backups, worker recovery, security incidents and truthful status."
+      },
+      {
+        "id": "L14",
+        "title": "Pilot review and conversion",
+        "stakeholders": [
+          "SA03",
+          "SA09",
+          "SA23",
+          "SA24",
+          "SA26",
+          "SA27"
+        ],
+        "scope": "CONDITIONAL",
+        "boundary": "Historic agreed outcomes from measured data, customer review and next-step decision. Workflow can be external; subscription activation and entitlement contract if offered."
+      },
+      {
+        "id": "L15",
+        "title": "Offboarding and retention",
+        "stakeholders": [
+          "SA01",
+          "SA03",
+          "SA05",
+          "SA09",
+          "SA10",
+          "SA12",
+          "SA13",
+          "SA15",
+          "SA16",
+          "SA21",
+          "SA23",
+          "SA25",
+          "SA26",
+          "SA28",
+          "SA29"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Exit or transfer, revoke sessions/access/grants/credentials, maintain required records and export/disposition by adopted retention rules. Customer exit automation conditional; no arbitrary deletion."
+      },
+      {
+        "id": "L16",
+        "title": "Adversarial and qualification subjects",
+        "stakeholders": [
+          "SA30",
+          "SA31"
+        ],
+        "scope": "REQUIRED",
+        "boundary": "Negative controls, controlled inbox, synthetic lifecycle subjects throughout. No real prospective/member/recipient data or invented independent human."
+      }
+    ]
+  },
+  "commercialJourneyScope": {
+    "status": "RECOMMENDED_BOUNDARY_NOT_PRICING_RATIFICATION",
+    "referencePolicy": "Historical April offer stack and June pilot programme are not assumed to describe today's pricing, package or exact period. Use current owner-approved offer/contract and do not expose unverified feature promises.",
+    "requiredOutcomes": [
+      "Verified sponsor and authorized customer signatory",
+      "Routed pilot intake and readiness assessment, regardless of approved delivery channel",
+      "Executed scope agreement and applicable DPA before handling real data",
+      "Verified tenant provisioning and entitlements",
+      "Training/guidance and first-use support",
+      "Measured pilot adoption/outcome review based on genuine records",
+      "Documented conversion, extension or exit with retained-data and access boundary"
+    ],
+    "conditionalAutomation": [
+      "Public OCRA/ICRA or other acquisition surface and data use",
+      "Online starter-product purchase and provisioning",
+      "CRM dispatch and customer-success dashboards",
+      "Automated pilot contract, subscription/invoice and payment workflow",
+      "Historical import beyond agreed initial dataset",
+      "Commercial conversion automation"
+    ],
+    "excluded": [
+      "Union dues and finance",
+      "Unverified pricing, conversion or ROI claims",
+      "Production deployment under this scope record"
+    ]
+  },
+  "technicalActorSourceIndex": {
+    "status": "HISTORICAL_DISCOVERY_ONLY_STEP2_REGENERATE",
+    "source": "actorMap",
+    "matchedRows": 778,
+    "actorClasses": {
+      "AUTHENTICATED_SERVER_ACTION_USER": 49,
+      "AUTHENTICATED_ROUTE_USER": 651,
+      "PLATFORM_ADMIN_OR_ROUTE_SPECIFIC_ELEVATED": 45,
+      "UNAUTHENTICATED_OR_CHALLENGE_BOUND": 18,
+      "UNAUTHENTICATED": 1,
+      "UNAUTHENTICATED_MFA_CHALLENGE": 1,
+      "INHERITED_FROM_CALLER": 13
+    },
+    "note": "Historical source actor map explicitly says NOT_PROVEN. Matched textual records are not a current caller denominator, not distinct stakeholders, and not qualified. Step 2 must regenerate exact source paths including worker/webhook, server actions and public challenge ingress."
   }
 }
