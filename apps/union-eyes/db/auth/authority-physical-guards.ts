@@ -429,6 +429,15 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       type: 'c',
       definition: "CHECK ((status = ANY (ARRAY['draft'::text, 'active'::text, 'retired'::text])))",
     },
+    // Active supervisory rules cannot grant a power inherent in a primary case relationship.
+    // Retired or inactive historical drafts remain preservable and can never authorize issuance.
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_primary_handler_ceiling_chk',
+      type: 'c',
+      definition:
+        "CHECK (((status <> 'active'::text) OR (domain <> 'supervisory'::text) OR (operation <> ALL (ARRAY['issue'::text, 'amend'::text])) OR (NOT (allowed_powers && ARRAY['disclose_to_member'::text, 'export_sealed_evidence'::text, 'close'::text, 'case:disclose_to_member'::text, 'case:export_sealed_evidence'::text, 'case:close'::text]))))",
+    },
     {
       table_name: 'ue_authority_issuance_rules',
       name: 'ue_authority_rule_term_chk',
@@ -486,6 +495,15 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       name: 'ue_authority_mandates_powers_chk',
       type: 'c',
       definition: 'CHECK ((cardinality(powers) > 0))',
+    },
+    // Active mandates and resumptions must meet the same nondelegable ceiling.
+    // Existing suspended or revoked history is preserved; a conflicting active row fails installation closed.
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_primary_handler_ceiling_chk',
+      type: 'c',
+      definition:
+        "CHECK (((status <> 'active'::text) OR (kind <> 'supervisory'::text) OR (NOT (powers && ARRAY['disclose_to_member'::text, 'export_sealed_evidence'::text, 'close'::text, 'case:disclose_to_member'::text, 'case:export_sealed_evidence'::text, 'case:close'::text]))))",
     },
     {
       table_name: 'ue_authority_mandates',

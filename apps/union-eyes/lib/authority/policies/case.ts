@@ -27,6 +27,7 @@ import {
   hasCapacity,
   instrumentOf,
   isLive,
+  PRIMARY_CASE_HANDLER_ONLY_ACTIONS,
 } from '../common'
 import type {
   Action,
@@ -62,8 +63,7 @@ const MEMBER_ACTIONS: readonly Action[] = ['case:read', 'case:comment']
 // power named. Role, label or seniority never imply it.
 // Disclosing to a member, exporting sealed evidence and closing the case belong to the primary handler alone: a
 // collaborator grant can never carry them, whatever permission names it lists.
-const PRIMARY_ONLY_ACTIONS: readonly Action[] = ['case:disclose_to_member', 'case:export_sealed_evidence', 'case:close']
-const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted', ...PRIMARY_ONLY_ACTIONS]
+const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted', ...PRIMARY_CASE_HANDLER_ONLY_ACTIONS]
 const COLLABORATOR_CEILING: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted']
 
 interface Candidate {
@@ -177,10 +177,15 @@ export function decideCase(
   }
 
   // 2 ── supervisory & emergency mandates (never privileged) ──────────────
+  const primaryOnly = PRIMARY_CASE_HANDLER_ONLY_ACTIONS.includes(action)
   const mandateBlocked = privilegedMatter && action !== 'case:assign'
   for (const m of facts.mandates) {
     if (m.principalUserId !== principalId) continue
     if (m.kind !== 'supervisory' && m.kind !== 'emergency_access') continue
+    if (primaryOnly) {
+      misses.push({ code: 'ACTION_NOT_COVERED', ref: m.id, detail: 'this power requires a live primary case-handler relationship' })
+      continue
+    }
     const verdict = assessMandate(m, orgId, now)
     if (!verdict.effective) {
       misses.push(...verdict.reasons)
@@ -235,7 +240,8 @@ export function decideCase(
   if (req.delegationId) {
     const d = facts.delegations.find((x) => x.id === req.delegationId)
     const bad = (detail: string): Reason => ({ code: 'DELEGATION_INVALID', ref: req.delegationId ?? undefined, detail })
-    if (!d) misses.push(bad('delegation not found'))
+    if (primaryOnly) misses.push(bad('primary case-handler-only powers are not delegable'))
+    else if (!d) misses.push(bad('delegation not found'))
     else if (d.delegateUserId !== principalId) misses.push(bad('principal is not the delegate'))
     else {
       const dv = assessDelegation(d, orgId, now)

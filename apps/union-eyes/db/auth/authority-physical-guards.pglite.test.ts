@@ -148,6 +148,82 @@ describe('base authority physical source contract', () => {
       await f.pg.close()
     }
   }, 30000)
+  it('blocks primary-handler overpowers at the physical supervisory rule and mandate boundaries without erasing historical drafts', async () => {
+    const f = await fixture()
+    const forbidden = [
+      'disclose_to_member', 'export_sealed_evidence', 'close',
+      'case:disclose_to_member', 'case:export_sealed_evidence', 'case:close',
+    ]
+    try {
+      // Use real threshold resolution and adoption rather than assuming approvals from a status flag.
+      for (const operation of ['issue', 'amend']) {
+        const createAndApprove = async (powers: string[], version: number) => {
+          const ruleId = randomUUID()
+          const requestId = randomUUID()
+          await f.audited(
+            'drafter',
+            `INSERT INTO ue_authority_issuance_rules(id,organization_id,domain,operation,issuer_capacities,allowed_powers,max_term_days,version,source_instrument,drafted_by) VALUES($1,$2,'supervisory',$3,ARRAY['officer'],$4::text[],30,$5,'Synthetic ceiling fixture','drafter')`,
+            [ruleId, f.org, operation, powers, version],
+          )
+          await f.audited(
+            'drafter',
+            `INSERT INTO ue_authority_approval_requests(id,organization_id,subject_type,subject_id,proposed_by,required_approvals,risk_class,named_approver_ids,eligible_capacities) VALUES($1,$2,'rule_adoption',$3,'drafter',2,'high',ARRAY['approver-one','approver-two'],ARRAY['executive'])`,
+            [requestId, f.org, ruleId],
+          )
+          for (const actor of ['approver-one', 'approver-two']) {
+            await f.audited(
+              actor,
+              `INSERT INTO ue_authority_approval_decisions(organization_id,approval_request_id,approver_user_id,authority_line_user_id,decision) VALUES($1,$2,$3,$3,'approved')`,
+              [f.org, requestId, actor],
+            )
+          }
+          return ruleId
+        }
+        const activate = (ruleId: string) =>
+          f.audited(
+            'drafter',
+            "UPDATE ue_authority_issuance_rules SET status='active',approved_by=ARRAY['approver-one','approver-two'],activated_at=now() WHERE id=$1",
+            [ruleId],
+          )
+        for (const [i, power] of forbidden.entries()) {
+          const ruleId = await createAndApprove(['read', power], i + 1)
+          await expect(activate(ruleId)).rejects.toThrow('ue_authority_rule_primary_handler_ceiling_chk')
+          expect((await f.pg.query('SELECT status FROM ue_authority_issuance_rules WHERE id=$1', [ruleId])).rows)
+            .toEqual([{ status: 'draft' }])
+          await f.audited(
+            'drafter',
+            "UPDATE ue_authority_issuance_rules SET status='retired',retired_at=now() WHERE id=$1",
+            [ruleId],
+          )
+        }
+        const valid = await createAndApprove(['read', 'assign'], forbidden.length + 1)
+        await activate(valid)
+        expect((await f.pg.query('SELECT status FROM ue_authority_issuance_rules WHERE id=$1', [valid])).rows)
+          .toEqual([{ status: 'active' }])
+      }
+
+      // Dedicated disposable fixture only: bypass the issuance trigger to test the independent CHECK itself.
+      await f.pg.exec('ALTER TABLE ue_authority_mandates DISABLE TRIGGER ue_authority_guard_issuance')
+      try {
+        const insert = (powers: string[], holder: string) =>
+          f.audited(
+            'issuer',
+            `INSERT INTO ue_authority_mandates(organization_id,principal_user_id,kind,powers,scope,source_instrument,granted_by,effective_at,expires_at) VALUES($1,$2,'supervisory',$3::text[], '{"resourceIds":["fixture-case"]}'::jsonb,'Synthetic ceiling fixture','issuer',now(),now()+interval '1 day')`,
+            [f.org, holder, powers],
+          )
+        for (const [i, power] of forbidden.entries())
+          await expect(insert(['read', power], 'denied-holder-' + i)).rejects.toThrow('ue_authority_mandates_primary_handler_ceiling_chk')
+        await insert(['read', 'assign'], 'allowed-holder')
+        expect((await f.pg.query('SELECT principal_user_id FROM ue_authority_mandates WHERE organization_id=$1', [f.org])).rows)
+          .toEqual([{ principal_user_id: 'allowed-holder' }])
+      } finally {
+        await f.pg.exec('ALTER TABLE ue_authority_mandates ENABLE TRIGGER ue_authority_guard_issuance')
+      }
+      expect(planPhysicalGuards(contract, await inspectPhysicalGuards(contract, f.execute)).statements).toEqual([])
+    } finally {
+      await f.pg.close()
+    }
+  }, 60000)
   it('refuses unaudited commits, direct event forgery and fabricated active rules, while retiring an inactive draft grants nothing', async () => {
     const f = await fixture()
     try {

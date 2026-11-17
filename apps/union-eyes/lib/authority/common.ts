@@ -23,6 +23,17 @@ import {
 export const EMERGENCY_MAX_MS = 24 * 60 * 60 * 1000
 export const EMERGENCY_MIN_JUSTIFICATION = 20
 
+/** These case powers are inherent in a live primary owner/assignee relationship.
+ * An institutional rule may narrow but cannot confer them through a secondary authority source.
+ */
+export const PRIMARY_CASE_HANDLER_ONLY_ACTIONS: readonly Action[] = [
+  'case:disclose_to_member', 'case:export_sealed_evidence', 'case:close',
+]
+
+export function hasPrimaryCaseHandlerOnlyPower(powers: readonly string[]): boolean {
+  return PRIMARY_CASE_HANDLER_ONLY_ACTIONS.some(action => powers.includes(action) || powers.includes(action.slice('case:'.length)))
+}
+
 export interface Live {
   status: string
   effectiveAt: Date
@@ -39,6 +50,10 @@ export type Liveness = 'live' | 'not_yet_effective' | 'expired' | 'revoked' | 'i
  * is inverted, is inconsistent and never live.
  */
 export function liveness(row: Live, now: Date): Liveness {
+  // Invalid Date comparisons otherwise evaluate false and can turn malformed authority into a live grant.
+  if (!Number.isFinite(now.getTime()) || !Number.isFinite(row.effectiveAt.getTime()) ||
+      (row.expiresAt !== null && !Number.isFinite(row.expiresAt.getTime())) ||
+      (row.revokedAt !== null && !Number.isFinite(row.revokedAt.getTime()))) return 'inconsistent'
   if (row.expiresAt && row.expiresAt.getTime() <= row.effectiveAt.getTime()) return 'inconsistent'
   if (row.revokedAt) {
     if (row.status === 'active') return 'inconsistent'
@@ -120,6 +135,7 @@ export function assessMandate(m: Mandate, orgId: string, now: Date): InstrumentV
     const bounded = (s.unitIds?.length ?? 0) + (s.territoryIds?.length ?? 0) + (s.resourceIds?.length ?? 0) > 0
     if (!bounded) bad('supervisory mandate has no unit, territory or resource scope')
     if (m.powers.includes('read_privileged')) bad('supervisory mandates cannot reach privileged matters')
+    if (hasPrimaryCaseHandlerOnlyPower(m.powers)) bad('supervisory mandates cannot carry primary case-handler-only powers')
   }
 
   if (m.kind === 'financial') {

@@ -8,6 +8,7 @@
  * never the issued authority, and with no active rule nothing is issued.
  */
 import { randomUUID } from 'node:crypto'
+import { hasPrimaryCaseHandlerOnlyPower } from '../common'
 import { decideIssuance, DEFAULT_ISSUANCE_TEMPLATES, PLACEHOLDER_INSTRUMENT, type IssuanceDecision, type IssuanceDomain, type IssuanceOperation, type IssuanceRule, type IssuanceRuleTemplate, type IssuanceRequest } from '../issuance'
 import type { Capacity, Mandate, MandateKind, MandateScope, Membership, ResourceType } from '../ontology'
 import { auditAuthorityMutation } from './audit'
@@ -128,12 +129,21 @@ export interface DraftRuleInput extends Omit<IssuanceRuleTemplate, 'rationale'> 
   sourceInstrument?: string
 }
 
+/** Institution-specific rules may narrow but cannot expand primary-handler-only authority. */
+function requireRulePowerCeiling(domain: string, operation: string, powers: readonly string[]): void {
+  if (domain === 'supervisory' && (operation === 'issue' || operation === 'amend') &&
+      hasPrimaryCaseHandlerOnlyPower(powers)) {
+    throw new AuthorityStoreError('DENIED', 'supervisory rule exceeds the primary case-handler-only ceiling')
+  }
+}
+
 /** Drafts an INACTIVE rule. A draft grants nothing. */
 export async function draftIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps, i: DraftRuleInput): Promise<string> {
   requireUuids(i.organizationId)
   requirePrincipals(i.draftedBy)
   await bindSessionActor(exec, i.draftedBy, 'rule drafter')
   await requireAdopter(exec, deps, i.organizationId, i.draftedBy)
+  requireRulePowerCeiling(i.domain, i.operation, i.allowedPowers)
   const row = (
     await exec.query<Row>(
       `INSERT INTO ue_authority_issuance_rules
@@ -229,8 +239,14 @@ export async function activateIssuanceRule(exec: SqlExecutor, deps: EnforcementD
   requireUuids(i.organizationId, i.ruleId, i.approvalRequestId)
   requirePrincipals(i.actorUserId)
   await bindSessionActor(exec, i.actorUserId, 'rule activator')
-  const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by, source_instrument FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
+  const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by, source_instrument, allowed_powers FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
   if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
+  if (rule.domain === 'supervisory' && (rule.operation === 'issue' || rule.operation === 'amend')) {
+    if (!Array.isArray(rule.allowed_powers) || !rule.allowed_powers.every((power: unknown): power is string => typeof power === 'string')) {
+      throw new AuthorityStoreError('PRECONDITION', 'issuance rule power list is invalid')
+    }
+    requireRulePowerCeiling(rule.domain, rule.operation, rule.allowed_powers)
+  }
   const approval = await loadIssuanceApproval(exec, i.organizationId, i.approvalRequestId)
   if (!approval || approval.status !== 'satisfied' || approval.subjectType !== 'rule_adoption' || approval.subjectId !== i.ruleId) {
     throw new AuthorityStoreError('PRECONDITION', 'a satisfied rule_adoption approval bound to this rule is required')
