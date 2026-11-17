@@ -279,8 +279,10 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
 
     it('refuses a caller without authority over the matter, whatever their role', async () => {
       const grievance = await newGrievance(ORG_A, officerA, { status: 'filed' })
+      state.kernelAllows = false
       const response = await run(status!.PATCH, asStewardA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'acknowledged' }) })
       expect(response.status).toBe(403)
+      state.kernelAllows = true
       expect((await grievanceRow(grievance))?.status).toBe('filed')
     })
   })

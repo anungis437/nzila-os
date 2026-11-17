@@ -45,6 +45,8 @@ export interface CollaboratorAccess {
 
 export interface EffectiveAccess {
   canViewInternal: boolean;
+  canTransition?: boolean;
+  canCloseCase?: boolean;
   isPrimaryOwner: boolean;
   isSecondaryCollaborator: boolean;
   accessRole: string | null;
@@ -105,24 +107,20 @@ export const ACCESS_ROLES = ['secondary_lro', 'reviewer', 'read_only'] as const;
 const lifecycleOf = (status: string) => toLifecycleState('grievance', status) ?? toLifecycleState('cupe', status);
 
 /** The statuses the server's lifecycle rules allow from `current`, for a steward and the assigned representative. */
-export function nextStatuses(current: string, assignedTo: string | null): GrievanceStatus[] {
+export function nextStatuses(current: string, assignedTo: string | null, canCloseCase = false): GrievanceStatus[] {
   const from = lifecycleOf(current);
   if (!from) return [];
   return GRIEVANCE_STATUSES.filter((target) => {
     if (target === current) return false;
     const to = lifecycleOf(target);
+    if ((from === 'closed' || to === 'closed') && !canCloseCase) return false;
     return to !== null && validateTransition({ actorRole: 'steward', caseId: 'client', currentState: from, targetState: to, assignedTo }).allowed;
   });
 }
 
 /** Whether the caller has authority over this matter to change its status: the rule the status route applies. */
 export const maySetStatus = (grievance: Pick<GrievanceDetail, 'status' | 'primaryLroId' | 'effectiveAccess'>): boolean =>
-  canTransitionGrievance({
-    isPrimaryOwner: grievance.effectiveAccess.isPrimaryOwner,
-    accessRole: grievance.effectiveAccess.isSecondaryCollaborator ? grievance.effectiveAccess.accessRole : null,
-    grievanceStatus: grievance.status,
-    primaryRepresentativeId: grievance.primaryLroId,
-  });
+  canTransitionGrievance({ canTransition: grievance.effectiveAccess.canTransition });
 
 const MIME_TYPES: Record<string, string> = {
   pdf: 'application/pdf',
@@ -228,6 +226,8 @@ export function readGrievanceDetail(body: unknown): GrievanceDetail {
     effectiveAccess: {
       // Missing authority never enables internal tools.
       canViewInternal: access.canViewInternal === true,
+      canTransition: access.canTransition === true,
+      canCloseCase: access.ownerOnly !== null && typeof access.ownerOnly === 'object' && !Array.isArray(access.ownerOnly) && (access.ownerOnly as Record<string, unknown>).canCloseCase === true,
       isPrimaryOwner: access.isPrimaryOwner,
       isSecondaryCollaborator: access.isSecondaryCollaborator === true,
       accessRole: text(access.accessRole),
