@@ -176,3 +176,8 @@ Source `41dba402dd53fec280091f11f46a99077dd91465` / PR #1256 passed exact-source
 
 
 The founder approved the same staging execution scope through `2026-11-17T03:00:00Z`. This time extension retains current candidate `41dba402dd53fec280091f11f46a99077dd91465` and every qualification control; it grants neither production nor full base staging acceptance. [Recorded approval](evidence/ue-v2-runtime-repairs-41dba402/founder-window-extension.json).
+
+
+## Base repaired-source admission — 2026-11-17
+
+Source `cccfc8c311a1017f80241bf089c00ef0c6828751` / PR #1258 passed exact-source CI and normal admission. Fresh seven-tool native compile/import and local export/restore/no-op/privilege proofs passed. Actual observed staging remains `41dba402dd53fec280091f11f46a99077dd91465` / workflow `beb67cf1f5219da572393340334540abd51ca276`. Binding/main-bound qualification and deployed final-source acceptance remain pending. Historical accepted F evidence, original191-entry evidence index, actual source41 observations and live data retain their provenance. The full base ledger remains unfinished, and production is not authorized.
