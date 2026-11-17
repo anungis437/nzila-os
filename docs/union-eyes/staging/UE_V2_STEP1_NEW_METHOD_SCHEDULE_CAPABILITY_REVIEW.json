@@ -1,0 +1,686 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_NEW_METHOD_SCHEDULE_AND_CAPABILITY_REVIEW",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "counts": {
+    "reviewedKeys": 12,
+    "remainingNewKeys": 60,
+    "sourceFiles": 12
+  },
+  "sources": [
+    {
+      "path": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+      "blobSha": "faf646c52f5ed155b49943296d933bb631fa0670",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "O14"
+      ],
+      "signals": [
+        {
+          "line": 11,
+          "statement": "* responds with HTTP 501 (`not_implemented`) via `ApiError.notImplemented()`."
+        },
+        {
+          "line": 16,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 18,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 20,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 27,
+          "statement": "throw ApiError.notImplemented("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/education-reminders/route.ts",
+      "blobSha": "4dc53d57ac77de8c047caa8b4b3922bc2431e70d",
+      "scope": "ADJACENT_SCHEDULE_BOUNDARY",
+      "links": [
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 4,
+          "statement": "* Protected by withApi cron auth (Phase 7 — Workflow Realignment)."
+        },
+        {
+          "line": 5,
+          "statement": "* - System-wide cron job uses withSystemContext() for unrestricted access"
+        },
+        {
+          "line": 9,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 20,
+          "statement": "export const dynamic = \"force-dynamic\";"
+        },
+        {
+          "line": 25,
+          "statement": "export const runtime = \"nodejs\";"
+        },
+        {
+          "line": 35,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 37,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 53,
+          "statement": "// Use withSystemContext for system-wide cron job access"
+        },
+        {
+          "line": 54,
+          "statement": "const allSessionReminders = await withSystemContext(async () => {"
+        },
+        {
+          "line": 83,
+          "statement": "const allExpiryWarnings = await withSystemContext(async () => {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/equity-retention/route.ts",
+      "blobSha": "691124d5f1a4f0f1822b24848d01994536f4c045",
+      "scope": "PRIVACY_RETENTION_BOUNDARY",
+      "links": [
+        "C20",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 2,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 5,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 6,
+          "statement": "export const runtime = 'nodejs';"
+        },
+        {
+          "line": 8,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 9,
+          "statement": "{ auth: { cron: true }, openapi: { tags: ['Cron'], summary: 'Erase expired equity self-identification payloads' } },"
+        },
+        {
+          "line": 10,
+          "statement": "async () => withSystemContext((tx) => enforceEquityRetention(tx)),"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+      "blobSha": "d1d13441592365aa337ac8d5ae5778332988950b",
+      "scope": "EXCLUDED_FINANCE_RETIRED_BOUNDARY",
+      "links": [
+        "C22",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 16,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 18,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 20,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 27,
+          "statement": "throw ApiError.notImplemented("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+      "blobSha": "59445ff1b9d4edbfd15e4e48b8eee4ffa8330e25",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "C21",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 14,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 16,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 18,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 25,
+          "statement": "throw ApiError.notImplemented("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/process-messages/route.ts",
+      "blobSha": "1128fa6a8a764de20df6a929c153a385e01beb0a",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "C17",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 13,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 15,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 17,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 24,
+          "statement": "throw ApiError.notImplemented("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/process-notifications/route.ts",
+      "blobSha": "e4d0971eef2071cef8217b3c642f8a547a9912b9",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "C17",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 13,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 15,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 17,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 24,
+          "statement": "throw ApiError.notImplemented("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+      "blobSha": "a3b613faf483a815884e7867c076b2d4d9b46980",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 13,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 15,
+          "statement": "export const POST = withApi("
+        },
+        {
+          "line": 17,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 24,
+          "statement": "throw ApiError.notImplemented("
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+      "blobSha": "0ec0e4928d68d591f36cda881100e064a4b86426",
+      "scope": "CORRESPONDENCE_ADJACENT_SCHEDULE_BOUNDARY",
+      "links": [
+        "C16",
+        "O06"
+      ],
+      "signals": [
+        {
+          "line": 6,
+          "statement": "* still-open document past its expiry to expired, lapses its unsettled signers, and records the trail event and the platform audit"
+        },
+        {
+          "line": 9,
+          "statement": "* Cron-authenticated. The overdue documents are found across organizations by system authority (a cross-organization SELECT on"
+        },
+        {
+          "line": 17,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 18,
+          "statement": "export const runtime = 'nodejs';"
+        },
+        {
+          "line": 22,
+          "statement": "auth: { cron: true },"
+        },
+        {
+          "line": 41,
+          "statement": "export const POST = handler;"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/voice/disclosure/route.ts",
+      "blobSha": "5a5362c0d0441c857be27b1e84d2183f885ec22c",
+      "scope": "PRIVACY_ADJACENT_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 2,
+          "statement": "import { withRoleAuth } from '@/lib/api-auth-guard';"
+        },
+        {
+          "line": 3,
+          "statement": "import { getVoiceDisclosureNotice } from '@/lib/voice/disclosure-consent';"
+        },
+        {
+          "line": 5,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 7,
+          "statement": "/** Read-only notice. No audio, personal data or consent is written by GET. */"
+        },
+        {
+          "line": 8,
+          "statement": "export const GET = withRoleAuth('member', async () => {"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/workbook/[id]/consent/route.ts",
+      "blobSha": "f5468241da0d736ff7043ae5e2c8b53e3fb02b8a",
+      "scope": "PUBLIC_CAPABILITY_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 1,
+          "statement": "/** DELETE withdraws workbook consent. All ordinary workbook routes use the shared access boundary, which refuses the withdrawn record. */"
+        },
+        {
+          "line": 8,
+          "statement": "import { activeWorkbookConsent } from '@/lib/workbook/consent';"
+        },
+        {
+          "line": 9,
+          "statement": "import { persistAtomicAudit } from '@/lib/audit/atomic-audit';"
+        },
+        {
+          "line": 11,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 14,
+          "statement": "export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {"
+        },
+        {
+          "line": 16,
+          "statement": "if (!parsedParams.success) return NextResponse.json({ error: 'Valid workbook id is required' }, { status: 400 });"
+        },
+        {
+          "line": 20,
+          "statement": "async (authority) => {"
+        },
+        {
+          "line": 21,
+          "statement": "const ownershipScope = authority.claimedByUserId"
+        },
+        {
+          "line": 22,
+          "statement": "? eq(workbooks.claimedByUserId, authority.claimedByUserId)"
+        },
+        {
+          "line": 24,
+          "statement": "const [row] = await authority.tx"
+        },
+        {
+          "line": 25,
+          "statement": ".select({ consent: workbooks.consent })"
+        },
+        {
+          "line": 29,
+          "statement": "if (!row || !activeWorkbookConsent(row.consent)) return false;"
+        },
+        {
+          "line": 30,
+          "statement": "const consent = { ...row.consent, withdrawnAt: new Date().toISOString() };"
+        },
+        {
+          "line": 31,
+          "statement": "await authority.tx"
+        },
+        {
+          "line": 33,
+          "statement": ".set({ consent, updatedAt: new Date() })"
+        },
+        {
+          "line": 36,
+          "statement": "authority.claimedByUserId"
+        },
+        {
+          "line": 37,
+          "statement": "? eq(workbooks.claimedByUserId, authority.claimedByUserId)"
+        },
+        {
+          "line": 40,
+          "statement": "if (authority.actorUserId && authority.claimedOrgId) {"
+        },
+        {
+          "line": 41,
+          "statement": "await persistAtomicAudit(authority.tx, {"
+        },
+        {
+          "line": 42,
+          "statement": "organizationId: authority.claimedOrgId,"
+        },
+        {
+          "line": 43,
+          "statement": "userId: authority.actorUserId,"
+        },
+        {
+          "line": 44,
+          "statement": "action: 'workbook.consent.withdraw',"
+        },
+        {
+          "line": 47,
+          "statement": "details: { noticeVersion: consent.noticeVersion, purposes: consent.purposes },"
+        },
+        {
+          "line": 49,
+          "statement": "} else if (authority.appendPublicIntakeAudit) {"
+        },
+        {
+          "line": 50,
+          "statement": "await authority.appendPublicIntakeAudit({"
+        },
+        {
+          "line": 51,
+          "statement": "surface: 'workbook.consent',"
+        },
+        {
+          "line": 52,
+          "statement": "action: 'workbook.consent.withdraw',"
+        },
+        {
+          "line": 56,
+          "statement": "details: { noticeVersion: consent.noticeVersion },"
+        }
+      ]
+    },
+    {
+      "path": "apps/union-eyes/app/api/workbook/checkout/redeem/route.ts",
+      "blobSha": "5bc36f2112598e62a85baefd0f3bb1862ec57db5",
+      "scope": "COMMERCIAL_CAPABILITY_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "signals": [
+        {
+          "line": 5,
+          "statement": "import { withSystemContext } from '@/lib/db/with-rls-context';"
+        },
+        {
+          "line": 12,
+          "statement": "export const dynamic = 'force-dynamic';"
+        },
+        {
+          "line": 13,
+          "statement": "export const runtime = 'nodejs';"
+        },
+        {
+          "line": 17,
+          "statement": "export async function POST(request: NextRequest) {"
+        },
+        {
+          "line": 25,
+          "statement": "const [redeemed] = await withSystemContext((tx) =>"
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "key": "POST apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+      "path": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+      "blobSha": "faf646c52f5ed155b49943296d933bb631fa0670",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "O14"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/education-reminders/route.ts",
+      "path": "apps/union-eyes/app/api/cron/education-reminders/route.ts",
+      "blobSha": "4dc53d57ac77de8c047caa8b4b3922bc2431e70d",
+      "scope": "ADJACENT_SCHEDULE_BOUNDARY",
+      "links": [
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/equity-retention/route.ts",
+      "path": "apps/union-eyes/app/api/cron/equity-retention/route.ts",
+      "blobSha": "691124d5f1a4f0f1822b24848d01994536f4c045",
+      "scope": "PRIVACY_RETENTION_BOUNDARY",
+      "links": [
+        "C20",
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+      "path": "apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+      "blobSha": "d1d13441592365aa337ac8d5ae5778332988950b",
+      "scope": "EXCLUDED_FINANCE_RETIRED_BOUNDARY",
+      "links": [
+        "C22",
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+      "path": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+      "blobSha": "59445ff1b9d4edbfd15e4e48b8eee4ffa8330e25",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "C21",
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/process-messages/route.ts",
+      "path": "apps/union-eyes/app/api/cron/process-messages/route.ts",
+      "blobSha": "1128fa6a8a764de20df6a929c153a385e01beb0a",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "C17",
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/process-notifications/route.ts",
+      "path": "apps/union-eyes/app/api/cron/process-notifications/route.ts",
+      "blobSha": "e4d0971eef2071cef8217b3c642f8a547a9912b9",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "C17",
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+      "path": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+      "blobSha": "a3b613faf483a815884e7867c076b2d4d9b46980",
+      "scope": "RETIRED_VERIFY",
+      "links": [
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+      "path": "apps/union-eyes/app/api/cron/signature-expiry/route.ts",
+      "blobSha": "0ec0e4928d68d591f36cda881100e064a4b86426",
+      "scope": "CORRESPONDENCE_ADJACENT_SCHEDULE_BOUNDARY",
+      "links": [
+        "C16",
+        "O06"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/voice/disclosure/route.ts",
+      "path": "apps/union-eyes/app/api/voice/disclosure/route.ts",
+      "blobSha": "5a5362c0d0441c857be27b1e84d2183f885ec22c",
+      "scope": "PRIVACY_ADJACENT_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/workbook/[id]/consent/route.ts",
+      "path": "apps/union-eyes/app/api/workbook/[id]/consent/route.ts",
+      "blobSha": "f5468241da0d736ff7043ae5e2c8b53e3fb02b8a",
+      "scope": "PUBLIC_CAPABILITY_BOUNDARY",
+      "links": [
+        "C20",
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/workbook/checkout/redeem/route.ts",
+      "path": "apps/union-eyes/app/api/workbook/checkout/redeem/route.ts",
+      "blobSha": "5bc36f2112598e62a85baefd0f3bb1862ec57db5",
+      "scope": "COMMERCIAL_CAPABILITY_BOUNDARY",
+      "links": [
+        "C22"
+      ],
+      "authorityClosure": false,
+      "runtimeVerified": false
+    }
+  ],
+  "remainingKeys": [
+    "PATCH apps/union-eyes/app/api/analytics/insights/route.ts",
+    "POST apps/union-eyes/app/api/cba-intelligence/benchmark/[id]/route.ts",
+    "POST apps/union-eyes/app/api/chatbot/sessions/[sessionId]/archive/route.ts",
+    "GET apps/union-eyes/app/api/clause-library/[id]/versions/route.ts",
+    "POST apps/union-eyes/app/api/cnesst/pay-equity/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts",
+    "POST apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts",
+    "DELETE apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+    "PATCH apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+    "POST apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
+    "PATCH apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts",
+    "POST apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
+    "POST apps/union-eyes/app/api/compliance/evaluate/route.ts",
+    "DELETE apps/union-eyes/app/api/education/certifications/route.ts",
+    "PATCH apps/union-eyes/app/api/education/certifications/route.ts",
+    "DELETE apps/union-eyes/app/api/education/programs/route.ts",
+    "PATCH apps/union-eyes/app/api/education/programs/route.ts",
+    "GET apps/union-eyes/app/api/education/registrations/join/route.ts",
+    "DELETE apps/union-eyes/app/api/education/sessions/route.ts",
+    "PATCH apps/union-eyes/app/api/education/sessions/route.ts",
+    "PATCH apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+    "POST apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts",
+    "POST apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+    "DELETE apps/union-eyes/app/api/equity/consent/route.ts",
+    "GET apps/union-eyes/app/api/equity/consent/route.ts",
+    "POST apps/union-eyes/app/api/equity/consent/route.ts",
+    "DELETE apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+    "POST apps/union-eyes/app/api/equity/disclosure-grants/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/[id]/documents/upload/route.ts",
+    "GET apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+    "PATCH apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+    "GET apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+    "POST apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+    "POST apps/union-eyes/app/api/health-safety/hazards/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/health-safety/incidents/[id]/close/route.ts",
+    "DELETE apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+    "POST apps/union-eyes/app/api/integrations/shopify/credentials/route.ts",
+    "DELETE apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+    "PATCH apps/union-eyes/app/api/meeting-rooms/[id]/bookings/[bookingId]/route.ts",
+    "POST apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+    "DELETE apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "GET apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "PATCH apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
+    "POST apps/union-eyes/app/api/mobile/devices/[id]/test-push/route.ts",
+    "DELETE apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
+    "POST apps/union-eyes/app/api/pension/benefits/[id]/transition/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/route.ts",
+    "GET apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts",
+    "POST apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts",
+    "DELETE apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "PATCH apps/union-eyes/app/api/reconciliation/resolve/route.ts",
+    "DELETE apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "GET apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/reports/field-grants/route.ts",
+    "POST apps/union-eyes/app/api/signatures/documents/[id]/route.ts",
+    "POST apps/union-eyes/app/api/social-media/posts/review/route.ts"
+  ],
+  "limits": "Pinned direct source and control signals only. Retired handlers require actual denial qualification; adjacent cron jobs do not inherit admission from base jobs. No jobs triggered."
+}
