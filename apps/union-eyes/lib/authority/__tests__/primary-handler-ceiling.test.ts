@@ -65,6 +65,16 @@ describe('primary case-handler-only authority is a hard ceiling', () => {
     })
   }
 
+  it('rejects malformed validity timestamps on primary relationships and supervisory grants', () => {
+    for (const validity of [{ effectiveAt: new Date(NaN) }, { expiresAt: new Date(NaN) }, { revokedAt: new Date(NaN) }]) {
+      const owner = relationship({ principalUserId: U.chief, relation: 'owner', ...validity })
+      const m = mandate({ powers: ['read'], scope: { resourceIds: [CASE_ID] }, ...validity })
+      expect(decide(request(U.chief, 'case:close', resource), facts(U.chief, caps, { relationships: [owner] }), caseFacts(), NOW).effect).toBe('deny')
+      expect(assessMandate(m, ORG, NOW).effective).toBe(false)
+      expect(decide(request(U.chief, 'case:read', resource), facts(U.chief, caps, { mandates: [m] }), caseFacts(), NOW).effect).toBe('deny')
+    }
+  })
+
   it('retains legitimate scoped read and assignment powers', () => {
     for (const action of ['case:read','case:assign'] as const) {
       const m = mandate({powers:[action.split(':')[1]],scope:{resourceIds:[CASE_ID]}})
