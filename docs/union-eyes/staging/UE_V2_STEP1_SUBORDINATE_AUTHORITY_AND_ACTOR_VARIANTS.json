@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_SUBORDINATE_AUTHORITY_AND_ACTOR_VARIANTS",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "sourceInputs": {
+    "kernel": {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_KERNEL_AUTHORITY_ACTION_CENSUS.json",
+      "blobSha": "e01472701d22c41877e6e4848e285ce992d65738"
+    },
+    "stakeholders": {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_STAKEHOLDER_ACTION_CENSUS.json",
+      "blobSha": "956ac8910aee8d51c69883246d21dfbb839917a8"
+    },
+    "triage": {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_SCOPE_TRIAGE_AND_ADVERSARIAL_FINDINGS.json",
+      "blobSha": "cacebf35376f88c0cc370f7b146f848312fbf109"
+    },
+    "subordinate": {
+      "path": "apps/union-eyes/lib/authority/subordinate-authority-register.ts",
+      "blobSha": "ad25e82324ea8b1f5cf1d175b23ddffe06ee6b20"
+    },
+    "diagnostic": {
+      "path": "apps/union-eyes/scripts/runtime/step1-primary-handler-ceiling-probe.ts",
+      "blobSha": "cca56053ae6da03cf3528bcf5370e9a2e875d5e2"
+    }
+  },
+  "actorVariants": [
+    {
+      "id": "A14.1",
+      "actor": "External representative with matter-organization membership",
+      "parent": "A14",
+      "basis": "matter representation authority + exact grant + current V2 tenant membership",
+      "boundary": "No authority from title or external organization alone; verify revoked membership, expired grant, wrong document version.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A14.2",
+      "actor": "External representative without matter-organization membership",
+      "parent": "A14",
+      "basis": "independent external lifecycle verifier and applicable grant if separately admitted",
+      "boundary": "Current V2 layered membership binder constrains existing feature; test refusal, no invented guest access.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A14.3",
+      "actor": "Member-counsel with active union membership",
+      "parent": "A14",
+      "basis": "live counsel engagement + counsel session + active membership",
+      "boundary": "Verify member lifecycle and independent engagement revocation.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A14.4",
+      "actor": "Nonmember external counsel",
+      "parent": "A14",
+      "basis": "live engagement + deployment-supplied counsel verification",
+      "boundary": "Verifier absent according to source register; fail closed; specialist activation remains deferred.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A14.5",
+      "actor": "Member sharing with counsel",
+      "parent": "A14",
+      "basis": "member-issued consent; named matter and allowed categories; relationship as applicable",
+      "boundary": "Consent to share is not counsel permission to read private material; revocation, narrowed scope.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A14.6",
+      "actor": "Union recipient of counsel-authored disclosure",
+      "parent": "A14",
+      "basis": "counsel-issued consent for exact named recipient and categories",
+      "boundary": "Union-issued record cannot impersonate counsel; raw counsel material always denied to union principal.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A08.1",
+      "actor": "Clerk performing correspondence preparation",
+      "parent": "A08",
+      "basis": "explicit correspondence-specific entitlement and assigned workflow scope",
+      "boundary": "Clerk role has no kernel capacity; test private cases and thread content denied absent separately authorized context.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A10.1",
+      "actor": "Appointment-only governance/privacy/assurance actors",
+      "parent": "A10",
+      "basis": "recorded live appointment capacity plus exact resource and power",
+      "boundary": "Expired appointment, recusal, related party, self-verification; no blanket read.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A06.1",
+      "actor": "Scoped supervisor without primary case relationship",
+      "parent": "A06",
+      "basis": "live scoped supervisory mandate only",
+      "boundary": "Primary-only case powers challenged using custom rule; deny expectation pending policy/source reproduction.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A06.2",
+      "actor": "Supervisor also assigned as primary handler",
+      "parent": "A06",
+      "basis": "live owner/assignee relationship + handler capacity, not title",
+      "boundary": "Verify primary-only actions only under correct resource relationship and classification.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "id": "A17.1",
+      "actor": "Bearer/invitation/first-factor capability holder",
+      "parent": "A17",
+      "basis": "purpose-bound token audience, nonce, recipient, expiry and state",
+      "boundary": "Replay, substitution, wrong tenant, subsequent role/session revocation; distinct from cron identity.",
+      "admissionVerified": false,
+      "runtimeVerified": false
+    }
+  ],
+  "subordinateAuthorityRows": [
+    {
+      "id": "mandates",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A06",
+        "A07",
+        "A10",
+        "A11"
+      ],
+      "requiredScenario": "issue, accept, expire, suspend, revoke; same-session read/write refusal",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "delegations",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A07",
+        "A06"
+      ],
+      "requiredScenario": "delegator offboarded, revoked, scope mismatch, duplicate approval line",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "resource-relationships",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A03",
+        "A05",
+        "A06"
+      ],
+      "requiredScenario": "owner reassigned, collaborator revoked, member represented relationship, former session",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "issuance-approvals",
+      "sourceStatus": "FIXED",
+      "actors": [
+        "A07",
+        "A10"
+      ],
+      "requiredScenario": "approver leaves before issuance; independent approval rechecked",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "rule-adoption-approvals",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A07",
+        "A10"
+      ],
+      "requiredScenario": "adopter loses active membership/capacity before activation; duplicate approval",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "counsel-engagements",
+      "sourceStatus": "FIXED",
+      "actors": [
+        "A14.3"
+      ],
+      "requiredScenario": "member-counsel loses membership or engagement; no served content",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "external-counsel",
+      "sourceStatus": "OPEN",
+      "actors": [
+        "A14.4"
+      ],
+      "requiredScenario": "absent verifier, invalid signature, engagement revocation, no institution mutation",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "workaid-referral",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A14.5",
+        "A03",
+        "A05"
+      ],
+      "requiredScenario": "consent revoke and primary relationship revoke independently",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "workaid-union-side-disclosure",
+      "sourceStatus": "OTHER_LANE",
+      "actors": [
+        "A14.5",
+        "A14.6"
+      ],
+      "requiredScenario": "consent/category scope, document authorization, share revocation, counsel-attributed receipt",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "triage-designations",
+      "sourceStatus": "LAYERED",
+      "actors": [
+        "A05",
+        "A06",
+        "A08"
+      ],
+      "requiredScenario": "demotion, session revoke, queue/detail/notification visibility",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "external-representation",
+      "sourceStatus": "LAYERED",
+      "actors": [
+        "A14.1",
+        "A14.2"
+      ],
+      "requiredScenario": "V2 tenant membership, own lifecycle, matter and document grants independently",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "document-grants",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A03",
+        "A05",
+        "A14.1"
+      ],
+      "requiredScenario": "case link, version, explicit processing/download/share grants and classification",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "legacy-case-access-assignments",
+      "sourceStatus": "NO_LIVE_CONSUMER",
+      "actors": [
+        "A05",
+        "A20"
+      ],
+      "requiredScenario": "stale pre-kernel grant cannot create access; search consumers",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "api-keys",
+      "sourceStatus": "NO_LIVE_CONSUMER",
+      "actors": [
+        "A17",
+        "A20"
+      ],
+      "requiredScenario": "key_hash or generic CRUD does not authenticate, separate provider and cron credentials",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "sessions",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A02",
+        "A04",
+        "A20"
+      ],
+      "requiredScenario": "real session invalidation, replay, org switch, MFA context",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "invite-tokens",
+      "sourceStatus": "FIXED",
+      "actors": [
+        "A02",
+        "A17.1",
+        "A20"
+      ],
+      "requiredScenario": "reissue, revoke, recipient binding, expired/replayed token",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "mfa-challenges",
+      "sourceStatus": "FIXED",
+      "actors": [
+        "A02",
+        "A17.1",
+        "A20"
+      ],
+      "requiredScenario": "expired, replay, wrong principal, disabled/suspended account",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "first-factor-tokens",
+      "sourceStatus": "ENFORCED",
+      "actors": [
+        "A02",
+        "A17.1",
+        "A20"
+      ],
+      "requiredScenario": "wrong purpose, replay, expiry, stale account lifecycle",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    },
+    {
+      "id": "legacy-lineage-route-guard",
+      "sourceStatus": "OPEN",
+      "actors": [
+        "A04",
+        "A13",
+        "A20"
+      ],
+      "requiredScenario": "explicit V2/legacy route exposure, membership removal and direct API denial",
+      "sourceStatusBoundary": "Historical source register only; not current runtime evidence.",
+      "currentRuntimeVerified": false
+    }
+  ],
+  "staticChecks": {
+    "uniqueKernelActions": true,
+    "roleRows": true,
+    "capacityReferences": true,
+    "appointmentOnlyDisjoint": true,
+    "kernelActionFamilyJoins": true,
+    "actorJoins": true,
+    "nonDelegableJoins": true,
+    "subordinateIdExact": true,
+    "allScopesUnverified": true,
+    "stepHeld": true,
+    "uniqueActors": true
+  },
+  "staticCheckCount": 11,
+  "diagnostic": {
+    "path": "apps/union-eyes/scripts/runtime/step1-primary-handler-ceiling-probe.ts",
+    "blobSha": "cca56053ae6da03cf3528bcf5370e9a2e875d5e2",
+    "plannedScenarios": 32,
+    "state": "COMMITTED_NOT_EXECUTED",
+    "boundary": "Pure kernel and issuance facts; does not establish DB reachability or deployed authorization."
+  },
+  "remaining": [
+    "Execute full source census with locked dependency set; include package/proxy/callback/worker routes.",
+    "Verify positive institutional admission for roles, mandates, protocols, and external actor variants.",
+    "Run diagnostic; if mismatch reproduced, fix invariant at issuance and evaluation, with regression and database/control-plane verification.",
+    "Reconcile exact action-specific permissions and complete scope joins; no Step 2 until complete."
+  ]
+}
