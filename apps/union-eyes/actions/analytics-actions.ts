@@ -181,12 +181,12 @@ export async function calculateMetrics(params: {
 
         revalidatePath('/dashboard/analytics')
 
-        return { success: true, metric }
+        return { success: true as const, metric }
       },
     )
   } catch (error) {
     logger.error('Error calculating metrics', error as Error)
-    return { success: false, error: safeActionMessage(error, { action: 'calculateMetrics' }) }
+    return { success: false as const, error: safeActionMessage(error, { action: 'calculateMetrics' }) }
   }
 }
 
@@ -221,7 +221,7 @@ export async function generatePredictions(params: {
 
       if (historicalMetrics.length < 7) {
         return {
-          success: false,
+          success: false as const,
           error: 'Insufficient historical data for predictions (minimum 7 data points required)',
         }
       }
@@ -243,7 +243,7 @@ export async function generatePredictions(params: {
       } else if (modelName === 'linear_regression') {
         predictions = forecastLinearRegression(timeSeriesData, params.periodsAhead)
       } else {
-        return { success: false, error: 'Unsupported model' }
+        return { success: false as const, error: 'Unsupported model' }
       }
 
       // Store predictions in database
@@ -285,11 +285,11 @@ export async function generatePredictions(params: {
 
       revalidatePath('/dashboard/analytics')
 
-      return { success: true, predictions: storedPredictions }
+      return { success: true as const, predictions: storedPredictions }
     })
   } catch (error) {
     logger.error('Error generating predictions', error as Error)
-    return { success: false, error: safeActionMessage(error, { action: 'generatePredictions' }) }
+    return { success: false as const, error: safeActionMessage(error, { action: 'generatePredictions' }) }
   }
 }
 
@@ -321,7 +321,7 @@ export async function detectMetricTrends(params: { metricType: string; daysBack?
 
       if (metrics.length < 7) {
         return {
-          success: false,
+          success: false as const,
           error: 'Insufficient data for trend analysis (minimum 7 data points required)',
         }
       }
@@ -372,11 +372,11 @@ export async function detectMetricTrends(params: { metricType: string; daysBack?
 
       revalidatePath('/dashboard/analytics')
 
-      return { success: true, trend: storedTrend }
+      return { success: true as const, trend: storedTrend }
     })
   } catch (error) {
     logger.error('Error detecting trends', error as Error)
-    return { success: false, error: safeActionMessage(error, { action: 'detectMetricTrends' }) }
+    return { success: false as const, error: safeActionMessage(error, { action: 'detectMetricTrends' }) }
   }
 }
 
@@ -437,11 +437,11 @@ export async function createKPI(params: {
 
       revalidatePath('/dashboard/analytics/kpis')
 
-      return { success: true, kpi }
+      return { success: true as const, kpi }
     })
   } catch (error) {
     logger.error('Error creating KPI', error as Error)
-    return { success: false, error: safeActionMessage(error, { action: 'createKPI' }) }
+    return { success: false as const, error: safeActionMessage(error, { action: 'createKPI' }) }
   }
 }
 
@@ -510,12 +510,12 @@ export async function getAnalyticsMetrics(params: {
           }
           return { ...metric, metadata }
         })
-        return { success: true, metrics: publicMetrics }
+        return { success: true as const, metrics: publicMetrics }
       },
     )
   } catch (error) {
     logger.error('Error fetching analytics metrics', error as Error)
-    return { success: false, error: safeActionMessage(error, { action: 'getAnalyticsMetrics' }) }
+    return { success: false as const, error: safeActionMessage(error, { action: 'getAnalyticsMetrics' }) }
   }
 }
 

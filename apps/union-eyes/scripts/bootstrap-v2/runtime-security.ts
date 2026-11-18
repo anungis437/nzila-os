@@ -18,7 +18,11 @@ import {
 import { PgDialect } from 'drizzle-orm/pg-core'
 import { authenticatedOrgBindingSql } from '../../../../packages/platform-auth/src/org-binding'
 import { prepareRuntimeColumnActors, type RuntimeSessionFactory } from './runtime-column-fixtures'
-import { COLUMN_ACTOR_CLASSES, createRuntimeColumnQualification } from './runtime-column-security'
+import {
+  COLUMN_ACTOR_CLASSES,
+  createRuntimeColumnQualification,
+  type ColumnTableReport,
+} from './runtime-column-security'
 import { createModuleAdmissionRuntimeQualification } from './module-admission-runtime-security'
 import { orderRuntimeReports } from './runtime-report-order'
 import { RUNTIME_COLUMN_PRIVILEGE_CONTRACTS } from './service-column-contracts'

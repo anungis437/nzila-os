@@ -23,12 +23,16 @@ import {
 import { eq, and, desc } from 'drizzle-orm';
 import { inOrganization } from '../jobs/tenant-scope';
 import { getFromEmail, sendResendEmail } from '@/lib/email-service';
-import twilio from 'twilio';
+import { twilioAdapter } from '@nzila/comms-sms';
 import { logger } from '@/lib/logger';
 
-// Initialize SMS client
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+// SMS goes through the platform adapter (@nzila/comms-sms); null when Twilio is not configured.
+const twilioCredentials = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
+  ? {
+      accountSid: process.env.TWILIO_ACCOUNT_SID,
+      authToken: process.env.TWILIO_AUTH_TOKEN,
+      fromNumber: process.env.TWILIO_PHONE_NUMBER ?? '',
+    }
   : null;
 
 // ============================================================================
@@ -300,7 +304,7 @@ async function sendThroughChannel(
       await sendEmail(userId, rendered.subject!, rendered.body, data);
       break;
     case 'sms':
-      await sendSMS(userId, rendered.body);
+      await sendSMS(organizationId, userId, rendered.body);
       break;
     case 'push':
       await sendPushNotification(userId, rendered.subject || type, rendered.body, data);
@@ -358,7 +362,7 @@ async function sendEmail(
  * Send SMS notification
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sendSMS(userId: string, message: string, data: Record<string, any> = {}): Promise<void> {
+async function sendSMS(organizationId: string, userId: string, message: string, data: Record<string, any> = {}): Promise<void> {
   // The user-table lookup by userId is not yet wired, so callers MUST provide data.phone.
   // Previously we fell back to '+1234567890', a fake number that Twilio rejects but still
   // counts against API limits / surfaces as a runtime error on every send.
@@ -369,17 +373,23 @@ async function sendSMS(userId: string, message: string, data: Record<string, any
   }
 
   try {
-    if (!twilioClient) {
+    if (!twilioCredentials) {
       logger.warn('[SMS] Twilio not configured, skipping SMS send');
       return;
     }
 
     // Use Twilio for SMS delivery
-    await twilioClient.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: userPhone,
-    });
+    const sent = await twilioAdapter.send(
+      {
+        orgId: organizationId,
+        channel: 'sms',
+        to: userPhone,
+        body: message,
+        correlationId: `notification-sms:${userId}`,
+      },
+      twilioCredentials,
+    );
+    if (!sent.ok) throw new Error(sent.error ?? 'Twilio send failed');
     
     logger.info('[SMS] Successfully sent', { userPhone });
   } catch (error) {
