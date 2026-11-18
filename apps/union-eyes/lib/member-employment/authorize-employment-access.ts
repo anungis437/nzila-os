@@ -28,6 +28,7 @@ import { getUserRole, normalizeRole } from '@/lib/api-auth-guard'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import { logger } from '@/lib/logger'
 import { userHasOrganizationAccess } from '@/lib/organization-utils'
+import { assertOrgActionContext, type OrgActionContext } from '@/lib/resolve-org'
 import {
   PLATFORM_MODULES,
   requireEntitlement,
@@ -119,7 +120,10 @@ export function leaveSubjectIdentityUnresolved(subjectUserId: string | null | un
  * The approver and the subject member must be different people.
  * `subjectUserId` comes from the member row, not from the caller payload.
  */
-export function leaveSelfApprovalDenied(actorUserId: string, subjectUserId: string | null | undefined): boolean {
+export function leaveSelfApprovalDenied(
+  actorUserId: string,
+  subjectUserId: string | null | undefined,
+): boolean {
   if (leaveSubjectIdentityUnresolved(subjectUserId)) return false
   return subjectUserId!.trim() === actorUserId
 }
@@ -170,8 +174,10 @@ async function auditInOrganizationDenial(
 export async function authorizeEmploymentAccess(
   organizationId: string,
   capability: EmploymentCapability,
+  context?: OrgActionContext,
 ): Promise<EmploymentAccessDecision> {
-  const { userId } = await auth()
+  if (context) assertOrgActionContext(context)
+  const { userId } = context ?? (await auth())
   if (!userId) {
     logger.warn('member-employment access denied', { reason: 'unauthenticated', capability })
     return { ok: false, message: 'Unauthorized' }
@@ -187,6 +193,8 @@ export async function authorizeEmploymentAccess(
   }
 
   const requestedOrganizationId = organizationId.trim()
+  if (context && requestedOrganizationId.toLowerCase() !== context.organizationId.toLowerCase())
+    return { ok: false, message: 'Forbidden' }
   const member = await userHasOrganizationAccess(userId, requestedOrganizationId)
   if (!member) {
     logger.warn('member-employment cross-tenant access denied', {
@@ -211,11 +219,15 @@ export async function authorizeEmploymentAccess(
     return { ok: false, message: 'Forbidden' }
   }
 
-  const allowed = capability === 'finance'
-    ? rolePermitsEmploymentFinance(role)
-    : rolePermitsEmploymentAdmin(role)
+  const allowed =
+    capability === 'finance' ? rolePermitsEmploymentFinance(role) : rolePermitsEmploymentAdmin(role)
   if (!allowed) {
-    await auditInOrganizationDenial(userId, requestedOrganizationId, capability, 'insufficient_role')
+    await auditInOrganizationDenial(
+      userId,
+      requestedOrganizationId,
+      capability,
+      'insufficient_role',
+    )
     return { ok: false, message: 'Forbidden' }
   }
 

@@ -39,6 +39,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4",
     "@playwright/test": "^1.58.2",
     "@nzila/config": "workspace:*",
     "@tailwindcss/postcss": "^4",

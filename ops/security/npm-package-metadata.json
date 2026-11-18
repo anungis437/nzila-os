@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-11-17T20:20:58Z",
-  "lockfileSha256": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0",
+  "recordedAt": "2026-11-18T13:51:32Z",
+  "lockfileSha256": "66487ed6f7133ed9c6247b0f8970359a91924486e36c1a3b13f5192e381dbe68",
   "packages": {
     "@adobe/css-tools@4.4.4": {
       "integrity": "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==",

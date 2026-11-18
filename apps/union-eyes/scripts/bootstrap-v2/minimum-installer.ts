@@ -9,6 +9,7 @@ import { CANONICAL_BOOTSTRAP_ROLES, INSTALLER_FUNCTION_OWNER_ROLES } from './exe
 import { FRAMEWORK_MEMBERSHIPS, FRAMEWORK_ROLES } from './framework-contract'
 import { quote, type V2Plan } from './source'
 import { compileRolePrerequisiteAssertions } from '../../../../packages/db/src/auth-storage-authority/role-prerequisites'
+import { EXTERNAL_READ_OWNER } from '../../lib/external-resource-read/source'
 
 export { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 
@@ -26,6 +27,7 @@ export function compileMinimumRoleProvisioningSql(
   const dedicated: readonly string[] = [
     ...Object.values(AUTH_EXECUTION_ROLES),
     ...Object.values(FRAMEWORK_ROLES),
+    EXTERNAL_READ_OWNER,
   ]
   return [
     ...CANONICAL_BOOTSTRAP_ROLES.map(
@@ -117,6 +119,7 @@ export async function assertMinimumInstaller(
       RAISE EXCEPTION 'UE_V2_UNDECLARED_VECTOR_PREINSTALL_DENIED';
     END IF;
   END $minimum_installer$`)
+  await client.query(compileRolePrerequisiteAssertions([EXTERNAL_READ_OWNER], {}, options))
 }
 
 export async function inspectVectorObjectIds(client: pg.Client): Promise<Set<string>> {

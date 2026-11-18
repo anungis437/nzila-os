@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Member Arrears List
  *
@@ -7,24 +8,27 @@
  * Returns:
  *   { members: MemberInArrears[] }
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
-import { sql } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { db } from '@/db'
+import { sql } from 'drizzle-orm'
+import { withRLSContext } from '@/lib/db/with-rls-context'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'List members in arrears' },
   },
   async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId) throw ApiError.badRequest('Organization context required')
 
     // Join with organization_members to get contact details
+    requireBaseFinancialAuthority()
+
     const rows = await withRLSContext(() =>
       db.execute(sql`
         SELECT
@@ -48,8 +52,8 @@ export const GET = withApi(
           AND ma.arrears_status <> 'current'
         ORDER BY ma.total_owed DESC
       `),
-    );
+    )
 
-    return { members: rows };
+    return { members: rows }
   },
-);
+)

@@ -67,7 +67,7 @@ export function compileAuthOrgBindingSql(options: { ordinaryRole?: string } = {}
     CREATE FUNCTION ${AUTH_BUSINESS_ORG_PREDICATE}(row_org uuid,required_roles text[] DEFAULT NULL)
     RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
       WITH auth_clock AS MATERIALIZED (SELECT clock_timestamp() AS checked_at)
-      SELECT row_org::text=NULLIF(current_setting('app.current_org_id',true),'')
+      SELECT (row_org::text=NULLIF(current_setting('app.current_org_id',true),'')
         AND EXISTS (
           SELECT FROM user_management.user_sessions s
           JOIN user_management.users u ON u.user_id=s.user_id
@@ -89,15 +89,15 @@ export function compileAuthOrgBindingSql(options: { ordinaryRole?: string } = {}
               ))
             AND u.is_active AND u.lifecycle_state='active' AND m.is_active
             AND (required_roles IS NULL OR m.role=ANY(required_roles))
-        ) FROM auth_clock $auth$;
+        ) ) IS TRUE FROM auth_clock $auth$;
     ALTER FUNCTION ${AUTH_BUSINESS_ORG_PREDICATE}(uuid,text[]) OWNER TO ${reader};
     REVOKE ALL ON FUNCTION ${AUTH_BUSINESS_ORG_PREDICATE}(uuid,text[]) FROM PUBLIC;
     GRANT USAGE ON SCHEMA user_management TO ${q(ordinary)};
     GRANT EXECUTE ON FUNCTION ${AUTH_BUSINESS_ORG_PREDICATE}(uuid,text[]) TO ${q(ordinary)};
     CREATE FUNCTION ${AUTH_BUSINESS_USER_PARENT_PREDICATE}(parent_user_id text,row_org uuid)
     RETURNS boolean LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
-      SELECT parent_user_id=NULLIF(current_setting('app.current_user_id',true),'')
-        AND user_management.auth_business_org_authorized(row_org,NULL::text[])
+      SELECT (parent_user_id=NULLIF(current_setting('app.current_user_id',true),'')
+        AND user_management.auth_business_org_authorized(row_org,NULL::text[])) IS TRUE
       $auth$;
     ALTER FUNCTION ${AUTH_BUSINESS_USER_PARENT_PREDICATE}(text,uuid) OWNER TO ${reader};
     REVOKE ALL ON FUNCTION ${AUTH_BUSINESS_USER_PARENT_PREDICATE}(text,uuid) FROM PUBLIC;
@@ -119,16 +119,32 @@ export function compileAuthOrgBindingSql(options: { ordinaryRole?: string } = {}
 }
 
 /** Current-source definition admission, in addition to the existing role/column census. */
-export const AUTH_BUSINESS_FUNCTION_CATALOG_QUERY = `SELECT p.proname AS name,p.prosrc,p.provolatile,p.prosecdef,
+export function buildAuthBusinessFunctionCatalogQuery(
+  additionalCallers: Readonly<Record<string, readonly string[]>> = {},
+): string {
+  const clauses = Object.entries(additionalCallers).map(([name, callers]) => {
+    if (!['auth_business_org_authorized', 'auth_business_user_parent_authorized', 'auth_business_member_parent_authorized'].includes(name)
+      || !callers.length || new Set(callers).size !== callers.length
+      || callers.some(role => !/^[a-z_][a-z0-9_]{0,62}$/.test(role)))
+      throw new Error('AUTH_BUSINESS_PREDICATE_SOURCE_CALLERS_REQUIRED')
+    return `(p.proname='${name}' AND EXISTS(SELECT FROM pg_roles expected_caller
+      WHERE expected_caller.oid=a.grantee AND expected_caller.rolname IN(${callers.map(role => `'${role}'`).join(',')})))`
+  })
+  const ordinary = `a.grantee NOT IN(p.proowner,
+      (SELECT oid FROM pg_roles WHERE rolname='union_eyes_runtime'))`
+  const unexpected = clauses.length ? `(${ordinary} AND NOT (${clauses.join(' OR ')}))` : ordinary
+  return `SELECT p.proname AS name,p.prosrc,p.provolatile,p.prosecdef,
   p.proargtypes::text AS argument_types,p.prorettype::regtype::text AS returns,l.lanname AS language,
   owner.rolname AS owner,p.proconfig,p.proleakproof,p.proretset,p.proisstrict,
   has_function_privilege('public',p.oid,'EXECUTE') AS public_execute,
   NOT EXISTS(SELECT FROM aclexplode(COALESCE(p.proacl,acldefault('f',p.proowner))) a
-    WHERE a.privilege_type='EXECUTE' AND (a.grantee NOT IN(p.proowner,
-      (SELECT oid FROM pg_roles WHERE rolname='union_eyes_runtime')) OR (a.is_grantable AND a.grantee<>p.proowner))) AS exact_acl
+    WHERE a.privilege_type='EXECUTE' AND (${unexpected} OR (a.is_grantable AND a.grantee<>p.proowner))) AS exact_acl
   FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang
   JOIN pg_roles owner ON owner.oid=p.proowner WHERE n.nspname='user_management'
   AND p.proname IN('auth_business_org_authorized','auth_business_user_parent_authorized','auth_business_member_parent_authorized')`
+}
+
+export const AUTH_BUSINESS_FUNCTION_CATALOG_QUERY = buildAuthBusinessFunctionCatalogQuery()
 
 export function authBusinessFunctionViolations(rows: readonly Record<string, unknown>[]): string[] {
   const source = compileAuthOrgBindingSql()

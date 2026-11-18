@@ -9,6 +9,10 @@ import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { uploadBuffer, generateSasUrl } from '@nzila/blob'
 import { logger } from '@/lib/logger'
+import { resolveOrgContext, CfoScopeError } from '@/lib/resolve-org'
+import { recordUploadedDocument } from '@/lib/services/workspace-records'
+import { z } from 'zod'
+import { randomUUID } from 'node:crypto'
 
 const CONTAINER = 'cfo-documents'
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB
@@ -53,39 +57,65 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const arrayBuffer = await file.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-
-        // Build a unique blob path: userId/timestamp-originalFilename
-        const timestamp = Date.now()
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const blobPath = `${auth.userId}/${timestamp}-${safeName}`
-
-        const result = await uploadBuffer({
-          container: CONTAINER,
-          blobPath,
-          buffer,
-          contentType: file.type,
-        })
-
-        // Generate a 24-hour read-only SAS URL
-        const sasUrl = generateSasUrl(CONTAINER, result.blobPath, 60 * 24)
-
-        logger.info('File uploaded to blob storage', {
-          userId: auth.userId,
-          blobPath: result.blobPath,
-          sha256: result.sha256,
-          sizeBytes: result.sizeBytes,
-        })
-
-        return NextResponse.json({
-          blobPath: result.blobPath,
-          sha256: result.sha256,
-          sizeBytes: result.sizeBytes,
-          url: sasUrl,
-          fileName: file.name,
-        })
+        return await resolveOrgContext(
+          'organization',
+          {
+            permission: 'documents:upload',
+            organizationId:
+              typeof formData.get('orgId') === 'string' ? String(formData.get('orgId')) : undefined,
+          },
+          async (context) => {
+            const name = z
+              .string()
+              .trim()
+              .min(1)
+              .parse(formData.get('name') ?? file.name)
+            const type = z
+              .enum(['invoice', 'receipt', 'contract', 'report', 'statement', 'other'])
+              .parse(formData.get('type') ?? 'other')
+            const buffer = Buffer.from(await file.arrayBuffer())
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+            const blobPath = `${context.organizationId}/${encodeURIComponent(context.userId)}/${randomUUID()}-${safeName}`
+            const result = await uploadBuffer({
+              container: CONTAINER,
+              blobPath,
+              buffer,
+              contentType: file.type,
+            })
+            if (result.blobPath !== blobPath || result.sizeBytes !== file.size)
+              throw new Error('Upload result does not match requested resource')
+            const sasUrl = generateSasUrl(CONTAINER, result.blobPath, 60 * 24)
+            const record = await recordUploadedDocument(context, {
+              name,
+              type,
+              size: result.sizeBytes,
+              url: sasUrl,
+              blobPath: result.blobPath,
+              sha256: result.sha256,
+            })
+            logger.info('Document upload recorded', {
+              userId: context.userId,
+              organizationId: context.organizationId,
+              recordId: record.id,
+            })
+            return NextResponse.json({
+              uploadId: record.id,
+              blobPath: result.blobPath,
+              sha256: result.sha256,
+              sizeBytes: result.sizeBytes,
+              url: sasUrl,
+              fileName: file.name,
+            })
+          },
+        )
       } catch (error) {
+        if (error instanceof CfoScopeError)
+          return NextResponse.json(
+            { error: error.message },
+            { status: error.message === 'Unauthorized' ? 401 : 403 },
+          )
+        if (error instanceof z.ZodError)
+          return NextResponse.json({ error: 'Invalid upload metadata' }, { status: 400 })
         logger.error('File upload failed', { error })
         return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
       }

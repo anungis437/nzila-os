@@ -1,0 +1,132 @@
+{
+  "scope": "INTERIM_PRODUCTION_MJS_AND_AUTHENTICATED_COMPANION_CHECKS",
+  "recordedAt": "2026-11-18T04:21:46.208202+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "result": "PASS_ON_OWNED_DISPOSABLE_POSTGRESQL15_CLONE",
+  "image": {
+    "id": "sha256:1aac5b49cefd627f02816141ca4ad012d6cc19460dfe02a9b5168a105be3fc53",
+    "reference": "postgres:15",
+    "postgresMajor": 15
+  },
+  "serverVersionNum": "150019",
+  "rawPrivateReceipt": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_63898_7f3ab0ce9b77/receipt.json",
+    "sha256": "2846143ae76c9d12f511fe5c7d8cb71b78260268f75d2c15f12254abb63b3752",
+    "bytes": 2492705
+  },
+  "launch": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-production-launch-v3.json",
+    "sha256": "72362bf3f2017315090fd35246ad0b1a4afde54e4a846770bb886ca0cae4ec0c",
+    "bytes": 579
+  },
+  "snapshot": {
+    "bytes": 126433012,
+    "boundSourceFiles": 12942,
+    "allSourceUnchanged": true,
+    "noEnvironmentFilesCopied": true
+  },
+  "nativePrerequisite": {
+    "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-security-transition-v16.json",
+    "sha256": "f6e772df5f6890a3d5d3fadad6bfa932e70bf7041baff89b82e6003952b46e92",
+    "bytes": 4103
+  },
+  "runs": [
+    {
+      "iteration": 1,
+      "exitCode": 0,
+      "signal": null,
+      "rawLog": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_63898_7f3ab0ce9b77/runner-1.log",
+        "sha256": "14c948914b5c9c58f9680e07f7d509d5675194d56d2d19efdca5e179d3d99d45",
+        "bytes": 13868
+      },
+      "applicationReady": false,
+      "securityPolicyVerified": true,
+      "runtimePrivilegesVerified": true,
+      "runtimeGrantActivationApplied": true
+    },
+    {
+      "iteration": 2,
+      "exitCode": 0,
+      "signal": null,
+      "rawLog": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_63898_7f3ab0ce9b77/runner-2.log",
+        "sha256": "14c948914b5c9c58f9680e07f7d509d5675194d56d2d19efdca5e179d3d99d45",
+        "bytes": 13868
+      },
+      "applicationReady": false,
+      "securityPolicyVerified": true,
+      "runtimePrivilegesVerified": true,
+      "runtimeGrantActivationApplied": false
+    }
+  ],
+  "restrictedSessionProbes": {
+    "scope": "restricted canonical-session companion execution only",
+    "finalCandidateQualified": false,
+    "probes": [
+      {
+        "name": "runtime-live-org-and-membership-reader",
+        "passed": true
+      },
+      {
+        "name": "runtime-assignee-positive-and-member-denial",
+        "passed": true
+      },
+      {
+        "name": "runtime-unissued-domain-transition-denial-with-public-fact-load",
+        "passed": true
+      },
+      {
+        "name": "runtime-cannot-call-system-verifier",
+        "passed": true
+      },
+      {
+        "name": "system-missing-queue-verifier-reads-public-and-returns-null",
+        "passed": true
+      },
+      {
+        "name": "system-cannot-mint-or-decide-case",
+        "passed": true
+      },
+      {
+        "name": "revoked-real-session-refuses-before-companion-use",
+        "passed": true
+      }
+    ],
+    "cleanup": {},
+    "passed": true,
+    "limits": [
+      "No governed primary grant, valid queued intent, email delivery or institutional adoption is claimed",
+      "Source-native caller execution only; identities are synthetic setup and actions use real canonical sessions"
+    ]
+  },
+  "cleanup": {
+    "originalTemplatePreserved": true,
+    "cloneRemoved": true,
+    "loginsRemoved": true
+  },
+  "namespaceCounterexample": {
+    "priorRawReceipt": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_61268_a637922668f1/receipt.json",
+      "sha256": "c2748ce62adb3a4498dbef180bccc4b9767bc47e03ad9b51f34d2b85fc48943a",
+      "bytes": 2491136
+    },
+    "priorProbes": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_61268_a637922668f1/probe-results.json",
+      "sha256": "8eb8e6cf70340ed5b561e66a25f58521c1428a0116d9884fe14af954bd4cc8c5",
+      "bytes": 674
+    },
+    "priorResult": "FAIL_42501_PUBLIC_SCHEMA_USAGE",
+    "repair": "Shared bounded schema-USAGE source contract used by four existing companions, with strict CREATE/grant-option denial."
+  },
+  "limits": [
+    "This proves owned synthetic source execution; no staging or production operation.",
+    "Only current-security stage is atomic. Whole bootstrap appends attestations on each invocation; no whole-process read-only NOOP is claimed.",
+    "No governed primary grant, valid queued intent, email delivery, external reader, finance mutation boundary or actual institutional adoption is inferred.",
+    "Exact final integrated candidate, whole regression and all canonical action qualification remain pending."
+  ],
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

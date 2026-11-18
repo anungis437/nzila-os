@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-18T00:05:29.330Z",
+  "generatedAt": "2026-11-18T13:22:37.839Z",
   "filesScanned": 2814,
-  "totalFindings": 3061,
+  "totalFindings": 3060,
   "findingsByRule": {
-    "stale-reference": 1031,
+    "stale-reference": 1030,
     "stale-package-ref": 84,
     "naming-inconsistency": 1790,
     "stale-date": 45,
@@ -11,7 +11,7 @@
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1226,
+    "warning": 1225,
     "info": 1835
   },
   "findings": [
@@ -6204,13 +6204,6 @@
       "message": "References @nzila/abr but package does not exist"
     },
     {
-      "rule": "stale-reference",
-      "severity": "warning",
-      "file": "docs/documentation-index.md",
-      "line": 1894,
-      "message": "Possible broken link: [docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md](docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md)"
-    },
-    {
       "rule": "stale-package-ref",
       "severity": "warning",
       "file": "docs/oci/superseded/stabilization/OCI_STABILIZATION_PLATFORM_ALIGNMENT.md",
@@ -10596,21 +10589,21 @@
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md",
-      "line": 78,
+      "line": 79,
       "message": "\"organizationId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md",
-      "line": 97,
+      "line": 136,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
       "rule": "naming-inconsistency",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md",
-      "line": 98,
+      "line": 137,
       "message": "\"orgId\" should be \"org_id\" (tenant identifier)"
     },
     {
@@ -20523,7 +20516,7 @@
       "severity": "info",
       "file": "docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md",
       "line": 475,
-      "message": "Document date \"April 23, 2026\" is 208 days old — may be stale"
+      "message": "Document date \"April 23, 2026\" is 209 days old — may be stale"
     },
     {
       "rule": "stale-date",

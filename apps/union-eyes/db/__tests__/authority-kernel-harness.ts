@@ -150,7 +150,10 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   await db.exec(GRANTS)
   await db.exec('GRANT SELECT ON bargaining_units,case_territories,case_authority_scopes,case_respondents TO union_eyes_runtime')
   for (const e of authorityKernelEntries) {
-    await db.exec(`GRANT ${e.requiredRuntimePrivileges.join(', ')} ON ${e.table} TO union_eyes_runtime`)
+    const privileges = e.requiredRuntimePrivileges
+    if (privileges === 'TBD') throw new Error(`Unresolved fixture authority: ${e.table}`)
+    if (privileges.length)
+      await db.exec(`GRANT ${privileges.join(', ')} ON ${e.table} TO union_eyes_runtime`)
   }
 }
 

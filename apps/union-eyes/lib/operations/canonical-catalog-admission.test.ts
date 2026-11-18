@@ -12,7 +12,7 @@ import type { V2Plan } from '../../scripts/bootstrap-v2/source'
 const canonical = canonicalCatalogContract()
 // Classification/column fixtures isolate those checks; function authority has
 // a separate real-producer fixture below, and complete native qualification.
-const focusedPayload = {...canonical.payload,currentFunctions:[]}
+const focusedPayload = {...canonical.payload,currentFunctions:[],requiredContainedParentPolicies:[],requiredPhysicalTriggers:[]}
 const focused = {payload:focusedPayload,digest:catalogContractDigest(focusedPayload)}
 let functionContract: typeof focused
 let functionRow: Record<string,unknown>
@@ -39,7 +39,7 @@ describe('canonical catalog admission', () => {
     const body=producer.options.find((option:Record<string,Record<string,unknown>>)=>option.DefElem.defname==='as').DefElem.arg.List.items[0].String.sval
     const spec=(canonical.payload as typeof canonical.payload & {currentFunctions:Record<string,unknown>[]}).currentFunctions.find(fn=>fn.name==='auth_business_org_authorized')!
     functionRow={...spec,body}
-    const payload={...canonical.payload,currentFunctions:[spec]}
+    const payload={...canonical.payload,currentFunctions:[spec],requiredContainedParentPolicies:[],requiredPhysicalTriggers:[]}
     functionContract={payload,digest:catalogContractDigest(payload)} as typeof focused
   })
 

@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
@@ -19,8 +20,7 @@ import {
 } from './source'
 import { assertLocalTarget } from './installer'
 
-const image =
-  'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337'
+const image = nativePostgres16Image()
 
 function databaseError(error: unknown): pg.DatabaseError | null {
   if (error instanceof pg.DatabaseError) return error

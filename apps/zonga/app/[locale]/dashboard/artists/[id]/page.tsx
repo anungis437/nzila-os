@@ -8,8 +8,7 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
-import { getCreatorDetail } from '@/lib/actions/creator-actions'
-import { listCatalogAssets } from '@/lib/actions/catalog-actions'
+import { getPublishedCreator, browsePublishedAssets } from '@/lib/actions/browse-actions'
 import { getSocialStats } from '@/lib/actions/social-actions'
 import { FollowButton } from '@/components/dashboard/follow-button'
 import { TipButton } from '@/components/dashboard/tip-button'
@@ -23,19 +22,13 @@ export default async function ArtistProfilePage({
   if (!userId) redirect('/sign-in')
 
   const { id, locale } = await params
-  const [creatorResult, socialStats] = await Promise.all([
-    getCreatorDetail(id),
+  const creator = await getPublishedCreator(id)
+  if (!creator) notFound()
+  const [socialStats, allAssets] = await Promise.all([
     getSocialStats(id),
+    browsePublishedAssets({ creatorId: id }),
   ])
-
-  if (!creatorResult.creator) notFound()
-  const creator = creatorResult.creator
-
-  // Get creator's published tracks
-  const allAssets = await listCatalogAssets({ status: 'published' })
-  const creatorAssets = allAssets.assets.filter(
-    (a) => a.creatorId === id,
-  )
+  const creatorAssets = allAssets.assets.filter((a) => a.creatorId === id)
 
   return (
     <div className="space-y-8">
@@ -56,12 +49,8 @@ export default async function ArtistProfilePage({
             <p className="text-xs font-medium uppercase text-white/60 tracking-wider">Artist</p>
             <h1 className="mt-1 text-3xl font-bold">{creator.displayName}</h1>
             <div className="mt-2 flex flex-wrap gap-3 text-sm text-white/70">
-              {creator.country && (
-                <span>📍 {creator.country.replace(/_/g, ' ')}</span>
-              )}
-              {creator.genre && (
-                <span>🎵 {creator.genre.replace(/_/g, ' ')}</span>
-              )}
+              {creator.country && <span>📍 {creator.country.replace(/_/g, ' ')}</span>}
+              {creator.genre && <span>🎵 {creator.genre.replace(/_/g, ' ')}</span>}
             </div>
             <div className="mt-4 flex items-center gap-6 text-sm">
               <div>
@@ -74,7 +63,7 @@ export default async function ArtistProfilePage({
               </div>
               <div>
                 <span className="font-bold text-white">{socialStats.likes}</span>
-                <span className="ml-1 text-white/60">likes given</span>
+                <span className="ml-1 text-white/60">likes received</span>
               </div>
             </div>
           </div>
@@ -119,7 +108,9 @@ export default async function ArtistProfilePage({
                         </p>
                       </div>
                       <span className="text-xs text-muted-foreground/70">
-                        {((asset.metadata?.streams as number) ?? 0).toLocaleString()} plays
+                        {asset.durationSeconds === null
+                          ? ''
+                          : `${Math.floor(asset.durationSeconds / 60)}:${String(asset.durationSeconds % 60).padStart(2, '0')}`}
                       </span>
                     </Link>
                   ))}
@@ -173,12 +164,12 @@ export default async function ArtistProfilePage({
                   <p className="text-xs text-muted-foreground">Followers</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
-                  <p className="text-lg font-bold text-foreground">{socialStats.following}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
+                  <p className="text-lg font-bold text-foreground">{creatorAssets.length}</p>
+                  <p className="text-xs text-muted-foreground">Published tracks</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
                   <p className="text-lg font-bold text-foreground">{socialStats.comments}</p>
-                  <p className="text-xs text-muted-foreground">Comments</p>
+                  <p className="text-xs text-muted-foreground">Comments received</p>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
                   <p className="text-lg font-bold text-foreground">{socialStats.likes}</p>

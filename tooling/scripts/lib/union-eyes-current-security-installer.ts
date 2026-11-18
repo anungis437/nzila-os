@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import type pg from 'pg'
 import { parseSql, type ParseNode } from '../../../apps/union-eyes/scripts/lib/sql-census/parse'
-import { buildCurrentPlatformAuthSource, buildCurrentPlatformIdentitySource, hash, type V2Plan } from '../../../apps/union-eyes/scripts/bootstrap-v2/source'
+import { buildCurrentPlatformAuthSource, buildCurrentPlatformIdentitySource, buildCurrentExternalReadSource, hash, type V2Plan } from '../../../apps/union-eyes/scripts/bootstrap-v2/source'
 import { compileSecurity } from '../../../apps/union-eyes/scripts/bootstrap-v2/security'
 import { compileMinimumRoleProvisioningSql } from '../../../apps/union-eyes/scripts/bootstrap-v2/minimum-installer'
 import { CANONICAL_BOOTSTRAP_ROLES, INSTALLER_FUNCTION_OWNER_ROLES } from '../../../apps/union-eyes/scripts/bootstrap-v2/execution-roles'
@@ -19,7 +19,9 @@ import {
   planLegacyJournalReplacement, readLegacySecurityReferences,
   planLegacyFrameworkFunctionReplacement, planExistingFrameworkPolicies, planLegacyFrameworkLedgerPolicy, frameworkPolicyPreimageQuery,
   planLegacyPhysicalFunctionAdoption,
-  type LegacyAuthPolicy, type LegacyJournalFunction, type LegacyJournalTrigger, type ExistingFrameworkPolicy,
+  LEGACY_REWARDS_SIGNATURE_POLICY_QUERY, planLegacyRewardsSignaturePolicyRetirement,
+  planLegacyActivationConstraintTransition,
+  type LegacyAuthPolicy, type LegacyJournalFunction, type LegacyJournalTrigger, type ExistingFrameworkPolicy, type LegacyActivationConstraint,
 } from './union-eyes-current-security-preimage'
 import { projectCurrentCompilerSecurity, type CurrentFunctionDescriptor } from './union-eyes-current-security-contract'
 import { currentFunctionViolations, admissionQueries } from '../../../apps/union-eyes/lib/operations/catalog-admission-core.mjs'
@@ -36,6 +38,9 @@ import {
 import { planBusinessSessionRepair, applyBusinessSessionRepair } from '../../../apps/union-eyes/db/auth/business-session-policy'
 import { DEADLINE_SESSION_GUARD_QUERY } from '../../../apps/union-eyes/db/auth/business-session-event-guard'
 import { verifyCurrentCatalogAuthority } from './union-eyes-catalog-authority.mjs'
+import { EXTERNAL_READ_OWNER, EXTERNAL_READ_STORAGE_TABLES } from '../../../apps/union-eyes/lib/external-resource-read/source'
+import { CONTAINED_PARENT_POLICY_QUERY, planContainedParentPolicyInstall } from '../../../apps/union-eyes/scripts/bootstrap-v2/contained-parent-policies'
+import { CURRENT_PUBLIC_TABLE_CREATION_SQL, verifyCurrentUuidDefaultBindings, type CurrentUuidDefaultRow } from '../../../apps/union-eyes/scripts/bootstrap-v2/uuid-default-bindings'
 
 type Row = Record<string, unknown>
 type RoleRow = { rolname: string; rolsuper: boolean; rolbypassrls: boolean; rolcanlogin: boolean; rolinherit: boolean; rolcreatedb: boolean; rolcreaterole: boolean }
@@ -72,7 +77,7 @@ export const CURRENT_SECURITY_QUERIES = {
     r.rolsuper FROM pg_catalog.pg_roles r WHERE r.rolname=session_user`,
   anchor: "SELECT to_regprocedure('user_management.auth_business_org_authorized(uuid,text[])')::text AS anchor",
   roles: `SELECT rolname,rolsuper,rolbypassrls,rolcanlogin,rolinherit,rolcreatedb,rolcreaterole FROM pg_catalog.pg_roles WHERE rolname IN (${managedRoles.map(literal).join(',')})`,
-  relations: `SELECT n.nspname AS schema,c.relname AS table,c.relkind,pg_catalog.pg_get_userbyid(c.relowner) AS owner,
+  relations: `SELECT n.nspname AS schema,c.relname AS table,c.relkind,pg_catalog.pg_get_userbyid(c.relowner) AS owner,c.relrowsecurity,c.relforcerowsecurity,
     ARRAY(SELECT a.attname::text FROM pg_catalog.pg_attribute a WHERE a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped ORDER BY a.attnum) AS columns,
     ARRAY(SELECT a.attname::text FROM pg_catalog.pg_attribute a WHERE a.attrelid=c.oid AND a.attnum<>0 AND NOT a.attisdropped ORDER BY a.attnum) AS acl_columns
     FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
@@ -268,6 +273,72 @@ export async function planCurrentIdentityCreation(
   return { table: producer.table, statements: statements.map(statement => statement.sql), denyStatements, objectNames: [...objectNames].sort(), sourceDigest: producer.sourceDigest }
 }
 
+/** Only the two exact current declarations may be absent. Existing or partial
+ * storage has no admitted legacy preimage and is never adopted by name. */
+export async function planCurrentExternalReadCreation(
+  plan: V2Plan, actual: Row[], conflicts: Row[],
+  producer: Awaited<ReturnType<typeof buildCurrentExternalReadSource>>,
+) {
+  const source = await buildCurrentExternalReadSource()
+  const names = new Set<string>(EXTERNAL_READ_STORAGE_TABLES)
+  if (JSON.stringify(producer) !== JSON.stringify(source)
+    || plan.sourceCommitments[source.source] !== source.sourceDigest
+    || JSON.stringify(plan.statements.filter(statement => statement.canonicalId.startsWith('EXTERNAL_READ_CURRENT:'))) !== JSON.stringify(source.statements)
+    || JSON.stringify(plan.tables.filter(table => names.has(table.name))) !== JSON.stringify(source.tables))
+    throw new Error('Current external storage declaration or SQL producer differs')
+  const missing = plan.tables.filter(table => {
+    const target = relationParts(table.name)
+    return !actual.some(row => row.schema === target.schema && row.table === target.table)
+  })
+  if (missing.some(table => !names.has(table.name) && table.name !== identityTarget))
+    throw new Error('Current source relation prerequisites are missing')
+  if (conflicts.length || missing.filter(table => names.has(table.name)).length !== 2
+    || actual.some(row => row.schema === 'public' && names.has(String(row.table))))
+    throw new Error('Current external storage is present, partial or conflicting')
+  const objectNames = new Set(source.tables.flatMap(table => [table.name, `${table.name}_pkey`]))
+  for (const statement of source.statements) {
+    const parsed = await parseSql(statement.sql)
+    if (!parsed.ok || parsed.statements.length !== 1) throw new Error('Current external storage must be one parsed DDL statement')
+    const node = parsed.statements[0]
+    const relation = node.CreateStmt?.relation ?? node.AlterTableStmt?.relation ?? node.IndexStmt?.relation
+    if (!relation || !names.has(relation.relname) || (relation.schemaname && relation.schemaname !== 'public')
+      || node.CreateStmt?.if_not_exists || node.IndexStmt?.if_not_exists
+      || (!node.CreateStmt && !node.AlterTableStmt && !node.IndexStmt))
+      throw new Error('Current external storage operation or target differs')
+    if (node.IndexStmt) objectNames.add(node.IndexStmt.idxname)
+  }
+  const security = compileSecurity({ ...plan, tables: source.tables })
+  if (security.blockers.length) throw new Error('Current external storage denial must resolve')
+  const denyStatements: string[] = []
+  for (const sql of security.statements) {
+    const parsed = await parseSql(sql)
+    if (!parsed.ok) throw new Error('Current external storage security must parse')
+    const node = parsed.statements[0]
+    if (names.has(node.AlterTableStmt?.relation?.relname)
+      || node.GrantStmt?.objects?.some((object: { RangeVar?: { relname?: string } }) => names.has(object.RangeVar?.relname ?? '')))
+      denyStatements.push(sql)
+  }
+  if (denyStatements.length !== 6) throw new Error('Exact external storage FORCE/RLS/denial source required')
+  return { tables: source.tables, statements: source.statements.map(statement => statement.sql), denyStatements,
+    objectNames: [...objectNames].sort(), sourceDigest: source.sourceDigest }
+}
+
+async function externalReadObjectConflicts(client: pg.Client, producer: Awaited<ReturnType<typeof buildCurrentExternalReadSource>>) {
+  const names = producer.tables.flatMap(table => [table.name, `${table.name}_pkey`])
+  for (const statement of producer.statements) {
+    const parsed = await parseSql(statement.sql)
+    if (!parsed.ok) throw new Error('Current external storage source must parse before catalog preflight')
+    for (const node of parsed.statements) if (node.IndexStmt) names.push(node.IndexStmt.idxname)
+  }
+  return (await client.query(`SELECT 'relation' AS kind,c.relname AS name,c.relkind::text AS relkind
+    FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND c.relname=ANY($1::text[])
+    UNION ALL SELECT 'type' AS kind,t.typname AS name,t.typtype::text AS relkind
+    FROM pg_catalog.pg_type t JOIN pg_catalog.pg_namespace n ON n.oid=t.typnamespace
+    WHERE n.nspname='public' AND (t.typname=ANY($1::text[]) OR t.typname=ANY($2::text[]))`,
+  [names, producer.tables.map(table => `_${table.name}`)])).rows
+}
+
 async function identityObjectConflicts(client: pg.Client, producer: Awaited<ReturnType<typeof buildCurrentPlatformIdentitySource>>) {
   const names = [producer.table.name, `${producer.table.name}_pkey`]
   for (const statement of producer.statements) {
@@ -354,6 +425,177 @@ async function compilerTexts(source: string) {
   return parsed.texts.map((sql, index) => ({ sql, node: parsed.statements[index] }))
 }
 
+/** Apply only actual source ENABLE/FORCE metadata. Historical resource
+ * predicates stay intact; full source policy compilation is not replayed. */
+export async function planCurrentRlsFlagConvergence(plan: V2Plan, relations: readonly Row[], options: { identityWillBeCreated?: boolean; externalReadWillBeCreated?: boolean } = {}) {
+  const source = compileSecurity(plan)
+  if (source.blockers.length) throw new Error('Current source RLS flag authority is unresolved')
+  const targets = plan.tables.map(table => relationParts(table.name))
+  const expected = new Map<string, Map<string, string>>()
+  for (const program of source.statements) for (const entry of await compilerTexts(program)) {
+    const alter = entry.node.AlterTableStmt
+    if (!alter) continue
+    const flags = alter.cmds?.map((command: ParseNode) => command.AlterTableCmd?.subtype) ?? []
+    if (!flags.some((flag: string) => ['AT_EnableRowSecurity', 'AT_ForceRowSecurity', 'AT_DisableRowSecurity', 'AT_NoForceRowSecurity'].includes(flag))) continue
+    const table = targets.find(target => target.schema === alter.relation?.schemaname && target.table === alter.relation?.relname)
+    if (!table || flags.length !== 1 || !['AT_EnableRowSecurity', 'AT_ForceRowSecurity'].includes(flags[0]) || alter.missing_ok)
+      throw new Error('Current source RLS flag atom is not admitted')
+    const key = table.schema + '.' + table.table, current = expected.get(key) ?? new Map<string, string>()
+    if (current.has(flags[0])) throw new Error('Duplicate current source RLS flag producer')
+    current.set(flags[0], entry.sql); expected.set(key, current)
+  }
+  if (expected.size !== targets.length || [...expected.values()].some(flags => flags.size !== 2))
+    throw new Error('Every canonical source table requires exact ENABLE and FORCE producers')
+  const statements: string[] = []
+  for (const target of targets) {
+    const rows = relations.filter(row => row.schema === target.schema && row.table === target.table)
+    if (!rows.length && options.identityWillBeCreated && target.schema === 'public' && target.table === identityTarget) continue
+    if (!rows.length && options.externalReadWillBeCreated && target.schema === 'public'
+      && EXTERNAL_READ_STORAGE_TABLES.some(name => name === target.table)) continue
+    const row = rows[0]
+    if (rows.length !== 1 || !['r', 'p'].includes(String(row.relkind)) || typeof row.relrowsecurity !== 'boolean' || typeof row.relforcerowsecurity !== 'boolean')
+      throw new Error('Exact current source RLS relation metadata required: ' + target.schema + '.' + target.table)
+    const flags = expected.get(target.schema + '.' + target.table)!
+    if (!row.relrowsecurity) statements.push(flags.get('AT_EnableRowSecurity')!)
+    if (!row.relforcerowsecurity) statements.push(flags.get('AT_ForceRowSecurity')!)
+  }
+  return { statements, inspectedRelations: expected.size }
+}
+
+async function verifyCurrentRlsFlags(plan: V2Plan, execute: (sql: string) => Promise<Row[]>) {
+  const current = await planCurrentRlsFlagConvergence(plan, await execute(CURRENT_SECURITY_QUERIES.relations))
+  if (current.statements.length) throw new Error('Current source RLS flags remain missing; read-only verification refused')
+  return current.inspectedRelations
+}
+
+export interface RetainedPublicSchemaAuthority {
+  owner: string; effective_owner: string; can_set_owner: boolean;
+}
+export interface CurrentPublicSchemaExecution {
+  owner: string; statements: readonly string[]; usageRoles: readonly string[];
+}
+type CurrentPublicSchemaPrivileges = Pick<CurrentPublicSchemaExecution, 'statements' | 'usageRoles'>
+
+function publicSchemaGrant(node: ParseNode) {
+  const grant = node.GrantStmt
+  if (grant?.objtype !== 'OBJECT_SCHEMA' || !grant.objects?.some((item: ParseNode) => item.String?.sval === 'public')) return null
+  if (grant.objects.length !== 1 || grant.objects[0].String?.sval !== 'public' || grant.grant_option || grant.grantor
+    || (grant.targtype && grant.targtype !== 'ACL_TARGET_OBJECT') || (grant.behavior && grant.behavior !== 'DROP_RESTRICT'))
+    throw new Error('Current public schema privilege atom is not admitted')
+  const roles: string[] = (grant.grantees ?? []).map((item: ParseNode) => {
+    const role = item.RoleSpec
+    if (role?.roletype === 'ROLESPEC_PUBLIC') return 'PUBLIC'
+    if (role?.roletype !== 'ROLESPEC_CSTRING' || !managedRoles.includes(role.rolename)) throw new Error('Current public schema privilege target is not admitted')
+    return role.rolename
+  })
+  if (!roles.length || new Set(roles).size !== roles.length || (grant.is_grant && roles.includes('PUBLIC')))
+    throw new Error('Current public schema privilege target is not admitted')
+  const privileges: string[] = grant.privileges?.map((item: ParseNode) => {
+    const privilege = item.AccessPriv
+    const name = String(privilege?.priv_name).toUpperCase()
+    if (!['USAGE', 'CREATE'].includes(name) || privilege.cols?.length) throw new Error('Current public schema privilege is not admitted')
+    return name
+  }) ?? []
+  if (!privileges.length && (grant.is_grant || roles.length !== 1 || roles[0] !== 'PUBLIC'))
+    throw new Error('Current public schema ALL privilege is not admitted')
+  return { roles, privileges: privileges.length ? privileges : ['USAGE', 'CREATE'], isGrant: grant.is_grant === true }
+}
+
+/** The old public owner remains authoritative until its protected deadline
+ * guard is repaired. Delegate only exact current source schema atoms through
+ * that verified owner; never give the installer a new GRANT OPTION. */
+export async function planRetainedPublicSchemaExecution(
+  programs: readonly string[], authority: RetainedPublicSchemaAuthority, trustedOwner: string,
+): Promise<CurrentPublicSchemaExecution> {
+  if (!authority || ![trustedOwner, 'ue_v2_owner', 'pg_database_owner'].includes(authority.owner)
+    || ![trustedOwner, 'ue_v2_owner'].includes(authority.effective_owner)
+    || (authority.owner !== 'pg_database_owner' && authority.owner !== authority.effective_owner)
+    || authority.can_set_owner !== true)
+    throw new Error('Retained public schema owner and SET authority are required')
+  q(authority.effective_owner)
+  return { owner: authority.effective_owner, ...await projectCurrentPublicSchemaPrivileges(programs) }
+}
+
+async function projectCurrentPublicSchemaPrivileges(programs: readonly string[]): Promise<CurrentPublicSchemaPrivileges> {
+  const statements: string[] = [], privileges = new Map<string, Set<string>>()
+  for (const program of programs) for (const entry of await compilerTexts(program)) {
+    const atom = publicSchemaGrant(entry.node)
+    if (!atom) continue
+    statements.push(entry.sql)
+    for (const role of atom.roles) {
+      const current = privileges.get(role) ?? new Set<string>()
+      for (const privilege of atom.privileges) {
+        if (atom.isGrant) current.add(privilege)
+        else current.delete(privilege)
+      }
+      privileges.set(role, current)
+    }
+  }
+  if (!statements.length || [...privileges].some(([role, current]) => role !== 'ue_v2_owner' && current.has('CREATE')))
+    throw new Error('Current source must revoke every transient public schema CREATE grant')
+  return { statements: [...new Set(statements)],
+    usageRoles: [...privileges].filter(([role, current]) => current.has('USAGE') && role !== 'ue_v2_owner').map(([role]) => role).sort() }
+}
+
+/** A savepoint restores role state even when PostgreSQL aborts a statement.
+ * The error still propagates to the caller's complete transaction rollback. */
+export async function executeRetainedPublicSchemaProgram(
+  source: string, plan: CurrentPublicSchemaExecution, execute: (sql: string) => Promise<Row[]>,
+): Promise<Row[]> {
+  const entries = await compilerTexts(source)
+  if (!entries.some(entry => publicSchemaGrant(entry.node))) return execute(source)
+  for (const entry of entries) if (publicSchemaGrant(entry.node) && !plan.statements.includes(entry.sql))
+    throw new Error('Public schema privilege has no exact current source producer')
+  let rows: Row[] = []
+  for (const entry of entries) {
+    if (!publicSchemaGrant(entry.node)) { rows = await execute(entry.sql); continue }
+    await execute('SAVEPOINT ue_current_public_schema_atom')
+    try {
+      await execute(`SET LOCAL ROLE ${q(plan.owner)}`)
+      rows = await execute(entry.sql)
+    } catch (error) {
+      await execute('ROLLBACK TO SAVEPOINT ue_current_public_schema_atom')
+      throw error
+    } finally {
+      await execute('SET LOCAL ROLE ue_v2_owner')
+      await execute('RELEASE SAVEPOINT ue_current_public_schema_atom')
+    }
+  }
+  return rows
+}
+
+async function currentPublicSchemaAuthority(execute: (sql: string) => Promise<Row[]>, major: CanonicalPostgresMajor) {
+  const rows = await execute(`WITH retained AS (
+    SELECT n.nspowner,pg_catalog.pg_get_userbyid(n.nspowner) AS owner,
+      CASE WHEN pg_catalog.pg_get_userbyid(n.nspowner)='pg_database_owner' THEN d.datdba ELSE n.nspowner END AS effective_oid
+    FROM pg_catalog.pg_namespace n CROSS JOIN pg_catalog.pg_database d WHERE n.nspname='public' AND d.datname=current_database())
+    SELECT owner,pg_catalog.pg_get_userbyid(effective_oid) AS effective_owner,
+      pg_catalog.pg_has_role(session_user,effective_oid,'${major === 16 ? 'SET' : 'MEMBER'}') AS can_set_owner FROM retained`)
+  if (rows.length !== 1) throw new Error('Exactly one retained public schema owner is required')
+  return rows[0] as unknown as RetainedPublicSchemaAuthority
+}
+
+export function assertFinalPublicSchemaPrivileges(plan: CurrentPublicSchemaPrivileges, rows: readonly Row[]) {
+  if (rows.length !== 1 || rows[0].owner !== 'ue_v2_owner' || !Array.isArray(rows[0].create_roles)
+    || rows[0].create_roles.length || !Array.isArray(rows[0].grantable_roles) || rows[0].grantable_roles.length || !Array.isArray(rows[0].usage_roles)
+    || JSON.stringify([...rows[0].usage_roles].sort()) !== JSON.stringify([...plan.usageRoles].sort()))
+    throw new Error('Final public schema privileges differ from current source')
+}
+
+async function verifyFinalPublicSchemaPrivileges(plan: CurrentPublicSchemaPrivileges, execute: (sql: string) => Promise<Row[]>) {
+  assertFinalPublicSchemaPrivileges(plan, await execute(`SELECT pg_catalog.pg_get_userbyid(n.nspowner) AS owner,
+    ARRAY(SELECT r.rolname::text FROM pg_catalog.pg_roles r WHERE r.rolname IN (${applicationRoles.map(literal).join(',')})
+      AND pg_catalog.has_schema_privilege(r.oid,n.oid,'CREATE')
+      UNION SELECT COALESCE(r.rolname::text,'PUBLIC') FROM pg_catalog.aclexplode(COALESCE(n.nspacl,pg_catalog.acldefault('n',n.nspowner))) a
+        LEFT JOIN pg_catalog.pg_roles r ON r.oid=a.grantee WHERE a.privilege_type='CREATE' AND a.grantee<>n.nspowner) AS create_roles,
+    ARRAY(SELECT COALESCE(r.rolname::text,'PUBLIC') FROM pg_catalog.aclexplode(COALESCE(n.nspacl,pg_catalog.acldefault('n',n.nspowner))) a
+      LEFT JOIN pg_catalog.pg_roles r ON r.oid=a.grantee WHERE a.is_grantable AND a.grantee<>n.nspowner) AS grantable_roles,
+    ARRAY(SELECT COALESCE(r.rolname::text,'PUBLIC') FROM pg_catalog.aclexplode(COALESCE(n.nspacl,pg_catalog.acldefault('n',n.nspowner))) a
+      LEFT JOIN pg_catalog.pg_roles r ON r.oid=a.grantee WHERE a.privilege_type='USAGE' AND a.grantee<>n.nspowner
+      AND (a.grantee=0 OR r.rolname IN (${applicationRoles.map(literal).join(',')})) ORDER BY 1) AS usage_roles
+    FROM pg_catalog.pg_namespace n WHERE n.nspname='public'`))
+}
+
 /** Parser slices exclude statement delimiters. Append a delimiter outside any
  * trailing line comment while retaining every byte of each source program. */
 export function joinCurrentSecurityPrograms(programs: readonly string[]) {
@@ -414,23 +656,32 @@ export async function planCurrentFrameworkProgram(
 
 /** Failed DDL aborts PostgreSQL's transaction, so record its safe context
  * before execution. Never include the SQL body, row values or driver detail. */
-export async function executeCurrentFrameworkProgram(statements: readonly string[], execute: (sql: string) => Promise<Row[]>) {
+async function executeCurrentSourceProgram(label: string, statements: readonly string[], execute: (sql: string) => Promise<Row[]>) {
   const actor = (await execute('SELECT current_user::text AS current_role'))[0]?.current_role
   if (typeof actor !== 'string' || !/^[a-z_][a-z0-9_]{0,62}$/.test(actor)) throw new Error('Current framework executor identity is invalid')
   for (const [index, sql] of statements.entries()) {
     const parsed = await parseSql(sql)
     if (!parsed.ok || parsed.statements.length !== 1) throw new Error('Current framework statement must parse individually')
     const node = parsed.statements[0], declaration = node.CreateFunctionStmt
-    const signature = declaration ? declaration.funcname.map((part: ParseNode) => part.String.sval).join('.') + '()' : undefined
+    const signature = declaration ? declaration.funcname.map((part: ParseNode) => part.String.sval).join('.') + (declaration.parameters?.length ? '' : '()') : undefined
     try { await execute(sql) } catch (error) {
       const message = error instanceof Error ? error.message : ''
       const code = (error as { code?: unknown })?.code
       const denied = /^permission denied for (function|table|schema) ([a-z_][a-z0-9_.]*)$/.exec(message)
-      throw new Error('Current framework statement failed: ' + JSON.stringify({ index: index + 1, kind: Object.keys(node)[0], currentRole: actor,
+      throw new Error(`Current ${label} statement failed: ` + JSON.stringify({ index: index + 1, kind: Object.keys(node)[0], currentRole: actor,
         function: signature, sqlstate: typeof code === 'string' && /^[A-Z0-9]{5}$/.test(code) ? code : 'UNKNOWN',
         ...(denied ? { deniedKind: denied[1], deniedIdentity: denied[2] } : {}) }))
     }
   }
+}
+
+export async function executeCurrentFrameworkProgram(statements: readonly string[], execute: (sql: string) => Promise<Row[]>) {
+  return executeCurrentSourceProgram('framework', statements, execute)
+}
+
+export async function executeCurrentCompanionPrograms(programs: readonly string[], execute: (sql: string) => Promise<Row[]>) {
+  for (const [index, source] of programs.entries())
+    await executeCurrentSourceProgram(`companion ${index + 1}`, (await compilerTexts(source)).map(entry => entry.sql), execute)
 }
 
 /** Names here come only from independently verified released preimages. The
@@ -445,6 +696,8 @@ export function assertNoPartialCurrentSecurityFunctions(
 
 async function validateCurrent(client: pg.Client, root: string, plan: V2Plan, projection: Awaited<ReturnType<typeof currentSecurityProjection>>, currentContract: ReturnType<typeof canonicalCatalogContractFromOverlay>, major: CanonicalPostgresMajor) {
   const execute = async (sql: string) => (await client.query(sql)).rows
+  await verifyCurrentUuidDefaultBindings(plan, async (sql, parameters) =>
+    (await client.query<CurrentUuidDefaultRow>(sql, parameters)).rows)
   const currentSecurity = { ...(await buildCurrentCatalogOverlay(plan)).currentSecurity }
   const failures = await inspectCanonicalAuthCatalog(execute, { postgresMajor: major, currentSecurity })
   failures.push(...(await inspectFrameworkPrivileges(client, { postgresMajor: major })).failures)
@@ -463,6 +716,10 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   const version = await execute(CURRENT_SECURITY_QUERIES.version), major = canonicalPostgresMajor(version[0]?.server_version_num)
   const plan = loadCurrentSecurityPlan(options.repoRoot), projection = await currentSecurityProjection(plan, { postgresMajor: major })
   const overlay = await buildCurrentCatalogOverlay(plan), currentContract = canonicalCatalogContractFromOverlay(baseContract, overlay)
+  const schemaPrograms = [...projection.security.statements, ...projection.programs.auth, projection.programs.framework,
+    ...projection.programs.companions, ...projection.programs.guardFunctions, ...projection.programs.messaging,
+    projection.programs.externalRead.prepare, projection.programs.externalRead.install, projection.programs.externalRead.authBridge, projection.programs.externalRead.finalize]
+  const publicSchemaPrivileges = await projectCurrentPublicSchemaPrivileges(schemaPrograms)
   const sourcePlanDigest = hash(JSON.stringify(plan))
   await execute("SELECT pg_catalog.pg_advisory_xact_lock(hashtextextended('union-eyes-current-security-v1',0))")
   const actor = await execute(CURRENT_SECURITY_QUERIES.actor)
@@ -478,12 +735,19 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   const anchor = await execute(CURRENT_SECURITY_QUERIES.anchor)
   if (anchor[0]?.anchor) {
     if (presentTargets.length !== sourceTargets.length) throw new Error('Current source relation prerequisites are missing')
+    await verifyCurrentRlsFlags(plan, execute)
+    await verifyFinalPublicSchemaPrivileges(publicSchemaPrivileges, execute)
     const verified = await validateCurrent(client, options.repoRoot, plan, projection, currentContract, major)
     return { profile: 'CURRENT_SOURCE', applied: false, sourcePlanDigest, currentContract, ...verified,
       securityPolicyVerified: true, runtimePrivilegesVerified: true, applicationReady: false }
   }
+  const externalProducer = await buildCurrentExternalReadSource()
+  const externalCreation = await planCurrentExternalReadCreation(plan, relations, await externalReadObjectConflicts(client, externalProducer), externalProducer)
   const identityProducer = await buildCurrentPlatformIdentitySource()
-  const identityCreation = await planCurrentIdentityCreation(plan, relations, await identityObjectConflicts(client, identityProducer), identityProducer)
+  const identityScope = { ...plan, tables: plan.tables.filter(table => !EXTERNAL_READ_STORAGE_TABLES.some(name => name === table.name)) }
+  const identityCreation = await planCurrentIdentityCreation(identityScope, relations, await identityObjectConflicts(client, identityProducer), identityProducer)
+  const rlsFlags = await planCurrentRlsFlagConvergence(plan, relations, { identityWillBeCreated: identityCreation.statements.length > 0,
+    externalReadWillBeCreated: externalCreation.statements.length > 0 })
   const authProducer = await buildCurrentPlatformAuthSource()
   const authColumns = await planCurrentAuthColumnConvergence(plan, await execute(CURRENT_SECURITY_QUERIES.authColumns) as unknown as CurrentAuthColumn[], relations,
     authProducer, readFileSync(path.join(options.repoRoot, legacyAuthReference.source), 'utf8'))
@@ -492,6 +756,13 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   if (legacyOwner.length !== 1 || legacyOwner[0].current_user !== originalRole || legacyOwner[0].session_user !== originalRole ||
       (legacyOwner[0].owner !== originalRole && actor[0].rolsuper !== true) || managedRoles.includes(String(legacyOwner[0].owner))) throw new Error('Trusted original relation owner cannot be established')
   const trustedOwner = String(legacyOwner[0].owner)
+  const containedParent = planContainedParentPolicyInstall(projection.requiredContainedParentPolicies,
+    await execute(CONTAINED_PARENT_POLICY_QUERY), { expectedOwner: trustedOwner, requireForcedRls: false })
+  const signaturePolicyDrops = await planLegacyRewardsSignaturePolicyRetirement(options.repoRoot,
+    await execute(LEGACY_REWARDS_SIGNATURE_POLICY_QUERY) as unknown as ExistingFrameworkPolicy[])
+  const schemaExecution = await planRetainedPublicSchemaExecution(schemaPrograms, await currentPublicSchemaAuthority(execute, major), trustedOwner)
+  const activationTransition = await planLegacyActivationConstraintTransition(options.repoRoot,
+    await execute(LEGACY_SECURITY_PREIMAGE_QUERIES.activationConstraint) as unknown as LegacyActivationConstraint[])
   const authDrops = planLegacyAuthPolicyReplacement(await execute(LEGACY_SECURITY_PREIMAGE_QUERIES.authPolicies) as unknown as LegacyAuthPolicy[])
   const journalDrops = planLegacyJournalReplacement(references['apps/union-eyes/db/migrations-platform/0049_claim_status_transitions.sql'], trustedOwner,
     await execute(LEGACY_SECURITY_PREIMAGE_QUERIES.journalFunctions) as unknown as LegacyJournalFunction[], await execute(LEGACY_SECURITY_PREIMAGE_QUERIES.journalTriggers) as unknown as LegacyJournalTrigger[])
@@ -501,11 +772,13 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   const metadataPolicySql: string[] = []
   const scopePolicySql: string[] = []
   const securityFunctionSql: string[] = []
+  const publicSchemaSql: string[] = []
   for (const source of projection.security.statements) for (const entry of await compilerTexts(source)) {
     const create = entry.node.CreatePolicyStmt
     if (create?.table?.schemaname === 'public' && b002.has(create.table.relname)) scopePolicySql.push(entry.sql)
     if (create?.policy_name === 'ue_platform_metadata_admin') metadataPolicySql.push(entry.sql)
     if (entry.node.CreateFunctionStmt || entry.node.GrantStmt?.objtype === 'OBJECT_FUNCTION' || entry.node.AlterDefaultPrivilegesStmt) securityFunctionSql.push(entry.sql)
+    if (publicSchemaGrant(entry.node)) publicSchemaSql.push(entry.sql)
   }
   const frameworkPolicySource = joinCurrentSecurityPrograms([projection.programs.framework, ...metadataPolicySql])
   const frameworkRows = await execute(await frameworkPolicyPreimageQuery(frameworkPolicySource))
@@ -517,7 +790,8 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
     FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles member ON member.oid=m.member JOIN pg_catalog.pg_roles target ON target.oid=m.roleid
     WHERE member.rolname IN (${managedRoles.map(literal).join(',')})`)
   const rolePlan = await planCanonicalRoleConvergence(await execute(CURRENT_SECURITY_QUERIES.roles) as unknown as RoleRow[], members as unknown as MembershipRow[], major)
-  const ownership = planCanonicalOwnership({ tables: plan.tables.filter(table => table.name !== identityCreation.table.name) }, relations, await execute(CURRENT_SECURITY_QUERIES.sequences), trustedOwner)
+  const ownership = planCanonicalOwnership({ tables: plan.tables.filter(table => table.name !== identityCreation.table.name
+    && !EXTERNAL_READ_STORAGE_TABLES.some(name => name === table.name)) }, relations, await execute(CURRENT_SECURITY_QUERIES.sequences), trustedOwner)
   const schemaSql = await schemaOwnerSql(await execute(CURRENT_SECURITY_QUERIES.schemas), trustedOwner)
   // Reject unrecognized current-function fragments before any convergence write.
   const admittedExistingNames = new Set([...MESSAGING_GUARD_FUNCTIONS.map(fn => `public.${fn.name}`), ...authorityAdoption.adoptedNames, 'public.ue_claims_stamp_status_changed', 'public.ue_claims_record_status_transition', 'user_management.ue_framework_actor_authorized', 'user_management.ue_framework_admin_authorized'])
@@ -541,7 +815,7 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   for (const row of relations) {
     if (row.schema === 'public' && !currentContract.payload.entries.some(entry => entry.table === row.table)) throw new Error('Unclassified existing public relation refuses convergence')
   }
-  for (const sql of [...authDrops, ...journalDrops, ...ledgerDrop]) await execute(sql)
+  for (const sql of [...authDrops, ...journalDrops, ...ledgerDrop, ...signaturePolicyDrops]) await execute(sql)
   const schemas = await execute(CURRENT_SECURITY_QUERIES.schemas)
   const recipients = ['PUBLIC', ...applicationRoles.map(q)].join(',')
   for (const schema of schemas) {
@@ -569,46 +843,66 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   }
   await execute('SET LOCAL ROLE ue_v2_owner')
   await execute('SET LOCAL search_path=pg_catalog,public,pg_temp')
+  const executeSource = (sql: string) => executeRetainedPublicSchemaProgram(sql, schemaExecution, execute)
   for (const sql of await planVerifiedFrameworkExecuteRestore(projection.functions, frameworkReplacements)) await execute(sql)
   for (const sql of authColumns.statements) await execute(sql)
-  // These canonical producers use an unqualified public table identity. Pin
-  // its creation namespace, then restore the security-program search path.
-  await execute('SET LOCAL search_path=public,pg_catalog,pg_temp')
+  // Public remains the table creation namespace; implicit pg_catalog wins
+  // function lookup over a retained public alias. Restore security path below.
+  await execute(CURRENT_PUBLIC_TABLE_CREATION_SQL)
   for (const sql of identityCreation.statements) await execute(sql)
+  for (const sql of externalCreation.statements) await execute(sql)
   await execute('SET LOCAL search_path=pg_catalog,public,pg_temp')
   for (const sql of identityCreation.denyStatements) await execute(sql)
-  await execute('GRANT USAGE ON SCHEMA public TO union_eyes_runtime,union_eyes_system')
+  for (const sql of externalCreation.denyStatements) await execute(sql)
+  for (const sql of rlsFlags.statements) await execute(sql)
+  for (const sql of publicSchemaSql) await executeSource(sql)
   for (const sql of projection.publicTableGrants) await execute(sql)
   for (const sql of securityFunctionSql) await execute(sql)
-  for (const sql of projection.programs.auth) await execute(sql)
+  for (const sql of projection.programs.auth) await executeSource(sql)
   const omissions = new Set(policyOmissions.map(entry => entry.originalSql))
-  await executeCurrentFrameworkProgram(await planCurrentFrameworkProgram(projection.programs.framework, projection.functions, frameworkReplacements, policyOmissions), execute)
+  await executeCurrentFrameworkProgram(await planCurrentFrameworkProgram(projection.programs.framework, projection.functions, frameworkReplacements, policyOmissions), executeSource)
   for (const sql of metadataPolicySql) if (!omissions.has(sql)) await execute(sql)
-  for (const sql of projection.programs.companions) await execute(sql)
+  await executeCurrentCompanionPrograms(projection.programs.companions, executeSource)
+  await asRole(originalRole, projection.programs.externalRead.prepare)
+  await executeCurrentSourceProgram('external read', (await compilerTexts(projection.programs.externalRead.install)).map(entry => entry.sql), executeSource)
+  await executeCurrentSourceProgram('external auth bridge', (await compilerTexts(projection.programs.externalRead.authBridge)).map(entry => entry.sql), executeSource)
+  for (const sql of activationTransition.statements) await execute(sql)
   for (const contract of CURRENT_CASE_GUARDS) {
     const guards = planPhysicalGuards(contract, await inspectPhysicalGuards(contract, execute))
-    for (const sql of guards.statements) await execute(sql)
+    for (const sql of guards.statements) await executeSource(sql)
   }
   const messaging = planMessagingPhysicalGuards(await inspectMessagingPhysicalCatalog(execute))
   if (messaging.missingTables.length) throw new Error('Current messaging relation prerequisites are missing')
-  for (const sql of messaging.statements) await execute(sql)
+  for (const sql of messaging.statements) await executeSource(sql)
   // Existing dedicated-reader-owned functions survive replacement by OID.
   // Quarantine may have removed an owner's ordinary EXECUTE privilege too;
   // restore the exact source ACL, including that owner entry, rather than
   // inheriting the old object's post-replacement ACL by accident.
   for (const fn of projection.functions) {
-    for (const sql of sourceFunctionExecuteSql(fn)) await execute(sql)
+    for (const sql of sourceFunctionExecuteSql(fn)) {
+      if (fn.owner === EXTERNAL_READ_OWNER) await asRole(EXTERNAL_READ_OWNER, sql)
+      else await execute(sql)
+    }
   }
+  await asRole(originalRole, projection.programs.externalRead.finalize)
   for (const sql of scopePolicySql) await execute(sql)
+  for (const sql of containedParent.statements) await execute(sql)
   const session = await planBusinessSessionRepair(execute)
   const sessionReceipt = await applyBusinessSessionRepair(execute, session.fingerprint, sql => asRole('uev2admin', sql))
-  await asRole(originalRole, 'ALTER SCHEMA public OWNER TO ue_v2_owner')
+  await asRole(schemaExecution.owner, 'ALTER SCHEMA public OWNER TO ue_v2_owner')
+  await verifyFinalPublicSchemaPrivileges(publicSchemaPrivileges, execute)
+  const rlsRelationsVerified = await verifyCurrentRlsFlags(plan, execute)
   const verified = await validateCurrent(client, options.repoRoot, plan, projection, currentContract, major)
   await execute(`SET LOCAL ROLE ${q(originalRole)}`)
   return { profile: 'CURRENT_SOURCE', applied: true, postgresMajor: major, sourcePlanDigest, currentContract,
     roleSourceDigest: rolePlan.sourceDigest, sourceFunctionCount: projection.functions.length, session: sessionReceipt,
-    identitySourceDigest: identityCreation.sourceDigest, sourceTablesCreated: [identityCreation.table.name],
+    identitySourceDigest: identityCreation.sourceDigest,
+    externalReadSourceDigest: externalCreation.sourceDigest,
+    sourceTablesCreated: [identityCreation.table.name, ...externalCreation.tables.map(table => table.name)],
+    containedParentPoliciesAdded: containedParent.targets,
     authColumnsAdded: authColumns.addedColumns, authSchemaSourceDigest: authColumns.sourceDigest,
+    activationConstraintReplaced: activationTransition.statements.length > 0, activationReferenceSha256: activationTransition.referenceSha256,
+    rlsFlagStatementsApplied: rlsFlags.statements.length, rlsRelationsVerified,
     ...verified, securityPolicyVerified: true, runtimePrivilegesVerified: true, applicationReady: false,
     businessDmlIssued: false, historicalSqlReplayed: false }
 }

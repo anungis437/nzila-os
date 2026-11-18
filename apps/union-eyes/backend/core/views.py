@@ -177,7 +177,7 @@ class AutomationExecutionLogViewSet(viewsets.ModelViewSet):
     """API endpoint for AutomationExecutionLog operations."""
     queryset = AutomationExecutionLog.objects.all()
     serializer_class = AutomationExecutionLogSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [DenyAllPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['rule_id', 'triggered_by']
     search_fields = ['triggered_by']

@@ -9,6 +9,9 @@
 
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
+import { zongaRows, type ZongaActionDb } from '@/queries/action-context'
+import { eligibleQualityTiers, safeMediaKey } from './quality-ceiling'
+import type { QualityTier as PlaybackQualityTier } from './types'
 import { logger } from '@/lib/logger'
 import { mediaConvertBreaker, resilientAwsCall } from './resilience'
 import type { MediaJobStatus, MediaJobType, QualityTier } from '@nzila/zonga-streaming-aws'
@@ -66,18 +69,20 @@ export async function submitMediaConvertJob(params: {
   const mcConfig = resolveMediaConvertConfig()
   const s3Config = resolveS3Config()
 
-  const result = await resilientAwsCall(mediaConvertBreaker, () =>
-    submitTranscodeJob(mcConfig, {
-      inputBucket: s3Config.rawBucket,
-      inputStorageKey: inputStorageKey,
-      assetId: contentAssetId,
-      orgId,
-      jobType,
-      qualities: [
-        { label: 'standard', bitrate: 128, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
-        { label: 'high', bitrate: 256, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
-      ],
-    }),
+  const result = await resilientAwsCall(
+    mediaConvertBreaker,
+    () =>
+      submitTranscodeJob(mcConfig, {
+        inputBucket: s3Config.rawBucket,
+        inputStorageKey: inputStorageKey,
+        assetId: contentAssetId,
+        orgId,
+        jobType,
+        qualities: [
+          { label: 'standard', bitrate: 128, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
+          { label: 'high', bitrate: 256, codec: 'aac', container: 'fmp4', sampleRate: 44100 },
+        ],
+      }),
     { timeoutMs: 15_000 },
   )
 
@@ -187,9 +192,7 @@ export async function getMediaJob(jobId: string): Promise<MediaJob | null> {
   return row ? mapJobRow(row) : null
 }
 
-export async function getMediaJobsForAsset(
-  contentAssetId: string,
-): Promise<MediaJob[]> {
+export async function getMediaJobsForAsset(contentAssetId: string): Promise<MediaJob[]> {
   const rows = await platformDb.execute(sql`
     SELECT * FROM zonga_media_jobs
     WHERE content_asset_id = ${contentAssetId}
@@ -198,9 +201,7 @@ export async function getMediaJobsForAsset(
   return (rows as unknown as Array<Record<string, unknown>>).map(mapJobRow)
 }
 
-export async function getMediaVariantsForAsset(
-  contentAssetId: string,
-): Promise<MediaVariant[]> {
+export async function getMediaVariantsForAsset(contentAssetId: string): Promise<MediaVariant[]> {
   const rows = await platformDb.execute(sql`
     SELECT * FROM zonga_media_variants
     WHERE content_asset_id = ${contentAssetId}
@@ -214,23 +215,23 @@ export async function getMediaVariantsForAsset(
  */
 export async function getBestMediaVariant(
   contentAssetId: string,
-  preferredQuality?: QualityTier,
+  preferredQuality: PlaybackQualityTier = 'high',
+  db: Pick<ZongaActionDb, 'execute'> = platformDb,
 ): Promise<MediaVariant | null> {
-  const tiers: QualityTier[] = preferredQuality
-    ? [preferredQuality, 'high', 'standard', 'preview']
-    : ['high', 'standard', 'preview']
-  const uniqueTiers = [...new Set(tiers)]
-
-  for (const tier of uniqueTiers) {
-    const rows = await platformDb.execute(sql`
-      SELECT * FROM zonga_media_variants
-      WHERE content_asset_id = ${contentAssetId}
-        AND quality_tier = ${tier}
-        AND status = 'ready'
-      LIMIT 1
-    `)
-    const row = (rows as unknown as Array<Record<string, unknown>>)[0]
-    if (row) return mapVariantRow(row)
+  const [availability] = zongaRows<{ relation: string | null }>(
+    await db.execute(
+      sql`SELECT pg_catalog.to_regclass('public.zonga_media_variants')::text AS relation`,
+    ),
+  )
+  if (!availability?.relation) return null
+  for (const tier of eligibleQualityTiers(preferredQuality)) {
+    const [row] = zongaRows<Record<string, unknown>>(
+      await db.execute(
+        sql`SELECT v.* FROM public.zonga_media_variants v JOIN public.zonga_content_assets a ON a.id=v.content_asset_id JOIN public.zonga_creators c ON c.id=a.creator_id WHERE v.content_asset_id=${contentAssetId}::uuid AND v.quality_tier=${tier} AND v.status='ready' AND v.provider IN('aws_mediaconvert','aws_cloudfront') AND a.status='published' AND c.status='active' AND(c.org_id IS NULL OR c.org_id=a.org_id) AND v.storage_key LIKE 'processed/'||a.org_id::text||'/'||a.id::text||'/%' ORDER BY v.id LIMIT 1 FOR SHARE OF v,a,c`,
+      ),
+    )
+    if (row && typeof row.storage_key === 'string' && safeMediaKey(row.storage_key))
+      return mapVariantRow(row)
   }
   return null
 }

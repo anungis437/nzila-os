@@ -20,7 +20,8 @@ import pg from 'pg'
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { authorityKernelEntries } from '../rls-storage-authority/authority-kernel'
+import { AUTHORITY_PHYSICAL_GUARDS } from '../auth/authority-physical-guards'
+import type { V2Plan } from '../../scripts/bootstrap-v2/source'
 import { ORG, ORG_B, newUuid, seedMembership, seedUser, U, type Db } from './authority-kernel-harness'
 import { daysAhead, kit, minutesAgo } from './authority-kernel-testkit'
 import { reconcileAuthorityAudit } from '../../lib/authority/store/audit'
@@ -34,10 +35,16 @@ import { DEFAULT_ISSUANCE_TEMPLATES } from '../../lib/authority/issuance'
 import { nativeActionUrl, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import type { Action } from '../../lib/authority/ontology'
 
-const URL = process.env.UE_AUTHORITY_COMBINED_URL
+const combinedOperatorUrl = process.env.UE_AUTHORITY_COMBINED_URL
+const currentPlan: V2Plan = JSON.parse(readFileSync(new URL('../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json', import.meta.url), 'utf8'))
+const authorityKernelEntries = AUTHORITY_PHYSICAL_GUARDS.tables.map(table => {
+  const declaration = currentPlan.tables.find(candidate => candidate.name === table)
+  if (!declaration?.authority) throw new Error(`CURRENT_AUTHORITY_DECLARATION_REQUIRED:${table}`)
+  return declaration.authority
+})
 const adapt = (c: pg.Client): Db => ({ exec: (sql) => c.query(sql), query: (sql, params) => c.query(sql, params as unknown[]) as never })
 
-describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the runtime role', () => {
+describe.skipIf(!combinedOperatorUrl)('authority kernel on the combined deployed schema, as the runtime role', () => {
   let admin: pg.Client
   let runtime: pg.Client
   let identityReader: pg.Client
@@ -54,7 +61,7 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     asUser(user, (t) => enforceAuthority(t, { memberships: activeMembershipSource }, { principalUserId: user, organizationId: org, action, resource: { type, id, organizationId: org } }, { authenticated: true }), org)
 
   beforeAll(async () => {
-    admin = new pg.Client({ connectionString: URL })
+    admin = new pg.Client({ connectionString: combinedOperatorUrl })
     await admin.connect()
     const d = adapt(admin)
     for (const [org, slug] of [[ORG, 'combined-a'], [ORG_B, 'combined-b']]) {
@@ -68,11 +75,11 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     await admin.query(`INSERT INTO grievances (id, organization_id, created_by, created_at, updated_at, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, priority, status, grievance_number, title, type, description)
       VALUES ($1,$2,$3, now(), now(), false, false, false, false, 'medium', 'open', 'AK-COMBINED-1', 'Authority kernel case', 'individual', 'Fixture case for the authority kernel proof') ON CONFLICT (id) DO NOTHING`, [CASE, ORG, U.member])
     await admin.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method) VALUES ($1,$2,now(),now(),'dues','cash') ON CONFLICT (id) DO NOTHING`, [PAYMENT, ORG])
-    runtime = new pg.Client({ connectionString: nativeActionUrl('union_eyes_runtime', URL) })
+    runtime = new pg.Client({ connectionString: nativeActionUrl('union_eyes_runtime', combinedOperatorUrl) })
     await runtime.connect()
     await runtime.query('SET ROLE union_eyes_runtime')
     // Separate SYSTEM credentials do not confer access to private authentication records.
-    identityReader = new pg.Client({ connectionString: nativeActionUrl('union_eyes_system', URL) })
+    identityReader = new pg.Client({ connectionString: nativeActionUrl('union_eyes_system', combinedOperatorUrl) })
     await identityReader.connect()
     await identityReader.query('SET ROLE union_eyes_system')
     // Commit seed records before the separate auth gateway issues each real parent session.
@@ -86,7 +93,12 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     await admin?.end().catch(() => undefined)
   })
 
-  it('live runtime privileges equal the storage-authority registry exactly, and never include DELETE', async () => {
+  it('live runtime privileges equal every current authority declaration exactly, and never include DELETE', async () => {
+    expect(authorityKernelEntries).toHaveLength(22)
+    expect(authorityKernelEntries.find(entry => entry.table === 'ue_authority_financial_steps')).toMatchObject({
+      classification: 'CONTAINED_NO_AUTHORITY', requiredRuntimePrivileges: [], requiredSystemPrivileges: [],
+      invocationAuthority: 'NONE', dbExecutionPrincipal: 'NONE',
+    })
     for (const e of authorityKernelEntries) {
       const live: string[] = []
       for (const p of ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE']) {
@@ -121,10 +133,17 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     // There is no valid parent session in ORG for this actor; canonical session issuance refuses it.
     await expect(m('user_other_org')).rejects.toMatchObject({ cause: { code: '42501' } })
     await admin.query(`UPDATE user_management.organization_users SET is_active = false WHERE user_id = $1 AND organization_id = $2`, [U.stranger, ORG])
-    await expect(m(U.stranger)).rejects.toMatchObject({ code: 'MEMBERSHIP_REQUIRED' })
+    try {
+      await expect(m(U.stranger)).rejects.toMatchObject({ code: 'MEMBERSHIP_REQUIRED' })
+    } finally {
+      await admin.query(`UPDATE user_management.organization_users SET is_active = true WHERE user_id = $1 AND organization_id = $2`, [U.stranger, ORG])
+    }
     await admin.query(`UPDATE user_management.users SET lifecycle_state = 'suspended' WHERE user_id = $1`, [U.officer])
-    await expect(m(U.officer)).rejects.toMatchObject({ code: 'MEMBERSHIP_REQUIRED' })
-    await admin.query(`UPDATE user_management.users SET lifecycle_state = 'active' WHERE user_id = $1`, [U.officer])
+    try {
+      await expect(m(U.officer)).rejects.toMatchObject({ code: 'MEMBERSHIP_REQUIRED' })
+    } finally {
+      await admin.query(`UPDATE user_management.users SET lifecycle_state = 'active' WHERE user_id = $1`, [U.officer])
+    }
   })
 
   it('keeps private identity tables denied while the live bearer authorizes bounded organization membership facts', async () => {
@@ -184,16 +203,16 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     const cols = (await admin.query(`SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payments'`)).rows.map((r) => r.column_name)
     expect(cols).toEqual(expect.arrayContaining(['amount', 'currency', 'member_id']))
     // Physical source-column presence is a schema check, not financial feature qualification.
-    expect(await asUser(U.treasurer, (t) => financeSourceReadiness(t))).toEqual({ ready: true, missingColumns: [] })
+    expect(await financeSourceReadiness(adapt(admin))).toEqual({ ready: true, missingColumns: [] })
     // The pre-existing row has no amount or payer; the currency is only the declared column default (platform 0018).
     expect((await admin.query(`SELECT amount, currency, member_id FROM payments WHERE id = $1`, [PAYMENT])).rows[0]).toEqual({ amount: null, currency: 'CAD', member_id: null })
     // Integrity: a negative amount and a malformed currency are refused by the database.
     await expect(admin.query(`UPDATE payments SET amount = -1 WHERE id = $1`, [PAYMENT])).rejects.toThrow(/payments_amount_non_negative/)
     await expect(admin.query(`UPDATE payments SET currency = 'cad' WHERE id = $1`, [PAYMENT])).rejects.toThrow(/payments_currency_iso_shape/)
-    // A payment with no amount cannot be registered as a finance transaction, and nobody is authorized against it.
+    // Retained financial records never activate financial persistence in the base release.
     await expect(
       asUser(U.treasurer, (t) => recordFinancialStep(t, { memberships: activeMembershipSource }, { organizationId: ORG, actorUserId: U.treasurer, paymentId: PAYMENT, step: 'registered', accountId: newUuid(), requiredApprovals: 1 })),
-    ).rejects.toThrow()
+    ).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED', status: 501 })
     for (const action of ['finance:view', 'finance:prepare', 'finance:approve', 'finance:execute', 'finance:reconcile'] as Action[]) {
       for (const who of [U.president, U.treasurer, U.member]) {
         expect((await decide(who, action, 'financial_transaction', PAYMENT)).effect, `${who} ${action}`).toBe('deny')
@@ -201,9 +220,20 @@ describe.skipIf(!URL)('authority kernel on the combined deployed schema, as the 
     }
     // Positive finance persistence is outside the base-release fixture; foreign tenant writes remain denied.
     const OWN = newUuid()
+    const foreignPaymentId = newUuid()
+    const financialHistory = async () => {
+      const result: Record<string, unknown> = {}
+      for (const table of ['payments', 'ue_authority_financial_steps', 'ue_authority_events', 'audit_logs']) {
+        result[table] = (await admin.query(`SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) AS rows FROM public.${table} t`)).rows[0].rows
+      }
+      return result
+    }
+    const beforeForeignAttempt = await financialHistory()
     await expect(
-      asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method, amount, currency) VALUES ($1,$2,now(),now(),'dues','cash','1.00','CAD')`, [newUuid(), ORG_B])),
-    ).rejects.toThrow(/row-level security/)
+      asUser(U.treasurer, (t) => t.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method, amount, currency) VALUES ($1,$2,now(),now(),'dues','cash','1.00','CAD')`, [foreignPaymentId, ORG_B])),
+    ).rejects.toMatchObject({ code: '42501' })
+    expect((await admin.query('SELECT id FROM public.payments WHERE id=$1', [foreignPaymentId])).rows).toEqual([])
+    expect(await financialHistory()).toEqual(beforeForeignAttempt)
     // Complete operator-seeded fixture data still supplies no financial authority to the actor.
     await admin.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method, amount, currency, member_id) VALUES ($1,$2,now(),now(),'dues','cash','125.50','CAD',$3)`, [OWN, ORG, U.member])
     // Unregistered, so still denied even with a complete source row.

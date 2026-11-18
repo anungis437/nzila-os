@@ -6,6 +6,7 @@ import { hash, root } from './source'
 import { canonicalRoleSqlList } from './execution-roles'
 import { AUTH_EXECUTION_ROLES } from './auth-sql'
 import { FRAMEWORK_ROLES } from './framework-contract'
+import { EXTERNAL_READ_OWNER } from '../../lib/external-resource-read/source'
 
 export function producerOwnsSharedRole(producerId: string, canonicalId: string): boolean {
   const roles: readonly string[] =
@@ -13,6 +14,8 @@ export function producerOwnsSharedRole(producerId: string, canonicalId: string):
       ? Object.values(AUTH_EXECUTION_ROLES)
       : producerId === 'CANONICAL_FRAMEWORK_EXECUTION'
         ? Object.values(FRAMEWORK_ROLES)
+        : producerId === 'CANONICAL_EXTERNAL_READ_EXECUTION'
+          ? [EXTERNAL_READ_OWNER]
         : []
   const [kind, ...names] = canonicalId.split(':')
   return (
@@ -205,7 +208,8 @@ export async function beginManifestTrace(client: pg.Client) {
     await execute()
     if (
       producer.canonicalId === 'CANONICAL_AUTH_EXECUTION' ||
-      producer.canonicalId === 'CANONICAL_FRAMEWORK_EXECUTION'
+      producer.canonicalId === 'CANONICAL_FRAMEWORK_EXECUTION' ||
+      producer.canonicalId === 'CANONICAL_EXTERNAL_READ_EXECUTION'
     ) {
       const shared = (await inspectNativeAddresses(client)).filter((entry) =>
         producerOwnsSharedRole(producer.canonicalId, entry.canonicalId),

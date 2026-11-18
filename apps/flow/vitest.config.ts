@@ -58,6 +58,7 @@ export default defineProject({
       '@nzila/os-core/policy': resolve(ROOT, 'packages/os-core/src/policy/index.ts'),
       '@nzila/os-core/config': resolve(ROOT, 'packages/os-core/src/config/env.ts'),
       '@nzila/os-core/retention': resolve(ROOT, 'packages/os-core/src/retention/index.ts'),
+      '@nzila/os-core/secrets': resolve(ROOT, 'packages/os-core/src/secrets/keyvault.ts'),
       '@nzila/os-core': resolve(ROOT, 'packages/os-core/src/index.ts'),
       '@nzila/commerce-core': resolve(ROOT, 'packages/commerce-core/src/index.ts'),
       '@nzila/commerce-core/types': resolve(ROOT, 'packages/commerce-core/src/types/index.ts'),

@@ -3,8 +3,9 @@ import { AUTH_BRIDGE_PURPOSE, AUTH_BRIDGE_PROVIDER_NO_PARENT } from '@nzila/db/a
 import { ROLE_CAPACITIES } from '../../lib/authority/capacity'
 import { ACTIVE_CASE_RESPONDENT_SQL, ACTIVE_RECUSAL_SQL } from '../../lib/authority/common'
 import { TENANT_LOCAL_ROLES, getRoleLevel, UserRole } from '../../lib/auth/roles'
+import { CASE_AUTHORITY_READER_ROLE, CASE_AUTHORITY_READER_SCHEMA_QUERY_FIELDS, compileCaseAuthorityReaderSchemaSql, hasBoundedCaseAuthorityReaderSchema } from './case-authority-reader-schema'
 
-export const QUEUED_CASE_MAIL_OWNER = 'nzila_auth_org_authority_reader'
+export const QUEUED_CASE_MAIL_OWNER = CASE_AUTHORITY_READER_ROLE
 export const QUEUED_CASE_MAIL_OPERATION = 'ue.case-mail.intent/1'
 export const QUEUED_CASE_MAIL_MINT = 'public.ue_issue_queued_case_mail'
 export const QUEUED_CASE_MAIL_CONTEXT = 'public.ue_queued_case_mail_context'
@@ -159,7 +160,7 @@ BEGIN
   SELECT id,organization_id,payload,created_at,status INTO q FROM public.notification_queue WHERE id=queue_id;
   IF NOT FOUND OR q.status<>'pending' OR q.payload->>'queueId'<>q.id::text OR q.payload->>'organizationId'<>q.organization_id::text
     OR q.payload->>'queuedBy' IS DISTINCT FROM actor OR NOT isfinite(q.created_at) OR q.created_at>clock_timestamp()
-    OR NOT user_management.auth_business_org_authorized(q.organization_id,NULL::text[])
+    OR user_management.auth_business_org_authorized(q.organization_id,NULL::text[]) IS NOT TRUE
     THEN RAISE EXCEPTION 'QUEUED_MAIL_MINT_DENIED' USING ERRCODE='42501'; END IF;
   PERFORM set_config('ue.mail_org',q.organization_id::text,true);
   PERFORM set_config('ue.mail_actor',actor,true);
@@ -259,6 +260,7 @@ export function compileQueuedCaseMailSql(): string {
     IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='${reader}' AND NOT(rolsuper OR rolbypassrls OR rolcanlogin OR rolinherit OR rolcreatedb OR rolcreaterole))
       THEN RAISE EXCEPTION 'Existing bounded canonical reader is required'; END IF;
   END $ue_mail$;
+  ${compileCaseAuthorityReaderSchemaSql()}
   GRANT CREATE ON SCHEMA public TO ${reader};
   GRANT SELECT(user_id,email,email_verified,locale) ON user_management.users TO ${reader};
   GRANT SELECT(id,organization_id,payload,created_at,status) ON public.notification_queue TO ${reader};
@@ -317,6 +319,7 @@ export const QUEUED_CASE_MAIL_FUNCTION_SIGNATURES = [
   'ue_load_queued_case_mail(jsonb)','ue_issue_queued_case_mail(uuid)','ue_queued_case_mail_context(uuid,text)',
 ] as const
 export const QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY = `SELECT p.oid::text,p.proname AS name,p.prosrc AS body,
+  ${CASE_AUTHORITY_READER_SCHEMA_QUERY_FIELDS},
   pg_get_userbyid(p.proowner) AS owner,p.prosecdef AS definer,p.provolatile,p.proconfig,p.proargtypes::text AS args,
   p.prorettype::regtype::text AS returns,p.proleakproof,p.proretset,p.proisstrict,l.lanname AS language,
   has_function_privilege('public',p.oid,'EXECUTE') AS public_execute,
@@ -333,7 +336,7 @@ export function queuedCaseMailFunctionViolations(rows: Record<string,unknown>[])
   const errors:string[]=[]
   for(const expected of EXPECTED_MAIL_FUNCTIONS){
     const matches=rows.filter(row=>row.name===expected.name), row=matches[0]
-    if(matches.length!==1||!row||row.body!==expected.body||row.owner!==expected.owner||row.definer!==expected.definer
+    if(matches.length!==1||!row||!hasBoundedCaseAuthorityReaderSchema(row)||row.body!==expected.body||row.owner!==expected.owner||row.definer!==expected.definer
       ||row.args!==expected.args||row.returns!==expected.returns||row.provolatile!=='v'||row.language!=='plpgsql'
       ||row.proleakproof!==false||row.proretset!==false||row.proisstrict!==false
       ||JSON.stringify(row.proconfig)!==JSON.stringify(['search_path=pg_catalog'])||row.public_execute!==false

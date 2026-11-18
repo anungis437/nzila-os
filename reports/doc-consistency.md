@@ -1,15 +1,15 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-11-18T00:05:29.330Z
+> Generated: 2026-11-18T13:22:37.839Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 2814 |
-| Total Findings | 3061 |
+| Total Findings | 3060 |
 | Errors | 0 |
-| Warnings | 1226 |
+| Warnings | 1225 |
 | Info | 1835 |
 
 ## Findings by Rule
@@ -17,12 +17,12 @@
 | Rule | Count |
 |------|-------|
 | naming-inconsistency | 1790 |
-| stale-reference | 1031 |
+| stale-reference | 1030 |
 | missing-package-readme | 111 |
 | stale-package-ref | 84 |
 | stale-date | 45 |
 
-## stale-reference (1031)
+## stale-reference (1030)
 
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:124` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -838,7 +838,6 @@
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:137` — Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:138` — Possible broken link: [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
 - 🟡 `docs/categories/stakeholders/tutorials/first-app.md:135` — Possible broken link: [Reference: Package Catalogue](../reference/packages.md)
-- 🟡 `docs/documentation-index.md:1894` — Possible broken link: [docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md](docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 - 🟡 `governance/business/README.md:158` — Possible broken link: [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/business/README.md:159` — Possible broken link: [Migration Plan](../MIGRATION_PLAN.md)
@@ -1541,9 +1540,9 @@
 - ℹ️ `docs/categories/platform-and-operations/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md:64` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md:83` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:78` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:97` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:98` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:79` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:136` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:137` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_FRAGMENTATION_MATRIX.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_FRAGMENTATION_MATRIX.md:13` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_FRAGMENTATION_MATRIX.md:89` — "orgId" should be "org_id" (tenant identifier)
@@ -2962,7 +2961,7 @@
 - ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 215 days old — may be stale
 - ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 215 days old — may be stale
 - ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 215 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 208 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 209 days old — may be stale
 - ℹ️ `docs/compliance/soc2/vendor-assurance-index.md:5` — Document date "2026-06-07" is 164 days old — may be stale
 - ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 177 days old — may be stale
 - ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 177 days old — may be stale

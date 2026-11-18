@@ -1,5 +1,6 @@
-import { redirect } from 'next/navigation';
-import { requireUser, hasMinRole, isCongressOrg } from '@/lib/api-auth-guard';
+import { redirect } from 'next/navigation'
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable'
+import { requireUser, hasMinRole, isCongressOrg } from '@/lib/api-auth-guard'
 
 /**
  * Finance routes layout — blocks congress-type organizations.
@@ -11,17 +12,25 @@ import { requireUser, hasMinRole, isCongressOrg } from '@/lib/api-auth-guard';
  * EXECUTIVE-CANONICAL-2.1 §VII); the floor matches the /api/finance handlers.
  */
 export default async function FinanceLayout({
-  children,
+  children: _children,
+  params,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
+  params?: Promise<{ locale: string }>
 }) {
-  const user = await requireUser();
-  const minRoleMet = await hasMinRole('secretary_treasurer');
+  const user = await requireUser()
+  const minRoleMet = await hasMinRole('secretary_treasurer')
   if (await isCongressOrg(user.organizationId)) {
-    redirect('/dashboard/clc');
+    redirect('/dashboard/clc')
   }
   if (!minRoleMet) {
-    redirect('/dashboard');
+    redirect('/dashboard')
   }
-  return <>{children}</>;
+  const locale = (await params)?.locale
+  return (
+    <CapabilityUnavailable
+      locale={locale}
+      capability={locale?.startsWith('fr') ? 'Finances et cotisations' : 'Finance and dues'}
+    />
+  )
 }

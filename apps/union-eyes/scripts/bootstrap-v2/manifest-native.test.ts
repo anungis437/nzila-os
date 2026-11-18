@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
@@ -15,8 +16,7 @@ import { buildNativeManifest, renderManifestMarkdown, verifyDeclaredSource } fro
 import { qualifyNativePrivileges } from './manifest-security'
 import type { V2Plan } from './source'
 
-const image =
-  'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337'
+const image = nativePostgres16Image()
 const docker = (args: string[]) =>
   execFileSync('docker', args, { encoding: 'utf8', timeout: 120000 }).trim()
 const roleSql =
@@ -216,10 +216,14 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
             [[], { name: 'manifest_composite_key', fields: ['id', 'title'] }],
             [[], { name: 'manifest_conditional_key', fields: ['id', 'title'] }],
           ],
-          databaseConstraints: [{
-            name: 'manifest_conditional_key', kind: 'UniqueConstraint', deferredUniqueIndex: true,
-            sql: 'CREATE UNIQUE INDEX "manifest_conditional_key" ON "manifest_example" ("id", "title") WHERE "later" IS NULL',
-          }],
+          databaseConstraints: [
+            {
+              name: 'manifest_conditional_key',
+              kind: 'UniqueConstraint',
+              deferredUniqueIndex: true,
+              sql: 'CREATE UNIQUE INDEX "manifest_conditional_key" ON "manifest_example" ("id", "title") WHERE "later" IS NULL',
+            },
+          ],
         })
         const reference = await database('reference')
         await reference.query('BEGIN')
@@ -259,21 +263,39 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
           execution: lateIndexExecution.order,
           basis: 'DDL_EVENT',
         })
-        const triggerExecution = trace.executions.find((entry) => entry.producer.sql.includes('CREATE CONSTRAINT TRIGGER manifest_late_audit'))!
+        const triggerExecution = trace.executions.find((entry) =>
+          entry.producer.sql.includes('CREATE CONSTRAINT TRIGGER manifest_late_audit'),
+        )!
         const constraint = object('constraint:manifest_example.manifest_late_audit')
-        expect(constraint.CREATION_ORDER).toEqual({ execution: triggerExecution.order, basis: 'DDL_EVENT' })
-        expect(constraint.SOURCE_AUTHORITY[0].producerId).toBe(triggerExecution.producer.canonicalId)
-        expect(constraint.CREATION_ORDER.execution).toBeGreaterThan(object('relation:public.manifest_example').CREATION_ORDER.execution!)
+        expect(constraint.CREATION_ORDER).toEqual({
+          execution: triggerExecution.order,
+          basis: 'DDL_EVENT',
+        })
+        expect(constraint.SOURCE_AUTHORITY[0].producerId).toBe(
+          triggerExecution.producer.canonicalId,
+        )
+        expect(constraint.CREATION_ORDER.execution).toBeGreaterThan(
+          object('relation:public.manifest_example').CREATION_ORDER.execution!,
+        )
         // Without the exact trigger event, its older relation dependency cannot
         // manufacture a producer or creation order for this constraint.
         const missingConstraintTrace = {
           ...trace,
-          events: trace.events.filter((event) => !(
-            event.order === triggerExecution.order && event.address.startsWith('pg_constraint:')
-          )),
+          events: trace.events.filter(
+            (event) =>
+              !(
+                event.order === triggerExecution.order && event.address.startsWith('pg_constraint:')
+              ),
+          ),
         }
-        expect((await buildNativeManifest(reference, plan, expected, missingConstraintTrace, { image, roleSql })).blockers)
-          .toContain('SOURCE_BINDING_UNRESOLVED:constraint:manifest_example.manifest_late_audit')
+        expect(
+          (
+            await buildNativeManifest(reference, plan, expected, missingConstraintTrace, {
+              image,
+              roleSql,
+            })
+          ).blockers,
+        ).toContain('SOURCE_BINDING_UNRESOLVED:constraint:manifest_example.manifest_late_audit')
         expect(
           object('column_default:public.manifest_example.title').CREATION_ORDER.execution,
         ).toBeGreaterThan(object('column:public.manifest_example.title').CREATION_ORDER.execution!)
@@ -287,12 +309,22 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
         const fresh = await database('fresh')
         expect((await applyV2(fresh, plan, expected)).result).toBe('CREATED')
         expect((await applyV2(fresh, plan, expected)).result).toBe('NOOP')
-        await fresh.query('DROP INDEX public.manifest_conditional_key; CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NOT NULL')
-        expect((await verifyDeclaredSource(fresh, plan)).mismatches).toContain('CURRENT_MODEL_NAMED_CONSTRAINT_MISMATCH:manifest_example:manifest_conditional_key')
-        await fresh.query('DROP INDEX public.manifest_conditional_key; CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NULL')
+        await fresh.query(
+          'DROP INDEX public.manifest_conditional_key; CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NOT NULL',
+        )
+        expect((await verifyDeclaredSource(fresh, plan)).mismatches).toContain(
+          'CURRENT_MODEL_NAMED_CONSTRAINT_MISMATCH:manifest_example:manifest_conditional_key',
+        )
+        await fresh.query(
+          'DROP INDEX public.manifest_conditional_key; CREATE UNIQUE INDEX manifest_conditional_key ON public.manifest_example(id,title) WHERE later IS NULL',
+        )
         await fresh.query('DROP INDEX public.manifest_composite_key')
-        expect((await verifyDeclaredSource(fresh, plan)).mismatches).toContain('CURRENT_MODEL_COMPOSITE_KEY_MISMATCH:manifest_example:id,title')
-        await fresh.query('CREATE UNIQUE INDEX manifest_composite_key ON public.manifest_example(id,title)')
+        expect((await verifyDeclaredSource(fresh, plan)).mismatches).toContain(
+          'CURRENT_MODEL_COMPOSITE_KEY_MISMATCH:manifest_example:id,title',
+        )
+        await fresh.query(
+          'CREATE UNIQUE INDEX manifest_composite_key ON public.manifest_example(id,title)',
+        )
         const initialized = await fresh.query(
           'INSERT INTO public.manifest_defaults DEFAULT VALUES RETURNING id,created_at',
         )

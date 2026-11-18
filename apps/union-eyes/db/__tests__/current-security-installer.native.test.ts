@@ -13,6 +13,10 @@ import pg from 'pg'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { installUnionEyesCurrentSecurity } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
 import { runCurrentSecurityBootstrapStage } from '../../../../tooling/scripts/lib/union-eyes-bootstrap-stages.mjs'
+import { AUTHORITY_PHYSICAL_GUARDS } from '../auth/authority-physical-guards'
+import { auditAuthorityMutation } from '../../lib/authority/store/audit'
+import type { SqlExecutor } from '../../lib/authority/store/executor'
+import { EXTERNAL_READ_STORAGE_TABLES } from '../../lib/external-resource-read/source'
 
 const enabled = process.env.UE_CURRENT_SECURITY_NATIVE_PROOF === '1'
 const root = path.resolve(__dirname, '../../../..')
@@ -30,6 +34,7 @@ const preserved = {
   case: '9a7e0000-0000-4000-8000-000000000002',
   claim: '9a7e0000-0000-4000-8000-000000000003',
   transition: '9a7e0000-0000-4000-8000-000000000004',
+  inactiveRule: '9a7e0000-0000-4000-8000-000000000005',
   user: 'ue_native_preserved_member',
 } as const
 
@@ -52,10 +57,13 @@ async function securityDigest(client: pg.Client) {
       WHERE n.nspname IN('public','user_management','audit_security') AND a.attnum<>0 AND NOT a.attisdropped ORDER BY 1,2,a.attnum`,
     `SELECT n.nspname,c.relname,p.polname,p.polcmd,p.polpermissive,p.polroles::text,pg_get_expr(p.polqual,p.polrelid) AS using,pg_get_expr(p.polwithcheck,p.polrelid) AS check
       FROM pg_policy p JOIN pg_class c ON c.oid=p.polrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN('public','user_management','audit_security') ORDER BY 1,2,3`,
-    `SELECT n.nspname,p.oid::regprocedure::text AS identity,pg_get_userbyid(p.proowner) AS owner,pg_get_functiondef(p.oid) AS definition,p.proacl::text
+    `SELECT n.nspname,p.oid::text AS oid,p.oid::regprocedure::text AS identity,pg_get_userbyid(p.proowner) AS owner,pg_get_functiondef(p.oid) AS definition,p.proacl::text
       FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN('public','user_management') AND p.prokind IN('f','p') ORDER BY 1,2`,
     `SELECT n.nspname,c.relname,t.tgname,pg_get_triggerdef(t.oid) AS definition,t.tgenabled FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
       JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN('public','user_management','audit_security') AND NOT t.tgisinternal ORDER BY 1,2,3`,
+    `SELECT n.nspname,c.relname,k.oid::text,k.conname,k.contype,k.convalidated,k.condeferrable,k.condeferred,k.connoinherit,pg_get_constraintdef(k.oid) AS definition
+      FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+      WHERE n.nspname IN('public','user_management','audit_security') ORDER BY n.nspname,c.relname,k.conname,k.oid`,
     `SELECT r.rolname,r.rolsuper,r.rolbypassrls,r.rolcanlogin,r.rolinherit,r.rolcreatedb,r.rolcreaterole FROM pg_roles r ORDER BY 1`,
     `SELECT row_to_json(m)::text AS membership FROM pg_auth_members m ORDER BY m.member,m.roleid`,
     `SELECT nspname,pg_get_userbyid(nspowner) AS owner,nspacl::text FROM pg_namespace WHERE nspname IN('public','user_management','audit_security') ORDER BY 1`,
@@ -105,9 +113,31 @@ async function seedAndAssertPreservedLegacyRows(client: pg.Client) {
     VALUES($1,$2,$3,$4,$5,true,now(),now()+interval '1 day')`, [session, preserved.user, preserved.organization, token, createHash('sha256').update(token).digest('hex')])
   await client.query(`INSERT INTO user_management.magic_links(id,email,user_id,organization_id,purpose,token_hash,expires_at,attempts,created_at)
     VALUES($1,'preserved-member@example.invalid',$2,$3,'login',$4,now()+interval '1 hour',0,now())`, [randomUUID(), preserved.user, preserved.organization, createHash('sha256').update('synthetic-magic-' + token).digest('hex')])
+  await client.query('BEGIN')
+  try {
+    await client.query("SELECT set_config('app.current_user_id',$1,true)", [preserved.user])
+    // Inactive synthetic storage history, never an adopted rule or entitlement.
+    await client.query(`INSERT INTO public.ue_authority_issuance_rules(id,organization_id,domain,operation,issuer_capacities,version,status,source_instrument,drafted_by)
+      VALUES($1,$2,'platform_staff','revoke',ARRAY['executive'],1,'draft','PENDING_INSTITUTIONAL_SOURCE',$3)`, [preserved.inactiveRule, preserved.organization, preserved.user])
+    const covered = await auditAuthorityMutation(client as unknown as SqlExecutor, {
+      organizationId: preserved.organization, action: 'qa.legacy-preservation.rule-draft',
+      resourceType: 'ue_authority_issuance_rules', resourceId: preserved.inactiveRule,
+      details: { purpose: 'Synthetic inactive legacy history; no adopted authority' },
+    })
+    expect(covered).toHaveLength(1)
+    await client.query('COMMIT')
+  } catch (error) { await client.query('ROLLBACK'); throw error }
   expect((await client.query(`SELECT count(*)::int AS count FROM user_management.users WHERE user_id=$1`, [preserved.user])).rows).toEqual([{ count: 1 }])
   expect((await client.query(`SELECT count(*)::int AS count FROM user_management.organization_users WHERE user_id=$1 AND organization_id=$2`, [preserved.user, preserved.organization])).rows).toEqual([{ count: 1 }])
   expect((await client.query(`SELECT count(*)::int AS count FROM user_management.user_sessions WHERE session_id=$1 AND user_id=$2`, [session, preserved.user])).rows).toEqual([{ count: 1 }])
+  expect((await client.query('SELECT domain,status,activated_at FROM public.ue_authority_issuance_rules WHERE id=$1', [preserved.inactiveRule])).rows)
+    .toEqual([{ domain: 'platform_staff', status: 'draft', activated_at: null }])
+}
+
+async function activeStaffCounts(client: pg.Client) {
+  return (await client.query(`SELECT
+    (SELECT count(*)::int FROM public.ue_authority_issuance_rules WHERE domain='platform_staff' AND status='active') AS rules,
+    (SELECT count(*)::int FROM public.ue_authority_mandates WHERE kind='platform_staff' AND status='active') AS mandates`)).rows[0]
 }
 
 describe.runIf(enabled)('actual released-to-current security transaction on owned native PostgreSQL', () => {
@@ -178,24 +208,49 @@ describe.runIf(enabled)('actual released-to-current security transaction on owne
     expect(await historyDigest(admin!, history)).toEqual(history)
   })
 
+  it('restores the exact old constraint and full state after a real failure following its current replacement', async () => {
+    const definition = AUTHORITY_PHYSICAL_GUARDS.constraints.find(spec => spec.table_name === 'ue_authority_issuance_rules' && spec.name === 'ue_authority_rule_activation_chk')!.definition
+    await admin!.query(`CREATE FUNCTION ue_native_proof.fail_after_activation_replacement() RETURNS event_trigger LANGUAGE plpgsql AS $proof$
+      BEGIN IF current_user='ue_v2_owner' AND EXISTS(SELECT FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid
+        JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='ue_authority_issuance_rules'
+        AND k.conname='ue_authority_rule_activation_chk' AND pg_get_constraintdef(k.oid)='${definition.replaceAll("'", "''")}')
+        THEN RAISE EXCEPTION 'UE_NATIVE_FORCED_AFTER_ACTIVATION_REPLACEMENT'; END IF; END $proof$`)
+    await admin!.query("CREATE EVENT TRIGGER ue_native_fail_after_activation_replacement ON ddl_command_end WHEN TAG IN('ALTER TABLE') EXECUTE FUNCTION ue_native_proof.fail_after_activation_replacement()")
+    const before = await securityDigest(admin!), history = await historyDigest(admin!)
+    await expect(runCurrentSecurityBootstrapStage(operator!, installUnionEyesCurrentSecurity, { repoRoot: root })).rejects.toThrow('UE_NATIVE_FORCED_AFTER_ACTIVATION_REPLACEMENT')
+    expect(await securityDigest(admin!)).toBe(before)
+    expect(await historyDigest(admin!, history)).toEqual(history)
+  })
+
   it('qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP', async () => {
     const history = await historyDigest(admin!)
+    const staffBefore = await activeStaffCounts(admin!)
+    const frameworkOids = (await admin!.query(`SELECT p.proname,p.oid::text FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+      WHERE n.nspname='user_management' AND p.proname IN('ue_framework_actor_authorized','ue_framework_admin_authorized') ORDER BY p.proname`)).rows
     const first = await runCurrentSecurityBootstrapStage(operator!, installUnionEyesCurrentSecurity, { repoRoot: root })
     expect(first.applied).toBe(true)
     expect(first.securityPolicyVerified).toBe(true)
     expect(first.runtimePrivilegesVerified).toBe(true)
     expect(first.businessDmlIssued).toBe(false)
-    expect(first.sourceTablesCreated).toEqual(['platform_identity_bindings'])
-    expect((await admin!.query(`SELECT pg_get_userbyid(c.relowner) AS owner,c.relrowsecurity,c.relforcerowsecurity
-      FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='platform_identity_bindings'`)).rows)
-      .toEqual([{ owner: 'ue_v2_owner', relrowsecurity: true, relforcerowsecurity: true }])
-    expect((await admin!.query('SELECT count(*)::int AS count FROM public.platform_identity_bindings')).rows).toEqual([{ count: 0 }])
+    expect(first.activationConstraintReplaced).toBe(true)
+    const createdTables = ['platform_identity_bindings', ...EXTERNAL_READ_STORAGE_TABLES]
+    expect(first.sourceTablesCreated).toEqual(createdTables)
+    expect((await admin!.query(`SELECT c.relname AS table,pg_get_userbyid(c.relowner) AS owner,c.relrowsecurity,c.relforcerowsecurity
+      FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname=ANY($1::text[]) ORDER BY c.relname`, [createdTables])).rows)
+      .toEqual([...createdTables].sort().map(table => ({ table, owner: 'ue_v2_owner', relrowsecurity: true, relforcerowsecurity: true })))
+    for (const table of createdTables)
+      expect((await admin!.query(`SELECT count(*)::int AS count FROM public.${quote(table)}`)).rows).toEqual([{ count: 0 }])
     expect(first.authColumnsAdded).toEqual(['user_management.magic_links.consumed_ip', 'user_management.magic_links.requested_ip', 'user_management.magic_links.requested_user_agent'])
     expect(history.columns['user_management.magic_links']).not.toContain('requested_ip')
     const addedValues = (await admin!.query(`SELECT count(*)::int AS total,count(*) FILTER(WHERE consumed_ip IS NOT NULL OR requested_ip IS NOT NULL OR requested_user_agent IS NOT NULL)::int AS invented FROM user_management.magic_links`)).rows[0]
     expect(addedValues.total).toBeGreaterThan(0)
     expect(addedValues.invented).toBe(0)
     expect(await historyDigest(admin!, history)).toEqual(history)
+    expect(await activeStaffCounts(admin!)).toEqual(staffBefore)
+    process.stdout.write(JSON.stringify({ proof: 'owned-legacy-current-security-active-platform-staff-counts', before: staffBefore, after: await activeStaffCounts(admin!),
+      statement: 'Counts prove preservation on this synthetic fixture, not that accepted active platform_staff mandates are inert.' }) + '\n')
+    expect((await admin!.query(`SELECT p.proname,p.oid::text FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+      WHERE n.nspname='user_management' AND p.proname IN('ue_framework_actor_authorized','ue_framework_admin_authorized') ORDER BY p.proname`)).rows).toEqual(frameworkOids)
     const currentHistory = await historyDigest(admin!)
     const beforeSecond = await securityDigest(admin!)
     const second = await runCurrentSecurityBootstrapStage(operator!, installUnionEyesCurrentSecurity, { repoRoot: root })

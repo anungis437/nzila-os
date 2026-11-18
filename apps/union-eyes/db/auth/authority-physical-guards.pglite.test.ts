@@ -74,7 +74,7 @@ async function fixture(guardContract: PhysicalGuardContract = contract) {
 }
 
 describe('base authority physical source contract', () => {
-  it('pins immutable reference bytes while declaring only base case/governance tables', () => {
+  it('pins immutable reference bytes and protects the complete retained authority family', () => {
     const root = path.resolve(__dirname, '../../../..')
     for (const ref of contract.references)
       expect(
@@ -82,8 +82,10 @@ describe('base authority physical source contract', () => {
           .update(readFileSync(path.join(root, ref.path)))
           .digest('hex'),
       ).toBe(ref.sha256)
-    expect(contract.tables).not.toContain('ue_authority_financial_steps')
-    expect(contract.tables).not.toContain('ue_authority_workaid_matters')
+    expect(contract.tables).toContain('ue_authority_financial_steps')
+    expect(contract.tables).toContain('ue_authority_workaid_matters')
+    expect(contract.tables).toContain('ue_authority_workaid_consent_text_proposals')
+    expect(contract.tables).toHaveLength(22)
     expect(contract.functions.every((fn) => fn.path.endsWith('pg_temp'))).toBe(true)
   })
   it('records actual distinct votes, satisfies only after the threshold, rejects direct resolution/self-approval/forgery, and retains audit coverage', async () => {

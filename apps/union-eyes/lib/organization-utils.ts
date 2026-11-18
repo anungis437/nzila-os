@@ -1,37 +1,37 @@
 /**
  * Organization Utilities
- * 
+ *
  * Helper functions for organization management and resolution.
  * Supports hierarchical multi-tenancy with organizations.
  */
 
-import { db } from "@/db/db";
-import { organizations, organizationMembers } from "@/db/schema-organizations";
-import { eq, and, isNull } from "drizzle-orm";
+import { db } from '@/db/db'
+import { organizations, organizationMembers } from '@/db/schema-organizations'
+import { eq, and, isNull } from 'drizzle-orm'
 import { authOrganizationUsers } from '@nzila/db/schema'
-import { cookies } from "next/headers";
-import { escapeHatchActive } from '@/lib/runtime/production-guard';
-import { logger } from "./logger";
-import { withSystemContext } from "@/lib/db/with-rls-context";
-import { currentStateContextEnabled } from "@/lib/auth/canonical-bootstrap";
-import { getCanonicalOrganizationContext } from "@/lib/auth/canonical-context";
+import { cookies } from 'next/headers'
+import { escapeHatchActive } from '@/lib/runtime/production-guard'
+import { logger } from './logger'
+import { withSystemContext } from '@/lib/db/with-rls-context'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
 /**
  * Default organization ID used for system operations
  * This points to the Default Organization where all users start
  */
-export const DEFAULT_ORGANIZATION_ID = "458a56cb-251a-4c91-a0b5-81bb8ac39087"; // Default Organization
+export const DEFAULT_ORGANIZATION_ID = '458a56cb-251a-4c91-a0b5-81bb8ac39087' // Default Organization
 
-const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
  * BR-6: Raised when organization context cannot be resolved and no safe
  * fallback is permitted. Callers must treat this as fail-closed (no data).
  */
 export class OrgContextRequiredError extends Error {
-  readonly code = 'ORG_CONTEXT_REQUIRED';
+  readonly code = 'ORG_CONTEXT_REQUIRED'
   constructor(message: string) {
-    super(message);
-    this.name = 'OrgContextRequiredError';
+    super(message)
+    this.name = 'OrgContextRequiredError'
   }
 }
 
@@ -46,26 +46,26 @@ export class OrgContextRequiredError extends Error {
  * never honours it, whatever the variable says (lib/runtime/production-guard.ts).
  */
 export function isDefaultOrgFallbackAllowed(): boolean {
-  return escapeHatchActive('UE_ALLOW_DEFAULT_ORG');
+  return escapeHatchActive('UE_ALLOW_DEFAULT_ORG')
 }
 
 /**
  * Get the organization ID for a given user ID.
- * 
+ *
  * Priority order:
  * 1. Selected organization from cookie
  * 2. User's primary organization
  * 3. User's first available organization
  * 4. Default organization (fallback)
- * 
+ *
  * @param userId - The auth provider user ID (from auth())
  * @returns The organization ID UUID string
  * @throws Error if no organization found
  */
 export async function getOrganizationIdForUser(userId: string): Promise<string> {
   if (currentStateContextEnabled()) {
-    const context = await getCanonicalOrganizationContext({ expectedActorUserId: userId });
-    return context.organizationId;
+    const context = await getCanonicalOrganizationContext({ expectedActorUserId: userId })
+    return context.organizationId
   }
   // Bootstrap membership lookups must run on the system connection.
   // Tenant RLS on organization_members / organization_users is org-scoped;
@@ -74,214 +74,213 @@ export async function getOrganizationIdForUser(userId: string): Promise<string> 
   // not weaken tenant RLS for later scoped work. Filter by userId remains in
   // every WHERE clause.
   return withSystemContext(async () => {
-  try {
-    // Check if user selected a specific organization UUID via cookie.
-    // This is the primary selector written by the client org switcher.
-    const cookieStore = await cookies();
-    const selectedOrgId =
-      cookieStore.get("selected_org_id")?.value ||
-      cookieStore.get("selected_organization_id")?.value;
+    try {
+      // Check if user selected a specific organization UUID via cookie.
+      // This is the primary selector written by the client org switcher.
+      const cookieStore = await cookies()
+      const selectedOrgId =
+        cookieStore.get('selected_org_id')?.value ||
+        cookieStore.get('selected_organization_id')?.value
 
-    // The cookie is client-controlled and may be stale (a value from another identity provider, "org_xxx"): one that is not a uuid names no
-    // organization, and sending it to a uuid column would fail the whole resolution for this person until they cleared the cookie.
-    if (selectedOrgId && UUID_SHAPE.test(selectedOrgId)) {
-      const orgById = await db
-        .select({ id: organizations.id })
-        .from(organizations)
-        .where(eq(organizations.id, selectedOrgId))
-        .limit(1);
-
-      if (orgById.length > 0) {
-        // The cookie only names a candidate. Membership in that organization is
-        // required. PLATFORM_ADMIN_USER_IDS and an administrator role in the
-        // default organization do not select a different organization from a
-        // client-controlled cookie.
-        const userOrg = await db
-          .select({ organizationId: organizationMembers.organizationId })
-          .from(organizationMembers)
-          .where(
-            and(
-              eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, orgById[0].id),
-              eq(organizationMembers.status, 'active'),
-              isNull(organizationMembers.deletedAt),
-            )
-          )
-          .limit(1);
-
-        if (userOrg.length > 0) {
-          return orgById[0].id;
-        }
-
-        const authUserOrg = await db
-          .select({ organizationId: authOrganizationUsers.organizationId })
-          .from(authOrganizationUsers)
-          .where(
-            and(
-              eq(authOrganizationUsers.userId, userId),
-              eq(authOrganizationUsers.organizationId, orgById[0].id),
-              eq(authOrganizationUsers.isActive, true),
-            )
-          )
+      // The cookie is client-controlled and may be stale (a value from another identity provider, "org_xxx"): one that is not a uuid names no
+      // organization, and sending it to a uuid column would fail the whole resolution for this person until they cleared the cookie.
+      if (selectedOrgId && UUID_SHAPE.test(selectedOrgId)) {
+        const orgById = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.id, selectedOrgId))
           .limit(1)
 
-        if (authUserOrg.length > 0) {
-          return orgById[0].id
+        if (orgById.length > 0) {
+          // The cookie only names a candidate. Membership in that organization is
+          // required. PLATFORM_ADMIN_USER_IDS and an administrator role in the
+          // default organization do not select a different organization from a
+          // client-controlled cookie.
+          const userOrg = await db
+            .select({ organizationId: organizationMembers.organizationId })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.userId, userId),
+                eq(organizationMembers.organizationId, orgById[0].id),
+                eq(organizationMembers.status, 'active'),
+                isNull(organizationMembers.deletedAt),
+              ),
+            )
+            .limit(1)
+
+          if (userOrg.length > 0) {
+            return orgById[0].id
+          }
+
+          const authUserOrg = await db
+            .select({ organizationId: authOrganizationUsers.organizationId })
+            .from(authOrganizationUsers)
+            .where(
+              and(
+                eq(authOrganizationUsers.userId, userId),
+                eq(authOrganizationUsers.organizationId, orgById[0].id),
+                eq(authOrganizationUsers.isActive, true),
+              ),
+            )
+            .limit(1)
+
+          if (authUserOrg.length > 0) {
+            return orgById[0].id
+          }
         }
       }
-    }
 
-    // Secondary selector: slug-based cookie.
-    const selectedOrgSlug = cookieStore.get("active-organization")?.value;
-    
-    if (selectedOrgSlug) {
-      // Look up organization by slug to get UUID
+      // Secondary selector: slug-based cookie.
+      const selectedOrgSlug = cookieStore.get('active-organization')?.value
+
+      if (selectedOrgSlug) {
+        // Look up organization by slug to get UUID
+        const org = await db
+          .select({ id: organizations.id })
+          .from(organizations)
+          .where(eq(organizations.slug, selectedOrgSlug))
+          .limit(1)
+
+        if (org.length > 0) {
+          // Same membership rule as the organization-id cookie. A slug cookie is
+          // not an administrator grant.
+          const userOrg = await db
+            .select({ organizationId: organizationMembers.organizationId })
+            .from(organizationMembers)
+            .where(
+              and(
+                eq(organizationMembers.userId, userId),
+                eq(organizationMembers.organizationId, org[0].id),
+                eq(organizationMembers.status, 'active'),
+                isNull(organizationMembers.deletedAt),
+              ),
+            )
+            .limit(1)
+
+          if (userOrg.length > 0) {
+            return org[0].id
+          }
+
+          const authUserOrg = await db
+            .select({ organizationId: authOrganizationUsers.organizationId })
+            .from(authOrganizationUsers)
+            .where(
+              and(
+                eq(authOrganizationUsers.userId, userId),
+                eq(authOrganizationUsers.organizationId, org[0].id),
+                eq(authOrganizationUsers.isActive, true),
+              ),
+            )
+            .limit(1)
+
+          if (authUserOrg.length > 0 && authUserOrg[0].organizationId) {
+            return authUserOrg[0].organizationId
+          }
+        }
+      }
+
+      // No explicit org selection: prefer platform auth primary membership.
+      // This keeps organization context aligned with centralized auth state and
+      // avoids default local org rows masking true tenant membership.
+      const authPrimaryOrg = await db
+        .select({ organizationId: authOrganizationUsers.organizationId })
+        .from(authOrganizationUsers)
+        .where(
+          and(
+            eq(authOrganizationUsers.userId, userId),
+            eq(authOrganizationUsers.isActive, true),
+            eq(authOrganizationUsers.isPrimary, true),
+          ),
+        )
+        .limit(1)
+
+      if (authPrimaryOrg.length > 0 && authPrimaryOrg[0].organizationId) {
+        return authPrimaryOrg[0].organizationId
+      }
+
+      // Fallback to any active platform auth membership.
+      const authUserOrgs = await db
+        .select({ organizationId: authOrganizationUsers.organizationId })
+        .from(authOrganizationUsers)
+        .where(
+          and(eq(authOrganizationUsers.userId, userId), eq(authOrganizationUsers.isActive, true)),
+        )
+        .limit(1)
+
+      if (authUserOrgs.length > 0 && authUserOrgs[0].organizationId) {
+        return authUserOrgs[0].organizationId
+      }
+
+      // Legacy fallback: local organization membership.
+      const userOrgs = await db
+        .select({ organizationId: organizationMembers.organizationId })
+        .from(organizationMembers)
+        .where(
+          and(
+            eq(organizationMembers.userId, userId),
+            eq(organizationMembers.status, 'active'),
+            isNull(organizationMembers.deletedAt),
+          ),
+        )
+        .limit(1)
+
+      if (userOrgs.length > 0 && userOrgs[0].organizationId) {
+        return userOrgs[0].organizationId
+      }
+
+      // BR-6: no verified organization membership was found for this user.
+      // A silent fallback to the Default Organization is FORBIDDEN in production
+      // because it lets an unscoped identity read another tenant's substrate.
+      // Fail closed in production; the default org is permitted ONLY in an
+      // explicitly-enabled non-production/demo context.
+      if (!isDefaultOrgFallbackAllowed()) {
+        throw new OrgContextRequiredError(
+          `No verified organization membership for user ${userId}. ` +
+            `Refusing silent Default Organization fallback (BR-6). ` +
+            `Set UE_ALLOW_DEFAULT_ORG=true in a non-production environment to allow it.`,
+        )
+      }
+
+      // Explicit non-production fallback to the default organization.
+      const organizationId = DEFAULT_ORGANIZATION_ID
+
+      // Validate that organization exists
       const org = await db
         .select({ id: organizations.id })
         .from(organizations)
-        .where(eq(organizations.slug, selectedOrgSlug))
-        .limit(1);
-      
-      if (org.length > 0) {
-        // Same membership rule as the organization-id cookie. A slug cookie is
-        // not an administrator grant.
-        const userOrg = await db
-          .select({ organizationId: organizationMembers.organizationId })
-          .from(organizationMembers)
-          .where(
-            and(
-              eq(organizationMembers.userId, userId),
-              eq(organizationMembers.organizationId, org[0].id),
-              eq(organizationMembers.status, 'active'),
-              isNull(organizationMembers.deletedAt),
-            )
-          )
-          .limit(1);
-        
-        if (userOrg.length > 0) {
-          return org[0].id;
-        }
+        .where(eq(organizations.id, organizationId))
+        .limit(1)
 
-        const authUserOrg = await db
-          .select({ organizationId: authOrganizationUsers.organizationId })
-          .from(authOrganizationUsers)
-          .where(
-            and(
-              eq(authOrganizationUsers.userId, userId),
-              eq(authOrganizationUsers.organizationId, org[0].id),
-              eq(authOrganizationUsers.isActive, true),
-            )
-          )
-          .limit(1)
-
-        if (authUserOrg.length > 0 && authUserOrg[0].organizationId) {
-          return authUserOrg[0].organizationId
-        }
+      if (org.length === 0) {
+        throw new Error(
+          `Organization ${organizationId} not found. Run database migrations to seed organizations.`,
+        )
       }
-    }
-    
-    // No explicit org selection: prefer platform auth primary membership.
-    // This keeps organization context aligned with centralized auth state and
-    // avoids default local org rows masking true tenant membership.
-    const authPrimaryOrg = await db
-      .select({ organizationId: authOrganizationUsers.organizationId })
-      .from(authOrganizationUsers)
-      .where(
-        and(
-          eq(authOrganizationUsers.userId, userId),
-          eq(authOrganizationUsers.isActive, true),
-          eq(authOrganizationUsers.isPrimary, true),
-        )
-      )
-      .limit(1)
 
-    if (authPrimaryOrg.length > 0 && authPrimaryOrg[0].organizationId) {
-      return authPrimaryOrg[0].organizationId
+      return organizationId
+    } catch (error) {
+      logger.error('Error resolving organization for user', error)
+      throw error
     }
-
-    // Fallback to any active platform auth membership.
-    const authUserOrgs = await db
-      .select({ organizationId: authOrganizationUsers.organizationId })
-      .from(authOrganizationUsers)
-      .where(
-        and(
-          eq(authOrganizationUsers.userId, userId),
-          eq(authOrganizationUsers.isActive, true),
-        )
-      )
-      .limit(1)
-
-    if (authUserOrgs.length > 0 && authUserOrgs[0].organizationId) {
-      return authUserOrgs[0].organizationId
-    }
-
-    // Legacy fallback: local organization membership.
-    const userOrgs = await db
-      .select({ organizationId: organizationMembers.organizationId })
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.userId, userId),
-          eq(organizationMembers.status, 'active'),
-          isNull(organizationMembers.deletedAt),
-        ),
-      )
-      .limit(1);
-    
-    if (userOrgs.length > 0 && userOrgs[0].organizationId) {
-      return userOrgs[0].organizationId;
-    }
-    
-    // BR-6: no verified organization membership was found for this user.
-    // A silent fallback to the Default Organization is FORBIDDEN in production
-    // because it lets an unscoped identity read another tenant's substrate.
-    // Fail closed in production; the default org is permitted ONLY in an
-    // explicitly-enabled non-production/demo context.
-    if (!isDefaultOrgFallbackAllowed()) {
-      throw new OrgContextRequiredError(
-        `No verified organization membership for user ${userId}. ` +
-          `Refusing silent Default Organization fallback (BR-6). ` +
-          `Set UE_ALLOW_DEFAULT_ORG=true in a non-production environment to allow it.`,
-      );
-    }
-
-    // Explicit non-production fallback to the default organization.
-    const organizationId = DEFAULT_ORGANIZATION_ID;
-    
-    // Validate that organization exists
-    const org = await db
-      .select({ id: organizations.id })
-      .from(organizations)
-      .where(eq(organizations.id, organizationId))
-      .limit(1);
-    
-    if (org.length === 0) {
-      throw new Error(`Organization ${organizationId} not found. Run database migrations to seed organizations.`);
-    }
-    
-    return organizationId;
-  } catch (error) {
-    logger.error('Error resolving organization for user', error);
-    throw error;
-  }
-  });
+  })
 }
 
 /**
  * Get the default organization ID.
- * 
+ *
  * Use this function when you need an organization ID but don&apos;t have a user context,
  * such as in background jobs or system operations.
- * 
+ *
  * @returns The default organization ID
  */
 export function getDefaultOrganizationId(): string {
-  return DEFAULT_ORGANIZATION_ID;
+  return DEFAULT_ORGANIZATION_ID
 }
 
 /**
  * Validate that an organization exists in the database.
- * 
+ *
  * @param organizationId - The organization ID to validate
  * @returns True if the organization exists, false otherwise
  */
@@ -294,18 +293,18 @@ export async function validateOrganizationExists(organizationId: string): Promis
         .from(organizations)
         .where(eq(organizations.id, organizationId))
         .limit(1),
-    );
-    
-    return result.length > 0;
+    )
+
+    return result.length > 0
   } catch (error) {
-    logger.error('Error validating organization exists', error);
-    return false;
+    logger.error('Error validating organization exists', error)
+    return false
   }
 }
 
 /**
  * Get basic organization information.
- * 
+ *
  * @param organizationId - The organization ID
  * @returns Organization info or null if not found
  */
@@ -323,27 +322,31 @@ export async function getOrganizationInfo(organizationId: string) {
         .from(organizations)
         .where(eq(organizations.id, organizationId))
         .limit(1),
-    );
-    
-    return result[0] || null;
+    )
+
+    return result[0] || null
   } catch (error) {
-    logger.error('Error fetching organization info', error);
-    return null;
+    logger.error('Error fetching organization info', error)
+    return null
   }
 }
 
 /**
  * Check if a user has access to a specific organization.
- * 
+ *
  * @param userId - The auth provider user ID
  * @param organizationId - The organization ID to check
  * @returns True if the user has access, false otherwise
  */
 export async function userHasOrganizationAccess(
   userId: string,
-  organizationId: string
+  organizationId: string,
 ): Promise<boolean> {
   try {
+    if (currentStateContextEnabled()) {
+      await getCanonicalOrganizationContext({ organizationId, expectedActorUserId: userId })
+      return true
+    }
     // The person's own membership, looked up by their id and the organization's before any organization context exists: the system role reads it.
     const result = await withSystemContext((tx) =>
       tx
@@ -355,21 +358,21 @@ export async function userHasOrganizationAccess(
             eq(organizationMembers.organizationId, organizationId),
             eq(organizationMembers.status, 'active'),
             isNull(organizationMembers.deletedAt),
-          )
+          ),
         )
         .limit(1),
-    );
-    
-    return result.length > 0;
+    )
+
+    return result.length > 0
   } catch (error) {
-    logger.error('Error checking organization access', error);
-    return false;
+    logger.error('Error checking organization access', error)
+    return false
   }
 }
 
 /**
  * Get user's role in an organization from organizationMembers table
- * 
+ *
  * @param userId - The auth provider user ID
  * @param organizationId - The organization ID
  * @returns The user's role or null if not found
@@ -377,42 +380,57 @@ export async function userHasOrganizationAccess(
 /** All recognised sidebar roles — keep in sync with SidebarProps */
 export type AppRole =
   // Base Membership
-  | "member"
+  | 'member'
   // Front-line Representatives
-  | "steward" | "bargaining_committee"
+  | 'steward'
+  | 'bargaining_committee'
   // Specialized Representatives
-  | "health_safety_rep"
+  | 'health_safety_rep'
   // Senior Representatives
-  | "chief_steward" | "officer"
+  | 'chief_steward'
+  | 'officer'
   // Local Union Executives
-  | "president" | "vice_president" | "secretary_treasurer" | "admin"
+  | 'president'
+  | 'vice_president'
+  | 'secretary_treasurer'
+  | 'admin'
   // Union National Level
-  | "national_officer"
+  | 'national_officer'
   // System Administration
-  | "system_admin"
+  | 'system_admin'
   // Federation Level
-  | "fed_staff" | "fed_executive"
+  | 'fed_staff'
+  | 'fed_executive'
   // CLC National Level
-  | "clc_staff" | "clc_executive"
+  | 'clc_staff'
+  | 'clc_executive'
   // Legacy (backward compatibility)
-  | "congress_staff" | "federation_staff"
+  | 'congress_staff'
+  | 'federation_staff'
   // App Operations (Nzila platform)
-  | "app_owner" | "coo" | "cto" | "platform_lead"
-  | "customer_success_director" | "support_manager"
-  | "data_analytics_manager" | "billing_manager"
-  | "support_agent" | "data_analyst" | "billing_specialist";
+  | 'app_owner'
+  | 'coo'
+  | 'cto'
+  | 'platform_lead'
+  | 'customer_success_director'
+  | 'support_manager'
+  | 'data_analytics_manager'
+  | 'billing_manager'
+  | 'support_agent'
+  | 'data_analyst'
+  | 'billing_specialist'
 
 export async function getUserRoleInOrganization(
   userId: string,
-  organizationId: string
+  organizationId: string,
 ): Promise<AppRole | null> {
   try {
     if (currentStateContextEnabled()) {
       const context = await getCanonicalOrganizationContext({
         expectedActorUserId: userId,
         organizationId,
-      });
-      return context.role as AppRole;
+      })
+      return context.role as AppRole
     }
     const result = await withSystemContext((tx) =>
       tx
@@ -424,58 +442,58 @@ export async function getUserRoleInOrganization(
             eq(organizationMembers.organizationId, organizationId),
             eq(organizationMembers.status, 'active'),
             isNull(organizationMembers.deletedAt),
-          )
+          ),
         )
         .limit(1),
-    );
-    
+    )
+
     if (result.length === 0) {
-      return null;
+      return null
     }
-    
+
     // Map database roles to UI roles
-    const dbRole = result[0].role;
+    const dbRole = result[0].role
     const roleMap: Record<string, AppRole> = {
       // Union membership roles
-      'member': 'member',
-      'steward': 'steward',
-      'union_steward': 'steward',
-      'chief_steward': 'chief_steward',
-      'bargaining_committee': 'bargaining_committee',
-      'health_safety_rep': 'health_safety_rep',
-      'officer': 'officer',
-      'union_officer': 'officer',
-      'president': 'president',
-      'vice_president': 'vice_president',
-      'secretary_treasurer': 'secretary_treasurer',
-      'national_officer': 'national_officer',
-      'admin': 'admin',
-      'super_admin': 'admin',
-      'system_admin': 'system_admin',
+      member: 'member',
+      steward: 'steward',
+      union_steward: 'steward',
+      chief_steward: 'chief_steward',
+      bargaining_committee: 'bargaining_committee',
+      health_safety_rep: 'health_safety_rep',
+      officer: 'officer',
+      union_officer: 'officer',
+      president: 'president',
+      vice_president: 'vice_president',
+      secretary_treasurer: 'secretary_treasurer',
+      national_officer: 'national_officer',
+      admin: 'admin',
+      super_admin: 'admin',
+      system_admin: 'system_admin',
       // Federation / CLC
-      'congress_staff': 'congress_staff',
-      'federation_staff': 'federation_staff',
-      'fed_staff': 'fed_staff',
-      'fed_executive': 'fed_executive',
-      'clc_staff': 'clc_staff',
-      'clc_executive': 'clc_executive',
+      congress_staff: 'congress_staff',
+      federation_staff: 'federation_staff',
+      fed_staff: 'fed_staff',
+      fed_executive: 'fed_executive',
+      clc_staff: 'clc_staff',
+      clc_executive: 'clc_executive',
       // Nzila platform ops
-      'app_owner': 'app_owner',
-      'coo': 'coo',
-      'cto': 'cto',
-      'platform_lead': 'platform_lead',
-      'customer_success_director': 'customer_success_director',
-      'support_manager': 'support_manager',
-      'data_analytics_manager': 'data_analytics_manager',
-      'billing_manager': 'billing_manager',
-      'support_agent': 'support_agent',
-      'data_analyst': 'data_analyst',
-      'billing_specialist': 'billing_specialist',
-    };
-    
-    return roleMap[dbRole] || 'member';
+      app_owner: 'app_owner',
+      coo: 'coo',
+      cto: 'cto',
+      platform_lead: 'platform_lead',
+      customer_success_director: 'customer_success_director',
+      support_manager: 'support_manager',
+      data_analytics_manager: 'data_analytics_manager',
+      billing_manager: 'billing_manager',
+      support_agent: 'support_agent',
+      data_analyst: 'data_analyst',
+      billing_specialist: 'billing_specialist',
+    }
+
+    return roleMap[dbRole] || 'member'
   } catch (error) {
-    logger.error('Error fetching user role', error);
-    return null;
+    logger.error('Error fetching user role', error)
+    return null
   }
 }

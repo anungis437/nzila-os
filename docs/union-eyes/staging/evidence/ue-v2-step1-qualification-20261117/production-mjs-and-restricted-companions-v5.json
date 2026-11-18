@@ -1,0 +1,145 @@
+{
+  "recordedAt": "2026-11-18T09:09:29.488335+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "INTERIM_ACTUAL_PRODUCTION_MJS_AND_RESTRICTED_LOGIN_COMPANIONS_ON_OWNED_PG15_CLONE",
+  "result": "TWO_ACTUAL_CLI_INVOCATIONS_AND_SEVEN_COMPANION_PROBES_PASS",
+  "image": {
+    "id": "sha256:1aac5b49cefd627f02816141ca4ad012d6cc19460dfe02a9b5168a105be3fc53",
+    "reference": "postgres:15",
+    "postgresMajor": 15
+  },
+  "serverVersionNum": "150019",
+  "nativePrerequisite": {
+    "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-security-transition-v20.json",
+    "sha256": "d23bed04f6d0fbbb391105f39496e96b5471862364e86f9d238432d0a32deb3a",
+    "bytes": 2557
+  },
+  "rawPrivateReceipt": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_97465_61ee3566fac5/receipt.json",
+    "sha256": "de064cec4f9813ce8610a66f737b927118c70b50a6283e6f0ec927ee8b887460",
+    "bytes": 2499197
+  },
+  "launch": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-production-launch-v5.json",
+    "sha256": "e978dfab2aff1ca2e1b7174657efed95146cf2a2ab09b694b2a52146853d1603",
+    "bytes": 653
+  },
+  "snapshot": {
+    "bytes": 126408286,
+    "sourceBindings": 12973,
+    "sourceUnchanged": true,
+    "deletedSourcePaths": [
+      "apps/union-eyes/components/admin/clc-approval-workflow.tsx",
+      "apps/union-eyes/components/rewards/admin/awards-queue.tsx",
+      "apps/union-eyes/components/rewards/admin/budgets-list.tsx",
+      "apps/union-eyes/components/rewards/admin/create-award-dialog.tsx",
+      "apps/union-eyes/components/rewards/admin/create-award-type-dialog.tsx",
+      "apps/union-eyes/components/rewards/admin/create-budget-dialog.tsx",
+      "apps/union-eyes/components/rewards/admin/create-program-dialog.tsx",
+      "apps/union-eyes/components/rewards/admin/edit-program-dialog.tsx",
+      "apps/union-eyes/components/rewards/admin/programs-list.tsx",
+      "apps/union-eyes/components/rewards/admin/test-connection-button.tsx",
+      "apps/union-eyes/components/rewards/credit-timeline.tsx",
+      "apps/union-eyes/components/rewards/ledger-table.tsx",
+      "apps/union-eyes/components/rewards/redemption-form.tsx",
+      "apps/union-eyes/components/rewards/wallet-balance-card.tsx",
+      "apps/union-eyes/lib/__tests__/console-wrapper.test.ts",
+      "apps/union-eyes/lib/console-wrapper.ts",
+      "apps/union-eyes/lib/rewards/__tests__/admin-reads.test.ts",
+      "apps/union-eyes/lib/rewards/admin-reads.ts"
+    ]
+  },
+  "runs": [
+    {
+      "iteration": 1,
+      "exitCode": 0,
+      "applicationReady": false,
+      "physicalSchemaVerified": true,
+      "securityPolicyVerified": true,
+      "runtimePrivilegesVerified": true,
+      "runtimeGrantActivationApplied": true,
+      "migrationLedger": {
+        "digest": "b88b3987842049a02ce50e91b66131fc83ce2907b9e7bda240c9e7b97bba4ace",
+        "rowCount": 149
+      },
+      "rawLog": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_97465_61ee3566fac5/runner-1.log",
+        "sha256": "14c948914b5c9c58f9680e07f7d509d5675194d56d2d19efdca5e179d3d99d45",
+        "bytes": 13868
+      }
+    },
+    {
+      "iteration": 2,
+      "exitCode": 0,
+      "applicationReady": false,
+      "physicalSchemaVerified": true,
+      "securityPolicyVerified": true,
+      "runtimePrivilegesVerified": true,
+      "runtimeGrantActivationApplied": false,
+      "migrationLedger": {
+        "digest": "b88b3987842049a02ce50e91b66131fc83ce2907b9e7bda240c9e7b97bba4ace",
+        "rowCount": 149
+      },
+      "rawLog": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_97465_61ee3566fac5/runner-2.log",
+        "sha256": "14c948914b5c9c58f9680e07f7d509d5675194d56d2d19efdca5e179d3d99d45",
+        "bytes": 13868
+      }
+    }
+  ],
+  "restrictedSessionProbes": {
+    "scope": "restricted canonical-session companion execution only",
+    "finalCandidateQualified": false,
+    "probes": [
+      {
+        "name": "runtime-live-org-and-membership-reader",
+        "passed": true
+      },
+      {
+        "name": "runtime-assignee-positive-and-member-denial",
+        "passed": true
+      },
+      {
+        "name": "runtime-unissued-domain-transition-denial-with-public-fact-load",
+        "passed": true
+      },
+      {
+        "name": "runtime-cannot-call-system-verifier",
+        "passed": true
+      },
+      {
+        "name": "system-missing-queue-verifier-reads-public-and-returns-null",
+        "passed": true
+      },
+      {
+        "name": "system-cannot-mint-or-decide-case",
+        "passed": true
+      },
+      {
+        "name": "revoked-real-session-refuses-before-companion-use",
+        "passed": true
+      }
+    ],
+    "cleanup": {},
+    "passed": true,
+    "limits": [
+      "No governed primary grant, valid queued intent, email delivery or institutional adoption is claimed",
+      "Source-native caller execution only; identities are synthetic setup and actions use real canonical sessions"
+    ]
+  },
+  "cleanup": {
+    "originalTemplatePreserved": true,
+    "cloneRemoved": true,
+    "loginsRemoved": true
+  },
+  "limits": [
+    "Owned disposable source snapshot only; applicationReady remains false.",
+    "The second current-security stage is a NOOP; the whole bootstrap still appends an attestation, so no whole-command read-only NOOP is claimed.",
+    "No valid queued delivery, institutional adoption, external consent journey, positive financial feature or complete release is inferred.",
+    "Separate UUID default counterexample discovered afterward; repair and native application rerun remain necessary."
+  ]
+}

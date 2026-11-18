@@ -17,7 +17,7 @@ const spec = {
 }
 const actual = { ...spec, body }
 function contract() {
-  const payload = { ...structuredClone(base.payload), currentFunctions:[spec],
+  const payload = { ...structuredClone(base.payload), currentFunctions:[spec], requiredContainedParentPolicies:[], requiredPhysicalTriggers:[],
     approvedColumnGrants:[{schema:'user_management',table:'users',role:'nzila_auth_org_authority_reader',privilege:'SELECT',columns:['user_id'],grantable:false}],
     dedicatedRolePrivileges:[{schema:'public',table:'claims',role:'nzila_auth_org_authority_reader',privileges:['SELECT']}],
   }

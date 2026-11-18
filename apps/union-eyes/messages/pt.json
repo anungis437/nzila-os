@@ -89,7 +89,7 @@
     "wordingProposed": "A proposta foi registrada. Não é o texto do consentimento até que outro dirigente a adote.",
     "wordingAdopted": "O texto agora é o texto de consentimento vigente.",
     "wordingWithdrawn": "A proposta foi retirada. Não é o texto do consentimento.",
-    "wordingUnavailable": "A adoção de texto não está instalada neste banco de dados.",
+    "wordingUnavailable": "A proposta e a adoção de texto não estão disponíveis nesta versão inicial.",
     "openJourney": "Consentimento e encaminhamento WorkAid"
   },
   "memberDocuments": {

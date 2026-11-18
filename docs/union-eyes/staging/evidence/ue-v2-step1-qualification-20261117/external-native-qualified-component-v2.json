@@ -1,0 +1,133 @@
+{
+  "recordedAt": "2026-11-18T12:10:57.495906+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "SIXTEEN_ACTUAL_PROTECTED_EXTERNAL_READER_CASES_ON_OWNED_PG15_SOURCE",
+  "result": "PASS_SELECTED_COMPONENT",
+  "counts": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceBindings": 1041,
+  "sourceChangedDuringRun": [],
+  "sourcePlanSha256": "ffcdb4fa75306940d341cfab0cae2ce153953d34535087a4ce95c8e9d484d090",
+  "templateQualification": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_14315_7771b5bf5d88/receipt.json",
+    "sha256": "d6329d35679e780df206d0a1777443867c087bf45e7ae8e8559a307c158a86d4",
+    "bytes": 2437
+  },
+  "cases": [
+    {
+      "name": "uses genuine restricted LOGIN + original own-org session, actual independent adoption/issuance/consent, exact projection and terminal revocation",
+      "result": "passed",
+      "durationMs": 6053.56025
+    },
+    {
+      "name": "does not qualify legacy active grants or member consent without exact institutional approval, and the primary cannot manufacture member consent",
+      "result": "passed",
+      "durationMs": 1582.9632079999992
+    },
+    {
+      "name": "denies wrong original recipient, organization, matter and document alongside a positive exact qualification",
+      "result": "passed",
+      "durationMs": 3640.671583000001
+    },
+    {
+      "name": "requires a selected own organization and rejects forged private scopes as a generic foreign membership read",
+      "result": "passed",
+      "durationMs": 3612.4145000000026
+    },
+    {
+      "name": "revalidates current canonical authorizer membership after actual approval/qualification while the office stays active",
+      "result": "passed",
+      "durationMs": 4487.439083000001
+    },
+    {
+      "name": "revalidates current canonical authorizer role after actual approval/qualification while the office stays active",
+      "result": "passed",
+      "durationMs": 4915.788375
+    },
+    {
+      "name": "revalidates current canonical authorizer user after actual approval/qualification while the office stays active",
+      "result": "passed",
+      "durationMs": 5815.502708
+    },
+    {
+      "name": "independently revalidates actual consent revocation during the blob gap",
+      "result": "passed",
+      "durationMs": 4884.4832499999975
+    },
+    {
+      "name": "independently revalidates actual office revocation during the blob gap",
+      "result": "passed",
+      "durationMs": 4861.294332999998
+    },
+    {
+      "name": "independently revalidates actual session revocation during the blob gap",
+      "result": "passed",
+      "durationMs": 4228.359040999996
+    },
+    {
+      "name": "observes real finite-term expiry on the server clock without changing stored terms or clocks",
+      "result": "passed",
+      "durationMs": 21601.747750000002
+    },
+    {
+      "name": "keeps qualified version/permission identities immutable and rejects wrong actual blob bytes before any download success audit",
+      "result": "passed",
+      "durationMs": 4465.7851660000015
+    },
+    {
+      "name": "rolls consent/qualification back on mandatory audit failure and releases no bytes when download audit fails only at COMMIT",
+      "result": "passed",
+      "durationMs": 4273.665458999996
+    },
+    {
+      "name": "serializes read-first download commit before a real restricted auth-system offboard and denies every subsequent read",
+      "result": "passed",
+      "durationMs": 4469.863250000009
+    },
+    {
+      "name": "serializes mutation-first offboard during the blob gap, rechecks after the real database wait and releases no bytes",
+      "result": "passed",
+      "durationMs": 3336.615958999988
+    },
+    {
+      "name": "rechecks the genuine parent session expiry after an observed authorizer lock wait before locating or releasing any bytes",
+      "result": "passed",
+      "durationMs": 8785.88283300001
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-v2.json",
+      "sha256": "a0c0ce16d6d1063b7a57aa46f0b54b4c535a8dbe13c6d73ceca2799c0c4b4007",
+      "bytes": 8856
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-v2.log",
+      "sha256": "5cc0e00638c3f156b3f14ea8f1a8f1304fc2aee84a4d963730839306b19f4aa1",
+      "bytes": 3524
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-v2-source.json",
+      "sha256": "6eb01dd716dc955356c3d76d0b0e1c8c94feec9ec0e879e0e55ce7c408f72343",
+      "bytes": 174112
+    }
+  ],
+  "priorAdverseEvidence": {
+    "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/external-native-uuid-default-counterexample-v1.json",
+    "sha256": "4d2118655c9aaed1960ca14af4cb6eee7944b6ddb348fb2feb8831eaabc772c2",
+    "bytes": 2845
+  },
+  "limits": [
+    "Real native restricted LOGIN/canonical sessions and source functions; identities and institutional lifecycle data are explicitly synthetic.",
+    "Exact controlled blob bytes are used; no live Azure object access or browser workflow is inferred.",
+    "Native expiry, actual database lock observation, revocation and audit-before-release are component evidence, not customer rule adoption.",
+    "Final integrated source, PG16 full matrix, whole regression, browser and all37release families remain unqualified."
+  ]
+}

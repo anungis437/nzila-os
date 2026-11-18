@@ -19,7 +19,7 @@ import assert from 'node:assert/strict'
 import { nativeActionUrl, setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
-export type RouteDb = ReturnType<typeof drizzle>
+export type RouteDb = ReturnType<typeof drizzle<Record<string, unknown>, pg.PoolClient>>
 
 export const RUNTIME_ROLE = 'union_eyes_runtime'
 export const SYSTEM_ROLE = 'union_eyes_system'
@@ -43,7 +43,7 @@ const scopes = new AsyncLocalStorage<Scope>()
 let pool: pg.Pool | null = null
 let systemPool: pg.Pool | null = null
 let runtimePool: pg.Pool | null = null
-let ambient: RouteDb | null = null
+let ambient: ReturnType<typeof drizzle> | null = null
 let schema: Record<string, unknown> | null = null
 let auditFailure: Error | null = null
 // ga-check:exempt test-harness state: one process per native test file, holding the roles a test assigned to its own callers.
@@ -183,8 +183,8 @@ export function emulatedWithApi(config: EmulatedConfig, handler: (ctx: Context) 
       }
     }
     if (config.rlsOrgContext && ctx.organizationId && !scopes.getStore()) {
-      return harness.tenant(RUNTIME_ROLE, ctx.organizationId, ctx.userId ?? null, () => handler({ ...ctx, role: held }))
+      return harness.tenant(RUNTIME_ROLE, ctx.organizationId, ctx.userId ?? null, () => handler({ ...ctx, role: held ?? undefined }))
     }
-    return handler({ ...ctx, role: held })
+    return handler({ ...ctx, role: held ?? undefined })
   }
 }

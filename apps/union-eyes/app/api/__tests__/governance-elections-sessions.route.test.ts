@@ -24,8 +24,7 @@ vi.mock('drizzle-orm', async (importOriginal) => {
     ...actual,
     desc: vi.fn(() => 'desc'),
     count: vi.fn(() => 'count'),
-    eq: vi.fn((col: unknown, val: unknown) => ({ col, val })),
-    sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }),
+    eq: vi.fn((col: unknown, val: unknown) => ({ col, val }))
   };
 });
 

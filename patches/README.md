@@ -4,12 +4,15 @@
 backtracking patterns in [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
 and multi-character literal prefix overlap described in the upstream issue.
 The registry's latest release is 4.0.7 and the advisory lists no patched release
-as observed on November 17, 2026. This patch is not an upstream release or an
+as observed on November 18, 2026. This patch is not an upstream release or an
 audit waiver. The unmodified advisory scan continues to report the HIGH finding.
 
 The patch extends the existing parser's risky-pattern literalization to repeated
 wildcard operands and overlapping literal prefixes, including case-insensitive
-JavaScript and Unicode case folding. It preserves safe flattened
+JavaScript and Unicode case folding. Negated extglobs also emit an unbounded
+wildcard; repeating them, including through wrappers, uses the same literal
+fallback. The scan distinguishes actual negated-extglob openers from escaped,
+quoted and bracketed literals and raw regex groups. It preserves safe flattened
 character repetitions and ordinary globs. The recursion tuning option cannot
 disable these security guards. Risky expressions are matched literally, following
 the parser's existing safety behavior; they do not retain unrestricted extglob

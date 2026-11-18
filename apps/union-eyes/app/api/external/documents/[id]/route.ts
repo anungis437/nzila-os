@@ -13,6 +13,7 @@ import { authorizeExternalDocumentAccess } from '@/lib/services/external-resourc
 export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'view_documents',
+    protectedRead: 'document',
     resolve: resolveExternalDocumentResource,
   },
   async (request, context, params?: { id?: string }) => {

@@ -8,6 +8,7 @@ import { afterAll,beforeAll,describe,expect,it } from 'vitest'
 import { caseDomainFixture } from '../__tests__/case-primary-domain-testkit'
 import { CASE_DOMAIN_SUPPORT_CATALOG_QUERY,caseDomainSupportViolations,CASE_PRIMARY_DOMAIN_GUARDS,compileCaseDomainSupportSql } from './case-primary-domain-guards'
 import { inspectPhysicalGuards,planPhysicalGuards } from './physical-guard-catalog'
+import { CASE_AUTHORITY_READER_ROLE, compileCaseAuthorityReaderSchemaSql } from './case-authority-reader-schema'
 
 const native=process.env.UE_CASE_DOMAIN_NATIVE==='1'
 let f:Awaited<ReturnType<typeof caseDomainFixture>>
@@ -24,11 +25,48 @@ describe('case persistence boundary on canonical auth and forced RLS',()=>{
  it('admits only exact support ownership/body/ACL and refuses conflicting or duplicate journal installation',async()=>{
   const rows=(await f.db.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows
   expect(caseDomainSupportViolations(rows)).toEqual([])
-  for(const mutation of [{body:'SELECT true'},{owner:'postgres'},{runtime_execute:false},{system_execute:true},{public_execute:true}])
+  for(const mutation of [{body:'SELECT true'},{owner:'postgres'},{runtime_execute:false},{system_execute:true},{public_execute:true},
+   {reader_public_usage:false},{reader_public_create:true},{reader_public_grant_option:true}])
    expect(caseDomainSupportViolations(rows.map((row,index)=>index===0?{...row,...mutation}:row))).not.toEqual([])
   await expect(f.db.exec(compileCaseDomainSupportSql())).rejects.toThrow('requires exact reconciliation')
   const execute=async(text:string)=>(await f.db.query(text)).rows as Record<string,unknown>[]
   expect(planPhysicalGuards(CASE_PRIMARY_DOMAIN_GUARDS,await inspectPhysicalGuards(CASE_PRIMARY_DOMAIN_GUARDS,execute)).statements).toEqual([])
+ })
+ it('loads public case facts through explicit bounded reader namespace access while foreign organizations and wrong callers still deny',async()=>{
+  const authority=(await f.db.query(`SELECT has_schema_privilege($1,'public','USAGE') AS usage,
+   has_schema_privilege($1,'public','CREATE') AS create,has_schema_privilege($1,'public','USAGE WITH GRANT OPTION') AS grant_option,
+   has_schema_privilege('public','public','USAGE') AS public_usage`,[CASE_AUTHORITY_READER_ROLE])).rows[0]
+  expect(authority).toEqual({usage:true,create:false,grant_option:false,public_usage:false})
+  expect(await f.allow(f.actor,'case:transition')).toBe(true)
+  expect((await f.tenant(f.actor,tx=>tx.query<{allowed:boolean}>('SELECT public.ue_case_domain_authorized($1,$2,$3) AS allowed',[randomUUID(),f.caseId,'case:transition']))).rows[0].allowed).toBe(false)
+  await f.db.exec('BEGIN;SET LOCAL ROLE union_eyes_system')
+  try{await expect(f.db.query('SELECT public.ue_case_domain_authorized($1,$2,$3)',[f.org,f.caseId,'case:transition'])).rejects.toMatchObject({code:'42501'})}finally{await f.db.exec('ROLLBACK')}
+  await f.db.exec(`REVOKE USAGE ON SCHEMA public FROM ${CASE_AUTHORITY_READER_ROLE}`)
+  try{
+   expect(caseDomainSupportViolations((await f.db.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows)).not.toEqual([])
+   await expect(f.allow(f.actor,'case:transition')).rejects.toMatchObject({code:'42501',message:'permission denied for schema public'})
+  }finally{await f.db.exec(compileCaseAuthorityReaderSchemaSql())}
+  expect(await f.allow(f.actor,'case:transition')).toBe(true)
+  for(const atom of [`GRANT CREATE ON SCHEMA public TO ${CASE_AUTHORITY_READER_ROLE}`,
+   `GRANT USAGE ON SCHEMA public TO ${CASE_AUTHORITY_READER_ROLE} WITH GRANT OPTION`]){
+   await f.db.exec('BEGIN')
+   try{await f.db.exec(atom);expect(caseDomainSupportViolations((await f.db.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows)).not.toEqual([])}finally{await f.db.exec('ROLLBACK')}
+  }
+ })
+ it('returns explicit false for empty or foreign organization binding and NULL target with an otherwise live own bearer',async()=>{
+  expect(await f.allow(f.actor,'case:transition')).toBe(true)
+  for(const selected of ['',randomUUID()]){
+   const observed=(await f.tenant(f.actor,async tx=>{
+    await tx.query("SELECT set_config('app.current_org_id',$1,true)",[selected])
+    return tx.query(`SELECT user_management.auth_business_org_authorized($1,NULL::text[]) AS binding,
+     user_management.auth_business_user_parent_authorized($2,$1) AS own_parent,
+     user_management.auth_business_member_parent_authorized($2,$1) AS member_parent,
+     user_management.auth_business_org_authorized(NULL,NULL::text[]) AS null_target,
+     public.ue_case_domain_authorized($1,$3,'case:transition') AS case_allowed`,[f.org,f.actor,f.caseId])
+   })).rows[0]
+   expect(observed).toEqual({binding:false,own_parent:false,member_parent:false,null_target:false,case_allowed:false})
+  }
+  expect(await f.allow(f.actor,'case:transition')).toBe(true)
  })
  it('allows the governed primary and denies unrelated staff, member titles and raw system calls',async()=>{
   expect(await f.allow(f.actor,'case:transition')).toBe(true)

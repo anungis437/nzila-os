@@ -1,18 +1,13 @@
-/**
- * CFO Server Actions — Client management CRUD.
- *
- * All actions are auth-gated and entity-scoped via @nzila/db
- * and @nzila/os-core/evidence for governance trail.
- */
 'use server'
 
-import { auth } from '@nzila/platform-auth/entra/server'
-import { requirePermission } from '@/lib/rbac'
 import { revalidatePath } from 'next/cache'
-import { platformDb } from '@nzila/db/platform'
 import { orgs, orgMembers } from '@nzila/db/schema'
-import { eq, and, ilike, desc, sql, count, type SQL } from 'drizzle-orm'
+import { eq, and, ilike, desc, inArray, sql, count, type SQL } from 'drizzle-orm'
+import { z } from 'zod'
 import { logger } from '@/lib/logger'
+import { CfoScopeError, isCfoOrganizationId, resolveOrgContext } from '@/lib/resolve-org'
+import { cfoRows } from '@/queries/action-context'
+import { clientInput, createCfoClient } from '@/lib/services/clients'
 
 export interface Client {
   id: string
@@ -22,7 +17,6 @@ export interface Client {
   createdAt: Date
   memberCount: number
 }
-
 export interface ClientListResult {
   clients: Client[]
   total: number
@@ -34,166 +28,138 @@ export async function listClients(opts?: {
   page?: number
   pageSize?: number
 }): Promise<ClientListResult> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('clients:view')
-
-  const page = opts?.page ?? 1
-  const pageSize = opts?.pageSize ?? 20
-  const offset = (page - 1) * pageSize
-
   try {
-    const conditions: SQL[] = []
-    if (opts?.search) {
-      conditions.push(ilike(orgs.legalName, `%${opts.search}%`))
-    }
-    if (opts?.status) {
-      conditions.push(eq(orgs.status, opts.status as typeof orgs.status._.data))
-    }
-
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
-
-    const [clientRows, totalResult] = await Promise.all([
-      platformDb
-        .select({
-          id: orgs.id,
-          name: orgs.legalName,
-          status: orgs.status,
-          createdAt: orgs.createdAt,
-        })
-        .from(orgs)
-        .where(whereClause)
-        .orderBy(desc(orgs.createdAt))
-        .limit(pageSize)
-        .offset(offset),
-      platformDb
-        .select({ count: count() })
-        .from(orgs)
-        .where(whereClause),
-    ])
-
-    // Enrich with member counts
-    const clientsWithMembers = await Promise.all(
-      clientRows.map(async (client) => {
-        const [memberResult] = await platformDb
-          .select({ count: count() })
-          .from(orgMembers)
-          .where(
-            and(
-              eq(orgMembers.orgId, client.id),
-              eq(orgMembers.status, 'active'),
-            ),
-          )
-        return {
+    return await resolveOrgContext(
+      'collection',
+      { permission: 'clients:view' },
+      async (context) => {
+        const page = Math.max(1, Math.trunc(opts?.page ?? 1)),
+          pageSize = Math.min(100, Math.max(1, Math.trunc(opts?.pageSize ?? 20)))
+        const conditions: SQL[] = []
+        if (context.purpose === 'organizations')
+          conditions.push(inArray(orgs.id, [...context.organizationIds]))
+        if (opts?.search) conditions.push(ilike(orgs.legalName, `%${opts.search}%`))
+        if (opts?.status) conditions.push(eq(orgs.status, opts.status as typeof orgs.status._.data))
+        const where = conditions.length ? and(...conditions) : undefined
+        const rows = await context.db
+          .select({
+            id: orgs.id,
+            name: orgs.legalName,
+            status: orgs.status,
+            createdAt: orgs.createdAt,
+          })
+          .from(orgs)
+          .where(where)
+          .orderBy(desc(orgs.createdAt))
+          .limit(pageSize)
+          .offset((page - 1) * pageSize)
+        const [total] = await context.db.select({ count: count() }).from(orgs).where(where)
+        const memberCounts = rows.length
+          ? await context.db
+              .select({ organizationId: orgMembers.orgId, count: count() })
+              .from(orgMembers)
+              .where(
+                and(
+                  inArray(
+                    orgMembers.orgId,
+                    rows.map((row) => row.id),
+                  ),
+                  eq(orgMembers.status, 'active'),
+                ),
+              )
+              .groupBy(orgMembers.orgId)
+          : []
+        const membersByOrg = new Map(memberCounts.map((row) => [row.organizationId, row.count]))
+        const clients = rows.map((client) => ({
           ...client,
-          contactEmail: null as string | null,
-          memberCount: memberResult?.count ?? 0,
-          createdAt: client.createdAt ?? new Date(),
-        }
-      }),
-    )
+          contactEmail: null,
+          memberCount: membersByOrg.get(client.id) ?? 0,
+        }))
 
-    return {
-      clients: clientsWithMembers,
-      total: totalResult[0]?.count ?? 0,
-    }
+        return { clients, total: total?.count ?? 0 }
+      },
+    )
   } catch (error) {
+    if (error instanceof CfoScopeError) throw error
     logger.error('Failed to list clients', { error })
     return { clients: [], total: 0 }
   }
 }
 
-export async function createClient(data: {
-  name: string
-  contactEmail?: string
-  jurisdiction?: string
-  incorporationNumber?: string
-  fiscalYearEnd?: string
-  industry?: string
-  businessType?: string
-  phone?: string
-  servicesNeeded?: string[]
-  notes?: string
-}): Promise<{ ok: boolean; id?: string; error?: string }> {
-  const { userId } = await auth()
-  if (!userId) return { ok: false, error: 'Unauthorized' }
-  await requirePermission('clients:create')
-
+export async function createClient(
+  data: z.input<typeof clientInput>,
+): Promise<{ ok: boolean; id?: string; error?: string }> {
   try {
-    const [entity] = await platformDb
-      .insert(orgs)
-      .values({
-        legalName: data.name,
-        jurisdiction: data.jurisdiction || 'CA-ON',
-        incorporationNumber: data.incorporationNumber || null,
-        fiscalYearEnd: data.fiscalYearEnd || null,
-        status: 'active',
-        policyConfig: {
-          contactEmail: data.contactEmail || null,
-          industry: data.industry || null,
-          businessType: data.businessType || null,
-          phone: data.phone || null,
-          servicesNeeded: data.servicesNeeded || [],
-          notes: data.notes || null,
-        },
-      })
-      .returning({ id: orgs.id })
-
-    logger.info('Client created', { clientId: entity.id, actorId: userId })
-    revalidatePath('/dashboard/clients')
+    // A legal entity is a platform resource. A default firm role cannot create
+    // an organization outside a verified relationship by supplying its label.
+    const entity = await resolveOrgContext(
+      'platform',
+      { permission: 'clients:create' },
+      async (context) => {
+        return createCfoClient(context, data)
+      },
+    )
+    try {
+      revalidatePath('/dashboard/clients')
+    } catch (error) {
+      logger.warn('Client cache invalidation failed after commit', { error, clientId: entity.id })
+    }
     return { ok: true, id: entity.id }
   } catch (error) {
+    if (error instanceof CfoScopeError) {
+      if (error.message === 'Unauthorized') return { ok: false, error: 'Unauthorized' }
+      throw error
+    }
     logger.error('Failed to create client', { error })
     return { ok: false, error: 'Failed to create client' }
   }
 }
 
 export async function getClientDetail(clientId: string) {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('clients:view')
-
   try {
-    const [client] = await platformDb
-      .select()
-      .from(orgs)
-      .where(eq(orgs.id, clientId))
-      .limit(1)
-
-    if (!client) return null
-
-    const members = await platformDb
-      .select()
-      .from(orgMembers)
-      .where(eq(orgMembers.orgId, clientId))
-      .orderBy(desc(orgMembers.createdAt))
-
-    // Financial summary from audit log
-    const [financials] = await platformDb.execute(
-      sql`SELECT
-        COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)) FILTER (WHERE action LIKE 'revenue.%' AND org_id = ${clientId}), 0) as total_revenue,
-        COUNT(*) FILTER (WHERE action LIKE 'document.%' AND org_id = ${clientId}) as document_count,
-        COUNT(*) FILTER (WHERE org_id = ${clientId}) as audit_event_count
-      FROM audit_log`,
-    ) as unknown as [{ total_revenue: number; document_count: number; audit_event_count: number }]
-
-    const recentActivityRows = (await platformDb.execute(
-      sql`SELECT id, action, created_at as "createdAt"
-      FROM audit_log WHERE org_id = ${clientId}
-      ORDER BY created_at DESC LIMIT 10`,
-    )) as unknown as { rows: Array<{ id: string; action: string; createdAt: Date }> }
-
-    return {
-      ...client,
-      members,
-      financialSummary: {
-        totalRevenue: Number(financials?.total_revenue ?? 0),
-        documentCount: Number(financials?.document_count ?? 0),
-        auditEventCount: Number(financials?.audit_event_count ?? 0),
-        recentActivity: recentActivityRows.rows ?? [],
+    return await resolveOrgContext(
+      'collection',
+      { permission: 'clients:view' },
+      async (context) => {
+        if (!isCfoOrganizationId(clientId)) throw new CfoScopeError()
+        const target = clientId.toLowerCase()
+        if (context.purpose === 'organizations' && !context.organizationIds.includes(target))
+          throw new CfoScopeError()
+        const [client] = await context.db.select().from(orgs).where(eq(orgs.id, target)).limit(1)
+        if (!client) return null
+        const members = await context.db
+          .select()
+          .from(orgMembers)
+          .where(eq(orgMembers.orgId, target))
+          .orderBy(desc(orgMembers.createdAt))
+        const [financials] = cfoRows<{
+          total_revenue: number
+          document_count: number
+          audit_event_count: number
+        }>(
+          await context.db.execute(sql`
+        SELECT COALESCE(SUM(CAST(metadata->>'amount' AS NUMERIC)) FILTER (WHERE action LIKE 'revenue.%'),0) AS total_revenue,
+          COUNT(*) FILTER (WHERE action LIKE 'document.%') AS document_count,COUNT(*) AS audit_event_count
+        FROM public.audit_log WHERE org_id=${target}::uuid`),
+        )
+        const recentActivity = cfoRows<{ id: string; action: string; createdAt: Date }>(
+          await context.db.execute(sql`
+        SELECT id,action,created_at AS "createdAt" FROM public.audit_log WHERE org_id=${target}::uuid ORDER BY created_at DESC LIMIT 10`),
+        )
+        return {
+          ...client,
+          members,
+          financialSummary: {
+            totalRevenue: Number(financials?.total_revenue ?? 0),
+            documentCount: Number(financials?.document_count ?? 0),
+            auditEventCount: Number(financials?.audit_event_count ?? 0),
+            recentActivity,
+          },
+        }
       },
-    }
+    )
   } catch (error) {
+    if (error instanceof CfoScopeError) throw error
     logger.error('Failed to get client detail', { error, clientId })
     return null
   }

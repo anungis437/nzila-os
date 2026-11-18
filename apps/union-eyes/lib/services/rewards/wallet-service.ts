@@ -1,18 +1,19 @@
+import { requireRewardsInstitutionalAuthority } from '@/lib/rewards/credit-authority'
 /**
  * Wallet Service
  * Handles wallet balance, ledger queries, and transactional ledger writes
  */
 
-import { type PgTransaction } from 'drizzle-orm/pg-core';
-import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
-import { db } from '@/db';
+import { type PgTransaction } from 'drizzle-orm/pg-core'
+import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
+import { db } from '@/db'
 import {
   rewardWalletLedger,
   type RewardWalletLedgerEntry,
-} from '@/db/schema/domains/infrastructure/rewards';
-import { eq, and, desc, sql, getTableColumns, type SQL } from 'drizzle-orm';
-import { sqlIn } from '@/lib/db/sql-in';
-import { UserFacingError } from '@/lib/errors/user-facing-error';
+} from '@/db/schema/domains/infrastructure/rewards'
+import { eq, and, desc, sql, getTableColumns, type SQL } from 'drizzle-orm'
+import { sqlIn } from '@/lib/db/sql-in'
+import { UserFacingError } from '@/lib/errors/user-facing-error'
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -20,47 +21,42 @@ type DbTransaction = PgTransaction<
   any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
->;
+>
 
 export interface LedgerEntryOptions {
-  orgId: string;
-  userId: string;
-  eventType: 'earn' | 'spend' | 'expire' | 'revoke' | 'adjust' | 'refund';
-  amountCredits: number; // Can be negative for spend/revoke
-  sourceType: 'award' | 'redemption' | 'admin_adjustment' | 'system';
-  sourceId?: string;
-  memo?: string;
-  expiresAt?: Date;
+  orgId: string
+  userId: string
+  eventType: 'earn' | 'spend' | 'expire' | 'revoke' | 'adjust' | 'refund'
+  amountCredits: number // Can be negative for spend/revoke
+  sourceType: 'award' | 'redemption' | 'admin_adjustment' | 'system'
+  sourceId?: string
+  memo?: string
+  expiresAt?: Date
 }
 
 interface OutstandingBalanceRow {
-  total: number;
+  total: number
 }
 
 interface BulkBalanceRow {
-  user_id: string;
-  balance_after: number;
+  user_id: string
+  balance_after: number
 }
 
 /**
  * Get user's current wallet balance
  * Returns the balance_after from the most recent ledger entry
  */
-export async function getBalance(
-  orgId: string,
-  userId: string
-): Promise<number> {
+export async function getBalance(orgId: string, userId: string): Promise<number> {
+  requireRewardsInstitutionalAuthority()
   const [latestEntry] = await db
     .select()
     .from(rewardWalletLedger)
-    .where(and(
-      eq(rewardWalletLedger.orgId, orgId),
-      eq(rewardWalletLedger.userId, userId)
-    ))
+    .where(and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId)))
     .orderBy(desc(rewardWalletLedger.createdAt))
-    .limit(1);
+    .limit(1)
 
-  return latestEntry?.balanceAfter ?? 0;
+  return latestEntry?.balanceAfter ?? 0
 }
 
 /**
@@ -70,37 +66,30 @@ export async function listLedger(
   orgId: string,
   userId: string,
   limit = 20,
-  offset = 0
+  offset = 0,
 ): Promise<{
-  entries: RewardWalletLedgerEntry[];
-  total: number;
+  entries: RewardWalletLedgerEntry[]
+  total: number
 }> {
+  requireRewardsInstitutionalAuthority()
   const entries = await db
     .select()
     .from(rewardWalletLedger)
-    .where(and(
-      eq(rewardWalletLedger.orgId, orgId),
-      eq(rewardWalletLedger.userId, userId)
-    ))
+    .where(and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId)))
     .orderBy(desc(rewardWalletLedger.createdAt))
     .limit(limit)
-    .offset(offset);
+    .offset(offset)
 
   // Get total count
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(rewardWalletLedger)
-    .where(
-      and(
-        eq(rewardWalletLedger.orgId, orgId),
-        eq(rewardWalletLedger.userId, userId)
-      )
-    );
+    .where(and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId)))
 
   return {
     entries,
     total: count,
-  };
+  }
 }
 
 /**
@@ -115,7 +104,8 @@ export async function getWalletSnapshot(
   limit = 20,
   offset = 0,
 ): Promise<{ balance: number; entries: RewardWalletLedgerEntry[]; total: number }> {
-  const owned = and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId));
+  requireRewardsInstitutionalAuthority()
+  const owned = and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId))
   const rows = await db
     .select({
       ...getTableColumns(rewardWalletLedger),
@@ -126,37 +116,49 @@ export async function getWalletSnapshot(
     .where(owned)
     .orderBy(desc(rewardWalletLedger.createdAt))
     .limit(limit)
-    .offset(offset);
+    .offset(offset)
 
   if (rows.length > 0) {
-    const { snapshotTotal, snapshotBalance } = rows[0];
+    const { snapshotTotal, snapshotBalance } = rows[0]
     return {
       balance: snapshotBalance ?? 0,
       total: snapshotTotal,
       entries: rows.map(({ snapshotTotal: _total, snapshotBalance: _balance, ...entry }) => entry),
-    };
+    }
   }
 
   // A page past the end holds no row to read the figures from: they are read by themselves (an empty ledger is balance 0, total 0).
-  const [latest] = await db.select().from(rewardWalletLedger).where(owned).orderBy(desc(rewardWalletLedger.createdAt)).limit(1);
-  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(rewardWalletLedger).where(owned);
-  return { balance: latest?.balanceAfter ?? 0, entries: [], total: count };
+  const [latest] = await db
+    .select()
+    .from(rewardWalletLedger)
+    .where(owned)
+    .orderBy(desc(rewardWalletLedger.createdAt))
+    .limit(1)
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(rewardWalletLedger)
+    .where(owned)
+  return { balance: latest?.balanceAfter ?? 0, entries: [], total: count }
 }
 
 /**
  * Apply a ledger entry (transactional)
  * Calculates new balance and enforces the canonical non-negative constraint.
- * 
+ *
  * IMPORTANT: This function should be called within a transaction
  */
 export async function applyLedgerEntry(
   tx: DbTransaction | typeof db,
   options: LedgerEntryOptions,
-  allowNegativeBalance = false
+  allowNegativeBalance = false,
 ): Promise<RewardWalletLedgerEntry> {
-  const { orgId, userId, eventType, amountCredits, sourceType, sourceId, memo, expiresAt } = options;
-  if (expiresAt && (eventType !== 'earn' || amountCredits <= 0 || !Number.isFinite(expiresAt.getTime()))) {
-    throw new Error('Expiration requires a positive earning entry and a valid date');
+  requireRewardsInstitutionalAuthority()
+  const { orgId, userId, eventType, amountCredits, sourceType, sourceId, memo, expiresAt } = options
+  if (
+    expiresAt &&
+    (eventType !== 'earn' || amountCredits <= 0 || !Number.isFinite(expiresAt.getTime()))
+  ) {
+    throw new Error('Expiration requires a positive earning entry and a valid date')
   }
 
   // Read the current balance. Caller transaction alone does not serialize
@@ -164,24 +166,21 @@ export async function applyLedgerEntry(
   const [latestEntry] = await tx
     .select()
     .from(rewardWalletLedger)
-    .where(and(
-      eq(rewardWalletLedger.orgId, orgId),
-      eq(rewardWalletLedger.userId, userId)
-    ))
+    .where(and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId)))
     .orderBy(desc(rewardWalletLedger.createdAt))
-    .limit(1);
+    .limit(1)
 
-  const currentBalance = latestEntry?.balanceAfter ?? 0;
-  const newBalance = currentBalance + amountCredits;
+  const currentBalance = latestEntry?.balanceAfter ?? 0
+  const newBalance = currentBalance + amountCredits
 
   // Validate non-negative balance
   if (newBalance < 0) {
     if (allowNegativeBalance) {
-      throw new Error('Negative balances are prohibited by the canonical ledger contract');
+      throw new Error('Negative balances are prohibited by the canonical ledger contract')
     }
     throw new UserFacingError(
-      `Insufficient balance. Current: ${currentBalance}, Requested: ${Math.abs(amountCredits)}`
-    );
+      `Insufficient balance. Current: ${currentBalance}, Requested: ${Math.abs(amountCredits)}`,
+    )
   }
 
   // Insert ledger entry
@@ -198,9 +197,9 @@ export async function applyLedgerEntry(
       memo,
       expiresAt,
     })
-    .returning();
+    .returning()
 
-  return entry;
+  return entry
 }
 
 /**
@@ -213,8 +212,9 @@ export async function adminAdjustBalance(
   amountCredits: number,
   adminUserId: string,
   memo: string,
-  allowNegative = false
+  allowNegative = false,
 ): Promise<RewardWalletLedgerEntry> {
+  requireRewardsInstitutionalAuthority()
   return await db.transaction(async (tx) => {
     return await applyLedgerEntry(
       tx,
@@ -226,9 +226,9 @@ export async function adminAdjustBalance(
         sourceType: 'admin_adjustment',
         memo: `Admin adjustment by ${adminUserId}: ${memo}`,
       },
-      allowNegative
-    );
-  });
+      allowNegative,
+    )
+  })
 }
 
 /**
@@ -238,24 +238,25 @@ export async function adminAdjustBalance(
 export async function getLedgerSummary(
   orgId: string,
   startDate?: Date,
-  endDate?: Date
+  endDate?: Date,
 ): Promise<{
-  totalCreditsIssued: number;
-  totalCreditsSpent: number;
-  totalCreditsOutstanding: number;
-  activeMembers: number;
+  totalCreditsIssued: number
+  totalCreditsSpent: number
+  totalCreditsOutstanding: number
+  activeMembers: number
 }> {
-  const conditions: SQL<any>[] = [eq(rewardWalletLedger.orgId, orgId)];
+  requireRewardsInstitutionalAuthority()
+  const conditions: SQL<any>[] = [eq(rewardWalletLedger.orgId, orgId)]
 
   if (startDate) {
-    conditions.push(sql`${rewardWalletLedger.createdAt} >= ${startDate}`);
+    conditions.push(sql`${rewardWalletLedger.createdAt} >= ${startDate}`)
   }
 
   if (endDate) {
-    conditions.push(sql`${rewardWalletLedger.createdAt} <= ${endDate}`);
+    conditions.push(sql`${rewardWalletLedger.createdAt} <= ${endDate}`)
   }
 
-  const whereClause = and(...conditions) ?? eq(rewardWalletLedger.orgId, orgId);
+  const whereClause = and(...conditions) ?? eq(rewardWalletLedger.orgId, orgId)
 
   const [summary] = await db
     .select({
@@ -264,7 +265,7 @@ export async function getLedgerSummary(
       activeMembers: sql<number>`COUNT(DISTINCT ${rewardWalletLedger.userId})::int`,
     })
     .from(rewardWalletLedger)
-    .where(whereClause);
+    .where(whereClause)
 
   // Get total outstanding (sum of all latest balances)
   const [outstanding] = (await db.execute(sql`
@@ -278,14 +279,14 @@ export async function getLedgerSummary(
     )
     SELECT COALESCE(SUM(balance_after), 0)::int AS total
     FROM latest_balances
-  `)) as any as OutstandingBalanceRow[];
+  `)) as any as OutstandingBalanceRow[]
 
   return {
     totalCreditsIssued: summary.totalIssued,
     totalCreditsSpent: summary.totalSpent,
     totalCreditsOutstanding: outstanding?.total ?? 0,
     activeMembers: summary.activeMembers,
-  };
+  }
 }
 
 /**
@@ -294,9 +295,10 @@ export async function getLedgerSummary(
  */
 export async function getBulkBalances(
   orgId: string,
-  userIds: string[]
+  userIds: string[],
 ): Promise<Map<string, number>> {
-  if (userIds.length === 0) return new Map();
+  requireRewardsInstitutionalAuthority()
+  if (userIds.length === 0) return new Map()
 
   const results = await db.execute(sql`
     WITH latest_entries AS (
@@ -310,20 +312,20 @@ export async function getBulkBalances(
     )
     SELECT user_id, balance_after
     FROM latest_entries
-  `);
+  `)
 
-  const balanceMap = new Map<string, number>();
-  
+  const balanceMap = new Map<string, number>()
+
   for (const row of results as any as BulkBalanceRow[]) {
-    balanceMap.set(row.user_id, row.balance_after);
+    balanceMap.set(row.user_id, row.balance_after)
   }
 
   // Fill in zero balances for users with no entries
   for (const userId of userIds) {
     if (!balanceMap.has(userId)) {
-      balanceMap.set(userId, 0);
+      balanceMap.set(userId, 0)
     }
   }
 
-  return balanceMap;
+  return balanceMap
 }

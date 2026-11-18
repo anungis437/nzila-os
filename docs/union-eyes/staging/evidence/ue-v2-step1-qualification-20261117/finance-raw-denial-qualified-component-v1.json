@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-11-18T09:09:29.488335+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "SELECTED_BASE_RELEASE_RAW_PAYMENT_MUTATION_DENIAL_ON_OWNED_PG15_CLONE",
+  "result": "ONE_SELECTED_TEST_PASS",
+  "counts": {
+    "passed": 1,
+    "failed": 0,
+    "otherTestsFilteredOut": 10,
+    "filteredTestsCountAsPassed": false
+  },
+  "sourceChangedDuringRun": [],
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-green-v1.json",
+      "sha256": "7f8459154230e15b92a4cee8ee224ff154708f3b2543c0654b829f7a89b1fb4a",
+      "bytes": 5871
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-green-v1.log",
+      "sha256": "1b2df9dcab28ea0a406c4e646d6fa9cee2adebce33a3898304c64e1be5db0b9c",
+      "bytes": 2187
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-green-v1-source.json",
+      "sha256": "29a9fb3cce5172a3cfc21fbd23591264ef0bfae0a41fa0f8a621f1db52fd6a61",
+      "bytes": 173012
+    }
+  ],
+  "priorAdverseEvidence": {
+    "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/finance-raw-mutation-counterexample-v2.json",
+    "sha256": "6e04f8da53d413e29577265d89a2d837fcaaae53cf5d7b3f99793b56e4fb930f",
+    "bytes": 4649
+  },
+  "limits": [
+    "Payment INSERT/UPDATE denial and unchanged data are a bounded SQL component; this does not qualify finance HTTP/service denial family or implement positive finance.",
+    "Ten other combined-schema cases were filtered, remain unexecuted here and do not count as passed.",
+    "Qualified-template provenance is bound in the private source receipt. Other template UUID defaults failed separately."
+  ]
+}

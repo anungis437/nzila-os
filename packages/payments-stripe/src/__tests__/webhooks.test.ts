@@ -119,7 +119,7 @@ describe('extractEntityIdFromEvent', () => {
     expect(extractEntityIdFromEvent(event)).toBeNull()
   })
 
-  it('prefers top-level metadata over nested', () => {
+  it('refuses contradictory organization metadata across the signed object and expanded parent', () => {
     const event = {
       data: {
         object: {
@@ -131,7 +131,17 @@ describe('extractEntityIdFromEvent', () => {
       },
     } as unknown as Stripe.Event
 
-    expect(extractEntityIdFromEvent(event)).toBe('top_level')
+    expect(extractEntityIdFromEvent(event)).toBeNull()
+  })
+
+  it('accepts agreeing object and expanded-parent organization metadata', () => {
+    const event = { data: { object: { metadata: { org_id: 'same-org' }, payment_intent: { metadata: { org_id: 'same-org' } } } } } as unknown as Stripe.Event
+    expect(extractEntityIdFromEvent(event)).toBe('same-org')
+  })
+
+  it.each([42, true, {}, [], '', ' org-a', 'org-a '])('refuses malformed supplied organization metadata without falling back to a different source', (value) => {
+    const event = { data: { object: { metadata: { org_id: value }, payment_intent: { metadata: { org_id: 'org-a' } } } } } as unknown as Stripe.Event
+    expect(extractEntityIdFromEvent(event)).toBeNull()
   })
 
   it('returns null when payment_intent is a string (not expanded)', () => {

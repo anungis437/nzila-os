@@ -31,7 +31,6 @@ export const FRAMEWORK_MODEL_OWNERS: Record<string, string> = {
 export const PLATFORM_METADATA_MODEL_OWNERS: Record<string, string> = {
   failed_login_attempts: 'apps/union-eyes/backend/core/models.py',
   rate_limit_events: 'apps/union-eyes/backend/core/models.py',
-  clc_chart_of_accounts: 'apps/union-eyes/backend/billing/models.py',
 }
 
 export const DEDICATED_ADMIN_MODEL_OWNERS = {

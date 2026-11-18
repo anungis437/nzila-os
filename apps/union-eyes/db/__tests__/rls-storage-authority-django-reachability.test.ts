@@ -672,23 +672,25 @@ class MultiPartyIsolationMixin:
     expect(mixinSourceImplementsMultiPartyPolicy(BROKEN_SOURCE)).toBe(false);
   });
 
-  it('account_mappings\' real Django route uses GlobalPlusTenantIsolationMixin and is recognized as proven isolation', () => {
+  it('account_mappings\' real Django route retains its read-only mixin wiring and denies the excluded financial operation', () => {
     const tableRoutes = liveDjangoTableRoutes();
     const routes = tableRoutes.get('account_mappings') ?? [];
     expect(routes.length).toBeGreaterThan(0);
     for (const route of routes) {
       expect(route.usesGlobalPlusTenantMixin).toBe(true);
-      expect(route.usesDenyAllPermission).toBe(false);
+      expect(route.usesReadOnlyModelViewSet).toBe(true);
+      expect(route.usesDenyAllPermission).toBe(true);
       expect(routeHasProvenIsolation(route)).toBe(true);
     }
   });
 
-  it('per_capita_remittances\' real Django route uses MultiPartyIsolationMixin with fields matching the real model and is recognized as proven isolation', () => {
+  it('per_capita_remittances\' real Django route retains matching multi-party fields and denies the excluded financial operation', () => {
     const tableRoutes = liveDjangoTableRoutes();
     const routes = tableRoutes.get('per_capita_remittances') ?? [];
     expect(routes.length).toBeGreaterThan(0);
     for (const route of routes) {
       expect(route.usesMultiPartyMixin).toBe(true);
+      expect(route.usesDenyAllPermission).toBe(true);
       expect(route.declaredFromField).toBe('from_organization_id');
       expect(route.declaredToField).toBe('to_organization_id');
       expect(route.multiPartyFieldsMatchModel).toBe(true);

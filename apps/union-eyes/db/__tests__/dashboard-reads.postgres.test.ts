@@ -16,7 +16,8 @@
 import { randomUUID } from 'node:crypto'
 import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-import { insertMember, insertOrganization } from './page-reads-seed'
+import { insertOrganization, insertMember } from './page-reads-seed'
+import { SYNC_LOG_OVERVIEW_COLUMNS } from '../../lib/dashboard-reads/data-source-contract'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
@@ -30,7 +31,6 @@ const security = URL ? await import('@/lib/dashboard-reads/security') : null
 const integrations = URL ? await import('@/lib/dashboard-reads/integrations') : null
 const platformSettings = URL ? await import('@/lib/dashboard-reads/platform-settings') : null
 const dataSource = URL ? await import('@/lib/dashboard-reads/data-source') : null
-const rewardsAdmin = URL ? await import('@/lib/rewards/admin-reads') : null
 const pageReads = URL ? await import('@/lib/rewards/page-reads') : null
 const { sql } = await import('drizzle-orm')
 
@@ -49,6 +49,13 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     return `${error?.message ?? ''} ${error?.cause?.message ?? ''}`
   }
   const one = async <T>(query: string, params: unknown[] = []) => (await admin.query(query, params)).rows[0] as T
+  // The harness deliberately emulates postgres-js arrays. Refuse a mismatched
+  // transport result instead of counting properties of a pg.QueryResult.
+  const driverRows=(result:unknown):readonly unknown[]=>{
+    if(!Array.isArray(result)) throw new Error('Native dashboard driver must return a row array')
+    return result
+  }
+
 
   beforeAll(async () => {
     admin = await savepointHarness.start(URL!)
@@ -58,6 +65,11 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     await insertOrganization(admin, tag, { id: PLATFORM_ORG, type: 'congress' })
     await admin.query(`UPDATE organizations SET settings = $2::jsonb, features_enabled = ARRAY['feature-x'] WHERE id = $1`, [PLATFORM_ORG, JSON.stringify({ sessionTimeout: 45 })])
 
+    // Supported overview metadata only. These rows carry no financial powers.
+    for(const [organizationId,userId] of [[ORG_A,U.adminA],[ORG_A,U.memberA1],[ORG_A,U.memberA2],[ORG_B,U.memberB1]])
+      await insertMember(admin,organizationId,{userId})
+    await admin.query(`INSERT INTO external_data_sync_log(source,source_type,sync_id,status,sync_type,error_details,initiated_by,parameters)
+      VALUES($1,'synthetic',$2,'completed','scheduled','synthetic hidden diagnostic','synthetic hidden initiator','synthetic hidden parameters')`,[`src-${tag}`,`sync-${tag}`])
     // content
     const page = (org: string, slug: string, title: string, type: string, status: string, views: number) =>
       admin.query(`INSERT INTO cms_pages (organization_id, title, slug, status, content_type, view_count, meta_description) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [org, title, slug, status, type, views, `About ${title}`])
@@ -85,36 +97,13 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     await admin.query(`INSERT INTO integration_configs (organization_id, type, provider, credentials, settings, enabled) VALUES ($1, 'hris', 'workday', '{}'::jsonb, '{"k":"a"}'::jsonb, true), ($2, 'hris', 'adp', '{}'::jsonb, '{"k":"b"}'::jsonb, false)`, [ORG_A, ORG_B])
     await admin.query(`INSERT INTO platform_services (service_name, status) VALUES ($1, 'healthy'), ($2, 'down') ON CONFLICT (service_name) DO UPDATE SET status = EXCLUDED.status`, [`web-${tag}`, `queue-${tag}`])
 
-    // rewards
-    for (const [org, who] of [[ORG_A, [U.adminA, U.memberA1, U.memberA2]], [ORG_B, [U.memberB1]]] as const) {
-      for (const [index, userId] of who.entries()) await insertMember(admin, org, { userId, name: `${userId.split('-')[1]} Name`, email: `${userId}@example.test`, role: index === 0 && org === ORG_A ? 'admin' : 'member' })
-    }
-    const program = async (org: string, name: string) => (await one<{ id: string }>(`INSERT INTO recognition_programs (org_id, name, status) VALUES ($1, $2, 'active') RETURNING id::text AS id`, [org, name])).id
-    const programA = await program(ORG_A, `Program A ${tag}`)
-    const programB = await program(ORG_B, `Program B ${tag}`)
-    const awardType = async (org: string, programId: string, name: string) =>
-      (await one<{ id: string }>(`INSERT INTO recognition_award_types (org_id, program_id, name, kind, default_credit_amount, requires_approval) VALUES ($1, $2, $3, 'peer', 25, false) RETURNING id::text AS id`, [org, programId, name])).id
-    const typeA = await awardType(ORG_A, programA, `Type A ${tag}`)
-    const typeB = await awardType(ORG_B, programB, `Type B ${tag}`)
-    const award = async (org: string, programId: string, typeId: string, recipient: string, status: string) =>
-      (await one<{ id: string }>(`INSERT INTO recognition_awards (org_id, program_id, award_type_id, recipient_user_id, issuer_user_id, reason, status) VALUES ($1, $2, $3, $4, 'issuer', 'Thanks', $5) RETURNING id::text AS id`, [org, programId, typeId, recipient, status])).id
-    const awardA = await award(ORG_A, programA, typeA, U.memberA1, 'issued')
-    await award(ORG_A, programA, typeA, U.memberA2, 'pending')
-    const awardB = await award(ORG_B, programB, typeB, U.memberB1, 'issued')
-    const ledger = (org: string, userId: string, eventType: string, amount: number, balance: number, awardId: string | null, ago: string) =>
-      admin.query(`INSERT INTO reward_wallet_ledger (org_id, user_id, event_type, amount_credits, balance_after, source_type, source_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, now() - $8::interval)`, [org, userId, eventType, amount, balance, awardId ? 'award' : 'system', awardId, ago])
-    await ledger(ORG_A, U.memberA1, 'earn', 100, 100, awardA, '3 hours')
-    await ledger(ORG_A, U.memberA1, 'spend', -30, 70, null, '2 hours')
-    await ledger(ORG_A, U.memberA1, 'expire', -10, 60, null, '1 hour')
-    await ledger(ORG_B, U.memberB1, 'earn', 500, 500, awardB, '1 hour')
 
-    // data-source
-    await admin.query(`INSERT INTO external_data_sync_log (source, source_type, sync_id, started_at, status, sync_type) VALUES ($1, 'wages', $2, now(), 'completed', 'full')`, [`src-${tag}`, randomUUID()])
-  }, 240_000)
+  })
 
   afterAll(async () => {
-    await admin?.end()
-    await savepointHarness.stop()
+    const results=await Promise.allSettled([admin?.end(),savepointHarness.stop()])
+    const failures=results.filter((result):result is PromiseRejectedResult=>result.status==='rejected')
+    if(failures.length) throw new AggregateError(failures.map(result=>result.reason),'Dashboard native fixture cleanup failed')
   })
 
   describe('the content dashboard', () => {
@@ -139,8 +128,8 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
 
     it('control: with no organization set the runtime role sees none of it, and the system role is refused the tables: the old pages could not work', async () => {
       const bare = await savepointHarness.context(RUNTIME_ROLE, null, null, async (tx) => ({
-        pages: Array.from((await tx.execute(sql`SELECT id FROM cms_pages`)) as Iterable<unknown>).length,
-        courses: Array.from((await tx.execute(sql`SELECT id FROM training_courses`)) as Iterable<unknown>).length,
+        pages: driverRows(await tx.execute(sql`SELECT id FROM cms_pages`)).length,
+        courses: driverRows(await tx.execute(sql`SELECT id FROM training_courses`)).length,
       }))
       expect(bare).toEqual({ pages: 0, courses: 0 })
       // training_courses and course_registrations are not in this list: the daily education reminder job (a cross-organization system job) holds SELECT on them, so only the content table is refused.
@@ -163,7 +152,7 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     })
 
     it('control: no organization set reads nothing, and the system role is refused both tables', async () => {
-      const bare = await savepointHarness.context(RUNTIME_ROLE, null, null, async (tx) => Array.from((await tx.execute(sql`SELECT id FROM security_events`)) as Iterable<unknown>).length)
+      const bare = await savepointHarness.context(RUNTIME_ROLE, null, null, async (tx) => driverRows(await tx.execute(sql`SELECT id FROM security_events`)).length)
       expect(bare).toBe(0)
       for (const table of ['security_events', 'security_posture_checks']) {
         expect(await refusedBy(savepointHarness.context(SYSTEM_ROLE, null, null, (tx) => tx.execute(sql.raw(`SELECT 1 FROM ${table}`))))).toMatch(/permission denied/)
@@ -193,7 +182,7 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     })
 
     it('control: no organization set reads nothing, and the system role is refused the keys and the configurations', async () => {
-      expect(await savepointHarness.context(RUNTIME_ROLE, null, null, async (tx) => Array.from((await tx.execute(sql`SELECT id FROM integration_api_keys`)) as Iterable<unknown>).length)).toBe(0)
+      expect(await savepointHarness.context(RUNTIME_ROLE, null, null, async (tx) => driverRows(await tx.execute(sql`SELECT id FROM integration_api_keys`)).length)).toBe(0)
       for (const table of ['integration_api_keys', 'integration_configs']) {
         expect(await refusedBy(savepointHarness.context(SYSTEM_ROLE, null, null, (tx) => tx.execute(sql.raw(`SELECT 1 FROM ${table}`))))).toMatch(/permission denied/)
       }
@@ -216,99 +205,50 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     })
   })
 
-  describe('the rewards administrator pages', () => {
-    it('reports the awards, credits and recipients of the organization, and none of another', async () => {
-      const a = await rewardsAdmin!.loadRewardsReport(ORG_A)
-      expect(a.stats).toMatchObject({ active_programs: '1', total_awards: '2', issued_awards: '1', pending_awards: '1', unique_recipients: '1', unique_givers: '1' })
-      expect(Number(a.stats.credits_issued)).toBe(100)
-      expect(Number(a.stats.awards_last_30_days)).toBe(2)
-      expect(a.recent).toHaveLength(2)
-      expect(a.top).toMatchObject([{ award_count: '1', user_id: U.memberA1 }])
-      expect(Number(a.top[0].total_points)).toBe(100)
-
-      const b = await rewardsAdmin!.loadRewardsReport(ORG_B)
-      expect(b.stats).toMatchObject({ total_awards: '1' })
-      expect(Number(b.stats.credits_issued)).toBe(500)
+  describe('the held credit dashboard adapters', () => {
+    it('answers unavailable without reading a wallet or fabricating an empty financial history', async () => {
+      await expect(Promise.resolve().then(() => pageReads!.loadWalletBalance(ORG_A, U.memberA1))).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED', status: 501 })
+      await expect(Promise.resolve().then(() => pageReads!.loadCreditHistory(ORG_A, U.memberA1, { eventType: 'all', limit: 25, page: 1 }))).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED', status: 501 })
     })
-
-    it('lists the members with the balance and the lifetime totals of their wallet, filters by name or e-mail and pages', async () => {
-      const wallets = await rewardsAdmin!.loadMemberWallets(ORG_A)
-      expect(wallets.total).toBe(3)
-      const alice = wallets.rows.find((row) => row.email === `${U.memberA1}@example.test`)
-      expect(alice).toMatchObject({ balance: 60 })
-      expect(Number(alice?.lifetime_earned)).toBe(100)
-      expect(Number(alice?.lifetime_redeemed)).toBe(40)
-      expect(wallets.rows[0].email).toBe(`${U.memberA1}@example.test`)
-
-      expect((await rewardsAdmin!.loadMemberWallets(ORG_A, { search: 'memberA2' })).rows).toHaveLength(1)
-      expect((await rewardsAdmin!.loadMemberWallets(ORG_A, { perPage: 2, page: 2 })).rows).toHaveLength(1)
-      expect((await rewardsAdmin!.loadMemberWallets(ORG_B)).rows.map((row) => row.email)).toEqual([`${U.memberB1}@example.test`])
-    })
-
-    it("sums up the whole organization's wallets, whatever the search or the page, and nobody else's", async () => {
-      const everyone = await rewardsAdmin!.loadMemberWallets(ORG_A)
-      expect(everyone.summary).toEqual({ members: 3, withBalance: 1, outstanding: 60 })
-
-      // A search or a page narrows the list, not the figures of the organization.
-      expect((await rewardsAdmin!.loadMemberWallets(ORG_A, { search: 'memberA2' })).summary).toEqual(everyone.summary)
-      expect((await rewardsAdmin!.loadMemberWallets(ORG_A, { perPage: 1, page: 3 })).summary).toEqual(everyone.summary)
-      expect((await rewardsAdmin!.loadMemberWallets(ORG_B)).summary).toEqual({ members: 1, withBalance: 1, outstanding: 500 })
-    })
-
-    it('control: no organization set reads nothing, and the system role is refused the recognition tables', async () => {
-      expect(await savepointHarness.context(RUNTIME_ROLE, null, null, async (tx) => Array.from((await tx.execute(sql`SELECT id FROM reward_wallet_ledger`)) as Iterable<unknown>).length)).toBe(0)
-      // reward_wallet_ledger is not in this list: the rewards cron (a cross-organization system job) holds SELECT and INSERT on it, so only the recognition table is refused.
-      for (const table of ['recognition_programs']) {
-        expect(await refusedBy(savepointHarness.context(SYSTEM_ROLE, null, null, (tx) => tx.execute(sql.raw(`SELECT 1 FROM ${table}`))))).toMatch(/permission denied/)
+    it('does not let either actual restricted role read credit balances directly', async () => {
+      for (const role of [RUNTIME_ROLE, SYSTEM_ROLE]) {
+        await expect(savepointHarness.context(role, null, null, tx => tx.execute(sql`SELECT balance_after FROM public.reward_wallet_ledger`)))
+          .rejects.toMatchObject({ cause: expect.objectContaining({ code: '42501' }) })
       }
-    })
-
-    it('reads the balance a member can redeem, and a page of their ledger filtered by event type with totals over the whole ledger', async () => {
-      expect(await pageReads!.loadWalletBalance(ORG_A, U.memberA1)).toBe(60)
-      expect(await pageReads!.loadWalletBalance(ORG_A, U.memberA2)).toBe(0)
-      expect(await pageReads!.loadWalletBalance(ORG_B, U.memberA1)).toBe(0)
-
-      const all = await pageReads!.loadCreditHistory(ORG_A, U.memberA1, { eventType: 'all', limit: 25, page: 1 })
-      expect(all.entries.map((entry) => entry.eventType)).toEqual(['expire', 'spend', 'earn'])
-      expect(all).toMatchObject({ matching: 3, totalTransactions: 3, totalEarned: 100, totalSpent: 30, totalExpired: 10 })
-
-      const spent = await pageReads!.loadCreditHistory(ORG_A, U.memberA1, { eventType: 'spend', limit: 25, page: 1 })
-      expect(spent.entries.map((entry) => entry.eventType)).toEqual(['spend'])
-      // The totals are over the whole ledger, not over the filter or the page.
-      expect(spent).toMatchObject({ matching: 1, totalTransactions: 3, totalEarned: 100 })
-
-      const second = await pageReads!.loadCreditHistory(ORG_A, U.memberA1, { eventType: 'all', limit: 25, page: 2 })
-      expect(second.entries).toEqual([])
-      expect(second.matching).toBe(3)
-      expect(await pageReads!.loadCreditHistory(ORG_B, U.memberA1, { eventType: 'all', limit: 25, page: 1 })).toMatchObject({ entries: [], matching: 0, totalTransactions: 0 })
     })
   })
 
   describe('the platform data-source overview', () => {
-    it('holds system SELECT on claim_deadlines and external_data_sync_log, as the storage-authority manifest declares for the overview', async () => {
+    it('holds source-authorized deadline read and exact sync-status column SELECT without table SELECT', async () => {
       const granted = async (table: string) => (await one<{ ok: boolean }>(`SELECT has_table_privilege('${SYSTEM_ROLE}', '${table}', 'SELECT') AS ok`)).ok
       expect(await granted('claim_deadlines')).toBe(true)
-      expect(await granted('external_data_sync_log')).toBe(true)
+      expect(await granted('external_data_sync_log')).toBe(false)
+      const columns=(await admin.query<{name:string}>(`SELECT a.attname AS name FROM pg_attribute a WHERE a.attrelid='public.external_data_sync_log'::regclass
+        AND a.attnum>0 AND NOT a.attisdropped AND has_column_privilege($1,a.attrelid,a.attnum,'SELECT') ORDER BY a.attname`,[SYSTEM_ROLE])).rows.map(row=>row.name)
+      expect(columns).toEqual([...SYNC_LOG_OVERVIEW_COLUMNS].sort())
     })
 
     it('counts the records of every organization as the system role and lists the recent syncs', async () => {
       const overview = await dataSource!.loadDataSourceOverview()
 
       expect(overview.internalCounts.organization_members).toBeGreaterThanOrEqual(4)
-      expect(Object.keys(overview.internalCounts).sort()).toEqual(['claim_deadlines', 'claims', 'dues_assignments', 'organization_members'])
+      expect(Object.keys(overview.internalCounts).sort()).toEqual(['claim_deadlines', 'claims', 'organization_members'])
       expect(Object.keys(overview.externalCounts).sort()).toEqual(['contribution_rates', 'cost_of_living_data', 'union_density', 'wage_benchmarks'])
       expect(overview.totalExternalRecords).toBe(Object.values(overview.externalCounts).reduce((sum, count) => sum + count, 0))
       expect(overview.syncLogs.map((entry) => entry.source)).toContain(`src-${tag}`)
+      const selected=overview.syncLogs.find(entry=>entry.source===`src-${tag}`)!
+      expect(Object.keys(selected).sort()).toEqual([...SYNC_LOG_OVERVIEW_COLUMNS].sort())
+      for(const column of ['error_details','initiated_by','parameters','created_at','updated_at']) expect(selected).not.toHaveProperty(column)
     })
 
     it('fails, instead of showing zero records and no sync history, when a table cannot be read', async () => {
-      await admin.query(`REVOKE SELECT ON external_data_sync_log FROM ${SYSTEM_ROLE}`)
+      await admin.query(`REVOKE SELECT (sync_id) ON external_data_sync_log FROM ${SYSTEM_ROLE}`)
       try {
         const failure = await refusedBy(dataSource!.loadDataSourceOverview())
 
         expect(failure).toMatch(/permission denied/)
       } finally {
-        await admin.query(`GRANT SELECT ON external_data_sync_log TO ${SYSTEM_ROLE}`)
+        await admin.query(`GRANT SELECT (sync_id) ON external_data_sync_log TO ${SYSTEM_ROLE}`)
       }
     })
   })

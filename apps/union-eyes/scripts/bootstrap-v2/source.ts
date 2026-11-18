@@ -11,7 +11,9 @@ import type { StorageAuthorityEntry } from '../../db/rls-storage-authority'
 import { AUTH_EXECUTION_ROLES } from './auth-sql'
 import { platformIdentityBindings } from '../../../../packages/db/src/schema/platform-authorization'
 import * as currentPlatformAuthSchema from '../../../../packages/db/src/schema/auth'
-import { reconcileCurrentAuthority } from './current-authority'
+import { externalReadConsents, externalReadQualifications } from '../../db/schema/domains/documents/external-read'
+import { representationAuthorities, externalMatterAccessGrants, externalDocumentAccessGrants } from '../../db/schema/representation-authority-schema'
+import { reconcileCurrentAuthority, reconcileCurrentDeclarationAuthority } from './current-authority'
 import { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 import { SYSTEM_COLUMN_READ_CONTRACTS } from './service-column-contracts'
 import {
@@ -571,6 +573,62 @@ export async function buildCurrentPlatformIdentitySource() {
   return { source: bindingSource, sourceDigest: bindingDigest, statements, table, decision }
 }
 
+const externalReadStorageDeclarations = [
+  { source: 'apps/union-eyes/db/schema/domains/documents/external-read.ts', table: externalReadConsents },
+  { source: 'apps/union-eyes/db/schema/domains/documents/external-read.ts', table: externalReadQualifications },
+  { source: 'apps/union-eyes/db/schema/representation-authority-schema.ts', table: representationAuthorities },
+  { source: 'apps/union-eyes/db/schema/representation-authority-schema.ts', table: externalMatterAccessGrants },
+  { source: 'apps/union-eyes/db/schema/representation-authority-schema.ts', table: externalDocumentAccessGrants },
+] as const
+
+export const EXTERNAL_READ_DECLARATION_OWNERS: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(externalReadStorageDeclarations.map(({ source, table }) => [getTableConfig(table).name, source])),
+)
+
+export function externalReadStorageAuthority(name: string, source: string): StorageAuthorityEntry {
+  if (EXTERNAL_READ_DECLARATION_OWNERS[name] !== source)
+    throw new Error(`UE_V2_EXTERNAL_READ_STORAGE_SOURCE_REQUIRED:${name}`)
+  return { table: name, classification: 'CONTAINED_NO_AUTHORITY',
+    reason: 'Current external read storage is accessible only through the independently inspected private consent/qualification functions. Retain the existing representation records without conferring membership or raw ordinary/system grant, mutation or discovery authority.',
+    supportingCapability: [source, 'apps/union-eyes/lib/external-resource-read/source.ts'],
+    requiredRuntimePrivileges: [], requiredSystemPrivileges: [], invocationAuthority: 'NONE',
+    dbExecutionPrincipal: 'NONE', reviewPriority: 'NONE' }
+}
+
+/** The two new declarations have one source producer for fresh and legacy
+ * installation. The three retained representation declarations keep their
+ * existing schema producer and receive only a prospective authority decision. */
+export async function buildCurrentExternalReadSource() {
+  const drizzleKit = await import('drizzle-kit/api')
+  const source = 'apps/union-eyes/db/schema/domains/documents/external-read.ts'
+  const sourceDigest = hash(readFileSync(path.join(root, ...source.split('/')), 'utf8'))
+  const declarations = { externalReadConsents, externalReadQualifications }
+  const snapshot = drizzleKit.generateDrizzleJson(declarations as never) as unknown as DrizzleSnapshotJson
+  const empty = drizzleKit.generateDrizzleJson({} as never) as unknown as DrizzleSnapshotJson
+  const ddl = await drizzleKit.generateMigration(empty as never, snapshot as never)
+  const statements: V2Plan['statements'] = ddl.map((sql, index) => {
+    assertNoProtectedConstraintDrop(sql)
+    return { canonicalId: `EXTERNAL_READ_CURRENT:${index}`, sql, source, sourceDigest }
+  })
+  const tables: SourceTable[] = Object.values(declarations).map(table => {
+    const config = getTableConfig(table)
+    if (config.schema && config.schema !== 'public')
+      throw new Error(`UE_V2_EXTERNAL_READ_STORAGE_SCHEMA_REQUIRED:${config.name}`)
+    return { name: config.name, source, sourceDigest,
+      columns: config.columns.map(column => ({ name: column.name, type: column.getSQLType(), notNull: column.notNull })),
+      foreignKeys: config.foreignKeys.flatMap(key => {
+        const reference = key.reference(), parent = getTableConfig(reference.foreignTable)
+        if (parent.schema && parent.schema !== 'public') throw new Error('UE_V2_EXTERNAL_READ_STORAGE_PARENT_REQUIRED')
+        return reference.columns.map((column, index) => ({ column: column.name, table: parent.name,
+          referencedColumn: reference.foreignColumns[index].name }))
+      }),
+      authority: externalReadStorageAuthority(config.name, source) }
+  })
+  if (new Set(tables.map(table => table.name)).size !== 2 || Object.keys(snapshot.tables).length !== 2)
+    throw new Error('UE_V2_EXTERNAL_READ_STORAGE_CENSUS_REQUIRED')
+  return { source, sourceDigest, statements, tables }
+}
+
 export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
   // drizzle-kit derives its declaration types from its own zod schema; under zod 4 they widen to unknown, so the fields
   // this planner reads are stated once here (the runtime shapes are unchanged).
@@ -659,12 +717,26 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/scripts/lib/sql-census/parse.ts',
     'apps/union-eyes/scripts/bootstrap-v2/source.ts',
     'apps/union-eyes/scripts/bootstrap-v2/security.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/contained-parent-policies.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/physical-trigger-source.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/external-read-installer-bridge.ts',
     'apps/union-eyes/db/auth/business-session-policy.ts',
     'apps/union-eyes/db/auth/business-session-event-guard.ts',
     'apps/union-eyes/db/auth/messaging-physical-guards.ts',
     'apps/union-eyes/db/auth/authority-physical-guards.ts',
     'apps/union-eyes/db/auth/case-scope-physical-guards.ts',
     'apps/union-eyes/db/auth/case-primary-domain-guards.ts',
+    'apps/union-eyes/db/auth/reward-nomination-guards.ts',
+    'apps/union-eyes/db/auth/case-authority-reader-schema.ts',
+    'apps/union-eyes/lib/external-resource-read/source.ts',
+    'apps/union-eyes/lib/external-resource-read/institutional-source.ts',
+    'apps/union-eyes/lib/external-resource-read/auth-bridge.ts',
+    'apps/union-eyes/lib/external-resource-read/catalog.ts',
+    'apps/union-eyes/lib/external-resource-read/audit-contract.ts',
+    'apps/union-eyes/lib/external-resource-read/qualification.ts',
+    'apps/union-eyes/lib/external-resource-read/reader.ts',
+    'apps/union-eyes/db/auth/case-assignee-predicate.ts',
+    'apps/union-eyes/db/auth/conversation-assignee-predicate.ts',
     'apps/union-eyes/lib/authority/capacity.ts',
     'apps/union-eyes/lib/authority/common.ts',
     'apps/union-eyes/lib/authority/counsel-boundary.ts',
@@ -718,10 +790,26 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/db/migrations-cache/0019_deadline_reassignment_convergence.sql',
     'apps/union-eyes/scripts/bootstrap-v2/clean-room.ts',
     'apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-report-order.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-guarded-case-fixtures.ts',
+    'apps/union-eyes/lib/workflow-engine.ts',
+    'apps/union-eyes/lib/audit/atomic-audit.ts',
+    'apps/union-eyes/lib/cases/case-authorization.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-column-security.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-session-proof.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-column-fixtures.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/module-admission-runtime-security.ts',
     'apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/native-postgres-image.ts',
     'apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.ts',
     'apps/union-eyes/scripts/bootstrap-v2/fee-adjustment-native-proof.ts',
     'apps/union-eyes/scripts/bootstrap-v2/service-column-contracts.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/rewards-storage-contract.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/module-admission-storage-contract.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/external-sync-log-storage-contract.ts',
+    'apps/union-eyes/lib/dashboard-reads/data-source-contract.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/uuid-default-bindings.ts',
+    'apps/union-eyes/lib/finance/base-release-boundary.ts',
     'apps/union-eyes/services/platform-economics/transaction-fee-engine.ts',
     'apps/union-eyes/services/platform-economics/fee-adjustment-insert.ts',
     'apps/union-eyes/scripts/bootstrap-v2/installer.ts',
@@ -1033,6 +1121,9 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     is(entry[1], PgTable),
   )
   const requiredTables = new Set(currentModels.models.map((model) => model.table))
+  for (const { table, source } of externalReadStorageDeclarations)
+    if (source === 'apps/union-eyes/db/schema/representation-authority-schema.ts')
+      requiredTables.add(getTableConfig(table).name)
   for (const [, table] of exported) {
     const config = getTableConfig(table)
     const authority = storageAuthorityManifest.find((entry) => entry.table === config.name)
@@ -1295,6 +1386,10 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
   statements.push(...identity.statements)
   tables.push(identity.table)
   decisions.push(identity.decision)
+  const externalRead = await buildCurrentExternalReadSource()
+  commitments[externalRead.source] = externalRead.sourceDigest
+  statements.push(...externalRead.statements)
+  tables.push(...externalRead.tables)
   const enumStatements = [...enums]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, sql]) => ({
@@ -1361,6 +1456,19 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
         'Current Django source wins: tranche 10 (d42d05ba5) made organization_id required, matching the Drizzle declarations. A fresh V2 database has no legacy ownerless rows to preserve.',
     })
   }
+  // Resolve current declaration authority after retaining the historical schema
+  // closure. Containment removes access, never the tables or their stored data.
+  for (const table of tables)
+    table.authority = reconcileCurrentDeclarationAuthority(table, table.authority)
+  for (const [name, source] of Object.entries(EXTERNAL_READ_DECLARATION_OWNERS)) {
+    const matches = tables.filter(table => table.name === name)
+    if (matches.length !== 1 || matches[0].source !== source)
+      throw new Error(`UE_V2_EXTERNAL_READ_STORAGE_SOURCE_REQUIRED:${name}`)
+    matches[0].authority = externalReadStorageAuthority(name, source)
+    decisions.push({ relation: name, disposition: 'PROSPECTIVE_PRIVATE_EXTERNAL_READ_STORAGE', source,
+      sourceDigest: matches[0].sourceDigest, rationale: matches[0].authority.reason })
+  }
+
   return {
     contractVersion: '2.0',
     lineage: 'PROSPECTIVE_UE_BOOTSTRAP_V2',

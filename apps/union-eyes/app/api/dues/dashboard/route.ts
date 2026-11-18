@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Dues Dashboard
  *
@@ -9,28 +10,39 @@
  *   inArrears       — total amount owed across all members in arrears
  *   reconciliationQueue — count of pending/exception line items needing review
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db';
-import { memberArrears, employerRemittances, remittanceLineItems } from '@/db/schema/dues-finance-schema';
-import { eq, and, sql, ne } from 'drizzle-orm';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { db } from '@/db'
+import {
+  memberArrears,
+  employerRemittances,
+  remittanceLineItems,
+} from '@/db/schema/dues-finance-schema'
+import { eq, and, sql, ne } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'Dues dashboard aggregate stats' },
   },
   async ({ organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
+    requireBaseFinancialAuthority()
+
     await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
-    );
+      requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:view',
+        requiresLedger: true,
+      }),
+    )
 
     const [arrearsRow] = await db
       .select({
@@ -42,7 +54,7 @@ export const GET = withApi(
           eq(memberArrears.organizationId, organizationId),
           ne(memberArrears.arrearsStatus, 'current'),
         ),
-      );
+      )
 
     const [remittancesRow] = await db
       .select({
@@ -50,7 +62,7 @@ export const GET = withApi(
         pendingAmount: sql<string>`coalesce(sum(case when not ${employerRemittances.isReconciled} then ${employerRemittances.totalAmount} else 0 end), '0')`,
       })
       .from(employerRemittances)
-      .where(eq(employerRemittances.organizationId, organizationId));
+      .where(eq(employerRemittances.organizationId, organizationId))
 
     const [queueRow] = await db
       .select({
@@ -62,13 +74,13 @@ export const GET = withApi(
           eq(remittanceLineItems.organizationId, organizationId),
           sql`${remittanceLineItems.lineStatus} in ('pending', 'exception', 'manual_review')`,
         ),
-      );
+      )
 
     return {
       totalCollected: parseFloat(remittancesRow?.totalCollected ?? '0'),
       pendingRemittances: parseFloat(remittancesRow?.pendingAmount ?? '0'),
       inArrears: parseFloat(arrearsRow?.totalOwed ?? '0'),
       reconciliationQueue: queueRow?.queueCount ?? 0,
-    };
+    }
   },
-);
+)

@@ -1,3 +1,4 @@
+import { addOrganizationMember } from '@/lib/services/organization-admin-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Org People (Member Management)
@@ -6,11 +7,10 @@
  * REM-09: All member-management mutations emit audit events.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { recordAuditEvent, AUDIT_ACTIONS } from '@/lib/audit-db'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
-import { platformDb } from '@nzila/db/platform'
-import { orgMembers } from '@nzila/db/schema'
+
 import { z } from 'zod'
 
 const AddMemberSchema = z.object({
@@ -33,33 +33,13 @@ export async function POST(
     const body = await request.json()
     const parsed = AddMemberSchema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 },
+      )
     }
 
-    const { userId, role, email, displayName } = parsed.data
-
-    const [member] = await platformDb
-      .insert(orgMembers)
-      .values({
-        orgId,
-        userId,
-        role,
-      })
-      .returning()
-
-    await recordAuditEvent({
-      orgId,
-      actorClerkUserId: access.context.userId,
-      actorRole: access.context.membership?.role ?? access.context.platformRole,
-      action: AUDIT_ACTIONS.MEMBER_ADD,
-      targetType: 'member',
-      targetId: member.id,
-      afterJson: { userId, role, email, displayName },
-    })
-
-    return NextResponse.json(
-      { id: member.id, userId, role, email, displayName, orgId, status: member.status },
-      { status: 201 },
-    )
+    const result = await addOrganizationMember(orgId, parsed.data, access.context)
+    return NextResponse.json(result.body, { status: result.status })
   })
 }

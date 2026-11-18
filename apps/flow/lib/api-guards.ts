@@ -20,16 +20,12 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
-import {
-  createRequestContext,
-  runWithContext,
-} from '@nzila/os-core/telemetry'
+import { createRequestContext, runWithContext } from '@nzila/os-core/telemetry'
 
 // ── Authentication ──────────────────────────────────────────────────────────
 
 export async function authenticateUser(): Promise<
-  | { ok: true; userId: string }
-  | { ok: false; response: NextResponse }
+  { ok: true; userId: string } | { ok: false; response: NextResponse }
 > {
   const { userId } = await auth()
   if (!userId) {
@@ -41,13 +37,41 @@ export async function authenticateUser(): Promise<
   return { ok: true, userId }
 }
 
+/** Global commerce totals require a platform assignment, never an org role.
+ * auth() exposes verified Entra app assignments in sessionClaims.roles. Its
+ * has({ role }) also accepts org roles, so it is unsuitable for this boundary.
+ */
+export async function authenticateGlobalOperator(): Promise<
+  { ok: true; userId: string; platformRole: string } | { ok: false; response: NextResponse }
+> {
+  const session = await auth()
+  if (!session.userId) {
+    return { ok: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  }
+  const roles = session.sessionClaims?.roles
+  const operatorRoles = ['platform_admin', 'studio_admin', 'ops', 'platform.admin', 'system.admin']
+  const platformRole =
+    Array.isArray(roles) && roles.every((role) => typeof role === 'string')
+      ? roles.find((role: string) => operatorRoles.includes(role))
+      : undefined
+  if (!platformRole) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Forbidden: platform operator required' },
+        { status: 403 },
+      ),
+    }
+  }
+  return { ok: true, userId: session.userId, platformRole }
+}
+
 /**
  * Authenticate AND resolve org context for API routes.
  * Returns userId + orgId from auth session, or a 401/403 JSON response.
  */
 export async function authenticateOrgUser(): Promise<
-  | { ok: true; userId: string; orgId: string }
-  | { ok: false; response: NextResponse }
+  { ok: true; userId: string; orgId: string } | { ok: false; response: NextResponse }
 > {
   const { userId, orgId } = await auth()
   if (!userId) {
@@ -59,10 +83,7 @@ export async function authenticateOrgUser(): Promise<
   if (!orgId) {
     return {
       ok: false,
-      response: NextResponse.json(
-        { error: 'No active organization' },
-        { status: 403 },
-      ),
+      response: NextResponse.json({ error: 'No active organization' }, { status: 403 }),
     }
   }
   return { ok: true, userId, orgId }

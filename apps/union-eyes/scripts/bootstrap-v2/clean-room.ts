@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import { execFileSync } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -18,6 +19,7 @@ import {
 } from './installer'
 import { compileSecurity } from './security'
 import { proveRuntimeSecurity } from './runtime-security'
+import { openRuntimeSessionFactory } from './runtime-column-fixtures'
 import { openNativeRuntimeFixture } from './native-runtime-fixture'
 import { systemMutationContracts } from './system-mutation-contracts'
 import { beginManifestTrace } from './manifest-trace'
@@ -35,9 +37,9 @@ import {
   INSTALLER_FUNCTION_OWNER_ROLES,
   VECTOR_FUNCTION_ACL_SQL,
 } from './minimum-installer'
+import { compileExternalReadInstallerBridge } from './external-read-installer-bridge'
 
-const image =
-  'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337'
+const image = nativePostgres16Image()
 const docker = (args: string[], env?: NodeJS.ProcessEnv) =>
   execFileSync('docker', args, {
     encoding: 'utf8',
@@ -59,6 +61,10 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
     'apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts',
     'apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.ts',
     'apps/union-eyes/scripts/bootstrap-v2/fee-adjustment-native-proof.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-session-proof.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-column-fixtures.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-column-security.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/module-admission-runtime-security.ts',
   ])
     assert.equal(
       plan.sourceCommitments[file],
@@ -66,10 +72,13 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
       `UE_V2_SYSTEM_PRODUCER_SOURCE_NOT_BOUND:${file}`,
     )
   const contracts = systemMutationContracts(plan)
-  const fixture = await openNativeRuntimeFixture(plan)
+  const fixture = await openNativeRuntimeFixture(plan, { auth: true })
+  let sessions: ReturnType<typeof openRuntimeSessionFactory> | undefined
   let proofFailed = false
   let proofError: unknown
   try {
+    assert(fixture.authUrl, 'UE_V2_OWNED_AUTH_URL_REQUIRED')
+    sessions = openRuntimeSessionFactory(fixture.seed, fixture.authUrl, fixture.authSystemUrl)
     return await proveRuntimeSecurity(
       fixture.seed,
       fixture.runtime,
@@ -79,6 +88,7 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
       undefined,
       contracts,
       fixture.systemWriter,
+      sessions,
     )
   } catch (error) {
     proofFailed = true
@@ -86,7 +96,21 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
     throw error
   } finally {
     try {
-      await fixture.dispose()
+      const cleanup = await Promise.allSettled([sessions?.dispose()])
+      try {
+        await fixture.dispose()
+      } catch (error) {
+        cleanup.push({ status: 'rejected', reason: error })
+      }
+      const failed = cleanup.filter(
+        (entry): entry is PromiseRejectedResult => entry.status === 'rejected',
+      )
+      if (failed.length === 1) throw failed[0].reason
+      if (failed.length)
+        throw new AggregateError(
+          failed.map((entry) => entry.reason),
+          'SYSTEM_FIXTURE_SESSION_OR_DATABASE_CLEANUP_FAILED',
+        )
     } catch (error) {
       if (proofFailed)
         throw new AggregateError(
@@ -334,6 +358,8 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
         await operator.query("CREATE EXTENSION vector WITH VERSION '0.8.1'")
         await operator.query(VECTOR_FUNCTION_ACL_SQL)
       }
+      const bridge = await compileExternalReadInstallerBridge(`ue_v2_clean_minimum_${suffix}`)
+      await operator.query(bridge.provisionSql)
       const installer = await connect({
         ...config,
         user: 'ue_v2_fixture_installer',
@@ -564,14 +590,42 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
         })()
       : undefined
     evidence.frameworkExecutionBoundary = frameworkProof ?? { result: 'NOT_CONFIGURED' }
-    evidence.runtimeSecurityComponentMatrix = await proveRuntimeSecurity(
+    const runtimeSessions = openRuntimeSessionFactory(
       reference,
-      runtimeActor,
-      systemActor,
-      plan,
-      security.rules,
-      frameworkProof,
+      `postgresql://ue_v2_fixture_auth:${encodeURIComponent(password)}@127.0.0.1:${config.port}/ue_v2_clean_reference`,
+      `postgresql://ue_v2_fixture_auth_system:${encodeURIComponent(password)}@127.0.0.1:${config.port}/ue_v2_clean_reference`,
     )
+    let runtimeFailed = false
+    let runtimeFailure: unknown
+    try {
+      evidence.runtimeSecurityComponentMatrix = await proveRuntimeSecurity(
+        reference,
+        runtimeActor,
+        systemActor,
+        plan,
+        security.rules,
+        frameworkProof,
+        undefined,
+        undefined,
+        runtimeSessions,
+      )
+    } catch (error) {
+      runtimeFailed = true
+      runtimeFailure = error
+      throw error
+    } finally {
+      try {
+        await runtimeSessions.dispose()
+      } catch (error) {
+        if (runtimeFailed)
+          throw new AggregateError(
+            [runtimeFailure, error],
+            'RUNTIME_MATRIX_AND_SESSION_CLEANUP_FAILED',
+            { cause: runtimeFailure },
+          )
+        throw error
+      }
+    }
     evidence.systemMutationComponentMatrix = await proveIntegratedSystemMutations(plan)
     evidence.systemMutationFixtureRemoved = true
     assert.deepEqual(connectionFailures, [], 'UE_V2_CLEANROOM_CONNECTION_FAILURE')

@@ -4,19 +4,21 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 
-from billing import views
+from billing.urls import router
 
 
 class BaseReleaseFinancialBoundary(SimpleTestCase):
-    def test_every_registered_financial_view_denies_every_role_and_method_without_sql(self):
-        endpoints = [
-            view for view in vars(views).values()
-            if isinstance(view, type) and issubclass(view, ModelViewSet)
-            and view.__module__ == views.__name__
-        ]
-        self.assertGreater(len(endpoints), 60)
+    def test_every_registered_financial_view_denies_every_role_and_exposed_action_without_sql(self):
+        endpoints = [view for _, view, _ in router.registry]
+        self.assertEqual(len(endpoints), 81)
+        self.assertEqual(len(set(endpoints)), 81)
+        self.assertTrue(all(issubclass(view, GenericViewSet) for view in endpoints))
+        self.assertEqual(
+            [view.__name__ for view in endpoints if not hasattr(view, "create")],
+            ["AccountMappingsViewSet"],
+        )
         factory = APIRequestFactory()
         for endpoint in endpoints:
             for role in ("member", "steward", "officer", "executive", "admin"):
@@ -28,6 +30,10 @@ class BaseReleaseFinancialBoundary(SimpleTestCase):
                     ("get", "list"), ("post", "create"), ("get", "retrieve"),
                     ("put", "update"), ("patch", "partial_update"), ("delete", "destroy"),
                 ):
+                    # ReadOnlyModelViewSet is a sibling of ModelViewSet, so a
+                    # subclass scan used to omit its real list/retrieve routes.
+                    if not hasattr(endpoint, action):
+                        continue
                     with self.subTest(endpoint=endpoint.__name__, role=role, action=action):
                         request = getattr(factory, method)(
                             "/synthetic-finance-boundary/",
@@ -36,7 +42,10 @@ class BaseReleaseFinancialBoundary(SimpleTestCase):
                             format="json",
                         )
                         force_authenticate(request, user=actor)
-                        with patch("django.db.backends.utils.CursorWrapper.execute") as sql:
+                        with patch("django.db.backends.utils.CursorWrapper.execute") as sql, patch(
+                            "django.db.backends.utils.CursorWrapper.executemany"
+                        ) as bulk_sql:
                             response = endpoint.as_view({method: action})(request, pk="synthetic-denied-row")
                         self.assertEqual(response.status_code, 403)
                         sql.assert_not_called()
+                        bulk_sql.assert_not_called()

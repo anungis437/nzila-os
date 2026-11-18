@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Post a Payment to a Member's Arrears
  *
@@ -11,50 +12,61 @@
  * claimed must equal the amount on record. The financial step, ledger entry, arrears update and audit record are one
  * transaction. See lib/authority/store/finance-route-adapter.ts for the answers (404 / 403 / 409 / 501).
  */
-import { withApi, ApiError, z } from '@/lib/api/framework';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { recordArrearsPayment } from '@/lib/dues/arrears-payment';
-import { financialDutyErrorResponse } from '@/lib/finance/financial-duty-response';
-import { logger } from '@/lib/logger';
+import { withApi, ApiError, z } from '@/lib/api/framework'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { recordArrearsPayment } from '@/lib/dues/arrears-payment'
+import { financialDutyErrorResponse } from '@/lib/finance/financial-duty-response'
+import { logger } from '@/lib/logger'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const schema = z.object({
   paymentId: z.guid(),
   amount: z.number().positive(),
   notes: z.string().max(500).optional(),
-});
+})
 
 export const POST = withApi(
   {
+    rlsOrgContext: false,
     auth: { required: true },
-    entitlement: 'financial_intelligence_suite',
-    openapi: { tags: ['Dues'], summary: 'Execute a registered payment against a member in arrears' },
+
+    openapi: {
+      tags: ['Dues'],
+      summary: 'Execute a registered payment against a member in arrears',
+    },
   },
   async ({ request, params, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
 
-    const memberId = params.id;
+    const memberId = params.id
 
-    const body = await request.json();
-    const parsed = schema.safeParse(body);
-    if (!parsed.success) throw ApiError.badRequest('Invalid request body');
+    const body = await request.json()
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) throw ApiError.badRequest('Invalid request body')
 
-    const { paymentId, amount, notes } = parsed.data;
+    const { paymentId, amount, notes } = parsed.data
 
-    let outcome;
+    let outcome
+    requireBaseFinancialAuthority()
+
     try {
       outcome = await withRLSContext({ organizationId }, (tx) =>
         recordArrearsPayment(tx, { userId, organizationId, memberId, paymentId, amount, notes }),
-      );
+      )
     } catch (error) {
-      const refusal = financialDutyErrorResponse(error);
-      if (refusal) return refusal;
-      throw error;
+      const refusal = financialDutyErrorResponse(error)
+      if (refusal) return refusal
+      throw error
     }
 
-    logger.info('Arrears payment recorded', { memberId, paymentId, amount, balanceAfter: outcome.balanceAfter });
+    logger.info('Arrears payment recorded', {
+      memberId,
+      paymentId,
+      amount,
+      balanceAfter: outcome.balanceAfter,
+    })
 
-    return { success: true, newBalance: outcome.balanceAfter, arrears: outcome.arrears };
+    return { success: true, newBalance: outcome.balanceAfter, arrears: outcome.arrears }
   },
-);
+)

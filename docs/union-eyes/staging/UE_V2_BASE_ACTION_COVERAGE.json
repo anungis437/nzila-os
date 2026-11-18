@@ -11069,59 +11069,54 @@
     "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117",
     "sourceProofNeverInheritsPriorRuntimeAcceptance": true,
     "latestEngineeringObservation": {
-      "recordedAt": "2026-11-18T02:12:52.151371+00:00",
-      "state": "INTEGRATED_STEP_1_REMEDIATION_AND_QUALIFICATION_OPEN",
-      "interimEvidence": "evidence/ue-v2-step1-qualification-20261117/source-plan-generation-v10.json",
-      "confirmedCorrections": [
-        "Canonical authority reads schema-qualified; tenant/system/nested transactions explicitly place pg_temp last. Actual native temporary-relation regression passed.",
-        "Counsel case-conflict checks include source-derived creator relationships and acquire transaction admission locks before facts.",
-        "Queued notification updates bind the exact organization as well as queue identity.",
-        "New source-owned status journal binds history and atomic audit to the real transaction; native component proof exists, combined bootstrap remains open.",
-        "English/French state-only queued mail uses the exact live recipient locale through a bounded companion column read.",
-        "Current Django constraint metadata uses an isolated collector; conditional index is emitted once, not silently ignored.",
-        "Three newly orphaned legacy template/timeline modules and their standalone tests retired; existing orphan ceiling unchanged. Canonical case history and durable state-only mail remain live.",
-        "Restricted auth installer keeps its existing temporary schema CREATE grant until the final function ownership transfer; final privilege contract unchanged. Native restricted-role regression passed before final candidate requalification.",
-        "Evidence CLI no longer downgrades cryptographic failures to unsigned success; canonical attestations bind actual local evidence bytes. Focused regression and interim receipts exist, final candidate rebind remains required.",
-        "Python actual hashlocked dependency audit now covers the deployment lock; certifi-only patch applied with hash-verified exact artifact.",
-        "Financial compatibility APIs are contained at request boundary; metadata serializers must never permit a member to delete real financial rows. Positive finance implementation remains excluded.",
-        "Current-source auth column grants exclude six preserved sensitive legacy fields; actual SQL-engine counterexample and 100 focused corrected cases are on file. Native final proof remains pending.",
-        "Source-derived auth schema upgrade adds only three nullable/no-default magic-link metadata fields and preserves prior data; partial/drifted schemas are refused.",
-        "PR1268 represented-member disclosure binding integrated after a reproduced denial regression; 25 related pure-kernel cases pass. No WorkAid feature activation.",
-        "NAR proof persistence uses its actual separate platform connection through a service; grievance import operations take their authorized transaction. 54 component and79 scope controls pass;11 obsolete exceptions retired without changing gate tests or expiry dates.",
-        "Stripe facade now imports its type from the existing platform adapter; one unnecessary provider exception retired,23 related checks pass. No finance features implemented.",
-        "Only the obsolete Partners/contracts exception retired; the unchanged platform concern gate passes. Its empty adapter scaffold proves no feature implementation."
+      "recordedAt": "2026-11-18T13:26:22.885958+00:00",
+      "state": "CONFIRMED_COMPONENT_CORRECTIONS_INTEGRATED_NATIVE_AND_FINAL_QUALIFICATION_OPEN",
+      "candidateSha": null,
+      "sourceBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+      "currentWorkingTreeUncommitted": true,
+      "interimEvidence": [
+        "native-security-transition-v21.json",
+        "production-mjs-and-restricted-companions-v6.json",
+        "external-native-qualified-component-v2.json",
+        "fresh-native-runtime-diagnostic-v2.json",
+        "picomatch-wrapper-negation-remediation-v7.json",
+        "notification-recipient-storage-component-v1.json"
       ],
-      "interimValidation": {
-        "rootLint": "PRIOR_INTERIM172_TASKS_PASS; NEW_INTEGRATION_RERUN_REQUIRED",
-        "rootTypecheck": "LATEST_COMPLETED_V7_FAILED235_OF238_TASKS_SUCCESSFUL; FOUR_ERRORS_REPAIRED; V8_RUNNING",
-        "ueTypecheck": "PRIOR_APPLICATION_V6_PASS; FINAL_INTEGRATED_RERUN_REQUIRED",
-        "all13DiscoveredFailureFiles": "184 tests passed in targeted rerun",
-        "wholeCandidateFullRegression": "REQUIRED_FINAL_RERUN",
-        "wholeBootstrap": "RESTRICTED_INSTALLER_REPAIR_NATIVE_1_OF_1_PASS; V9_RESOURCE_FAILURE; V10_INTERRUPTED_AFTER_CONTAINED_SERVICE_SCOPE_ASSERTION",
-        "dependencyAudit": "FAIL_HIGH_PICOMATCH_1247710_NO_OFFICIAL_PATCHED_RELEASE",
-        "rootTestFast": "PREVIOUS_RUN_INTERRUPTED_HOST_RESTART_NO_FINAL_RESULT; FINAL_RERUN_REQUIRED",
-        "pythonLockedAudit": "87_DEPENDENCIES_ZERO_FINDINGS_AFTER_CERTIFI_2026_10_19; FINAL_CANDIDATE_REBIND_REQUIRED",
-        "architecturalContracts": "V8_REPORTED10139_PASS7_FAIL0_PENDING; FULL_RAW_ASSERTIONS_PRESERVED; PERMANENT_EXCEPTION_REPAIRS_IN_PROGRESS",
-        "secretScanFullHistory": "FAILED67_FINDINGS_ALL_ANCESTORS_OF_MAIN; CONTAINMENT_AND_MATERIALITY_REVIEW_IN_PROGRESS",
-        "productionNextHttpBrowserLoad": "SOURCE_HARNESS_PRESENT; ACTUAL_BUILD_HTTP_BROWSER_AND_MEASURED_LOAD_STILL_UNPROVEN",
-        "expandedManifestTypecheck": "V4_PASS_AFTER_FIVE_AST_TYPING_REPAIRS; INSTALLER_CHANGED_AFTERWARD_FINAL_RERUN_REQUIRED",
-        "historicalSecurityTransition": "V8_NATIVE2_PASS1_FAIL; EXACT_FRAMEWORK_CREATE_FUNCTION_PERMISSION_COUNTEREXAMPLE; CORRECTION_PENDING_REAL_RERUN",
-        "authSourceColumns": "100_FOCUSED_PASS;12_RETAINED_FIELD_READS_DENIED; NATIVE_FINAL_PENDING"
+      "evidencePathsRelativeTo": "evidence/ue-v2-step1-qualification-20261117",
+      "confirmedObservations": {
+        "priorPlan18SecurityTransition": "4_NATIVE_PG15_PASS_ZERO_SKIP_SOURCE_UNCHANGED",
+        "priorPlan18ProductionEntrypoint": "TWO_ACTUAL_MJS_RUNS_AND7_RESTRICTED_SESSION_PROBES_PASS_APPLICATION_READY_FALSE",
+        "priorPlan18ExternalReader": "16_NATIVE_PG15_PASS_ZERO_SKIP1041_SOURCE_BINDINGS_UNCHANGED_SYNTHETIC_BYTES_NOT_BROWSER_OR_LIVE_ADOPTION",
+        "freshPg16RuntimeV2": "INTERRUPTED_AFTER8_OBSERVED_FAILURES_NO_FINAL_REPORT_NO_FULL_COVERAGE_CLAIM_SOURCE_UNCHANGED_OWNED_CONTAINER_CLEANED",
+        "freshBootstrapOrder": "62_FOCUSED_PASS_AFTER_ACTUAL_PERMISSION_FAILURE_FINAL_NATIVE_RERUN_REQUIRED",
+        "financialBoundary": "SOURCE107_AND_RECONCILED_KERNEL65_PASS_ZERO_SKIP_89_FINANCE10_CREDIT1_JOURNAL_NATIVE_CENSUS_PENDING",
+        "moduleAdmission": "FOUR_SEPARATE_OPERATIONAL_TABLES17_RUNTIME_READ_COLUMNS_COMPONENT_PROOF_ONLY_NATIVE_MATRIX_PENDING",
+        "picomatchInstalled": "ACTUAL_PATCHED4_0_7_PARSER71_PASS_ZERO_SKIP_FROZEN_INSTALL0_RAW_AUDIT1_HIGH_REMAINS",
+        "recipientStorage": "10_SQL_ENGINE_PASS_ZERO_SKIP_TWO_ENTRYPOINT_SEMANTIC0_UNAPPLIED_MIGRATION",
+        "documentation": "V7_ZERO_CRITICAL_ERRORS1225_WARNINGS1835_INFO_FINAL_CANDIDATE_RECHECK_REQUIRED",
+        "rootSemanticDiagnostic": "24_ENTRYPOINT_RUN_FAILED3_OLD_STORAGE_TEST_PREDICATE_DIAGNOSTICS_REPAIRED_RECHECK_PENDING",
+        "sourcePlan": "V21_C101DE562180C26E1B4AFC5BC415F47C062F1106DAA8F9592ACFDD4BE88D925E_NOW_STALE_AFTER_COHERENT_SOURCE_AND_LOCK_EDITS",
+        "cfoTransitiveFamily": "FROZEN756_COMPONENT_PASS_NOT_WHOLE_CANDIDATE",
+        "zongaConnectedFamily": "SOURCE_REMEDIATION_AND_ACTUAL_SQL_COMPONENT_REQUALIFICATION_IN_PROGRESS",
+        "storageCapacity": "POSTINSTALL_REGENERABLE_CACHE_PRUNING_RESTORED_APPROX5_5_GIB_SOURCE_EVIDENCE_INSTALLED_TOOLS_AND_LIVE_DATA_PRESERVED"
       },
+      "currentRemediation": [
+        "Exact13-column system sync-log contract for actual dashboard/cron callers, with no broad read or excluded dues count",
+        "Source-specific real-session six-table case/scope/journal fixtures using production workflow and atomic audit operations; current physical guards stay enforced",
+        "Connected transitive action, public DTO, moderation audit/notification and source-backed media access corrections"
+      ],
       "remainingQualification": [
-        "Finish and qualify the actual historical-to-current security upgrade, exact old-data preservation, rollback, second-install NOOP, and real Node MJS database hook.",
-        "Qualify native auth/session/tenant/physical-guard purpose boundaries on the integrated schema, including direct sensitive finance denial; no finance feature implementation.",
-        "Complete protected external resource-read qualification and production execution for the canonical required external matter/document scope, without resurrecting forgeable legacy grants or issuing live authority.",
-        "Resolve actual remaining architecture and scoped-server-action defects behind expired fleet exceptions; preserve existing gates, institutional scope and dates. Complete provider-boundary remediation where required.",
-        "Freeze one exact integrated source candidate and run all prescribed root checks, full application/backend regressions, native PostgreSQL15/16, BootstrapV2 cleanroom/provenance and recovery checks.",
-        "Execute actual disposable production build, authenticated HTTP and browser journeys across EN/FR desktop/mobile, accessibility and unchanged measured performance acceptance.",
-        "Complete dependency/container/SBOM/license/secret/security-design/access/reliability/runtime-governance qualification. Raw Picomatch HIGH remains unresolved, exact image license materiality and four historical credential revocations remain unverified.",
-        "Complete final adversarial falsification and bind each of22 functional plus15 operational action chains to substantive exact-candidate positive/denial/tenant/lifecycle/audit/recovery evidence, then seal and verify canonical evidence.",
-        "Keep Step2 live stakeholder/provider/inbox/environment qualification and every staging/production promotion held; historical777 closures and live Azure data preserved."
+        "Freeze coherent producer bytes, regenerate plan/overlay and requalify current legacy transition, real startup and native15/16 matrices, including seven column-contract paths and100 sensitive finance/credit/journal denials.",
+        "Run all17 financial boundary cases and69 handlers with real sessions/role floors/no effects on the qualified current template; no positive finance feature work.",
+        "Complete required five root checks, full official fast-suite shards and contracts, full application/backend regressions, native bootstrap/physical guards and recovery against one exact integrated candidate.",
+        "Execute existing real disposable build/HTTP/EN-FR desktop/mobile browser/accessibility and unchanged measured-load acceptance. The harness covers bounded families and never substitutes for all37 chains.",
+        "Resolve raw dependency HIGH, exact final image/SBOM/license materiality, historical credential revocation evidence, and security-design/access/reliability/runtime-governance requirements without waivers.",
+        "Bind all22 functional and15 operational canonical chains to substantive exact-candidate positive, denial, tenant, lifecycle, audit and recovery proofs; finish adversarial review, seal and verify evidence.",
+        "Retain Step2/live stakeholder/provider/inbox/environment acceptance and every staging/production promotion on hold; preserve original777 history and live Azure data."
       ],
       "step2Held": true,
       "stagingAndProductionPromoted": false,
-      "executionRecoveryEvidence": "evidence/ue-v2-step1-qualification-20261117/interrupted-qualification-v1.json"
+      "liveDataMutated": false
     },
     "readonlyStagingPreflight": {
       "evidence": "evidence/ue-v2-step1-qualification-20261117/readonly-staging-authority-preflight-v3.json",
@@ -11133,6 +11128,65 @@
       "conflictingPrimaryProvenance": 0,
       "activeMandates": 0,
       "conflictingSupervisoryPowers": 0
-    }
+    },
+    "engineeringObservationHistory": [
+      {
+        "recordedAt": "2026-11-18T03:44:15.347518+00:00",
+        "state": "STATIC_AND_DISPOSABLE_SECURITY_UPGRADE_SUBPROOFS_PASS_RUNTIME_CHAINS_OPEN",
+        "interimEvidence": "evidence/ue-v2-step1-qualification-20261117/native-security-transition-v15.json",
+        "confirmedCorrections": [
+          "Canonical authority reads schema-qualified; tenant/system/nested transactions explicitly place pg_temp last. Actual native temporary-relation regression passed.",
+          "Counsel case-conflict checks include source-derived creator relationships and acquire transaction admission locks before facts.",
+          "Queued notification updates bind the exact organization as well as queue identity.",
+          "New source-owned status journal binds history and atomic audit to the real transaction; native component proof exists, combined bootstrap remains open.",
+          "English/French state-only queued mail uses the exact live recipient locale through a bounded companion column read.",
+          "Current Django constraint metadata uses an isolated collector; conditional index is emitted once, not silently ignored.",
+          "Three newly orphaned legacy template/timeline modules and their standalone tests retired; existing orphan ceiling unchanged. Canonical case history and durable state-only mail remain live.",
+          "Restricted auth installer keeps its existing temporary schema CREATE grant until the final function ownership transfer; final privilege contract unchanged. Native restricted-role regression passed before final candidate requalification.",
+          "Evidence CLI no longer downgrades cryptographic failures to unsigned success; canonical attestations bind actual local evidence bytes. Focused regression and interim receipts exist, final candidate rebind remains required.",
+          "Python actual hashlocked dependency audit now covers the deployment lock; certifi-only patch applied with hash-verified exact artifact.",
+          "Financial compatibility APIs are contained at request boundary; metadata serializers must never permit a member to delete real financial rows. Positive finance implementation remains excluded.",
+          "Current-source auth column grants exclude six preserved sensitive legacy fields; actual SQL-engine counterexample and 100 focused corrected cases are on file. Native final proof remains pending.",
+          "Source-derived auth schema upgrade adds only three nullable/no-default magic-link metadata fields and preserves prior data; partial/drifted schemas are refused.",
+          "PR1268 represented-member disclosure binding integrated after a reproduced denial regression; 25 related pure-kernel cases pass. No WorkAid feature activation.",
+          "NAR proof persistence uses its actual separate platform connection through a service; grievance import operations take their authorized transaction. 54 component and79 scope controls pass;11 obsolete exceptions retired without changing gate tests or expiry dates.",
+          "Stripe facade now imports its type from the existing platform adapter; one unnecessary provider exception retired,23 related checks pass. No finance features implemented.",
+          "Only the obsolete Partners/contracts exception retired; the unchanged platform concern gate passes. Its empty adapter scaffold proves no feature implementation."
+        ],
+        "interimValidation": {
+          "rootLint": "PRIOR_INTERIM172_TASKS_PASS; NEW_INTEGRATION_RERUN_REQUIRED",
+          "rootTypecheck": "V9_PASS238_OF238_TASKS_NO_RESOURCE_STOP; SOURCE_CHANGED_DURING_RUN_FINAL_CANDIDATE_RERUN_REQUIRED",
+          "ueTypecheck": "PRIOR_APPLICATION_V6_PASS; FINAL_INTEGRATED_RERUN_REQUIRED",
+          "all13DiscoveredFailureFiles": "184 tests passed in targeted rerun",
+          "wholeCandidateFullRegression": "REQUIRED_FINAL_RERUN",
+          "wholeBootstrap": "RESTRICTED_INSTALLER_REPAIR_NATIVE_1_OF_1_PASS; V9_RESOURCE_FAILURE; V10_INTERRUPTED_AFTER_CONTAINED_SERVICE_SCOPE_ASSERTION",
+          "dependencyAudit": "FAIL_HIGH_PICOMATCH_1247710_NO_OFFICIAL_PATCHED_RELEASE",
+          "rootTestFast": "PREVIOUS_RUN_INTERRUPTED_HOST_RESTART_NO_FINAL_RESULT; FINAL_RERUN_REQUIRED",
+          "pythonLockedAudit": "87_DEPENDENCIES_ZERO_FINDINGS_AFTER_CERTIFI_2026_10_19; FINAL_CANDIDATE_REBIND_REQUIRED",
+          "architecturalContracts": "V8_REPORTED10139_PASS7_FAIL0_PENDING; FULL_RAW_ASSERTIONS_PRESERVED; PERMANENT_EXCEPTION_REPAIRS_IN_PROGRESS",
+          "secretScanFullHistory": "FAILED67_FINDINGS_ALL_ANCESTORS_OF_MAIN; CONTAINMENT_AND_MATERIALITY_REVIEW_IN_PROGRESS",
+          "productionNextHttpBrowserLoad": "SOURCE_HARNESS_PRESENT; ACTUAL_BUILD_HTTP_BROWSER_AND_MEASURED_LOAD_STILL_UNPROVEN",
+          "expandedManifestTypecheck": "V5_PASS_ON_PRODUCTION_TOOLING; NEW_RLS_FLAG_FAMILY_REPAIR_REQUIRES_RECHECK",
+          "historicalSecurityTransition": "V15_NATIVE4_OF4_PASS_ZERO_SKIP_UNCHANGED_SOURCE; REAL_MJS_ENTRYPOINT_AND_HELPER_BUSINESS_JOURNEYS_STILL_PENDING",
+          "authSourceColumns": "100_FOCUSED_PASS;12_RETAINED_FIELD_READS_DENIED; NATIVE_FINAL_PENDING",
+          "authorityRuleInitialState": "25_SQL_ENGINE_CASES_PASS_AFTER_CONFIRMED_ACTIVE_RULE_INSERT_GAP; NATIVE_FINAL_PENDING",
+          "stagedSecretScan": "V2_PASS_ZERO_FINDINGS_UNCHANGED_RULES_AFTER_EXPLICIT_PUBLICATION_DERIVATIVES; FULL_HISTORY_REVOCATION_QUESTION_SEPARATE"
+        },
+        "remainingQualification": [
+          "Finish and qualify the actual historical-to-current security upgrade, exact old-data preservation, rollback, second-install NOOP, and real Node MJS database hook.",
+          "Qualify native auth/session/tenant/physical-guard purpose boundaries on the integrated schema, including direct sensitive finance denial; no finance feature implementation.",
+          "Complete protected external resource-read qualification and production execution for the canonical required external matter/document scope, without resurrecting forgeable legacy grants or issuing live authority.",
+          "Resolve actual remaining architecture and scoped-server-action defects behind expired fleet exceptions; preserve existing gates, institutional scope and dates. Complete provider-boundary remediation where required.",
+          "Freeze one exact integrated source candidate and run all prescribed root checks, full application/backend regressions, native PostgreSQL15/16, BootstrapV2 cleanroom/provenance and recovery checks.",
+          "Execute actual disposable production build, authenticated HTTP and browser journeys across EN/FR desktop/mobile, accessibility and unchanged measured performance acceptance.",
+          "Complete dependency/container/SBOM/license/secret/security-design/access/reliability/runtime-governance qualification. Raw Picomatch HIGH remains unresolved, exact image license materiality and four historical credential revocations remain unverified.",
+          "Complete final adversarial falsification and bind each of22 functional plus15 operational action chains to substantive exact-candidate positive/denial/tenant/lifecycle/audit/recovery evidence, then seal and verify canonical evidence.",
+          "Keep Step2 live stakeholder/provider/inbox/environment qualification and every staging/production promotion held; historical777 closures and live Azure data preserved."
+        ],
+        "step2Held": true,
+        "stagingAndProductionPromoted": false,
+        "executionRecoveryEvidence": "evidence/ue-v2-step1-qualification-20261117/interrupted-qualification-v1.json"
+      }
+    ]
   }
 }

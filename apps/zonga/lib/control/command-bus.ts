@@ -13,6 +13,7 @@
 import type { CommandContext, CommandResult, CommandHandler } from './types'
 import { afterCommandSuccess, emitCommandEvent } from './control-plane-bridge'
 import { logger } from '@/lib/logger'
+import { commandTransaction } from './scoped-command-context'
 
 // ── Pre-execution guard registry ──────────────────────────────────────────
 type PreExecutionGuard = (
@@ -50,10 +51,12 @@ export async function execute<T extends { type: string }>(
     logger.error('No handler for command type', { commandType: command.type })
     return {
       success: false,
-      errors: [{
-        code: 'UNKNOWN_COMMAND',
-        message: `No handler registered for command type: ${command.type}`,
-      }],
+      errors: [
+        {
+          code: 'UNKNOWN_COMMAND',
+          message: `No handler registered for command type: ${command.type}`,
+        },
+      ],
     }
   }
 
@@ -80,10 +83,12 @@ export async function execute<T extends { type: string }>(
         })
         return {
           success: false,
-          errors: [{
-            code: 'PRE_EXECUTION_GUARD_FAILED',
-            message: gate.reason ?? 'Command blocked by pre-execution guard',
-          }],
+          errors: [
+            {
+              code: 'PRE_EXECUTION_GUARD_FAILED',
+              message: gate.reason ?? 'Command blocked by pre-execution guard',
+            },
+          ],
         }
       }
     }
@@ -99,7 +104,7 @@ export async function execute<T extends { type: string }>(
     })
 
     // Control plane post-execution hook: emit system event + metrics
-    if (result.success) {
+    if (result.success && !commandTransaction(context)) {
       afterCommandSuccess(context, result)
     }
 
@@ -112,10 +117,12 @@ export async function execute<T extends { type: string }>(
     })
     return {
       success: false,
-      errors: [{
-        code: 'COMMAND_EXECUTION_FAILED',
-        message,
-      }],
+      errors: [
+        {
+          code: 'COMMAND_EXECUTION_FAILED',
+          message,
+        },
+      ],
     }
   }
 }

@@ -32,6 +32,8 @@ export async function buildCurrentCatalogOverlay(plan: V2Plan) {
       approvedColumnGrants: projection.columnGrants,
       dedicatedRolePrivileges: projection.tableGrants.filter(grant => /^(nzila_auth_|ue_framework_)/.test(grant.role)),
       requiredSessionPolicy: projection.requiredSessionPolicy,
+      requiredContainedParentPolicies: projection.requiredContainedParentPolicies,
+      requiredPhysicalTriggers: projection.requiredPhysicalTriggers,
       nonPublic: [
         ...plan.tables.filter(table => table.name.startsWith('user_management.')).map(table => ({ schema: 'user_management', table: table.name.split('.')[1], runtime: [], system: [] })),
         { schema: 'audit_security', table: 'audit_logs', runtime: [], system: [] },

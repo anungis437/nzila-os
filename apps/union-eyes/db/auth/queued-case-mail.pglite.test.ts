@@ -47,7 +47,8 @@ describe('database-issued queued mail capability',()=>{
   it('admits only exact source-bound helper functions and execution ACLs',async()=>{
     const rows=(await pg.query<Record<string,unknown>>(QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY)).rows
     expect(queuedCaseMailFunctionViolations(rows)).toEqual([])
-    for(const change of [{body:'SELECT true'},{owner:'postgres'},{system_execute:true},{public_execute:true},{exact_acl:false}])
+    for(const change of [{body:'SELECT true'},{owner:'postgres'},{system_execute:true},{public_execute:true},{exact_acl:false},
+      {reader_public_usage:false},{reader_public_create:true},{reader_public_grant_option:true}])
       expect(queuedCaseMailFunctionViolations(rows.map((row,index)=>index===0?{...row,...change}:row))).not.toEqual([])
   })
   it('mints under a real live session and revalidates the exact current action without direct identity grants',async()=>{

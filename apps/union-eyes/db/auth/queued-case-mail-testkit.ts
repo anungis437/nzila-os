@@ -10,10 +10,11 @@ import { CASE_SCOPE_FACTS_FIXTURE_SQL } from '../__tests__/case-scope-facts-fixt
 export interface MailFixtureDb { exec(sql:string):Promise<unknown>; query<T=Record<string,unknown>>(sql:string,params?:unknown[]):Promise<{rows:T[]}> }
 export async function installQueuedMailFixture(pg:MailFixtureDb,input:{org:string;caseId:string;actor:string;member:string;sessionHash:string}) {
   const {org,caseId,actor,member,sessionHash}=input
-  await pg.exec(`REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+  await pg.exec(`REVOKE ALL ON SCHEMA public FROM PUBLIC;
     CREATE ROLE ue_v2_owner NOLOGIN NOINHERIT; CREATE ROLE union_eyes_runtime NOLOGIN NOINHERIT;
     CREATE ROLE union_eyes_system NOLOGIN NOINHERIT; CREATE ROLE nzila_auth_org_authority_reader NOLOGIN NOINHERIT;
-    GRANT CREATE ON SCHEMA public TO ue_v2_owner; SET ROLE ue_v2_owner;`)
+    GRANT USAGE ON SCHEMA public TO union_eyes_runtime,union_eyes_system;
+    GRANT USAGE,CREATE ON SCHEMA public TO ue_v2_owner; SET ROLE ue_v2_owner;`)
   const ddl=await generateMigration(generateDrizzleJson({}),generateDrizzleJson(authoritySchema))
   for(const sql of [...ddl.filter(sql=>!sql.startsWith('ALTER TABLE')),...ddl.filter(sql=>sql.startsWith('ALTER TABLE'))])await pg.exec(sql)
   await pg.exec(`RESET ROLE;

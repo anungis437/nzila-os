@@ -20,7 +20,7 @@
  */
 import 'server-only'
 import { sql } from 'drizzle-orm'
-import { getHqDb } from '../db/client'
+import { getHqDb } from '../../lib/db/client'
 
 // Lazy imports — these packages bring native deps (Stripe SDK) we don't want
 // to load when the env flags are off.

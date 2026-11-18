@@ -21,9 +21,13 @@ function routeFiles(dir: string, out: string[] = []): string[] {
   return out
 }
 const methodsOf = (source: string) =>
-  METHODS.filter((m) => new RegExp(`export\\s+(?:async\\s+function|const|let|function)\\s+${m}\\b`).test(source)
-    || new RegExp(`export\\s*\\{[^}]*\\b(?:as\\s+)?${m}\\b[^}]*\\}`).test(source))
-const routeOf = (urlPath: string) => path.join(API, urlPath.split('?')[0].replace(/^\/api\//, ''), 'route.ts')
+  METHODS.filter(
+    (m) =>
+      new RegExp(`export\\s+(?:async\\s+function|const|let|function)\\s+${m}\\b`).test(source) ||
+      new RegExp(`export\\s*\\{[^}]*\\b(?:as\\s+)?${m}\\b[^}]*\\}`).test(source),
+  )
+const routeOf = (urlPath: string) =>
+  path.join(API, urlPath.split('?')[0].replace(/^\/api\//, ''), 'route.ts')
 
 describe('scheduled jobs manifest', () => {
   const jobs = scheduled.jobs
@@ -51,13 +55,17 @@ describe('scheduled jobs manifest', () => {
     const declared = new Set(jobs.map((j) => path.normalize(routeOf(j.path))))
     // Routes that take the cron secret as one of several credentials, or hold no job of their own, are named here with the reason.
     const NOT_JOBS: Record<string, string> = {
-      'icra/report/[assessmentId]/review': 'a review decision, not a scheduled job (its authorization is a separate defect family)',
+      'icra/report/[assessmentId]/review':
+        'a review decision, not a scheduled job (its authorization is a separate defect family)',
     }
     const undeclared = routeFiles(API).filter((file) => {
       const source = readFileSync(file, 'utf8')
-      const cron = /auth:\s*\{[^}]*\bcron:\s*true/.test(source) || /cronSecretMatches\(/.test(source)
+      const cron =
+        /auth:\s*\{[^}]*\bcron:\s*true/.test(source) || /cronSecretMatches\(/.test(source)
       const rel = path.relative(API, path.dirname(file)).replace(/\\/g, '/')
-      return cron && !declared.has(path.normalize(file)) && !(rel in NOT_JOBS) && !(rel in RETIRED_CRON)
+      return (
+        cron && !declared.has(path.normalize(file)) && !(rel in NOT_JOBS) && !(rel in RETIRED_CRON)
+      )
     })
     expect(undeclared.map((f) => path.relative(API, f))).toEqual([])
   })
@@ -72,17 +80,36 @@ describe('scheduled jobs manifest', () => {
     'cron/monthly-dues': 'UE-CRON-MONTHLY-DUES',
     'cron/analytics/daily-metrics': 'UE-CRON-DAILY-METRICS',
     'cron/calendar-sync': 'UE-ACTION-CALENDAR-SYNC',
+    'rewards/cron': 'UE-INST-REWARDS-PROGRAM-AUTOMATION-EXPIRY-AND-EXPORT',
   }
 
   it('schedules no route that answers 501, and keeps a route off the schedule only while it does', () => {
-    const manifest = JSON.parse(readFileSync(path.resolve(APP, '../../docs/union-eyes/convergence/register/ue-route-coverage-manifest.json'), 'utf8')) as {
+    const manifest = JSON.parse(
+      readFileSync(
+        path.resolve(
+          APP,
+          '../../docs/union-eyes/convergence/register/ue-route-coverage-manifest.json',
+        ),
+        'utf8',
+      ),
+    ) as {
       routes: Array<{ route: string; guard: string }>
     }
-    const guardOf = (urlPath: string) => manifest.routes.find((r) => r.route === `${urlPath.split('?')[0].replace(/^\/api\//, '')}/route.ts`)?.guard
-    for (const job of jobs) expect(guardOf(job.path), `${job.path} is scheduled but answers 501`).not.toBe('RETIRED')
+    const guardOf = (urlPath: string) =>
+      manifest.routes.find(
+        (r) => r.route === `${urlPath.split('?')[0].replace(/^\/api\//, '')}/route.ts`,
+      )?.guard
+    for (const job of jobs)
+      expect(guardOf(job.path), `${job.path} is scheduled but answers 501`).not.toBe('RETIRED')
     for (const rel of Object.keys(RETIRED_CRON)) {
-      expect(guardOf(`/api/${rel}`), `${rel} is off the schedule but no longer retired: schedule it`).toBe('RETIRED')
-      expect(jobs.some((j) => j.path.split('?')[0] === `/api/${rel}`), `${rel} is retired and must not be scheduled`).toBe(false)
+      expect(
+        guardOf(`/api/${rel}`),
+        `${rel} is off the schedule but no longer retired: schedule it`,
+      ).toBe('RETIRED')
+      expect(
+        jobs.some((j) => j.path.split('?')[0] === `/api/${rel}`),
+        `${rel} is retired and must not be scheduled`,
+      ).toBe(false)
     }
   })
 
@@ -92,13 +119,17 @@ describe('scheduled jobs manifest', () => {
 
   it('is what the infrastructure schedules: bicep reads this manifest and posts with the cron secret, failing the run on a non-2xx answer', () => {
     const bicep = readFileSync(BICEP, 'utf8')
-    expect(bicep).toContain("loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json')")
+    expect(bicep).toContain(
+      "loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json')",
+    )
     expect(bicep).toMatch(/curl -fsS -X POST[^\n]*x-cron-secret: \$CRON_SECRET/)
     expect(bicep).not.toMatch(/cronSchedule/)
   })
 
   it('leaves no second scheduler behind: vercel.json declares no cron entry', () => {
-    const vercel = JSON.parse(readFileSync(path.join(APP, 'vercel.json'), 'utf8')) as { crons?: unknown }
+    const vercel = JSON.parse(readFileSync(path.join(APP, 'vercel.json'), 'utf8')) as {
+      crons?: unknown
+    }
     expect(vercel.crons).toBeUndefined()
   })
 })

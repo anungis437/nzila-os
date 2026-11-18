@@ -1,187 +1,52 @@
-/**
- * CFO Server Actions — Reports.
- *
- * Financial report generation, listing, and AI-powered narrative
- * summaries using @nzila/ai-sdk.
- */
+/** Existing report creation/read/export with one verified tenant/resource context. */
 'use server'
-
-import { auth } from '@nzila/platform-auth/entra/server'
-import { requirePermission } from '@/lib/rbac'
-import { platformDb } from '@nzila/db/platform'
-import { sql } from 'drizzle-orm'
-import { logger } from '@/lib/logger'
-import { buildCanonicalAiOutput, type CanonicalAiOutput } from '@nzila/ai-sdk'
-import { runAICompletionDetailed } from '@/lib/ai-client'
-import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
-
-export interface Report {
-  id: string
-  title: string
-  type: 'pnl' | 'balance-sheet' | 'cash-flow' | 'tax-summary' | 'audit-trail' | 'custom'
-  status: 'draft' | 'generated' | 'reviewed' | 'published'
-  period: string
-  createdAt: Date
-  generatedBy: string
-  narrativeSummary: string | null
-}
-
-export interface ReportListResult {
-  reports: Report[]
-  total: number
-}
-
+import { resolveOrgContext } from '@/lib/resolve-org'
+import {
+  generateScopedReport,
+  listReportsForContext,
+  reportNarrative,
+  exportReports,
+  type Report,
+  type ReportListResult,
+} from '@/lib/services/reports'
+export type { Report, ReportListResult } from '@/lib/services/reports'
 export async function listReports(opts?: {
   page?: number
   pageSize?: number
   type?: string
   status?: string
 }): Promise<ReportListResult> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('reports:view')
-
-  const page = opts?.page ?? 1
-  const pageSize = opts?.pageSize ?? 20
-  const offset = (page - 1) * pageSize
-
-  try {
-    const reports = (await platformDb.execute(
-      sql`SELECT
-        id, metadata->>'title' as title,
-        metadata->>'type' as type,
-        metadata->>'status' as status,
-        metadata->>'period' as period,
-        created_at as "createdAt",
-        actor_id as "generatedBy",
-        metadata->>'narrative' as "narrativeSummary"
-      FROM audit_log
-      WHERE action = 'report.generated' OR action = 'report.created'
-      ORDER BY created_at DESC
-      LIMIT ${pageSize} OFFSET ${offset}`,
-    )) as unknown as { rows: Report[] }
-
-    const [countResult] = (await platformDb.execute(
-      sql`SELECT COUNT(*) as total FROM audit_log
-      WHERE action = 'report.generated' OR action = 'report.created'`,
-    )) as unknown as [{ total: number }]
-
-    return {
-      reports: reports.rows ?? [],
-      total: Number(countResult?.total ?? 0),
-    }
-  } catch (error) {
-    logger.error('Failed to list reports', { error })
-    return { reports: [], total: 0 }
-  }
+  return resolveOrgContext('resource', { permission: 'reports:view' }, (context) =>
+    listReportsForContext(context, opts),
+  )
 }
-
 export async function generateReport(input: {
   type: Report['type']
   period: string
   orgId?: string
   includeNarrative?: boolean
-}): Promise<CanonicalAiOutput<{ success: boolean; reportId?: string; narrative?: string }>> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('reports:create')
-
-  try {
-    logger.info('Generating financial report', { type: input.type, period: input.period, actorId: userId })
-
-    let narrative: string | undefined
-    let execution = {
-      modelUsed: 'report-generator',
-      engineVersion: 'finance:report-generator',
-    }
-    if (input.includeNarrative) {
-      const prompt = `Generate a concise executive summary for a ${input.type} financial report
-        covering the period ${input.period}. Focus on key trends, notable changes, and actionable insights.
-        Keep it under 300 words. Professional tone suitable for CFO-level review.`
-      const result = await runAICompletionDetailed(prompt, {
-        orgId: input.orgId ?? 'platform',
-        profile: 'cfo-default',
-        dataClass: 'sensitive',
-      })
-      execution = result.execution
-      narrative = result.content ?? ''
-    }
-
-    // Record in audit log as report generation
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES (
-        'report.generated',
-        ${userId},
-        'report',
-        gen_random_uuid()::text,
-        ${JSON.stringify({
-          title: `${input.type.replace('-', ' ').toUpperCase()} — ${input.period}`,
-          type: input.type,
-          status: narrative ? 'generated' : 'draft',
-          period: input.period,
-          narrative: narrative ?? null,
-          orgId: input.orgId ?? null,
-        })}::jsonb
-      )`,
-    )
-
-    const pack = buildEvidencePackFromAction({
-      actionId: `report-${Date.now()}`,
-      actionType: 'REPORT_GENERATED',
-      orgId: input.orgId ?? 'platform',
-      executedBy: userId,
-    })
-    await processEvidencePack(pack)
-
-    logger.info('Report generated', { type: input.type, period: input.period })
-    return buildCanonicalAiOutput({
-      payload: { success: true, narrative },
-      appKey: 'cfo',
-      orgId: input.orgId ?? 'platform',
-      execution,
-      confidenceScore: input.includeNarrative ? 0.72 : 1,
-      evidenceRefs: ['audit_log:report.generated'],
-      domain: 'finance',
-    })
-  } catch (error) {
-    logger.error('Report generation failed', { error })
-    return buildCanonicalAiOutput({
-      payload: { success: false },
-      appKey: 'cfo',
-      orgId: input.orgId ?? 'platform',
-      execution: { modelUsed: 'report-generator', engineVersion: 'finance:report-generator' },
-      confidenceScore: 0,
-      evidenceRefs: [],
-      domain: 'finance',
-    })
-  }
+}) {
+  return resolveOrgContext(
+    'organization',
+    { permission: 'reports:create', organizationId: input?.orgId },
+    (context) => generateScopedReport(context, input),
+  )
 }
-
 export async function getReportNarrative(reportId: string): Promise<string | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('reports:view')
-
-  try {
-    const [row] = (await platformDb.execute(
-      sql`SELECT metadata->>'narrative' as narrative FROM audit_log WHERE id = ${reportId}`,
-    )) as unknown as [{ narrative: string | null }]
-    return row?.narrative ?? null
-  } catch {
-    return null
-  }
+  return resolveOrgContext('resource', { permission: 'reports:view' }, (context) =>
+    reportNarrative(context, reportId),
+  )
 }
-
-/**
- * Build the export URL for client-side download.
- * The actual export is handled by the /api/reports/export route.
- */
 export async function getReportExportUrl(opts: {
   reportId?: string
   format: 'csv' | 'pdf'
 }): Promise<string> {
-  const params = new URLSearchParams({ format: opts.format })
-  if (opts.reportId) params.set('reportId', opts.reportId)
-  return `/api/reports/export?${params.toString()}`
+  return resolveOrgContext('resource', { permission: 'reports:export' }, async (context) => {
+    if (!['csv', 'pdf'].includes(opts.format)) throw new Error('Invalid report format')
+    // The URL is a convenience only; the download handler resolves authority again.
+    await exportReports(context, opts.reportId)
+    const params = new URLSearchParams({ format: opts.format })
+    if (opts.reportId) params.set('reportId', opts.reportId)
+    return `/api/reports/export?${params.toString()}`
+  })
 }

@@ -1,9 +1,10 @@
 import { AUTHORITY_PHYSICAL_GUARDS } from '@/db/auth/authority-physical-guards'
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '@/db/auth/case-scope-physical-guards'
 import { AUTHORITY_ISSUER_GUARDS } from '@/db/auth/authority-issuer-guards'
+import { REWARD_NOMINATION_GUARDS } from '@/db/auth/reward-nomination-guards'
 import { CASE_PRIMARY_DOMAIN_GUARDS, CASE_DOMAIN_SUPPORT_CATALOG_QUERY, caseDomainSupportViolations } from '@/db/auth/case-primary-domain-guards'
 import { QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY, queuedCaseMailFunctionViolations } from '@/db/auth/queued-case-mail'
-import { physicalGuardQueries, physicalGuardViolations } from '@/db/auth/physical-guard-catalog'
+import { physicalGuardQueries, physicalGuardViolations, type PhysicalTriggerDescriptor } from '@/db/auth/physical-guard-catalog'
 import {
   inspectMessagingPhysicalCatalog,
   MESSAGING_PHYSICAL_QUERIES,
@@ -11,13 +12,15 @@ import {
 } from '@/db/auth/messaging-physical-guards'
 import {
   AUTH_EXECUTION_ROLES,
-  AUTH_FUNCTION_EXPECTATIONS,
   AUTH_PRIVILEGE_EXPECTATIONS,
   AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
 } from '@nzila/db/auth-storage-authority'
+import { AUTH_FUNCTION_EXPECTATIONS } from '../../scripts/bootstrap-v2/auth-sql'
+import { EXTERNAL_READ_CATALOG_QUERIES, inspectExternalRead, externalReadCatalogViolations } from '../external-resource-read/catalog'
+import { CONTAINED_PARENT_POLICY_QUERY, containedParentPolicyInstallViolations } from '../../scripts/bootstrap-v2/contained-parent-policies'
 import baseContract from './catalog-authority-contract.json'
 import v2Decisions from './catalog-v2-decisions.json'
-import { catalogContractDigest, type CatalogRow } from './catalog-admission-core.mjs'
+import { catalogContractDigest, type CatalogRow, type ContainedParentPolicy } from './catalog-admission-core.mjs'
 import {
   CASE_ASSIGNEE_CATALOG_QUERY,
   caseAssigneePredicateViolations,
@@ -50,10 +53,12 @@ export type CurrentOverlay = {
     nonPublic: { schema: string; table: string; runtime: string[]; system: string[] }[]
     runtimeSchemaUsage: string[]; systemSchemaUsage: string[]
     requiredSessionPolicy: { name: string; command: string; permissive: boolean; roles: string[]; predicate: string }
+    requiredContainedParentPolicies: ContainedParentPolicy[]
+    requiredPhysicalTriggers: PhysicalTriggerDescriptor[]
   }
 }
 const currentOverlay = v2Decisions as unknown as CurrentOverlay
-const physicalContracts = [AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS]
+const physicalContracts = [AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS, REWARD_NOMINATION_GUARDS]
 
 /** The canonical source projection replaces current permissions, never history.
  * A corrupt base or an ungenerated current overlay remains a denial. */
@@ -81,6 +86,8 @@ export function canonicalCatalogContractFromOverlay(base: typeof baseContract, o
     dedicatedRolePrivileges: current.dedicatedRolePrivileges,
     currentFunctions: current.currentFunctions,
     requiredSessionPolicy: current.requiredSessionPolicy,
+    requiredContainedParentPolicies: current.requiredContainedParentPolicies,
+    requiredPhysicalTriggers: current.requiredPhysicalTriggers,
   }
   return { payload, digest: catalogContractDigest(payload) }
 }
@@ -142,6 +149,8 @@ export const canonicalAdmissionQueriesForMajor = (postgresMajor: CanonicalPostgr
   QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY,
   ...Object.values(MESSAGING_PHYSICAL_QUERIES),
   ...physicalContracts.flatMap(contract => Object.values(physicalGuardQueries(contract))),
+  ...Object.values(EXTERNAL_READ_CATALOG_QUERIES),
+  CONTAINED_PARENT_POLICY_QUERY,
 ]
 export const canonicalAdmissionQueries = canonicalAdmissionQueriesForMajor()
 
@@ -266,5 +275,8 @@ export async function inspectCanonicalAuthCatalog(execute: Execute, options: { p
     violations.push(...await physicalGuardViolations(contract, execute))
   violations.push(...caseDomainSupportViolations(await execute(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)))
   violations.push(...queuedCaseMailFunctionViolations(await execute(QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY)))
+  violations.push(...externalReadCatalogViolations(await inspectExternalRead(execute)))
+  violations.push(...containedParentPolicyInstallViolations(current.requiredContainedParentPolicies,
+    await execute(CONTAINED_PARENT_POLICY_QUERY), { expectedOwner: 'ue_v2_owner', requireForcedRls: true }))
   return violations
 }

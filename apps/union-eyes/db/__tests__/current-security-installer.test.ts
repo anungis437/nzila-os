@@ -1,10 +1,15 @@
-import { readFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { assertNoPartialCurrentSecurityFunctions, executeCurrentFrameworkProgram, joinCurrentSecurityPrograms, planCanonicalOwnership, planCanonicalRoleConvergence, planCurrentAuthColumnConvergence, planCurrentFrameworkProgram, planCurrentIdentityCreation, planVerifiedFrameworkExecuteRestore, type CurrentAuthColumn } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
-import { frameworkPolicyPreimageQuery, planExistingFrameworkPolicies, planLegacyPhysicalFunctionAdoption } from '../../../../tooling/scripts/lib/union-eyes-current-security-preimage'
+import { assertFinalPublicSchemaPrivileges, assertNoPartialCurrentSecurityFunctions, executeCurrentCompanionPrograms, executeCurrentFrameworkProgram, executeRetainedPublicSchemaProgram, joinCurrentSecurityPrograms, planCanonicalOwnership, planCanonicalRoleConvergence, planCurrentAuthColumnConvergence, planCurrentFrameworkProgram, planCurrentIdentityCreation, planCurrentRlsFlagConvergence, planRetainedPublicSchemaExecution, planVerifiedFrameworkExecuteRestore, type CurrentAuthColumn, type CurrentPublicSchemaExecution } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
+import { frameworkPolicyPreimageQuery, planExistingFrameworkPolicies, planLegacyActivationConstraintTransition, planLegacyPhysicalFunctionAdoption, type LegacyActivationConstraint } from '../../../../tooling/scripts/lib/union-eyes-current-security-preimage'
 import { projectCurrentCompilerSecurity } from '../../../../tooling/scripts/lib/union-eyes-current-security-contract'
+import { currentSecurityPrograms } from '../../../../tooling/scripts/lib/union-eyes-current-security-programs'
 import { AUTHORITY_PHYSICAL_GUARDS } from '../auth/authority-physical-guards'
+import { compileCaseAssigneePredicateSql } from '../auth/case-assignee-predicate'
+import { CASE_AUTHORITY_READER_ROLE, compileCaseAuthorityReaderSchemaSql, hasBoundedCaseAuthorityReaderSchema } from '../auth/case-authority-reader-schema'
 import { CANONICAL_BOOTSTRAP_ROLES } from '../../scripts/bootstrap-v2/execution-roles'
 import { buildCurrentPlatformAuthSource, buildCurrentPlatformIdentitySource, type V2Plan } from '../../scripts/bootstrap-v2/source'
 import { compileFrameworkSql } from '../../scripts/bootstrap-v2/framework-sql'
@@ -373,5 +378,269 @@ describe('framework ACLs are effective before their source dependencies run', ()
     expect(failure?.message).toBe('Current framework statement failed: ' + JSON.stringify({ index: 1, kind: 'CreateFunctionStmt', currentRole: 'ue_v2_owner', function: 'user_management.ue_framework_actor_authorized()', sqlstate: '42501', deniedKind: 'function', deniedIdentity: 'ue_framework_actor_authorized' }))
     expect(failure?.message).not.toContain('private')
     expect(failure?.message).not.toContain('SELECT EXISTS')
+  })
+
+  it('identifies the exact compiled companion statement without logging its SQL or driver detail', async () => {
+    const parsed = await parseSql(compileCaseAssigneePredicateSql())
+    if (!parsed.ok) throw new Error(parsed.message)
+    const index = parsed.statements.findIndex(node => node.AlterOwnerStmt)
+    expect(index).toBeGreaterThan(0)
+    const executed: string[] = []
+    let failure: Error | undefined
+    try {
+      await executeCurrentCompanionPrograms([compileCaseAssigneePredicateSql()], async sql => {
+        if (sql === 'SELECT current_user::text AS current_role') return [{ current_role: 'ue_v2_owner' }]
+        executed.push(sql)
+        if (sql === parsed.texts[index]) throw Object.assign(new Error('permission denied for schema public'), { code: '42501', detail: 'private driver detail' })
+        return []
+      })
+    } catch (caught) { failure = caught as Error }
+    expect(executed).toEqual(parsed.texts.slice(0, index + 1))
+    expect(failure?.message).toBe('Current companion 1 statement failed: ' + JSON.stringify({ index: index + 1, kind: 'AlterOwnerStmt', currentRole: 'ue_v2_owner', sqlstate: '42501', deniedKind: 'schema', deniedIdentity: 'public' }))
+    expect(failure?.message).not.toContain('private')
+    expect(failure?.message).not.toContain('ALTER FUNCTION')
+  })
+})
+
+describe('retained public schema ownership executes only current source privilege atoms', () => {
+  const authority = { owner: 'uev2admin', effective_owner: 'uev2admin', can_set_owner: true }
+  let sourcePlan: CurrentPublicSchemaExecution
+  beforeAll(async () => {
+    const plan = JSON.parse(readFileSync(new URL('../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json', import.meta.url), 'utf8')) as V2Plan
+    const programs = currentSecurityPrograms(plan, { postgresMajor: 15 })
+    sourcePlan = await planRetainedPublicSchemaExecution([...compileSecurity(plan).statements, ...programs.auth, programs.framework,
+      ...programs.companions, ...programs.guardFunctions, ...programs.messaging], authority, 'uev2admin')
+  })
+
+  it('derives schema privileges from every actual current producer and revokes transient CREATE', async () => {
+    expect(sourcePlan.owner).toBe('uev2admin')
+    expect(sourcePlan.statements).toContain('GRANT CREATE ON SCHEMA public TO nzila_auth_org_authority_reader')
+    expect(sourcePlan.statements).toContain('REVOKE CREATE ON SCHEMA public FROM nzila_auth_org_authority_reader')
+    expect(sourcePlan.usageRoles).toContain('union_eyes_runtime')
+    expect(sourcePlan.usageRoles).not.toContain('PUBLIC')
+    expect(sourcePlan.statements.every(sql => !sql.includes('GRANT OPTION'))).toBe(true)
+    const canonical = await planRetainedPublicSchemaExecution(sourcePlan.statements,
+      { owner: 'pg_database_owner', effective_owner: 'uev2admin', can_set_owner: true }, 'uev2admin')
+    expect(canonical).toEqual(sourcePlan)
+  })
+
+  it.each([
+    { owner: 'unknown_owner', effective_owner: 'unknown_owner', can_set_owner: true },
+    { owner: 'uev2admin', effective_owner: 'other_operator', can_set_owner: true },
+    { owner: 'pg_database_owner', effective_owner: 'other_operator', can_set_owner: true },
+    { owner: 'uev2admin', effective_owner: 'uev2admin', can_set_owner: false },
+  ])('refuses unknown owner or missing SET authority: %j', async facts => {
+    await expect(planRetainedPublicSchemaExecution(sourcePlan.statements, facts, 'uev2admin')).rejects.toThrow('owner and SET authority')
+  })
+
+  it.each([
+    'GRANT USAGE ON SCHEMA public TO unknown_role',
+    'GRANT USAGE ON SCHEMA public TO PUBLIC',
+    'GRANT USAGE ON SCHEMA public TO union_eyes_runtime WITH GRANT OPTION',
+    'GRANT USAGE ON SCHEMA public,user_management TO union_eyes_runtime',
+    'REVOKE ALL ON SCHEMA public FROM union_eyes_runtime',
+    'GRANT CREATE ON SCHEMA public TO union_eyes_runtime',
+    'GRANT USAGE ON SCHEMA public TO union_eyes_runtime GRANTED BY uev2admin',
+    'REVOKE CREATE ON SCHEMA public FROM union_eyes_runtime CASCADE',
+  ])('rejects undeclared schema authority or persistent CREATE: %s', async sql => {
+    await expect(planRetainedPublicSchemaExecution([...sourcePlan.statements, sql], authority, 'uev2admin')).rejects.toThrow()
+  })
+
+  it('executes the exact source schema atom as its retained owner and restores the installer role', async () => {
+    const sql = sourcePlan.statements.find(sql => sql.startsWith('GRANT CREATE'))!
+    const executed: string[] = []
+    await executeRetainedPublicSchemaProgram(sql, sourcePlan, async statement => { executed.push(statement); return [] })
+    expect(executed).toEqual(['SAVEPOINT ue_current_public_schema_atom', 'SET LOCAL ROLE "uev2admin"', sql,
+      'SET LOCAL ROLE ue_v2_owner', 'RELEASE SAVEPOINT ue_current_public_schema_atom'])
+    expect(executed.some(statement => statement.includes('GRANT OPTION') || statement.startsWith('ALTER SCHEMA'))).toBe(false)
+  })
+
+  it('rolls back an aborted schema atom before restoring the installer role and propagates failure', async () => {
+    const sql = sourcePlan.statements.find(sql => sql.startsWith('GRANT CREATE'))!
+    const executed: string[] = [], fault = new Error('controlled schema failure')
+    await expect(executeRetainedPublicSchemaProgram(sql, sourcePlan, async statement => {
+      executed.push(statement)
+      if (statement === sql) throw fault
+      return []
+    })).rejects.toBe(fault)
+    expect(executed).toEqual(['SAVEPOINT ue_current_public_schema_atom', 'SET LOCAL ROLE "uev2admin"', sql,
+      'ROLLBACK TO SAVEPOINT ue_current_public_schema_atom', 'SET LOCAL ROLE ue_v2_owner', 'RELEASE SAVEPOINT ue_current_public_schema_atom'])
+  })
+
+  it('refuses an otherwise valid schema atom absent from exact compiled source before executing anything', async () => {
+    const executed: string[] = []
+    await expect(executeRetainedPublicSchemaProgram('GRANT USAGE ON SCHEMA public TO ue_v2_owner', sourcePlan,
+      async statement => { executed.push(statement); return [] })).rejects.toThrow('no exact current source producer')
+    expect(executed).toEqual([])
+  })
+
+  it('preserves ordinary source programs and verifies final CREATE/USAGE/grant-option closure', async () => {
+    const sql = 'SELECT current_user::text AS current_role', executed: string[] = []
+    await executeRetainedPublicSchemaProgram(sql, sourcePlan, async statement => { executed.push(statement); return [] })
+    expect(executed).toEqual([sql])
+    const current = { owner: 'ue_v2_owner', create_roles: [], grantable_roles: [], usage_roles: [...sourcePlan.usageRoles] }
+    expect(() => assertFinalPublicSchemaPrivileges(sourcePlan, [current])).not.toThrow()
+    for (const drift of [{ owner: 'uev2admin' }, { create_roles: ['nzila_auth_org_authority_reader'] },
+      { grantable_roles: ['union_eyes_runtime'] }, { usage_roles: [] }, { usage_roles: [...sourcePlan.usageRoles, 'PUBLIC'] }])
+      expect(() => assertFinalPublicSchemaPrivileges(sourcePlan, [{ ...current, ...drift }])).toThrow('Final public schema privileges')
+  })
+})
+
+describe('released activation constraint transitions to the actual current source without changing active-rule approval', () => {
+  const root = path.resolve(__dirname, '../../../..')
+  // Schema-only metadata measured on the pristine released PostgreSQL template.
+  // Expected authority comes independently from hash-pinned0013 and current code.
+  const legacy: LegacyActivationConstraint = {
+    schema: 'public', table_name: 'ue_authority_issuance_rules', name: 'ue_authority_rule_activation_chk', type: 'c',
+    definition: "CHECK (((status = 'draft'::text) OR ((activated_at IS NOT NULL) AND (length(btrim(source_instrument)) > 0) AND (source_instrument <> 'PENDING_INSTITUTIONAL_SOURCE'::text) AND (cardinality(approved_by) >= 2) AND (NOT ((drafted_by)::text = ANY ((approved_by)::text[]))))))",
+    convalidated: true, condeferrable: false, condeferred: false, connoinherit: false,
+  }
+
+  it('retains exactly the already-released0082 vocabulary without inventing a mandate or issuance power', () => {
+    const reference = AUTHORITY_PHYSICAL_GUARDS.references.find(ref => ref.path.endsWith('/0082_platform_staff_mandate_kind.sql'))!
+    const sql = readFileSync(path.join(root, reference.path), 'utf8')
+    expect(createHash('sha256').update(sql).digest('hex')).toBe(reference.sha256)
+    for (const [table, name, column] of [['ue_authority_issuance_rules', 'ue_authority_rule_domain_chk', 'domain'], ['ue_authority_mandates', 'ue_authority_mandates_kind_chk', 'kind']]) {
+      const released = sql.match(new RegExp('ADD CONSTRAINT ' + name + '\\s+CHECK \\(' + column + ' IN \\(([^)]+)\\)\\)'))
+      expect(released).not.toBeNull()
+      const current = AUTHORITY_PHYSICAL_GUARDS.constraints.find(spec => spec.table_name === table && spec.name === name)!
+      expect([...current.definition.matchAll(/'([^']+)'/g)].map(match => match[1]))
+        .toEqual([...released![1].matchAll(/'([^']+)'/g)].map(match => match[1]))
+      expect(current.definition).toContain("'platform_staff'::text")
+    }
+  })
+
+  it('uses the pinned released AST and sole inactive-gate change, with immediate validating current CHECK DDL', async () => {
+    const plan = await planLegacyActivationConstraintTransition(root, [legacy])
+    const current = AUTHORITY_PHYSICAL_GUARDS.constraints.find(spec => spec.table_name === legacy.table_name && spec.name === legacy.name)!
+    expect(plan.referenceSha256).toBe('906ea28fb67b0f30b44ee7f7c3cfe6a7fdb1dd820c895259a0e093d580da045a')
+    expect(plan.statements).toEqual([
+      'ALTER TABLE public."ue_authority_issuance_rules" DROP CONSTRAINT "ue_authority_rule_activation_chk"',
+      'ALTER TABLE public."ue_authority_issuance_rules" ADD CONSTRAINT "ue_authority_rule_activation_chk" ' + current.definition,
+    ])
+    expect(plan.statements.join('\n')).not.toMatch(/\b(?:CASCADE|NOT VALID|INSERT|UPDATE|DELETE)\b/)
+    expect(plan.currentDefinition).toBe(current.definition)
+    expect((await planLegacyActivationConstraintTransition(root, [{ ...legacy, definition: current.definition }])).statements).toEqual([])
+    expect((await planLegacyActivationConstraintTransition(root, [{ ...legacy, definition: legacy.definition.replaceAll(' AND ', '\n AND ') }])).statements).toEqual(plan.statements)
+  })
+
+  it.each([
+    { schema: 'other' }, { table_name: 'other' }, { name: 'other' }, { type: 'u' },
+    { convalidated: false }, { condeferrable: true }, { condeferred: true }, { connoinherit: true },
+  ])('refuses changed constraint address or metadata: %j', async change => {
+    await expect(planLegacyActivationConstraintTransition(root, [{ ...legacy, ...change }])).rejects.toThrow('constraint metadata differs')
+  })
+
+  it.each([
+    () => [], () => [legacy, legacy],
+  ])('refuses missing or duplicated released constraint facts', async rows => {
+    await expect(planLegacyActivationConstraintTransition(root, rows())).rejects.toThrow('constraint metadata differs')
+  })
+
+  it.each([
+    (text: string) => text.replace('>= 2', '>= 1'),
+    (text: string) => text.replace("status = 'draft'", "status = 'retired'"),
+    (text: string) => text.replace('activated_at IS NOT NULL', 'activated_at IS NULL'),
+    (text: string) => text.replace('CHECK (', 'CHECK (true OR '),
+    (text: string) => text.replace('(drafted_by)::text', '(drafted_by)::varchar'),
+    (text: string) => text + ' NO INHERIT',
+    (text: string) => text + ' NOT VALID',
+    (text: string) => text + '; DROP TABLE public.claims',
+  ])('refuses unmeasured predicates, casts, nonvalidated DDL and SQL substitution', async change => {
+    await expect(planLegacyActivationConstraintTransition(root, [{ ...legacy, definition: change(legacy.definition) }])).rejects.toThrow()
+  })
+
+  it('rejects a substituted released reference before planning any change', async () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'ue-activation-preimage-'))
+    try {
+      const target = path.join(directory, 'apps/union-eyes/db/migrations-platform')
+      mkdirSync(target, { recursive: true })
+      writeFileSync(path.join(target, '0013_authority_kernel_storage.sql'), 'SELECT true;\n')
+      await expect(planLegacyActivationConstraintTransition(directory, [legacy])).rejects.toThrow('Released activation constraint reference differs')
+    } finally { rmSync(directory, { recursive: true, force: true }) }
+  })
+})
+
+describe('all current-source RLS metadata converges without replaying legacy resource policies', () => {
+  const plan = () => JSON.parse(readFileSync(new URL('../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json', import.meta.url), 'utf8')) as V2Plan
+  const rows = (current: V2Plan) => current.tables.map(table => {
+    const [schema, name] = table.name.includes('.') ? table.name.split('.') : ['public', table.name]
+    return { schema, table: name, relkind: 'r', relrowsecurity: true, relforcerowsecurity: true }
+  })
+
+  it('uses exact actual compiler ENABLE/FORCE statements for missing public and auth flags only', async () => {
+    const current = plan(), facts = rows(current)
+    for (const row of facts) if ((row.schema === 'public' && row.table === 'case_studies') || (row.schema === 'user_management' && row.table === 'magic_links'))
+      row.relrowsecurity = row.relforcerowsecurity = false
+    const repair = await planCurrentRlsFlagConvergence(current, facts)
+    expect(repair.inspectedRelations).toBe(current.tables.length)
+    expect(repair.statements).toHaveLength(4)
+    const sourceStatements = new Set<string>()
+    for (const source of compileSecurity(current).statements) {
+      const parsed = await parseSql(source)
+      if (!parsed.ok) throw new Error(parsed.message)
+      for (const sql of parsed.texts) sourceStatements.add(sql)
+    }
+    for (const sql of repair.statements) {
+      expect(sourceStatements.has(sql)).toBe(true)
+      expect(sql).toMatch(/^ALTER TABLE .+ (ENABLE|FORCE) ROW LEVEL SECURITY$/)
+      expect(sql).not.toMatch(/POLICY|GRANT|DISABLE|NO FORCE|\b(?:INSERT|UPDATE|DELETE)\b/)
+    }
+    expect((await planCurrentRlsFlagConvergence(current, rows(current))).statements).toEqual([])
+  })
+
+  it('repairs a missing FORCE flag without rewriting existing ENABLE metadata', async () => {
+    const current = plan(), facts = rows(current)
+    facts.find(row => row.table === 'case_studies')!.relforcerowsecurity = false
+    const repair = await planCurrentRlsFlagConvergence(current, facts)
+    expect(repair.statements).toHaveLength(1)
+    expect(repair.statements[0]).toContain('FORCE ROW LEVEL SECURITY')
+  })
+
+  it('allows only the separately planned new identity table to be absent before writes', async () => {
+    const current = plan(), facts = rows(current).filter(row => row.table !== 'platform_identity_bindings')
+    await expect(planCurrentRlsFlagConvergence(current, facts)).rejects.toThrow('Exact current source RLS relation metadata')
+    expect((await planCurrentRlsFlagConvergence(current, facts, { identityWillBeCreated: true })).statements).toEqual([])
+    await expect(planCurrentRlsFlagConvergence(current, facts.filter(row => row.table !== 'claims'), { identityWillBeCreated: true })).rejects.toThrow('Exact current source RLS relation metadata')
+  })
+
+  it.each(['missing', 'duplicate', 'wrong-kind', 'unknown-flag'] as const)('refuses ambiguous or incomplete relation facts: %s', async kind => {
+    const current = plan(), facts: Record<string, unknown>[] = rows(current)
+    const index = facts.findIndex(row => row.table === 'case_studies')
+    if (kind === 'missing') facts.splice(index, 1)
+    if (kind === 'duplicate') facts.push({ ...facts[index] })
+    if (kind === 'wrong-kind') facts[index].relkind = 'v'
+    if (kind === 'unknown-flag') delete facts[index].relforcerowsecurity
+    await expect(planCurrentRlsFlagConvergence(current, facts)).rejects.toThrow('Exact current source RLS relation metadata')
+  })
+})
+
+describe('UE case-reader public namespace is an explicit bounded source dependency', () => {
+  it('every actual common-reader companion emits only its declared namespace USAGE without grant options', async () => {
+    const plan = JSON.parse(readFileSync(new URL('../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json', import.meta.url), 'utf8')) as V2Plan
+    const programs = currentSecurityPrograms(plan, { postgresMajor: 15 }).companions.slice(1)
+    expect(programs).toHaveLength(4)
+    const expected = await parseSql(compileCaseAuthorityReaderSchemaSql())
+    if (!expected.ok) throw new Error(expected.message)
+    for (const program of programs) {
+      const parsed = await parseSql(program)
+      if (!parsed.ok) throw new Error(parsed.message)
+      expect(parsed.texts.filter(sql => sql === expected.texts[0])).toHaveLength(1)
+      const usage = parsed.statements.filter(node => node.GrantStmt?.objtype === 'OBJECT_SCHEMA'
+        && node.GrantStmt.objects?.some((item: Record<string, { sval?: string }>) => item.String?.sval === 'public')
+        && node.GrantStmt.privileges?.some((item: Record<string, { priv_name?: string }>) => item.AccessPriv?.priv_name === 'usage'))
+      expect(usage).toHaveLength(1)
+      expect(usage[0].GrantStmt.grantees.map((item: Record<string, { rolename?: string }>) => item.RoleSpec.rolename)).toEqual([CASE_AUTHORITY_READER_ROLE])
+      expect(usage[0].GrantStmt.grant_option).not.toBe(true)
+      expect(usage[0].GrantStmt.privileges.map((item: Record<string, { priv_name?: string }>) => item.AccessPriv.priv_name)).toEqual(['usage'])
+    }
+  })
+
+  it.each([
+    {}, { reader_public_usage: false, reader_public_create: false, reader_public_grant_option: false },
+    { reader_public_usage: true, reader_public_create: true, reader_public_grant_option: false },
+    { reader_public_usage: true, reader_public_create: false, reader_public_grant_option: true },
+  ])('refuses absent namespace access or excessive authority: %j', row => {
+    expect(hasBoundedCaseAuthorityReaderSchema(row)).toBe(false)
   })
 })

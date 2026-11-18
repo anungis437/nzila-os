@@ -1,9 +1,15 @@
+import { REWARD_RUNTIME_COLUMN_CONTRACTS, type RewardRuntimeColumnContract } from './rewards-storage-contract'
+import { MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS } from './module-admission-storage-contract'
+
+export const RUNTIME_COLUMN_PRIVILEGE_CONTRACTS: Readonly<Record<string, RewardRuntimeColumnContract>> = Object.freeze({
+  ...REWARD_RUNTIME_COLUMN_CONTRACTS,
+  ...MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS,
+})
+export {
+  REWARD_SIGNATURE_COLUMN_CONTRACTS as SYSTEM_COLUMN_ONLY_READ_CONTRACTS,
+} from './rewards-storage-contract'
+
 export const SYSTEM_COLUMN_READ_CONTRACTS = [
-  {
-    table: 'external_data_sync_log',
-    columns: ['sync_id'],
-    caller: 'apps/union-eyes/lib/services/external-data/wage-enrichment-service.ts',
-  },
   {
     table: 'commercial_contracts',
     columns: ['id', 'contract_number'],

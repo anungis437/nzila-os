@@ -4,6 +4,7 @@
  * WorkAid referral register.
  */
 import { randomUUID } from 'node:crypto'
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 import { decide } from '../kernel'
 import type { Action, AuthorityRequest, FinancialTransactionFacts, WorkAidMatterFacts } from '../ontology'
 import { auditAuthorityMutation } from './audit'
@@ -42,6 +43,7 @@ export interface RecordFinancialStepInput {
 export async function recordFinancialStep(exec: SqlExecutor, deps: EnforcementDeps, i: RecordFinancialStepInput): Promise<string> {
   requireUuids(i.organizationId, i.paymentId, i.accountId)
   requirePrincipals(i.actorUserId)
+  requireBaseFinancialAuthority()
   await bindSessionActor(exec, i.actorUserId, 'financial actor')
   const now = (deps.now ?? (() => new Date()))()
   const resource = { type: 'financial_transaction' as const, id: i.paymentId, organizationId: i.organizationId }

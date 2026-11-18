@@ -26,6 +26,12 @@ No `.env.example` — configure `.env.local` with standard auth vars (`AUTH_SECR
 - [docs/demo-flow.md](docs/demo-flow.md) — Demo walkthrough
 - [docs/pilot-playbook.md](docs/pilot-playbook.md) — Pilot deployment guide
 
+## Source layers
+
+API handlers call `lib/services/`. Authority and governance services retain their
+existing policy/lifecycle contracts. Database ports live in `db/adapters/`, query
+operations in `db/queries/`, and platform audit persistence in `lib/repositories/`.
+
 ## Dashboard Modules
 
 `accounts` · `agents` · `anomalies` · `architecture` · `change-calendar` · `decisions` · `environments` · `governance` · `intelligence` · `modules` · `partners` · `pilots` · `pipeline` · `procurement` · `proof` · `proposals`

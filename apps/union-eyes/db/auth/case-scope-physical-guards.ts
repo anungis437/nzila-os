@@ -60,7 +60,7 @@ BEGIN
  END IF;
  IF logical_case IS NULL THEN RAISE EXCEPTION 'EXACT_CASE_SCOPE_REQUIRED' USING ERRCODE='42501'; END IF;
  PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.resource:'||logical_case::text,0));
- IF actor IS NULL OR NOT user_management.auth_business_org_authorized(NEW.organization_id,NULL::text[]) THEN
+ IF actor IS NULL OR user_management.auth_business_org_authorized(NEW.organization_id,NULL::text[]) IS NOT TRUE THEN
    RAISE EXCEPTION 'LIVE_CANONICAL_CASE_SCOPE_ACTOR_REQUIRED' USING ERRCODE='42501'; END IF;
  IF TG_TABLE_NAME='case_authority_scopes' AND TG_OP='INSERT' THEN
    IF NEW.unit_id IS NOT NULL OR NEW.territory_id IS NOT NULL OR NEW.revision<>0 OR NEW.last_proposal_id IS NOT NULL

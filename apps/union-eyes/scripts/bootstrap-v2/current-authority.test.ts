@@ -78,6 +78,7 @@ describe('current evidence capability authority', () => {
     const donation: CurrentModel = {
       ...model,
       table: 'donations',
+      app: 'billing',
       source: 'apps/union-eyes/backend/billing/models.py',
       columns: [
         {

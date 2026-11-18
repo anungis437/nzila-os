@@ -19,7 +19,7 @@ const plans = [legacyStatements, canonicalStatements,pg15Statements]
 const versionQuery = "SELECT pg_catalog.current_setting('server_version_num') AS server_version_num"
 // These tests isolate overlapping catalog transport. A deliberately declared
 // empty function source fixture avoids endorsing the historical raw grants.
-const fixturePayload = {...contract.payload,currentFunctions:[]}
+const fixturePayload = {...contract.payload,currentFunctions:[],requiredContainedParentPolicies:[],requiredPhysicalTriggers:[]}
 const fixtureContract = {payload:fixturePayload,digest:catalogContractDigest(fixturePayload)}
 
 function deferred() {

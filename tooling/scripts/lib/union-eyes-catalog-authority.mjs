@@ -27,7 +27,6 @@ export const RLS_REQUIRED_CLASSIFICATIONS = [
   'FRAMEWORK_DEDICATED_EXECUTION_CONTEXT',
   'PLATFORM_METADATA_DEDICATED_EXECUTION_CONTEXT',
 ]
-const RLS_REQUIRED = new Set(RLS_REQUIRED_CLASSIFICATIONS)
 export const RUNTIME_SCHEMA_USAGE = ['public', 'user_management', 'audit_security']
 export const SYSTEM_SCHEMA_USAGE = ['public', 'user_management']
 
@@ -153,24 +152,6 @@ async function tableExists(client, schema, table) {
   return Boolean(result.rows[0]?.regclass)
 }
 
-async function effectivePrivileges(client, schema, table, role) {
-  const held = []
-  for (const privilege of PRIVILEGE_ORDER) {
-    const result = await client.query('SELECT has_table_privilege($1::name, format(\'%I.%I\', $2::text, $3::text)::regclass, $4::text) AS allowed', [
-      role,
-      schema,
-      table,
-      privilege,
-    ])
-    if (result.rows[0]?.allowed) held.push(privilege)
-  }
-  return held
-}
-
-function samePrivileges(actual, expected) {
-  return actual.length === expected.length && actual.every((privilege, index) => privilege === expected[index])
-}
-
 /** Pure, reviewable plan for an isolated, transaction-controlled reconciliation.
  * Does not execute, commit, touch auth roles, or infer authority from DB grants.
  * The caller must verify the target and admit the resulting catalog before commit.
@@ -258,8 +239,22 @@ export function readCurrentCatalogContract(repoRoot) {
   const current = overlay.currentSecurity
   const plan = JSON.parse(fs.readFileSync(path.join(repoRoot, 'docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'), 'utf8'))
   if (!current || current.contractVersion !== '1' || current.sourcePlanDigest !== catalogContractDigest(plan)
-    || !Array.isArray(current.currentFunctions) || current.currentFunctions.length < 1)
+    || !Array.isArray(current.currentFunctions) || current.currentFunctions.length < 1
+    || !Array.isArray(current.requiredContainedParentPolicies) || !Array.isArray(current.requiredPhysicalTriggers)
+    || !current.requiredSessionPolicy || current.requiredSessionPolicy.command !== '*'
+    || current.requiredSessionPolicy.permissive !== false
+    || JSON.stringify(current.requiredSessionPolicy.roles) !== JSON.stringify(['union_eyes_runtime'])
+    || typeof current.requiredSessionPolicy.name !== 'string' || !current.requiredSessionPolicy.name
+    || typeof current.requiredSessionPolicy.predicate !== 'string' || !current.requiredSessionPolicy.predicate)
     throw new Error('Current catalog source projection is absent or stale')
+  if (plan.tables?.some(table => table.name === 'ue_external_read_consents')
+    && !current.currentFunctions.some(fn => fn.owner === 'ue_external_read_reader'))
+    throw new Error('Current protected external execution source projection is absent')
+  if (plan.tables?.some(table => table.name === 'recognition_awards')
+    && !current.requiredPhysicalTriggers.some(trigger => trigger.table_name === 'recognition_awards'
+      && trigger.name === 'ue_reward_nomination_guard' && trigger.function_name === 'ue_reward_guard_nomination'
+      && trigger.exclusive === true))
+    throw new Error('Current protected nomination trigger source projection is absent')
   const payload = {
     ...structuredClone(base.payload),
     entries: overlay.entries.map(({ decision: _decision, ...entry }) => entry),
@@ -270,6 +265,8 @@ export function readCurrentCatalogContract(repoRoot) {
     dedicatedRolePrivileges: current.dedicatedRolePrivileges,
     currentFunctions: current.currentFunctions,
     requiredSessionPolicy: current.requiredSessionPolicy,
+    requiredContainedParentPolicies: current.requiredContainedParentPolicies,
+    requiredPhysicalTriggers: current.requiredPhysicalTriggers,
   }
   return { payload, digest: catalogContractDigest(payload) }
 }

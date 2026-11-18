@@ -1,3 +1,4 @@
+import { listUeSlaRiskScores } from '@/lib/services/ml-read-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/scores/ue/cases/sla-risk
@@ -25,9 +26,7 @@
  *   { items: UESlaRiskScoreResponse[], nextCursor: string | null, total: number }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { mlScoresUESlaRisk, mlModels } from '@nzila/db/schema'
-import { eq, and, gte, lte, lt, desc, or } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { createLogger } from '@nzila/os-core'
 
@@ -70,98 +69,17 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const startTs = new Date(startDate + 'T00:00:00Z')
-    const endTs = new Date(endDate + 'T23:59:59Z')
-    const minProb = minProbParam ? parseFloat(minProbParam) : null
-
-    // Optional breach filter
-    let breachFilter: boolean | null = null
-    if (breachParam === 'true') breachFilter = true
-    if (breachParam === 'false') breachFilter = false
-
-    // Decode composite cursor: base64("<iso-timestamp>|<uuid>")
-    let cursorTs: Date | null = null
-    let cursorId: string | null = null
-    if (cursor) {
-      try {
-        const decoded = Buffer.from(cursor, 'base64').toString('utf-8')
-        const pipeIdx = decoded.lastIndexOf('|')
-        if (pipeIdx === -1) throw new Error('malformed')
-        cursorTs = new Date(decoded.slice(0, pipeIdx))
-        cursorId = decoded.slice(pipeIdx + 1)
-        if (isNaN(cursorTs.getTime()) || !cursorId) throw new Error('invalid')
-      } catch {
-        return NextResponse.json({ error: 'Invalid cursor' }, { status: 400 })
-      }
-    }
-
-    const whereClause = and(
-      eq(mlScoresUESlaRisk.orgId, orgId),
-      gte(mlScoresUESlaRisk.occurredAt, startTs),
-      lte(mlScoresUESlaRisk.occurredAt, endTs),
-      ...(breachFilter !== null ? [eq(mlScoresUESlaRisk.predictedBreach, breachFilter)] : []),
-      ...(cursorTs && cursorId
-        ? [or(
-            lt(mlScoresUESlaRisk.occurredAt, cursorTs),
-            and(
-              eq(mlScoresUESlaRisk.occurredAt, cursorTs),
-              lt(mlScoresUESlaRisk.id, cursorId),
-            ),
-          )]
-        : []),
-    )
-
-    let rows = await platformDb
-      .select({
-        id: mlScoresUESlaRisk.id,
-        caseId: mlScoresUESlaRisk.caseId,
-        occurredAt: mlScoresUESlaRisk.occurredAt,
-        probability: mlScoresUESlaRisk.probability,
-        predictedBreach: mlScoresUESlaRisk.predictedBreach,
-        actualBreach: mlScoresUESlaRisk.actualBreach,
-        modelId: mlScoresUESlaRisk.modelId,
-        modelKey: mlModels.modelKey,
-        inferenceRunId: mlScoresUESlaRisk.inferenceRunId,
-        createdAt: mlScoresUESlaRisk.createdAt,
-        featuresJson: mlScoresUESlaRisk.featuresJson,
-      })
-      .from(mlScoresUESlaRisk)
-      .innerJoin(mlModels, eq(mlScoresUESlaRisk.modelId, mlModels.id))
-      .where(whereClause)
-      .orderBy(desc(mlScoresUESlaRisk.occurredAt), desc(mlScoresUESlaRisk.id))
-      .limit(limit + 1)
-
-    // Apply minProb filter in application layer (numeric comparison on string column)
-    if (minProb !== null) {
-      rows = rows.filter((r) => parseFloat(r.probability ?? '0') >= minProb)
-    }
-
-    const hasMore = rows.length > limit
-    const pageRows = rows.slice(0, limit)
-
-    const nextCursor = hasMore
-      ? Buffer.from(
-          `${pageRows[pageRows.length - 1].occurredAt.toISOString()}|${pageRows[pageRows.length - 1].id}`,
-        ).toString('base64')
-      : null
-
-    return NextResponse.json({
-      items: pageRows.map((r) => ({
-        id: r.id,
-        caseId: r.caseId,
-        occurredAt: r.occurredAt.toISOString(),
-        probability: r.probability,
-        predictedBreach: r.predictedBreach,
-        actualBreach: r.actualBreach,
-        modelId: r.modelId,
-        modelKey: r.modelKey,
-        inferenceRunId: r.inferenceRunId,
-        createdAt: r.createdAt.toISOString(),
-        ...(includeFeatures ? { features: r.featuresJson } : {}),
-      })),
-      nextCursor,
-      total: pageRows.length,
+    const result = await listUeSlaRiskScores({
+      orgId,
+      startDate,
+      endDate,
+      breachParam,
+      minProbParam,
+      includeFeatures,
+      cursor,
+      limit,
     })
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     logger.error('[ML /scores/ue/cases/sla-risk]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

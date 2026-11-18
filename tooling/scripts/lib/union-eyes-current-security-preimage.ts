@@ -5,6 +5,7 @@ import { parseSql, type ParseNode } from '../../../apps/union-eyes/scripts/lib/s
 import { currentFunctionViolations, type CatalogRow } from '../../../apps/union-eyes/lib/operations/catalog-admission-core.mjs'
 import { projectCurrentCompilerSecurity } from './union-eyes-current-security-contract'
 import { compileGuardFunction, type PhysicalGuardContract } from '../../../apps/union-eyes/db/auth/physical-guard-catalog'
+import { AUTHORITY_PHYSICAL_GUARDS } from '../../../apps/union-eyes/db/auth/authority-physical-guards'
 
 const references = {
   'apps/union-eyes/db/migrations-cache/0006_external_specialist_runtime_privilege_closure.sql': 'aa9a3314fc70de80e3064e8dedbc31b12a09caa3d99632ac75ae0c0a19731003',
@@ -201,6 +202,122 @@ export function planLegacyFrameworkLedgerPolicy(root: string, actual: ExistingFr
   return ['DROP POLICY "ue_framework_admin" ON public."django_migrations"']
 }
 
+const rewardsSignatureReference = {
+  path: 'apps/union-eyes/db/migrations-platform/0088_gate0_checkout_and_payroll_integrity.sql',
+  sha256: 'd0e79a43a34d2d53521feb61a45a9e0323496d3da7ea636df8abd1bf77edc687',
+}
+export const LEGACY_REWARDS_SIGNATURE_POLICY_QUERY = `SELECT n.nspname AS schema,c.relname AS table,
+  p.polname AS name,p.polcmd AS command,p.polpermissive AS permissive,
+  ARRAY(SELECT COALESCE(r.rolname::text,'PUBLIC') FROM unnest(p.polroles) v(oid)
+    LEFT JOIN pg_catalog.pg_roles r ON r.oid=v.oid ORDER BY 1) AS roles,
+  pg_catalog.pg_get_expr(p.polqual,p.polrelid) AS using,
+  pg_catalog.pg_get_expr(p.polwithcheck,p.polrelid) AS check
+  FROM pg_catalog.pg_policy p JOIN pg_catalog.pg_class c ON c.oid=p.polrelid
+  JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+  WHERE n.nspname='public' AND c.relname='shopify_webhook_secret_versions'
+    AND (p.polname='shopify_webhook_secret_versions_tenant_policy' OR 0=ANY(p.polroles)
+      OR (SELECT oid FROM pg_catalog.pg_roles WHERE rolname='union_eyes_runtime')=ANY(p.polroles))
+  ORDER BY p.polname`
+
+/** Retire only the exact released tenant policy. The current signature reader
+ * retains its separately compiled system column projection and all stored rows. */
+export async function planLegacyRewardsSignaturePolicyRetirement(root: string, actual: ExistingFrameworkPolicy[]) {
+  const source = readFileSync(path.join(root, rewardsSignatureReference.path), 'utf8')
+  if (createHash('sha256').update(source).digest('hex') !== rewardsSignatureReference.sha256)
+    throw new Error('Released rewards signature policy reference differs')
+  const parsed = await parseSql(source)
+  if (!parsed.ok) throw new Error('Released rewards signature policy must parse')
+  const matches = parsed.statements.flatMap((statement, index) => {
+    const policy = statement.CreatePolicyStmt
+    return policy?.table.schemaname === 'public' && policy.table.relname === 'shopify_webhook_secret_versions'
+      && policy.policy_name === 'shopify_webhook_secret_versions_tenant_policy' ? [parsed.texts[index]] : []
+  })
+  if (matches.length !== 1 || actual.length !== 1)
+    throw new Error('Exact released rewards signature policy required')
+  const verified = await planExistingFrameworkPolicies(matches[0], actual)
+  if (verified.length !== 1) throw new Error('Released rewards signature policy preimage differs')
+  return ['DROP POLICY "shopify_webhook_secret_versions_tenant_policy" ON public."shopify_webhook_secret_versions"']
+}
+
+export interface LegacyActivationConstraint {
+  schema: string; table_name: string; name: string; type: string; definition: string;
+  convalidated: boolean; condeferrable: boolean; condeferred: boolean; connoinherit: boolean;
+}
+const activationAddress = { table: 'ue_authority_issuance_rules', name: 'ue_authority_rule_activation_chk' } as const
+const activationReference = { path: 'apps/union-eyes/db/migrations-platform/0013_authority_kernel_storage.sql',
+  sha256: '906ea28fb67b0f30b44ee7f7c3cfe6a7fdb1dd820c895259a0e093d580da045a' } as const
+
+/** Only the casts PostgreSQL inserts for this released text/domain expression
+ * are normalized. Every operator, literal, column and remaining cast binds. */
+function activationExpressionTree(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(activationExpressionTree)
+  if (!value || typeof value !== 'object') return value
+  const node = value as ParseNode, cast = node.TypeCast
+  if (cast) {
+    const names = cast.typeName.names.map((part: ParseNode) => part.String.sval)
+    const text = (names.length === 1 || (names.length === 2 && names[0] === 'pg_catalog')) && names.at(-1) === 'text'
+    const fields = cast.arg.ColumnRef?.fields
+    const column = fields?.length === 1 ? fields[0].String?.sval : undefined
+    const dimensions = cast.typeName.arrayBounds ?? []
+    const scalar = !dimensions.length, array = dimensions.length === 1 && dimensions[0].Integer?.ival === -1
+    if (text && !cast.typeName.typmods?.length && ((scalar && (typeof cast.arg.A_Const?.sval?.sval === 'string' || column === 'drafted_by'))
+      || (array && column === 'approved_by'))) return activationExpressionTree(cast.arg)
+  }
+  const result: ParseNode = Object.fromEntries(Object.entries(node).filter(([key]) => key !== 'location')
+    .sort(([left],[right]) => left.localeCompare(right)).map(([key, item]) => [key, activationExpressionTree(item)]))
+  if (result.BoolExpr && ['AND_EXPR', 'OR_EXPR'].includes(result.BoolExpr.boolop))
+    result.BoolExpr.args = result.BoolExpr.args.flatMap((item: ParseNode) => item.BoolExpr?.boolop === result.BoolExpr.boolop ? item.BoolExpr.args : [item])
+  return result
+}
+
+async function activationCheckExpression(definition: string) {
+  const parsed = await parseSql(`ALTER TABLE public.${quote(activationAddress.table)} ADD CONSTRAINT ${quote(activationAddress.name)} ${definition}`)
+  const alter = parsed.ok && parsed.statements.length === 1 && parsed.statements[0].AlterTableStmt
+  const command = alter?.cmds?.length === 1 && alter.cmds[0].AlterTableCmd
+  const constraint = command?.def?.Constraint
+  if (!alter || alter.relation?.schemaname !== 'public' || alter.relation.relname !== activationAddress.table
+    || command.subtype !== 'AT_AddConstraint' || constraint?.contype !== 'CONSTR_CHECK' || constraint.conname !== activationAddress.name
+    || !constraint.raw_expr || constraint.skip_validation || constraint.is_no_inherit || constraint.deferrable || constraint.initdeferred)
+    throw new Error('Exact validated current activation CHECK source required')
+  return activationExpressionTree(constraint.raw_expr) as ParseNode
+}
+
+/** Replace only this measured released CHECK with its actual current source
+ * producer. The draft-to-nonactive gate is the sole semantic difference;
+ * every active-rule approval term remains identical and all rows validate. */
+export async function planLegacyActivationConstraintTransition(root: string, actual: LegacyActivationConstraint[]) {
+  const sql = readFileSync(path.join(root, activationReference.path), 'utf8')
+  if (createHash('sha256').update(sql).digest('hex') !== activationReference.sha256)
+    throw new Error('Released activation constraint reference differs')
+  const parsed = await parseSql(sql)
+  const table = parsed.ok && parsed.statements.map(node => node.CreateStmt).filter(node => node?.relation?.relname === activationAddress.table)
+  const released = table && table.length === 1 && table[0].tableElts?.map((node: ParseNode) => node.Constraint)
+    .filter((node: ParseNode) => node?.conname === activationAddress.name)
+  if (!released || released.length !== 1 || released[0].contype !== 'CONSTR_CHECK' || !released[0].raw_expr)
+    throw new Error('Exact released activation CHECK source required')
+  const current = AUTHORITY_PHYSICAL_GUARDS.constraints.filter(spec => spec.table_name === activationAddress.table && spec.name === activationAddress.name)
+  if (current.length !== 1 || current[0].type !== 'c') throw new Error('Exact current activation constraint producer required')
+  const oldTree = activationExpressionTree(released[0].raw_expr) as ParseNode, nextTree = await activationCheckExpression(current[0].definition)
+  const oldGate = await parseSql("SELECT status='draft'"), newGate = await parseSql("SELECT status<>'active'")
+  if (!oldGate.ok || !newGate.ok || oldTree.BoolExpr?.boolop !== 'OR_EXPR' || nextTree.BoolExpr?.boolop !== 'OR_EXPR'
+    || oldTree.BoolExpr.args.length !== 2 || nextTree.BoolExpr.args.length !== 2
+    || JSON.stringify(oldTree.BoolExpr.args[0]) !== JSON.stringify(activationExpressionTree(oldGate.statements[0].SelectStmt.targetList[0].ResTarget.val))
+    || JSON.stringify(nextTree.BoolExpr.args[0]) !== JSON.stringify(activationExpressionTree(newGate.statements[0].SelectStmt.targetList[0].ResTarget.val))
+    || JSON.stringify(oldTree.BoolExpr.args[1]) !== JSON.stringify(nextTree.BoolExpr.args[1]))
+    throw new Error('Current activation transition changes more than the inactive gate')
+  const row = actual[0]
+  if (actual.length !== 1 || !row || row.schema !== 'public' || row.table_name !== activationAddress.table || row.name !== activationAddress.name
+    || row.type !== 'c' || row.convalidated !== true || row.condeferrable !== false || row.condeferred !== false || row.connoinherit !== false)
+    throw new Error('Legacy activation constraint metadata differs')
+  const observed = await activationCheckExpression(row.definition)
+  if (JSON.stringify(observed) === JSON.stringify(nextTree)) return { statements: [], referenceSha256: activationReference.sha256, currentDefinition: current[0].definition }
+  if (JSON.stringify(observed) !== JSON.stringify(oldTree)) throw new Error('Legacy activation constraint preimage differs')
+  return { statements: [
+    `ALTER TABLE public.${quote(activationAddress.table)} DROP CONSTRAINT ${quote(activationAddress.name)}`,
+    `ALTER TABLE public.${quote(activationAddress.table)} ADD CONSTRAINT ${quote(activationAddress.name)} ${current[0].definition}`,
+  ], referenceSha256: activationReference.sha256, currentDefinition: current[0].definition }
+}
+
 /** Adopt only unchanged functions from the contract's measured immutable
  * references. Bodies and signatures are never replaced; ownership, path and
  * EXECUTE ACL alone converge to the current source descriptor. */
@@ -257,6 +374,11 @@ export interface LegacyJournalTrigger {
 /** All candidate facts are read; unexpected policies, overloads or claim
  * triggers are not filtered away before the exact preimage comparison. */
 export const LEGACY_SECURITY_PREIMAGE_QUERIES = {
+  activationConstraint: `SELECT n.nspname AS schema,c.relname AS table_name,k.conname AS name,k.contype AS type,
+    pg_catalog.pg_get_constraintdef(k.oid) AS definition,k.convalidated,k.condeferrable,k.condeferred,k.connoinherit
+    FROM pg_catalog.pg_constraint k JOIN pg_catalog.pg_class c ON c.oid=k.conrelid
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname='ue_authority_issuance_rules'
+      AND k.conname='ue_authority_rule_activation_chk' ORDER BY k.oid`,
   owner: `SELECT pg_catalog.pg_get_userbyid(c.relowner) AS owner,current_user::text AS current_user,session_user::text AS session_user
     FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
     WHERE n.nspname='public' AND c.relname='claims' AND c.relkind='r'`,

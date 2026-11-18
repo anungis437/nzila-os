@@ -1,3 +1,4 @@
+import { listAiPrompts, createAiPrompt } from '@/lib/services/ai-prompt-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — AI Prompts Registry (Admin)
@@ -7,9 +8,7 @@
  * RBAC: org_admin or platform ai_admin
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { aiPrompts } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { z } from 'zod'
 import { authenticateUser, requirePlatformRole } from '@/lib/api-guards'
 
@@ -26,12 +25,7 @@ export async function GET(req: NextRequest) {
 
   const appKey = req.nextUrl.searchParams.get('appKey')
 
-  const query = appKey
-    ? platformDb.select().from(aiPrompts).where(eq(aiPrompts.appKey, appKey))
-    : platformDb.select().from(aiPrompts)
-
-  const rows = await query
-  return NextResponse.json(rows)
+  return NextResponse.json(await listAiPrompts(appKey))
 }
 
 export async function POST(req: NextRequest) {
@@ -44,16 +38,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [row] = await platformDb
-    .insert(aiPrompts)
-    .values({
-      appKey: parsed.data.appKey,
-      promptKey: parsed.data.promptKey,
-      description: parsed.data.description ?? null,
-      ownerRole: parsed.data.ownerRole ?? null,
-      createdBy: auth.userId,
-    })
-    .returning()
-
-  return NextResponse.json(row, { status: 201 })
+  return NextResponse.json(await createAiPrompt(parsed.data, auth.userId), { status: 201 })
 }

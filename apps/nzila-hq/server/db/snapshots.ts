@@ -16,7 +16,7 @@
 import 'server-only'
 import { sql } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core/telemetry'
-import { getHqDb } from './client'
+import { getHqDb } from '../../lib/db/client'
 import { allocationsHistory, dependencyScores, metricsSnapshots, snapshotRuns } from './schema'
 import type { AllocationScore, DependencyScore, PortfolioSnapshot } from '@nzila/hq-domain'
 

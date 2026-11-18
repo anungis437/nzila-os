@@ -1,3 +1,4 @@
+import { ApiError } from '@/lib/api/errors'
 /**
  * Governance-Safe Financial Cognition Service
  *
@@ -17,60 +18,63 @@
  * @module lib/ai/financial-insights
  */
 
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
-import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
-import { logger } from '@/lib/logger';
+import { db } from '@/db/db'
+import { sql } from 'drizzle-orm'
+import {
+  buildOrgAiTrace,
+  toGatewayDataClass,
+  getAiClient,
+  UE_APP_KEY,
+  UE_PROFILES,
+  UE_SYSTEM_ORG_ID,
+} from '@/lib/ai/ai-client'
+import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard'
+import { logger } from '@/lib/logger'
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 export type FinancialAnalysisType =
-  | 'collection_health'
-  | 'arrears_risk'
-  | 'budget_variance'
-  | 'remittance_trends'
-  | 'comprehensive';
+  'collection_health' | 'arrears_risk' | 'budget_variance' | 'remittance_trends' | 'comprehensive'
 
-export type FinancialTimeframe = '30d' | '60d' | '90d' | '6m' | '12m';
+export type FinancialTimeframe = '30d' | '60d' | '90d' | '6m' | '12m'
 
 export interface FinancialInsightEntry {
-  label: string;
-  value: number | string;
-  trend: 'up' | 'down' | 'stable';
-  severity: 'info' | 'warning' | 'critical';
-  description: string;
+  label: string
+  value: number | string
+  trend: 'up' | 'down' | 'stable'
+  severity: 'info' | 'warning' | 'critical'
+  description: string
 }
 
 export interface FinancialRiskEntry {
-  area: string;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  currentMetric: number | string;
-  threshold: number | string;
-  description: string;
+  area: string
+  riskLevel: 'low' | 'medium' | 'high' | 'critical'
+  currentMetric: number | string
+  threshold: number | string
+  description: string
 }
 
 export interface FinancialRecommendation {
-  action: string;
-  priority: 'low' | 'medium' | 'high';
-  impact: string;
-  timeframe: string;
+  action: string
+  priority: 'low' | 'medium' | 'high'
+  impact: string
+  timeframe: string
 }
 
 export interface FinancialInsightResult {
-  analysisType: FinancialAnalysisType;
-  timeframe: FinancialTimeframe;
-  title: string;
-  executiveSummary: string;
-  insights: FinancialInsightEntry[];
-  risks: FinancialRiskEntry[];
-  recommendations: FinancialRecommendation[];
-  dataSourcesUsed: string[];
+  analysisType: FinancialAnalysisType
+  timeframe: FinancialTimeframe
+  title: string
+  executiveSummary: string
+  insights: FinancialInsightEntry[]
+  risks: FinancialRiskEntry[]
+  recommendations: FinancialRecommendation[]
+  dataSourcesUsed: string[]
 }
 
-const MODEL_VERSION = '1.0.0';
+const MODEL_VERSION = '1.0.0'
 
 // ============================================================================
 // SERVICE
@@ -79,20 +83,27 @@ const MODEL_VERSION = '1.0.0';
 /**
  * Generate a financial insight report.
  */
+function requireUnionFinancialAnalysisAuthority(): void {
+  throw ApiError.notImplemented(
+    'Union financial analysis is unavailable in the current base release.',
+  )
+}
+
 export async function generateFinancialInsight(params: {
-  analysisType: FinancialAnalysisType;
-  timeframe: FinancialTimeframe;
-  organizationId: string;
-  userId: string;
+  analysisType: FinancialAnalysisType
+  timeframe: FinancialTimeframe
+  organizationId: string
+  userId: string
 }): Promise<AiResponseEnvelope<FinancialInsightResult>> {
-  const { analysisType, timeframe, organizationId, userId } = params;
+  requireUnionFinancialAnalysisAuthority()
+  const { analysisType, timeframe, organizationId, userId } = params
 
   // 1. Gather financial context
-  const context = await gatherFinancialContext(organizationId);
+  const context = await gatherFinancialContext(organizationId)
 
   // 2. Call AI
-  const ai = getAiClient();
-  const prompt = buildFinancialPrompt(analysisType, timeframe, context);
+  const ai = getAiClient()
+  const prompt = buildFinancialPrompt(analysisType, timeframe, context)
   const aiResult = await ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
     trace: buildOrgAiTrace(organizationId),
@@ -100,10 +111,10 @@ export async function generateFinancialInsight(params: {
     profileKey: UE_PROFILES.FINANCIAL_ANALYSIS,
     input: prompt,
     dataClass: toGatewayDataClass('confidential'),
-  });
+  })
 
   // 3. Parse
-  const parsed = parseFinancialResponse(aiResult.content ?? '', analysisType, timeframe);
+  const parsed = parseFinancialResponse(aiResult.content ?? '', analysisType, timeframe)
 
   // 4. Audit
   const auditRef = await auditAiInteraction({
@@ -114,7 +125,7 @@ export async function generateFinancialInsight(params: {
     action: analysisType,
     confidence: parsed.confidence,
     modelVersion: MODEL_VERSION,
-  });
+  })
 
   // 5. Return envelope (no DB persistence — aiInsightReports enum doesn't include financial types)
   return buildAiEnvelope(parsed.result, {
@@ -122,7 +133,7 @@ export async function generateFinancialInsight(params: {
     explanation: parsed.explanation,
     modelVersion: MODEL_VERSION,
     auditRef,
-  });
+  })
 }
 
 // ============================================================================
@@ -130,30 +141,43 @@ export async function generateFinancialInsight(params: {
 // ============================================================================
 
 interface FinancialContext {
-  collectionRate: number;
-  totalPaid: number;
-  totalCharged: number;
-  uniquePayingMembers: number;
-  totalOrgMembers: number;
+  collectionRate: number
+  totalPaid: number
+  totalCharged: number
+  uniquePayingMembers: number
+  totalOrgMembers: number
   memberStanding: {
-    current: number;
-    warning: number;
-    suspended: number;
-    onPaymentPlan: number;
-    total: number;
-  };
-  paymentPlans: { activePlans: number; totalRemaining: number; totalRecovered: number };
-  reconciliation: { reconciled: number; unreconciled: number; unreconciledAmount: number };
-  remittanceTrend: { year: number; month: number; amount: number; expected: number; variance: number; reconciled: boolean }[];
-  strikeFund: { totalDisbursed: number; totalDisbursements: number; craThresholdBreaches: number };
-  pensionFunding: { totalFunded: number; totalPending: number; activeMembers: number };
-  glSnapshot: { assets: number; liabilities: number; equity: number; revenue: number; expenses: number };
-  budgets: { name: string; totalBudget: number; spent: number; utilization: number }[];
-  legalCosts: { totalClaims: number; openClaims: number; totalLegalCosts: number };
+    current: number
+    warning: number
+    suspended: number
+    onPaymentPlan: number
+    total: number
+  }
+  paymentPlans: { activePlans: number; totalRemaining: number; totalRecovered: number }
+  reconciliation: { reconciled: number; unreconciled: number; unreconciledAmount: number }
+  remittanceTrend: {
+    year: number
+    month: number
+    amount: number
+    expected: number
+    variance: number
+    reconciled: boolean
+  }[]
+  strikeFund: { totalDisbursed: number; totalDisbursements: number; craThresholdBreaches: number }
+  pensionFunding: { totalFunded: number; totalPending: number; activeMembers: number }
+  glSnapshot: {
+    assets: number
+    liabilities: number
+    equity: number
+    revenue: number
+    expenses: number
+  }
+  budgets: { name: string; totalBudget: number; spent: number; utilization: number }[]
+  legalCosts: { totalClaims: number; openClaims: number; totalLegalCosts: number }
 }
 
 async function gatherFinancialContext(organizationId: string): Promise<FinancialContext> {
-  const orgIdCast = sql`${organizationId}::uuid`;
+  const orgIdCast = sql`${organizationId}::uuid`
 
   // Run all queries in parallel
   const [
@@ -207,7 +231,9 @@ async function gatherFinancialContext(organizationId: string): Promise<Financial
       FROM employer_remittances WHERE organization_id = ${orgIdCast}
       ORDER BY fiscal_year DESC, fiscal_month DESC LIMIT 12
     `),
-    db.execute(sql`SELECT COUNT(*)::int AS "totalOrgMembers" FROM organization_members WHERE organization_id = ${organizationId}`),
+    db.execute(
+      sql`SELECT COUNT(*)::int AS "totalOrgMembers" FROM organization_members WHERE organization_id = ${organizationId}`,
+    ),
     db.execute(sql`
       SELECT
         COUNT(*)::int AS "totalDisbursements",
@@ -243,36 +269,36 @@ async function gatherFinancialContext(organizationId: string): Promise<Financial
         COALESCE(SUM(NULLIF(legal_costs, '')::numeric), 0) AS "totalLegalCosts"
       FROM claims WHERE organization_id = ${orgIdCast}
     `),
-  ]);
+  ])
 
-  const collection = collectionRows[0] as Record<string, unknown> | undefined;
-  const standing = standingRows[0] as Record<string, unknown> | undefined;
-  const plan = planRows[0] as Record<string, unknown> | undefined;
-  const recon = reconRows[0] as Record<string, unknown> | undefined;
-  const org = orgRows[0] as Record<string, unknown> | undefined;
-  const strike = strikeRows[0] as Record<string, unknown> | undefined;
-  const contrib = contribRows[0] as Record<string, unknown> | undefined;
-  const claims = claimsRows[0] as Record<string, unknown> | undefined;
+  const collection = collectionRows[0] as Record<string, unknown> | undefined
+  const standing = standingRows[0] as Record<string, unknown> | undefined
+  const plan = planRows[0] as Record<string, unknown> | undefined
+  const recon = reconRows[0] as Record<string, unknown> | undefined
+  const org = orgRows[0] as Record<string, unknown> | undefined
+  const strike = strikeRows[0] as Record<string, unknown> | undefined
+  const contrib = contribRows[0] as Record<string, unknown> | undefined
+  const claims = claimsRows[0] as Record<string, unknown> | undefined
 
-  const totalPaid = Number(collection?.totalPaid ?? 0);
-  const totalCharged = Number(collection?.totalCharged ?? 0);
-  const collectionRate = totalCharged > 0 ? Math.round((totalPaid / totalCharged) * 1000) / 10 : 100;
+  const totalPaid = Number(collection?.totalPaid ?? 0)
+  const totalCharged = Number(collection?.totalCharged ?? 0)
+  const collectionRate = totalCharged > 0 ? Math.round((totalPaid / totalCharged) * 1000) / 10 : 100
 
-  const glMap: Record<string, number> = {};
+  const glMap: Record<string, number> = {}
   for (const row of glRows as Record<string, unknown>[]) {
-    glMap[String(row.accountType)] = Number(row.balance);
+    glMap[String(row.accountType)] = Number(row.balance)
   }
 
   const budgets = (budgetRows as Record<string, unknown>[]).map((b) => {
-    const total = Number(b.totalBudget);
-    const spent = Number(b.spent);
+    const total = Number(b.totalBudget)
+    const spent = Number(b.spent)
     return {
       name: String(b.name),
       totalBudget: total,
       spent,
       utilization: total > 0 ? Math.round((spent / total) * 100) : 0,
-    };
-  });
+    }
+  })
 
   return {
     collectionRate,
@@ -328,7 +354,7 @@ async function gatherFinancialContext(organizationId: string): Promise<Financial
       openClaims: Number(claims?.openClaims ?? 0),
       totalLegalCosts: Number(claims?.totalLegalCosts ?? 0),
     },
-  };
+  }
 }
 
 function buildFinancialPrompt(
@@ -338,14 +364,17 @@ function buildFinancialPrompt(
 ): string {
   const remittanceSummary = ctx.remittanceTrend
     .slice(0, 6)
-    .map((r) => `  ${r.year}-${String(r.month).padStart(2, '0')}: collected $${r.amount}, expected $${r.expected}, variance $${r.variance}, reconciled=${r.reconciled}`)
-    .join('\n');
+    .map(
+      (r) =>
+        `  ${r.year}-${String(r.month).padStart(2, '0')}: collected $${r.amount}, expected $${r.expected}, variance $${r.variance}, reconciled=${r.reconciled}`,
+    )
+    .join('\n')
 
   const budgetSummary = ctx.budgets
     .map((b) => `  ${b.name}: budget $${b.totalBudget}, spent $${b.spent} (${b.utilization}%)`)
-    .join('\n');
+    .join('\n')
 
-  const netPosition = ctx.glSnapshot.assets - ctx.glSnapshot.liabilities;
+  const netPosition = ctx.glSnapshot.assets - ctx.glSnapshot.liabilities
 
   return [
     'You are a financial analyst for a union organization. Provide executive-level financial intelligence.',
@@ -403,7 +432,7 @@ function buildFinancialPrompt(
     '}',
     '',
     'Respond ONLY with valid JSON.',
-  ].join('\n');
+  ].join('\n')
 }
 
 function parseFinancialResponse(
@@ -412,7 +441,7 @@ function parseFinancialResponse(
   timeframe: FinancialTimeframe,
 ): { result: FinancialInsightResult; confidence: number; explanation: string } {
   try {
-    const json = JSON.parse(raw);
+    const json = JSON.parse(raw)
     return {
       result: {
         analysisType,
@@ -426,9 +455,9 @@ function parseFinancialResponse(
       },
       confidence: Math.min(1, Math.max(0, Number(json.confidence) || 0.5)),
       explanation: String(json.explanation ?? 'AI-generated financial insight report.'),
-    };
+    }
   } catch {
-    logger.warn('Failed to parse financial insights AI response');
+    logger.warn('Failed to parse financial insights AI response')
     return {
       result: {
         analysisType,
@@ -442,6 +471,6 @@ function parseFinancialResponse(
       },
       confidence: 0.2,
       explanation: 'AI response could not be parsed.',
-    };
+    }
   }
 }

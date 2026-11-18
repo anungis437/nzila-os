@@ -1,38 +1,23 @@
-# Architecture Shape — control-plane
+# Architecture Shape — Control Plane
 
-> Domain-core architecture status for the Control Plane application.
-> See: [APP_DOMAIN_CORE_STANDARD.md](../../../docs/architecture/APP_DOMAIN_CORE_STANDARD.md)
+The Control Plane is an operating shell. It coordinates platform workflows and
+read models rather than introducing another domain authority.
 
-## Current Structure
+- `app/api/` authenticates requests, validates parameters and formats responses.
+- `lib/services/authority/` owns policy evaluation, approval, replay and signed workflow authorization.
+- `lib/services/governance/` owns the existing governance action lifecycle.
+- `lib/services/` coordinates audit exports/verification, decision intelligence,
+  operational health, deal mutations, events and automations.
+- `db/adapters/` implements the existing database ports and event store.
+- `db/queries/` holds platform overview and commercial event queries.
+- `lib/repositories/` persists and retrieves platform NAR records.
+- `server/` contains the remaining dashboard read-model composition.
 
-- `lib/api-auth.ts` — API authentication
-- `lib/utils.ts` — utility functions
-- `lib/demoSeed.ts` — demo seed data
-- `app/api/control-plane/` — API routes for platform operations
-- `app/(dashboard)/` — dashboard pages
+Services retain the existing internal API-key and organization-scoped auditor
+contracts. Platform NAR records retain their platform connection. The legacy UE
+ingestion adapter still assumes shared storage; this refactor grants no access
+to the isolated Union Eyes database and does not qualify that integration.
 
-## Target Structure (Adapted)
-
-The control-plane is not a domain app — it is an operating shell. Its domain-core
-adoption is adapted to fit its orchestration role.
-
-| Layer | Status | Notes |
-|-------|--------|-------|
-| `domain/` | **N/A** | Control Plane orchestrates, does not own domain entities |
-| `services/` | **Missing** | Summary/query orchestration in route handlers |
-| `workflows/` | **N/A** | No lifecycle state machines — uses platform workflows |
-| `queries/` | **Missing** | Summary queries embedded in API routes |
-| `events/` | **N/A** | Consumes platform events, does not own domain events |
-| `ui/` | **Present** | app/(dashboard)/ pages |
-
-## Gaps
-
-1. Summary/aggregation queries embedded directly in API route handlers
-2. No service layer — orchestration logic lives in routes
-
-## Migration Notes
-
-- Extract summary queries from API routes into `queries/`
-- Extract orchestration logic into `services/` where it coordinates multiple platform packages
-- `domain/` and `workflows/` are not applicable — control-plane does not own domain state
-- Priority: Separate read-model queries from route handlers
+See the [domain-core standard](../../../docs/categories/platform-and-operations/architecture/APP_DOMAIN_CORE_STANDARD.md)
+for service/query responsibilities. This source organization does not establish
+runtime or deployment readiness.

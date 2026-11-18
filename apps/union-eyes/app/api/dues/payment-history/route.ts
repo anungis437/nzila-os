@@ -1,25 +1,26 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * GET /api/dues/payment-history — List the authenticated member's dues
  * payment history, backed by the native member_dues_ledger table.
  */
 
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db';
-import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { withApi } from '@/lib/api/framework'
+import { db } from '@/db'
+import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
+import { eq, and, desc } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const STATUS_MAP: Record<string, 'completed' | 'pending' | 'failed' | 'refunded'> = {
   posted: 'completed',
   pending: 'pending',
   reversed: 'refunded',
   voided: 'failed',
-};
+}
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Dues'],
@@ -27,10 +28,12 @@ export const GET = withApi(
     },
   },
   async ({ userId, organizationId, request }) => {
-    if (!userId || !organizationId) return { data: [] };
+    if (!userId || !organizationId) return { data: [] }
 
-    const url = new URL(request.url);
-    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')));
+    const url = new URL(request.url)
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50')))
+
+    requireBaseFinancialAuthority()
 
     const rows = await db
       .select()
@@ -43,7 +46,7 @@ export const GET = withApi(
         ),
       )
       .orderBy(desc(memberDuesLedger.transactionDate))
-      .limit(limit);
+      .limit(limit)
 
     const data = rows.map((r) => ({
       id: r.id,
@@ -58,8 +61,8 @@ export const GET = withApi(
       periodStart: r.periodStart ? new Date(r.periodStart).toISOString() : null,
       periodEnd: r.periodEnd ? new Date(r.periodEnd).toISOString() : null,
       receiptUrl: r.receiptNumber ? `/api/dues/receipt/${r.id}` : undefined,
-    }));
+    }))
 
-    return { data };
+    return { data }
   },
-);
+)

@@ -3,6 +3,7 @@ import { ROLE_CAPACITIES } from '../../lib/authority/capacity'
 import { ACTIVE_CASE_RESPONDENT_SQL, ACTIVE_RECUSAL_SQL, PRIMARY_CASE_HANDLER_ONLY_ACTIONS } from '../../lib/authority/common'
 import {AUTHORITY_PHYSICAL_GUARDS} from './authority-physical-guards'
 import type { PhysicalGuardContract } from './physical-guard-catalog'
+import { CASE_AUTHORITY_READER_ROLE, CASE_AUTHORITY_READER_SCHEMA_QUERY_FIELDS, compileCaseAuthorityReaderSchemaSql, hasBoundedCaseAuthorityReaderSchema } from './case-authority-reader-schema'
 
 const literal=(value:string)=>`'${value.replaceAll("'","''")}'`
 const roles=(capacities:readonly string[])=>Object.entries(ROLE_CAPACITIES).filter(([,held])=>held.some(cap=>capacities.includes(cap))).map(([role])=>literal(role)).join(',')
@@ -20,7 +21,7 @@ const validPowers=(alias:string)=>`cardinality(${alias}.powers)>0 AND array_posi
 const canonicalScopeValidation=AUTHORITY_PHYSICAL_GUARDS.functions.find(fn=>fn.name==='ue_authority_scope_valid')
 if(!canonicalScopeValidation || canonicalScopeValidation.language!=='sql' || canonicalScopeValidation.volatility!=='i')throw new Error('Canonical immutable mandate scope validation required')
 const validScope=(alias:string)=>`(${canonicalScopeValidation.body.trim().replace(/^SELECT\s+/i,'').replace(/\bscope\b/g,`${alias}.scope`)})`
-const owner='nzila_auth_org_authority_reader'
+const owner=CASE_AUTHORITY_READER_ROLE
 const trustedOwner=`current_user='ue_v2_owner' OR EXISTS(SELECT FROM pg_roles WHERE rolname=current_user AND rolsuper)`
 
 /** Boolean only, real-session-bound, and independent of the caller's incomplete RLS view of restrictions. */
@@ -36,7 +37,7 @@ BEGIN
   <<decision>>
   BEGIN
   IF actor IS NULL OR requested_action NOT IN ('case:transition','case:close','case:disclose_to_member','case:comment','case:write_notes','case:assign')
-    OR NOT user_management.auth_business_org_authorized(row_org,NULL::text[]) THEN EXIT decision; END IF;
+    OR user_management.auth_business_org_authorized(row_org,NULL::text[]) IS NOT TRUE THEN EXIT decision; END IF;
   PERFORM set_config('ue.case_domain_org',row_org::text,true);
   PERFORM set_config('ue.case_domain_case',target_case_id::text,true);
   PERFORM set_config('ue.case_domain_people',ARRAY[actor]::text,true);
@@ -58,7 +59,7 @@ BEGIN
   SELECT organization_id,CASE WHEN organization_id=row_org AND status::text='active' AND archived_at IS NULL THEN id END INTO s.unit_org,s.live_unit FROM public.bargaining_units WHERE id=s.unit_id;
   SELECT organization_id,CASE WHEN organization_id=row_org AND retired_at IS NULL AND length(btrim(source_instrument))>0 THEN id END INTO s.territory_org,s.live_territory FROM public.case_territories WHERE id=s.territory_id;
   checked_at:=clock_timestamp();
-  IF NOT user_management.auth_business_org_authorized(row_org,NULL::text[]) THEN EXIT decision; END IF;
+  IF user_management.auth_business_org_authorized(row_org,NULL::text[]) IS NOT TRUE THEN EXIT decision; END IF;
   SELECT lower(m.role) INTO member_role FROM user_management.organization_users m JOIN user_management.users u USING(user_id)
     WHERE m.organization_id=row_org AND m.user_id=actor AND m.is_active AND u.is_active AND u.lifecycle_state='active';
   IF NOT FOUND OR (SELECT count(*) FROM user_management.organization_users WHERE organization_id=row_org AND user_id=actor)<>1 THEN EXIT decision; END IF;
@@ -131,7 +132,7 @@ BEGIN
   ELSE target:=NEW.id;
     IF TG_OP='UPDATE' AND (NEW.id IS DISTINCT FROM OLD.id OR NEW.organization_id IS DISTINCT FROM OLD.organization_id OR NEW.created_by IS DISTINCT FROM OLD.created_by OR NEW.grievant_id IS DISTINCT FROM OLD.grievant_id OR NEW.represented_member_user_id IS DISTINCT FROM OLD.represented_member_user_id) THEN RAISE EXCEPTION 'CASE_IDENTITY_IMMUTABLE' USING ERRCODE='42501'; END IF;
   END IF;
-  IF actor IS NULL OR NOT user_management.auth_business_org_authorized(NEW.organization_id,NULL::text[]) THEN RAISE EXCEPTION 'LIVE_CASE_ACTOR_REQUIRED' USING ERRCODE='42501'; END IF;
+  IF actor IS NULL OR user_management.auth_business_org_authorized(NEW.organization_id,NULL::text[]) IS NOT TRUE THEN RAISE EXCEPTION 'LIVE_CASE_ACTOR_REQUIRED' USING ERRCODE='42501'; END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.principal:'||actor,0));
   PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.resource:'||target::text,0));
   IF TG_OP='INSERT' THEN
@@ -161,7 +162,7 @@ BEGIN
   IF ${trustedOwner} THEN IF TG_OP='DELETE' THEN RETURN OLD; END IF; RETURN NEW; END IF;
   IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'CASE_HISTORY_IMMUTABLE' USING ERRCODE='42501'; END IF;
   SELECT id,claim_id,organization_id,member_id,status::text AS status INTO c FROM public.claims WHERE id=NEW.claim_id;
-  IF NOT FOUND OR actor IS NULL OR NEW.created_by IS DISTINCT FROM actor OR NOT user_management.auth_business_org_authorized(c.organization_id,NULL::text[]) THEN RAISE EXCEPTION 'CASE_HISTORY_ACTOR_REQUIRED' USING ERRCODE='42501'; END IF;
+  IF NOT FOUND OR actor IS NULL OR NEW.created_by IS DISTINCT FROM actor OR user_management.auth_business_org_authorized(c.organization_id,NULL::text[]) IS NOT TRUE THEN RAISE EXCEPTION 'CASE_HISTORY_ACTOR_REQUIRED' USING ERRCODE='42501'; END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.principal:'||actor,0));
   PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.resource:'||c.claim_id::text,0));
   SELECT id,claim_id,organization_id,member_id,status::text AS status INTO c FROM public.claims WHERE id=NEW.claim_id;
@@ -195,7 +196,7 @@ END;
 `
 export const CLAIM_JOURNAL_WRITE_BODY=`
 BEGIN
-  IF NULLIF(current_setting('app.current_user_id',true),'') IS NULL OR NOT user_management.auth_business_org_authorized(NEW.organization_id,NULL::text[]) THEN RETURN NULL; END IF;
+  IF NULLIF(current_setting('app.current_user_id',true),'') IS NULL OR user_management.auth_business_org_authorized(NEW.organization_id,NULL::text[]) IS NOT TRUE THEN RETURN NULL; END IF;
   PERFORM set_config('ue.case_domain_org',NEW.organization_id::text,true);
   PERFORM set_config('ue.case_domain_internal',NEW.id::text,true);
   IF TG_OP='INSERT' OR NEW.status IS DISTINCT FROM OLD.status THEN
@@ -338,6 +339,7 @@ export function compileCaseDomainSupportSql():string{
     IF NOT EXISTS(SELECT FROM pg_roles WHERE rolname='${owner}' AND NOT(rolsuper OR rolbypassrls OR rolcanlogin OR rolinherit OR rolcreatedb OR rolcreaterole))
       OR has_schema_privilege('${owner}','public','CREATE') THEN RAISE EXCEPTION 'Bounded canonical reader required'; END IF;
   END $ue_case_domain$;
+  ${compileCaseAuthorityReaderSchemaSql()}
   GRANT CREATE ON SCHEMA public TO ${owner};
   GRANT SELECT(id,claim_id,organization_id,member_id,status) ON public.claims TO ${owner};
   GRANT SELECT(id,organization_id,created_by,grievant_id,represented_member_user_id,has_legal_implications,is_confidential) ON public.grievances TO ${owner};
@@ -359,15 +361,20 @@ export function compileCaseDomainSupportSql():string{
 }
 
 export const CASE_DOMAIN_SUPPORT_CATALOG_QUERY=`SELECT p.proname AS name,p.prosrc AS body,p.prosecdef,p.provolatile,p.proleakproof,p.proretset,p.proisstrict,l.lanname AS language,
+  ${CASE_AUTHORITY_READER_SCHEMA_QUERY_FIELDS},
   pg_get_function_identity_arguments(p.oid) AS args,p.prorettype::regtype::text AS returns,pg_get_userbyid(p.proowner) AS owner,p.proconfig,
   has_function_privilege('public',p.oid,'EXECUTE') AS public_execute,has_function_privilege('union_eyes_runtime',p.oid,'EXECUTE') AS runtime_execute,
   has_function_privilege('union_eyes_system',p.oid,'EXECUTE') AS system_execute,has_function_privilege('ue_v2_owner',p.oid,'EXECUTE') AS installer_execute,
-  NOT EXISTS(SELECT FROM aclexplode(COALESCE(p.proacl,acldefault('f',p.proowner))) a WHERE a.grantee NOT IN(p.proowner,(SELECT oid FROM pg_roles WHERE rolname='union_eyes_runtime'),(SELECT oid FROM pg_roles WHERE rolname='ue_v2_owner')) OR (a.is_grantable AND a.grantee<>p.proowner)) AS exact_acl
+  NOT EXISTS(SELECT FROM aclexplode(COALESCE(p.proacl,acldefault('f',p.proowner))) a WHERE
+    (a.grantee NOT IN(p.proowner,(SELECT oid FROM pg_roles WHERE rolname='union_eyes_runtime'),(SELECT oid FROM pg_roles WHERE rolname='ue_v2_owner'))
+      AND NOT(p.proname='ue_case_domain_authorized' AND EXISTS(SELECT FROM pg_roles external_caller
+        WHERE external_caller.rolname='ue_external_read_reader' AND external_caller.oid=a.grantee)))
+    OR (a.is_grantable AND a.grantee<>p.proowner)) AS exact_acl
   FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='public' AND p.proname IN (${supportFunctions.map(fn=>literal(fn.name)).join(',')}) ORDER BY p.proname,p.oid`
 export function caseDomainSupportViolations(rows:Record<string,unknown>[]):string[]{
   const violations:string[]=[]
   for(const fn of supportFunctions){const matches=rows.filter(row=>row.name===fn.name),row=matches[0]
-    if(matches.length!==1||row.body!==fn.body||row.args!==fn.args||row.returns!==fn.returns||row.owner!==owner||row.prosecdef!==true||row.provolatile!=='v'||row.language!=='plpgsql'||row.proleakproof!==false||row.proretset!==false||row.proisstrict!==false||row.installer_execute!==true
+    if(matches.length!==1||!hasBoundedCaseAuthorityReaderSchema(row)||row.body!==fn.body||row.args!==fn.args||row.returns!==fn.returns||row.owner!==owner||row.prosecdef!==true||row.provolatile!=='v'||row.language!=='plpgsql'||row.proleakproof!==false||row.proretset!==false||row.proisstrict!==false||row.installer_execute!==true
       ||JSON.stringify(row.proconfig)!==JSON.stringify(['search_path=pg_catalog'])||row.public_execute!==false||row.runtime_execute!==fn.callable||row.system_execute!==false||row.exact_acl!==true)violations.push(`${fn.name}: case domain authority differs`)
   }
   return violations

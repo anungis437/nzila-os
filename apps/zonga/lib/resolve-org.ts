@@ -1,155 +1,215 @@
-/**
- * Org context resolution — Zonga.
- *
- * Resolves a fully typed `ZongaOrgContext` from auth session.
- * Every `'use server'` action MUST call `resolveOrgContext()` at the top
- * and use the returned context for:
- *   - org-scoped DB queries (WHERE org_id = ctx.orgId)
- *   - org-scoped DB inserts (org_id = ctx.orgId)
- *   - audit trail attribution
- *   - evidence generation
- *
- * This enforces the ORG_REQUIRED invariant at the server action boundary —
- * no query can accidentally omit the org filter.
- *
- * @module resolve-org
- */
+/** Verified tenant, personal-owner and published-projection purposes. Provider
+ * organization labels are selection hints, never source membership facts. */
 import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { ZongaOrgContext } from '@nzila/zonga-core/types'
-
-/** Zonga roles mirror the core ZongaRole enum. */
-type ZongaRole = 'admin' | 'creator' | 'manager' | 'viewer'
-
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
-
-/**
- * Resolve org context from auth session.
- *
- * `auth()` returns `orgId` when the user has an active
- * organization selected. We map this to the NzilaOS `orgId`.
- *
- * @throws Error('Unauthorized') if unauthenticated
- * @throws Error('No active organization') if no org selected
- */
-export async function resolveOrgContext(): Promise<ZongaOrgContext> {
-  const { userId, orgId, orgRole, sessionClaims } = await auth()
-
-  if (!userId) {
-    throw new Error('Unauthorized')
-  }
-
-  if (!orgId) {
-    throw new Error('No active organization — select an org before accessing Zonga.')
-  }
-
-  let role = mapAuthRoleToZongaRole(orgRole, sessionClaims)
-
-  // Super-admin email override
-  if (role !== 'admin') {
-    const user = await currentUser()
-    const email = user?.primaryEmailAddress?.emailAddress
-                ?? user?.emailAddresses?.[0]?.emailAddress
-    if (isSuperAdmin(email)) {
-      role = 'admin'
-    }
-  }
-
-  return {
-    orgId: orgId,
-    actorId: userId,
-    role: role as ZongaOrgContext['role'],
-    permissions: derivePermissions(role),
-    requestId: crypto.randomUUID(),
+import { sql } from 'drizzle-orm'
+import {
+  activeZongaMemberships,
+  withZongaTransaction,
+  zongaRows,
+  type ZongaActionDb,
+} from '@/queries/action-context'
+type ZongaRole = 'admin' | 'creator' | 'manager' | 'viewer'
+const active = new WeakSet<object>(),
+  listeners = new WeakSet<object>()
+export class ZongaScopeError extends Error {
+  readonly status = 403
+  constructor(message = 'Forbidden') {
+    super(message)
+    this.name = 'ZongaScopeError'
   }
 }
-
-/**
- * Lightweight context for listener-facing reads.
- *
- * Unlike `resolveOrgContext()`, this does NOT require an active
- * organization. Listeners are individual users who browse cross-org
- * content — they should never be forced to select a label.
- *
- * Actions that only need the authenticated user ID (and optionally
- * an org hint for scoped sub-queries) should use this resolver.
- *
- * @throws Error('Unauthorized') if unauthenticated
- */
+export class ZongaUnavailableError extends Error {
+  readonly status = 501
+  readonly code = 'VERIFIED_TIP_PAYMENT_SOURCE_UNAVAILABLE'
+  constructor() {
+    super('Tipping requires a verified payment source')
+    this.name = 'ZongaUnavailableError'
+  }
+}
+export const isZongaId = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+function actor(value: unknown): asserts value is string {
+  if (
+    typeof value !== 'string' ||
+    !value ||
+    value !== value.trim() ||
+    value.length > 255 ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  )
+    throw new ZongaScopeError('Unauthorized')
+}
 export interface ListenerContext {
-  actorId: string
-  /** Present only when the user has an active org selected. */
-  orgId: string | null
+  readonly actorId: string
+  readonly orgId: null
 }
-
+export interface ListenerActionContext extends ListenerContext {
+  readonly purpose: 'personal' | 'published'
+  readonly db: ZongaActionDb
+}
+export interface OrganizationActionContext extends ZongaOrgContext {
+  readonly purpose: 'organization'
+  readonly db: ZongaActionDb
+}
+export type ZongaActionContext = ListenerActionContext | OrganizationActionContext
+export function assertZongaContext(context: ZongaActionContext) {
+  if (!context || !active.has(context)) throw new ZongaScopeError()
+}
+async function scoped<T extends object, R>(
+  fields: T,
+  db: ZongaActionDb,
+  operation: (context: T & { readonly db: ZongaActionDb }) => Promise<R>,
+): Promise<R> {
+  const constructed = Object.assign(fields, { db })
+  Object.defineProperty(constructed, 'db', {
+    enumerable: false,
+    get() {
+      if (!active.has(constructed)) throw new ZongaScopeError()
+      return db
+    },
+  })
+  const context = Object.freeze(constructed)
+  active.add(context)
+  try {
+    return await operation(context)
+  } finally {
+    active.delete(context)
+  }
+}
+export function resolveOrgContext(): Promise<ZongaOrgContext>
+export function resolveOrgContext<T>(
+  purpose: 'personal' | 'published',
+  operation: (context: ListenerActionContext) => Promise<T>,
+): Promise<T>
+export function resolveOrgContext<T>(
+  purpose: 'organization',
+  options: { organizationId?: string },
+  operation: (context: OrganizationActionContext) => Promise<T>,
+): Promise<T>
+export async function resolveOrgContext<T>(
+  purpose?: 'personal' | 'published' | 'organization',
+  options?: { organizationId?: string } | ((context: ListenerActionContext) => Promise<T>),
+  operation?: (context: OrganizationActionContext) => Promise<T>,
+): Promise<T | ZongaOrgContext> {
+  const identity = await auth()
+  actor(identity.userId)
+  const actorId = identity.userId
+  if (purpose === 'personal' || purpose === 'published') {
+    if (typeof options !== 'function') throw new ZongaScopeError()
+    if ((await auth()).userId !== actorId) throw new ZongaScopeError()
+    return withZongaTransaction((db) => scoped({ purpose, actorId, orgId: null }, db, options))
+  }
+  if (purpose !== undefined && purpose !== 'organization') throw new ZongaScopeError()
+  const requested = options && typeof options !== 'function' ? options.organizationId : undefined
+  if (requested !== undefined && !isZongaId(requested)) throw new ZongaScopeError()
+  return withZongaTransaction(async (db) => {
+    const rows = await activeZongaMemberships(db, actorId),
+      ids = [...new Set(rows.map((r) => r.orgId))]
+    const hint = isZongaId(identity.orgId) ? identity.orgId.toLowerCase() : null
+    const selected =
+      requested?.toLowerCase() ??
+      (hint && ids.includes(hint) ? hint : ids.length === 1 ? ids[0] : undefined)
+    if (!selected || !ids.includes(selected))
+      throw new ZongaScopeError('Select a verified organization')
+    // Live selected-org assignments govern this legacy product context.
+    // Provider role/metadata cannot restore powers removed by a live downgrade.
+    // This is not a migration to canonical platform permission grants.
+    const selectedRoles = [
+      ...new Set(rows.filter((row) => row.orgId === selected).map((row) => row.role)),
+    ]
+    if (selectedRoles.length !== 1) throw new ZongaScopeError('Organization role is ambiguous')
+    const liveRoles = {
+      org_admin: 'admin',
+      org_secretary: 'manager',
+      org_viewer: 'viewer',
+    } as const
+    let role: ZongaRole = liveRoles[selectedRoles[0]]
+    if (!role) throw new ZongaScopeError('Organization role is unavailable')
+    if (role !== 'admin') {
+      const profile = await currentUser()
+      if (profile && profile.id !== actorId) throw new ZongaScopeError()
+      const email =
+        profile?.primaryEmailAddress?.emailAddress ?? profile?.emailAddresses?.[0]?.emailAddress
+      if (isSuperAdmin(email)) role = 'admin'
+    }
+    if ((await auth()).userId !== actorId) throw new ZongaScopeError()
+    const fields = {
+      orgId: selected,
+      actorId,
+      role: role as ZongaOrgContext['role'],
+      permissions: derivePermissions(role),
+      requestId: crypto.randomUUID(),
+    }
+    if (purpose === undefined) return Object.freeze(fields)
+    if (!operation) throw new ZongaScopeError()
+    return scoped({ ...fields, purpose: 'organization' as const }, db, operation)
+  })
+}
+/** Compatibility callers receive identity only; an unverified group hint is
+ * never inserted as jurisdiction. New personal actions keep a live callback. */
 export async function resolveListenerContext(): Promise<ListenerContext> {
-  const { userId, orgId } = await auth()
-
-  if (!userId) {
-    throw new Error('Unauthorized')
-  }
-
-  return {
-    actorId: userId,
-    orgId: orgId ?? null,
-  }
+  const identity = await auth()
+  actor(identity.userId)
+  const context = Object.freeze({ actorId: identity.userId, orgId: null })
+  listeners.add(context)
+  return context
 }
-
-/**
- * Resolve the internal UUID for the current listener from zonga_listeners.
- *
- * Child tables (activity, follows, favorites, playlist_saves) use
- * `listener_id` (UUID) as a FK → `zonga_listeners.id`.
- * Auth user ID is stored in `zonga_listeners.user_id` (text).
- *
- * This helper returns the UUID `id`, creating the listener row on the
- * fly via ensureListenerProfile when it doesn't exist yet.
- */
-export async function resolveListenerUUID(ctx: ListenerContext): Promise<string> {
-  const { platformDb } = await import('@nzila/db/platform')
-  const { sql } = await import('drizzle-orm')
-
-  const [row] = (await platformDb.execute(
-    sql`SELECT id FROM zonga_listeners WHERE user_id = ${ctx.actorId} LIMIT 1`,
-  )) as unknown as [{ id: string } | undefined]
-
-  if (row) return row.id
-
-  // Auto-create a minimal listener profile (atomic upsert)
-  // org_id is a UUID FK — auth orgId is NOT a UUID, so always pass null here.
-  // The org_id can be linked later via org resolution if needed.
-  const [created] = (await platformDb.execute(
-    sql`INSERT INTO zonga_listeners (user_id, org_id, display_name)
-    VALUES (${ctx.actorId}, ${null}, 'Listener')
-    ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
-    RETURNING id`,
-  )) as unknown as [{ id: string }]
-
-  return created.id
+export interface ListenerFacts {
+  id: string
+  userId: string
+  displayName: string
+  email: string | null
+  avatarUrl: string | null
+  bio: string | null
+  city: string | null
+  country: string | null
+  plan: 'free' | 'premium'
+  subscriptionStatus: string | null
+  createdAt: Date
 }
-
-/**
- * Map auth provider organization role to ZongaRole.
- */
-function mapAuthRoleToZongaRole(
-  orgRole: string | undefined | null,
-  sessionClaims: Record<string, unknown> | undefined | null,
-): ZongaRole {
-  const metaRole = (
-    sessionClaims as { publicMetadata?: { zongaRole?: string } } | undefined
-  )?.publicMetadata?.zongaRole
-
-  if (metaRole && ['admin', 'creator', 'manager', 'viewer'].includes(metaRole)) {
-    return metaRole as ZongaRole
+export async function listenerFacts(
+  context: ListenerActionContext,
+  create = false,
+  data?: { displayName: string; email?: string },
+): Promise<ListenerFacts | null> {
+  assertZongaContext(context)
+  await context.db.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtext(${`zonga.listener:${context.actorId}`}))`,
+  )
+  const [row] = zongaRows<ListenerFacts>(
+    await context.db.execute(
+      sql`SELECT id,user_id AS "userId",display_name AS "displayName",email,avatar_url AS "avatarUrl",bio,city,country,plan,subscription_status AS "subscriptionStatus",created_at AS "createdAt" FROM public.zonga_listeners WHERE user_id=${context.actorId} ORDER BY created_at DESC,id DESC LIMIT 1 FOR UPDATE`,
+    ),
+  )
+  if (row || !create) return row ?? null
+  const [created] = zongaRows<ListenerFacts>(
+    await context.db.execute(
+      sql`INSERT INTO public.zonga_listeners(user_id,org_id,display_name,email) VALUES(${context.actorId},NULL,${data?.displayName ?? 'Listener'},${data?.email ?? null}) RETURNING id,user_id AS "userId",display_name AS "displayName",email,avatar_url AS "avatarUrl",bio,city,country,plan,subscription_status AS "subscriptionStatus",created_at AS "createdAt"`,
+    ),
+  )
+  if (!created || !isZongaId(created.id) || created.userId !== context.actorId)
+    throw new Error('Listener profile was not stored')
+  return created
+}
+export async function resolveListenerUUID(
+  context: ListenerContext | ListenerActionContext,
+): Promise<string> {
+  if ('purpose' in context) {
+    assertZongaContext(context)
+    const row = await listenerFacts(context, true)
+    if (!row) throw new Error('Listener profile is unavailable')
+    return row.id
   }
-
-  switch (orgRole) {
-    case 'org:admin':
-      return 'admin'
-    case 'org:member':
-      return 'creator'
-    default:
-      return 'viewer'
-  }
+  if (!listeners.has(context) || (await auth()).userId !== context.actorId)
+    throw new ZongaScopeError()
+  return resolveOrgContext('personal', async (current) => {
+    if (current.actorId !== context.actorId) throw new ZongaScopeError()
+    const row = await listenerFacts(current, true)
+    if (!row) throw new Error('Listener profile is unavailable')
+    return row.id
+  })
 }
 
 /**
@@ -184,12 +244,7 @@ function derivePermissions(role: ZongaRole): readonly string[] {
         'zonga:payout:preview',
       ]
     case 'creator':
-      return [
-        ...base,
-        'zonga:catalog:create',
-        'zonga:release:create',
-        'zonga:payout:preview',
-      ]
+      return [...base, 'zonga:catalog:create', 'zonga:release:create', 'zonga:payout:preview']
     case 'viewer':
     default:
       return base

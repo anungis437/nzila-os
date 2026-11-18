@@ -7,26 +7,24 @@
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 15,
-   "CRON_SECRET": 1,
    "CRUD_FACTORY": 133,
    "DELEGATED": 18,
-   "NONE": 24,
+   "NONE": 25,
    "ORG_AUTH": 13,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 238,
-   "ROLE_AUTH": 104,
+   "ROLE_AUTH": 103,
    "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 417,
+   "WITH_API": 418,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 9,
-   "CRON_SECRET": 1,
    "CRUD_FACTORY": 82,
    "DELEGATED": 10,
-   "NONE": 9,
+   "NONE": 10,
    "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 223,
@@ -36,22 +34,22 @@
    "WITH_API": 262
   },
   "mutatingByAudit": {
-   "ATOMIC": 175,
-   "ATOMIC_SERVICE": 138,
+   "ATOMIC": 173,
+   "ATOMIC_SERVICE": 137,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 25,
    "NO_WRITES_FOUND": 9,
-   "NONE": 222
+   "NONE": 225
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 82,
-   "NONE": 320,
-   "SYSTEM_CONTEXT": 59,
-   "TENANT_TX": 250
+   "NONE": 322,
+   "SYSTEM_CONTEXT": 58,
+   "TENANT_TX": 249
   }
  },
  "routes": [
@@ -8502,7 +8500,7 @@
    "kernel": true,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "grievances/route.ts",
@@ -8997,8 +8995,8 @@
    "guard": "WEBHOOK_SIGNATURE",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
-   "audit": "ATOMIC_SERVICE"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "intelligence/route.ts",
@@ -10903,7 +10901,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "ATOMIC_SERVICE"
+   "audit": "NONE"
   },
   {
    "route": "payments/webhooks/stripe/route.ts",
@@ -11926,11 +11924,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRON_SECRET",
+   "guard": "NONE",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "ATOMIC"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "rewards/export/route.ts",
@@ -11938,10 +11936,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {

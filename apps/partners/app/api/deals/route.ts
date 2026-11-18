@@ -17,6 +17,7 @@ const CreateDealSchema = z.object({
   estimatedArr: z.number().positive(),
   expectedCloseDate: z.string().min(1),
   notes: z.string().optional(),
+  partnerId: z.string().uuid().optional(),
 })
 
 export async function GET(request: Request) {
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
       const view = url.searchParams.get('view')
 
       if (view === 'stats') {
-        const data = await getDealStats()
+        const data = await getDealStats(url.searchParams.get('partnerId') ?? undefined)
         return NextResponse.json({ ok: true, data })
       }
 
@@ -37,7 +38,8 @@ export async function GET(request: Request) {
       const stage = url.searchParams.get('stage') ?? undefined
       const search = url.searchParams.get('search') ?? undefined
 
-      const data = await listDeals({ page, stage, search })
+      const partnerId = url.searchParams.get('partnerId') ?? undefined
+      const data = await listDeals({ page, stage, search, partnerId })
       return NextResponse.json({ ok: true, data })
     }),
   )

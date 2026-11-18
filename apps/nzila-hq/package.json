@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@nzila/db": "workspace:*",
     "@nzila/hq-domain": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",

@@ -21,12 +21,12 @@ vi.mock("@/db/schema", () => ({
   orgConfigurations: {},
 }));
 
-vi.mock("drizzle-orm", () => ({
+vi.mock("drizzle-orm", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("drizzle-orm")>()),
   eq: vi.fn((...a: any[]) => a),
   and: vi.fn((...a: any[]) => a),
   or: vi.fn((...a: any[]) => a),
   desc: vi.fn((a: any) => a),
-  sql: vi.fn(),
   relations: vi.fn(() => ({})),
 }));
 

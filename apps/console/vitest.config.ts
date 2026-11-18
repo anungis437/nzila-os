@@ -41,6 +41,7 @@ export default defineProject({
   },
   resolve: {
     alias: {
+      '@': resolve(__dirname, '.'),
       // Resolve workspace subpath exports to their TypeScript source files.
       // Required because pnpm + vitest cannot follow package.json `exports`
       // pointing to .ts files without these aliases.
@@ -51,6 +52,7 @@ export default defineProject({
       '@nzila/os-core/orgRateLimit': resolve(ROOT, 'packages/os-core/src/orgRateLimit.ts'),
       '@nzila/os-core/telemetry': resolve(ROOT, 'packages/os-core/src/telemetry/index.ts'),
       '@nzila/os-core/policy': resolve(ROOT, 'packages/os-core/src/policy/index.ts'),
+      '@nzila/os-core/config/super-admins': resolve(ROOT, 'packages/os-core/src/config/super-admins.ts'),
       '@nzila/os-core/config': resolve(ROOT, 'packages/os-core/src/config/env.ts'),
       '@nzila/os-core/retention': resolve(ROOT, 'packages/os-core/src/retention/index.ts'),
       '@nzila/os-core': resolve(ROOT, 'packages/os-core/src/index.ts'),

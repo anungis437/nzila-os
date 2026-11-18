@@ -8,7 +8,7 @@ import { auth } from '@nzila/platform-auth/entra/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@nzila/ui'
-import { getAssetDetail } from '@/lib/actions/catalog-actions'
+import { getPublishedAsset } from '@/lib/actions/browse-actions'
 import { getAssetLikeCount, listComments } from '@/lib/actions/social-actions'
 import { TrackPlayer } from '@/components/dashboard/track-player'
 import { LikeButton } from '@/components/dashboard/like-button'
@@ -24,13 +24,9 @@ export default async function TrackPage({
   if (!userId) redirect('/sign-in')
 
   const { id, locale } = await params
-  const [asset, likeCount, comments] = await Promise.all([
-    getAssetDetail(id),
-    getAssetLikeCount(id),
-    listComments(id),
-  ])
-
+  const asset = await getPublishedAsset(id)
   if (!asset) notFound()
+  const [likeCount, comments] = await Promise.all([getAssetLikeCount(id), listComments(id)])
 
   return (
     <div className="space-y-8">
@@ -52,14 +48,14 @@ export default async function TrackPage({
               {asset.type ?? 'Track'}
             </p>
             <h1 className="mt-1 text-3xl font-bold">{asset.title}</h1>
-            {(asset.metadata?.creatorName as string) && (
+            {asset.metadata.creatorName && (
               <p className="mt-2 text-sm text-white/80">
                 by{' '}
                 <Link
                   href={`/${locale}/dashboard/artists/${asset.creatorId ?? ''}`}
                   className="font-medium text-white underline-offset-2 hover:underline"
                 >
-                  {(asset.metadata?.creatorName as string)}
+                  {asset.metadata.creatorName}
                 </Link>
               </p>
             )}
@@ -95,7 +91,7 @@ export default async function TrackPage({
               <TrackPlayer
                 assetId={id}
                 title={asset.title}
-                creatorName={(asset.metadata?.creatorName as string) ?? undefined}
+                creatorName={asset.metadata.creatorName ?? undefined}
                 durationSeconds={asset.durationSeconds ?? undefined}
               />
             </div>
@@ -106,7 +102,7 @@ export default async function TrackPage({
             <LikeButton assetId={id} assetTitle={asset.title} initialCount={likeCount} />
             <TipButton
               creatorId={asset.creatorId ?? ''}
-              creatorName={(asset.metadata?.creatorName as string) ?? 'Creator'}
+              creatorName={asset.metadata.creatorName ?? 'Creator'}
             />
           </div>
 
@@ -126,10 +122,7 @@ export default async function TrackPage({
               ) : (
                 <div className="mt-4 space-y-3">
                   {comments.map((c) => (
-                    <div
-                      key={c.id}
-                      className="rounded-lg bg-muted p-3"
-                    >
+                    <div key={c.id} className="rounded-lg bg-muted p-3">
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-medium text-foreground">
                           {c.userName ?? 'Anonymous'}
@@ -160,12 +153,6 @@ export default async function TrackPage({
               <h2 className="mb-3 text-sm font-semibold text-foreground">📊 Stats</h2>
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-xl font-bold text-foreground">
-                    {((asset.metadata?.streams as number) ?? 0).toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Streams</p>
-                </div>
-                <div>
                   <p className="text-xl font-bold text-foreground">{likeCount}</p>
                   <p className="text-xs text-muted-foreground">Likes</p>
                 </div>
@@ -173,18 +160,12 @@ export default async function TrackPage({
                   <p className="text-xl font-bold text-foreground">{comments.length}</p>
                   <p className="text-xs text-muted-foreground">Comments</p>
                 </div>
-                <div>
-                  <p className="text-xl font-bold text-foreground">
-                    {((asset.metadata?.downloads as number) ?? 0).toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Downloads</p>
-                </div>
               </div>
             </div>
           </Card>
 
           {/* Creator Card */}
-          {(asset.metadata?.creatorName as string) && (
+          {asset.metadata.creatorName && (
             <Card>
               <div className="p-5">
                 <h2 className="mb-3 text-sm font-semibold text-foreground">🎤 Creator</h2>
@@ -193,33 +174,16 @@ export default async function TrackPage({
                     <span className="text-sm">🎤</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{(asset.metadata?.creatorName as string)}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {asset.metadata.creatorName}
+                    </p>
                     <Link
-                      href={`/${locale}/dashboard/creators/${asset.creatorId ?? ''}`}
+                      href={`/${locale}/dashboard/artists/${asset.creatorId ?? ''}`}
                       className="text-xs text-electric hover:underline"
                     >
                       View profile →
                     </Link>
                   </div>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Quality */}
-          {asset.qualityTiers && asset.qualityTiers.length > 0 && (
-            <Card>
-              <div className="p-5">
-                <h2 className="mb-3 text-sm font-semibold text-foreground">🎵 Quality</h2>
-                <div className="space-y-1">
-                  {asset.qualityTiers.map((tier: string) => (
-                    <div
-                      key={tier}
-                      className="flex items-center justify-between rounded bg-muted px-3 py-1.5 text-xs"
-                    >
-                      <span className="font-medium text-foreground capitalize">{tier}</span>
-                    </div>
-                  ))}
                 </div>
               </div>
             </Card>

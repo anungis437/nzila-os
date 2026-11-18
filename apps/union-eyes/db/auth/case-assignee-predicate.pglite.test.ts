@@ -20,10 +20,11 @@ let pg: PGlite
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(`
-    REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+    REVOKE ALL ON SCHEMA public FROM PUBLIC;
     CREATE ROLE nzila_auth_org_authority_reader NOLOGIN NOINHERIT;
     CREATE ROLE union_eyes_runtime NOLOGIN NOINHERIT;
     CREATE ROLE union_eyes_system NOLOGIN NOINHERIT;
+    GRANT USAGE ON SCHEMA public TO union_eyes_runtime,union_eyes_system;
     CREATE SCHEMA user_management;
     CREATE TABLE user_management.users(user_id text PRIMARY KEY,is_active boolean,lifecycle_state text);
     CREATE TABLE user_management.organization_users(user_id text,organization_id uuid,role text,is_active boolean);
@@ -256,6 +257,9 @@ describe('bounded canonical case assignee predicate', () => {
       { public_execute: true },
       { argument_types: '25' },
       { allowed: false },
+      { reader_public_usage: false },
+      { reader_public_create: true },
+      { reader_public_grant_option: true },
     ]) {
       expect(
         caseAssigneePredicateViolations(

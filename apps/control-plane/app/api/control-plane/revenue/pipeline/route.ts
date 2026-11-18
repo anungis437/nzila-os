@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
-import { buildPipelineSnapshot } from '@/server/revenue-snapshots'
+import { buildPipelineSnapshot } from '@/lib/services/revenue-service'
 
 export async function GET(request: Request) {
   try {

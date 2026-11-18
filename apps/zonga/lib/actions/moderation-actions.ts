@@ -11,7 +11,10 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
-import { createNotification } from '@/lib/actions/notification-actions'
+import { notifyModerationResolution } from '@/lib/services/moderation-notifications'
+import { executeModerationResolution } from '@/lib/control/control-adapter'
+import { guardRoleAuthorization } from '@/lib/guards/governance-guards'
+import { ZongaScopeError } from '@/lib/resolve-org'
 import { executeCommand } from '@/lib/control'
 import { buildEvidencePackFromAction, processEvidencePack } from '@/lib/evidence'
 
@@ -153,55 +156,40 @@ export async function resolveModerationCase(
   caseId: string,
   data: { status: string; notes?: string },
 ): Promise<{ success: boolean }> {
-  const ctx = await resolveOrgContext()
-
-  const result = await executeCommand({
-    type: 'resolve_moderation_case' as const,
-    case_id: caseId,
-    status: data.status,
-    notes: data.notes,
-    actor_id: ctx.actorId,
-  })
-
-  if (!result.success) {
+  let committedHook: (() => void) | undefined
+  try {
+    const outcome = await resolveOrgContext('organization', {}, async (context) => {
+      if (!guardRoleAuthorization(context.role, ['admin', 'manager']).passed)
+        throw new ZongaScopeError()
+      const command = await executeModerationResolution(context, {
+        type: 'resolve_moderation_case',
+        case_id: caseId,
+        status: data.status,
+        notes: data.notes,
+        actor_id: context.actorId,
+      })
+      if (data.status === 'resolved') await notifyModerationResolution(context, caseId)
+      committedHook = command.afterCommit
+      return { success: true }
+    })
+    try {
+      committedHook?.()
+    } catch {
+      logger.warn('Moderation outcome hook unavailable after commit')
+    }
+    try {
+      revalidatePath('/dashboard/moderation')
+    } catch {
+      logger.warn('Moderation cache invalidation unavailable after commit')
+    }
+    return outcome
+  } catch (error) {
+    if (error instanceof ZongaScopeError) throw error
+    logger.error('resolveModerationCase failed', {
+      errorName: error instanceof Error ? error.name : 'unknown',
+    })
     return { success: false }
   }
-
-  // Side-effect: notify content owner on resolution
-  if (data.status === 'resolved') {
-    const modCase = await getModerationCase(caseId)
-    if (modCase) {
-      const [owner] = (await platformDb.execute(
-        sql`SELECT CASE
-          WHEN ${modCase.entityType} = 'asset' THEN (SELECT creator_id FROM zonga_content_assets WHERE id = ${modCase.targetEntityId})
-          WHEN ${modCase.entityType} = 'release' THEN (SELECT creator_id FROM zonga_releases WHERE id = ${modCase.targetEntityId})
-          ELSE NULL
-        END as "ownerId"`,
-      )) as unknown as [{ ownerId: string | null }]
-
-      if (owner?.ownerId) {
-        await createNotification({
-          orgId: ctx.orgId,
-          userId: owner.ownerId,
-          type: 'moderation_resolved',
-          title: 'Content review complete',
-          body: `Your ${modCase.entityType} has been reviewed and the case has been resolved.`,
-          link: `/dashboard/catalog/${modCase.targetEntityId}`,
-        })
-      }
-    }
-  }
-
-  const pack = buildEvidencePackFromAction({
-    actionType: 'MODERATION_CASE_RESOLVED',
-    orgId: ctx.orgId,
-    executedBy: ctx.actorId,
-    actionId: crypto.randomUUID(),
-  })
-  await processEvidencePack(pack)
-
-  revalidatePath('/dashboard/moderation')
-  return { success: true }
 }
 
 export async function assignModerationCase(

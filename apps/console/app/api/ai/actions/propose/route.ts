@@ -1,3 +1,4 @@
+import { proposeAiAction } from '@/lib/services/ai-proposal-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — AI Actions: Propose
@@ -8,16 +9,9 @@
  * No LLM involved in the propose flow for typed actions.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { aiActions } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
-import { recordAiReviewDecision } from '@nzila/ai-sdk'
+
 import { createLogger } from '@nzila/os-core'
-import {
-  validateActionProposal,
-  appendAiAuditEvent,
-  checkActionPolicy,
-} from '@nzila/ai-core'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 import { z } from 'zod'
@@ -43,116 +37,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const {
-      orgId,
-      appKey,
-      profileKey,
-      actionType,
-      proposalJson,
-      relatedDomainType,
-      relatedDomainId,
-      evidencePackEligible,
-    } = parsed.data
+    const { orgId } = parsed.data
 
     const access = await requireOrgAccess(orgId)
     if (!access.ok) return access.response
 
-    // 1. Validate proposal against action type schema
-    const validation = validateActionProposal(actionType, proposalJson)
-    if (!validation.valid) {
-      return NextResponse.json(
-        { error: `Action proposal validation failed: ${validation.error}`, code: 'schema_invalid' },
-        { status: 422 },
-      )
-    }
-
-    // 2. Insert ai_actions row — status: proposed
-    const [action] = await platformDb
-      .insert(aiActions)
-      .values({
-        orgId,
-        appKey,
-        profileKey,
-        actionType,
-        status: 'proposed',
-        proposalJson: validation.data as Record<string, unknown>,
-        requestedBy: access.context.userId,
-        relatedDomainType: relatedDomainType ?? null,
-        relatedDomainId: relatedDomainId ?? undefined,
-        evidencePackEligible: evidencePackEligible ?? false,
-      })
-      .returning()
-
-    // 3. Audit event — proposed
-    await appendAiAuditEvent({
-      orgId,
-      actorClerkUserId: access.context.userId,
-      action: 'ai.action_proposed',
-      targetType: 'ai_action',
-      targetId: action.id,
-      afterJson: {
-        actionType,
-        appKey,
-        profileKey,
-      },
-    })
-
-    // 4. Run deterministic policy check
-    const policyDecision = await checkActionPolicy({
-      actionType,
-      orgId,
-      appKey,
-      profileKey,
-      proposalJson: validation.data as Record<string, unknown>,
-      actor: access.context.userId,
-    })
-
-    // 5. Update action with policy decision
-    let finalStatus: string = 'policy_checked'
-    let approvedBy: string | null = null
-    let approvedAt: Date | null = null
-
-    if (!policyDecision.allowed) {
-      finalStatus = 'rejected'
-    } else if (policyDecision.autoApproved) {
-      finalStatus = 'approved'
-      approvedBy = 'system'
-      approvedAt = new Date()
-    } else if (policyDecision.approvalsRequired && policyDecision.approvalsRequired.length > 0) {
-      finalStatus = 'awaiting_approval'
-    }
-
-    await platformDb
-      .update(aiActions)
-      .set({
-        status: finalStatus as 'proposed',
-        riskTier: policyDecision.riskTier,
-        policyDecisionJson: policyDecision,
-        approvalsRequiredJson: policyDecision.approvalsRequired,
-        approvedBy,
-        approvedAt,
-        updatedAt: new Date(),
-      })
-      .where(eq(aiActions.id, action.id))
-
-    if (finalStatus === 'approved') {
-      recordAiReviewDecision({
-        appKey,
-        orgId,
-        modelUsed: actionType,
-        engineVersion: `policy:${profileKey}`,
-        approved: true,
-        overridden: false,
-        requestId: action.id,
-        traceId: action.id,
-      })
-    }
-
-    return NextResponse.json({
-      actionId: action.id,
-      status: finalStatus,
-      policyDecision,
-    }, { status: 201 })
+    const result = await proposeAiAction(parsed.data, access.context.userId)
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     const aiErr = asAiError(err)
     if (aiErr) {
@@ -162,9 +53,6 @@ export async function POST(req: NextRequest) {
       )
     }
     logger.error('[AI Action Propose Error]', err instanceof Error ? err : { detail: err })
-    return NextResponse.json(
-      { error: 'Internal server error', code: 'unknown' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Internal server error', code: 'unknown' }, { status: 500 })
   }
 }

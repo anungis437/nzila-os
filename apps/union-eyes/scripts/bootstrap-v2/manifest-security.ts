@@ -3,12 +3,13 @@ import { CASE_PRIMARY_DOMAIN_GUARDS, CASE_DOMAIN_SUPPORT_CATALOG_QUERY, CASE_DOM
 import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
 import { AUTHORITY_ISSUER_GUARDS } from '../../db/auth/authority-issuer-guards'
+import { REWARD_NOMINATION_GUARDS } from '../../db/auth/reward-nomination-guards'
 import {
   QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY,
   QUEUED_CASE_MAIL_FUNCTION_SIGNATURES,
   queuedCaseMailFunctionViolations,
 } from '../../db/auth/queued-case-mail'
-import { physicalGuardViolations } from '../../db/auth/physical-guard-catalog'
+import { physicalGuardViolations, type PhysicalGuardContract } from '../../db/auth/physical-guard-catalog'
 import {
   inspectMessagingPhysicalCatalog,
   messagingPhysicalGuardViolations,
@@ -21,6 +22,10 @@ import { inspectAuthPrivilegeExpectations } from './auth-privileges'
 import { FRAMEWORK_FUNCTIONS, FRAMEWORK_ROLES } from './framework-contract'
 import { inspectFrameworkPrivileges } from './framework-privileges'
 import { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
+import { EXTERNAL_READ_FUNCTIONS, EXTERNAL_READ_OWNER, EXTERNAL_READ_STORAGE_TABLES } from '../../lib/external-resource-read/source'
+import { inspectExternalRead, externalReadCatalogViolations } from '../../lib/external-resource-read/catalog'
+import { CONTAINED_PARENT_POLICY_QUERY, containedParentPolicyInstallViolations } from './contained-parent-policies'
+import { EXTERNAL_AUTHORIZER_LIVE_FUNCTION } from '../../lib/external-resource-read/auth-bridge'
 import {
   CASE_ASSIGNEE_PREDICATE,
   CASE_ASSIGNEE_PREDICATE_OWNER,
@@ -83,6 +88,13 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
   const membershipProjection = membershipCatalogProjectionSql(options.postgresMajor)
   const rules = compileSecurity(plan).rules
   const mismatches: string[] = []
+  const verifiedInvokerFunctions = new Set<string>()
+  const qualifyPhysicalContract = async (contract: PhysicalGuardContract) => {
+    const failures = await physicalGuardViolations(contract, async sql => (await client.query(sql)).rows)
+    mismatches.push(...failures)
+    if (!failures.length)
+      for (const fn of contract.functions) verifiedInvokerFunctions.add(`${fn.name}:${fn.args}`)
+  }
   if (plan.authExecution) {
     mismatches.push(
       ...businessSessionPolicyViolations((await client.query(BUSINESS_SESSION_POLICY_QUERY)).rows),
@@ -108,9 +120,7 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
       AUTHORITY_ISSUER_GUARDS,
       CASE_PRIMARY_DOMAIN_GUARDS,
     ])
-      mismatches.push(
-        ...(await physicalGuardViolations(contract, async (sql) => (await client.query(sql)).rows)),
-      )
+      await qualifyPhysicalContract(contract)
     mismatches.push(
       ...queuedCaseMailFunctionViolations(
         (await client.query(QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY)).rows,
@@ -118,12 +128,19 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
     )
   }
   if (plan.authExecution) mismatches.push(...caseDomainSupportViolations((await client.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows))
+  if (plan.authExecution && plan.tables.some(table => table.name === 'recognition_awards'))
+    await qualifyPhysicalContract(REWARD_NOMINATION_GUARDS)
   const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client, options) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)
   const frameworkPrivileges = plan.frameworkExecution
     ? await inspectFrameworkPrivileges(client, options)
     : null
   if (frameworkPrivileges) mismatches.push(...frameworkPrivileges.failures)
+  const externalEnabled = EXTERNAL_READ_STORAGE_TABLES.every(name => plan.tables.some(table => table.name === name))
+  if (externalEnabled) mismatches.push(...externalReadCatalogViolations(await inspectExternalRead(async sql => (await client.query(sql)).rows)))
+  const containedParent = compileSecurity(plan).containedParentPolicies
+  mismatches.push(...containedParentPolicyInstallViolations(containedParent, (await client.query(CONTAINED_PARENT_POLICY_QUERY)).rows,
+    { expectedOwner: 'ue_v2_owner', requireForcedRls: true }))
   const roles = await client.query<{
     name: string
     superuser: boolean
@@ -176,10 +193,9 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
       : false
     // Auth adapter grants have their own producer and independent auth-native qualification.
     if (entry.schema === 'user_management') continue
-    const predicateColumns =
-      entry.role === 'union_eyes_system' && entry.privilege === 'SELECT'
-        ? rule && rule.systemSelectColumns?.length
-        : false
+    const predicateColumns = Boolean(rule && (entry.role === 'union_eyes_runtime'
+      ? rule.runtimeColumnPrivileges?.some(contract => contract.privilege === entry.privilege && contract.columns.length)
+      : entry.privilege === 'SELECT' && rule.systemSelectColumns?.length))
     if (
       entry.allowed !== Boolean(declared) ||
       (!declared && entry.columnAllowed !== Boolean(predicateColumns))
@@ -188,35 +204,42 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
         `TABLE_GRANT_MISMATCH:${entry.schema}.${entry.table}:${entry.role}:${entry.privilege}`,
       )
   }
-  const columnReads = await client.query<{
+  const columns = await client.query<{
     table: string
     column: string
     role: string
+    privilege: string
     allowed: boolean
   }>(`
-    SELECT c.relname AS table,a.attname AS column,actor.role,
-      has_column_privilege(actor.role,c.oid,a.attnum,'SELECT') AS allowed
+    SELECT c.relname AS table,a.attname AS column,actor.role,permission.privilege,
+      has_column_privilege(actor.role,c.oid,a.attnum,permission.privilege) AS allowed
     FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid
     CROSS JOIN (VALUES ('union_eyes_runtime'),('union_eyes_system')) actor(role)
+    CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('REFERENCES')) permission(privilege)
     WHERE c.relnamespace='public'::regnamespace AND c.relkind IN ('r','p','v','m')
-      AND a.attnum>0 AND NOT a.attisdropped
-    ORDER BY c.relname,a.attnum,actor.role
+      AND a.attnum<>0 AND NOT a.attisdropped
+    ORDER BY c.relname,a.attnum,actor.role,permission.privilege
   `)
-  for (const entry of columnReads.rows) {
+  for (const entry of columns.rows) {
     const rule = rules.find((rule) => rule.table === entry.table)
     const declared = Boolean(
       rule &&
       ((entry.role === 'union_eyes_runtime'
         ? rule.runtimePrivileges
         : rule.systemPrivileges
-      ).includes('SELECT') ||
-        (entry.role === 'union_eyes_system' && rule.systemSelectColumns?.includes(entry.column))),
+      ).includes(entry.privilege) ||
+        (entry.role === 'union_eyes_system' && entry.privilege === 'SELECT' && rule.systemSelectColumns?.includes(entry.column)) ||
+        (entry.role === 'union_eyes_runtime' && rule.runtimeColumnPrivileges?.some(contract =>
+          contract.privilege === entry.privilege && contract.columns.includes(entry.column)))),
     )
     if (entry.allowed !== declared)
-      mismatches.push(`COLUMN_SELECT_GRANT_MISMATCH:${entry.table}.${entry.column}:${entry.role}`)
+      mismatches.push(`COLUMN_${entry.privilege}_GRANT_MISMATCH:${entry.table}.${entry.column}:${entry.role}`)
   }
   const functions = await client.query<{
+    schema: string
+    name: string
     signature: string
+    identityArgs: string
     owner: string
     definer: boolean
     config: string[] | null
@@ -226,7 +249,8 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
     runtimeExecute: boolean
     systemExecute: boolean
   }>(`
-    SELECT p.oid::regprocedure::text AS signature,pg_get_userbyid(p.proowner) AS owner,
+    SELECT n.nspname AS schema,p.proname AS name,p.oid::regprocedure::text AS signature,
+      pg_get_function_identity_arguments(p.oid) AS "identityArgs",pg_get_userbyid(p.proowner) AS owner,
       p.prosecdef AS definer,p.proconfig AS config,l.lanname AS language,
       (SELECT e.extname FROM pg_depend d JOIN pg_extension e ON e.oid=d.refobjid
         WHERE d.classid='pg_proc'::regclass AND d.objid=p.oid AND d.deptype='e') AS extension,
@@ -239,6 +263,12 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
   `)
   for (const entry of functions.rows) {
     if (entry.publicExecute) mismatches.push(`PUBLIC_FUNCTION_EXECUTE:${entry.signature}`)
+    if (externalEnabled && EXTERNAL_READ_FUNCTIONS.some(fn => fn.name === entry.name)
+      && entry.owner === EXTERNAL_READ_OWNER && entry.definer && entry.config?.length === 1
+      && entry.config[0] === 'search_path=pg_catalog') continue
+    if (externalEnabled && entry.name === EXTERNAL_AUTHORIZER_LIVE_FUNCTION.name
+      && entry.owner === EXTERNAL_AUTHORIZER_LIVE_FUNCTION.owner && entry.definer
+      && entry.config?.length === 1 && entry.config[0] === 'search_path=pg_catalog') continue
     if (
       plan.frameworkExecution &&
       FRAMEWORK_FUNCTIONS.some((name) => entry.signature === `user_management.${name}()`) &&
@@ -267,8 +297,7 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
       continue
     // Source-declared invoker guards are admitted only after their exact body,
     // ownership, argument, ACL and path catalog checks above. Overloads fail those checks.
-    if ([AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS]
-      .some(contract => contract.functions.some(fn => entry.signature.startsWith(fn.name + '('))) &&
+    if (entry.schema === 'public' && verifiedInvokerFunctions.has(`${entry.name}:${entry.identityArgs}`) &&
       entry.owner === 'ue_v2_owner' && !entry.definer) continue
     if (
       entry.owner !== 'ue_v2_owner' &&

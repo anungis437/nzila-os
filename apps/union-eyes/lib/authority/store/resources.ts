@@ -19,6 +19,7 @@
  * member financial records keyed to a principal, or WorkAid counsel content.
  */
 import { createHash } from 'node:crypto'
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 import type {
   AuthorityRequest,
   CaseFacts,
@@ -288,6 +289,7 @@ export async function financeSourceReadiness(exec: SqlExecutor): Promise<Finance
 export async function loadFinancialTransaction(exec: SqlExecutor, req: AuthorityRequest): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
   if (!isUuid(org) || !isUuid(req.resource.id)) return null
+  requireBaseFinancialAuthority()
   const steps = (
     await exec.query<Row>(
       `SELECT step, actor, account_id::text AS account_id, required_approvals, amount_minor::text AS amount_minor, currency, at

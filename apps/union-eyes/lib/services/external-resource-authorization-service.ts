@@ -295,7 +295,7 @@ export async function authorizeExternalMatterAccess(tx: RLSTx, input: {
   // A read records its allowed decision itself, in the same transaction as the read (see external-resource-middleware), so the decision
   // and the read are one record rather than a decision row followed by an unrecorded read. A refusal is always recorded here.
   if (!(decision.allowed && options.recordAllowed === false)) {
-    await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: input.matterType, resourceId: input.matterId });
+    await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: input.matterType, resourceId: input.matterId }, tx);
   }
   return decision;
 }
@@ -307,8 +307,8 @@ export async function authorizeExternalDocumentAccess(tx: RLSTx, input: {
   matterId: string;
   documentId: string;
   requiredPermission: ExternalDocumentPermission;
-}): Promise<ExternalAuthorizationDecision> {
-  const [authority] = await tx
+}, options: { lock?: boolean; recordAllowed?: boolean } = {}): Promise<ExternalAuthorizationDecision> {
+  const authorityQuery = tx
     .select()
     .from(representationAuthorities)
     .where(
@@ -323,9 +323,10 @@ export async function authorizeExternalDocumentAccess(tx: RLSTx, input: {
       ),
     )
     .limit(1);
+  const [authority] = await (options.lock ? authorityQuery.for('share') : authorityQuery);
 
-  const [matterGrant] = authority
-    ? await tx
+  const matterQuery = authority
+    ? tx
       .select()
       .from(externalMatterAccessGrants)
       .where(
@@ -341,10 +342,11 @@ export async function authorizeExternalDocumentAccess(tx: RLSTx, input: {
         ),
       )
       .limit(1)
-    : [undefined];
+    : null;
+  const [matterGrant] = matterQuery ? await (options.lock ? matterQuery.for('share') : matterQuery) : [undefined];
 
-  const [documentGrant] = matterGrant
-    ? await tx
+  const documentQuery = matterGrant
+    ? tx
       .select()
       .from(externalDocumentAccessGrants)
       .where(
@@ -362,7 +364,8 @@ export async function authorizeExternalDocumentAccess(tx: RLSTx, input: {
         ),
       )
       .limit(1)
-    : [undefined];
+    : null;
+  const [documentGrant] = documentQuery ? await (options.lock ? documentQuery.for('share') : documentQuery) : [undefined];
 
   const decision = evaluateExternalDocumentAccess({
     ...input,
@@ -370,7 +373,8 @@ export async function authorizeExternalDocumentAccess(tx: RLSTx, input: {
     matterGrant,
     documentGrant,
   });
-  await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: 'document', resourceId: input.documentId });
+  if (!(decision.allowed && options.recordAllowed === false))
+    await auditExternalAuthorizationDecision({ decision, actorUserId: input.actor.userId, organizationId: input.organizationId, resource: 'document', resourceId: input.documentId }, tx);
   return decision;
 }
 
@@ -380,7 +384,7 @@ export async function auditExternalAuthorizationDecision(params: {
   organizationId: string;
   resource: string;
   resourceId: string;
-}) {
+}, suppliedTx?: RLSTx) {
   // A refusal for someone who holds no authority at all is not an event of the organization they named: any signed-in user can name any
   // organization id, and the named organization's audit trail must not take rows from strangers. It is kept in the application log.
   if (!params.decision.allowed && !params.decision.authorityId) {
@@ -389,7 +393,7 @@ export async function auditExternalAuthorizationDecision(params: {
   }
   // The record is mandatory, not best-effort: an allowed decision releases the outside party's data only once its record exists. A
   // failure to write it throws, and the external-resource middleware answers 403 instead of serving the data.
-  await withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+  const record = async (tx: RLSTx) => {
     await persistAtomicAudit(
       tx,
       {
@@ -407,5 +411,7 @@ export async function auditExternalAuthorizationDecision(params: {
       },
       params.decision.allowed ? 'success' : 'failure',
     );
-  });
+  };
+  if (suppliedTx) await record(suppliedTx);
+  else await withRLSContext({ organizationId: params.organizationId }, record);
 }

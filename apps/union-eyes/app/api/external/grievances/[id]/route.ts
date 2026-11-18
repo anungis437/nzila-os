@@ -8,6 +8,7 @@ import { toExternalMatterProjection } from '@/lib/services/external-matter-proje
 export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'view',
+    protectedRead: 'matter',
     resolve: resolveExternalGrievanceResource,
   },
   async (_request, context) => {

@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * GET /api/finance/per-capita/inbound
  *
@@ -10,24 +11,24 @@
  *   year  number (default: current year)
  */
 
-import { withApi, ApiError, z } from '@/lib/api/framework';
-import { db } from '@/db';
-import { sql } from 'drizzle-orm';
-import { getRemittanceStatusForParent } from '@/services/clc/per-capita-calculator';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withApi, ApiError, z } from '@/lib/api/framework'
+import { db } from '@/db'
+import { sql } from 'drizzle-orm'
+import { getRemittanceStatusForParent } from '@/services/clc/per-capita-calculator'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const querySchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100).optional(),
-});
+})
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { minRole: 'secretary_treasurer' },
-    entitlement: 'financial_intelligence_suite',
+
     query: querySchema,
     openapi: {
       tags: ['Finance', 'Per-Capita'],
@@ -35,20 +36,29 @@ export const GET = withApi(
     },
   },
   async ({ organizationId, userId, query }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
+    requireBaseFinancialAuthority()
+
     await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
-    );
+      requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:view',
+        requiresLedger: true,
+      }),
+    )
 
     // Verify the org is a parent (has child organizations)
-    const [childCheck] = await withRLSContext(async () => db.execute(sql`
+    const [childCheck] = await withRLSContext(async () =>
+      db.execute(sql`
       SELECT COUNT(*)::int AS "childCount"
       FROM organizations
       WHERE parent_id = ${organizationId}
         AND status = 'active'
-    `));
+    `),
+    )
 
-    const childCount = Number((childCheck as Record<string, unknown>)?.childCount ?? 0);
+    const childCount = Number((childCheck as Record<string, unknown>)?.childCount ?? 0)
     if (childCount === 0) {
       return {
         isParentOrg: false,
@@ -56,13 +66,10 @@ export const GET = withApi(
         year: query.year ?? new Date().getFullYear(),
         childRemittances: [],
         totals: { totalDue: 0, totalPaid: 0, totalOverdue: 0 },
-      };
+      }
     }
 
-    const remittances = await getRemittanceStatusForParent(
-      organizationId,
-      query.year,
-    );
+    const remittances = await getRemittanceStatusForParent(organizationId, query.year)
 
     const totals = remittances.reduce(
       (acc, r) => ({
@@ -71,7 +78,7 @@ export const GET = withApi(
         totalOverdue: acc.totalOverdue + r.totalOverdue,
       }),
       { totalDue: 0, totalPaid: 0, totalOverdue: 0 },
-    );
+    )
 
     return {
       isParentOrg: true,
@@ -79,6 +86,6 @@ export const GET = withApi(
       year: query.year ?? new Date().getFullYear(),
       childRemittances: remittances,
       totals,
-    };
+    }
   },
-);
+)

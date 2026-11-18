@@ -11,7 +11,9 @@
  *   2. `runAIExtraction`  → Auto-extract deal details from partner emails
  *   3. `runPrediction`    → Deal conversion prediction + commission forecasting
  */
-import { auth } from '@nzila/platform-auth/entra/server'
+import { resolveOrgContext } from '../resolve-org'
+import { actionRows } from '../../queries/partner-action-facts'
+import { requireDealOrigin, scopedDeals, scopedCommissions } from '../partner-action-scope'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -57,30 +59,32 @@ export type DealExtraction = CanonicalAiOutput<{
 
 /* ─── Deal Scoring ─── */
 
-export async function scoreDeal(dealId: string): Promise<DealScore | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+export async function scoreDeal(dealId: string, selection?: { partnerId?: string; orgId?: string }): Promise<DealScore | null> {
+  const resourceContext = await resolveOrgContext({ scope: 'partner', partnerId: selection?.partnerId, allowPlatform: true })
+  const origin = await requireDealOrigin(resourceContext, dealId)
+  const ctx = await resolveOrgContext({ scope: 'entity', partnerId: origin.partner.id, orgId: selection?.orgId })
+  if (ctx.actorId !== resourceContext.actorId) throw new Error('Identity changed during scope resolution')
 
   try {
     // Try ML model first
     const mlResult = await runPredictionDetailed({
-      model: 'deal-conversion-scorer',
+      model: 'deal-conversion-scorer', orgId: ctx.orgId,
       features: { dealId },
     })
 
-    if (mlResult.data && typeof mlResult.data.score === 'number') {
+    if (mlResult.data?.dealId === dealId && typeof mlResult.data.score === 'number') {
       const mlPayload = mlResult.data as Record<string, unknown>
       const mlScore = typeof mlPayload.score === 'number' ? mlPayload.score : 0
       return buildCanonicalAiOutput({
         payload: {
-          dealId: typeof mlPayload.dealId === 'string' ? mlPayload.dealId : dealId,
+          dealId,
           score: mlScore,
           tier: (mlPayload.tier as DealScore['tier']) ?? 'medium',
           factors: Array.isArray(mlPayload.factors) ? mlPayload.factors as DealScore['factors'] : [],
           suggestedActions: Array.isArray(mlPayload.suggestedActions) ? mlPayload.suggestedActions as string[] : [],
         },
         appKey: 'partners',
-        orgId: 'platform',
+        orgId: ctx.orgId,
         execution: mlResult.execution ?? {
           modelUsed: 'deal-conversion-scorer',
           provider: 'ml',
@@ -93,24 +97,10 @@ export async function scoreDeal(dealId: string): Promise<DealScore | null> {
     }
 
     // Fallback: AI heuristic from deal data
-    const [dealRow] = (await platformDb.execute(
-      sql`SELECT metadata FROM audit_log
-      WHERE org_id = ${dealId}
-        AND (action = 'deal.registered' OR action = 'deal.submitted')
-      ORDER BY created_at DESC LIMIT 1`,
-    )) as unknown as [{ metadata: Record<string, unknown> } | undefined]
-
-    if (!dealRow) return null
-
-    // Get partner's historical win rate for context
-    const [history] = (await platformDb.execute(
-      sql`SELECT
-        COUNT(*) FILTER (WHERE action = 'deal.won')::int as wins,
-        COUNT(*) FILTER (WHERE action = 'deal.lost')::int as losses,
-        COUNT(*)::int as total
-      FROM audit_log
-      WHERE action LIKE 'deal.%' AND actor_id = ${userId}`,
-    )) as unknown as [{ wins: number; losses: number; total: number }]
+    const dealRow = { metadata: origin.metadata }
+    const [history] = actionRows<{ wins: number; losses: number; total: number }>(await platformDb.execute(sql`
+      SELECT count(*) FILTER (WHERE stage='won') AS wins,count(*) FILTER (WHERE stage='lost') AS losses,count(*) AS total
+      FROM (${scopedDeals(ctx)}) deals`))
 
     const prompt = `Score this partner deal for conversion likelihood.
 
@@ -125,21 +115,21 @@ Return JSON: {
   "suggestedActions": [string, ...]
 }`
 
-    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-deal-score' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-deal-score', orgId: ctx.orgId })
 
     try {
       const parsed = JSON.parse(raw) as Record<string, unknown>
       const score = typeof parsed.score === 'number' ? parsed.score : 0
       return buildCanonicalAiOutput({
         payload: {
-          dealId: typeof parsed.dealId === 'string' ? parsed.dealId : dealId,
+          dealId,
           score,
           tier: (parsed.tier as DealScore['tier']) ?? 'medium',
           factors: Array.isArray(parsed.factors) ? parsed.factors as DealScore['factors'] : [],
           suggestedActions: Array.isArray(parsed.suggestedActions) ? parsed.suggestedActions as string[] : [],
         },
         appKey: 'partners',
-        orgId: 'platform',
+        orgId: ctx.orgId,
         execution,
         confidenceScore: Math.min(1, Math.max(0, score / 100)),
         evidenceRefs: ['audit_log:deal.registered', 'audit_log:deal.submitted', 'ai-profile:partners-deal-score'],
@@ -159,22 +149,22 @@ Return JSON: {
 export async function forecastCommissions(
   partnerId: string,
   months: number = 3,
+  orgId?: string,
 ): Promise<CommissionForecast | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext({ scope: 'entity', partnerId, orgId })
 
   try {
     const mlResult = await runPredictionDetailed({
-      model: 'commission-forecaster',
+      model: 'commission-forecaster', orgId: ctx.orgId,
       features: { partnerId, months },
     })
 
-    if (mlResult.data && typeof mlResult.data.forecasted === 'number') {
+    if (mlResult.data?.partnerId === ctx.partner.id && typeof mlResult.data.forecasted === 'number') {
       const mlPayload = mlResult.data as Record<string, unknown>
       const mlConfidence = typeof mlPayload.confidence === 'number' ? mlPayload.confidence : 0.5
       return buildCanonicalAiOutput({
         payload: {
-          partnerId: typeof mlPayload.partnerId === 'string' ? mlPayload.partnerId : partnerId,
+          partnerId: ctx.partner.id,
           period: typeof mlPayload.period === 'string' ? mlPayload.period : `${months} months`,
           forecasted: typeof mlPayload.forecasted === 'number' ? mlPayload.forecasted : 0,
           confidence: mlConfidence,
@@ -183,7 +173,7 @@ export async function forecastCommissions(
             : [],
         },
         appKey: 'partners',
-        orgId: 'platform',
+        orgId: ctx.orgId,
         execution: mlResult.execution ?? {
           modelUsed: 'commission-forecaster',
           provider: 'ml',
@@ -196,17 +186,9 @@ export async function forecastCommissions(
     }
 
     // Fallback: AI based on historical commission data
-    const commissions = (await platformDb.execute(
-      sql`SELECT
-        metadata->>'amount' as amount,
-        metadata->>'dealId' as "dealId",
-        metadata->>'status' as status,
-        created_at as "createdAt"
-      FROM audit_log
-      WHERE action LIKE 'commission.%'
-        AND metadata->>'partnerId' = ${partnerId}
-      ORDER BY created_at DESC LIMIT 50`,
-    )) as unknown as Array<Record<string, string>>
+    const commissions = actionRows<Record<string, unknown>>(await platformDb.execute(sql`
+      SELECT "finalAmount" AS amount,"dealId",status,"createdAt" FROM (${scopedCommissions(ctx)}) commissions
+      ORDER BY "createdAt" DESC LIMIT 50`))
 
     const prompt = `Forecast commissions for partner ${partnerId} over the next ${months} months.
 
@@ -220,23 +202,23 @@ Return JSON: {
   "breakdown": [{ "dealId": string, "expected": number, "probability": number }]
 }`
 
-    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-forecast' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-forecast', orgId: ctx.orgId })
 
     try {
       const parsed = JSON.parse(raw) as Record<string, unknown>
       return buildCanonicalAiOutput({
         payload: {
-          partnerId: typeof parsed.partnerId === 'string' ? parsed.partnerId : partnerId,
+          partnerId: ctx.partner.id,
           period: typeof parsed.period === 'string' ? parsed.period : `${months} months`,
           forecasted: typeof parsed.forecasted === 'number' ? parsed.forecasted : 0,
           confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
           breakdown: Array.isArray(parsed.breakdown) ? parsed.breakdown as CommissionForecast['breakdown'] : [],
         },
         appKey: 'partners',
-        orgId: 'platform',
+        orgId: ctx.orgId,
         execution,
         confidenceScore: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
-        evidenceRefs: ['audit_log:commission.paid', 'ai-profile:partners-forecast'],
+        evidenceRefs: ['audit_log:commission.created', 'audit_log:commission.updated', 'ai-profile:partners-forecast'],
         domain: 'commerce',
       })
     } catch {
@@ -252,31 +234,23 @@ Return JSON: {
 
 export async function recommendCertification(
   partnerId: string,
+  orgId?: string,
 ): Promise<CertificationRecommendation | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext({ scope: 'entity', partnerId, orgId })
 
   try {
-    const [partnerData] = (await platformDb.execute(
-      sql`SELECT metadata FROM audit_log
-      WHERE org_id = ${partnerId}
-        AND action = 'partner.registered'
-      ORDER BY created_at DESC LIMIT 1`,
-    )) as unknown as [{ metadata: Record<string, unknown> } | undefined]
-
-    const [activity] = (await platformDb.execute(
-      sql`SELECT
-        COUNT(*) FILTER (WHERE action = 'deal.won')::int as "dealsWon",
-        COUNT(*) FILTER (WHERE action = 'certification.completed')::int as "certsCompleted",
-        COALESCE(SUM(CASE WHEN action = 'commission.paid' THEN (metadata->>'amount')::numeric END), 0) as "totalRevenue"
-      FROM audit_log
-      WHERE metadata->>'partnerId' = ${partnerId}`,
-    )) as unknown as [{ dealsWon: number; certsCompleted: number; totalRevenue: number }]
+    const partnerData = { metadata: ctx.partner }
+    const [activity] = actionRows<{ dealsWon: number; trainingTracksRecorded: number; totalRevenue: number }>(await platformDb.execute(sql`
+      SELECT (SELECT count(*) FROM (${scopedDeals(ctx)}) deals WHERE stage='won') AS "dealsWon",
+        (SELECT count(*) FROM public.audit_log progress WHERE progress.action='cert.progress' AND progress.actor_id=${ctx.actorId}
+          AND progress.metadata->>'status'='completed') AS "trainingTracksRecorded",
+        (SELECT COALESCE(sum("finalAmount"),0) FROM (${scopedCommissions(ctx)}) commissions WHERE status='paid') AS "totalRevenue"`))
 
     const prompt = `Recommend a certification advancement path for this partner.
 
 Partner profile: ${JSON.stringify(partnerData?.metadata ?? {})}
-Activity: ${activity?.dealsWon ?? 0} deals won, ${activity?.certsCompleted ?? 0} certifications, $${activity?.totalRevenue ?? 0} total revenue.
+Activity: ${activity?.dealsWon ?? 0} deals won, ${activity?.trainingTracksRecorded ?? 0} self-recorded training completions, $${activity?.totalRevenue ?? 0} recorded historical paid commissions.
+Training progress is not a verified certification, institutional approval, or authority to advance a partner tier.
 
 Our tier system: Registered → Silver → Gold → Platinum
 Each tier requires: progressively more deals, revenue thresholds, and certifications.
@@ -289,14 +263,14 @@ Return JSON: {
   "projectedTierDate": string|null (ISO date)
 }`
 
-    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-certification' })
+    const { content: raw, execution } = await runAICompletionDetailed(prompt, { profile: 'partners-certification', orgId: ctx.orgId })
 
     try {
       const parsed = JSON.parse(raw) as Record<string, unknown>
       return buildCanonicalAiOutput({
         payload: {
-          partnerId: typeof parsed.partnerId === 'string' ? parsed.partnerId : partnerId,
-          currentTier: typeof parsed.currentTier === 'string' ? parsed.currentTier : 'Registered',
+          partnerId: ctx.partner.id,
+          currentTier: ctx.partner.tier,
           recommendedPath: typeof parsed.recommendedPath === 'string' ? parsed.recommendedPath : '',
           requiredActions: Array.isArray(parsed.requiredActions)
             ? parsed.requiredActions as CertificationRecommendation['requiredActions']
@@ -304,10 +278,10 @@ Return JSON: {
           projectedTierDate: typeof parsed.projectedTierDate === 'string' ? parsed.projectedTierDate : null,
         },
         appKey: 'partners',
-        orgId: 'platform',
+        orgId: ctx.orgId,
         execution,
         confidenceScore: 0.7,
-        evidenceRefs: ['audit_log:partner.registered', 'audit_log:deal.won', 'ai-profile:partners-certification'],
+        evidenceRefs: ['partners:current_record', 'audit_log:deal.registered', 'audit_log:cert.progress:personal', 'ai-profile:partners-certification'],
         domain: 'commerce',
       })
     } catch {
@@ -323,22 +297,23 @@ Return JSON: {
 
 export async function extractDealFromEmail(
   emailBody: string,
+  selection?: { partnerId?: string; orgId?: string },
 ): Promise<DealExtraction | null> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const ctx = await resolveOrgContext({ scope: 'entity', partnerId: selection?.partnerId, orgId: selection?.orgId })
+  const userId = ctx.actorId
 
   try {
     logger.info('Extracting deal from email', { actorId: userId, textLength: emailBody.length })
 
     const { data, execution } = await runAIExtractionDetailed(emailBody, 'deal-extraction', {
-      profile: 'partners-extract',
+      profile: 'partners-extract', orgId: ctx.orgId,
       variables: { format: 'deal-registration' },
     })
 
-    const _pack = buildPartnerEvidencePack({
+    await buildPartnerEvidencePack({
       actionId: crypto.randomUUID(),
       actionType: 'DEAL_EXTRACTION',
-      orgId: 'platform',
+      orgId: ctx.orgId,
       executedBy: userId,
     })
     // Evidence pack is already processed by buildPartnerEvidencePack
@@ -353,7 +328,7 @@ export async function extractDealFromEmail(
         notes: (data.notes as string) ?? null,
       },
       appKey: 'partners',
-      orgId: 'platform',
+      orgId: ctx.orgId,
       execution,
       confidenceScore: 0.76,
       evidenceRefs: ['prompt:deal-extraction', 'evidence_pack:DEAL_EXTRACTION'],

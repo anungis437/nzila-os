@@ -64,6 +64,75 @@ interface RegistryEvidence {
   integrity: string
   license: string
   sourceUrl: string
+  licenseProvenance?: RegistryLicenseProvenance
+}
+
+interface RegistryLicenseProvenance {
+  field: 'license' | 'license.type' | 'licenses[0].type' | null
+  declaration: { license?: unknown; licenses?: unknown }
+}
+
+/** Read declarations only; this does not approve or infer a license. */
+export function readRegistryLicense(metadata: { license?: unknown; licenses?: unknown }): {
+  license: string
+  licenseProvenance: RegistryLicenseProvenance
+} {
+  const declaration: RegistryLicenseProvenance['declaration'] = {}
+  if (Object.hasOwn(metadata, 'license')) declaration.license = metadata.license
+  if (Object.hasOwn(metadata, 'licenses')) declaration.licenses = metadata.licenses
+
+  const result = (license = 'NOASSERTION', field: RegistryLicenseProvenance['field'] = null) => ({
+    license,
+    licenseProvenance: { field, declaration },
+  })
+  const validType = (value: unknown): value is string =>
+    typeof value === 'string' &&
+    !!value &&
+    value === value.trim() &&
+    !/[\u0000-\u001f\u007f]/.test(value)
+  const objectType = (value: unknown): string | null => {
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      Array.isArray(value) ||
+      !Object.hasOwn(value, 'type') ||
+      Object.keys(value).some((key) => key !== 'type' && key !== 'url')
+    )
+      return null
+    const candidate = value as { type?: unknown; url?: unknown }
+    if (
+      !validType(candidate.type) ||
+      (Object.hasOwn(candidate, 'url') && !validType(candidate.url))
+    )
+      return null
+    return candidate.type
+  }
+
+  const hasPrimary = Object.hasOwn(declaration, 'license')
+  const hasLegacy = Object.hasOwn(declaration, 'licenses')
+  const primary =
+    typeof declaration.license === 'string'
+      ? validType(declaration.license)
+        ? declaration.license
+        : null
+      : objectType(declaration.license)
+  const legacy =
+    Array.isArray(declaration.licenses) && declaration.licenses.length === 1
+      ? objectType(declaration.licenses[0])
+      : null
+  // Never choose the first item from multiple declarations, or let one valid
+  // field mask an invalid/conflicting one. An explicit null/empty primary is
+  // not an absent primary and cannot be replaced with a more permissive value.
+  if (
+    (hasPrimary && !primary) ||
+    (hasLegacy && !legacy) ||
+    (hasPrimary && hasLegacy && primary !== legacy)
+  )
+    return result()
+  if (hasPrimary && primary)
+    return result(primary, typeof declaration.license === 'string' ? 'license' : 'license.type')
+  if (hasLegacy && legacy) return result(legacy, 'licenses[0].type')
+  return result()
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -99,7 +168,8 @@ export function extractDependencies(
       )
     if (!match || !metadata || typeof metadata !== 'object')
       throw new Error(`Invalid SBOM package identity: ${key}`)
-    const [, name, version] = match as [string, string, string]
+    const [, name, version] = match
+    if (!name || !version) throw new Error(`Invalid SBOM package identity: ${key}`)
     const integrity = metadata.resolution?.integrity
     if (typeof integrity !== 'string') throw new Error(`Missing package integrity: ${key}`)
     const sri = /^(sha256|sha384|sha512)-([A-Za-z0-9+/]+={0,2})$/.exec(integrity)
@@ -119,6 +189,28 @@ export function extractDependencies(
         !evidence.license.trim())
     )
       throw new Error(`Stale or invalid registry metadata: ${key}`)
+    const provenance = evidence?.licenseProvenance
+    if (provenance !== undefined) {
+      if (
+        !provenance ||
+        typeof provenance !== 'object' ||
+        Array.isArray(provenance) ||
+        Object.keys(provenance).some((field) => field !== 'field' && field !== 'declaration') ||
+        !provenance.declaration ||
+        typeof provenance.declaration !== 'object' ||
+        Array.isArray(provenance.declaration) ||
+        Object.keys(provenance.declaration).some(
+          (field) => field !== 'license' && field !== 'licenses',
+        )
+      )
+        throw new Error(`Stale or invalid registry license provenance: ${key}`)
+      const observed = readRegistryLicense(provenance.declaration)
+      if (
+        observed.license !== evidence?.license ||
+        observed.licenseProvenance.field !== provenance.field
+      )
+        throw new Error(`Stale or invalid registry license provenance: ${key}`)
+    }
     components.push({
       type: 'library',
       name,
@@ -132,6 +224,12 @@ export function extractDependencies(
       properties: [
         { name: 'nzila:hash-subject', value: 'upstream-registry-tarball' },
         ...(evidence ? [{ name: 'nzila:license-source', value: evidence.sourceUrl }] : []),
+        ...(provenance
+          ? [
+              { name: 'nzila:license-field', value: provenance.field ?? 'UNRESOLVED' },
+              { name: 'nzila:license-declaration', value: JSON.stringify(provenance.declaration) },
+            ]
+          : []),
         ...(patch
           ? [
               { name: 'pnpm:patch-path', value: String(patch.path) },
@@ -169,7 +267,8 @@ async function refreshMetadata(lockContent: string): Promise<void> {
             const metadata = (await response.json()) as {
               name?: string
               version?: string
-              license?: string | { type?: string }
+              license?: unknown
+              licenses?: unknown
               dist?: { integrity?: string; tarball?: string }
             }
             if (metadata.name !== component.name || metadata.version !== component.version)
@@ -191,9 +290,7 @@ async function refreshMetadata(lockContent: string): Promise<void> {
               if (hash.digest('hex') !== expected.content)
                 throw new Error(`Registry integrity mismatch: ${key}`)
             }
-            const license =
-              typeof metadata.license === 'string' ? metadata.license : metadata.license?.type
-            evidence[key] = { integrity: sri, license: license || 'NOASSERTION', sourceUrl }
+            evidence[key] = { integrity: sri, sourceUrl, ...readRegistryLicense(metadata) }
             lastError = undefined
             break
           } catch (error) {

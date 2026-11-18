@@ -1,8 +1,9 @@
-import { membershipCatalogProjectionSql, type CanonicalPostgresMajor } from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
+import { canonicalPostgresMajor, membershipCatalogProjectionSql, type CanonicalPostgresMajor } from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import { CASE_PRIMARY_DOMAIN_GUARDS, compileCaseDomainSupportSql } from '../../db/auth/case-primary-domain-guards'
 import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
 import { AUTHORITY_ISSUER_GUARDS } from '../../db/auth/authority-issuer-guards'
+import { REWARD_NOMINATION_GUARDS } from '../../db/auth/reward-nomination-guards'
 import { compileQueuedCaseMailSql } from '../../db/auth/queued-case-mail'
 import { inspectPhysicalGuards, planPhysicalGuards } from '../../db/auth/physical-guard-catalog'
 import assert from 'node:assert/strict'
@@ -19,6 +20,10 @@ import { compileConversationAssigneePredicateSql } from '../../db/auth/conversat
 import { canonicalRoleSqlList } from './execution-roles'
 import { compileFrameworkSql } from './framework-sql'
 import { canonicalCatalogObject } from './catalog-normalization'
+import { CURRENT_PUBLIC_TABLE_CREATION_SQL, verifyCurrentUuidDefaultBindings, type CurrentUuidDefaultRow } from './uuid-default-bindings'
+import { compileExternalReadRolePreparationSql, compileExternalReadSql, compileExternalReadRoleFinalizationSql, EXTERNAL_READ_SOURCE_PATH } from '../../lib/external-resource-read/source'
+import { compileExternalReadInstallerBridge, assertExternalReadInstallerBridge } from './external-read-installer-bridge'
+import { compileExternalAuthBridgeSql, EXTERNAL_AUTH_BRIDGE_SOURCE_PATH } from '../../lib/external-resource-read/auth-bridge'
 import {
   assertMinimumInstaller,
   currentPlanRequiresVector,
@@ -36,19 +41,29 @@ export interface CatalogObject {
   definition: unknown
 }
 const localClients = new WeakMap<pg.Client, string>()
+const localMajors = new WeakMap<pg.Client, CanonicalPostgresMajor>()
 export async function connectLocalV2(config: pg.ClientConfig) {
   assertLocalTarget(config)
   const client = new pg.Client(config)
   await client.connect()
-  const target = await client.query<{ database: string; authenticatedUser: string }>(
-    'SELECT current_database() AS database,session_user AS "authenticatedUser"',
-  )
-  assert.equal(target.rows[0].database, config.database, 'UE_V2_TARGET_IDENTITY_MISMATCH')
-  localClients.set(client, target.rows[0].authenticatedUser)
-  return client
+  try {
+    const target = await client.query<{ database: string; authenticatedUser: string; serverVersion: string }>(
+      'SELECT current_database() AS database,session_user AS "authenticatedUser",current_setting(\'server_version_num\') AS "serverVersion"',
+    )
+    assert.equal(target.rows[0].database, config.database, 'UE_V2_TARGET_IDENTITY_MISMATCH')
+    const major = canonicalPostgresMajor(target.rows[0].serverVersion)
+    localClients.set(client, target.rows[0].authenticatedUser)
+    localMajors.set(client, major)
+    return client
+  } catch (error) {
+    try { await client.end() } catch (cleanup) { throw new AggregateError([error, cleanup], 'UE_V2_CONNECTION_ADMISSION_AND_CLEANUP_FAILED') }
+    throw error
+  }
 }
 export async function inspectCatalog(client: pg.Client, options: { postgresMajor?: CanonicalPostgresMajor } = {}): Promise<CatalogObject[]> {
-  const membershipProjection = membershipCatalogProjectionSql(options.postgresMajor)
+  const major = localMajors.get(client) ?? canonicalPostgresMajor((await client.query<{ version: string }>("SELECT current_setting('server_version_num') AS version")).rows[0].version)
+  if (options.postgresMajor !== undefined && options.postgresMajor !== major) throw new Error('UE_V2_POSTGRES_VERSION_MISMATCH')
+  const membershipProjection = membershipCatalogProjectionSql(major)
   const queries = [
     `SELECT 'schema' kind, nspname id, jsonb_build_object('owner',pg_get_userbyid(nspowner),'acl',nspacl::text) definition FROM pg_namespace WHERE nspname !~ '^pg_' AND nspname <> 'information_schema'`,
     `SELECT 'extension' kind, extname id, jsonb_build_object('version',extversion,'schema',extnamespace::regnamespace::text) definition FROM pg_extension`,
@@ -147,10 +162,11 @@ export async function createCurrentState(
   options: InstallerOptions = {},
 ) {
   if (!localClients.has(client)) throw new Error('UE_V2_LOCAL_CLIENT_REQUIRED')
+  const postgresMajor = localMajors.get(client)!
   if (options.profile === 'PREPROVISIONED_NON_SUPERUSER') {
     if (localClients.get(client) !== 'ue_v2_fixture_installer')
       throw new Error('UE_V2_GENUINE_RESTRICTED_INSTALLER_LOGIN_REQUIRED')
-    await assertMinimumInstaller(client, {vectorRequired:currentPlanRequiresVector(plan)})
+    await assertMinimumInstaller(client, {vectorRequired:currentPlanRequiresVector(plan), postgresMajor})
   }
   const execute = async (producer: Producer) => {
     if (hook) await hook(producer, () => client.query(producer.sql))
@@ -176,9 +192,9 @@ export async function createCurrentState(
     await execute(installerProducer('EXTENSION_FUNCTION_ACL', VECTOR_FUNCTION_ACL_SQL))
   }
   await client.query('SET LOCAL ROLE ue_v2_owner')
-  // Current model DDL has unqualified CREATE targets, so public is the creation schema.
-  // pg_temp is explicit and last; runtime read transactions separately put pg_catalog first.
-  await client.query('SET LOCAL search_path = public, pg_catalog, pg_temp')
+  // Keep public as the creation namespace and pg_catalog implicitly first for
+  // function resolution. A retained public UUID alias must never win here.
+  await client.query(CURRENT_PUBLIC_TABLE_CREATION_SQL)
   const deferred: typeof plan.statements = []
   for (const statement of plan.statements) {
     if (statement.canonicalId.startsWith('CURRENT_EXTENSION:')) continue
@@ -195,6 +211,7 @@ export async function createCurrentState(
       sql: [
         compileAuthBootstrapSql({
           rolesPreprovisioned: options.profile === 'PREPROVISIONED_NON_SUPERUSER',
+          postgresMajor,
         }),
         compileAuthorityMembershipReaderSql(),
       ].join('\n'),
@@ -209,6 +226,7 @@ export async function createCurrentState(
       canonicalId: 'CANONICAL_FRAMEWORK_EXECUTION',
       sql: compileFrameworkSql(plan, {
         rolesPreprovisioned: options.profile === 'PREPROVISIONED_NON_SUPERUSER',
+        postgresMajor,
       }),
       source: plan.frameworkExecution.compilerSource,
       sourceDigest: producerBytes(plan.frameworkExecution.compilerSource),
@@ -274,6 +292,41 @@ export async function createCurrentState(
       source: contract.source, sourceDigest: producerBytes(contract.source),
     })
   }
+  if (plan.authExecution && plan.tables.some(table => table.name === 'recognition_awards')) {
+    const contract = REWARD_NOMINATION_GUARDS
+    const guards = planPhysicalGuards(contract, await inspectPhysicalGuards(contract, async sql => (await client.query(sql)).rows))
+    for (const [index, sql] of guards.statements.entries()) await execute({
+      canonicalId: `CURRENT_REWARD_NOMINATION_GUARD:${index}`, sql,
+      source: contract.source, sourceDigest: producerBytes(contract.source),
+    })
+  }
+  if (plan.authExecution) {
+    const externalProducer = (canonicalId: string, sql: string, source = EXTERNAL_READ_SOURCE_PATH): Producer => ({
+      canonicalId, sql, source, sourceDigest: producerBytes(source),
+    })
+    const restricted = options.profile === 'PREPROVISIONED_NON_SUPERUSER'
+    const database = (await client.query<{ database: string }>('SELECT current_database() AS database')).rows[0].database
+    const bridge = restricted ? await compileExternalReadInstallerBridge(database) : null
+    await client.query('RESET ROLE')
+    if (bridge) {
+      await assertExternalReadInstallerBridge(bridge, async sql => (await client.query(sql)).rows)
+      await execute(externalProducer('CANONICAL_EXTERNAL_READ_PREPARE', bridge.prepareSql,
+        'apps/union-eyes/scripts/bootstrap-v2/external-read-installer-bridge.ts'))
+    } else await execute(externalProducer('CANONICAL_EXTERNAL_READ_PREPARE', compileExternalReadRolePreparationSql({ rolesPreprovisioned: true })))
+    await client.query('SET LOCAL ROLE ue_v2_owner')
+    await execute(externalProducer('CANONICAL_EXTERNAL_READ_EXECUTION', compileExternalReadSql({ rolesPreprovisioned: true })))
+    await execute(externalProducer('CANONICAL_EXTERNAL_READ_AUTH_BRIDGE', compileExternalAuthBridgeSql({ rolesPreprovisioned: true }), EXTERNAL_AUTH_BRIDGE_SOURCE_PATH))
+    await client.query('RESET ROLE')
+    if (bridge) {
+      await assertExternalReadInstallerBridge(bridge, async sql => (await client.query(sql)).rows)
+      await execute(externalProducer('CANONICAL_EXTERNAL_READ_FINALIZE', bridge.finalizeSql,
+        'apps/union-eyes/scripts/bootstrap-v2/external-read-installer-bridge.ts'))
+      await client.query('SET LOCAL ROLE ue_v2_owner')
+      await execute(externalProducer('CANONICAL_EXTERNAL_READ_BRIDGE_CLEANUP', bridge.cleanupSql,
+        'apps/union-eyes/scripts/bootstrap-v2/external-read-installer-bridge.ts'))
+    } else await execute(externalProducer('CANONICAL_EXTERNAL_READ_FINALIZE', compileExternalReadRoleFinalizationSql()))
+    await client.query('SET LOCAL ROLE ue_v2_owner')
+  }
   await execute(
     installerProducer(
       'BOOTSTRAP_RECEIPT',
@@ -286,6 +339,8 @@ export async function createCurrentState(
       'REVOKE ALL ON TABLE public.ue_v2_bootstrap_receipt FROM PUBLIC, union_eyes_runtime, union_eyes_system',
     ),
   )
+  await verifyCurrentUuidDefaultBindings(plan, async (sql, parameters) =>
+    (await client.query<CurrentUuidDefaultRow>(sql, parameters)).rows)
   return security
 }
 
@@ -303,7 +358,7 @@ export async function applyV2(
     if (options.profile === 'PREPROVISIONED_NON_SUPERUSER') {
       if (localClients.get(client) !== 'ue_v2_fixture_installer')
         throw new Error('UE_V2_GENUINE_RESTRICTED_INSTALLER_LOGIN_REQUIRED')
-      await assertMinimumInstaller(client, {vectorRequired:currentPlanRequiresVector(plan)})
+      await assertMinimumInstaller(client, {vectorRequired:currentPlanRequiresVector(plan), postgresMajor: localMajors.get(client)!})
       await client.query('SET LOCAL ROLE ue_v2_owner')
     }
     await client.query("SELECT pg_advisory_xact_lock(hashtext('UE_BOOTSTRAP_V2'))")
@@ -326,6 +381,9 @@ export async function applyV2(
         receipt.rows[0].catalog_digest !== catalogDigest(expected)
       )
         throw new Error('UE_V2_AUTHENTICATED_RECEIPT_REQUIRED')
+      // A matching old receipt/catalog cannot bless a shadow-bound default.
+      await verifyCurrentUuidDefaultBindings(plan, async (sql, parameters) =>
+        (await client.query<CurrentUuidDefaultRow>(sql, parameters)).rows)
       await client.query('COMMIT')
       return { result: 'NOOP', created: 0, catalogDigest: catalogDigest(current) }
     }

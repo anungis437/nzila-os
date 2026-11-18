@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * POST /api/dues/create-payment-intent — initiate a Stripe dues payment.
  *
@@ -14,8 +15,9 @@ export const dynamic = 'force-dynamic'
 
 export const POST = withApi(
   {
+    rlsOrgContext: false,
     auth: { minRole: 'member' },
-    entitlement: 'financial_intelligence_suite',
+
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {
       tags: ['Dues'],
@@ -25,6 +27,8 @@ export const POST = withApi(
   async ({ organizationId, userId }) => {
     assertMemberDuesPaymentEnabled()
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
+    requireBaseFinancialAuthority()
+
     try {
       const initiation = await initiateDuesPayment({
         organizationId,

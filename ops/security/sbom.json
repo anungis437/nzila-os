@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:8e9bf2ed-13e2-4e61-808e-47ea0389c83e",
+  "serialNumber": "urn:uuid:43334030-f670-40dd-b3fa-1f8950d7023d",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-17T20:20:59Z",
+    "timestamp": "2026-11-18T13:51:33Z",
     "tools": [
       {
         "vendor": "nzila",
@@ -20,11 +20,11 @@
     "properties": [
       {
         "name": "nzila:lockfile-sha256",
-        "value": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0"
+        "value": "66487ed6f7133ed9c6247b0f8970359a91924486e36c1a3b13f5192e381dbe68"
       },
       {
         "name": "nzila:registry-metadata-sha256",
-        "value": "17223d30bcd613179ffe9018c9426a6978d625b4690fbf53caca9ff980f2aa1d"
+        "value": "3750cd27872bf036ce6046a3bdd120bd9958b8651bd58164655cf827a46de147"
       }
     ]
   },
@@ -59193,7 +59193,7 @@
         },
         {
           "name": "pnpm:patch-hash",
-          "value": "84f9739f825f963ad0896f3320add6fa2f0ea137ce1a4c57c6eb0827fdd45d36"
+          "value": "6a36b929622ce4b86f275680e96d31001b63ce209414fb2b02194a7ec1f7d10d"
         }
       ]
     },

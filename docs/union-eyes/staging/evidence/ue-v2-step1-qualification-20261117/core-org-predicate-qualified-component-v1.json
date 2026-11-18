@@ -1,0 +1,87 @@
+{
+  "scope": "INTERIM_TOTAL_BOOLEAN_ORG_PREDICATE_AND_CASE_DOMAIN_REMEDIATION",
+  "recordedAt": "2026-11-18T06:32:55.680410+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "observedDefect": "A valid own-user bearer with empty selected organization produced SQL NULL organization and user-parent decisions, while a negated consumer could admit a primary case-domain decision.",
+  "repair": [
+    "Make core organization and user-parent authorization return total boolean values using IS TRUE.",
+    "Require explicit TRUE in seven case-domain, case-scope and queued-mail consumers using IS NOT TRUE for rejection."
+  ],
+  "focusedResult": {
+    "passed": 37,
+    "failed": 0,
+    "skipped": 2,
+    "skipsRequireNativeExecution": true
+  },
+  "actualPG16Result": {
+    "success": true,
+    "numTotalTests": 17,
+    "numPassedTests": 17,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "sourceBindingsAtNativeExecution": [
+    {
+      "path": "apps/union-eyes/db/auth/case-primary-domain-guards.pglite.test.ts",
+      "sha256": "b077c5d9920d6fa10129fff1cfb69501739fad40a977999c206549ce3124ecc4"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-primary-domain-guards.ts",
+      "sha256": "0dd46c87a0a60e934243e00ce656eca80fc635cd201d0c77acd6cd5ba0a4a108"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-authority-reader-schema.ts",
+      "sha256": "b665eecbd08ead1199348a7fa39f5c8f20aa3ea72e97a53063fe81da6cf59877"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/case-primary-domain-testkit.ts",
+      "sha256": "17a8b33e11a4edfdda1866c339a0484df7f47a32521ad7cde320216254471c2d"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/queued-case-mail-testkit.ts",
+      "sha256": "a2dfa3c66da7bb58dd3578ba3002172d51072255323485cb8e89e3fd8e7f930b"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/org-session-authority.ts",
+      "sha256": "0defcbb246fb032c29fba45ebe6513b213a71d4a3ead0392431eb6dd372388dc"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "4f6fc18d249603583477544e5c71b931fa5b9adc5e4a0cd8ced845ae721a9028"
+    }
+  ],
+  "sourceChangedDuringNativeRun": false,
+  "rawPrivateProof": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/org-predicate-null-red-v1.txt",
+      "sha256": "d05c012b5a033975f341c1eaff1b5b274820dd3e904c6b40bd4d678b8f56ced0",
+      "bytes": 1629
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/org-predicate-null-green-v1.txt",
+      "sha256": "11fe03a17dfe3f2a8cb5730daa1103e71320e49cdeae64a149abb83eba7c5324",
+      "bytes": 505
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/domain-native-v4.json",
+      "sha256": "03497f76b0a499360f5033f2d5d9ae542c080de85106cf4528d854bdfb96c42e",
+      "bytes": 8780
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/domain-native-v4.log",
+      "sha256": "744a8ac241a758321a83daf6efe06e7f020036801f9b9a510667c755f54b2731",
+      "bytes": 586
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/domain-native-v4-source.json",
+      "sha256": "8dbccb2033c735f69c44dd62f00317065e75f79136721dbabd99bc92de189e24",
+      "bytes": 1704
+    }
+  ],
+  "limits": [
+    "Owned isolated pinnedPG16 only; fixture session_user is operator and actions SET LOCAL ROLE runtime. SeparateLOGIN/auth-service and wholebootstrap qualification are different pending probes.",
+    "This is a source-bound component proof; final source, full bootstrap, distinct LOGIN, HTTP, browser and release qualification remain pending."
+  ],
+  "finalCandidateQualified": false
+}

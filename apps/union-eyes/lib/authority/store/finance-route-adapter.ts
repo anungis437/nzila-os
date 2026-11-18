@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * The supported authorization adapter between an authenticated application request and the kernel's FINANCIAL duties
  * (UE-CONV-D-001 / D-002 / D-003).
@@ -40,7 +41,12 @@ import { recordFinancialStep, type FinancialStep } from './workflow'
 
 export type FinancialAction = Extract<
   Action,
-  'finance:view' | 'finance:prepare' | 'finance:approve' | 'finance:execute' | 'finance:reconcile' | 'finance:audit'
+  | 'finance:view'
+  | 'finance:prepare'
+  | 'finance:approve'
+  | 'finance:execute'
+  | 'finance:reconcile'
+  | 'finance:audit'
 >
 
 export const FINANCIAL_STEP_ACTION: Record<FinancialStep, FinancialAction> = {
@@ -106,11 +112,21 @@ const resourceOf = (i: FinancialActionRequest): AuthorityRequest['resource'] => 
 })
 
 /** A full kernel decision for one financial duty on one transaction, for the authenticated principal of `tx`. */
-export function decideFinancialAction(tx: RLSTx, input: FinancialActionRequest, deps: EnforcementDeps = kernelDeps): Promise<Decision> {
+export function decideFinancialAction(
+  tx: RLSTx,
+  input: FinancialActionRequest,
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  requireBaseFinancialAuthority()
   return decideFinancialActionOn(drizzleExecutor(tx), input, deps)
 }
 
-export function decideFinancialActionOn(exec: SqlExecutor, input: FinancialActionRequest, deps: EnforcementDeps = kernelDeps): Promise<Decision> {
+export function decideFinancialActionOn(
+  exec: SqlExecutor,
+  input: FinancialActionRequest,
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  requireBaseFinancialAuthority()
   return enforceAuthority(
     exec,
     deps,
@@ -129,8 +145,16 @@ export function decideFinancialActionOn(exec: SqlExecutor, input: FinancialActio
 /** Exact conversion of a decimal amount to minor units; refuses anything with more than two decimals or no safe integer. */
 export function amountToMinor(amount: number): number {
   const minor = Math.round(amount * 100)
-  if (!Number.isFinite(amount) || amount < 0 || !Number.isSafeInteger(minor) || Math.abs(minor / 100 - amount) > 1e-9) {
-    throw new FinancialDutyError('INVALID_REQUEST', 'amount must be a non-negative number with at most two decimals')
+  if (
+    !Number.isFinite(amount) ||
+    amount < 0 ||
+    !Number.isSafeInteger(minor) ||
+    Math.abs(minor / 100 - amount) > 1e-9
+  ) {
+    throw new FinancialDutyError(
+      'INVALID_REQUEST',
+      'amount must be a non-negative number with at most two decimals',
+    )
   }
   return minor
 }
@@ -147,7 +171,10 @@ async function requireFinanceSource(exec: SqlExecutor): Promise<void> {
   }
 }
 
-async function liveFinancialMandateCount(exec: SqlExecutor, organizationId: string): Promise<number> {
+async function liveFinancialMandateCount(
+  exec: SqlExecutor,
+  organizationId: string,
+): Promise<number> {
   const row = (
     await exec.query<{ n: number | string }>(
       `SELECT count(*)::int AS n FROM public.ue_authority_mandates
@@ -160,20 +187,36 @@ async function liveFinancialMandateCount(exec: SqlExecutor, organizationId: stri
 }
 
 /** Refuses when this organization has no live financial mandate. Does not treat a role or an administrator title as one. */
-export async function assertLiveFinancialMandate(exec: SqlExecutor, organizationId: string): Promise<void> {
-  if (!isUuid(organizationId)) throw new FinancialDutyError('INVALID_REQUEST', 'organizationId must be a uuid')
+export async function assertLiveFinancialMandate(
+  exec: SqlExecutor,
+  organizationId: string,
+): Promise<void> {
+  requireBaseFinancialAuthority()
+  if (!isUuid(organizationId))
+    throw new FinancialDutyError('INVALID_REQUEST', 'organizationId must be a uuid')
   if ((await liveFinancialMandateCount(exec, organizationId)) === 0) throw mandatesNotIssuedError()
 }
 
-async function holdsFinancialCapacity(exec: SqlExecutor, organizationId: string, userId: string): Promise<boolean> {
+async function holdsFinancialCapacity(
+  exec: SqlExecutor,
+  organizationId: string,
+  userId: string,
+): Promise<boolean> {
   const rows = await activeMembershipSource(exec, organizationId, [userId])
   return rows.some(
-    (m) => m.userId === userId && m.organizationId === organizationId && m.status === 'active' && m.capacities.some((c) => FINANCE_CAPACITIES.includes(c)),
+    (m) =>
+      m.userId === userId &&
+      m.organizationId === organizationId &&
+      m.status === 'active' &&
+      m.capacities.some((c) => FINANCE_CAPACITIES.includes(c)),
   )
 }
 
 /** Best-effort security evidence for a refusal; the refusal itself never depends on it. */
-async function recordRefusal(input: FinancialActionRequest, reasons: readonly string[]): Promise<void> {
+async function recordRefusal(
+  input: FinancialActionRequest,
+  reasons: readonly string[],
+): Promise<void> {
   try {
     await auditLog({
       eventType: AuditEventType.AUTH_FAILED,
@@ -187,7 +230,9 @@ async function recordRefusal(input: FinancialActionRequest, reasons: readonly st
       details: { reasons },
     })
   } catch (error) {
-    logger.warn('Financial refusal could not be recorded', { error: error instanceof Error ? error.message : String(error) })
+    logger.warn('Financial refusal could not be recorded', {
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
 }
 
@@ -197,8 +242,15 @@ const mandatesNotIssuedError = () =>
     'No financial mandate has been issued in this organization. Financial duties stay unavailable until the institution issues them.',
   )
 
-async function mandatesNotIssued(exec: SqlExecutor, organizationId: string, userId: string): Promise<boolean> {
-  return (await liveFinancialMandateCount(exec, organizationId)) === 0 && (await holdsFinancialCapacity(exec, organizationId, userId))
+async function mandatesNotIssued(
+  exec: SqlExecutor,
+  organizationId: string,
+  userId: string,
+): Promise<boolean> {
+  return (
+    (await liveFinancialMandateCount(exec, organizationId)) === 0 &&
+    (await holdsFinancialCapacity(exec, organizationId, userId))
+  )
 }
 
 /**
@@ -206,31 +258,62 @@ async function mandatesNotIssued(exec: SqlExecutor, organizationId: string, user
  * The caller who cannot `view` the transaction learns nothing about it (404), except that no financial mandate exists
  * at all in their organization, which is institutional state and independent of any transaction id.
  */
-async function refuse(exec: SqlExecutor, input: FinancialActionRequest, decision: Decision, deps: EnforcementDeps): Promise<never> {
+async function refuse(
+  exec: SqlExecutor,
+  input: FinancialActionRequest,
+  decision: Decision,
+  deps: EnforcementDeps,
+): Promise<never> {
   if (input.action !== 'finance:view') {
-    const view = await decideFinancialActionOn(exec, { userId: input.userId, organizationId: input.organizationId, transactionId: input.transactionId, action: 'finance:view' }, deps)
+    const view = await decideFinancialActionOn(
+      exec,
+      {
+        userId: input.userId,
+        organizationId: input.organizationId,
+        transactionId: input.transactionId,
+        action: 'finance:view',
+      },
+      deps,
+    )
     if (view.effect === 'allow') {
       await recordRefusal(input, reasonCodes(decision))
-      throw new FinancialDutyError('DUTY_NOT_HELD', `The ${input.action} duty is not held for this transaction.`, reasonCodes(decision))
+      throw new FinancialDutyError(
+        'DUTY_NOT_HELD',
+        `The ${input.action} duty is not held for this transaction.`,
+        reasonCodes(decision),
+      )
     }
   }
-  if (await mandatesNotIssued(exec, input.organizationId, input.userId)) throw mandatesNotIssuedError()
+  if (await mandatesNotIssued(exec, input.organizationId, input.userId))
+    throw mandatesNotIssuedError()
   if (reasonCodes(decision).includes('FACTS_CONTRADICTORY')) {
-    logger.warn('Financial transaction facts are contradictory or unloadable', { organizationId: input.organizationId, transactionId: input.transactionId })
+    logger.warn('Financial transaction facts are contradictory or unloadable', {
+      organizationId: input.organizationId,
+      transactionId: input.transactionId,
+    })
   }
   throw new FinancialDutyError('NOT_FOUND', 'Financial transaction not found.')
 }
-
 
 /**
  * The kernel decision for one duty on one transaction, as a throw. On an allow with a claimed amount or currency, the
  * claim must equal the record (checked AFTER authority, so the amount is never an oracle for a caller without a duty).
  */
-export async function requireFinancialDuty(tx: RLSTx, input: FinancialActionRequest, deps: EnforcementDeps = kernelDeps): Promise<Decision> {
+export async function requireFinancialDuty(
+  tx: RLSTx,
+  input: FinancialActionRequest,
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  requireBaseFinancialAuthority()
   return requireFinancialDutyOn(drizzleExecutor(tx), input, deps)
 }
 
-export async function requireFinancialDutyOn(exec: SqlExecutor, input: FinancialActionRequest, deps: EnforcementDeps = kernelDeps): Promise<Decision> {
+export async function requireFinancialDutyOn(
+  exec: SqlExecutor,
+  input: FinancialActionRequest,
+  deps: EnforcementDeps = kernelDeps,
+): Promise<Decision> {
+  requireBaseFinancialAuthority()
   await requireFinanceSource(exec)
   const { amountMinor, currency, ...bare } = input
   const decision = await decideFinancialActionOn(exec, bare, deps)
@@ -238,7 +321,11 @@ export async function requireFinancialDutyOn(exec: SqlExecutor, input: Financial
   if (amountMinor === undefined && currency === undefined) return decision
   const matched = await decideFinancialActionOn(exec, input, deps)
   if (matched.effect !== 'allow') {
-    throw new FinancialDutyError('FACT_MISMATCH', 'The amount or currency differs from the transaction on record.', reasonCodes(matched))
+    throw new FinancialDutyError(
+      'FACT_MISMATCH',
+      'The amount or currency differs from the transaction on record.',
+      reasonCodes(matched),
+    )
   }
   return matched
 }
@@ -268,7 +355,8 @@ export interface FinancialDutyResult<T> {
   result: T
 }
 
-const LEDGER_REFUSAL = /SEGREGATION_OF_DUTIES|STATE_NOT_ELIGIBLE|ue_authority_fin_step_uq|ue_authority_fin_approver_uq/
+const LEDGER_REFUSAL =
+  /SEGREGATION_OF_DUTIES|STATE_NOT_ELIGIBLE|ue_authority_fin_step_uq|ue_authority_fin_approver_uq/
 
 /**
  * Performs one financial step as ONE atomic unit on the caller's transaction: the kernel decision, the step in the
@@ -282,6 +370,7 @@ export async function performFinancialDuty<T = undefined>(
   defaultAudit?: FinancialAudit,
   deps: EnforcementDeps = kernelDeps,
 ): Promise<FinancialDutyResult<T>> {
+  requireBaseFinancialAuthority()
   const exec = drizzleExecutor(tx)
   const request: FinancialActionRequest = {
     userId: input.userId,
@@ -327,28 +416,45 @@ export async function performFinancialDuty<T = undefined>(
       transactionId: input.transactionId,
       financialStep: input.step,
       financialStepId: stepId,
-      authority: decision?.authority.map((a) => ({ kind: a.kind, id: a.id, instrument: a.instrument })) ?? [],
+      authority:
+        decision?.authority.map((a) => ({ kind: a.kind, id: a.id, instrument: a.instrument })) ??
+        [],
     },
   })
   return { stepId, decision, result: done?.result as T }
 }
 
-async function translateStepError(exec: SqlExecutor, request: FinancialActionRequest, error: unknown): Promise<unknown> {
+async function translateStepError(
+  exec: SqlExecutor,
+  request: FinancialActionRequest,
+  error: unknown,
+): Promise<unknown> {
   if (error instanceof FinancialDutyError) return error
   if (error instanceof AuthorityStoreError) {
-    if (error.code === 'NOT_FOUND') return new FinancialDutyError('NOT_FOUND', 'Financial transaction not found.')
+    if (error.code === 'NOT_FOUND')
+      return new FinancialDutyError('NOT_FOUND', 'Financial transaction not found.')
     if (error.code === 'PRECONDITION') {
-      if (/FINANCE_SOURCE_UNAVAILABLE/.test(error.message)) return new FinancialDutyError('FINANCE_SOURCE_UNAVAILABLE', 'Financial duties are unavailable: the payments source has no amount, currency or payer.')
+      if (/FINANCE_SOURCE_UNAVAILABLE/.test(error.message))
+        return new FinancialDutyError(
+          'FINANCE_SOURCE_UNAVAILABLE',
+          'Financial duties are unavailable: the payments source has no amount, currency or payer.',
+        )
       return new FinancialDutyError('INVALID_REQUEST', error.message)
     }
     if (error.code === 'DENIED') {
       // Registration is the only step that is not pre-decided: it answers like any other refused duty.
-      if (await mandatesNotIssued(exec, request.organizationId, request.userId)) return mandatesNotIssuedError()
+      if (await mandatesNotIssued(exec, request.organizationId, request.userId))
+        return mandatesNotIssuedError()
       await recordRefusal(request, [error.message])
-      return new FinancialDutyError('DUTY_NOT_HELD', `The ${request.action} duty is not held for this transaction.`, [error.message])
+      return new FinancialDutyError(
+        'DUTY_NOT_HELD',
+        `The ${request.action} duty is not held for this transaction.`,
+        [error.message],
+      )
     }
   }
-  const causeMessage = error instanceof Error && error.cause instanceof Error ? error.cause.message : ''
+  const causeMessage =
+    error instanceof Error && error.cause instanceof Error ? error.cause.message : ''
   if (error instanceof Error && LEDGER_REFUSAL.test(`${error.message} ${causeMessage}`)) {
     return new FinancialDutyError('STEP_REFUSED', causeMessage || error.message)
   }
@@ -371,16 +477,22 @@ export async function readFinancialTransaction(
   input: Pick<FinancialActionRequest, 'userId' | 'organizationId' | 'transactionId'>,
   deps: EnforcementDeps = kernelDeps,
 ): Promise<FinancialTransactionView> {
+  requireBaseFinancialAuthority()
   const exec = drizzleExecutor(tx)
   await requireFinancialDutyOn(exec, { ...input, action: 'finance:view' }, deps)
   const request: AuthorityRequest = {
     principalUserId: input.userId,
     organizationId: input.organizationId,
     action: 'finance:view',
-    resource: { type: 'financial_transaction', id: input.transactionId, organizationId: input.organizationId },
+    resource: {
+      type: 'financial_transaction',
+      id: input.transactionId,
+      organizationId: input.organizationId,
+    },
   }
   const loaded = await loadFinancialTransaction(exec, request)
-  if (!loaded || loaded.resource.kind !== 'financial_transaction') throw new FinancialDutyError('NOT_FOUND', 'Financial transaction not found.')
+  if (!loaded || loaded.resource.kind !== 'financial_transaction')
+    throw new FinancialDutyError('NOT_FOUND', 'Financial transaction not found.')
   const facts = loaded.resource
   return {
     transactionId: facts.id,
