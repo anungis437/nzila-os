@@ -86,9 +86,9 @@ function evaluate(
   const org = req.organizationId
   const foreign =
     facts.mandates.some((m) => m.organizationId !== org) ||
-    facts.relationships.some((r) => r.organizationId !== org) ||
+    facts.relationships.some((r) => r.organizationId !== org || r.resource.organizationId !== org) ||
     facts.delegations.some((d) => d.organizationId !== org) ||
-    facts.recusals.some((r) => r.organizationId !== org) ||
+    facts.recusals.some((r) => r.organizationId !== org || r.resource.organizationId !== org) ||
     facts.consents.some((c) => c.organizationId !== org)
   if (foreign) {
     return deny(req, now, { code: 'FACTS_CONTRADICTORY', detail: 'facts include rows from another organization' })
