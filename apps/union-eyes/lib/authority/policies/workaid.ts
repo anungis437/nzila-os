@@ -119,7 +119,7 @@ export function decideWorkAid(
 
   // workaid:receive_disclosure
   const d = facts.consents.find((c) => c.id === req.disclosureId)
-  if (!d || d.organizationId !== orgId || d.matterId !== matter.id || d.direction !== 'workaid_to_union') {
+  if (!d || d.organizationId !== orgId || d.matterId !== matter.id || d.memberUserId !== matter.memberUserId || d.direction !== 'workaid_to_union') {
     return deny(req, now, { code: 'CONSENT_REQUIRED', detail: 'no counsel disclosure record for this matter' })
   }
   if (d.issuer !== 'counsel') {
