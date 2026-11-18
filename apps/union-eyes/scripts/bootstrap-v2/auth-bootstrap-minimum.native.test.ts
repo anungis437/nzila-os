@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { describe, expect, it } from 'vitest'
-import { compileAuthBootstrapSql, AUTH_EXECUTION_ROLES, AUTH_PRIVILEGE_EXPECTATIONS, AUTH_FUNCTION_EXPECTATIONS } from './auth-sql'
+import { compileAuthBootstrapSql, AUTH_EXECUTION_ROLES, AUTH_PRIVILEGE_EXPECTATIONS, AUTH_FUNCTION_EXPECTATIONS, authColumnPrivilegeAllowed, authSystemColumnPrivilegeAllowed, authTablePrivilegeAllowed } from './auth-sql'
 import { compileSyntheticAuthFixtureSql } from './auth-fixture'
 import { assertMinimumInstaller, compileMinimumRoleProvisioningSql } from './minimum-installer'
 import { compileAuthorityMembershipReaderSql } from '../../lib/authority/store/platform-identity'
@@ -29,29 +29,30 @@ async function verifyCorePrivileges(client: pg.Client) {
   // The whole-UE census additionally expects later queued-mail companion grants.
   // This isolated compiler must match the independent core contract exactly.
   const roles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
-  const columns = await client.query<{ role: string; table_name: string; column_name: string; privilege: string; allowed: boolean }>(`
-    SELECT r.role,c.relname AS table_name,a.attname AS column_name,v.privilege,
+  const columns = await client.query<{ role: string; table_name: string; column_name: string; attribute_number: number; privilege: string; allowed: boolean }>(`
+    SELECT r.role,c.relname AS table_name,a.attname AS column_name,a.attnum AS attribute_number,v.privilege,
       has_column_privilege(r.role,c.oid,a.attname,v.privilege) AS allowed
     FROM unnest($1::text[]) r(role) CROSS JOIN pg_attribute a
     JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
     CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
-    WHERE n.nspname='user_management' AND c.relkind='r' AND a.attnum>0 AND NOT a.attisdropped`, [roles])
+    WHERE n.nspname='user_management' AND c.relkind='r' AND a.attnum<>0 AND NOT a.attisdropped`, [roles])
   expect(columns.rows.length).toBeGreaterThan(0)
   for (const row of columns.rows) {
     const expected = AUTH_PRIVILEGE_EXPECTATIONS[row.role]?.[row.table_name]?.[row.privilege]
     expect(row.allowed, `${row.role}:${row.table_name}.${row.column_name}:${row.privilege}`)
-      .toBe(expected === '*' || Boolean(expected?.includes(row.column_name)))
+      .toBe(row.attribute_number < 0 ? authSystemColumnPrivilegeAllowed(row.role, row.table_name, row.column_name, row.privilege)
+        : authColumnPrivilegeAllowed(row.table_name, row.column_name, expected))
   }
   const tables = await client.query<{ role: string; table_name: string; privilege: string; allowed: boolean; relrowsecurity: boolean; relforcerowsecurity: boolean; owner: string }>(`
     SELECT r.role,c.relname AS table_name,v.privilege,has_table_privilege(r.role,c.oid,v.privilege) AS allowed,
       c.relrowsecurity,c.relforcerowsecurity,pg_get_userbyid(c.relowner) AS owner
     FROM unnest($1::text[]) r(role) CROSS JOIN pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-    CROSS JOIN unnest(ARRAY['DELETE','TRUNCATE','TRIGGER']) v(privilege)
+    CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES','DELETE','TRUNCATE','TRIGGER']) v(privilege)
     WHERE n.nspname='user_management' AND c.relkind='r'`, [roles])
   expect(tables.rows.length).toBeGreaterThan(0)
   for (const row of tables.rows) {
     expect(row.allowed, `${row.role}:${row.table_name}:${row.privilege}`)
-      .toBe(AUTH_PRIVILEGE_EXPECTATIONS[row.role]?.[row.table_name]?.[row.privilege] === '*')
+      .toBe(authTablePrivilegeAllowed(row.privilege, AUTH_PRIVILEGE_EXPECTATIONS[row.role]?.[row.table_name]?.[row.privilege]))
     expect([row.relrowsecurity, row.relforcerowsecurity, row.owner]).toEqual([true, true, 'ue_v2_owner'])
   }
   for (const expected of AUTH_FUNCTION_EXPECTATIONS) {

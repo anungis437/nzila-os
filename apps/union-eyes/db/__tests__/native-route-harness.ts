@@ -15,6 +15,9 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
 import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import assert from 'node:assert/strict'
+import { nativeActionUrl, setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 export type RouteDb = ReturnType<typeof drizzle>
 
@@ -38,6 +41,7 @@ interface Scope {
 const scopes = new AsyncLocalStorage<Scope>()
 
 let pool: pg.Pool | null = null
+let systemPool: pg.Pool | null = null
 let runtimePool: pg.Pool | null = null
 let ambient: RouteDb | null = null
 let schema: Record<string, unknown> | null = null
@@ -55,9 +59,10 @@ export const harness = {
   /** Opens the pools against an ADMIN connection to a disposable, fully bootstrapped database and returns the admin client for seeding and inspection. */
   async start(url: string): Promise<pg.Client> {
     schema = (await import('@/db/schema')) as unknown as Record<string, unknown>
-    pool = new pg.Pool({ connectionString: url, max: 4 })
+    pool = new pg.Pool({ connectionString: nativeActionUrl(RUNTIME_ROLE, url), max: 4 })
+    systemPool = new pg.Pool({ connectionString: nativeActionUrl(SYSTEM_ROLE, url), max: 4 })
     // The handle a service reads with outside a tenant transaction is the runtime role, which row-level security applies to.
-    runtimePool = new pg.Pool({ connectionString: url, max: 4, options: `-c role=${RUNTIME_ROLE}` })
+    runtimePool = new pg.Pool({ connectionString: nativeActionUrl(RUNTIME_ROLE, url), max: 4, options: `-c role=${RUNTIME_ROLE}` })
     ambient = drizzle(runtimePool, { schema: schema as never })
     const admin = new pg.Client({ connectionString: url })
     await admin.connect()
@@ -66,13 +71,15 @@ export const harness = {
 
   async stop(): Promise<void> {
     await pool?.end()
+    await systemPool?.end()
     await runtimePool?.end()
     pool = null
+    systemPool = null
     runtimePool = null
     ambient = null
   },
 
-  /** The role a caller holds in an organization, as the membership lookup the CRUD factory consults would return it. */
+  /** Fixture declaration only; this cannot replace the live canonical membership read. */
   setRole(userId: string, organizationId: string, role: string): void {
     roles.set(`${userId}|${organizationId}`, role)
   },
@@ -82,25 +89,35 @@ export const harness = {
   },
 
   async tenant<T>(role: string, organizationId: string | null, userId: string | null, work: (tx: RouteDb) => Promise<T>): Promise<T> {
-    if (!pool || !schema) throw new Error('route harness not started')
-    const client = await pool.connect()
-    try {
-      await client.query('BEGIN')
-      await client.query(`SET LOCAL ROLE ${role}`)
-      await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userId ?? ''])
-      await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
-      const db = drizzle(client, { schema: schema as never })
-      const scope: Scope = { db, pendingAudits: [] }
-      const result = await scopes.run(scope, () => work(db))
-      await client.query('COMMIT')
-      harness.audits.push(...scope.pendingAudits)
-      return result
-    } catch (error) {
-      await client.query('ROLLBACK').catch(() => undefined)
-      throw error
-    } finally {
-      client.release()
+    assert.ok(role === RUNTIME_ROLE || role === SYSTEM_ROLE, 'Native action role must be declared')
+    const selectedPool = role === SYSTEM_ROLE ? systemPool : pool
+    if (!selectedPool || !schema) throw new Error('route harness not started')
+    const execute = async (binding?: AuthenticatedOrgBinding) => {
+      const client = await selectedPool.connect()
+      try {
+        await client.query('BEGIN')
+        await client.query(`SET LOCAL ROLE ${role}`)
+        await client.query('SET LOCAL search_path=pg_catalog,public,pg_temp')
+        await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userId ?? ''])
+        await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
+        if (binding) await setNativeBusinessContext(client, binding)
+        const db = drizzle(client, { schema: schema as never })
+        const scope: Scope = { db, pendingAudits: [] }
+        const result = await scopes.run(scope, () => work(db))
+        await client.query('COMMIT')
+        harness.audits.push(...scope.pendingAudits)
+        return result
+      } catch (error) {
+        await client.query('ROLLBACK').catch(() => undefined)
+        throw error
+      } finally {
+        client.release()
+      }
     }
+    // Missing actor/organization remains an explicitly unauthenticated negative SQL probe.
+    return role === RUNTIME_ROLE && userId && organizationId
+      ? withNativeCanonicalActor(userId, organizationId, execute)
+      : execute()
   },
 }
 
@@ -131,7 +148,12 @@ export async function recordAudit(_tx: unknown, entry: AuditRecord): Promise<voi
 }
 
 export async function roleInOrganization(userId: string, organizationId: string): Promise<string | null> {
-  return roles.get(`${userId}|${organizationId}`) ?? null
+  try { return await withNativeCanonicalActor(userId, organizationId, async (binding) => binding.role) }
+  catch (error) {
+    if (error && typeof error === 'object' && 'code' in error &&
+      ['UNAUTHENTICATED', 'MEMBERSHIP_REQUIRED', 'SESSION_AUTHORITY_REQUIRED'].includes(String(error.code))) return null
+    throw error
+  }
 }
 
 interface EmulatedConfig {
@@ -144,25 +166,25 @@ type Context = { organizationId?: string | null; userId?: string | null; role?: 
 
 /**
  * The wrapper's observable contract for a handler: the role floor, then a tenant transaction for a route that asks for one.
- * The role table is read when the first request arrives, not when this module loads: the harness is imported from vi.mock factories, and a static
+ * Canonical membership is read when the first request arrives, not when this module loads: the harness is imported from vi.mock factories, and a static
  * import of the auth guard from here would wait on the very mocks that are waiting on this module.
  */
 export function emulatedWithApi(config: EmulatedConfig, handler: (ctx: Context) => Promise<unknown>) {
   harness.configs.push(config)
   return async (ctx: Context) => {
     const required = config.auth?.minRole
-    const held = ctx.role ?? (ctx.userId && ctx.organizationId ? roles.get(`${ctx.userId}|${ctx.organizationId}`) : undefined)
+    const held = ctx.userId && ctx.organizationId ? await roleInOrganization(ctx.userId, ctx.organizationId) : null
     if (required) {
       const { ROLE_HIERARCHY } = await import('@/lib/api-auth-guard')
-      const level = (name: string | undefined) => (name ? (ROLE_HIERARCHY as Record<string, number>)[name] ?? 0 : 0)
+      const level = (name: string | null | undefined) => (name ? (ROLE_HIERARCHY as Record<string, number>)[name] ?? 0 : 0)
       if (level(held) < level(required)) {
         const { ApiError } = await import('@/lib/api/errors')
         throw ApiError.forbidden()
       }
     }
     if (config.rlsOrgContext && ctx.organizationId && !scopes.getStore()) {
-      return harness.tenant(RUNTIME_ROLE, ctx.organizationId, ctx.userId ?? null, () => handler(ctx))
+      return harness.tenant(RUNTIME_ROLE, ctx.organizationId, ctx.userId ?? null, () => handler({ ...ctx, role: held }))
     }
-    return handler(ctx)
+    return handler({ ...ctx, role: held })
   }
 }

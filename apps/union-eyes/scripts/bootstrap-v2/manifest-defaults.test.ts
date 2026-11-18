@@ -184,9 +184,16 @@ describe('independent server-default qualification', () => {
 
 describe('exact default source and PostgreSQL expression identity',()=>{
  it('selects only the plan-admitted caller, not a different table declaration from a barrel',()=>{
-  const plan={tables:[{name:'example',source:'canonical.py'}],decisions:[{relation:'example',disposition:'PROSPECTIVE_CANONICAL',source:'apps/union-eyes/db/schema/domains/example.ts'}]} as Parameters<typeof selectedDefaultDeclarationSources>[0]
+  const table: SourceTable = {
+    name: 'example', source: 'canonical.py', sourceDigest: 'synthetic-source',
+    columns: [], foreignKeys: [], authority: null,
+  }
+  const plan: Parameters<typeof selectedDefaultDeclarationSources>[0] = {
+    tables: [table],
+    decisions: [{ relation: 'example', disposition: 'PROSPECTIVE_CANONICAL', source: 'apps/union-eyes/db/schema/domains/example.ts' }],
+  }
   expect([...selectedDefaultDeclarationSources(plan)]).toEqual([['example','apps/union-eyes/db/schema/domains/example.ts']])
-  expect([...selectedDefaultDeclarationSources({tables:[{name:'synthetic',source:'scripts/example.test.ts'}],decisions:[]} as never)]).toEqual([])
+  expect([...selectedDefaultDeclarationSources({ tables: [{ ...table, name: 'synthetic', source: 'scripts/example.test.ts' }], decisions: [] })]).toEqual([])
  })
  it('recognizes deparsed interval casts but preserves changed duration, operator, literals and extra statements',async()=>{
   const equivalent=await defaultExpressionComparator()

@@ -417,6 +417,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
         "note": "Row security for ue_graph_node_alias (platform 0086): FORCE RLS + the direct-org tenant policy, same helper as 0059. ue_verified_dependency_evidence's own new columns (source_fingerprint, evidence_reference_type, evidence_document_id) need no new policy - an ADD COLUMN does not change existing RLS coverage."
+      },
+      {
+        "tag": "0061_case_scope_persistence_boundary",
+        "sha256": "2b4dedf16c6ba8ba9b2ab3a8c2e139668db19ed56f3a687cc6142406e52a8cb4",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-step1-integrated-20261117",
+        "note": "Forward-only prerequisites for current canonical case-security installation: FORCE RLS and no application policy on four new Django case-scope relations, plus source-backed defaults for future inserts. No historical row backfill or authority is inferred. Mandatory source-bound auth/session/physical compilers and native qualification remain required before runtime activation."
       }
     ],
     "platform": [
@@ -930,6 +937,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
         "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE (Family 1 final correction): adds evidence_document_integrity (document evidence bound to exact version/content hash), external_attestation/external_attested_by/external_attested_at (all-or-none, external citations only, attester distinct from submitter) and identity_key_version (smallint, default 1, CHECK 1|2) to ue_verified_dependency_evidence. Read-time, fail-closed enforcement in graph-evidence-evaluator.ts; no background job; review history preserved. RLS unchanged (cache 0059 covers the table)."
+      },
+      {
+        "tag": "0088_gate0_checkout_and_payroll_integrity",
+        "sha256": "d0e79a43a34d2d53521feb61a45a9e0323496d3da7ea636df8abd1bf77edc687",
+        "status": "UNQUALIFIED",
+        "introducedBy": "a6ed0264eb6a9be1c0c791a4574e3d7c6a264fff",
+        "note": "Inventory reconciliation only: existing founder-authored November 9 baseline ancestor source was present on main but absent from the additions registry. Its exact SQL bytes remain unchanged. Registration confers no runtime proof, no positive financial capability or release acceptance; the current base-release finance containment remains in force."
       }
     ]
   }

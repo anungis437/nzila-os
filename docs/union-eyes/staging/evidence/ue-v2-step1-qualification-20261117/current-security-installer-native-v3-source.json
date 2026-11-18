@@ -1,0 +1,55 @@
+{
+  "scope": "INTERIM_NATIVE_SECURITY_TRANSITION",
+  "startedAt": "2026-11-18T00:52:28.531571+00:00",
+  "finishedAt": "2026-11-18T00:52:34.054018+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "exitCode": 1,
+  "sourceSha256": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "e16dcc400bfe03ef0015d58f6108f48fd05942d95eb197c6fa3fd0fcc3d1900d"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-contract.ts",
+      "sha256": "46bfad3a39a20497ab5911b61b505cfcbc791df905041695f241a884aa96a9e4"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-preimage.ts",
+      "sha256": "4868467986aec8586632bd72ab34f5aa1325ce80af630835de9fb89d4f90a1e6"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-programs.ts",
+      "sha256": "4d0140cd2c5d028c0a145a9b0f949ffafdb0109edb1dba03fde2a42162de7e0c"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.mjs",
+      "sha256": "0b21eeb2d53254ff2003c329fe97fef9f0384d0850be8d6f39a3bfc89e9f3c9f"
+    },
+    {
+      "path": "tooling/scripts/write-union-eyes-current-catalog.ts",
+      "sha256": "7eced6bb2338e42a0bdfb3534cf3e109817f9ad494640a37007b521f62ee24d1"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+      "sha256": "510feb8c9107079f4932d7de90b91a9dfc8d1715dec9f3190a9e242d1d034a54"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "8cc1472d6f5494c63c8471eb426e5639f60008a2201b1231a77f6f80d511cfdb"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-v2-decisions.json",
+      "sha256": "bd7bd1b99f8532fc72516ce8566f6de28c323511243aa8beeb0a69dd8713a1b0"
+    }
+  ],
+  "sourceChangedDuringRun": false,
+  "finalCandidateQualified": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "37d3f7561170c964e1ecfee7b19be7ae9327a6f3ae5ee6841b4dcb3c5e2b7526",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-native-v3-source.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

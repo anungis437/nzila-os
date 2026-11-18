@@ -8,6 +8,13 @@ export const AUTH_ROLE_MEMBERSHIP_EXPECTATIONS: Record<string, readonly string[]
   nzila_auth_system_gateway: ['nzila_auth_system_mutation', 'nzila_auth_lifecycle', 'nzila_auth_cleanup', 'nzila_auth_mfa_admin'],
 }
 
+// The existing signup-session policy proves that the account was inserted in
+// the current transaction using users.xmin. This is an explicit technical read,
+// never part of '*' and never authority over retained application fields.
+export const AUTH_SYSTEM_COLUMN_PRIVILEGE_EXPECTATIONS: Record<string, Record<string, Record<string, readonly string[]>>> = {
+  nzila_auth_issuance: { users: { SELECT: ['xmin'] } },
+}
+
 export const AUTH_PRIVILEGE_EXPECTATIONS: Record<string, Record<string, Record<string, '*' | readonly string[]>>> = {
   nzila_auth_audit_writer: { auth_audit_log: { INSERT: '*' } },
   nzila_auth_org_authority_reader: {

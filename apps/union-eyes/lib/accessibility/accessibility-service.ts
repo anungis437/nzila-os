@@ -1,9 +1,8 @@
 /**
  * Accessibility Audit Service
  * 
- * WCAG 2.2 AA compliance testing
- * Automated and manual audit workflows
- * Integration with axe-core, Pa11y, Lighthouse
+ * Automated accessibility issue detection with optional axe-core tooling.
+ * A single-page automated scan does not establish WCAG conformance.
  */
 
 import { db } from "@/db";
@@ -73,7 +72,12 @@ export class AccessibilityAuditManager {
     // Update status
     await db
       .update(accessibilityAudits)
-      .set({ status: "in_progress" })
+      .set({
+        status: "in_progress",
+        accessibilityScore: null,
+        pagesScanned: 0,
+        completedAt: null,
+      })
       .where(eq(accessibilityAudits.id, auditId));
     
     const audit = await db
@@ -143,6 +147,8 @@ export class AccessibilityAuditManager {
         .update(accessibilityAudits)
         .set({
           status: "failed",
+          accessibilityScore: null,
+          pagesScanned: 0,
           completedAt: new Date(),
         })
         .where(eq(accessibilityAudits.id, auditId));
@@ -162,22 +168,23 @@ export class AccessibilityAuditManager {
       const { AxeBuilder } = await import('@axe-core/playwright');
 
       const browser = await chromium.launch({ headless: true });
-      const page = await browser.newPage();
-      await page.goto(url, { waitUntil: 'networkidle' });
+      try {
+        const page = await browser.newPage();
+        await page.goto(url, { waitUntil: 'networkidle' });
 
-      const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-        .analyze();
-
-      await browser.close();
-      return results;
+        return await new AxeBuilder({ page })
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+          .analyze();
+      } finally {
+        await browser.close();
+      }
     } catch (error) {
-      // Playwright or axe-core not available — return empty violations
-      logger.warn('axe-core scan unavailable: Playwright or @axe-core/playwright not installed. Returning empty violations.', {
+      // Missing tooling and execution errors are not evidence of zero issues.
+      logger.warn('Automated accessibility scan failed; audit results are unverified.', {
         url,
         error: error instanceof Error ? error.message : String(error),
       });
-      return { violations: [] };
+      throw error;
     }
   }
   
@@ -555,7 +562,8 @@ export class WCAGChecker {
  */
 export class AccessibilityReportGenerator {
   /**
-   * Generate WCAG 2.2 AA compliance report
+   * Summarize recorded issues without inferring WCAG conformance.
+   * This register does not establish the required automated and manual coverage.
    */
   async generateComplianceReport(
     organizationId: string,
@@ -572,7 +580,11 @@ export class AccessibilityReportGenerator {
       bySeverity: Record<string, number>;
       byWCAGCriteria: Record<string, number>;
     };
-    complianceScore: number;
+    complianceScore: null;
+    verificationStatus: "UNVERIFIED";
+    verificationReason: string;
+    /** Weighted issue-count heuristic; does not measure conformance or coverage. */
+    issueBurdenScore: number;
     criteriaCoverage: Array<{
       criteria: string;
       title: string;
@@ -605,8 +617,8 @@ export class AccessibilityReportGenerator {
       }, {} as Record<string, number>),
     };
     
-    // Calculate compliance score
-    const complianceScore = Math.max(
+    // A weighted issue-count heuristic is not evidence of tested WCAG coverage.
+    const issueBurdenScore = Math.max(
       0,
       100 -
         summary.bySeverity.critical * 10 -
@@ -638,7 +650,7 @@ export class AccessibilityReportGenerator {
         `Address ${summary.bySeverity.serious} serious issues that block users`
       );
     }
-    if (complianceScore < 80) {
+    if (issueBurdenScore < 80) {
       recommendations.push(
         "Schedule comprehensive accessibility audit with assistive technology users"
       );
@@ -646,7 +658,10 @@ export class AccessibilityReportGenerator {
     
     return {
       summary,
-      complianceScore: Math.round(complianceScore),
+      complianceScore: null,
+      verificationStatus: "UNVERIFIED",
+      verificationReason: "Recorded issues do not establish complete automated and manual WCAG audit coverage.",
+      issueBurdenScore: Math.round(issueBurdenScore),
       criteriaCoverage,
       recommendations,
     };

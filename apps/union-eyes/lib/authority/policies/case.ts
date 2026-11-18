@@ -259,9 +259,10 @@ export function decideCase(
             m.kind === 'executive_office' &&
             m.sourceInstrument.length > 0 &&
             m.powers.includes(power) &&
-            assessMandate(m, orgId, now).effective,
+            assessMandate(m, orgId, now).effective &&
+            scopeCoversCase(m.scope, c),
         )
-        if (!office) misses.push(bad('delegator holds no live office mandate carrying this power'))
+        if (!office) misses.push(bad('delegator holds no live in-scope office mandate carrying this power'))
         else {
           candidates.push({
             source: { kind: 'delegation', id: d.id, instrument: `delegation of ${d.office} (office mandate ${office.id})` },

@@ -1,0 +1,2 @@
+applying scoped migration: 0061_case_scope_persistence_boundary
+{"phase":"HISTORICAL_TEMPLATE_READY_WITH_CURRENT_0061_PREREQUISITE","migration":{"applied":1,"appliedTags":["0061_case_scope_persistence_boundary"]},"guards":[{"evtname":"ue_guard_deadline_reassignment_convergence_policy","owner":"uev2admin","evtenabled":"O"}],"liveDataTouched":false}

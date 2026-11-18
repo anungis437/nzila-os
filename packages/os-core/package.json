@@ -27,6 +27,7 @@
     "./evidence/collectors/stripe-close": "./src/evidence/collectors/stripe-close.ts",
     "./evidence/collectors/year-end": "./src/evidence/collectors/year-end.ts",
     "./telemetry": "./src/telemetry/index.ts",
+    "./browser-diagnostics": "./src/telemetry/browser.ts",
     "./retention": "./src/retention/index.ts",
     "./config": "./src/config/env.ts",
     "./config/super-admins": "./src/config/super-admins.ts",

@@ -1,0 +1,12 @@
+UE_V2_BOUNDARY_LOADED:{"pid":99061,"sourceDigest":"2f9cec5abb0af12be8a02a70ff9a2ea291739e9a7559d6f55a395150a8e831bb","ownedPorts":[59117,59125,59137,59138]}
+▲ Next.js 16.4.6 (webpack)
+⚠ Warning: Next.js ignored pnpm-workspace.yaml in /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/artifacts/ue-v2-next-48f2a807-041b-4817-85dc-757a78d20b31 because it would include your home directory (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/artifacts/ue-v2-next-48f2a807-041b-4817-85dc-757a78d20b31/.runtime-state).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 9.4s
+- Experiments (use with caution):
+  · optimizePackageImports
+  · serverActions
+
+  Creating an optimized production build ...
+UE_V2_BOUNDARY_LOADED:{"pid":99061,"sourceDigest":"2f9cec5abb0af12be8a02a70ff9a2ea291739e9a7559d6f55a395150a8e831bb","ownedPorts":[59117,59125,59137,59138]}

@@ -1,0 +1,72 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ❯ |union-eyes| lib/authority/__tests__/primary-handler-ceiling.test.ts (25 tests | 2 failed) 10ms
+   ❯ primary case-handler-only authority is a hard ceiling (25)
+     ✓ pins the complete primary-only set independently of the implementation 1ms
+     ✓ case:disclose_to_member: scoped supervisory facts cannot grant the power, even with an accepted live custom mandate 2ms
+     ✓ case:disclose_to_member: independently issued primary relationship authorizes within its scope 0ms
+     ✓ case:disclose_to_member: collaborator overgrant, member creator, and title alone are denied 0ms
+     ✓ case:disclose_to_member: injected executive delegation is refused independently of issuance/storage constraints 0ms
+     ✓ case:disclose_to_member: recusal, adverse-party, removed membership and privilege remain effective 0ms
+     ✓ case:disclose_to_member: custom issue/amend rule cannot confer the forbidden power at request or execution stage 0ms
+     ✓ case:export_sealed_evidence: scoped supervisory facts cannot grant the power, even with an accepted live custom mandate 0ms
+     ✓ case:export_sealed_evidence: independently issued primary relationship authorizes within its scope 0ms
+     ✓ case:export_sealed_evidence: collaborator overgrant, member creator, and title alone are denied 0ms
+     ✓ case:export_sealed_evidence: injected executive delegation is refused independently of issuance/storage constraints 0ms
+     ✓ case:export_sealed_evidence: recusal, adverse-party, removed membership and privilege remain effective 0ms
+     ✓ case:export_sealed_evidence: custom issue/amend rule cannot confer the forbidden power at request or execution stage 0ms
+     ✓ case:close: scoped supervisory facts cannot grant the power, even with an accepted live custom mandate 0ms
+     ✓ case:close: independently issued primary relationship authorizes within its scope 0ms
+     ✓ case:close: collaborator overgrant, member creator, and title alone are denied 0ms
+     ✓ case:close: injected executive delegation is refused independently of issuance/storage constraints 0ms
+     ✓ case:close: recusal, adverse-party, removed membership and privilege remain effective 0ms
+     ✓ case:close: custom issue/amend rule cannot confer the forbidden power at request or execution stage 0ms
+     ✓ rejects malformed validity timestamps on primary relationships and supervisory grants 0ms
+     ✓ requires a valid acceptance timestamp for mandate and delegation activation 0ms
+     × constrains delegated case read to the delegator office mandate resource scope 3ms
+     × rejects contradictory nested resource tenant on relationships and recusals 0ms
+     ✓ retains legitimate scoped read and assignment powers 0ms
+     ✓ fails closed on a contaminated mixed mandate without using an invalid source to authorize even a read 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes| lib/authority/__tests__/primary-handler-ceiling.test.ts > primary case-handler-only authority is a hard ceiling > constrains delegated case read to the delegator office mandate resource scope
+AssertionError: expected 'allow' to be 'deny' // Object.is equality
+
+Expected: "deny"
+Received: "allow"
+
+ ❯ lib/authority/__tests__/primary-handler-ceiling.test.ts:96:53
+     94|     })
+     95|     const req = request(U.chief, 'case:read', resource, { delegationId…
+     96|     expect(decide(req, f, caseFacts(), NOW).effect).toBe('deny')
+       |                                                     ^
+     97|     const inScope = { ...office, scope: { resourceIds: [CASE_ID] } }
+     98|     expect(decide(req, { ...f, mandates: [inScope] }, caseFacts(), NOW…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |union-eyes| lib/authority/__tests__/primary-handler-ceiling.test.ts > primary case-handler-only authority is a hard ceiling > rejects contradictory nested resource tenant on relationships and recusals
+AssertionError: expected 'allow' to be 'deny' // Object.is equality
+
+Expected: "deny"
+Received: "allow"
+
+ ❯ lib/authority/__tests__/primary-handler-ceiling.test.ts:112:29
+    110|     ]) {
+    111|       const result = decide(req, f, caseFacts(), NOW)
+    112|       expect(result.effect).toBe('deny')
+       |                             ^
+    113|       expect(result.reasons.map(x => x.code)).toContain('FACTS_CONTRAD…
+    114|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 23 passed (25)
+   Start at  18:03:17
+   Duration  220ms (transform 70%, import 14%, tests 10%, setup 3%, worker 2%)
+
+JSON report written to /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/artifacts/ue-step1-upstream-red-v1.json

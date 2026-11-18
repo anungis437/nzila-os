@@ -137,60 +137,22 @@ with override_settings(
     assert principal.organization_id == "55555555-5555-4555-8555-555555555555"
     assert principal.organization_role == "member" and not principal.is_system_admin
     cases.append("canonical-actor-attributes-cannot-inherit-forged-framework-metadata")
-    emission = request(
-        "member", reverse("carbon-accounting-service-record-emission"), "post", {}
-    )
-    status(emission, 400)
-    assert emission.json()["error"].startswith("Missing required fields:")
-    cases.append("actual-current-service-canonical-organization-attribute")
-    emissions = [
-        ("member", "55555555-5555-4555-8555-555555555555", "12.5"),
-        ("org-admin", "66666666-6666-4666-8666-666666666666", "27.25"),
-    ]
-    for actor, organization, amount in emissions:
-        response = request(
-            actor,
-            reverse("carbon-accounting-service-record-emission"),
-            "post",
-            {
-                "source": "synthetic-current-business-emission",
-                "scope": "scope_1",
-                "amount_kg": amount,
-                "emission_date": "2026-01-01",
-                "organization_id": emissions[1 if actor == "member" else 0][1],
+    # Carbon accounting is outside the accepted base product and its dormant
+    # generic service is deliberately contained. Never reopen it to obtain a
+    # framework-positive sample; identity/provider CRUD below remains live.
+    for actor in ("member", "org-admin", "platform-admin"):
+        for route, method, payload in (
+            ("carbon-accounting-service-record-emission", "post", {}),
+            ("carbon-accounting-service-record-emission", "post", {
+                "source": "synthetic-denied-emission", "scope": "scope_1",
+                "amount_kg": "12.5", "emission_date": "2026-01-01",
+                "organization_id": "66666666-6666-4666-8666-666666666666",
                 "user_id": "forged-current-service-actor",
-            },
-        )
-        status(response, 201)
-        assert response.json()["status"] == "success" and response.json()["id"]
-    cases.append("actual-current-service-two-organization-business-writes")
-    for actor, organization, amount in emissions:
-        response = request(actor, reverse("carbon-accounting-service-emission-report"))
-        status(response, 200)
-        report = response.json()
-        assert report["status"] == "success"
-        assert report["organization_id"] == organization
-        assert report["total_entries"] == 1
-        assert report["total_emissions_kg"] == amount
-        assert report["by_scope"] == {
-            "scope_1": amount,
-            "scope_2": "0",
-            "scope_3": "0",
-        }
-    cases.append("actual-current-service-business-reads-isolate-both-organizations")
-    for actor, organization, amount in emissions:
-        response = request(actor, reverse("core:auditlogs-list"))
-        status(response, 200)
-        payload = response.json()
-        records = payload["results"] if isinstance(payload, dict) else payload
-        assert isinstance(records, list)
-        records = [
-            record for record in records if record["resource_type"] == "CarbonEmission"
-        ]
-        assert len(records) == 1
-        assert records[0]["user_id"] == f"ue-framework-{actor}"
-        assert records[0]["details"]["amount_kg"] == amount
-    cases.append("actual-current-service-persisted-actor-ignores-forged-attribution")
+            }),
+            ("carbon-accounting-service-emission-report", "get", None),
+        ):
+            status(request(actor, reverse(route), method, payload), 403)
+    cases.append("actual-contained-carbon-service-denies-roles-and-forged-attribution")
     status(
         client.get(
             users_url,
@@ -347,53 +309,28 @@ with override_settings(
         ),
         204,
     )
-    donations_url = reverse("billing:donations-list")
-    organization_a = "55555555-5555-4555-8555-555555555555"
-    organization_b = "66666666-6666-4666-8666-666666666666"
-    donation = request(
-        "member", donations_url, "post", {"organization": organization_a}
-    )
-    status(donation, 201)
-    donation_url = reverse(
-        "billing:donations-detail", kwargs={"pk": donation.json()["id"]}
-    )
-    status(request("member", donation_url, "patch", {}), 200)
-    status(
-        request("member", donation_url, "put", {"organization": organization_a}),
-        200,
-    )
-    foreign = request("org-admin", donations_url)
-    status(foreign, 200)
-    assert foreign.json()["results"] == []
-    for method in ("get", "patch", "delete"):
-        status(request("org-admin", donation_url, method, {}), 404)
-    for path, method in ((donations_url, "post"), (donation_url, "patch")):
-        status(
-            request("member", path, method, {"organization": organization_b}),
-            400,
+    # Financial persistence is excluded; even a metadata-only serializer must
+    # not let a member delete a real donation row or create financial records.
+    for name in ("donations", "clcchartofaccounts"):
+        finance_list = reverse(f"billing:{name}-list")
+        finance_detail = reverse(
+            f"billing:{name}-detail",
+            kwargs={"pk": "99999999-9999-4999-8999-999999999999"},
         )
-    cases.append("actual-current-donation-metadata-tenant-crud-and-foreign-fk-denial")
-    donation_b = request(
-        "org-admin", donations_url, "post", {"organization": organization_b}
-    )
-    status(donation_b, 201)
-    visible = request("member", donations_url)
-    status(visible, 200)
-    assert [row["id"] for row in visible.json()["results"]] == [donation.json()["id"]]
-    status(request("member", donation_url, "delete"), 204)
-    status(
-        request(
-            "org-admin",
-            reverse("billing:donations-detail", kwargs={"pk": donation_b.json()["id"]}),
-            "delete",
-        ),
-        204,
-    )
-    cases.append("actual-current-donation-metadata-two-org-visibility-and-cleanup")
+        status(client.get(finance_list), 401)
+        for actor in ("member", "org-admin", "platform-admin"):
+            for path, method, payload in (
+                (finance_list, "get", None),
+                (finance_list, "post", {"organization": "55555555-5555-4555-8555-555555555555"}),
+                (finance_detail, "get", None),
+                (finance_detail, "patch", {"payment_status": "paid"}),
+                (finance_detail, "delete", None),
+            ):
+                status(request(actor, path, method, payload), 403)
+    cases.append("actual-excluded-finance-read-create-update-delete-denied-for-all-roles")
     for namespace, name, field in (
         ("core", "failedloginattempts", "email"),
         ("core", "ratelimitevents", "identifier"),
-        ("billing", "clcchartofaccounts", "account_code"),
     ):
         metadata_url = reverse(f"{namespace}:{name}-list")
         status(client.get(metadata_url), 401)

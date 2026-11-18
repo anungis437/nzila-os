@@ -21,3 +21,8 @@ export function assessCatalogAdmission(
 ): CatalogAdmissionReport
 
 export function privilegesInOrder(value: unknown): string[] | 'TBD'
+
+export function currentFunctionViolations(
+  expected: unknown,
+  actual: CatalogRow[],
+): string[]

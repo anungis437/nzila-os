@@ -1,0 +1,19 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| lib/__tests__/browser-error-boundaries.test.tsx (41 tests) 595ms
+ ✓ |union-eyes| lib/__tests__/bootstrap-diagnostics.test.ts (7 tests) 11ms
+ ✓ |contract-tests| no-console.test.ts (2 tests) 3356ms
+   ✓ NO_CONSOLE_001 — No console in runtime code (2)
+     ✓ no runtime code uses console.* (unless excepted) 3354ms
+ ✓ |os-core| src/telemetry/browser.test.ts (17 tests) 28ms
+
+ Test Files  4 passed (4)
+      Tests  67 passed (67)
+   Start at  21:12:54
+   Duration  7.00s (tests 61%, import 19%, environment 15%, transform 4%)
+
+    Isolate  4 workers spawned · ~361ms startup each (spawn + environment, per file)
+             at least ~1.08s faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/console-governance-focused-v4.json

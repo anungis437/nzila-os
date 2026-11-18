@@ -33,7 +33,9 @@
     {
       "DECLARED_CONSTRAINT": ">=5.3.4",
       "DISTRIBUTION": "celery",
-      "EXTRAS": ["redis"],
+      "EXTRAS": [
+        "redis"
+      ],
       "LINE": 12,
       "LOCKED_VERSION": "5.6.3"
     },
@@ -234,7 +236,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/1a/99/84ba7273339d0f3dfa57901b846489d2e5c2cd731470167757f1935fffbd/aiohttp_retry-2.9.1-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "aiohttp-retry",
-      "REQUIRES_DIST": ["aiohttp"],
+      "REQUIRES_DIST": [
+        "aiohttp"
+      ],
       "REQUIRES_PYTHON": ">=3.7",
       "VERSION": "2.9.1"
     },
@@ -244,7 +248,10 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/fb/76/641ae371508676492379f16e2fa48f4e2c11741bd63c48be4b12a6b09cba/aiosignal-1.4.0-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "aiosignal",
-      "REQUIRES_DIST": ["frozenlist>=1.1.0", "typing-extensions>=4.2; python_version < \"3.13\""],
+      "REQUIRES_DIST": [
+        "frozenlist>=1.1.0",
+        "typing-extensions>=4.2; python_version < \"3.13\""
+      ],
       "REQUIRES_PYTHON": ">=3.9",
       "VERSION": "1.4.0"
     },
@@ -254,7 +261,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/28/8e/25f762f8cf0da76c7b1a66a9cadc291168537598c533954b0e2c9de3a0a3/amqp-5.4.1-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "amqp",
-      "REQUIRES_DIST": ["vine<6.0.0,>=5.0.0"],
+      "REQUIRES_DIST": [
+        "vine<6.0.0,>=5.0.0"
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "5.4.1"
     },
@@ -335,7 +344,11 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/dc/8e/726acb7b6cd8d28cafd06531d6daf7e390667ebbbc4ff39f7cfc5bd75652/azure_keyvault_secrets-4.11.3-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "azure-keyvault-secrets",
-      "REQUIRES_DIST": ["azure-core>=1.31.0", "isodate>=0.6.1", "typing-extensions>=4.6.0"],
+      "REQUIRES_DIST": [
+        "azure-core>=1.31.0",
+        "isodate>=0.6.1",
+        "typing-extensions>=4.6.0"
+      ],
       "REQUIRES_PYTHON": ">=3.9",
       "VERSION": "4.11.3"
     },
@@ -456,14 +469,14 @@
       "VERSION": "5.6.3"
     },
     {
-      "ARTIFACT_FILENAME": "certifi-2026.7.22-py3-none-any.whl",
-      "ARTIFACT_SHA256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
-      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl",
+      "ARTIFACT_FILENAME": "certifi-2026.10.19-py3-none-any.whl",
+      "ARTIFACT_SHA256": "42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b",
+      "ARTIFACT_URL": "https://files.pythonhosted.org/packages/c4/51/29046e48f693c54e5b7412216d447a1d8362c9653148d98c02cdf65fa733/certifi-2026.10.19-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "certifi",
       "REQUIRES_DIST": [],
       "REQUIRES_PYTHON": ">=3.7",
-      "VERSION": "2026.7.22"
+      "VERSION": "2026.10.19"
     },
     {
       "ARTIFACT_FILENAME": "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
@@ -471,7 +484,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/f7/a4/4399daaf8f7dfee9d7c3327fdb0426ee041cc63edc358b93911ceb2bfc7a/cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
       "DIRECT": false,
       "DISTRIBUTION": "cffi",
-      "REQUIRES_DIST": ["pycparser; implementation_name != \"PyPy\""],
+      "REQUIRES_DIST": [
+        "pycparser; implementation_name != \"PyPy\""
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "2.1.1"
     },
@@ -501,7 +516,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/1b/5b/974430b5ffdb7a4f1941d13d83c64a0395114503cc357c6b9ae4ce5047ed/click_didyoumean-0.3.1-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "click-didyoumean",
-      "REQUIRES_DIST": ["click (>=7)"],
+      "REQUIRES_DIST": [
+        "click (>=7)"
+      ],
       "REQUIRES_PYTHON": ">=3.6.2",
       "VERSION": "0.3.1"
     },
@@ -566,7 +583,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/88/20/2cfe598ead23a715a00beb716477cfddd3e5948cf203c372d02221e5b0c6/cron_descriptor-1.4.5-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "cron-descriptor",
-      "REQUIRES_DIST": ["polib ; extra == 'dev'"],
+      "REQUIRES_DIST": [
+        "polib ; extra == 'dev'"
+      ],
       "REQUIRES_PYTHON": null,
       "VERSION": "1.4.5"
     },
@@ -625,7 +644,10 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/2c/da/70f0f3c5364735344c4bc89e53413bcaae95b4fc1de4e98a7a3b9fb70c88/django_celery_results-2.6.0-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "django-celery-results",
-      "REQUIRES_DIST": ["Django>=3.2.25", "celery<6.0,>=5.2.7"],
+      "REQUIRES_DIST": [
+        "Django>=3.2.25",
+        "celery<6.0,>=5.2.7"
+      ],
       "REQUIRES_PYTHON": null,
       "VERSION": "2.6.0"
     },
@@ -635,7 +657,10 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/30/d8/19ed1e47badf477d17fb177c1c19b5a21da0fd2d9f093f23be3fb86c5fab/django_cors_headers-4.9.0-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "django-cors-headers",
-      "REQUIRES_DIST": ["asgiref>=3.6", "django>=4.2"],
+      "REQUIRES_DIST": [
+        "asgiref>=3.6",
+        "django>=4.2"
+      ],
       "REQUIRES_PYTHON": ">=3.9",
       "VERSION": "4.9.0"
     },
@@ -645,7 +670,10 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/4a/92/6b098caa5b980a9d13a8db4825b7670410fa572e9195e39648f7700f2a37/django_filter-26.2-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "django-filter",
-      "REQUIRES_DIST": ["Django>=5.2", "djangorestframework ; extra == \"drf\""],
+      "REQUIRES_DIST": [
+        "Django>=5.2",
+        "djangorestframework ; extra == \"drf\""
+      ],
       "REQUIRES_PYTHON": ">=3.11",
       "VERSION": "26.2"
     },
@@ -686,7 +714,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/c4/dd/de5f4543765bec94e036a5e9593a42f8fa7efec8de78eb56b9ca834385f3/djangorestframework-3.18.3-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "djangorestframework",
-      "REQUIRES_DIST": ["django>=5.2"],
+      "REQUIRES_DIST": [
+        "django>=5.2"
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "3.18.3"
     },
@@ -934,7 +964,10 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/5e/75/bd9b7bb966668920f06b200e84454c8f3566b102183bc55c5473d96cb2b9/msal_extensions-1.3.1-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "msal-extensions",
-      "REQUIRES_DIST": ["msal<2,>=1.29", "portalocker<4,>=1.4; extra == \"portalocker\""],
+      "REQUIRES_DIST": [
+        "msal<2,>=1.29",
+        "portalocker<4,>=1.4; extra == \"portalocker\""
+      ],
       "REQUIRES_PYTHON": ">=3.9",
       "VERSION": "1.3.1"
     },
@@ -944,7 +977,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/27/50/f420de3683f9b047fc5588064d84043ef57a7152ef451b8373dfc7068d22/multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
       "DIRECT": false,
       "DISTRIBUTION": "multidict",
-      "REQUIRES_DIST": ["typing-extensions>=4.1.0; python_version < \"3.11\""],
+      "REQUIRES_DIST": [
+        "typing-extensions>=4.1.0; python_version < \"3.11\""
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "6.9.1"
     },
@@ -1120,7 +1155,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/54/6f/84908cad2d6aa5144abcf7b42709fe4fdb459bc640ec7ac5786e7693dabc/prompt_toolkit-3.0.53-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "prompt-toolkit",
-      "REQUIRES_DIST": ["wcwidth>=0.1.4"],
+      "REQUIRES_DIST": [
+        "wcwidth>=0.1.4"
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "3.0.53"
     },
@@ -1180,7 +1217,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "pygments",
-      "REQUIRES_DIST": ["colorama>=0.4.6; extra == 'windows-terminal'"],
+      "REQUIRES_DIST": [
+        "colorama>=0.4.6; extra == 'windows-terminal'"
+      ],
       "REQUIRES_PYTHON": ">=3.9",
       "VERSION": "2.21.0"
     },
@@ -1256,7 +1295,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "python-dateutil",
-      "REQUIRES_DIST": ["six >=1.5"],
+      "REQUIRES_DIST": [
+        "six >=1.5"
+      ],
       "REQUIRES_PYTHON": "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7",
       "VERSION": "2.9.0.post0"
     },
@@ -1266,7 +1307,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/60/d1/38f3a3405989a89ac18390803e70c6ad7c7760da4f9b83cbeca0c44a0c72/python_dotenv-1.2.4-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "python-dotenv",
-      "REQUIRES_DIST": ["click>=5.0; extra == \"cli\""],
+      "REQUIRES_DIST": [
+        "click>=5.0; extra == \"cli\""
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "1.2.4"
     },
@@ -1465,7 +1508,11 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/d9/50/f00935da0ec7cbf325f8dc4f772ae46fbc7b672dd62876e73f0a94adda57/sqlparse-0.6.0-py3-none-any.whl",
       "DIRECT": false,
       "DISTRIBUTION": "sqlparse",
-      "REQUIRES_DIST": ["build; extra == 'dev'", "furo; extra == 'doc'", "sphinx; extra == 'doc'"],
+      "REQUIRES_DIST": [
+        "build; extra == 'dev'",
+        "furo; extra == 'doc'",
+        "sphinx; extra == 'doc'"
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "0.6.0"
     },
@@ -1539,7 +1586,9 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/05/04/a350e6b9b910c6006826dd63deb45be30fed85b826351588df27671bd92b/upstash_redis-1.8.0-py3-none-any.whl",
       "DIRECT": true,
       "DISTRIBUTION": "upstash-redis",
-      "REQUIRES_DIST": ["httpx (>=0.23.0,<1)"],
+      "REQUIRES_DIST": [
+        "httpx (>=0.23.0,<1)"
+      ],
       "REQUIRES_PYTHON": ">=3.8,<4.0",
       "VERSION": "1.8.0"
     },
@@ -1585,17 +1634,21 @@
       "ARTIFACT_URL": "https://files.pythonhosted.org/packages/95/0c/a71501bbc1a674ff72c4d6c2b75f4d9a5af819f5244c3a7558080a8802c5/yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
       "DIRECT": false,
       "DISTRIBUTION": "yarl",
-      "REQUIRES_DIST": ["idna>=2.0", "multidict>=4.0", "propcache>=0.2.1"],
+      "REQUIRES_DIST": [
+        "idna>=2.0",
+        "multidict>=4.0",
+        "propcache>=0.2.1"
+      ],
       "REQUIRES_PYTHON": ">=3.10",
       "VERSION": "1.25.1"
     }
   ],
   "PACKAGE_AUTHORITY": "pip requirements.txt",
   "PACKAGE_INDEX_ACCESS_OCCURRED": true,
-  "REQUIREMENTS_SHA256": "a7f30b7fd83f9758d8307a795a4cfa4c60f7bee9d2b25ff3dcb9b6a19daf87de",
+  "REQUIREMENTS_SHA256": "127334912d0a804aa5301ffb327490567b411855dc0ce0546d231c85dba7d06c",
   "RESOLVER": {
     "NAME": "pip",
-    "VERSION": "25.3"
+    "VERSION": "25.0.1"
   },
   "RESOLVER_FLAGS": [
     "--isolated",
@@ -1611,32 +1664,101 @@
     "cp",
     "--abi",
     "cp311",
-    "--index-url",
-    "https://pypi.org/simple",
+    "--no-index",
+    "--find-links",
+    "/Users/oby/.cache/nzila/ue-v2-wheelhouse",
+    "--find-links",
+    "/private/tmp/ue-step1-certifi-2026.10.19-prepared",
+    "--require-hashes",
     "-r",
-    "apps/union-eyes/backend/requirements.txt"
+    "/private/tmp/ue-step1-certifi-2026.10.19-prepared/requirements.lock"
   ],
   "RESOLVER_MARKER_ENVIRONMENT": {
     "implementation_name": "cpython",
-    "implementation_version": "3.13.12",
-    "os_name": "nt",
-    "platform_machine": "AMD64",
+    "implementation_version": "3.12.13",
+    "os_name": "posix",
+    "platform_machine": "arm64",
     "platform_python_implementation": "CPython",
-    "platform_release": "11",
-    "platform_system": "Windows",
-    "platform_version": "10.0.26200",
-    "python_full_version": "3.13.12",
-    "python_version": "3.13",
-    "sys_platform": "win32"
+    "platform_release": "27.0.0",
+    "platform_system": "Darwin",
+    "platform_version": "Darwin Kernel Version 27.0.0: Tue Aug 11 21:05:41 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T8122",
+    "python_full_version": "3.12.13",
+    "python_version": "3.12",
+    "sys_platform": "darwin"
   },
-  "RUN_1_LOCK_DIGEST": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
-  "RUN_2_LOCK_DIGEST": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+  "RUN_1_LOCK_DIGEST": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979",
+  "RUN_2_LOCK_DIGEST": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979",
+  "SECURITY_LOCK_REFRESH": {
+    "ADVISORY": "https://github.com/advisories/GHSA-6q48-6c7w-9gw2",
+    "ARTIFACT_BYTES_VERIFIED": true,
+    "ARTIFACT_METADATA_SOURCE": "https://pypi.org/pypi/certifi/2026.10.19/json",
+    "CHANGED_DISTRIBUTIONS": [
+      "certifi"
+    ],
+    "DIRECT_SPECIFICATIONS_UNCHANGED": true,
+    "OFFLINE_REPLAY_COUNT": 2,
+    "OFFLINE_REPLAY_NETWORK_USED": false,
+    "PREVIOUS_LOCK_SHA256": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+    "PREVIOUS_REQUIREMENTS_SHA256": "a7f30b7fd83f9758d8307a795a4cfa4c60f7bee9d2b25ff3dcb9b6a19daf87de",
+    "PREVIOUS_RESOLVER": {
+      "NAME": "pip",
+      "VERSION": "25.3"
+    },
+    "PREVIOUS_RESOLVER_FLAGS": [
+      "--isolated",
+      "install",
+      "--dry-run",
+      "--ignore-installed",
+      "--only-binary=:all:",
+      "--python-version",
+      "3.11.14",
+      "--platform",
+      "manylinux2014_x86_64",
+      "--implementation",
+      "cp",
+      "--abi",
+      "cp311",
+      "--index-url",
+      "https://pypi.org/simple",
+      "-r",
+      "apps/union-eyes/backend/requirements.txt"
+    ],
+    "PREVIOUS_RESOLVER_MARKER_ENVIRONMENT": {
+      "implementation_name": "cpython",
+      "implementation_version": "3.13.12",
+      "os_name": "nt",
+      "platform_machine": "AMD64",
+      "platform_python_implementation": "CPython",
+      "platform_release": "11",
+      "platform_system": "Windows",
+      "platform_version": "10.0.26200",
+      "python_full_version": "3.13.12",
+      "python_version": "3.13",
+      "sys_platform": "win32"
+    },
+    "PREVIOUS_RUN_1_LOCK_DIGEST": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+    "PREVIOUS_RUN_2_LOCK_DIGEST": "310eb938f4f7c25b6f93323031981ede60a0d2ef2d68e017a5c9ced33e326fe6",
+    "RECORDED_AT": "2026-11-17T21:41:37.366239+00:00"
+  },
   "TARGET": {
     "ABI": "cp311",
     "EXACT_PATCH": "3.11.14",
     "IMPLEMENTATION": "cp",
     "PLATFORM": "manylinux2014_x86_64",
     "PYTHON": "3.11.14"
+  },
+  "TARGET_MARKER_ENVIRONMENT": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.11.14",
+    "os_name": "posix",
+    "platform_machine": "x86_64",
+    "platform_python_implementation": "CPython",
+    "platform_release": "",
+    "platform_system": "Linux",
+    "platform_version": "",
+    "python_full_version": "3.11.14",
+    "python_version": "3.11",
+    "sys_platform": "linux"
   },
   "TARGET_REQUIREMENTS_UNRESOLVED": [],
   "TRANSITIVE_REQUIREMENT_EDGES": [

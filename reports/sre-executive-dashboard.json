@@ -1,24 +1,43 @@
 {
-  "generatedAt": "2026-05-25T18:13:16.485Z",
+  "generatedAt": "2026-11-17T21:42:29.513Z",
+  "scope": "SOURCE_CONFIGURATION_AND_REFERENCED_TELEMETRY_ONLY",
   "portfolioUptimePct": null,
-  "incidentsThisMonth": 0,
-  "mttrHours": 0,
-  "appsBreachingSlo": [],
-  "deploySuccessRatePct": 100,
-  "rollbackCount": 0,
+  "incidentsThisMonth": null,
+  "appsBreachingSlo": null,
+  "appsMissingEndpointContracts": [],
+  "windowDays": 30,
+  "ciWorkflowCount": 0,
+  "ciWorkflowSuccessRatePct": null,
+  "ciFailedWorkflowCount": 0,
+  "contradictoryCiRecords": 0,
+  "deploySuccessRatePct": null,
+  "rollbackCount": null,
+  "mttrHours": null,
+  "incidentsLast30Days": null,
+  "incidentSnapshotAt": "2026-08-25T20:47:21.481Z",
   "costTrend": {
-    "monthlyCostUsd": 843.98,
-    "unresolvedCostApps": 0
+    "monthlyCostUsd": 4241.2,
+    "unresolvedCostApps": 0,
+    "observedAt": "2026-08-25T20:47:41.069Z",
+    "period": "2026-08-01..2026-08-31",
+    "note": "Referenced cost snapshot; not a current live measurement."
   },
   "topRiskApps": [],
-  "openActionItems": [],
+  "openActionItems": [
+    "Verify live synthetic probes; configured targets alone do not establish endpoint availability.",
+    "Verify live alert delivery; routing configuration alone does not establish delivery.",
+    "Backfill actual deployment outcomes and rollback events; CI workflow conclusions are not deployment or rollback receipts.",
+    "Integrate a current runtime incident feed; vulnerability remediation metrics do not establish incident MTTR or incident counts."
+  ],
   "scoreSummary": {
-    "reliability": 0,
-    "observability": 0,
-    "incidentReadiness": 0,
-    "costGovernance": 0,
-    "mttrReadiness": 0
+    "reliability": 10,
+    "observability": 10,
+    "incidentReadiness": 10,
+    "costGovernance": 10,
+    "mttrReadiness": 10
   },
-  "alertRoutingReady": true,
+  "alertRoutingConfigured": true,
+  "alertRoutingReady": null,
+  "liveAlertDeliveryVerified": false,
   "syntheticConfiguredTargets": 6
 }

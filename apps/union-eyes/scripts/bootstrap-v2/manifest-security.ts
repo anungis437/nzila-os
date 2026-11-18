@@ -1,3 +1,4 @@
+import { membershipCatalogProjectionSql, type CanonicalPostgresMajor } from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import { CASE_PRIMARY_DOMAIN_GUARDS, CASE_DOMAIN_SUPPORT_CATALOG_QUERY, CASE_DOMAIN_SUPPORT_FUNCTION_SIGNATURES, caseDomainSupportViolations } from '../../db/auth/case-primary-domain-guards'
 import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
@@ -78,7 +79,8 @@ export function inspectInstallerDelegations(
   return []
 }
 
-export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
+export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, options: { postgresMajor?: CanonicalPostgresMajor } = {}) {
+  const membershipProjection = membershipCatalogProjectionSql(options.postgresMajor)
   const rules = compileSecurity(plan).rules
   const mismatches: string[] = []
   if (plan.authExecution) {
@@ -116,10 +118,10 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
     )
   }
   if (plan.authExecution) mismatches.push(...caseDomainSupportViolations((await client.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows))
-  const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client) : null
+  const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client, options) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)
   const frameworkPrivileges = plan.frameworkExecution
-    ? await inspectFrameworkPrivileges(client)
+    ? await inspectFrameworkPrivileges(client, options)
     : null
   if (frameworkPrivileges) mismatches.push(...frameworkPrivileges.failures)
   const roles = await client.query<{
@@ -139,7 +141,7 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
     if (role.superuser || role.bypassrls || role.createdb || role.createrole || role.login)
       mismatches.push(`ROLE_ESCALATION:${role.name}`)
   const memberships = await client.query<InstallerMembership>(`
-    SELECT parent.rolname AS role,member.rolname AS member,m.admin_option,m.inherit_option,m.set_option
+    SELECT parent.rolname AS role,member.rolname AS member,${membershipProjection.adminOption} AS admin_option,${membershipProjection.inheritOption} AS inherit_option,${membershipProjection.setOption} AS set_option
     FROM pg_auth_members m JOIN pg_roles parent ON parent.oid=m.roleid JOIN pg_roles member ON member.oid=m.member
     WHERE parent.rolname IN ('ue_v2_owner','union_eyes_runtime','union_eyes_system')
       OR member.rolname IN ('ue_v2_owner','union_eyes_runtime','union_eyes_system')

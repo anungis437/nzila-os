@@ -57,7 +57,22 @@ describe('current evidence capability authority', () => {
     },
   )
 
-  it('reconciles current donation metadata without merging the financial boundary', () => {
+  it.each([
+    ['arbitration_decisions', 'apps/union-eyes/backend/bargaining/models.py'],
+    ['signature_audit_trail', 'apps/union-eyes/backend/content/models.py'],
+  ])('preserves the established contained current boundary for %s without changing historical authority', (table, source) => {
+    const prior = storageAuthorityManifest.find(entry => entry.table === table)!
+    const before = JSON.stringify(prior)
+    const current: CurrentModel = { ...model, table, source }
+    const decision = reconcileCurrentAuthority(current, prior)!
+    expect(decision.classification).toBe('CONTAINED_NO_AUTHORITY')
+    expect(decision.requiredRuntimePrivileges).toEqual([])
+    expect(decision.requiredSystemPrivileges).toEqual([])
+    expect(JSON.stringify(prior)).toBe(before)
+    expect(() => reconcileCurrentAuthority({ ...current, source: 'unreviewed-owner' }, prior)).toThrow('CURRENT_OWNER_REQUIRED')
+  })
+
+  it('contains financial donation records without rewriting historical authority', () => {
     const prior = storageAuthorityManifest.find((entry) => entry.table === 'donations')!
     const before = JSON.stringify(prior)
     const donation: CurrentModel = {
@@ -85,10 +100,10 @@ describe('current evidence capability authority', () => {
       ],
     }
     const authority = reconcileCurrentAuthority(donation, prior)!
-    expect(authority.classification).toBe('TENANT_RLS_REQUIRED')
-    expect(authority.requiredRuntimePrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE', 'DELETE'])
+    expect(authority.classification).toBe('CONTAINED_NO_AUTHORITY')
+    expect(authority.requiredRuntimePrivileges).toEqual([])
     expect(authority.requiredSystemPrivileges).toEqual([])
-    expect(authority.reason).toContain('does not merge')
+    expect(authority.reason).toContain('financial record')
     expect(JSON.stringify(prior)).toBe(before)
     for (const invalid of [
       { ...donation, source: 'unrelated-owner' },
@@ -103,7 +118,7 @@ describe('current evidence capability authority', () => {
       },
     ])
       expect(() => reconcileCurrentAuthority(invalid, prior)).toThrow(
-        'UE_V2_DONATION_METADATA_ORGANIZATION_SOURCE_REQUIRED',
+        'UE_V2_DONATION_BASE_BOUNDARY_SOURCE_REQUIRED',
       )
   })
 

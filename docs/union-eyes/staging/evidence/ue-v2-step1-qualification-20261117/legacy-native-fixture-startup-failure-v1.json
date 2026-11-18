@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-11-18T00:15:19.800374+00:00",
+  "scope": "OWNED_FIXTURE_STARTUP_FAILURE",
+  "containerId": "8fe436e6a905326b371cd249ae60bfc4d3d3d69fee905e1b1b8c2533bf3d0e17",
+  "owner": "ae39c30c-6b24-4e10-bb1e-eefd654894f8",
+  "phase": "Before fixture database creation",
+  "reason": "Socket readiness observed PostgreSQL temporary initialization server; CREATE DATABASE then found no socket during init restart",
+  "testExecuted": false,
+  "qualified": false,
+  "OOMKilled": false,
+  "cleanup": "Only exact freshly owned incomplete container removed; no prior runtime or volume touched"
+}

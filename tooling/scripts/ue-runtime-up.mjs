@@ -13,8 +13,8 @@
  * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --runtime-id worktree --fresh --prod --rebuild --redis
  * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
  *
- * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
- * solely when QA_TEST_ENV=true and UE_ENVIRONMENT=local. The NAR audit store is a local sandbox (never immutable) and the
+ * LOCAL ONLY. It uses an owned disposable container, separate bounded login credentials, and real password/MFA sessions.
+ * The NAR audit store is a local sandbox (never immutable) and the
  * sandbox platform database refuses the relaxation unless its name ends in _sandbox.
  */
 import { spawn, spawnSync } from 'node:child_process'
@@ -24,10 +24,12 @@ import { dirname, join, resolve } from 'node:path'
 import { hasOwnedContainerLabels, UE_DISPOSABLE_MISSION } from './lib/ue-disposable-container-ownership.mjs'
 import { resetRestartCaseHandoff, requireRestartCaseHandoff } from './lib/ue-runtime-restart-handoff.mjs'
 import { fileURLToPath } from 'node:url'
+import pg from 'pg'
+import {deriveRuntimeCredentials,runtimeDatabaseUrl,planRuntimeLoginProvisioning,RUNTIME_OPERATOR,RUNTIME_LOGIN_BINDINGS,RUNTIME_NAR_LOGIN} from './lib/ue-runtime-canonical-auth.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const APP = join(ROOT, 'apps', 'union-eyes')
-const STATE = join(ROOT, '.ue-runtime')
+const STATE_ROOT = join(ROOT, '.ue-runtime')
 const args = process.argv.slice(2)
 const command = args.find((a) => !a.startsWith('--')) ?? 'all'
 const opt = (name, fallback) => {
@@ -47,6 +49,7 @@ const RUNTIME_ID = opt('runtime-id', '')
 if (RUNTIME_ID && !/^[a-z0-9][a-z0-9-]{0,31}$/.test(RUNTIME_ID)) {
   throw new Error('Runtime ID must be 1-32 lowercase letters, digits, or hyphens')
 }
+const STATE = RUNTIME_ID ? join(STATE_ROOT,'runs',RUNTIME_ID) : STATE_ROOT
 const runtimeName = (base) => RUNTIME_ID ? `${base}-${RUNTIME_ID}` : base
 const REDIS_CONTAINER = runtimeName('ue-runtime-redis')
 const CONTAINER = runtimeName('ue-runtime-pg')
@@ -60,8 +63,8 @@ const useShell = (cmd) => isWin && /^(pnpm|npx)$/.test(cmd)
 
 /** Disposable credentials, generated on first use and kept (git-ignored) with the runtime state; nothing is committed. */
 function secrets() {
-  mkdirSync(STATE, { recursive: true })
-  const file = join(STATE, 'secrets.json')
+  mkdirSync(STATE_ROOT, { recursive: true,mode:0o700 })
+  const file = join(STATE_ROOT, 'secrets.json')
   if (!existsSync(file)) {
     const token = () => randomBytes(24).toString('hex')
     writeFileSync(file, JSON.stringify({ db: token(), auth: token(), voting: token(), nar: token() }), { mode: 0o600 })
@@ -71,8 +74,8 @@ function secrets() {
 
 /** Opaque per-worktree owner key. Only containers with this exact label may be reused or removed. */
 function runtimeOwnerToken() {
-  mkdirSync(STATE, { recursive: true })
-  const file = join(STATE, 'runtime-owner.txt')
+  mkdirSync(STATE_ROOT, { recursive: true,mode:0o700 })
+  const file = join(STATE_ROOT, 'runtime-owner.txt')
   if (!existsSync(file)) writeFileSync(file, randomBytes(16).toString('hex'), { mode: 0o600, flag: 'wx' })
   const token = readFileSync(file, 'utf8').trim()
   if (!/^[a-f0-9]{32}$/.test(token)) throw new Error('Malformed disposable runtime owner token')
@@ -104,29 +107,30 @@ function checkLoopbackPort(name, port, containerPort) {
   }
 }
 
-function dbUrl(db) {
-  const url = new URL('postgresql://127.0.0.1') // gitleaks:allow (credentials are generated at runtime, never committed)
-  url.username = 'postgres'
-  url.password = secrets().db
-  url.port = String(PORT_DB)
-  url.pathname = `/${db}`
-  return url.toString()
-}
+const credentials=()=>deriveRuntimeCredentials(secrets().db)
+const dbUrl=(database,purpose='operator')=>runtimeDatabaseUrl({database,port:PORT_DB,credential:credentials()[purpose]})
+export const operatorDatabaseUrl=()=>dbUrl(APP_DB)
+export function operatorEnv(){return {...runtimeEnv(),DATABASE_URL:operatorDatabaseUrl(),SYSTEM_DATABASE_URL:operatorDatabaseUrl(),UE_CANONICAL_BOOTSTRAP_V2:'0',AUTH_DATABASE_URL:'',AUTH_SYSTEM_DATABASE_URL:'',NODE_ENV:'development'}}
+function seedEnv(){return {...runtimeEnv(),DATABASE_URL:operatorDatabaseUrl(),UE_RUNTIME_OPERATOR_DATABASE_URL:operatorDatabaseUrl(),UE_RUNTIME_DATABASE_URL:dbUrl(APP_DB,'runtime'),NODE_ENV:'development'}}
+function testEnv(){return {...runtimeEnv(),UE_RUNTIME_OPERATOR_DATABASE_URL:operatorDatabaseUrl(),UE_RUNTIME_PLATFORM_OPERATOR_DATABASE_URL:dbUrl(PLATFORM_DB)}}
 
 export function runtimeEnv() {
   return {
-    DATABASE_URL: dbUrl(APP_DB),
-    SYSTEM_DATABASE_URL: dbUrl(APP_DB),
-    PLATFORM_DATABASE_URL: dbUrl(PLATFORM_DB),
+    DATABASE_URL: dbUrl(APP_DB,'runtime'),
+    SYSTEM_DATABASE_URL: dbUrl(APP_DB,'system'),
+    AUTH_DATABASE_URL: dbUrl(APP_DB,'auth'),
+    AUTH_SYSTEM_DATABASE_URL: dbUrl(APP_DB,'authSystem'),
+    PLATFORM_DATABASE_URL: dbUrl(PLATFORM_DB,'nar'),
+    AUTH_MFA_ENCRYPTION_KEY:credentials().mfaKey,
     AUTH_SECRET: secrets().auth,
     VOTING_SECRET: secrets().voting,
     QA_TEST_ENV: 'true',
     NODE_ENV: PROD ? 'production' : 'development',
-    PLAYWRIGHT_TEST_AUTH: 'true',
+    PLAYWRIGHT_TEST_AUTH: 'false',
     UE_ENVIRONMENT: 'local',
-    UE_CANONICAL_BOOTSTRAP_V2: '0',
-    UE_E2E_RISK_BYPASS: 'true',
-    NODE_OPTIONS: '--max-old-space-size=8192',
+    UE_CANONICAL_BOOTSTRAP_V2: '1',
+    NODE_OPTIONS: '--max-old-space-size=6144',
+    UE_RUNTIME_STATE_DIR:STATE,
     NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${PORT_APP}`,
     PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
     ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
@@ -144,11 +148,58 @@ function run(cmd, cmdArgs, options = {}) {
   if (result.status !== 0) throw new Error(`${cmd} exited with ${result.status ?? 'unknown'} (arguments withheld)`)
 }
 const out = (cmd, cmdArgs, options = {}) => spawnSync(cmd, cmdArgs, { encoding: 'utf8', shell: useShell(cmd), cwd: ROOT, ...options }).stdout?.trim() ?? ''
-const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
+const psql = (db, sql) => run('docker', ['exec', CONTAINER, 'psql', '-U', RUNTIME_OPERATOR, '-d', db, '-v', 'ON_ERROR_STOP=1', '-c', sql])
 const psqlFile = (db, file) => {
   const sql = readFileSync(file, 'utf8').replaceAll('--> statement-breakpoint', '')
-  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', 'postgres', '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8' })
+  const result = spawnSync('docker', ['exec', '-i', CONTAINER, 'psql', '-U', RUNTIME_OPERATOR, '-d', db, '-v', 'ON_ERROR_STOP=1'], { input: sql, encoding: 'utf8' })
   if (result.status !== 0) throw new Error(`psql ${file}: ${result.stderr}`)
+}
+
+async function provisionRuntimeLogins(){
+  const {tsImport}=await import('tsx/esm/api')
+  const {canonicalPostgresMajor,membershipCatalogProjectionSql}=await tsImport('../../packages/db/src/auth-storage-authority/membership-semantics.ts',{parentURL:import.meta.url})
+  const operator=new pg.Client({connectionString:operatorDatabaseUrl()})
+  await operator.connect()
+  try{
+    await operator.query('BEGIN')
+    const version=(await operator.query("SELECT pg_catalog.current_setting('server_version_num') AS version")).rows[0].version
+    const major=canonicalPostgresMajor(version),projection=membershipCatalogProjectionSql(major)
+    const roles=(await operator.query("SELECT rolname,rolcanlogin,rolsuper,rolbypassrls,rolinherit,rolcreatedb,rolcreaterole FROM pg_catalog.pg_roles WHERE rolname LIKE 'ue_runtime_%'")).rows
+    const memberships=(await operator.query(`SELECT member.rolname AS member,target.rolname AS granted,m.admin_option,${projection.inheritOption} AS inherit_option,${projection.setOption} AS set_option FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles member ON member.oid=m.member JOIN pg_catalog.pg_roles target ON target.oid=m.roleid WHERE member.rolname LIKE 'ue_runtime_%' OR target.rolname LIKE 'ue_runtime_%'`)).rows
+    for(const sql of await planRuntimeLoginProvisioning({roles,memberships,postgresMajor:major,credentials:credentials()}))await operator.query(sql)
+    await operator.query('COMMIT')
+  }catch(error){await operator.query('ROLLBACK');throw error}finally{await operator.end()}
+  // Prove that each generated credential connects and can SET only its intended
+  // bounded context; no login receives INHERIT or database ownership.
+  for(const binding of RUNTIME_LOGIN_BINDINGS){
+    const login=new pg.Client({connectionString:dbUrl(APP_DB,binding.key)})
+    await login.connect()
+    try{
+      await login.query('BEGIN')
+      await login.query(`SET LOCAL ROLE "${binding.target}"`)
+      const row=(await login.query('SELECT current_user::text AS role')).rows[0]
+      if(row.role!==binding.target)throw new Error('Disposable login context verification failed')
+      await login.query('ROLLBACK')
+    }finally{await login.end()}
+  }
+}
+
+async function provisionNarLogin(){
+  const operator=new pg.Client({connectionString:dbUrl(PLATFORM_DB)})
+  await operator.connect()
+  try{
+    await operator.query('BEGIN')
+    const roles=(await operator.query('SELECT rolcanlogin,rolsuper,rolbypassrls,rolinherit,rolcreatedb,rolcreaterole FROM pg_catalog.pg_roles WHERE rolname=$1',[RUNTIME_NAR_LOGIN])).rows
+    if(roles.length>1)throw new Error('Duplicate NAR sandbox login')
+    if(roles.length){
+      if(roles[0].rolcanlogin!==true||['rolsuper','rolbypassrls','rolinherit','rolcreatedb','rolcreaterole'].some(key=>roles[0][key]!==false))throw new Error('Existing NAR sandbox login differs')
+    }else await operator.query(`CREATE ROLE ${RUNTIME_NAR_LOGIN} LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '${credentials().nar.password}'`)
+    if((await operator.query('SELECT FROM pg_catalog.pg_auth_members m JOIN pg_catalog.pg_roles r ON r.oid=m.member WHERE r.rolname=$1',[RUNTIME_NAR_LOGIN])).rowCount)throw new Error('NAR sandbox login must have no role memberships')
+    await operator.query(`REVOKE ALL ON TABLE public.audit_records FROM PUBLIC; GRANT USAGE ON SCHEMA public TO ${RUNTIME_NAR_LOGIN}; GRANT SELECT,INSERT ON TABLE public.audit_records TO ${RUNTIME_NAR_LOGIN}`)
+    const grants=(await operator.query(`SELECT c.relname,p.privilege,pg_catalog.has_table_privilege($1::name,c.oid,p.privilege) AS allowed FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE','REFERENCES','TRIGGER','TRUNCATE']) p(privilege) WHERE n.nspname='public' AND c.relkind IN('r','p','v','m','f')`,[RUNTIME_NAR_LOGIN])).rows
+    if(grants.some(row=>row.allowed!==(row.relname==='audit_records'&&['SELECT','INSERT'].includes(row.privilege))))throw new Error('NAR sandbox privileges differ from append/read source')
+    await operator.query('COMMIT')
+  }catch(error){await operator.query('ROLLBACK');throw error}finally{await operator.end()}
 }
 
 async function healthy(timeoutMs) {
@@ -167,25 +218,31 @@ async function healthy(timeoutMs) {
 }
 
 async function up() {
-  mkdirSync(STATE, { recursive: true })
+  mkdirSync(STATE, { recursive: true, mode: 0o700 })
   const owner = runtimeOwnerToken()
   const labels = ['--label', `nzila.mission=${UE_DISPOSABLE_MISSION}`, '--label', `nzila.qualification-owner=${owner}`]
   const redisExists = isOwnedContainer(REDIS_CONTAINER)
   const pgExists = isOwnedContainer(CONTAINER)
   if (REDIS) {
     const redisRunning = out('docker', ['ps', '--filter', `name=^/${REDIS_CONTAINER}$`, '--format', '{{.Names}}'])
-    if (!redisRunning) {
-      if (redisExists) run('docker', ['rm', '-f', REDIS_CONTAINER])
-      run('docker', ['run', '-d', '--name', REDIS_CONTAINER, ...labels, '-p', `127.0.0.1:${PORT_REDIS}:6379`, 'redis:7-alpine'])
+    if(FRESH&&redisExists)run('docker',['rm','-f',REDIS_CONTAINER])
+    if (!redisRunning||FRESH) {
+      if(redisExists&&!FRESH)run('docker',['start',REDIS_CONTAINER])
+      else run('docker', ['run', '-d', '--name', REDIS_CONTAINER, ...labels, '-p', `127.0.0.1:${PORT_REDIS}:6379`, 'redis:7-alpine'])
     }
     checkLoopbackPort(REDIS_CONTAINER, PORT_REDIS, 6379)
   }
   const running = out('docker', ['ps', '--filter', `name=^/${CONTAINER}$`, '--format', '{{.Names}}'])
-  if (!running) {
-    if (pgExists) run('docker', ['rm', '-f', CONTAINER])
-    run('docker', ['run', '-d', '--name', CONTAINER, ...labels, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, `postgres:${POSTGRES_VERSION}`])
+  if(pgExists&&!FRESH){
+    const configured=JSON.parse(out('docker',['inspect','--format','{{json .Config.Env}}',CONTAINER]))
+    if(!configured.includes(`POSTGRES_USER=${RUNTIME_OPERATOR}`))throw new Error('Existing runtime uses the historical operator; use a new runtime ID or an explicit owned --fresh reset')
+  }
+  if (FRESH&&pgExists)run('docker',['rm','-f',CONTAINER])
+  if (!running||FRESH) {
+    if(pgExists&&!FRESH)run('docker',['start',CONTAINER])
+    else run('docker', ['run', '-d', '--name', CONTAINER, ...labels, '-e', `POSTGRES_USER=${RUNTIME_OPERATOR}`, '-e', `POSTGRES_PASSWORD=${secrets().db}`, '-p', `127.0.0.1:${PORT_DB}:5432`, `postgres:${POSTGRES_VERSION}`])
     for (let i = 0; i < 60; i++) {
-      if (/accepting connections/.test(out('docker', ['exec', CONTAINER, 'pg_isready', '-U', 'postgres']))) break
+      if (/accepting connections/.test(out('docker', ['exec', CONTAINER, 'pg_isready', '-U', RUNTIME_OPERATOR]))) break
       await new Promise((r) => setTimeout(r, 2_000))
     }
     await new Promise((r) => setTimeout(r, 4_000))
@@ -195,20 +252,22 @@ async function up() {
   if (actualImage !== `postgres:${POSTGRES_VERSION}`) {
     throw new Error('Refusing PostgreSQL QA container with wrong major version')
   }
-  const exists = (db) => out('docker', ['exec', CONTAINER, 'psql', '-U', 'postgres', '-tAc', `SELECT 1 FROM pg_database WHERE datname='${db}'`]) === '1'
-  const seeded = exists(APP_DB)
-  if (seeded && FRESH) {
-    for (const db of [APP_DB, PLATFORM_DB]) psql('postgres', `DROP DATABASE IF EXISTS ${db} WITH (FORCE)`)
-  }
+  const exists = (db) => out('docker', ['exec', CONTAINER, 'psql', '-U', RUNTIME_OPERATOR, '-d','postgres','-tAc', `SELECT 1 FROM pg_database WHERE datname='${db}'`]) === '1'
   if (!exists(APP_DB)) {
     psql('postgres', `CREATE DATABASE ${APP_DB}`)
     // Django migrates first, as in production; then the approved Drizzle bootstrap; then the deterministic QA fixtures.
     run('python', ['manage.py', 'migrate', '--noinput'], {
       cwd: join(APP, 'backend'),
-      env: { PGHOST: '127.0.0.1', PGPORT: String(PORT_DB), PGUSER: 'postgres', PGPASSWORD: secrets().db, PGDATABASE: APP_DB },
+      env: { PGHOST: '127.0.0.1', PGPORT: String(PORT_DB), PGUSER: RUNTIME_OPERATOR, PGPASSWORD: secrets().db, PGDATABASE: APP_DB,UE_CANONICAL_BOOTSTRAP_V2:'0' },
     })
-    run('node', ['tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'], { env: runtimeEnv() })
-    run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
+    run('node', ['tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'], { env: operatorEnv() })
+    await provisionRuntimeLogins()
+    run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: seedEnv() })
+  }else{
+    // Reusing state means verifying the mandatory current boundary; it cannot
+    // revive a previously prepared flag-off database by merely starting Next.
+    run('node',['tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs'],{env:operatorEnv()})
+    await provisionRuntimeLogins()
   }
   if (!exists(PLATFORM_DB)) {
     psql('postgres', `CREATE DATABASE ${PLATFORM_DB}`)
@@ -216,6 +275,8 @@ async function up() {
     psqlFile(PLATFORM_DB, join(ROOT, 'migrations/platform/20260502_nar_phase3_hardening.sql'))
     psqlFile(PLATFORM_DB, join(ROOT, 'tooling/sql/ue-runtime-sandbox-nar-relax.sql'))
   }
+
+  await provisionNarLogin()
 
   // CI's native database gate needs migrations and seed but must never start Next.js.
   if (command === 'db') return
@@ -256,42 +317,42 @@ function test() {
   // Separate machine-readable reports ensure later Playwright invocations never overwrite earlier proof.
   // They stay under the ignored disposable state directory and must be selectively uploaded (no secrets.json).
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], {
-    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+    cwd: APP, env: { ...testEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
   })
 }
 
 /** Re-applies the deterministic QA fixtures (idempotent) to a running database. */
 function seed() {
-  run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: runtimeEnv() })
+  run('pnpm', ['--filter', '@nzila/union-eyes', 'seed:test-env'], { env: seedEnv() })
 }
 
 /** Files a case, stops the application, starts it again, and proves the case, its audit proof and its boundaries survived. */
 async function restartCheck() {
-  // File, route, escalate and prepare everything the restart check then looks for, so it does not depend on an earlier run.
+  // Prepare a fresh filing and independent triage journey without rewriting
+  // the protected escalation history from an earlier complete run.
   const caseStateFile = join(STATE, 'journey-a-state.json')
   // Never accept a stale hand-off from an earlier QA run as evidence of this run's filing.
   resetRestartCaseHandoff(caseStateFile)
   const desktop = ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop']
-  run('npx', [...desktop, 'e2e/runtime/01', '-g', 'journey A'], {
+  run('npx', [...desktop, 'e2e/runtime/01', '-g', 'the member files an intake through the real route'], {
     cwd: APP,
     env: {
-      ...runtimeEnv(),
-      // The filing test writes the restart hand-off only when artifacts are enabled.
-      // This is also an isolated Playwright output directory, never a production setting.
+      ...testEnv(),
+      // Isolated Playwright output directory, never a production setting.
       UE_RUNTIME_ARTIFACTS: join(STATE, 'playwright-restart-artifacts'),
       UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-case.json'),
     },
   })
   requireRestartCaseHandoff(caseStateFile)
   run('npx', [...desktop, 'e2e/runtime/03', 'e2e/runtime/05'], {
-    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-mandates.json') },
+    cwd: APP, env: { ...testEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-pre-mandates.json') },
   })
   stopApp()
   await new Promise((r) => setTimeout(r, 5_000))
   startApp()
   await healthy(300_000)
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--project=desktop', 'e2e/runtime/02'], {
-    cwd: APP, env: { ...runtimeEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-persistence.json') },
+    cwd: APP, env: { ...testEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-restart-persistence.json') },
   })
 }
 

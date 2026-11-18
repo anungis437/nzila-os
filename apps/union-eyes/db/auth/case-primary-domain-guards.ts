@@ -111,7 +111,9 @@ BEGIN
       AND ${accepted('d','delegation','actor')}
       AND EXISTS(SELECT FROM public.ue_authority_mandates m WHERE m.organization_id=row_org AND m.principal_user_id=delegator AND m.kind='executive_office'
         AND ${live('m')} AND m.expires_at IS NOT NULL AND ${accepted('m','mandate','delegator')} AND ${validPowers('m')}
-        AND length(btrim(m.source_instrument))>0 AND m.granted_by<>delegator AND power=ANY(m.powers))) THEN allowed:=true; END IF;
+        AND length(btrim(m.source_instrument))>0 AND m.granted_by<>delegator AND power=ANY(m.powers) AND ${validScope('m')}
+        AND (m.scope->'resourceIds' ? target_case_id::text OR (s.live_unit IS NOT NULL AND m.scope->'unitIds' ? s.live_unit::text)
+          OR (s.live_territory IS NOT NULL AND m.scope->'territoryIds' ? s.live_territory::text)))) THEN allowed:=true; END IF;
   END decision;
   PERFORM set_config('ue.case_domain_org',COALESCE(prior_org,''),true);
   PERFORM set_config('ue.case_domain_case',COALESCE(prior_case,''),true);

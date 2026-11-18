@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-17T23:38:19.321Z",
+  "candidateBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "workingTreeDirty": true,
+  "state": "TARGETED_SQL_ENGINE_VERIFIED",
+  "engine": "PGlite",
+  "nativeVerdict": "UNEXECUTED",
+  "metadata": {
+    "proof": "AUTH_SYSTEM_PURPOSE_BOUNDARY",
+    "engine": "PGlite",
+    "nativeVerdict": "UNEXECUTED",
+    "compilerSourceSha256": "181dd2428baea5607eee417017a88d4632be54ceb3d8f6cb866c7f7ebd2448e1",
+    "compiledSqlSha256": "fb1b5970ba8d0db5fa4dde151366ea479126271b8a1ab662b0f8fc3e34faf03a"
+  },
+  "testSource": "apps/union-eyes/db/auth/auth-system-purpose.pglite.test.ts",
+  "testSourceSha256": "e86be38b4044375a16adc6052289635b35cfc9e03088bcb991ec0f928cf03fcd",
+  "sameRegressionBytesAsRed": true,
+  "redProof": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-system-purpose-red-v1.json",
+  "testResults": {
+    "newActualEngineRegression": {
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0
+    },
+    "existingAuthMembershipRegressions": {
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "validation": [
+    {
+      "workingDirectory": ".",
+      "command": "pnpm exec vitest run --project union-eyes apps/union-eyes/db/auth/auth-system-purpose.pglite.test.ts --maxWorkers=1",
+      "observedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-system-purpose-green-v1.txt",
+      "sha256": "33201f0fff35b545ef79c514d8d4cef95606f7676fb3a3128d5b9d4d4fae03a9"
+    },
+    {
+      "workingDirectory": ".",
+      "command": "pnpm exec vitest run --project db packages/db/src/auth-invite-revocation.test.ts packages/db/src/auth-inviter-lock.test.ts packages/db/src/auth-storage-authority/membership-semantics.test.ts --maxWorkers=1",
+      "observedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-system-purpose-existing-regressions-v1.txt",
+      "sha256": "c51069987e17ad0e8c60b79317a76ddaedea7861bc25bcdbbc4a193e389cb644"
+    },
+    {
+      "workingDirectory": "apps/union-eyes",
+      "command": "pnpm exec eslint db/auth/auth-system-purpose.pglite.test.ts",
+      "observedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-system-purpose-eslint-v1.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "findingsRemediated": [
+    "Revoke-only system UPDATE now refuses inactive-session revival and NULL active state with42501 and unchanged stored rows.",
+    "Declared active-session revocation remains allowed; membership-state still permits its separate deactivation/reactivation purpose.",
+    "Foreign-user/org and cross-purpose mutations remain denied; the system role has no raw bearer SELECT or membership-role UPDATE grant."
+  ],
+  "sourceChangeOwner": "root agent; this agent added regression and evidence only",
+  "productionCompilerChangedByThisAgent": false,
+  "limits": [
+    "PGlite SET ROLE demonstrates SQL/RLS under the actual source-compiled non-superuser executor; it does not prove native login delegation, concurrent connections or deployed authority.",
+    "Final integrated SHA, full qualification, native acceptance and Step1 closure remain unproven by this component receipt."
+  ],
+  "step2Started": false,
+  "stagingPromoted": false,
+  "productionPromoted": false
+}

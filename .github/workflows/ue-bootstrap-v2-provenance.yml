@@ -42,6 +42,11 @@ jobs:
 
       - uses: ./.github/actions/setup-monorepo
 
+      - name: Typecheck canonical bootstrap and current security upgrade producers
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: pnpm exec tsc --noEmit --project apps/union-eyes/scripts/bootstrap-v2/manifest-typecheck.json
+
       - name: Build the hash-locked Linux x86_64 cp311 wheelhouse in the pinned interpreter image
         shell: bash
         run: |

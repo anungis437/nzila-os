@@ -1,314 +1,322 @@
+/** Owned disposable fixtures: real bearer-bound governance, never role/GUC impersonation. */
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
+import { withBearerOrgBinding } from '@nzila/platform-auth/org-binding'
 import { runAuthorityTransaction, type SqlExecutor } from '@/lib/authority/store/executor'
-import { auditAuthorityMutation } from '@/lib/authority/store/audit'
-import { canonicalMembershipSource } from '@/lib/authority/store/identity'
-import { issueMandate, requestIssuanceApproval } from '@/lib/authority/store/lifecycle'
-import { changeMandateState, insertMandate, insertRelationship, recordApprovalDecision } from '@/lib/authority/store/mutations'
+import { activeMembershipSource } from '@/lib/authority/store/active-membership-source'
+import {
+  DEFAULT_ISSUANCE_TEMPLATES,
+  type IssuanceDomain,
+  type IssuanceOperation,
+} from '@/lib/authority/issuance'
+import {
+  draftIssuanceRule,
+  requestRuleAdoption,
+  activateIssuanceRule,
+  requestIssuanceApproval,
+  issueMandate,
+  acceptInstrument,
+  assignCase,
+} from '@/lib/authority/store/lifecycle'
+import { recordApprovalDecision } from '@/lib/authority/store/mutations'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
-import { UE_TEST_FINANCE } from '@/tests/fixtures/test-finance'
 import { UE_TEST_USERS } from '@/tests/fixtures/test-users'
 
-/**
- * Synthetic QA fixture only (called by seed-test-env.ts, which refuses to run outside QA_TEST_ENV and on a
- * production-like database). Case authority comes from governed relationships, never from a role, so the signed-in
- * journeys need a case handler who actually holds the case. The QA steward is made the live assignee of the two QA
- * cases of the primary organization through the same relationship store the application uses, audited by the same
- * canonical audit chain. Nothing here is an institutional policy: it records no issuance rule, mandate or office.
- *
- * Idempotent: a live relationship that already exists is left alone (authority records are append-only).
- */
-const HANDLER_PERMISSIONS = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document'] as const
-
-/**
- * A synthetic supervisory mandate so the QA case coordinator can hand a filing to a steward. It is labelled in its own
- * source instrument as a fixture, names no issuance rule, and is issued by the QA administrator: it proves the application
- * honours a mandate when one exists, and records no institutional decision.
- */
-type MandateScopeJson = { unitIds?: string[]; resourceIds?: string[]; accountIds?: string[] }
-const RULE_POWERS: Record<string, string[]> = {
-  supervisory: ['read', 'assign', 'monitor'],
-  financial: ['view', 'prepare', 'approve', 'execute', 'reconcile', 'audit'],
+export interface QaAuthorityContext {
+  runtimeUrl: string
+  sessions: Readonly<Record<string, string>>
 }
-const sameSet = (a: readonly string[] | undefined, b: readonly string[] | undefined) => {
-  const x = [...(a ?? [])].sort()
-  const y = [...(b ?? [])].sort()
-  return x.length === y.length && x.every((value, index) => value === y[index])
+const sourceInstrument =
+  'SYNTHETIC OWNED QA FIXTURE: canonical base case governance; not an institutional resolution'
+const issuer = UE_TEST_USERS.executivePrimary
+const approvers = [UE_TEST_USERS.governanceApprover, UE_TEST_USERS.financePreparer] as const
+const deps = { memberships: activeMembershipSource }
+const fixtureCaseIds = [
+  UE_TEST_CASES.primarySubmitted.claimId,
+  UE_TEST_CASES.primaryAssigned.claimId,
+]
+const same = (a: readonly string[], b: readonly string[]) =>
+  JSON.stringify([...a].sort()) === JSON.stringify([...b].sort())
+
+/** The supplied ID selects only an existing fixture; the actual bearer and
+ * current membership independently establish its identity and organization. */
+export async function runQaAuthorityActor<T>(
+  context: QaAuthorityContext,
+  userId: string,
+  operation: (tx: SqlExecutor) => Promise<T>,
+): Promise<T> {
+  if (process.env.QA_TEST_ENV !== 'true' || process.env.UE_CANONICAL_BOOTSTRAP_V2 !== '1')
+    throw new Error('Owned canonical QA context required')
+  const fixture = Object.values(UE_TEST_USERS).find((user) => user.userId === userId)
+  const sessionToken = context.sessions[userId]
+  const target = new URL(context.runtimeUrl)
+  if (
+    !fixture ||
+    fixture.status !== 'active' ||
+    !sessionToken ||
+    target.hostname !== '127.0.0.1' ||
+    target.username !== 'ue_runtime_web' ||
+    target.pathname !== '/ue_runtime'
+  )
+    throw new Error('Bounded active runtime fixture required')
+  return withBearerOrgBinding(
+    sessionToken,
+    { organizationId: fixture.orgId, expectedActorUserId: userId },
+    async (binding) => {
+      const client = new pg.Client({ connectionString: context.runtimeUrl })
+      await client.connect()
+      try {
+        return await runAuthorityTransaction(
+          client,
+          {
+            organizationId: binding.organizationId,
+            userId: binding.userId,
+            sessionToken: binding.sessionToken,
+          },
+          async (tx) => {
+            await tx.query('SET LOCAL ROLE union_eyes_runtime')
+            return operation(tx)
+          },
+        )
+      } finally {
+        await client.end()
+      }
+    },
+  )
 }
 
-async function seedQaMandate(
-  client: pg.Client,
-  exec: SqlExecutor,
-  principal: { userId: string; orgId: string },
-  kind: 'supervisory' | 'financial',
-  powers: readonly string[],
-  scope: MandateScopeJson,
-  purpose: string,
+async function ensureRule(
+  operator: pg.Client,
+  context: QaAuthorityContext,
+  domain: IssuanceDomain,
+  operation: IssuanceOperation,
 ): Promise<number> {
-  const organizationId = principal.orgId
-  const live = await client.query(
-    `SELECT id::text AS id, scope, powers FROM ue_authority_mandates
-      WHERE organization_id = $1 AND principal_user_id = $2 AND kind = $3 AND status = 'active' AND revoked_at IS NULL`,
-    [organizationId, principal.userId, kind],
+  const template = DEFAULT_ISSUANCE_TEMPLATES.find(
+    (rule) => rule.domain === domain && rule.operation === operation,
   )
-  const current = live.rows.some((row) => {
-    const held = ((row.powers as string[] | undefined) ?? []).map(String)
-    const have = (row.scope as MandateScopeJson | null) ?? {}
-    return sameSet(held, powers) && sameSet(have.unitIds, scope.unitIds) && sameSet(have.resourceIds, scope.resourceIds) && sameSet(have.accountIds, scope.accountIds)
-  })
-  if (current) return 0
-  // A fixture mandate with a stale scope is revoked through the application's own mandate-state path before it is reissued.
-  for (const stale of live.rows.filter((row) => !current)) {
-    await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, (tx) =>
-      changeMandateState(tx, organizationId, String(stale.id), 'revoke', UE_TEST_USERS.adminPrimary.userId),
+  if (!template) throw new Error('Current source issuance template required')
+  const existing = (
+    await operator.query(
+      `SELECT source_instrument,allowed_powers,issuer_capacities,required_independent_approvals,requires_acceptance,max_term_days FROM public.ue_authority_issuance_rules WHERE organization_id=$1 AND domain=$2 AND operation=$3 AND status='active'`,
+      [issuer.orgId, domain, operation],
     )
+  ).rows
+  if (existing.length) {
+    const rule = existing[0]
+    if (
+      existing.length !== 1 ||
+      rule.source_instrument !== sourceInstrument ||
+      !same(rule.allowed_powers, template.allowedPowers) ||
+      !same(rule.issuer_capacities, template.issuerCapacities) ||
+      rule.required_independent_approvals !== template.requiredIndependentApprovals ||
+      rule.requires_acceptance !== template.requiresAcceptance ||
+      rule.max_term_days !== template.maxTermDays
+    )
+      throw new Error('Existing fixture issuance authority differs from current source')
+    return 0
   }
-  // The database refuses any mandate without an active issuance rule and binds each write to the authenticated principal. This
-  // fixture rule is labelled synthetic in its own source instrument and its two "approvers" are fixture identities: it exists
-  // only in the QA database, which the seed refuses to touch if it looks like production, and it adopts no institutional policy.
-  await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, async (tx) => {
-    await tx.query(
-      `INSERT INTO ue_authority_issuance_rules
-         (organization_id, domain, operation, issuer_capacities, allowed_powers, max_term_days, requires_acceptance,
-          required_independent_approvals, version, status, source_instrument, drafted_by, approved_by, activated_at)
-       SELECT $1, $5, 'issue', ARRAY['executive']::text[], $6::text[], 400, false, 0,
-          COALESCE((SELECT max(version) FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $5 AND operation = 'issue'), 0) + 1,
-          'active', 'SYNTHETIC QA FIXTURE - not an institutional rule', $2, ARRAY[$3, $4]::ue_authority_principal[], now()
-       WHERE NOT EXISTS (SELECT 1 FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $5 AND operation = 'issue' AND status = 'active')`,
-      [organizationId, UE_TEST_USERS.adminPrimary.userId, UE_TEST_USERS.executivePrimary.userId, UE_TEST_USERS.auditorReadOnly.userId, kind, RULE_POWERS[kind]],
-    )
-    const rule = (
-      await tx.query<{ id: string }>(
-        `SELECT id::text AS id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $2 AND operation = 'issue' AND status = 'active'`,
-        [organizationId, kind],
-      )
-    ).rows[0]
-    if (!rule) throw new Error('could not establish the synthetic supervisory issuance rule')
-    await insertMandate(tx, {
-      organizationId,
-      principalUserId: principal.userId,
-      kind,
-      powers,
-      scope,
-      sourceInstrument: 'SYNTHETIC QA FIXTURE - not an institutional mandate',
-      grantedBy: UE_TEST_USERS.adminPrimary.userId,
-      justification: `Runtime acceptance fixture: ${purpose}. Issues no institutional authority.`,
-      effectiveAt: new Date(Date.now() - 60_000),
-      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-      issuanceRuleId: rule.id,
-    })
-  })
-  return 1
-}
-
-/**
- * Synthetic case-assignment issuance rules (issue and revoke) for the QA organization. Assigning or reassigning a case needs a
- * live rule for that operation. Their capacities and powers mirror the platform's reference catalog; they are labelled as a
- * fixture in their source instrument and adopt no institutional policy.
- */
-async function seedQaCaseAssignmentRules(client: pg.Client, exec: SqlExecutor): Promise<number> {
-  const organizationId = UE_TEST_USERS.chiefStewardPrimary.orgId
-  const powers = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document', 'process_ocr', 'read_third_party_restricted']
-  let added = 0
-  for (const [operation, allowed] of [['issue', powers], ['revoke', []]] as const) {
-    const live = await client.query(
-      `SELECT 1 FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = $2 AND status = 'active'`,
-      [organizationId, operation],
-    )
-    if (live.rowCount) continue
-    await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, async (tx) => {
-      const inserted = await tx.query<{ id: string }>(
-        `INSERT INTO ue_authority_issuance_rules
-           (organization_id, domain, operation, issuer_capacities, allowed_powers, max_term_days, requires_acceptance,
-            required_independent_approvals, version, status, source_instrument, drafted_by, approved_by, activated_at)
-         VALUES ($1, 'case_assignment', $2, ARRAY['steward','chief_steward','officer']::text[], $3::text[], NULL, false, 0,
-            COALESCE((SELECT max(version) FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = $2), 0) + 1,
-            'active', 'SYNTHETIC QA FIXTURE - not an institutional rule', $4, ARRAY[$5, $6]::ue_authority_principal[], now())
-         RETURNING id::text AS id`,
-        [organizationId, operation, allowed, UE_TEST_USERS.adminPrimary.userId, UE_TEST_USERS.executivePrimary.userId, UE_TEST_USERS.auditorReadOnly.userId],
-      )
-      // Every authority event needs its canonical audit record in the same transaction.
-      await auditAuthorityMutation(tx, {
-        organizationId,
-        action: 'issuance_rule.fixture_activate',
-        resourceType: 'ue_authority_issuance_rules',
-        resourceId: inserted.rows[0].id,
-        details: { domain: 'case_assignment', operation, fixture: true },
-      })
-    })
-    added += 1
-  }
-  return added
-}
-
-/** Inserts a labelled synthetic issuance rule for the QA organization, audited like every authority event. Idempotent. */
-async function ensureQaRule(
-  client: pg.Client,
-  exec: SqlExecutor,
-  organizationId: string,
-  rule: { domain: string; powers: string[]; approvals: number; maxTermDays: number },
-): Promise<void> {
-  const live = await client.query(
-    `SELECT 1 FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $2 AND operation = 'issue' AND status = 'active'`,
-    [organizationId, rule.domain],
+  const ruleId = await runQaAuthorityActor(context, issuer.userId, (tx) =>
+    draftIssuanceRule(tx, deps, {
+      ...template,
+      organizationId: issuer.orgId,
+      draftedBy: issuer.userId,
+    }),
   )
-  if (live.rowCount) return
-  await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, async (tx) => {
-    const inserted = await tx.query<{ id: string }>(
-      `INSERT INTO ue_authority_issuance_rules
-         (organization_id, domain, operation, issuer_capacities, allowed_powers, max_term_days, requires_acceptance,
-          required_independent_approvals, version, status, source_instrument, drafted_by, approved_by, activated_at)
-       VALUES ($1, $2, 'issue', ARRAY['executive']::text[], $3::text[], $4, false, $5,
-          COALESCE((SELECT max(version) FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = $2 AND operation = 'issue'), 0) + 1,
-          'active', 'SYNTHETIC QA FIXTURE - not an institutional rule', $6, ARRAY[$7, $8]::ue_authority_principal[], now())
-       RETURNING id::text AS id`,
-      [organizationId, rule.domain, rule.powers, rule.maxTermDays, rule.approvals, UE_TEST_USERS.adminPrimary.userId, UE_TEST_USERS.executivePrimary.userId, UE_TEST_USERS.auditorReadOnly.userId],
-    )
-    await auditAuthorityMutation(tx, {
-      organizationId,
-      action: 'issuance_rule.fixture_activate',
-      resourceType: 'ue_authority_issuance_rules',
-      resourceId: inserted.rows[0].id,
-      details: { domain: rule.domain, operation: 'issue', fixture: true },
-    })
-  })
-}
-
-/**
- * A financial mandate issued through the GOVERNED workflow: the database refuses any financial issuance without an independent
- * approval bound to that exact instrument. The root of trust (the executive_office rule and the approver's mandate) is a labelled
- * synthetic fixture; everything after it is the application's own path: the executive requests the approval, the independent
- * approver decides it as themself, and the mandate is issued against the satisfied request.
- */
-async function seedQaFinancialMandate(
-  client: pg.Client,
-  exec: SqlExecutor,
-  holder: { userId: string; orgId: string },
-  powers: readonly string[],
-  scope: MandateScopeJson,
-): Promise<number> {
-  const organizationId = holder.orgId
-  const issuer = UE_TEST_USERS.executivePrimary.userId
-  const approver = UE_TEST_USERS.governanceApprover.userId
-  const deps = { memberships: canonicalMembershipSource }
-
-  const live = await client.query(
-    `SELECT id::text AS id, scope, powers FROM ue_authority_mandates
-      WHERE organization_id = $1 AND principal_user_id = $2 AND kind = 'financial' AND status = 'active' AND revoked_at IS NULL`,
-    [organizationId, holder.userId],
+  const approvalRequestId = await runQaAuthorityActor(context, issuer.userId, (tx) =>
+    requestRuleAdoption(tx, deps, {
+      organizationId: issuer.orgId,
+      ruleId,
+      actorUserId: issuer.userId,
+      sourceInstrument,
+      namedApproverIds: approvers.map((person) => person.userId),
+    }),
   )
-  const current = live.rows.some((row) => {
-    const have = (row.scope as MandateScopeJson | null) ?? {}
-    return sameSet(((row.powers as string[]) ?? []).map(String), powers) && sameSet(have.resourceIds, scope.resourceIds) && sameSet(have.accountIds, scope.accountIds)
-  })
-  if (current) return 0
-  for (const stale of live.rows) {
-    await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, (tx) =>
-      changeMandateState(tx, organizationId, String(stale.id), 'revoke', UE_TEST_USERS.adminPrimary.userId),
-    )
-  }
-
-  await ensureQaRule(client, exec, organizationId, { domain: 'executive_office', powers: ['approve'], approvals: 0, maxTermDays: 400 })
-  await ensureQaRule(client, exec, organizationId, { domain: 'financial', powers: RULE_POWERS.financial, approvals: 1, maxTermDays: 400 })
-
-  const approverOffice = await client.query(
-    `SELECT 1 FROM ue_authority_mandates WHERE organization_id = $1 AND principal_user_id = $2 AND kind = 'executive_office' AND status = 'active' AND revoked_at IS NULL`,
-    [organizationId, approver],
-  )
-  if (!approverOffice.rowCount) {
-    await runAuthorityTransaction(exec, { organizationId, userId: issuer }, (tx) =>
-      issueMandate(tx, deps, {
-        organizationId,
-        issuerUserId: issuer,
-        holderUserId: approver,
-        kind: 'executive_office',
-        powers: ['approve'],
-        sourceInstrument: 'SYNTHETIC QA FIXTURE - not an institutional mandate',
-        justification: 'Runtime acceptance fixture: independent approver of QA financial issuances. Issues no institutional authority.',
-        effectiveAt: new Date(Date.now() - 60_000),
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+  for (const approver of approvers)
+    await runQaAuthorityActor(context, approver.userId, (tx) =>
+      recordApprovalDecision(tx, deps, {
+        organizationId: issuer.orgId,
+        approvalRequestId,
+        approverUserId: approver.userId,
+        decision: 'approved',
+        rationale: sourceInstrument,
       }),
     )
-  }
-
-  const instrumentId = randomUUID()
-  const input = {
-    organizationId,
-    issuerUserId: issuer,
-    holderUserId: holder.userId,
-    kind: 'financial' as const,
-    powers,
-    scope: scope as never,
-    // Monetary duties carry an integer limit and a currency (assessMandate); the figures are synthetic.
-    monetaryLimitMinor: 10_000_000,
-    currency: 'CAD',
-    sourceInstrument: 'SYNTHETIC QA FIXTURE - not an institutional mandate',
-    justification: 'Runtime acceptance fixture: a segregated financial duty for the QA organization. Issues no institutional authority.',
-    effectiveAt: new Date(Date.now() - 60_000),
-    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-  }
-  const approvalRequestId = await runAuthorityTransaction(exec, { organizationId, userId: issuer }, (tx) =>
-    requestIssuanceApproval(tx, deps, { ...input, instrumentId, namedApproverIds: [approver] }),
+  await runQaAuthorityActor(context, approvers[0].userId, (tx) =>
+    activateIssuanceRule(tx, deps, {
+      organizationId: issuer.orgId,
+      ruleId,
+      actorUserId: approvers[0].userId,
+      approvalRequestId,
+    }),
   )
-  await runAuthorityTransaction(exec, { organizationId, userId: approver }, (tx) =>
-    recordApprovalDecision(tx, deps, { organizationId, approvalRequestId, approverUserId: approver, decision: 'approved', rationale: 'SYNTHETIC QA FIXTURE' }),
-  )
-  await runAuthorityTransaction(exec, { organizationId, userId: issuer }, (tx) => issueMandate(tx, deps, { ...input, id: instrumentId, approvalRequestId }))
   return 1
 }
-/** A synthetic employer for the remittance journey. Idempotent. */
-async function seedQaEmployer(client: pg.Client): Promise<number> {
-  const result = await client.query(
-    `INSERT INTO employers (id, organization_id, name, employer_type, status) VALUES ($1, $2, $3, 'private', 'active') ON CONFLICT (id) DO NOTHING`,
-    [UE_TEST_FINANCE.employerId, UE_TEST_FINANCE.organizationId, UE_TEST_FINANCE.employerName],
+
+async function ensureSupervision(
+  operator: pg.Client,
+  context: QaAuthorityContext,
+  holder: typeof UE_TEST_USERS.chiefStewardPrimary | typeof UE_TEST_USERS.supervisorPrimary,
+  powers: readonly string[],
+  caseIds: readonly string[],
+): Promise<number> {
+  const existing = (
+    await operator.query(
+      `SELECT id::text,scope,powers FROM public.ue_authority_mandates WHERE organization_id=$1 AND principal_user_id=$2 AND kind='supervisory' AND status='active' AND revoked_at IS NULL AND effective_at<=clock_timestamp() AND expires_at>clock_timestamp()`,
+      [holder.orgId, holder.userId],
+    )
+  ).rows
+  if (
+    existing.some((row) => same(row.powers, powers) && same(row.scope?.resourceIds ?? [], caseIds))
   )
-  return result.rowCount ?? 0
+    return 0
+  const id = randomUUID(),
+    effectiveAt = new Date(Date.now() - 1000),
+    expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const grant = {
+    id,
+    organizationId: holder.orgId,
+    issuerUserId: issuer.userId,
+    holderUserId: holder.userId,
+    kind: 'supervisory' as const,
+    powers,
+    scope: { resourceIds: caseIds },
+    sourceInstrument,
+    effectiveAt,
+    expiresAt,
+  }
+  const approvalRequestId = await runQaAuthorityActor(context, issuer.userId, (tx) =>
+    requestIssuanceApproval(tx, deps, {
+      ...grant,
+      instrumentId: id,
+      namedApproverIds: [approvers[0].userId],
+    }),
+  )
+  await runQaAuthorityActor(context, approvers[0].userId, (tx) =>
+    recordApprovalDecision(tx, deps, {
+      organizationId: holder.orgId,
+      approvalRequestId,
+      approverUserId: approvers[0].userId,
+      decision: 'approved',
+      rationale: sourceInstrument,
+    }),
+  )
+  await runQaAuthorityActor(context, issuer.userId, (tx) =>
+    issueMandate(tx, deps, { ...grant, approvalRequestId }),
+  )
+  await runQaAuthorityActor(context, holder.userId, (tx) =>
+    acceptInstrument(tx, {
+      organizationId: holder.orgId,
+      instrumentType: 'mandate',
+      instrumentId: id,
+      holderUserId: holder.userId,
+    }),
+  )
+  return 1
 }
 
-export async function seedQaCaseAssignments(connectionString: string): Promise<number> {
-  const client = new pg.Client({ connectionString })
-  await client.connect()
-  const exec = client as unknown as SqlExecutor
-  let created = 0
+/** Explicit synthetic resolution for exactly the returned fixture case IDs.
+ * Unknown jurisdiction stays unknown; an organization is never invented as a unit. */
+export async function ensureQaCaseSupervision(
+  operatorUrl: string,
+  context: QaAuthorityContext,
+  caseIds: readonly string[],
+): Promise<number> {
+  const url = new URL(operatorUrl)
+  if (
+    process.env.QA_TEST_ENV !== 'true' ||
+    url.hostname !== '127.0.0.1' ||
+    url.username !== 'uev2admin' ||
+    url.pathname !== '/ue_runtime' ||
+    !caseIds.length
+  )
+    throw new Error('Owned fixture operator and exact cases required')
+  const operator = new pg.Client({ connectionString: operatorUrl })
+  await operator.connect()
   try {
-    // The unit is the organization that owns the case (see the case-facts loader): one organization, never its descendants.
-    const unit = { unitIds: [UE_TEST_USERS.chiefStewardPrimary.orgId] }
-    created += await seedQaMandate(client, exec, UE_TEST_USERS.chiefStewardPrimary, 'supervisory', ['assign'], unit, 'lets the QA case coordinator route a filing')
-    created += await seedQaMandate(client, exec, UE_TEST_USERS.supervisorPrimary, 'supervisory', ['read', 'monitor'], unit, 'lets the QA supervisor oversee cases without routing them')
-    created += await seedQaEmployer(client)
-    // Two segregated financial duties on one account, each ledger-wide for the organization.
-    const ledger = { resourceIds: [UE_TEST_FINANCE.organizationId], accountIds: [UE_TEST_FINANCE.accountId] }
-    created += await seedQaFinancialMandate(client, exec, UE_TEST_USERS.financePreparer, ['view', 'prepare'], ledger)
-    created += await seedQaFinancialMandate(client, exec, UE_TEST_USERS.financeReconciler, ['view', 'reconcile'], ledger)
-    // The independent auditor holds only the audit power; it confers no preparation, approval, execution or reconciliation.
-    created += await seedQaFinancialMandate(client, exec, UE_TEST_USERS.assuranceAuditor, ['audit'], ledger)
-    created += await seedQaCaseAssignmentRules(client, exec)
-    const cases = [UE_TEST_CASES.primarySubmitted, UE_TEST_CASES.primaryAssigned]
-    for (const qaCase of cases) {
-      const live = await client.query(
-        `SELECT 1 FROM ue_authority_resource_relationships
-          WHERE organization_id = $1 AND principal_user_id = $2 AND resource_type = 'case' AND resource_id = $3
-            AND relation = 'assignee' AND status = 'active' AND revoked_at IS NULL`,
-        [qaCase.organizationId, UE_TEST_USERS.stewardPrimary.userId, qaCase.claimId],
-      )
-      if (live.rowCount) continue
-      await runAuthorityTransaction(exec, { organizationId: qaCase.organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, (tx) =>
-        insertRelationship(tx, {
-          organizationId: qaCase.organizationId,
-          principalUserId: UE_TEST_USERS.stewardPrimary.userId,
-          resourceType: 'case',
-          resourceId: qaCase.claimId,
-          relation: 'assignee',
-          permissions: HANDLER_PERMISSIONS,
-          origin: 'derived',
-          effectiveAt: new Date(Date.now() - 60_000),
-          auditDetails: { fixture: 'synthetic QA seed', claimNumber: qaCase.claimNumber },
+    for (const caseId of caseIds) {
+      const rows = (
+        await operator.query(
+          'SELECT member_id FROM public.claims WHERE organization_id=$1 AND claim_id=$2',
+          [issuer.orgId, caseId],
+        )
+      ).rows
+      if (rows.length !== 1 || rows[0].member_id !== UE_TEST_USERS.memberPrimary.userId)
+        throw new Error('Supervision target is not a represented member fixture case')
+    }
+    let changed = 0
+    for (const [domain, operation] of [
+      ['supervisory', 'issue'],
+      ['supervisory', 'revoke'],
+      ['case_assignment', 'issue'],
+      ['case_assignment', 'revoke'],
+    ] as const)
+      changed += await ensureRule(operator, context, domain, operation)
+    changed += await ensureSupervision(
+      operator,
+      context,
+      UE_TEST_USERS.chiefStewardPrimary,
+      ['assign'],
+      caseIds,
+    )
+    changed += await ensureSupervision(
+      operator,
+      context,
+      UE_TEST_USERS.supervisorPrimary,
+      ['read', 'monitor'],
+      caseIds,
+    )
+    return changed
+  } finally {
+    await operator.end()
+  }
+}
+
+/** Only base case fixtures are established. No financial mandate or duty is seeded. */
+export async function seedQaCaseAssignments(
+  operatorUrl: string,
+  context?: QaAuthorityContext,
+): Promise<number> {
+  if (!context)
+    throw new Error(
+      'Canonical fixture bearer context required; legacy identity setters are refused',
+    )
+  let changed = await ensureQaCaseSupervision(operatorUrl, context, fixtureCaseIds)
+  const operator = new pg.Client({ connectionString: operatorUrl })
+  await operator.connect()
+  try {
+    for (const caseId of fixtureCaseIds) {
+      const live = (
+        await operator.query(
+          `SELECT principal_user_id,origin,granted_by FROM public.ue_authority_resource_relationships WHERE organization_id=$1 AND resource_type='case' AND resource_id=$2 AND relation='assignee' AND status='active' AND revoked_at IS NULL`,
+          [issuer.orgId, caseId],
+        )
+      ).rows
+      if (live.length) {
+        if (
+          live.length !== 1 ||
+          live[0].origin !== 'explicit' ||
+          live[0].granted_by !== UE_TEST_USERS.chiefStewardPrimary.userId ||
+          ![UE_TEST_USERS.stewardPrimary.userId, UE_TEST_USERS.stewardPrimaryTwo.userId].some(
+            (id) => id === live[0].principal_user_id,
+          )
+        )
+          throw new Error('Existing QA assignment lacks governed provenance')
+        continue
+      }
+      await runQaAuthorityActor(context, UE_TEST_USERS.chiefStewardPrimary.userId, (tx) =>
+        assignCase(tx, deps, {
+          organizationId: issuer.orgId,
+          issuerUserId: UE_TEST_USERS.chiefStewardPrimary.userId,
+          caseId,
+          assigneeUserId: UE_TEST_USERS.stewardPrimary.userId,
+          effectiveAt: new Date(Date.now() - 1000),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         }),
       )
-      created += 1
+      changed++
     }
   } finally {
-    await client.end()
+    await operator.end()
   }
-  return created
+  return changed
 }

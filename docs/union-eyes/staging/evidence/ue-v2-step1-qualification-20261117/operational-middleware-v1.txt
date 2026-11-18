@@ -1,0 +1,13 @@
+
+> @nzila/governance-middleware@0.1.0 test /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/governance-middleware
+> vitest run --maxWorkers=1
+
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/governance-middleware
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  16:37:27
+   Duration  326ms (transform 39%, import 30%, tests 28%, worker 3%)
+

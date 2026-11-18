@@ -6,6 +6,7 @@ import {
   assertOwnedLocalOrigin,
   assessStage,
   runScheduledStage,
+  login,
 } from './authenticated-casework-load'
 
 const principal = {
@@ -29,6 +30,40 @@ afterEach(() => {
 })
 
 describe('reusable owned authenticated casework profile', () => {
+  it('binds a real-password/MFA fixture through the canonical switch and returns its rotated session', async () => {
+    const organizationId = '11111111-1111-4111-8111-111111111111'
+    const request = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ requiresMfa: true, mfaChallengeToken: 'synthetic-challenge' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, userId: 'synthetic-member' }), {
+        status: 200, headers: { 'set-cookie': 'nzila_session=synthetic-unbound; HttpOnly; Path=/' },
+      }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: true, organization: { id: organizationId }, organizationAuthority: 'CANONICAL_CURRENT_STATE_V2', activeOrganizationId: organizationId }), {
+        status: 200, headers: { 'set-cookie': 'nzila_session=synthetic-bound; HttpOnly; Path=/' },
+      }))
+    vi.stubGlobal('fetch', request)
+    expect(await login('http://127.0.0.1:43210', { id: 'synthetic-member', email: 'synthetic-member@example.invalid' },
+      'synthetic-password', 'JBSWY3DPEHPK3PXP', organizationId)).toBe('nzila_session=synthetic-bound')
+    expect(request.mock.calls[2][0]).toBe('http://127.0.0.1:43210/api/organizations/switch')
+    expect(request.mock.calls[2][1].headers.cookie).toBe('nzila_session=synthetic-unbound')
+    expect(JSON.parse(request.mock.calls[2][1].body)).toEqual({ organizationId })
+  })
+
+  it.each(['denied', 'substitution', 'unrotated'])('refuses an unusable fixture organization binding: %s', async (kind) => {
+    const organizationId = '11111111-1111-4111-8111-111111111111'
+    const request = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ requiresMfa: true, mfaChallengeToken: 'synthetic-challenge' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true, userId: 'synthetic-member' }), {
+        status: 200, headers: { 'set-cookie': 'nzila_session=synthetic-unbound; HttpOnly; Path=/' },
+      }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ success: true, organization: { id: organizationId }, organizationAuthority: 'CANONICAL_CURRENT_STATE_V2',
+        activeOrganizationId: kind === 'substitution' ? '22222222-2222-4222-8222-222222222222' : organizationId }), {
+        status: kind === 'denied' ? 403 : 200,
+        headers: { 'set-cookie': `nzila_session=${kind === 'unrotated' ? 'synthetic-unbound' : 'synthetic-bound'}; HttpOnly; Path=/` },
+      }))
+    vi.stubGlobal('fetch', request)
+    await expect(login('http://127.0.0.1:43210', { id: 'synthetic-member', email: 'synthetic-member@example.invalid' },
+      'synthetic-password', 'JBSWY3DPEHPK3PXP', organizationId)).rejects.toThrow()
+  })
   it('retains every recovered profile constraint without shortening the measured stages', () => {
     const prior = JSON.parse(
       readFileSync(

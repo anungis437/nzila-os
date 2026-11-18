@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { decide } from '../kernel'
-import { assessMandate, PRIMARY_CASE_HANDLER_ONLY_ACTIONS } from '../common'
+import { assessDelegation, assessMandate, PRIMARY_CASE_HANDLER_ONLY_ACTIONS } from '../common'
 import { decideIssuance, type IssuanceRule, type IssuanceRequest } from '../issuance'
 import type { Action, Capacity } from '../ontology'
-import { ahead, ago, CASE_ID, DAY, HOUR, NOW, ORG, U, caseFacts, delegation, facts, mandate, membership, recusal, ref, relationship, request } from './fixtures'
+import { ahead, ago, CASE_ID, DAY, HOUR, NOW, ORG, ORG_B, U, caseFacts, delegation, facts, mandate, membership, recusal, ref, relationship, request } from './fixtures'
 
 const caps: Capacity[] = ['member', 'chief_steward', 'steward']
 const resource = ref('case', CASE_ID)
@@ -25,7 +25,7 @@ describe('primary case-handler-only authority is a hard ceiling', () => {
       expect(d({ mandates: [m] }).effect).toBe('deny')
       expect(d({ mandates: [mandate({ powers: [action] })] }).effect).toBe('deny')
     })
-    it(action + ': derived primary relationship still authorizes within its scope', () => {
+    it(action + ': independently issued primary relationship authorizes within its scope', () => {
       for (const relation of ['owner', 'assignee'] as const) {
         const r = d({ relationships: [primary(relation)] })
         expect(r.effect).toBe('allow')
@@ -73,6 +73,47 @@ describe('primary case-handler-only authority is a hard ceiling', () => {
       expect(assessMandate(m, ORG, NOW).effective).toBe(false)
       expect(decide(request(U.chief, 'case:read', resource), facts(U.chief, caps, { mandates: [m] }), caseFacts(), NOW).effect).toBe('deny')
     }
+  })
+
+  it('requires a valid acceptance timestamp for mandate and delegation activation', () => {
+    const invalid = new Date(NaN)
+    const m = mandate({ requiresAcceptance: true, acceptedAt: invalid })
+    const d = delegation({ requiresAcceptance: true, acceptedAt: invalid })
+    expect(assessMandate(m, ORG, NOW).effective).toBe(false)
+    expect(assessMandate(m, ORG, NOW).reasons.map(x => x.code)).toContain('NOT_ACCEPTED')
+    expect(assessDelegation(d, ORG, NOW).effective).toBe(false)
+    expect(assessDelegation(d, ORG, NOW).reasons.map(x => x.code)).toContain('NOT_ACCEPTED')
+  })
+
+  it('constrains delegated case read to the delegator office mandate resource scope', () => {
+    const del = delegation({ delegateUserId: U.chief, actions: ['case:read'], resourceTypes: ['case'] })
+    const office = mandate({ kind: 'executive_office', principalUserId: U.president, grantedBy: U.other, powers: ['read'], scope: { resourceIds: [U.other] } })
+    const f = facts(U.chief, caps, {
+      memberships: [membership(U.chief, caps), membership(U.president, ['member', 'executive'])],
+      delegations: [del], mandates: [office],
+    })
+    const req = request(U.chief, 'case:read', resource, { delegationId: del.id })
+    expect(decide(req, f, caseFacts(), NOW).effect).toBe('deny')
+    const inScope = { ...office, id: "00000000-0000-4000-8000-0000000f0001", scope: { resourceIds: [CASE_ID] } }
+    expect(decide(req, { ...f, mandates: [inScope] }, caseFacts(), NOW).effect).toBe('allow')
+    expect(decide(req, { ...f, mandates: [office, inScope] }, caseFacts(), NOW).effect).toBe('allow')
+  })
+
+  it('rejects contradictory nested resource tenant on relationships and recusals', () => {
+    const req = request(U.chief, 'case:close', resource)
+    const owner = primary('owner')
+    const foreignRef = ref('case', CASE_ID, ORG_B)
+    const foreignOwner = { ...owner, resource: foreignRef }
+    const foreignRecusal = recusal({ principalUserId: U.chief, resource: foreignRef, liftedAt: ago(HOUR) })
+    for (const f of [
+      facts(U.chief, caps, { relationships: [foreignOwner] }),
+      facts(U.chief, caps, { relationships: [owner], recusals: [foreignRecusal] }),
+    ]) {
+      const result = decide(req, f, caseFacts(), NOW)
+      expect(result.effect).toBe('deny')
+      expect(result.reasons.map(x => x.code)).toContain('FACTS_CONTRADICTORY')
+    }
+    expect(decide(req, facts(U.chief, caps, { relationships: [owner] }), caseFacts(), NOW).effect).toBe('allow')
   })
 
   it('retains legitimate scoped read and assignment powers', () => {

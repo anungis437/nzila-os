@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-11-18T00:22:08.100079+00:00",
+  "scope": "OWNED_HISTORICAL_FIXTURE_INPUT_FAILURE",
+  "reason": "Historical ORM nullable hierarchy_path conflicts with actual migrated NOT NULL column; synthetic root organization must explicitly supply its empty hierarchy path",
+  "djangoMigrations": "Executed successfully; synthetic organization insert refused",
+  "testExecuted": false,
+  "qualified": false,
+  "liveDataTouched": false,
+  "cleanup": "Only exact freshly owned failed setup removed; actual prior runtime/volumes preserved"
+}

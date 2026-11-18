@@ -1,0 +1,74 @@
+{
+  "scope": "PRIVATE_ARCHIVE_OF_OWNED_GENERATED_INTERIM_ARTIFACTS",
+  "at": "2026-11-18T02:17:01.976540+00:00",
+  "reason": "Preserve raw counterexamples including historical secret-scan matches privately; canonical sanitized evidence is separate. No tracked source or historical evidence removed.",
+  "files": [
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-contract-v1/results.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-contract-v1/results.json",
+      "bytes": 4270174,
+      "sha256": "0a780bc26827aa9ad72c571285d64cba38b419d2fe74a0febe052612dce5a4ae"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-domain-native-v3.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-domain-native-v3.json",
+      "bytes": 7754,
+      "sha256": "ef7ab58c3a150c21d2faf31711b7838f0ca3216465f7abe4674623e10beca4b5"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-membership-v1.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-membership-v1.json",
+      "bytes": 8795,
+      "sha256": "e455651573d643cd73b2962bec14b31556c7a466a68586d175108f11b5b23f7f"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-membership-v2.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-membership-v2.json",
+      "bytes": 8644,
+      "sha256": "48696563f6b260d31bad6e0502cd0465db45f1ca00b8c3cb8de0ca4455c37f97"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-membership-v3.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-membership-v3.json",
+      "bytes": 7245,
+      "sha256": "3dc48d2c4f3b1967ca917ae7e2b44f19c844f2f5735dc1a374a0884123199255"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-membership-v4.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-membership-v4.json",
+      "bytes": 7234,
+      "sha256": "2c52974cecdb31adb35724cc06bf53b86a04b9d9560c5872a87f1d3f4edb8e4f"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-membership-v5.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-membership-v5.json",
+      "bytes": 8527,
+      "sha256": "16a14174e41dd372f7e0cda43281766c0c408edc49d453b5b74e1ae852f72263"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-membership-v6.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-membership-v6.json",
+      "bytes": 7242,
+      "sha256": "4d504e58c29a3a635264c67b0e36be44b3d1b3f341c3c3f03d431080d6898c2c"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-secret-v1/gitleaks.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-secret-v1/gitleaks.json",
+      "bytes": 392564,
+      "sha256": "cb2c58bd14df7d40e94a43f414b8246ea47bd9ddecc4577f4340624e6dc4a6c4"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-upstream-green-v1.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-upstream-green-v1.json",
+      "bytes": 77138,
+      "sha256": "fe38df90ac904a859efe21050b3cdd44dccc6a58fe0ecd80e0580ba9f5b6fa57"
+    },
+    {
+      "previousWorkspacePath": "artifacts/ue-step1-upstream-red-v1.json",
+      "privateArchivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-generated-artifacts-v1/artifacts/ue-step1-upstream-red-v1.json",
+      "bytes": 14719,
+      "sha256": "127dc49acaa99bf05d7baec0fa57730a042abca1bef24f8cf5fb9e2b40ede352"
+    }
+  ],
+  "releaseQualificationInferred": false
+}

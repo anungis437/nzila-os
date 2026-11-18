@@ -1,0 +1,120 @@
+{
+  "schema": "ue-step1-component-qualification-v4",
+  "recordedAt": "2026-11-18T01:05:27.840613+00:00",
+  "finalCandidateSha": null,
+  "dirtyIntegrationSource": true,
+  "source": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "01d0e64c79a27e7050c99c14a376b7bcebd2083ce3268a0bc525ed7c85f20a64"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "c6442fc1508e4d0c37fc5b0211fe6be72d3ad491296f545f13dc519af2cc4738"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.mjs",
+      "sha256": "748f99ddb304e0bd396ef54f960165517cd578a40879d0c5022211ec659b1b8d"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.test.mjs",
+      "sha256": "27c8fbb54658b5780bd97cfedc81f71ce648ae374aaf2a99ef978e963fa9a8b5"
+    },
+    {
+      "path": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+      "sha256": "cb3effc2d58dc3cacfb4e75a1643cb79492246e92b2b35fcb976c0a70b862196"
+    }
+  ],
+  "nativeV3": {
+    "status": "FAILED_BEFORE_THIS_REPAIR",
+    "counts": {
+      "numTotalTests": 3,
+      "numPassedTests": 1,
+      "numFailedTests": 2,
+      "numPendingTests": 0
+    },
+    "privateRawPath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v3.json",
+    "rawSha256": "f74fd4023e498bde27c67be731f49894574fca498b836e1aaaf9198de8a7fc24",
+    "sourceChangedDuringRun": false
+  },
+  "actualReadOnlyDiagnosis": {
+    "receipt": "current-security-function-refusal-v1.json",
+    "sha256": "3458a725dbee99d4f3ff9c5d5b554eb64a98d3efad6736604190d6e1a2b6a816",
+    "result": "All 12 refused functions already passed immutable released preimage validation. Caller double-prefixed already qualified identities. Using the verified identities directly leaves zero unreviewed intersections.",
+    "databaseWrites": false
+  },
+  "repair": [
+    "Consumes already qualified preimage identities without broadening admission or replacing function bodies; an unknown function or altered released body still refuses.",
+    "Partial-installation diagnostics contain sorted function identities only.",
+    "Production CLI registers both CJS and ESM loaders with the explicit app configuration for the full same-client transaction callback. It restores hooks/configuration in finally, rejects concurrent loader use, and accepts only unambiguous exact named or CommonJS source function exports."
+  ],
+  "checks": {
+    "installer": {
+      "passed": 42,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-installer-unit-v7.log"
+    },
+    "stages": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-stage-unit-v7.log",
+      "includes": "A fresh real Node process loads the entire actual installer graph, preserves the returned function, and tests success, import failure, callback failure, configuration restoration and concurrency refusal."
+    },
+    "lint": {
+      "exitCode": 0,
+      "log": "current-security-installer-lint-v10.log"
+    },
+    "mjsParse": {
+      "exitCode": 0,
+      "files": [
+        "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+        "tooling/scripts/lib/union-eyes-bootstrap-stages.mjs"
+      ]
+    }
+  },
+  "nodeSmokeEnvironment": {
+    "node": "v24.16.0",
+    "platform": "macOS local process; not final Linux application image",
+    "databaseConnected": false
+  },
+  "earlierLoaderFailures": [
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-cli-loader-v1.log",
+      "sha256": "82ab6ffcaa38beecac568d8580152fe9c2c2a56778e7445bd036e7e8053992fe"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-cli-loader-v2.log",
+      "sha256": "5daa34d07532c7786e140e4397d911c513be2a9f0c105c9cca4b954f0bdcee1e"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-cli-loader-v3.log",
+      "sha256": "0559f91ff5d1d48bb4bf39ddc53db0792e30d894bda8b36fde6fb3a5a57601f8"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-cli-loader-v4.log",
+      "sha256": "74dc9a848515b29deefe7df0b95ea59649e14d2c0fa6a4da2e534982fc962c67"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-stage-unit-v4.log",
+      "sha256": "c1a6d70f694f49d76708bf59d39fb67e1d644732c489afd8e8fe17ba2350fc05"
+    }
+  ],
+  "earlierPrototypeCorrection": "loader-v4 resolved the graph but reported loaded:false because of CommonJS namespace shape. It is not counted as a successful export test; the later real stage CLI assertions passed.",
+  "artifacts": {
+    "current-security-installer-unit-v7.log": "8c2437e2141f869623e6851adc83345f4e05c5f765daa815ce1712742c643868",
+    "current-security-stage-unit-v7.log": "a513b2619af2fedcc73dc9354b973ed9a603cbc57409c6f7bf57f74e854b596a",
+    "current-security-installer-lint-v10.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+  },
+  "required": "Rerun the actual native transition cases on the unchanged historical template; perform final semantic/CI/source provenance qualification.",
+  "readiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "d98fdedb121c555a427ab2763c599edbb9d3dc2c56397b2a8386d805e59dca2b",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v4.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

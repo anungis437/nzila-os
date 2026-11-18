@@ -12,22 +12,22 @@ export const admissionQueries = [
   {
     name: 'roles',
     sql: `SELECT rolname, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole
-          FROM pg_roles
+          FROM pg_catalog.pg_roles
           WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system')`,
   },
   {
     name: 'membership',
     sql: `SELECT member.rolname AS member, granted.rolname AS granted
-          FROM pg_auth_members link
-          JOIN pg_roles member ON member.oid = link.member
-          JOIN pg_roles granted ON granted.oid = link.roleid
+          FROM pg_catalog.pg_auth_members link
+          JOIN pg_catalog.pg_roles member ON member.oid = link.member
+          JOIN pg_catalog.pg_roles granted ON granted.oid = link.roleid
           WHERE member.rolname IN ('union_eyes_runtime', 'union_eyes_system')`,
   },
   {
     name: 'schemaUsage',
     sql: `SELECT r.rolname, n.nspname
-          FROM pg_roles r
-          JOIN pg_namespace n ON has_schema_privilege(r.oid, n.oid, 'USAGE')
+          FROM pg_catalog.pg_roles r
+          JOIN pg_catalog.pg_namespace n ON pg_catalog.has_schema_privilege(r.oid, n.oid, 'USAGE')
           WHERE r.rolname IN ('union_eyes_runtime', 'union_eyes_system')
             AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
             AND n.nspname NOT LIKE 'pg_temp%'
@@ -35,13 +35,13 @@ export const admissionQueries = [
   },
   {
     name: 'schemaCreate',
-    // Only schemas that EXIST are inspected: has_schema_privilege raises on a missing schema, which made admission fail outright on a
+    // Only schemas that EXIST are inspected: pg_catalog.has_schema_privilege raises on a missing schema, which made admission fail outright on a
     // topology that has no audit_security schema (a missing schema holds no privilege to leak).
     sql: `SELECT r.rolname, s.nspname
-          FROM pg_roles r
-          CROSS JOIN (SELECT nspname FROM pg_namespace WHERE nspname IN ('public', 'user_management', 'audit_security')) AS s
+          FROM pg_catalog.pg_roles r
+          CROSS JOIN (SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname IN ('public', 'user_management', 'audit_security')) AS s
           WHERE r.rolname IN ('union_eyes_runtime', 'union_eyes_system')
-            AND has_schema_privilege(r.rolname, s.nspname::name, 'CREATE')`,
+            AND pg_catalog.has_schema_privilege(r.rolname, s.nspname::name, 'CREATE')`,
   },
   {
     name: 'relations',
@@ -52,22 +52,22 @@ export const admissionQueries = [
                  c.relforcerowsecurity,
                  ARRAY(
                    SELECT priv
-                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE')) AS v(ord, priv)
-                   WHERE has_table_privilege('union_eyes_runtime', c.oid, priv)
+                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE'), (5, 'REFERENCES'), (6, 'TRIGGER'), (7, 'TRUNCATE')) AS v(ord, priv)
+                   WHERE pg_catalog.has_table_privilege('union_eyes_runtime', c.oid, priv)
                    ORDER BY ord
                  ) AS runtime,
                  ARRAY(
                    SELECT priv
-                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE')) AS v(ord, priv)
-                   WHERE has_table_privilege('union_eyes_system', c.oid, priv)
+                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE'), (5, 'REFERENCES'), (6, 'TRIGGER'), (7, 'TRUNCATE')) AS v(ord, priv)
+                   WHERE pg_catalog.has_table_privilege('union_eyes_system', c.oid, priv)
                    ORDER BY ord
                  ) AS system
-          FROM pg_class c
-          JOIN pg_namespace n ON n.oid = c.relnamespace
+          FROM pg_catalog.pg_class c
+          JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
           WHERE n.nspname IN ('public', 'user_management', 'audit_security')
             AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
-            AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime')
-            AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system')
+            AND EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'union_eyes_runtime')
+            AND EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'union_eyes_system')
           ORDER BY 1, 2`,
   },
   {
@@ -75,17 +75,18 @@ export const admissionQueries = [
     sql: `SELECT relation.relname AS table_name,
                  pol.polname,
                  pol.polcmd,
-                 pg_get_expr(pol.polqual, pol.polrelid) AS qual,
-                 pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check,
+                 pol.polpermissive,
+                 pg_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS qual,
+                 pg_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check,
                  COALESCE(policy_roles.roles, ARRAY[]::name[]) AS roles
-          FROM pg_policy pol
-          JOIN pg_class relation ON relation.oid = pol.polrelid
-          JOIN pg_namespace namespace ON namespace.oid = relation.relnamespace
+          FROM pg_catalog.pg_policy pol
+          JOIN pg_catalog.pg_class relation ON relation.oid = pol.polrelid
+          JOIN pg_catalog.pg_namespace namespace ON namespace.oid = relation.relnamespace
           LEFT JOIN (
             SELECT vectors.polroles,
               COALESCE(array_agg(role.rolname ORDER BY role.rolname) FILTER (WHERE role.rolname IS NOT NULL), ARRAY[]::name[]) AS roles
-            FROM (SELECT DISTINCT polroles FROM pg_policy) AS vectors
-            LEFT JOIN pg_roles role ON role.oid = ANY (vectors.polroles)
+            FROM (SELECT DISTINCT polroles FROM pg_catalog.pg_policy) AS vectors
+            LEFT JOIN pg_catalog.pg_roles role ON role.oid = ANY (vectors.polroles)
             GROUP BY vectors.polroles
           ) AS policy_roles ON policy_roles.polroles = pol.polroles
           WHERE namespace.nspname = 'public'`,
@@ -93,88 +94,102 @@ export const admissionQueries = [
   {
     name: 'publicGrants',
     sql: `SELECT n.nspname AS schema_name, c.relname AS table_name, acl.privilege_type
-          FROM pg_class c
-          JOIN pg_namespace n ON n.oid = c.relnamespace
-          CROSS JOIN LATERAL aclexplode(c.relacl) acl
+          FROM pg_catalog.pg_class c
+          JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+          CROSS JOIN LATERAL pg_catalog.aclexplode(c.relacl) acl
           WHERE c.relacl IS NOT NULL
             AND n.nspname = 'public'
             AND c.relkind IN ('r', 'p', 'v', 'm')
             AND acl.grantee = 0
-            AND acl.privilege_type IN ('SELECT', 'INSERT', 'UPDATE', 'DELETE')`,
+            AND acl.privilege_type IN ('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'REFERENCES', 'TRIGGER', 'TRUNCATE')`,
   },
   {
     name: 'sequences',
     sql: `SELECT c.relname
-          FROM pg_class c
-          JOIN pg_namespace n ON n.oid = c.relnamespace
+          FROM pg_catalog.pg_class c
+          JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
           WHERE n.nspname = 'public'
             AND c.relkind = 'S'
-            AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime')
-            AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system')
+            AND EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'union_eyes_runtime')
+            AND EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'union_eyes_system')
             AND (
-              has_sequence_privilege('union_eyes_runtime', c.oid, 'USAGE')
-              OR has_sequence_privilege('union_eyes_runtime', c.oid, 'SELECT')
-              OR has_sequence_privilege('union_eyes_system', c.oid, 'USAGE')
-              OR has_sequence_privilege('union_eyes_system', c.oid, 'SELECT')
+              pg_catalog.has_sequence_privilege('union_eyes_runtime', c.oid, 'USAGE')
+              OR pg_catalog.has_sequence_privilege('union_eyes_runtime', c.oid, 'SELECT')
+              OR pg_catalog.has_sequence_privilege('union_eyes_system', c.oid, 'USAGE')
+              OR pg_catalog.has_sequence_privilege('union_eyes_system', c.oid, 'SELECT')
             )`,
   },
   {
     name: 'definers',
     sql: `SELECT n.nspname, p.proname, owner.rolname AS owner, p.proconfig,
-                 has_function_privilege('union_eyes_runtime',p.oid,'EXECUTE') AS runtime_execute,
-                 has_function_privilege('union_eyes_system',p.oid,'EXECUTE') AS system_execute,
-                 has_function_privilege('public',p.oid,'EXECUTE') AS public_execute
-          FROM pg_proc p
-          JOIN pg_namespace n ON n.oid = p.pronamespace
-          JOIN pg_roles owner ON owner.oid = p.proowner
+                 pg_catalog.has_function_privilege('union_eyes_runtime',p.oid,'EXECUTE') AS runtime_execute,
+                 pg_catalog.has_function_privilege('union_eyes_system',p.oid,'EXECUTE') AS system_execute,
+                 pg_catalog.has_function_privilege('public',p.oid,'EXECUTE') AS public_execute
+          FROM pg_catalog.pg_proc p
+          JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+          JOIN pg_catalog.pg_roles owner ON owner.oid = p.proowner
           WHERE p.prosecdef
             AND n.nspname NOT IN ('pg_catalog', 'information_schema')
-            AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime')
-            AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system')
+            AND EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'union_eyes_runtime')
+            AND EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'union_eyes_system')
             AND (
-              has_function_privilege('union_eyes_runtime', p.oid, 'EXECUTE')
-              OR has_function_privilege('union_eyes_system', p.oid, 'EXECUTE')
-              OR has_function_privilege('public', p.oid, 'EXECUTE')
+              pg_catalog.has_function_privilege('union_eyes_runtime', p.oid, 'EXECUTE')
+              OR pg_catalog.has_function_privilege('union_eyes_system', p.oid, 'EXECUTE')
+              OR pg_catalog.has_function_privilege('public', p.oid, 'EXECUTE')
             )`,
   },
   {
+    name: 'currentFunctions',
+    sql: `SELECT n.nspname AS schema,p.proname AS name,
+          n.nspname||'.'||p.proname||'('||array_to_string(ARRAY(SELECT pg_catalog.format_type(t,NULL) FROM unnest(p.proargtypes::oid[]) t),',')||')' AS signature,
+          pg_catalog.pg_get_userbyid(p.proowner) AS owner,p.prosrc AS body,l.lanname AS language,p.provolatile AS volatility,
+          p.prosecdef AS definer,p.proisstrict AS strict,p.proleakproof AS leakproof,
+          pg_catalog.format_type(p.prorettype,NULL) AS returns,p.proretset AS "returnsSet",
+          p.proargnames AS "argumentNames",p.proargmodes AS "argumentModes",
+          ARRAY(SELECT pg_catalog.format_type(t,NULL) FROM unnest(COALESCE(p.proallargtypes,p.proargtypes::oid[])) t) AS "allArgumentTypes",
+          p.pronargdefaults AS "defaultCount",pg_catalog.pg_get_expr(p.proargdefaults,0) AS defaults,p.proconfig AS config,
+          (SELECT pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object('role',COALESCE(r.rolname,'PUBLIC'),'grantable',a.is_grantable))
+            FROM pg_catalog.aclexplode(COALESCE(p.proacl,pg_catalog.acldefault('f',p.proowner))) a LEFT JOIN pg_catalog.pg_roles r ON r.oid=a.grantee
+            WHERE a.privilege_type='EXECUTE') AS "executeAcl"
+          FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace JOIN pg_catalog.pg_language l ON l.oid=p.prolang
+          WHERE n.nspname IN ('public','user_management') ORDER BY n.nspname,p.proname,p.oid`,
+  },
+  {
     name: 'dedicatedRoles',
-    sql: `SELECT c.relname AS table_name,
+    sql: `SELECT n.nspname AS schema_name,c.relname AS table_name,
                  r.rolname AS role_name,
                  ARRAY(
                    SELECT priv
-                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE')) AS v(ord, priv)
-                   WHERE has_table_privilege(r.oid, c.oid, priv)
+                   FROM (VALUES (1, 'SELECT'), (2, 'INSERT'), (3, 'UPDATE'), (4, 'DELETE'), (5, 'REFERENCES'), (6, 'TRIGGER'), (7, 'TRUNCATE')) AS v(ord, priv)
+                   WHERE pg_catalog.has_table_privilege(r.oid, c.oid, priv)
                    ORDER BY ord
                  ) AS privileges
-          FROM pg_class c
-          JOIN pg_namespace n ON n.oid = c.relnamespace
-          JOIN pg_roles r ON r.rolname IN (
-            'ue_framework_admin', 'ue_framework_identity', 'ue_framework_worker'
-          )
-          WHERE n.nspname = 'public'
+          FROM pg_catalog.pg_class c
+          JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+          JOIN pg_catalog.pg_roles r ON r.rolname LIKE 'ue_framework_%' OR r.rolname LIKE 'nzila_auth_%'
+          WHERE n.nspname IN ('public','user_management')
             AND c.relkind IN ('r', 'p')`,
   },
   {
     name: 'columnGrants',
     sql: `SELECT n.nspname AS schema_name, c.relname AS table_name, a.attname AS column_name,
-                 COALESCE(g.rolname, 'PUBLIC') AS role_name, x.privilege_type
-          FROM pg_attribute a
-          JOIN pg_class c ON c.oid = a.attrelid
-          JOIN pg_namespace n ON n.oid = c.relnamespace
-          CROSS JOIN LATERAL aclexplode(a.attacl) x
-          LEFT JOIN pg_roles g ON g.oid = x.grantee
+                 COALESCE(g.rolname, 'PUBLIC') AS role_name, x.privilege_type,x.is_grantable
+          FROM pg_catalog.pg_attribute a
+          JOIN pg_catalog.pg_class c ON c.oid = a.attrelid
+          JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+          CROSS JOIN LATERAL pg_catalog.aclexplode(a.attacl) x
+          LEFT JOIN pg_catalog.pg_roles g ON g.oid = x.grantee
           WHERE a.attacl IS NOT NULL
-            AND a.attnum > 0
+            AND a.attnum <> 0
             AND NOT a.attisdropped
             AND n.nspname IN ('public', 'user_management', 'audit_security')
           ORDER BY 1, 2, 4, 5, 3`,
   },
   {
     name: 'defaults',
-    sql: `SELECT n.nspname, pg_get_userbyid(d.defaclrole) AS owner, d.defaclacl::text AS acl
-          FROM pg_default_acl d
-          LEFT JOIN pg_namespace n ON n.oid = d.defaclnamespace
+    sql: `SELECT n.nspname, pg_catalog.pg_get_userbyid(d.defaclrole) AS owner, d.defaclacl::text AS acl
+          FROM pg_catalog.pg_default_acl d
+          LEFT JOIN pg_catalog.pg_namespace n ON n.oid = d.defaclnamespace
           WHERE d.defaclacl::text LIKE '%union_eyes_runtime%'
              OR d.defaclacl::text LIKE '%union_eyes_system%'`,
   },
@@ -202,6 +217,30 @@ function samePrivileges(actual, expected) {
 function rows(snapshots, name) {
   const value = snapshots?.[name]
   return Array.isArray(value) ? value : []
+}
+
+/** Exact compiler-derived identities. Same-name overloads and extra ACLs deny. */
+export function currentFunctionViolations(expected, actual) {
+  if (!Array.isArray(expected)) return ['current function source contract is missing']
+  const violations = []
+  const scalar = ['schema','name','signature','owner','language','volatility','definer','strict','leakproof','returns','returnsSet','defaultCount','defaults']
+  const arrays = ['argumentNames','argumentModes','allArgumentTypes','config']
+  const acl = value => Array.isArray(value)
+    ? [...value].sort((a,b) => String(a.role).localeCompare(String(b.role))) : value
+  for (const spec of expected) {
+    const matches = actual.filter(row => row.schema === spec.schema && row.name === spec.name)
+    const admittedNames = expected.filter(row => row.schema === spec.schema && row.name === spec.name)
+    const row = matches.find(item => item.signature === spec.signature)
+    if (matches.length !== admittedNames.length || !row
+      || !/^[a-f0-9]{64}$/.test(spec.bodyDigest ?? '')
+      || typeof row.body !== 'string' || createHash('sha256').update(row.body).digest('hex') !== spec.bodyDigest
+      || scalar.some(key => row[key] !== spec[key])
+      || arrays.some(key => JSON.stringify(row[key]) !== JSON.stringify(spec[key]))
+      || JSON.stringify(acl(row.executeAcl)) !== JSON.stringify(acl(spec.executeAcl))) {
+      violations.push(`current function differs: ${spec.signature}`)
+    }
+  }
+  return violations
 }
 
 function policyViolations(table, entry, policies) {
@@ -269,7 +308,7 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
       violations.push(`${role} is absent`)
       continue
     }
-    if (attributes.rolsuper || attributes.rolbypassrls || attributes.rolcreatedb || attributes.rolcreaterole) {
+    if (attributes.rolsuper !== false || attributes.rolbypassrls !== false || attributes.rolcreatedb !== false || attributes.rolcreaterole !== false) {
       violations.push(`${role} has a privileged attribute`)
     }
   }
@@ -309,6 +348,8 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
     const runtime = asArray(relation.runtime)
     const system = asArray(relation.system)
     if (relation.relkind === 'v' || relation.relkind === 'm') {
+      if (relation.schema_name === 'public' && !manifest.has(relation.table_name))
+        violations.push(`public.${relation.table_name} is unclassified`)
       if (runtime.length || system.length) violations.push(`${key} is a view with runtime or system privileges`)
       continue
     }
@@ -340,6 +381,15 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
     if (!samePrivileges(runtime, entry.runtime) || !samePrivileges(system, entry.system)) {
       violations.push(`public.${relation.table_name} privileges are runtime[${runtime}] system[${system}]`)
     }
+    if (runtime.length && payload.requiredSessionPolicy) {
+      const expected = payload.requiredSessionPolicy
+      const matches = (policiesByTable.get(relation.table_name) ?? []).filter(policy => policy.polname === expected.name)
+      const policy = matches[0]
+      if (matches.length !== 1 || !policy || policy.polcmd !== expected.command || policy.polpermissive !== expected.permissive
+        || JSON.stringify(policy.roles) !== JSON.stringify(expected.roles)
+        || policy.qual !== expected.predicate || policy.with_check !== expected.predicate)
+        violations.push(`public.${relation.table_name} verified session policy is missing or changed`)
+    }
     if (rlsRequired.has(entry.classification)) {
       if (!relation.relrowsecurity || !relation.relforcerowsecurity) {
         violations.push(`public.${relation.table_name} lacks FORCE RLS`)
@@ -349,33 +399,37 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
     }
   }
 
-  const presentPublic = new Set(
-    rows(snapshots, 'relations')
-      .filter((relation) => relation.schema_name === 'public')
-      .map((relation) => relation.table_name),
-  )
   const dedicatedActual = new Map()
   for (const row of rows(snapshots, 'dedicatedRoles')) {
-    dedicatedActual.set(`${row.table_name}|${row.role_name}`, asArray(row.privileges))
+    dedicatedActual.set(`${row.schema_name ?? 'public'}.${row.table_name}|${row.role_name}`, asArray(row.privileges))
   }
   for (const expected of payload.dedicatedRolePrivileges ?? []) {
-    if (!presentPublic.has(expected.table)) continue
-    const actual = dedicatedActual.get(`${expected.table}|${expected.role}`) ?? []
-    if (!samePrivileges(actual, expected.privileges)) {
-      violations.push(`public.${expected.table} ${expected.role} privileges are [${actual}]`)
+    const schema = expected.schema ?? 'public'
+    const present = rows(snapshots,'relations').some(row => row.schema_name === schema && row.table_name === expected.table)
+    if (!present) continue
+    const actual = dedicatedActual.get(`${schema}.${expected.table}|${expected.role}`) ?? []
+    if (JSON.stringify([...actual].sort()) !== JSON.stringify([...expected.privileges].sort())) {
+      violations.push(`${schema}.${expected.table} ${expected.role} privileges are [${actual}]`)
     }
+  }
+  for (const row of rows(snapshots,'dedicatedRoles')) {
+    if (!asArray(row.privileges).length) continue
+    if (!(payload.dedicatedRolePrivileges ?? []).some(expected => (expected.schema ?? 'public') === (row.schema_name ?? 'public')
+      && expected.table === row.table_name && expected.role === row.role_name))
+      violations.push(`${row.schema_name ?? 'public'}.${row.table_name} ${row.role_name} has undeclared table privileges`)
   }
 
   for (const row of rows(snapshots, 'publicGrants')) {
     violations.push(`PUBLIC holds ${row.privilege_type} on ${row.schema_name}.${row.table_name}`)
   }
   for (const row of rows(snapshots, 'sequences')) violations.push(`public sequence ${row.relname} is granted`)
+  violations.push(...currentFunctionViolations(payload.currentFunctions, rows(snapshots,'currentFunctions')))
   for (const row of rows(snapshots, 'definers')) {
-    const expected = (payload.approvedRuntimeDefiners ?? []).find(entry =>
-      entry.schema === row.nspname && entry.name === row.proname && entry.owner === row.owner,
-    )
-    if (!expected || !asArray(row.proconfig).includes('search_path=pg_catalog')
-      || row.runtime_execute !== true || row.system_execute !== false || row.public_execute !== false) {
+    const expected = (payload.currentFunctions ?? []).find(entry => entry.schema === row.nspname && entry.name === row.proname)
+    const effective = role => Boolean(expected?.executeAcl?.some(grant => grant.role === role))
+    if (!expected || row.owner !== expected.owner || JSON.stringify(row.proconfig) !== JSON.stringify(expected.config)
+      || row.runtime_execute !== effective('union_eyes_runtime')
+      || row.system_execute !== effective('union_eyes_system') || row.public_execute !== effective('PUBLIC')) {
       violations.push(`${row.nspname}.${row.proname} is a SECURITY DEFINER function executable by a runtime principal`)
     }
   }
@@ -394,6 +448,10 @@ export function assessCatalogAdmission(contract, snapshots, environment = 'unkno
       )
       continue
     }
+    if (row.is_grantable !== (approvedColumns.get(key).grantable ?? false))
+      violations.push(`${row.schema_name}.${row.table_name}.${row.column_name} column grant option differs`)
+    if (!approvedColumns.get(key).columns.includes(row.column_name))
+      violations.push(`${row.schema_name}.${row.table_name}.${row.column_name} is outside the source column ACL`)
     actualColumns.set(key, [...(actualColumns.get(key) ?? []), row.column_name])
   }
   const presentRelations = new Set(

@@ -4,6 +4,7 @@
 > **Enforced by**: `tooling/contract-tests/stack-authority.test.ts`  
 > **Owner**: `@nzila/platform`  
 > **Last reviewed**: 2025-02-26
+> **UE current-source reconciliation**: 2026-11-18 UTC; qualification remains separate below.
 
 ---
 
@@ -39,12 +40,12 @@ audit trails, and lets contract tests enforce structural invariants.
 | **web** | **None** | No DB | — | Static/marketing |
 | **orchestrator-api** | **TS/Drizzle** | Lazy `getDb()` (Fastify) | — | API-key authed, not a business app |
 | **nzila-hq** | **TS/Drizzle** | `server/db/client.ts` (Drizzle) | — | INCUBATING executive cockpit — scoped DB, PILOT promotion gate |
-| **union-eyes** | **Django** | Django ORM (12 apps) | TS/Drizzle (read proxy) | See §2 |
+| **union-eyes** | **Current TS/Drizzle execution contract** | Verified canonical session, authority kernel, scoped services and PostgreSQL physical guards | Retained Django model/schema sources and explicitly admitted framework sidecar | See §2.5; no blanket raw-write authority |
 | **abr** | **Django** | Django ORM (10 apps) | TS wired but not active | See §2 |
 
 ---
 
-## 2. Dual-Stack Rules (UE, ABR)
+## 2. Django-Authoritative Rules (ABR)
 
 For apps where **Django is authoritative**:
 
@@ -84,6 +85,44 @@ formal API boundary. TS code calls the proxy; Django handles the mutation.
 
 **Non-proxy direct DB writes from TS constitute a contract violation.**
 
+### 2.5. Union Eyes current source authority
+
+Union Eyes is classified as TS-authoritative in the existing contract test.
+Its retained Django backend is a declared sidecar, not an alternate grant of
+authority to mutate every Django-managed table. Django declarations still
+produce schema inputs; execution privileges come from the current admitted
+table/column/function contracts and physical guards. Contained compatibility
+viewsets remain denied. Moving a guarded operation back to a legacy Django
+viewset does not satisfy this boundary.
+
+Ordinary application operations must preserve the real canonical identity,
+active private membership and selected organization through the transaction.
+Action-specific kernel decisions and current resource facts remain required;
+neither a role title, a UI link, a caller-supplied organization nor a SYSTEM
+connection creates business authority. Writes retain required history and
+audit in their original transaction, including refusal and rollback behavior.
+Services receiving a transaction must use that transaction rather than opening
+another connection for a protected write.
+
+The platform NAR store has a separate connection and storage/signature
+contract. Its persistence service must preserve that connection and acknowledge
+only the signed record it actually stored. Wrapping that connection in the
+application database's SYSTEM context would not establish platform authority.
+Canonical tenant audit/proof persistence retains its own transaction boundary.
+
+Current implementation sources include `apps/union-eyes/lib/authority`,
+`apps/union-eyes/db/auth`, and
+`apps/union-eyes/scripts/bootstrap-v2/current-authority.ts`. The current source
+plan declares exact producers and privilege contracts; it does not prove a
+deployment or a user journey. Legacy identity GUCs and flag-off compatibility
+paths cannot bypass the current session and physical persistence guards.
+
+The sole canonical UE qualification record is
+[UE_V2_BASE_ACTION_COVERAGE.json](../../../union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json).
+This architecture reconciliation supplies no qualification, promotion,
+institutional adoption, finance feature, or Step 2 acceptance. Historical
+evidence remains historical.
+
 ---
 
 ## 3. TS-Authoritative Rules (Console, CFO, Partners, etc.)
@@ -102,7 +141,8 @@ Direct `db` imports from `@nzila/db` are restricted by ESLint (`no-shadow-db`).
 
 ### 3.2. No Django Backend
 
-These apps have no Django component. Domain logic lives in:
+These apps do not introduce a new Django mutation authority. Union Eyes retains
+the explicitly bounded model/framework sidecar described in §2.5. Domain logic lives in:
 
 - Server actions (`'use server'` files)
 - API routes (`app/api/`)
@@ -116,13 +156,14 @@ These apps have no Django component. Domain logic lives in:
 
 The invariant `STACK_AUTHORITY_001` verifies:
 
-1. **Django-authoritative apps** (UE, ABR): TS layer MUST NOT contain
+1. **Django-authoritative apps** (ABR): TS layer MUST NOT contain
    Drizzle mutation imports (`db.insert`, `db.update`, `db.delete`,
    `drizzle-orm/insert`, etc.) outside of read-only or audited-scoped
    patterns.
 
-2. **TS-authoritative apps**: MUST NOT contain Django proxy calls or
-   Python ORM imports.
+2. **TS-authoritative apps**: MUST NOT introduce an undeclared Django backend.
+   UE's retained sidecar follows §2.5; its existing audited-context and AST
+   mutation checks remain enforced.
 
 3. **No new Django backends**: Any app not in the Django-authority list
    must not introduce a Django backend without updating this document
@@ -143,14 +184,19 @@ Each exception has an owner, justification, and expiry date.
 
 ## 5. Migration Roadmap
 
-### UE → Consolidated Stack
+### UE current contract and qualification
 
-| Phase | Target | Description |
-|-------|--------|-------------|
-| **Phase 1** (current) | Auth consolidation | All TS actions use `requireAuth()` from rbac-server. No raw `auth()` for mutations. |
-| **Phase 2** | Read-path alignment | All TS reads go through `withRLSContext` or `createScopedDb`, never raw `db.query` |
-| **Phase 3** | Mutation boundary | All domain mutations routed through `djangoProxy()`. No direct Drizzle inserts. |
-| **Phase 4** | Single-authority decision | Evaluate: migrate Django apps to TS/Drizzle or commit to Django as permanent authority |
+The earlier proxy-every-mutation roadmap is superseded by the current
+source-owned execution boundary in §2.5. It must not revive denied compatibility
+writers or replace canonical authority with a legacy proxy to satisfy an expired
+exception.
+
+| Boundary | Required implementation |
+|----------|-------------------------|
+| Identity and organization | Real canonical session and private membership, bound to each actual transaction |
+| Business authority | Current action/resource kernel decisions and explicit source-backed relationships or mandates |
+| Persistence | Exact admitted roles/ACLs/RLS and physical guards; required audit/history commit or roll back with the write |
+| Qualification | Exact-candidate programme evidence recorded in the canonical UE coverage artifact; source designation alone proves none |
 
 ### ABR → Formal Boundary
 

@@ -1,3 +1,4 @@
+import { runtimeRequestAs } from '../helpers/runtime-auth'
 /**
  * Runtime acceptance 10: promotion of UNIT_VERIFIED security repairs to real HTTP proof on the production build.
  *
@@ -15,28 +16,40 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002'
 const U = UE_TEST_USERS
 
 const as = (user: { userId: string; orgId: string }): Promise<APIRequestContext> =>
-  pwRequest.newContext({ baseURL: BASE, extraHTTPHeaders: { cookie: `nzila_session=ue-seed-session-${user.userId}; selected_org_id=${user.orgId}` } })
+  runtimeRequestAs(user.userId, user.orgId)
 const anonymous = () => pwRequest.newContext({ baseURL: BASE })
 const apiOnly = (testInfo: { project: { name: string } }) => testInfo.project.name !== 'desktop'
-const status = async (api: APIRequestContext, method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string) =>
-  (await api[method](path, method === 'get' || method === 'delete' ? undefined : { data: {} })).status()
+const status = async (
+  api: APIRequestContext,
+  method: 'get' | 'post' | 'put' | 'patch' | 'delete',
+  path: string,
+) =>
+  (
+    await api[method](path, method === 'get' || method === 'delete' ? undefined : { data: {} })
+  ).status()
 
 // Rate limiting is a safety control, not a route acceptance result. Respect it
 // and retry within a bounded window; never count 429 as proof of HTTP 501.
-const statusAfterThrottle = async (api: APIRequestContext, method: 'get' | 'post', path: string): Promise<number> => {
+const statusAfterThrottle = async (
+  api: APIRequestContext,
+  method: 'get' | 'post',
+  path: string,
+): Promise<number> => {
   for (let attempt = 0; attempt < 8; attempt++) {
     const response = await api[method](path, method === 'get' ? undefined : { data: {} })
     if (response.status() !== 429) return response.status()
     if (attempt === 7) break
     const seconds = Number(response.headers()['retry-after'])
-    const waitMs = Number.isFinite(seconds) && seconds > 0
-      ? Math.min(32_000, Math.max(1000, seconds * 1000))
-      : Math.min(32_000, 1000 * 2 ** attempt)
+    const waitMs =
+      Number.isFinite(seconds) && seconds > 0
+        ? Math.min(32_000, Math.max(1000, seconds * 1000))
+        : Math.min(32_000, 1000 * 2 ** attempt)
     await new Promise((resolve) => setTimeout(resolve, waitMs))
   }
-  throw new Error(`Rate limiting prevented verification of ${method.toUpperCase()} ${path}; no route acceptance claimed`)
+  throw new Error(
+    `Rate limiting prevented verification of ${method.toUpperCase()} ${path}; no route acceptance claimed`,
+  )
 }
-
 
 test.describe('promotions: rewards export, profile roles, operational metrics, public surface', () => {
   test('DEF-0B11-PRP rewards export: administrator only, as a no-store CSV; a member, a steward and an anonymous caller are refused', async ({}, testInfo) => {
@@ -45,14 +58,20 @@ test.describe('promotions: rewards export, profile roles, operational metrics, p
     expect(admin.status()).toBe(200)
     expect(admin.headers()['content-type']).toContain('text/csv')
     expect(admin.headers()['cache-control']).toContain('no-store')
-    expect(await status(await as(U.memberPrimary), 'get', '/api/rewards/export?type=awards')).toBe(403)
-    expect(await status(await as(U.stewardPrimary), 'get', '/api/rewards/export?type=awards')).toBe(403)
+    expect(await status(await as(U.memberPrimary), 'get', '/api/rewards/export?type=awards')).toBe(
+      403,
+    )
+    expect(await status(await as(U.stewardPrimary), 'get', '/api/rewards/export?type=awards')).toBe(
+      403,
+    )
     expect(await status(await anonymous(), 'get', '/api/rewards/export?type=awards')).toBe(401)
   })
 
   test('DEF-0B11-PRP profile roles: a caller reads only their own roles, whoever they name', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
-    const response = await (await as(U.stewardPrimary)).get(`/api/profile/roles?userId=${U.memberPrimary.userId}`)
+    const response = await (
+      await as(U.stewardPrimary)
+    ).get(`/api/profile/roles?userId=${U.memberPrimary.userId}`)
     expect(response.status()).toBe(200)
     const body = await response.json()
     expect(body).toEqual({ role: 'steward', roles: ['steward'] })
@@ -74,8 +93,27 @@ test.describe('promotions: rewards export, profile roles, operational metrics, p
     const version = await (await anonymous()).get('/api/version')
     expect(version.status()).toBe(200)
     const text = (await version.text()).toLowerCase()
-    for (const leak of ['localhost', 'postgres', 'redis', 'azure', 'database_url', 'password', 'secret', '.internal', '10.', '192.168.']) expect(text, leak).not.toContain(leak)
-    expect(Object.keys(JSON.parse(text)).sort()).toEqual(['app', 'appversion', 'artifactid', 'buildtimestamp', 'gitsha', 'releaseid'])
+    for (const leak of [
+      'localhost',
+      'postgres',
+      'redis',
+      'azure',
+      'database_url',
+      'password',
+      'secret',
+      '.internal',
+      '10.',
+      '192.168.',
+    ])
+      expect(text, leak).not.toContain(leak)
+    expect(Object.keys(JSON.parse(text)).sort()).toEqual([
+      'app',
+      'appversion',
+      'artifactid',
+      'buildtimestamp',
+      'gitsha',
+      'releaseid',
+    ])
     expect(await status(await anonymous(), 'get', '/api/docs')).toBe(401)
     expect(await status(await anonymous(), 'get', '/api/docs/openapi')).toBe(401)
     expect(await status(await as(U.memberPrimary), 'get', '/api/docs')).toBe(403)
@@ -88,18 +126,33 @@ test.describe('promotions: retired and unimplemented surfaces never claim succes
     const member = await as(U.memberPrimary)
     for (const method of ['get', 'post', 'put', 'patch', 'delete'] as const) {
       expect(await status(member, method, '/api/v2/anything'), method).toBe(410)
-      expect(await status(await anonymous(), method, '/api/v2/anything'), `${method} anonymous`).toBe(401)
+      expect(
+        await status(await anonymous(), method, '/api/v2/anything'),
+        `${method} anonymous`,
+      ).toBe(401)
     }
   })
 
   test('DEF-0B4 carbon: 501 with no fabricated measurement, recommendation or certification', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const admin = await as(U.adminPrimary)
-    for (const [method, path] of [['get', '/api/carbon/dashboard'], ['get', '/api/carbon/infrastructure'], ['post', '/api/carbon/validate']] as const) {
+    for (const [method, path] of [
+      ['get', '/api/carbon/dashboard'],
+      ['get', '/api/carbon/infrastructure'],
+      ['post', '/api/carbon/validate'],
+    ] as const) {
       const response = await admin[method](path, method === 'post' ? { data: {} } : undefined)
       expect(response.status(), path).toBe(501)
       const text = await response.text()
-      for (const invented of ['totalEmissions', 'renewablePercentage', 'certificationEligible', 'validationScore', 'recommendations', '1245.67']) expect(text, `${path} ${invented}`).not.toContain(invented)
+      for (const invented of [
+        'totalEmissions',
+        'renewablePercentage',
+        'certificationEligible',
+        'validationScore',
+        'recommendations',
+        '1245.67',
+      ])
+        expect(text, `${path} ${invented}`).not.toContain(invented)
     }
   })
 
@@ -108,7 +161,12 @@ test.describe('promotions: retired and unimplemented surfaces never claim succes
     test.setTimeout(180_000)
     for (const who of [U.memberPrimary, U.adminPrimary]) {
       const api = await as(who)
-      for (const path of ['/api/tax/slips', '/api/tax/t106', '/api/tax/rl-1/generate', '/api/tax/cope/receipts']) {
+      for (const path of [
+        '/api/tax/slips',
+        '/api/tax/t106',
+        '/api/tax/rl-1/generate',
+        '/api/tax/cope/receipts',
+      ]) {
         expect(await statusAfterThrottle(api, 'get', path), `${who.userId} GET ${path}`).toBe(501)
         expect(await statusAfterThrottle(api, 'post', path), `${who.userId} POST ${path}`).toBe(501)
       }
@@ -129,20 +187,26 @@ test.describe('R-42: role floors resolve the real membership role', () => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     // The route then stops at an entitlement that is not enabled for the QA organization: a different refusal. What is proven
     // is that the ROLE gate no longer refuses real stewards and administrators.
-    const roleGate = async (who: { userId: string; orgId: string }) => (await (await as(who)).get('/api/ai/copilot/query')).text()
+    const roleGate = async (who: { userId: string; orgId: string }) =>
+      (await (await as(who)).get('/api/ai/copilot/query')).text()
     expect(await roleGate(U.stewardPrimary)).not.toContain("Requires at least 'steward' role")
     expect(await roleGate(U.adminPrimary)).not.toContain("Requires at least 'steward' role")
     expect(await roleGate(U.memberPrimary)).toContain("Requires at least 'steward' role")
-  })})
+  })
+})
 
-test.describe('promotion: DEF-0B10-PIL telemetry routes read only the caller\'s own organization', () => {
+test.describe("promotion: DEF-0B10-PIL telemetry routes read only the caller's own organization", () => {
   for (const route of ['champions', 'readiness', 'friction', 'metrics']) {
     test(`pilot/${route}: the administrator reads their own organization; naming another is refused; a member and a steward are refused`, async ({}, testInfo) => {
       test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
       const admin = await as(U.adminPrimary)
       const own = await admin.get(`/api/pilot/${route}`)
       expect(own.status(), await own.text()).toBe(200)
-      expect([400, 403, 404], 'a different organization named in the query').toContain((await admin.get(`/api/pilot/${route}?organizationId=${UE_TEST_ORGS.secondary.id}`)).status())
+      expect([400, 403, 404], 'a different organization named in the query').toContain(
+        (
+          await admin.get(`/api/pilot/${route}?organizationId=${UE_TEST_ORGS.secondary.id}`)
+        ).status(),
+      )
       expect((await (await as(U.memberPrimary)).get(`/api/pilot/${route}`)).status()).toBe(403)
       expect((await (await as(U.stewardPrimary)).get(`/api/pilot/${route}`)).status()).toBe(403)
       expect((await (await anonymous()).get(`/api/pilot/${route}`)).status()).toBe(401)
@@ -157,26 +221,43 @@ test.describe('promotions: role floors on organization settings, campaigns, heal
     const admin = await as(U.adminPrimary)
     const before = await admin.get('/api/settings/organization')
     expect(before.status(), await before.text()).toBe(200)
-    const settingsOf = async () => ((await (await admin.get('/api/settings/organization')).json()) as { data: { organization: { settings: Record<string, unknown> } } }).data.organization.settings
+    const settingsOf = async () =>
+      (
+        (await (await admin.get('/api/settings/organization')).json()) as {
+          data: { organization: { settings: Record<string, unknown> } }
+        }
+      ).data.organization.settings
     const original = await settingsOf()
     for (const key of ['perCapitaRate', 'creditLedger', 'arbitraryKey']) {
-      const refused = await admin.put('/api/settings/organization', { data: { settings: { [key]: key === 'perCapitaRate' ? 0.01 : { x: 1 } } } })
+      const refused = await admin.put('/api/settings/organization', {
+        data: { settings: { [key]: key === 'perCapitaRate' ? 0.01 : { x: 1 } } },
+      })
       expect(refused.status(), `${key} must be refused`).toBe(400)
       expect(await refused.text()).not.toContain('"x":1')
     }
     expect(await settingsOf(), 'a refused write changes nothing').toEqual(original)
-    const allowed = await admin.put('/api/settings/organization', { data: { settings: { timezone: 'America/Toronto' } } })
+    const allowed = await admin.put('/api/settings/organization', {
+      data: { settings: { timezone: 'America/Toronto' } },
+    })
     expect(allowed.status(), await allowed.text()).toBeLessThan(300)
     expect((await settingsOf()).timezone).toBe('America/Toronto')
     for (const who of [U.stewardPrimary, U.memberPrimary, U.executivePrimary]) {
       expect(await status(await as(who), 'get', '/api/settings/organization'), who.userId).toBe(403)
-      expect((await (await as(who)).put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })).status(), `${who.userId} write`).toBe(403)
+      expect(
+        (
+          await (
+            await as(who)
+          ).put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })
+        ).status(),
+        `${who.userId} write`,
+      ).toBe(403)
     }
     // 429 is valid flood protection but is NOT evidence that the role/tenant guard returned 403.
     // A previous test may have consumed this principal's mutation bucket; wait for the
     // advertised reset and retry once, preserving the strict authorization assertion.
     const wrongOrg = await as(U.wrongOrgSteward)
-    const wrongOrgWrite = () => wrongOrg.put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })
+    const wrongOrgWrite = () =>
+      wrongOrg.put('/api/settings/organization', { data: { settings: { timezone: 'UTC' } } })
     let denied = await wrongOrgWrite()
     if (denied.status() === 429) {
       const retryAfter = Number(denied.headers()['retry-after'])
@@ -185,7 +266,10 @@ test.describe('promotions: role floors on organization settings, campaigns, heal
       await new Promise((resolve) => setTimeout(resolve, (retryAfter + 1) * 1000))
       denied = await wrongOrgWrite()
     }
-    expect(denied.status(), 'wrong-org steward must be denied by authorization, not merely throttling').toBe(403)
+    expect(
+      denied.status(),
+      'wrong-org steward must be denied by authorization, not merely throttling',
+    ).toBe(403)
     await wrongOrg.dispose()
     expect((await settingsOf()).timezone, 'no refused caller changed it').toBe('America/Toronto')
   })
@@ -202,7 +286,13 @@ test.describe('promotions: role floors on organization settings, campaigns, heal
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const member = await as(U.memberPrimary)
     expect(await status(member, 'get', '/api/health-safety/incidents')).toBe(403)
-    expect(await status(member, 'get', '/api/health-safety/incidents/00000000-0000-4000-8000-000000000001')).toBe(403)
+    expect(
+      await status(
+        member,
+        'get',
+        '/api/health-safety/incidents/00000000-0000-4000-8000-000000000001',
+      ),
+    ).toBe(403)
     expect(await status(await as(U.adminPrimary), 'get', '/api/health-safety/incidents')).toBe(200)
     expect(await status(await anonymous(), 'get', '/api/health-safety/incidents')).toBe(401)
   })
@@ -214,9 +304,14 @@ test.describe('promotions: role floors on organization settings, campaigns, heal
     for (const who of [U.adminPrimary, U.stewardPrimary, U.memberPrimary]) {
       const api = await as(who)
       expect(await status(api, 'patch', `/api/testimonials/${id}`), `${who.userId} PATCH`).toBe(403)
-      expect(await status(api, 'delete', `/api/testimonials/${id}`), `${who.userId} DELETE`).toBe(403)
+      expect(await status(api, 'delete', `/api/testimonials/${id}`), `${who.userId} DELETE`).toBe(
+        403,
+      )
     }
-    expect(await testimonialState(id), 'the row survives every refused write').toEqual({ exists: true, visibility: 'internal' })
+    expect(await testimonialState(id), 'the row survives every refused write').toEqual({
+      exists: true,
+      visibility: 'internal',
+    })
   })
   test('DEF-0B11-SOC signatures: a member cannot send a document for signature', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')

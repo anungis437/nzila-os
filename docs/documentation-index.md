@@ -1,6 +1,6 @@
 # Documentation Index
 
-Generated: 2026-11-17T21:15:12.465Z
+Generated: 2026-11-18T00:05:30.935Z
 
 Total documents indexed: 2142
 Stale documents (>90 days since repo validation): 0
@@ -570,8 +570,8 @@ Stale documents (>90 days since repo validation): 0
 | [docs/categories/platform-and-operations/ops/release-governance/WORLD_CLASS_RELEASE_GOVERNANCE_SYSTEM.md](docs/categories/platform-and-operations/ops/release-governance/WORLD_CLASS_RELEASE_GOVERNANCE_SYSTEM.md) | categories | 2026-11-16 | current |
 | [docs/categories/platform-and-operations/ops/REPO_OPERATOR_RUNBOOK.md](docs/categories/platform-and-operations/ops/REPO_OPERATOR_RUNBOOK.md) | categories | 2026-11-16 | current |
 | [docs/categories/platform-and-operations/ops/revenue-metrics-canonical-layer.md](docs/categories/platform-and-operations/ops/revenue-metrics-canonical-layer.md) | categories | 2026-11-16 | current |
-| [docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md](docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md) | categories | 2026-11-16 | current |
-| [docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md](docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md) | categories | 2026-11-16 | current |
+| [docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md](docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md) | categories | 2026-11-17 | current |
+| [docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md](docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md) | categories | 2026-11-17 | current |
 | [docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md](docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md) | categories | 2026-11-16 | current |
 | [docs/categories/platform-and-operations/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md](docs/categories/platform-and-operations/ops/sre/WORLD_CLASS_PORTFOLIO_SRE_SYSTEM.md) | categories | 2026-11-16 | current |
 | [docs/categories/platform-and-operations/ops/staging-recovery-runbook.md](docs/categories/platform-and-operations/ops/staging-recovery-runbook.md) | categories | 2026-11-16 | current |
@@ -1632,10 +1632,10 @@ Stale documents (>90 days since repo validation): 0
 | [docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md](docs/ops/FINANCIAL_SERVICE_RELEASE_CHECKLIST.md) | ops | 2026-11-16 | current |
 | [docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md](docs/ops/FINANCIAL_SERVICE_RISK_REMEDIATION_MEMO.md) | ops | 2026-11-16 | current |
 | [docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md](docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md) | ops | 2026-11-16 | current |
-| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-11-17 | current |
+| [docs/ops/ownership-registry.md](docs/ops/ownership-registry.md) | ops | 2026-11-18 | current |
 | [docs/ops/release-governance/release-governance-audit.md](docs/ops/release-governance/release-governance-audit.md) | ops | 2026-11-17 | current |
 | [docs/ops/release-governance/union-eyes-e2e-bootstrap-baseline-2026-09-16.md](docs/ops/release-governance/union-eyes-e2e-bootstrap-baseline-2026-09-16.md) | ops | 2026-11-16 | current |
-| [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-11-16 | current |
+| [docs/ops/sre/executive-reliability-dashboard.md](docs/ops/sre/executive-reliability-dashboard.md) | ops | 2026-11-17 | current |
 | [docs/platform/AUDIT_ENFORCEMENT.md](docs/platform/AUDIT_ENFORCEMENT.md) | platform | 2026-11-16 | current |
 | [docs/platform/EVIDENCE_LIFECYCLE_POLICY.md](docs/platform/EVIDENCE_LIFECYCLE_POLICY.md) | platform | 2026-11-16 | current |
 | [docs/platform/ORG_SCOPED_TABLES.md](docs/platform/ORG_SCOPED_TABLES.md) | platform | 2026-11-16 | current |
@@ -1891,7 +1891,6 @@ Stale documents (>90 days since repo validation): 0
 | [docs/union-eyes/any-elimination.md](docs/union-eyes/any-elimination.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/bootstrap-v2/README.md](docs/union-eyes/bootstrap-v2/README.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/bootstrap-v2/UE_APPLICATION_IDENTITY_CONTRACT.md](docs/union-eyes/bootstrap-v2/UE_APPLICATION_IDENTITY_CONTRACT.md) | union-eyes | 2026-11-16 | current |
-| [docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md](docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md) | union-eyes | 2026-11-17 | current |
 | [docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.md](docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/bootstrap-v2/UE_V2_FINAL_V2_ACCEPTANCE_BLOCKERS.md](docs/union-eyes/bootstrap-v2/UE_V2_FINAL_V2_ACCEPTANCE_BLOCKERS.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.md](docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.md) | union-eyes | 2026-11-16 | current |
@@ -2135,6 +2134,7 @@ Stale documents (>90 days since repo validation): 0
 | [docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-deadline-navigation-repair-20261115.md](docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-deadline-navigation-repair-20261115.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/staging/evidence/ue-v2-invitation-email-compatibility-20261117/README.md](docs/union-eyes/staging/evidence/ue-v2-invitation-email-compatibility-20261117/README.md) | union-eyes | 2026-11-17 | current |
 | [docs/union-eyes/staging/evidence/ue-v2-privacy-self-service-20261116/README.md](docs/union-eyes/staging/evidence/ue-v2-privacy-self-service-20261116/README.md) | union-eyes | 2026-11-16 | current |
+| [docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md](docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md) | union-eyes | 2026-11-17 | current |
 | [docs/union-eyes/staging/UE_STAGING_APPLY_42774059371.md](docs/union-eyes/staging/UE_STAGING_APPLY_42774059371.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/staging/UE_V2_AUTHORITY_PHYSICAL_GUARDS.md](docs/union-eyes/staging/UE_V2_AUTHORITY_PHYSICAL_GUARDS.md) | union-eyes | 2026-11-16 | current |
 | [docs/union-eyes/staging/UE_V2_BASE_OPERATIONAL_MONITORING.md](docs/union-eyes/staging/UE_V2_BASE_OPERATIONAL_MONITORING.md) | union-eyes | 2026-11-17 | current |

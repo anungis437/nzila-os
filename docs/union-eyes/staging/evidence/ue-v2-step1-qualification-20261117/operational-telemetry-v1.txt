@@ -1,0 +1,13 @@
+
+> @nzila/governance-telemetry@0.1.0 test /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/governance-telemetry
+> vitest run --maxWorkers=1
+
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/governance-telemetry
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  16:36:40
+   Duration  760ms (import 78%, transform 17%, worker 2%, tests 2%)
+

@@ -2,7 +2,7 @@
  * Physical verification of scoped foundation security effects.
  * A hash in drizzle.__drizzle_migrations does not prove the effect.
  */
-import { SCOPED_NONPUBLIC_PRIVILEGES } from './union-eyes-catalog-authority.mjs'
+import { SCOPED_NONPUBLIC_PRIVILEGES, assertCurrentCatalogContract, verifyCurrentCatalogAuthority } from './union-eyes-catalog-authority.mjs'
 import { computeMigrationHash, getAppliedHashes } from './union-eyes-scoped-migrations.mjs'
 
 const EFFECT_TAGS = [
@@ -38,7 +38,10 @@ function same(actual, expected) {
   return actual.length === expected.length && actual.every((privilege, index) => privilege === expected[index])
 }
 
-export async function verifyRestoredAuthority(client, { migrationsDir, restored }) {
+export async function verifyRestoredAuthority(client, { migrationsDir, restored, repoRoot, currentContract }) {
+  // A current contract must match the actual packaged source projection. A
+  // caller cannot replace the historical checks with an unverified boolean.
+  const current = currentContract === undefined ? null : assertCurrentCatalogContract(repoRoot, currentContract)
   const applied = await getAppliedHashes(client)
   const recorded = {}
   let historicalMigrationRecorded = true
@@ -75,7 +78,7 @@ export async function verifyRestoredAuthority(client, { migrationsDir, restored 
     }
   }
   if (physicalSchemaVerified) {
-    for (const entry of SCOPED_NONPUBLIC_PRIVILEGES) {
+    for (const entry of current?.payload.nonPublic ?? SCOPED_NONPUBLIC_PRIVILEGES) {
       const runtime = await privileges(client, entry.schema, entry.table, 'union_eyes_runtime')
       const system = await privileges(client, entry.schema, entry.table, 'union_eyes_system')
       if (!same(runtime, entry.runtime) || !same(system, entry.system)) {
@@ -91,15 +94,19 @@ export async function verifyRestoredAuthority(client, { migrationsDir, restored 
        WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs'`,
     )
     if (!forced.rows[0]?.relforcerowsecurity) securityGaps.push('audit_security.audit_logs lacks FORCE RLS')
-    const policy = await client.query(
+    const policy = current ? null : await client.query(
       `SELECT 1 FROM pg_policy pol
        JOIN pg_class c ON c.oid = pol.polrelid
        JOIN pg_namespace n ON n.oid = c.relnamespace
        WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs' AND pol.polname = 'ue_runtime_audit_insert'`,
     )
-    if (policy.rowCount === 0) securityGaps.push('ue_runtime_audit_insert is absent')
+    if (policy?.rowCount === 0) securityGaps.push('ue_runtime_audit_insert is absent')
   } else {
     securityGaps.push('physical relations are absent')
+  }
+  if (current) {
+    try { await verifyCurrentCatalogAuthority(client, { repoRoot, currentContract: current }) }
+    catch (error) { securityGaps.push(error.message) }
   }
 
   const securityEffectsVerified = securityGaps.length === 0
@@ -115,6 +122,7 @@ export async function verifyRestoredAuthority(client, { migrationsDir, restored 
     missingRelations,
     securityGaps,
     hashDoesNotImplyEffects: true,
+    ...(current ? { currentSourceContractDigest: current.digest } : {}),
   }
 }
 

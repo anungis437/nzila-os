@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
+import { browserErrorReference, recordBrowserError } from '@nzila/os-core/browser-diagnostics';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 export default function DashboardError({
   error,
@@ -15,14 +16,17 @@ export default function DashboardError({
   reset: () => void;
 }) {
   const locale = useLocale();
+  const t = useTranslations('errors.dashboardBoundary');
+  const localReference = useId();
+  const diagnosticReference = browserErrorReference(error.digest, localReference);
   useEffect(() => {
-    // Log error to Sentry
-    Sentry.captureException(error, {
-      tags: {
-        boundary: 'dashboard',
-      },
-    });
-  }, [error]);
+    recordBrowserError({ app: 'union-eyes', surface: 'dashboard', code: 'CLIENT_BOUNDARY_ERROR',
+      reference: diagnosticReference.value, referenceOrigin: diagnosticReference.origin });
+    // Retain the existing SDK capture, without treating it as a delivery receipt.
+    try {
+      Sentry.captureException(error, { tags: { boundary: 'dashboard', reference: diagnosticReference.value } });
+    } catch { /* Reporting must not break the recovery controls. */ }
+  }, [error, diagnosticReference.value, diagnosticReference.origin]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 px-4">
@@ -35,25 +39,24 @@ export default function DashboardError({
           </div>
 
           <h1 className="mb-3 text-center text-2xl font-bold text-gray-900">
-            Something went wrong
+            {t('title')}
           </h1>
 
           <p className="mb-6 text-center text-gray-600">
-            We encountered an unexpected error while loading your dashboard. 
-            Our team has been notified and is working to fix the issue.
+            {t('description')}
           </p>
 
           {process.env.NODE_ENV === 'development' && (
             <div className="mb-6 rounded-lg bg-red-50 p-4">
               <p className="text-sm font-medium text-red-800 mb-2">
-                Error Details (Development Only):
+                {t('developmentDetails')}
               </p>
               <p className="text-xs text-red-700 font-mono break-all">
                 {error.message}
               </p>
               {error.digest && (
                 <p className="text-xs text-red-600 mt-2">
-                  Error ID: {error.digest}
+                  {t('reference', { reference: diagnosticReference.value })}
                 </p>
               )}
             </div>
@@ -66,34 +69,28 @@ export default function DashboardError({
               size="lg"
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try again
+              {t('retry')}
             </Button>
 
-            <Link href={`/${locale}`} className="w-full">
-              <Button
-                variant="outline"
-                className="w-full"
-                size="lg"
-              >
+            <Button asChild variant="outline" className="w-full" size="lg">
+              <Link href={`/${locale}`}>
                 <Home className="mr-2 h-4 w-4" />
-                Go to homepage
-              </Button>
-            </Link>
+                {t('home')}
+              </Link>
+            </Button>
           </div>
 
-          {error.digest && (
-            <p className="mt-6 text-center text-xs text-gray-500">
-              Reference ID: {error.digest}
-            </p>
-          )}
+          <p className="mt-6 text-center text-xs text-gray-500">
+            {t(diagnosticReference.origin === 'local' ? 'localReference' : 'reference', { reference: diagnosticReference.value })}
+          </p>
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          If this problem persists, please{' '}
-          <Link href={`/${locale}/dashboard/support`}
+          {t('supportLead')}{' '}
+          <Link href={`/${locale}/dashboard/help`}
             className="font-medium text-blue-600 hover:text-blue-700 underline"
           >
-            contact support
+            {t('supportLink')}
           </Link>
         </p>
       </div>

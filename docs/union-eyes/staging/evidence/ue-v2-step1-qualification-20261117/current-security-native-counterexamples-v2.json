@@ -1,0 +1,44 @@
+{
+  "scope": "INTERIM_FAILED_NATIVE_AND_COMPILER_CHECKS",
+  "nativeV5": "2 passed /1 failed; source function EXECUTE ACL restoration ordered after dependent framework statements.",
+  "nativeV6": "0 passed /3 failed; refused stale source commitment after upstream member-binding integration.",
+  "expandedManifestTypecheckV3": "FAILED five inferred AST property typing errors in installer; repaired subsequently, rerun pending.",
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v5.json",
+      "sha256": "f1f420a408d2b803a3fc98f0e6b74620c1d689a4b472f678a7b1a3d146c619a6"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v5.txt",
+      "sha256": "4276cc04899e1d272560aef39ed4a13acae1b16a7dcaf2c63ea038358cad9ae9"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v5-source.json",
+      "sha256": "4a6791070c83aeec3b49b10b853cbfd04276ad5609317827772bb897acb21a46"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v6.json",
+      "sha256": "6351e2d407cbdebb09df2bcdd3fe2c18003cd2ac4bddd51fed31e31c18219fa2"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v6.txt",
+      "sha256": "fb5205b257eb2d05a31dc2e4bc621430303c65fd2400e5ea13b03a85edc8cb07"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v6-source.json",
+      "sha256": "9eb64d705f2321c40cdab18233928cf1b44c97bc3d4f8188085368c7eff44b10"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/expanded-manifest-typecheck-v3.txt",
+      "sha256": "cd191480a2a41553559d8d9a36035b0a9064871595f32c81258c0f89c16d46ff"
+    }
+  ],
+  "finalCandidateQualified": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "56ca58a3066db499724aff78ae002d04efcba9190be9d341b0375f892f180af2",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-native-counterexamples-v2.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

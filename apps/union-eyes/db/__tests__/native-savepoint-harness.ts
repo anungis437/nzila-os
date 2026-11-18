@@ -17,6 +17,9 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { RUNTIME_ROLE, SYSTEM_ROLE, type AuditRecord } from './native-route-harness'
+import assert from 'node:assert/strict'
+import { nativeActionUrl, installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 export { RUNTIME_ROLE, SYSTEM_ROLE }
 export type { AuditRecord }
@@ -30,6 +33,7 @@ interface Scope {
 
 const scopes = new AsyncLocalStorage<Scope>()
 let pool: pg.Pool | null = null
+let systemPool: pg.Pool | null = null
 let runtimePool: pg.Pool | null = null
 let ambient: Db | null = null
 let schema: Record<string, unknown> | null = null
@@ -55,8 +59,9 @@ export const savepointHarness = {
   /** Opens the pools against an ADMIN connection to a disposable, fully bootstrapped database and returns the admin client for seeding and inspection. */
   async start(url: string): Promise<pg.Client> {
     schema = (await import('@/db/schema')) as unknown as Record<string, unknown>
-    pool = new pg.Pool({ connectionString: url, max: 4 })
-    runtimePool = new pg.Pool({ connectionString: url, max: 4, options: `-c role=${RUNTIME_ROLE}` })
+    pool = new pg.Pool({ connectionString: nativeActionUrl(RUNTIME_ROLE, url), max: 4 })
+    systemPool = new pg.Pool({ connectionString: nativeActionUrl(SYSTEM_ROLE, url), max: 4 })
+    runtimePool = new pg.Pool({ connectionString: nativeActionUrl(RUNTIME_ROLE, url), max: 4, options: `-c role=${RUNTIME_ROLE}` })
     ambient = emulateDriver(drizzle(runtimePool, { schema: schema as never }))
     const admin = new pg.Client({ connectionString: url })
     await admin.connect()
@@ -65,8 +70,10 @@ export const savepointHarness = {
 
   async stop(): Promise<void> {
     await pool?.end()
+    await systemPool?.end()
     await runtimePool?.end()
     pool = null
+    systemPool = null
     runtimePool = null
     ambient = null
   },
@@ -77,22 +84,31 @@ export const savepointHarness = {
 
   /** One context: the role, the organization and the user the policies read, in a transaction whose nested transactions are savepoints. */
   async context<T>(role: string, organizationId: string | null, userId: string | null, work: (tx: Db) => Promise<T>): Promise<T> {
-    if (!pool || !schema) throw new Error('savepoint harness not started')
-    const client = await pool.connect()
-    const scope: Scope = { pending: [], tx: null as unknown as Db }
-    try {
-      const result = await drizzle(client, { schema: schema as never }).transaction(async (tx) => {
-        await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
-        await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId ?? ''}, true)`)
-        await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId ?? ''}, true)`)
-        scope.tx = emulateDriver(tx as unknown as Db)
-        return scopes.run(scope, () => work(scope.tx))
-      })
-      savepointHarness.audits.push(...scope.pending)
-      return result
-    } finally {
-      client.release()
+    assert.ok(role === RUNTIME_ROLE || role === SYSTEM_ROLE, 'Native action role must be declared')
+    const selectedPool = role === SYSTEM_ROLE ? systemPool : pool
+    if (!selectedPool || !schema) throw new Error('savepoint harness not started')
+    const execute = async (binding?: AuthenticatedOrgBinding) => {
+      const client = await selectedPool.connect()
+      const scope: Scope = { pending: [], tx: null as unknown as Db }
+      try {
+        const result = await drizzle(client, { schema: schema as never }).transaction(async (tx) => {
+          await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
+          await tx.execute(sql`SET LOCAL search_path=pg_catalog,public,pg_temp`)
+          await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId ?? ''}, true)`)
+          await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId ?? ''}, true)`)
+          if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
+          scope.tx = emulateDriver(tx as unknown as Db)
+          return scopes.run(scope, () => work(scope.tx))
+        })
+        savepointHarness.audits.push(...scope.pending)
+        return result
+      } finally {
+        client.release()
+      }
     }
+    return role === RUNTIME_ROLE && userId && organizationId
+      ? withNativeCanonicalActor(userId, organizationId, execute)
+      : execute()
   },
 }
 

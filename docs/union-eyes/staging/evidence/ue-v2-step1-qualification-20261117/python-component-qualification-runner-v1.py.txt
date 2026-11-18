@@ -1,0 +1,139 @@
+"""Owned disposable component qualification; not a release gate or app source."""
+import base64
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import uuid
+
+ROOT = Path('/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup')
+WORK = Path('/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work')
+IMAGE = 'python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce'
+BACKEND = ROOT / 'apps/union-eyes/backend'
+MODE = sys.argv[1]
+assert MODE in ('billing', 'audit')
+RUN = sys.argv[2] if len(sys.argv) > 2 else 'v1'
+NAME = 'ue-step1-' + MODE + '-' + uuid.uuid4().hex
+LOG = WORK / ('python-' + MODE + '-qualification-' + RUN + '.log')
+STATE = WORK / ('python-' + MODE + '-container-' + RUN + '.json')
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+def command(args, *, input=None, timeout=600):
+    result = subprocess.run(args, input=input, capture_output=True, timeout=timeout)
+    with LOG.open('ab') as stream:
+        stream.write(result.stdout)
+        stream.write(result.stderr)
+    return result
+
+def checked(args, **kwargs):
+    result = command(args, **kwargs)
+    if result.returncode:
+        raise RuntimeError('Owned container command failed: ' + str(result.returncode))
+    return result.stdout
+
+COPY = '''import base64,json,pathlib,sys
+for relative,data in json.load(sys.stdin).items():
+ p=pathlib.Path('/workspace')/relative;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(base64.b64decode(data))
+'''
+
+BILLING = r'''import hashlib,json,os,pathlib,subprocess,sys,unittest
+root=pathlib.Path('/workspace/repo');backend=root/'apps/union-eyes/backend'
+pathlib.Path('/workspace/tmp').mkdir(parents=True,exist_ok=True)
+os.environ.update({'TMPDIR':'/workspace/tmp','TMP':'/workspace/tmp','TEMP':'/workspace/tmp'})
+subprocess.run([sys.executable,'-m','pip','install','--quiet','--no-compile','--no-cache-dir','--disable-pip-version-check','--no-index','--require-hashes','--find-links','/workspace/wheels','--target','/workspace/deps','--report','/workspace/locked-install.json','-r',str(backend/'requirements.lock')],check=True)
+sys.path[:0]=['/workspace/deps',str(backend)]
+if (backend/'.env').exists() or (backend/'.env.local').exists():raise RuntimeError('ENV_FILE_FORBIDDEN')
+os.environ.update({'PYTHON_DOTENV_DISABLED':'1','DJANGO_SETTINGS_MODULE':'config.settings','DJANGO_SECRET_KEY':'synthetic-offline-component-test-key','DJANGO_DEBUG':'False','DJANGO_ALLOWED_HOSTS':'localhost,127.0.0.1,testserver','PGHOST':'127.0.0.1','PGPORT':'1','PGDATABASE':'ue_v2_no_connection','PGUSER':'union_eyes_runtime','PGPASSWORD':'synthetic-not-a-live-credential','REDIS_URL':'redis://127.0.0.1:1/0','CELERY_BROKER_URL':'memory://','CELERY_RESULT_BACKEND':'cache+memory://'})
+env_reads=[]
+def no_env_read(event,args):
+ if event=='open' and isinstance(args[0],(str,bytes)) and pathlib.Path(os.fsdecode(args[0])).name in ('.env','.env.local'):
+  env_reads.append(str(args[0]));raise RuntimeError('ENV_FILE_READ_FORBIDDEN')
+sys.addaudithook(no_env_read)
+from django.db.backends.base.base import BaseDatabaseWrapper
+connections=[]
+def deny_connection(*args,**kwargs):
+ connections.append(True);raise RuntimeError('EXTERNAL_DATABASE_CONNECTION_FORBIDDEN')
+BaseDatabaseWrapper.connect=deny_connection
+import django
+expected=next(line.split('==')[1].split()[0] for line in (backend/'requirements.lock').read_text().splitlines() if line.startswith('django=='))
+if django.get_version()!=expected:raise RuntimeError('LOCKED_DJANGO_REQUIRED')
+django.setup()
+from django.conf import settings
+from rest_framework.viewsets import ModelViewSet
+from billing import views
+from unittest.mock import patch
+endpoints=[value for value in vars(views).values() if isinstance(value,type) and issubclass(value,ModelViewSet) and value.__module__==views.__name__]
+observed=[]
+original_dispatch=ModelViewSet.dispatch
+def counted_dispatch(self,request,*args,**kwargs):
+ response=original_dispatch(self,request,*args,**kwargs);observed.append(response.status_code);return response
+suite=unittest.defaultTestLoader.loadTestsFromName('billing.test_base_release_boundary')
+with patch.object(ModelViewSet,'dispatch',counted_dispatch):
+ result=unittest.TextTestRunner(verbosity=2).run(suite)
+install=json.loads(pathlib.Path('/workspace/locked-install.json').read_text())
+receipt={'pythonVersion':sys.version.split()[0],'platform':sys.platform,'djangoVersion':django.get_version(),'currentSettings':settings.SETTINGS_MODULE,'testModule':'billing.test_base_release_boundary','testsRun':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'skipped':len(result.skipped),'endpointClasses':len(endpoints),'endpointNames':sorted(endpoint.__name__ for endpoint in endpoints),'roles':['member','steward','officer','executive','admin'],'actions':['list','create','retrieve','update','partial_update','destroy'],'actualDispatches':len(observed),'allDispatchResponses403':all(status==403 for status in observed),'databaseConnectionAttempts':len(connections),'envFileReadAttempts':len(env_reads),'lockedInstalledDistributions':len(install['install']),'lockSha256':hashlib.sha256((backend/'requirements.lock').read_bytes()).hexdigest(),'verdict':'PASS' if result.wasSuccessful() and result.testsRun==1 and not result.skipped and len(observed)==len(endpoints)*5*6 and all(status==403 for status in observed) and not connections and not env_reads else 'FAIL'}
+pathlib.Path('/workspace/billing-result.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps(receipt,sort_keys=True),flush=True)
+if receipt['verdict']!='PASS':sys.exit(1)
+'''
+
+AUDIT = r'''import json,os,pathlib,subprocess,sys
+pathlib.Path('/workspace/tmp').mkdir(parents=True,exist_ok=True)
+os.environ.update({'TMPDIR':'/workspace/tmp','TMP':'/workspace/tmp','TEMP':'/workspace/tmp','XDG_CACHE_HOME':'/workspace/cache','PIP_DISABLE_PIP_VERSION_CHECK':'1'})
+subprocess.run([sys.executable,'-m','pip','install','--quiet','--no-compile','--no-cache-dir','--target','/workspace/auditdeps','--report','/workspace/audittool-install.json','pip-audit'],check=True)
+env={**os.environ,'PYTHONPATH':'/workspace/auditdeps','PYTHONPYCACHEPREFIX':'/workspace/pycache'}
+version=subprocess.run([sys.executable,'-m','pip_audit','--version'],env=env,capture_output=True,text=True,check=True).stdout.strip()
+args=[sys.executable,'-m','pip_audit','--require-hashes','--disable-pip','--strict','--progress-spinner','off','-r','/workspace/repo/apps/union-eyes/backend/requirements.lock','--format=json','--output=/workspace/python-lock-audit.json']
+result=subprocess.run(args,env=env)
+pathlib.Path('/workspace/audit-command.json').write_text(json.dumps({'pythonVersion':sys.version.split()[0],'toolVersion':version,'command':args,'exitCode':result.returncode,'ignoreFlags':[]},indent=2)+'\n')
+sys.exit(result.returncode)
+'''
+
+if LOG.exists() or STATE.exists():
+    raise RuntimeError('Refusing to overwrite prior bounded execution')
+compile(BILLING, '<billing-runner>', 'exec')
+compile(AUDIT, '<audit-runner>', 'exec')
+state={'name':NAME,'mode':MODE,'image':IMAGE,'platform':'linux/amd64','memoryBytes':1536*1024**2,'workspaceTmpfsBytes':768*1024**2,'network':'none' if MODE=='billing' else 'bridge','started':False,'cleanupConfirmed':False}
+STATE.write_text(json.dumps(state,indent=2)+'\n')
+try:
+    checked(['docker','run','-d','--rm','--pull','never','--platform','linux/amd64','--name',NAME,'--label','nzila.mission=UE_STEP1_BOUNDED_PYTHON','--network',state['network'],'--read-only','--user','65534:65534','--tmpfs','/workspace:rw,exec,size=768m','--memory','1536m','--cpus','2',IMAGE,'python','-B','-c','import time;time.sleep(900)'],timeout=30)
+    state['started']=True
+    files={'repo/apps/union-eyes/backend/requirements.lock':base64.b64encode((BACKEND/'requirements.lock').read_bytes()).decode()}
+    if MODE=='billing':
+        for source in sorted(BACKEND.rglob('*.py')):
+            if {'migrations','__pycache__','.venv','venv','node_modules'}&set(source.relative_to(BACKEND).parts):continue
+            files['repo/'+source.relative_to(ROOT).as_posix()]=base64.b64encode(source.read_bytes()).decode()
+        wanted=set(re.findall(r'--hash=sha256:([a-f0-9]{64})',(BACKEND/'requirements.lock').read_text()))
+        wheel_inventory=[]
+        for wheel in sorted(Path('/Users/oby/.cache/nzila/ue-v2-wheelhouse').glob('*.whl')):
+            data=wheel.read_bytes();sha=digest(data)
+            if sha not in wanted:continue
+            wanted.remove(sha)
+            wheel_inventory.append({'file':wheel.name,'sha256':sha,'bytes':len(data)})
+            files['wheels/'+wheel.name]=base64.b64encode(data).decode()
+        if wanted or len(wheel_inventory)!=87:raise RuntimeError('Exact 87-wheel locked graph required')
+        (WORK/'billing-locked-wheel-inventory-v1.json').write_text(json.dumps(wheel_inventory,indent=2)+'\n')
+    checked(['docker','exec','-i',NAME,'python','-B','-c',COPY],input=json.dumps(files).encode(),timeout=120)
+    result=command(['docker','exec',NAME,'python','-B','-c',BILLING if MODE=='billing' else AUDIT],timeout=600)
+    state['executionExitCode']=result.returncode
+    outputs=['billing-result.json','locked-install.json'] if MODE=='billing' else ['python-lock-audit.json','audit-command.json','audittool-install.json']
+    state['missingOutputs']=[]
+    for output in outputs:
+        extracted=command(['docker','exec',NAME,'python','-B','-c',"import pathlib,sys;sys.stdout.buffer.write(pathlib.Path(sys.argv[1]).read_bytes())",'/workspace/'+output],timeout=30)
+        if extracted.returncode:state['missingOutputs'].append(output)
+        else:(WORK/output).write_bytes(extracted.stdout)
+    if state['missingOutputs']:raise RuntimeError('Missing execution outputs: '+str(state['missingOutputs']))
+    if result.returncode:raise RuntimeError('Bounded qualification failed: '+str(result.returncode))
+finally:
+    residual=command(['docker','ps','-aq','--filter','name=^'+NAME+'$','--filter','label=nzila.mission=UE_STEP1_BOUNDED_PYTHON'],timeout=30)
+    if residual.returncode:raise RuntimeError('Owned cleanup inspection failed')
+    if residual.stdout.strip():checked(['docker','rm','-f',residual.stdout.decode().strip()],timeout=30)
+    after=checked(['docker','ps','-aq','--filter','name=^'+NAME+'$','--filter','label=nzila.mission=UE_STEP1_BOUNDED_PYTHON'],timeout=30)
+    state['cleanupConfirmed']=not after.strip()
+    STATE.write_text(json.dumps(state,indent=2)+'\n')
+print(json.dumps(state),flush=True)

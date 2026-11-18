@@ -3,7 +3,7 @@ import * as path from 'node:path'
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const OUT_JSON = path.join(ROOT, 'reports', 'sre-reliability-audit.json')
-const OUT_MD = path.join(ROOT, 'docs', 'ops', 'sre', 'portfolio-reliability-audit.md')
+const OUT_MD = path.join(ROOT, 'docs', 'categories', 'platform-and-operations', 'ops', 'sre', 'portfolio-reliability-audit.md')
 
 const TARGET_APPS = [
   'union-eyes', 'abr', 'flow', 'web', 'partners', 'cfo',
@@ -63,10 +63,10 @@ function main() {
   ]
 
   const incidentChecks = [
-    exists('docs/ops/incidents/sev1-runbook.md'),
-    exists('docs/ops/incidents/sev2-runbook.md'),
-    exists('docs/ops/incidents/communication-template.md'),
-    exists('docs/ops/incidents/postmortem-template.md'),
+    exists('docs/categories/platform-and-operations/ops/incidents/sev1-runbook.md'),
+    exists('docs/categories/platform-and-operations/ops/incidents/sev2-runbook.md'),
+    exists('docs/categories/platform-and-operations/ops/incidents/communication-template.md'),
+    exists('docs/categories/platform-and-operations/ops/incidents/postmortem-template.md'),
     exists('governance/sre/oncall-ownership-matrix.json'),
   ]
 
@@ -78,15 +78,17 @@ function main() {
   ]
 
   const mttrChecks = [
-    exists('docs/ops/incident-response.md'),
-    exists('docs/ops/on-call.md'),
-    exists('docs/ops/gameday-chaos-readiness.md'),
+    exists('docs/categories/platform-and-operations/ops/incident-response.md'),
+    exists('docs/categories/platform-and-operations/ops/on-call.md'),
+    exists('docs/categories/platform-and-operations/ops/gameday-chaos-readiness.md'),
     exists('governance/sre/alert-policy.json'),
     exists('scripts/sre/alert-routing-dry-run.ts'),
   ]
 
   const report = {
     generatedAt: new Date().toISOString(),
+    scope: 'SOURCE_AND_CONFIGURATION_PRESENCE_ONLY',
+    note: 'Scores establish source and configuration presence; they do not establish live reliability, SLO attainment, alert delivery or recovery.',
     appCount: TARGET_APPS.length,
     endpointCoverage: endpoint,
     missingHealthEndpointContracts: missingHealthEndpoints,
@@ -103,7 +105,7 @@ function main() {
   fs.mkdirSync(path.dirname(OUT_MD), { recursive: true })
   fs.writeFileSync(OUT_JSON, JSON.stringify(report, null, 2), 'utf8')
 
-  const md = `# Portfolio Reliability Audit\n\nGenerated: ${report.generatedAt}\n\n## Scores (0-10)\n\n- Reliability Score: ${report.scores.reliability}\n- Observability Score: ${report.scores.observability}\n- Incident Readiness Score: ${report.scores.incidentReadiness}\n- Cost Governance Score: ${report.scores.costGovernance}\n- MTTR Readiness Score: ${report.scores.mttrReadiness}\n\n## Endpoint Contract Coverage\n\n- Apps scanned: ${report.appCount}\n- Apps missing one or more required endpoints: ${report.missingHealthEndpointContracts.length}\n\n## Missing Endpoint Contracts\n\n${report.missingHealthEndpointContracts.map((a) => `- ${a.app}: health=${a.health}, ready=${a.ready}, version=${a.version}`).join('\n') || '- none'}\n`
+  const md = `# Portfolio Reliability Audit\n\nGenerated: ${report.generatedAt}\n\n${report.note}\n\n## Source and Configuration Scores (0-10)\n\n- Reliability Score: ${report.scores.reliability}\n- Observability Score: ${report.scores.observability}\n- Incident Procedure Score: ${report.scores.incidentReadiness}\n- Cost Governance Score: ${report.scores.costGovernance}\n- Recovery Procedure Score: ${report.scores.mttrReadiness}\n\n## Endpoint Source Contract Coverage\n\n- Apps scanned: ${report.appCount}\n- Apps missing one or more required endpoint source files: ${report.missingHealthEndpointContracts.length}\n\n## Missing Endpoint Source Contracts\n\n${report.missingHealthEndpointContracts.map((a) => `- ${a.app}: health=${a.health}, ready=${a.ready}, version=${a.version}`).join('\n') || '- none'}\n`
   fs.writeFileSync(OUT_MD, md, 'utf8')
 
   console.log(md)

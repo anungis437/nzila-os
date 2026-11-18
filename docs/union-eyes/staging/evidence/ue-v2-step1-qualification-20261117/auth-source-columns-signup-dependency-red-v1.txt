@@ -1,0 +1,31 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ❯ |union-eyes| db/auth/auth-source-columns.pglite.test.ts (19 tests | 1 failed) 1406ms
+   ❯ current-source auth columns at the physical SQL boundary (19)
+     × preserves signup and its same-transaction session without granting retained fields 4ms
+{"proof":"AUTH_SYSTEM_PURPOSE_BOUNDARY","engine":"PGlite","nativeVerdict":"UNEXECUTED","compilerSourceSha256":"05a5f4244f5bb9ef38dcdfb5c34b27f8f0d1ccdffb079f0face264919fc06b68","compiledSqlSha256":"593cf91b33cfcf17cf29f3eaeef8774d6752bde66f73968d3570fc8f91043d02"}
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes| db/auth/auth-source-columns.pglite.test.ts > current-source auth columns at the physical SQL boundary > preserves signup and its same-transaction session without granting retained fields
+error: permission denied for table users
+ ❯ pe.Le ../../node_modules/@electric-sql/pg-protocol/src/parser.ts:423:40
+ ❯ pe.Xe ../../node_modules/@electric-sql/pg-protocol/src/parser.ts:208:9
+ ❯ _bufferView ../../node_modules/@electric-sql/pg-protocol/src/parser.ts:99:27
+ ❯ O.qe ../../node_modules/@electric-sql/pglite/src/pglite.ts:753:26
+ ❯ ../../node_modules/@electric-sql/pglite/src/pglite.ts:706:14
+ ❯ null.<anonymous> ../../wasm:/wasm/0267b22e:1:5921341
+ ❯ null.<anonymous> ../../wasm:/wasm/0267b22e:1:2615851
+ ❯ null.<anonymous> ../../wasm:/wasm/0267b22e:1:2648337
+ ❯ null.<anonymous> ../../wasm:/wasm/0267b22e:1:2648941
+ ❯ null.<anonymous> ../../wasm:/wasm/0267b22e:1:5569674
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 30 passed (31)
+   Start at  20:38:45
+   Duration  3.57s (tests 70%, import 23%, transform 6%)
+

@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-17T21:15:10.555Z",
+  "generatedAt": "2026-11-18T00:05:29.330Z",
   "filesScanned": 2814,
-  "totalFindings": 3060,
+  "totalFindings": 3061,
   "findingsByRule": {
-    "stale-reference": 1030,
+    "stale-reference": 1031,
     "stale-package-ref": 84,
-    "naming-inconsistency": 1788,
-    "stale-date": 47,
+    "naming-inconsistency": 1790,
+    "stale-date": 45,
     "missing-package-readme": 111
   },
   "findingsBySeverity": {
     "error": 0,
-    "warning": 1225,
+    "warning": 1226,
     "info": 1835
   },
   "findings": [
@@ -6202,6 +6202,13 @@
       "file": "docs/courtlens/target-architecture.md",
       "line": 1,
       "message": "References @nzila/abr but package does not exist"
+    },
+    {
+      "rule": "stale-reference",
+      "severity": "warning",
+      "file": "docs/documentation-index.md",
+      "line": 1894,
+      "message": "Possible broken link: [docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md](docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md)"
     },
     {
       "rule": "stale-package-ref",
@@ -19737,6 +19744,20 @@
     {
       "rule": "naming-inconsistency",
       "severity": "info",
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md",
+      "line": 20,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md",
+      "line": 72,
+      "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
+    },
+    {
+      "rule": "naming-inconsistency",
+      "severity": "info",
       "file": "docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md",
       "line": 9,
       "message": "\"nzila-os\" should be \"NzilaOS\" (platform name)"
@@ -20334,182 +20355,168 @@
       "severity": "info",
       "file": "AWS_ZONGA_SETUP.md",
       "line": 432,
-      "message": "Document date \"2026-04-19\" is 212 days old — may be stale"
+      "message": "Document date \"2026-04-19\" is 213 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/INDEX.md",
       "line": 179,
-      "message": "Document date \"2026-04-20\" is 211 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 212 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md",
       "line": 343,
-      "message": "Document date \"2026-04-08\" is 223 days old — may be stale"
+      "message": "Document date \"2026-04-08\" is 224 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md",
       "line": 4,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 211 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 212 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/ownership-registry.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 211 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 212 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 211 days old — may be stale"
-    },
-    {
-      "rule": "stale-date",
-      "severity": "info",
-      "file": "docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md",
-      "line": 3,
-      "message": "Document date \"2026-05-04\" is 197 days old — may be stale"
-    },
-    {
-      "rule": "stale-date",
-      "severity": "info",
-      "file": "docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md",
-      "line": 3,
-      "message": "Document date \"2026-05-04\" is 197 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 212 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md",
       "line": 3,
-      "message": "Document date \"2026-04-20\" is 211 days old — may be stale"
+      "message": "Document date \"2026-04-20\" is 212 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md",
       "line": 3,
-      "message": "Document date \"2026-04-13\" is 218 days old — may be stale"
+      "message": "Document date \"2026-04-13\" is 219 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/portfolio-matrix.md",
       "line": 5,
-      "message": "Document date \"2026-05-07\" is 194 days old — may be stale"
+      "message": "Document date \"2026-05-07\" is 195 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md",
       "line": 10,
-      "message": "Document date \"2026-04-14\" is 217 days old — may be stale"
+      "message": "Document date \"2026-04-14\" is 218 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md",
       "line": 3,
-      "message": "Document date \"2026-04-24\" is 207 days old — may be stale"
+      "message": "Document date \"2026-04-24\" is 208 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md",
       "line": 3,
-      "message": "Document date \"2026-04-24\" is 207 days old — may be stale"
+      "message": "Document date \"2026-04-24\" is 208 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/platform-and-operations/security/static-analysis-suppressions.md",
       "line": 3,
-      "message": "Document date \"2026-04-23\" is 208 days old — may be stale"
+      "message": "Document date \"2026-04-23\" is 209 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md",
       "line": 3,
-      "message": "Document date \"2026-05-01\" is 200 days old — may be stale"
+      "message": "Document date \"2026-05-01\" is 201 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md",
       "line": 3,
-      "message": "Document date \"2026-05-01\" is 200 days old — may be stale"
+      "message": "Document date \"2026-05-01\" is 201 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md",
       "line": 3,
-      "message": "Document date \"2026-05-01\" is 200 days old — may be stale"
+      "message": "Document date \"2026-05-01\" is 201 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md",
       "line": 3,
-      "message": "Document date \"2026-05-01\" is 200 days old — may be stale"
+      "message": "Document date \"2026-05-01\" is 201 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/buyer-faq.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 214 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 215 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/deployment-models.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 214 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 215 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/integration-readiness-matrix.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 214 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 215 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/pilot-readiness-checklist.md",
       "line": 6,
-      "message": "Document date \"2026-04-17\" is 214 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 215 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/product-capability-matrix.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 214 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 215 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/categories/stakeholders/buyers/sla-support-model.md",
       "line": 5,
-      "message": "Document date \"2026-04-17\" is 214 days old — may be stale"
+      "message": "Document date \"2026-04-17\" is 215 days old — may be stale"
     },
     {
       "rule": "stale-date",
@@ -20523,140 +20530,140 @@
       "severity": "info",
       "file": "docs/compliance/soc2/vendor-assurance-index.md",
       "line": 5,
-      "message": "Document date \"2026-06-07\" is 163 days old — may be stale"
+      "message": "Document date \"2026-06-07\" is 164 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md",
       "line": 3,
-      "message": "Document date \"2026-05-25\" is 176 days old — may be stale"
+      "message": "Document date \"2026-05-25\" is 177 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "docs/ops/sre/executive-reliability-dashboard.md",
       "line": 3,
-      "message": "Document date \"2026-05-25\" is 176 days old — may be stale"
+      "message": "Document date \"2026-05-25\" is 177 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/AI_REMEDIATION_CHECKLIST.md",
       "line": 3,
-      "message": "Document date \"2026-06-07\" is 163 days old — may be stale"
+      "message": "Document date \"2026-06-07\" is 164 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_ENGINE_ARCHITECTURE.md",
       "line": 662,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/COMPANION_INTEGRATION_GUIDE.md",
       "line": 625,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/PROMPT_ENGINEERING_STANDARDS.md",
       "line": 403,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/README.md",
       "line": 318,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/UE_RELEASE_READINESS.md",
       "line": 3,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/WORLD_CLASS_SCORECARD.md",
       "line": 3,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/platform-cognition/incident-playbook-addendum.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/platform-cognition/kill-switch-drill.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/platform-cognition/monitoring-plan.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/ue/human-oversight.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/ue/incident-playbook-addendum.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/ue/kill-switch-drill.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/ai/world-class/ue/monitoring-plan.md",
       "line": 4,
-      "message": "Document date \"2026-06-08\" is 162 days old — may be stale"
+      "message": "Document date \"2026-06-08\" is 163 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/README.md",
       "line": 4,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/business/investor-materials/README.md",
       "line": 4,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "stale-date",
       "severity": "info",
       "file": "governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md",
       "line": 515,
-      "message": "Document date \"2026-07-03\" is 137 days old — may be stale"
+      "message": "Document date \"2026-07-03\" is 138 days old — may be stale"
     },
     {
       "rule": "missing-package-readme",

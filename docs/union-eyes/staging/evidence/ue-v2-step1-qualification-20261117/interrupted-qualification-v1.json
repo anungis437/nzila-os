@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-11-17T22:34:36.072857+00:00",
+  "status": "ENGINEERING_QUALIFICATION_OPEN",
+  "checkpointSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "hostMemoryBytes": 17179869184,
+  "hostRestartAt": "2026-11-17T21:58:08Z",
+  "interruptedRuns": [
+    {
+      "name": "root test:fast",
+      "status": "INTERRUPTED_HOST_RESTART_NO_FINAL_JSON",
+      "rawLog": "LOST_TEMPORARY_DIRECTORY_CLEANUP_ON_RESTART"
+    },
+    {
+      "name": "whole bootstrap v10",
+      "status": "INTERRUPTED_AFTER_FRAMEWORK_SCOPE_ASSERTION",
+      "observedFailure": "CarbonAccounting contained403; old harness expected400/201 outside base scope",
+      "finalReceipt": "NOT_PRODUCED"
+    },
+    {
+      "name": "Next build/HTTP/load v1",
+      "status": "INTERRUPTED_DURING_BUILD",
+      "buildResult": "NOT_PROVEN",
+      "httpResult": "UNEXECUTED",
+      "loadResult": "UNEXECUTED"
+    }
+  ],
+  "retainedContractRun": {
+    "sourceChangedDuringRun": true,
+    "status": "FAILED_INTERIM_REPAIR_DISCOVERY",
+    "total": 10138,
+    "passed": 10120,
+    "failed": 18,
+    "pending": 0,
+    "artifactPath": "artifacts/ue-step1-contract-v1/results.json",
+    "sha256": "0a780bc26827aa9ad72c571285d64cba38b419d2fe74a0febe052612dce5a4ae"
+  },
+  "restoredTestGeneratedOutputs": [
+    {
+      "path": "ops/outputs/data-residency-runtime.json",
+      "testGeneratedSha256": "4b001c404025c61e7688ae5d89c56da2f9fbc27b47c152de137b0bcf2f2be815",
+      "restoredHeadSha256": "d043485e375aa11353f2e88a7f0ca4e5b03d46db642d73e27b71bb8354e35788"
+    },
+    {
+      "path": "ops/outputs/governance-runtime-budget.json",
+      "testGeneratedSha256": "6b66b9428a98af172aad1e18de3eed795d1ce2ee5da22c504a0d025abfc57742",
+      "restoredHeadSha256": "1e8dd6492723f0c0a05bcf13db84970bf46deea280397fb3fc92c09bcdc350bf"
+    },
+    {
+      "path": "ops/outputs/onboarding-kpis.json",
+      "testGeneratedSha256": "9f6290a0fc77646a8b52dd728b02f52b95a3f149dd331acccf724d8eb085869f",
+      "restoredHeadSha256": "4e8ac2b7ebd9323a7768b3ffadad2d7ef05620a46c49d57eb3b653e2f3fef4b2"
+    },
+    {
+      "path": "ops/outputs/strategic-resilience-report.json",
+      "testGeneratedSha256": "c9652fd6fb32d37df46f5a5001fccca88c3e49088a39d30247afde7776336a85",
+      "restoredHeadSha256": "5955c7bf372f1dd1f33d1ea0e0d90953c54d6277dc0f9c2999322a0ccfafb83c"
+    }
+  ],
+  "nextResourcePolicy": "One memory-heavy job at a time; durable logs in canonical evidence or home private evidence, never temporary-only proof.",
+  "stagingOrProductionPromoted": false,
+  "step2Begun": false
+}

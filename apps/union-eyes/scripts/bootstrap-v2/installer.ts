@@ -1,3 +1,4 @@
+import { membershipCatalogProjectionSql, type CanonicalPostgresMajor } from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import { CASE_PRIMARY_DOMAIN_GUARDS, compileCaseDomainSupportSql } from '../../db/auth/case-primary-domain-guards'
 import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
@@ -46,7 +47,8 @@ export async function connectLocalV2(config: pg.ClientConfig) {
   localClients.set(client, target.rows[0].authenticatedUser)
   return client
 }
-export async function inspectCatalog(client: pg.Client): Promise<CatalogObject[]> {
+export async function inspectCatalog(client: pg.Client, options: { postgresMajor?: CanonicalPostgresMajor } = {}): Promise<CatalogObject[]> {
+  const membershipProjection = membershipCatalogProjectionSql(options.postgresMajor)
   const queries = [
     `SELECT 'schema' kind, nspname id, jsonb_build_object('owner',pg_get_userbyid(nspowner),'acl',nspacl::text) definition FROM pg_namespace WHERE nspname !~ '^pg_' AND nspname <> 'information_schema'`,
     `SELECT 'extension' kind, extname id, jsonb_build_object('version',extversion,'schema',extnamespace::regnamespace::text) definition FROM pg_extension`,
@@ -64,7 +66,7 @@ export async function inspectCatalog(client: pg.Client): Promise<CatalogObject[]
     `SELECT 'aggregate' kind,p.oid::regprocedure::text id,jsonb_build_object('owner',pg_get_userbyid(p.proowner),'acl',p.proacl::text,'kind',a.aggkind,'transition',a.aggtransfn::regproc::text,'final',a.aggfinalfn::regproc::text,'combine',a.aggcombinefn::regproc::text,'serialize',a.aggserialfn::regproc::text,'deserialize',a.aggdeserialfn::regproc::text,'transition_type',format_type(a.aggtranstype,NULL),'initial',a.agginitval,'moving_transition',a.aggmtransfn::regproc::text,'moving_inverse',a.aggminvtransfn::regproc::text,'moving_final',a.aggmfinalfn::regproc::text,'moving_type',format_type(a.aggmtranstype,NULL),'moving_initial',a.aggminitval,'final_extra',a.aggfinalextra,'final_modify',a.aggfinalmodify,'moving_final_modify',a.aggmfinalmodify,'parallel',p.proparallel) definition FROM pg_aggregate a JOIN pg_proc p ON p.oid=a.aggfnoid JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public'`,
     `SELECT 'trigger' kind, tgrelid::regclass::text||'.'||tgname id, jsonb_build_object('definition',pg_get_triggerdef(oid),'enabled',tgenabled) definition FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (SELECT oid FROM pg_class WHERE relnamespace='public'::regnamespace)`,
     `SELECT 'role' kind, rolname id, jsonb_build_object('superuser',rolsuper,'inherit',rolinherit,'createrole',rolcreaterole,'createdb',rolcreatedb,'login',rolcanlogin,'bypassrls',rolbypassrls) definition FROM pg_roles WHERE rolname IN (${canonicalRoleSqlList})`,
-    `SELECT 'role_membership' kind,parent.rolname||':'||member.rolname id,jsonb_build_object('role',parent.rolname,'member',member.rolname,'grantor',grantor.rolname,'admin',m.admin_option,'inherit',m.inherit_option,'set',m.set_option) definition FROM pg_auth_members m JOIN pg_roles parent ON parent.oid=m.roleid JOIN pg_roles member ON member.oid=m.member JOIN pg_roles grantor ON grantor.oid=m.grantor WHERE parent.rolname IN (${canonicalRoleSqlList}) OR member.rolname IN (${canonicalRoleSqlList})`,
+    `SELECT 'role_membership' kind,parent.rolname||':'||member.rolname id,jsonb_build_object('role',parent.rolname,'member',member.rolname,'grantor',grantor.rolname,'admin',${membershipProjection.adminOption},'inherit',${membershipProjection.inheritOption},'set',${membershipProjection.setOption}) definition FROM pg_auth_members m JOIN pg_roles parent ON parent.oid=m.roleid JOIN pg_roles member ON member.oid=m.member JOIN pg_roles grantor ON grantor.oid=m.grantor WHERE parent.rolname IN (${canonicalRoleSqlList}) OR member.rolname IN (${canonicalRoleSqlList})`,
     `SELECT 'default_acl' kind, pg_get_userbyid(defaclrole)||'.'||defaclnamespace::regnamespace::text||'.'||defaclobjtype::text id, to_jsonb(defaclacl::text) definition FROM pg_default_acl WHERE defaclrole='ue_v2_owner'::regrole`,
   ]
   const objects: CatalogObject[] = []

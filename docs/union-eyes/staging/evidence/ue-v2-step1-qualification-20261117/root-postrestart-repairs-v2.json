@@ -1,0 +1,102 @@
+{
+  "kind": "INTERIM_ROOT_REPAIRS_NOT_FINAL_QUALIFICATION",
+  "recordedAt": "2026-11-17T22:56:27.464162+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtySource": true,
+  "finalCandidateSha": null,
+  "logs": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-secret-containment-postrestart-v2.txt",
+      "status": "2_PASS",
+      "sha256": "13a5430ded5d22412e2f861c1ae874d956f4f0348a2d3aafea4f9b3c92c7e5d4",
+      "command": "node --test tooling/security/historical-secret-containment.test.mjs",
+      "workingDirectory": "repository root",
+      "exitCode": 0
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-contract-repairs-postrestart-v2.txt",
+      "status": "29_PASS",
+      "sha256": "5eb7f98c2cf3bbac3b91297f825f136b45488427912c338057ba86f14388f509",
+      "command": "pnpm exec vitest run --project contract-tests tooling/contract-tests/union-eyes-fsm-enforcement.test.ts tooling/contract-tests/runtime-governance-integrity.test.ts tooling/contract-tests/sre-runtime-evidence.test.ts --maxWorkers=1",
+      "workingDirectory": "repository root",
+      "exitCode": 0
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-authority-boundary-v3.txt",
+      "status": "9_PASS",
+      "sha256": "71a594f0aba2a5e25790c14078ed65ea4e2662cf494693ca2e1120b88d3bac49",
+      "command": "pnpm exec vitest run --config vitest.heavy.config.ts scripts/bootstrap-v2/current-authority.test.ts --maxWorkers=1",
+      "workingDirectory": "apps/union-eyes",
+      "exitCode": 0
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/ue-typecheck-postrestart-v4.txt",
+      "status": "PASS",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": "pnpm exec tsc --noEmit",
+      "workingDirectory": "apps/union-eyes",
+      "exitCode": 0,
+      "environment": {
+        "NODE_OPTIONS": "--max-old-space-size=6144"
+      }
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-bootstrap-lint-postrestart-v2.txt",
+      "status": "PASS",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "command": "pnpm exec eslint scripts/bootstrap-v2/clean-room.ts scripts/bootstrap-v2/current-authority.ts scripts/bootstrap-v2/current-authority.test.ts",
+      "workingDirectory": "apps/union-eyes",
+      "exitCode": 0
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": "apps/union-eyes/backend/billing/views.py",
+      "sha256": "47a54379c1d89c3a36a94d7e07aba4ff5e1f1a8be4ea4a04b95b45f3f045d0aa"
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/test_base_release_boundary.py",
+      "sha256": "d249f131f51c070bb0737daa61139c53b81108393e12a88393398a9018481a0f"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current-authority.ts",
+      "sha256": "a2ee7c99900a5dd152f86188ce3774626b9617c8490826ca80e213eb193f2d84"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current-authority.test.ts",
+      "sha256": "68e62c8647304cd0b049fa3e997a311dc6243c08a25e5e1edbb0195ef0b81590"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework_application.py",
+      "sha256": "be6bf9f589632309357dfa13c8424bca282b1f19b2ee5a1739d1dfcdf5d29a83"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/clean-room.ts",
+      "sha256": "45e37ef7c7e7ebbb09158d50504d61f6d4a75ff2c7a19c25e00a2f7971480655"
+    },
+    {
+      "path": "tooling/contract-tests/union-eyes-fsm-enforcement.test.ts",
+      "sha256": "6f02811a4618c20b87cc40eda26e920a7799731c590341517e7fe05e1dc3cd12"
+    }
+  ],
+  "unexecuted": [
+    "Django financial-family dispatch test",
+    "Updated actual framework HTTP consumer proof",
+    "Prospective contained-donation native table denials",
+    "Full integrated candidate checks and all remaining canonical qualification"
+  ],
+  "resourceObservation": {
+    "ueTypecheck3072Mb": "HEAP_EXHAUSTED_CONTROLLED_FAILURE_LOG_PRESERVED_PRIVATELY",
+    "ueTypecheck6144Mb": "PASS",
+    "heavyJobsSerialized": true
+  },
+  "stagingOrProductionPromoted": false,
+  "step2Begun": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "8ac0287ee515f9dda139ed612de2a2233c954bc7b9b4a0acee0f1a4183693a4e",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/root-postrestart-repairs-v2.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

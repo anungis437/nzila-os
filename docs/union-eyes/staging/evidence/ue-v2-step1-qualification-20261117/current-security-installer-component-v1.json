@@ -1,0 +1,90 @@
+{
+  "schema": "ue-step1-component-qualification-v1",
+  "component": "legacy-current-security-installer",
+  "recordedAt": "2026-11-18T00:20:59.008397+00:00",
+  "head": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtyWorktree": true,
+  "finalCandidateSha": null,
+  "environment": "local-source-and-unit-only",
+  "source": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "8a191dbefcbccbdd06659a961e66a2a433c531deb81cbefdb20b1927c9d42ffe"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.mjs",
+      "sha256": "0b21eeb2d53254ff2003c329fe97fef9f0384d0850be8d6f39a3bfc89e9f3c9f"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.test.mjs",
+      "sha256": "a070a844ab98ae88179397c50908f42f607eb51b843a845b48248c5f123095a7"
+    },
+    {
+      "path": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+      "sha256": "1a2dd924aab35c4d6fecc3b90679f8dc3a7edf5a0605090464ee480f4e96310a"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "d1e92a7dbfaedbcfc1e8e69b1e679de9ada208cf5376390b9e8f04819ed06e99"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+      "sha256": "7aed5f1161329d4bffd723aacc1cb10a88550085c1642413d03ba09a006ebc52"
+    }
+  ],
+  "checks": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-unit-v3.log",
+      "sha256": "5ceab84200cc57d994c4aa72e25ce06765a34bfb90edc332dd96ece49597763e",
+      "status": "PASS",
+      "executedCases": 17
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-stage-unit-v3.log",
+      "sha256": "fda82caad21a471621934487070c68f1318361001c07e04b81b822b8713ccbe2",
+      "status": "PASS",
+      "executedCases": 4
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-lint-v5.log",
+      "sha256": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45",
+      "status": "PASS",
+      "executedCases": null
+    }
+  ],
+  "nodeParseChecks": {
+    "status": "PASS",
+    "files": [
+      "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+      "tooling/scripts/lib/union-eyes-bootstrap-stages.mjs"
+    ]
+  },
+  "native": {
+    "status": "UNEXECUTED",
+    "cases": 3,
+    "required": "Genuine released0327 disposable native template installed as uev2admin; fixed synthetic prior case/history plus probe-created auth user,membership,session; all prior tables snapshot before/after; no trigger disabling or server-default invention",
+    "project": "apps/union-eyes/vitest.native.config.ts",
+    "test": "db/__tests__/current-security-installer.native.test.ts"
+  },
+  "semanticTypecheck": {
+    "status": "NOT_SEPARATELY_EXECUTED",
+    "reason": "Normal app tsconfig excludes tests and does not import new tooling installer. Focused execution and lint do not substitute for semantic typecheck."
+  },
+  "earlierInvocationFailures": [
+    {
+      "log": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-lint-v3.log",
+      "reason": "No root flat ESLint config; source unchanged"
+    },
+    {
+      "log": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-lint-v4.log",
+      "reason": "No root legacy ESLint config; source unchanged"
+    }
+  ],
+  "claims": {
+    "stagingQualified": false,
+    "productionDeployed": false,
+    "liveDataChanged": false,
+    "historicalSqlReplayed": false,
+    "finalReleaseReady": false
+  }
+}

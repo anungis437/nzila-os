@@ -1,0 +1,85 @@
+{
+  "scope": "INTERIM_FAILED_NATIVE_AND_INTEGRATED_CHECKS",
+  "at": "2026-11-18T01:53:26.827531+00:00",
+  "native": {
+    "v2": "1 passed / 2 failed",
+    "v3": "1 passed / 2 failed",
+    "v4": "2 passed / 1 failed; missing current-source magic_links.requested_ip"
+  },
+  "contractV8": {
+    "reportedTotalTests": 10146,
+    "reportedPassedTests": 10139,
+    "reportedFailedTests": 7,
+    "reportedPendingTests": 0,
+    "verdict": "FAILED; unsuppressed assertion diagnostics retained in raw JSON/log"
+  },
+  "rootTypecheckV7": {
+    "exitCode": 2,
+    "verdict": "FAILED; four source errors repaired afterward, full rerun pending"
+  },
+  "missingRawSourceBindings": [
+    "current-security-installer-native-v2-source.json"
+  ],
+  "limits": [
+    "Working source changed after these counterexamples.",
+    "No exact final candidate qualification.",
+    "No staging/production promotion or live-data mutation."
+  ],
+  "files": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v2.json",
+      "sha256": "3839c765a7f1c19d4bc4186c2c5a5ba06da45e49d67c3f8cfa3e176571a81ab1"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v2.txt",
+      "sha256": "6940afb152241aacc7be62526e4f27e5bee40a74ee913741c4306b18199a253f"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v3.json",
+      "sha256": "f74fd4023e498bde27c67be731f49894574fca498b836e1aaaf9198de8a7fc24"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v3.txt",
+      "sha256": "497e6f57d827d8fcb37be33ed7b2e3984dd2454a3bb19cae133d9f4a4f510c66"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v3-source.json",
+      "sha256": "e8c5f0d4d363ee5c2d3e7f3efb747bce02a119639db044b41f13486dc54a1d19"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v4.json",
+      "sha256": "ca6fa06c44b9289bfc0c95373dc5af063f0a5c101b52de577e8928d1ab4af348"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v4.txt",
+      "sha256": "369832a549c1640f571553146b10eaaf4e19eb18daaebe7ad4a74100bd6942c0"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v4-source.json",
+      "sha256": "239909045de0e61b5f8fe45d1ab09de48f88d316117086b6ebe029d7a73c36da"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/full-contract-v8.json",
+      "sha256": "a3f4ff18289a77488a56410c004cad20f9f4db02c80c82d7216445d32090aac5"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/full-contract-v8.txt",
+      "sha256": "0e9f38c672b3ff92cc9e7e05f66d04049ff8d440a559e4e4592b9d1a1d575861"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-typecheck-v7.json",
+      "sha256": "01da71b8581d913cdab5da3244cba1bb70ffb69022be371ee3fd3a8162181033"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-typecheck-v7.txt",
+      "sha256": "0822f60caf2e9df870a122f6ba419ae20ba396d6fe91de1cd8dcfb5d7c99aef8"
+    }
+  ],
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "dcf74d3d50c865ed5ac5967467b61ae4cc4351ec630ddf9c805d7a87deb7c080",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/integrated-counterexamples-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

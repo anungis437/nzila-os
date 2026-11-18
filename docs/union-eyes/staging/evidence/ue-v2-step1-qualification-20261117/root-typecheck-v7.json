@@ -1,0 +1,15 @@
+{
+  "scope": "INTERIM_FULL_WORKSPACE_TYPECHECK",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "command": [
+    "pnpm",
+    "typecheck",
+    "--concurrency=1"
+  ],
+  "startedAt": "2026-11-18T00:33:05.226870+00:00",
+  "finishedAt": "2026-11-18T00:40:28.243587+00:00",
+  "exitCode": 2,
+  "resourceStop": null,
+  "finalCandidateQualified": false
+}

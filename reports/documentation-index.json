@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T21:15:12.465Z",
+  "generatedAt": "2026-11-18T00:05:30.935Z",
   "totalDocuments": 2142,
   "staleDocuments": 0,
   "categories": [
@@ -3297,13 +3297,13 @@
     {
       "path": "docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md",
       "category": "categories",
-      "lastValidated": "2026-11-16",
+      "lastValidated": "2026-11-17",
       "stale": false
     },
     {
       "path": "docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md",
       "category": "categories",
-      "lastValidated": "2026-11-16",
+      "lastValidated": "2026-11-17",
       "stale": false
     },
     {
@@ -9669,7 +9669,7 @@
     {
       "path": "docs/ops/ownership-registry.md",
       "category": "ops",
-      "lastValidated": "2026-11-17",
+      "lastValidated": "2026-11-18",
       "stale": false
     },
     {
@@ -9687,7 +9687,7 @@
     {
       "path": "docs/ops/sre/executive-reliability-dashboard.md",
       "category": "ops",
-      "lastValidated": "2026-11-16",
+      "lastValidated": "2026-11-17",
       "stale": false
     },
     {
@@ -11221,12 +11221,6 @@
       "stale": false
     },
     {
-      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md",
-      "category": "union-eyes",
-      "lastValidated": "2026-11-17",
-      "stale": false
-    },
-    {
       "path": "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.md",
       "category": "union-eyes",
       "lastValidated": "2026-11-16",
@@ -12682,6 +12676,12 @@
       "path": "docs/union-eyes/staging/evidence/ue-v2-privacy-self-service-20261116/README.md",
       "category": "union-eyes",
       "lastValidated": "2026-11-16",
+      "stale": false
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md",
+      "category": "union-eyes",
+      "lastValidated": "2026-11-17",
       "stale": false
     },
     {

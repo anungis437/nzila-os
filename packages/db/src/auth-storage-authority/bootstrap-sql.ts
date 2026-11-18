@@ -1,8 +1,10 @@
+import { compileCanonicalMembershipGrant, type CanonicalPostgresMajor } from './membership-semantics'
 import { authStorageAuthorityEntries } from './entries'
 import { AUTH_EXECUTION_ROLES as roles, AUTH_TENANT_ASSIGNABLE_ROLES } from './execution-boundary'
 import { compileAuthOrgBindingSql } from './org-session-authority'
 import { compileRolePrerequisiteAssertions } from './role-prerequisites'
 import { AUTH_ROLE_MEMBERSHIP_EXPECTATIONS } from './privilege-expectations'
+import { compileAuthColumnPrivileges } from './source-columns'
 
 const q = (identifier: string) => `"${identifier.replaceAll('"', '""')}"`
 const setting = (name: string) => `NULLIF(current_setting('nzila.auth_${name}',true),'')`
@@ -19,6 +21,7 @@ export function compileAuthBootstrapSql(options: {
   ordinaryRole?: string
   legacySystemRole?: string
   rolesPreprovisioned?: boolean
+  postgresMajor?: CanonicalPostgresMajor
 } = {}): string {
   const ordinary = options.ordinaryRole ?? 'union_eyes_runtime'
   const legacySystem = options.legacySystemRole ?? 'union_eyes_system'
@@ -27,7 +30,7 @@ export function compileAuthBootstrapSql(options: {
   const statements: string[] = []
   if (options.rolesPreprovisioned)
     statements.push(compileRolePrerequisiteAssertions(
-      Object.values(roles), AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
+      Object.values(roles), AUTH_ROLE_MEMBERSHIP_EXPECTATIONS, { postgresMajor: options.postgresMajor },
     ))
   for (const role of options.rolesPreprovisioned ? [] : Object.values(roles)) {
     statements.push(`DO $auth$ BEGIN
@@ -41,8 +44,8 @@ export function compileAuthBootstrapSql(options: {
     END $auth$;`)
   }
   if (!options.rolesPreprovisioned)
-    statements.push(`GRANT ${[roles.lookup, roles.identity, roles.issuance, roles.redemption, roles.tenantAdmin, roles.provider, roles.audit].map(q).join(', ')} TO ${q(roles.gateway)};`,
-    `GRANT ${[roles.system, roles.lifecycle, roles.cleanup, roles.mfaAdmin].map(q).join(', ')} TO ${q(roles.systemGateway)};`)
+    for (const [member, targets] of Object.entries(AUTH_ROLE_MEMBERSHIP_EXPECTATIONS))
+      statements.push(compileCanonicalMembershipGrant(member, targets, { inherit: false, set: true, memberRoleInherit: false }, options.postgresMajor))
   for (const appRole of [ordinary, legacySystem]) {
     const literal = appRole.replaceAll("'", "''")
     statements.push(`DO $auth$ BEGIN
@@ -87,7 +90,7 @@ export function compileAuthBootstrapSql(options: {
       `ALTER TABLE ${relation} FORCE ROW LEVEL SECURITY;`)
     statements.push(`DO $auth$ DECLARE cols text; principal text; target text; BEGIN
       SELECT string_agg(quote_ident(attname),',') INTO cols FROM pg_attribute
-        WHERE attrelid='${relation}'::regclass AND attnum>0 AND NOT attisdropped;
+        WHERE attrelid='${relation}'::regclass AND attnum<>0 AND NOT attisdropped;
       FOREACH principal IN ARRAY ARRAY[${revokeRoles}] LOOP
         IF principal='PUBLIC' OR EXISTS (SELECT FROM pg_roles WHERE rolname=principal) THEN
           target := CASE WHEN principal='PUBLIC' THEN 'PUBLIC' ELSE quote_ident(principal) END;
@@ -98,10 +101,10 @@ export function compileAuthBootstrapSql(options: {
     END $auth$;`)
   }
   const grant = (table: string, role: string, privilege: string) =>
-    statements.push(`GRANT ${privilege} ON user_management.${q(table)} TO ${q(role)};`)
-  const policy = (table: string, role: string, operation: string, predicate: string) => {
-    const check = operation === 'INSERT' ? `WITH CHECK (${predicate})`
-      : operation === 'UPDATE' ? `USING (${predicate}) WITH CHECK (${predicate})`
+    statements.push(`GRANT ${compileAuthColumnPrivileges(table, privilege)} ON user_management.${q(table)} TO ${q(role)};`)
+  const policy = (table: string, role: string, operation: string, predicate: string, checkPredicate = predicate) => {
+    const check = operation === 'INSERT' ? `WITH CHECK (${checkPredicate})`
+      : operation === 'UPDATE' ? `USING (${predicate}) WITH CHECK (${checkPredicate})`
         : `USING (${predicate})`
     statements.push(`CREATE POLICY ${q(`auth_v2_${role}_${operation.toLowerCase()}`)}
       ON user_management.${q(table)} FOR ${operation} TO ${q(role)} ${check};`)
@@ -179,13 +182,17 @@ export function compileAuthBootstrapSql(options: {
       ${setting('reason')} IS NOT NULL AND ${setting('operation')}='${operation}'${table === 'organization_users'
         ? ` AND organization_id::text=${setting('org_id')}` : ''}`
     policy(table!, roles.system, 'SELECT', predicate)
-    policy(table!, roles.system, 'UPDATE', predicate)
+    // Session revocation cannot reactivate a bearer or replace its state with NULL.
+    policy(table!, roles.system, 'UPDATE', predicate, table === 'user_sessions' ? `(${predicate}) AND is_active IS FALSE` : predicate)
   }
 
   const issuance = `${setting('operation')}`
   const matchingEmail = `lower(email)=${setting('email')}`
   const emailUser = `user_id IN (SELECT u.user_id FROM user_management.users u WHERE lower(u.email)=${setting('email')})`
   grant('users', roles.issuance, 'SELECT, INSERT (user_id,email,password_hash,first_name,last_name,display_name,email_verified,is_active)')
+  // Preserve only the transaction-origin marker required by newlyProvisioned;
+  // table-wide SELECT would also resurrect retained historical fields.
+  statements.push(`GRANT SELECT (xmin) ON user_management.users TO ${q(roles.issuance)};`)
   policy('users', roles.issuance, 'SELECT', matchingEmail)
   policy('users', roles.issuance, 'INSERT', `${matchingEmail} AND ${issuance}='signup' AND
     NOT is_system_admin AND is_active AND lifecycle_state='active' AND account_source='local' AND NOT email_verified`)

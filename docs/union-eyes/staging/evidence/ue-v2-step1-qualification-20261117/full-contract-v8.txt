@@ -1,0 +1,2445 @@
+
+> nzila-os@1.0.3 contract-tests /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+> vitest run --project contract-tests --maxWorkers=1 --reporter=default --reporter=json --outputFile=/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/full-contract-v8.json
+
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |contract-tests| civic-oci-doctrine-integrity.test.ts (316 tests) 37856ms
+   ✓ portable CIVIC archive review without execution admission (8)
+     ✓ reviews a detached checkout without original payloads, anchors or workstation authority 326ms
+   ✓ bounded Round 1 evidence governance and admission (54)
+     ✓ admits reviewed six-session preparation without reopening runtime or creating results 334ms
+     ✓ checks exact human window at 2026-10-12T23:59:13.955Z admitted=false while preserving archival review 304ms
+     ✓ checks exact human window at 2026-10-12T23:59:13.956Z admitted=true while preserving archival review 302ms
+     ✓ checks exact human window at 2026-11-11T23:59:13.955Z admitted=true while preserving archival review 328ms
+     ✓ checks exact human window at 2026-11-11T23:59:13.956Z admitted=false while preserving archival review 324ms
+     ✓ checks exact human window at 2026-11-12T00:00:00Z admitted=false while preserving archival review 305ms
+     ✓ requires complete exact artifact docs/public-service/operations/CIVIC_HUMAN_VALIDATION_ROUND_1_AUTHORIZATION.md and rejects premature findings 305ms
+   ✓ exact human-validation plan archival gate (54)
+     ✓ blocks missing Slice 2 human acceptance 363ms
+   ✓ CIVIC / OCI doctrine integrity (194)
+     ✓ passes the current canonical repository state 1306ms
+ ✓ |contract-tests| dead-deps.test.ts (321 tests) 57975ms
+   ✓ Dead production dependencies — STUDIO-DEPS-01 contract (321)
+     ✓ apps/console (52)
+       ✓ @nzila/ai-core is actually imported (not a dead dependency) 609ms
+       ✓ @nzila/attestation-visibility is actually imported (not a dead dependency) 456ms
+     ✓ apps/union-eyes (124)
+       ✓ @aws-sdk/client-s3 is actually imported (not a dead dependency) 14201ms
+       ✓ @aws-sdk/client-textract is actually imported (not a dead dependency) 768ms
+       ✓ @aws-sdk/s3-request-presigner is actually imported (not a dead dependency) 545ms
+       ✓ @azure/cognitiveservices-computervision is actually imported (not a dead dependency) 569ms
+       ✓ @azure/identity is actually imported (not a dead dependency) 351ms
+       ✓ @azure/keyvault-keys is actually imported (not a dead dependency) 460ms
+       ✓ @azure/keyvault-secrets is actually imported (not a dead dependency) 2172ms
+       ✓ @azure/ms-rest-js is actually imported (not a dead dependency) 582ms
+       ✓ @azure/msal-node is actually imported (not a dead dependency) 592ms
+       ✓ @azure/storage-blob is actually imported (not a dead dependency) 502ms
+       ✓ @google-cloud/vision is actually imported (not a dead dependency) 585ms
+       ✓ @heroicons/react is actually imported (not a dead dependency) 615ms
+       ✓ @microsoft/microsoft-graph-client is actually imported (not a dead dependency) 431ms
+       ✓ @nzila/attestation-visibility is actually imported (not a dead dependency) 483ms
+       ✓ @nzila/continuity-review is actually imported (not a dead dependency) 395ms
+       ✓ @nzila/crm-hubspot is actually imported (not a dead dependency) 534ms
+       ✓ @nzila/governance-middleware is actually imported (not a dead dependency) 439ms
+       ✓ @nzila/governance-operations is actually imported (not a dead dependency) 427ms
+       ✓ @nzila/governance-otel is actually imported (not a dead dependency) 400ms
+       ✓ @nzila/governance-review is actually imported (not a dead dependency) 399ms
+       ✓ @nzila/ml-sdk is actually imported (not a dead dependency) 325ms
+       ✓ @nzila/oci-confidence is actually imported (not a dead dependency) 407ms
+       ✓ @nzila/operational-convergence is actually imported (not a dead dependency) 472ms
+       ✓ @nzila/platform-pilot-metrics is actually imported (not a dead dependency) 323ms
+       ✓ @nzila/reality-env is actually imported (not a dead dependency) 487ms
+       ✓ @nzila/stabilization-signals is actually imported (not a dead dependency) 399ms
+       ✓ @nzila/ui is actually imported (not a dead dependency) 315ms
+       ✓ @nzila/workload-intelligence is actually imported (not a dead dependency) 555ms
+       ✓ @radix-ui/react-accordion is actually imported (not a dead dependency) 562ms
+       ✓ @radix-ui/react-slider is actually imported (not a dead dependency) 568ms
+       ✓ @react-email/components is actually imported (not a dead dependency) 311ms
+       ✓ @react-email/render is actually imported (not a dead dependency) 568ms
+       ✓ @react-pdf/renderer is actually imported (not a dead dependency) 425ms
+       ✓ @tensorflow/tfjs-node is actually imported (not a dead dependency) 474ms
+       ✓ @upstash/redis is actually imported (not a dead dependency) 321ms
+       ✓ axios is actually imported (not a dead dependency) 377ms
+       ✓ bullmq is actually imported (not a dead dependency) 553ms
+       ✓ clsx is actually imported (not a dead dependency) 543ms
+       ✓ decimal.js is actually imported (not a dead dependency) 393ms
+       ✓ dompurify is actually imported (not a dead dependency) 350ms
+       ✓ drizzle-zod is actually imported (not a dead dependency) 319ms
+       ✓ exceljs is actually imported (not a dead dependency) 328ms
+       ✓ firebase-admin is actually imported (not a dead dependency) 495ms
+       ✓ geoip-lite is actually imported (not a dead dependency) 507ms
+       ✓ graphql-yoga is actually imported (not a dead dependency) 403ms
+       ✓ immutable is actually imported (not a dead dependency) 559ms
+       ✓ ioredis is actually imported (not a dead dependency) 320ms
+       ✓ jose is actually imported (not a dead dependency) 544ms
+       ✓ jspdf is actually imported (not a dead dependency) 324ms
+       ✓ mammoth is actually imported (not a dead dependency) 338ms
+       ✓ microsoft-cognitiveservices-speech-sdk is actually imported (not a dead dependency) 337ms
+       ✓ node-cron is actually imported (not a dead dependency) 443ms
+       ✓ node-geocoder is actually imported (not a dead dependency) 646ms
+       ✓ papaparse is actually imported (not a dead dependency) 398ms
+       ✓ pdf-parse is actually imported (not a dead dependency) 317ms
+       ✓ pdfjs-dist is actually imported (not a dead dependency) 317ms
+       ✓ pdfkit is actually imported (not a dead dependency) 316ms
+       ✓ prom-client is actually imported (not a dead dependency) 453ms
+       ✓ rrule is actually imported (not a dead dependency) 318ms
+       ✓ secrets.js-grempe is actually imported (not a dead dependency) 529ms
+       ✓ simple-statistics is actually imported (not a dead dependency) 456ms
+       ✓ tailwind-merge is actually imported (not a dead dependency) 516ms
+       ✓ tesseract.js is actually imported (not a dead dependency) 506ms
+     ✓ apps/zonga (30)
+       ✓ @nzila/ai-sdk is actually imported (not a dead dependency) 707ms
+ ✓ |contract-tests| polyglot-authority.test.ts (12 tests) 19497ms
+   ✓ STACK_POLYGLOT_001 — Apps must not bypass primary store for domain mutations (1)
+     ✓ no app writes domain data directly to Redis without a corresponding DB write 2112ms
+   ✓ STACK_POLYGLOT_002 — Redis usage must have TTL (2)
+     ✓ all Redis .set() calls use setEx, expire, or include EX/PX option 14110ms
+   ✓ STACK_POLYGLOT_003 — Elasticsearch indices must use shared index with orgId field (2)
+     ✓ no Elasticsearch index name contains a dynamic orgId segment (index-per-org anti-pattern) 1799ms
+     ✓ Elasticsearch search queries include orgId filter for org isolation 1431ms
+ ❯ |contract-tests| db-boundary.test.ts (16 tests | 1 failed) 6613ms
+   ❯ INV-06 — No raw DB access in application layer (6)
+     ✓ no app file imports @nzila/db/raw 2107ms
+     ✓ no app file imports rawDb from @nzila/db 972ms
+     ✓ no app file directly instantiates drizzle() 867ms
+     × no app file imports raw database drivers (postgres, pg) 855ms
+     ✓ no app file imports unscoped db from @nzila/db barrel 953ms
+     ✓ no app file imports from @nzila/db/client directly 853ms
+   ✓ INV-07 — Org isolation enforced via Scoped DAL (8)
+     ✓ createScopedDb exists and is exported from @nzila/db/scoped 0ms
+     ✓ createScopedDb throws on missing orgId 0ms
+     ✓ createScopedDb validates org_id column on tables 0ms
+     ✓ rawDb is exported from @nzila/db/raw with internal-only JSDoc 0ms
+     ✓ ScopedDb auto-injects orgId on insert operations 0ms
+     ✓ createAuditedScopedDb exists for write-enabled audited access 0ms
+     ✓ Org-scoped table registry is exported from @nzila/db 0ms
+     ✓ @nzila/db package.json exports scoped and raw modules 0ms
+   ✓ INV-06 — ESLint no-shadow-db enforcement (2)
+     ✓ every app with an eslint.config.mjs includes no-shadow-db 3ms
+     ✓ no-shadow-db ESLint config file exists 0ms
+ ✓ |contract-tests| revenue-enforcement.test.ts (103 tests) 4576ms
+   ✓ REV-001: No raw Stripe SDK imports outside allowlist (28)
+     ✓ union-eyes does not import stripe directly 897ms
+   ✓ REV-003: No inline payment URLs in app source (28)
+     ✓ union-eyes has no hardcoded payment API URLs 652ms
+   ✓ REV-008: No raw payment processing outside platform-revenue (29)
+     ✓ union-eyes has no raw payment processing calls 698ms
+     ✓ no non-allowlisted package has raw payment processing 582ms
+ ✓ |contract-tests| shared-core-enforcement.test.ts (42 tests) 7181ms
+   ✓ CORE-001: No duplicate platform logic patterns (3)
+     ✓ apps must not re-implement: custom rate-limiter implementation 1227ms
+     ✓ apps must not re-implement: custom hash-chain implementation 1179ms
+     ✓ apps must not re-implement: custom idempotency implementation 1213ms
+   ✓ CORE-002: No cross-app imports in source code (2)
+     ✓ no app imports from another app via @nzila/<app> paths 2013ms
+     ✓ no app imports from another app via relative paths to apps/ 1176ms
+ ✓ |contract-tests| org-semantic-convergence.test.ts (18 tests) 4111ms
+   ✓ ORG_SEMANTICS_ONLY_001: entityId must not appear in application code (2)
+     ✓ apps/ has zero \bentityId\b references 1650ms
+     ✓ packages/ has zero \bentityId\b references 2453ms
+ ✓ |contract-tests| auth-purity.test.ts (282 tests) 4128ms
+   ✓ AUTH-001: No Clerk-style naming outside adapters (28)
+     ✓ union-eyes has no Clerk-style variable names 771ms
+   ✓ AUTH-003: No @clerk/* imports outside platform-auth (1)
+     ✓ no @clerk/* imports found outside platform-auth 1944ms
+ ✓ |contract-tests| generated-runtime-separation.test.ts (1 test) 1466ms
+   ✓ Generated/runtime separation (1)
+     ✓ does not import generated artifacts into runtime business logic 1466ms
+stderr | file-size-enforcement.test.ts > SIZE_001 — Source files should not exceed 500 lines > should flag oversized source files (advisory)
+⚠️  508 files exceed 500 lines (top 20):
+  apps/union-eyes/services/financial-service/src/db/schema.ts: 6709 lines
+  apps/union-eyes/services/financial-service/drizzle/schema.ts: 6151 lines
+  apps/union-eyes/db/rls-storage-authority/reference-latent.ts: 3389 lines
+  packages/sage-core/src/postgres-repository.ts: 2974 lines
+  apps/union-eyes/lib/api-auth-guard.ts: 2457 lines
+  packages/sage-core/src/services.ts: 2425 lines
+  apps/union-eyes/backend/unions/models.py: 2291 lines
+  apps/union-eyes/backend/compliance/models.py: 2281 lines
+  packages/sage-core/src/repository.ts: 2266 lines
+  apps/union-eyes/lib/reality/capability-registry.ts: 2192 lines
+  apps/union-eyes/backend/billing/models.py: 2110 lines
+  packages/automation/generators/core/code_generator.py: 1974 lines
+  packages/automation/tests/test_platform_analyzer.py: 1914 lines
+  packages/platform-pilot-metrics/src/service.ts: 1906 lines
+  apps/union-eyes/components/financial/FinancialOverview.tsx: 1812 lines
+  apps/union-eyes/lib/ai/template-engine.ts: 1729 lines
+  apps/union-eyes/backend/compliance/tests.py: 1643 lines
+  apps/union-eyes/db/auth/authority-physical-guards.ts: 1607 lines
+  apps/union-eyes/app/[locale]/(marketing)/proof/page.tsx: 1577 lines
+  apps/console/components/command-section-guide.tsx: 1544 lines
+
+ ✓ |contract-tests| file-size-enforcement.test.ts (2 tests) 2637ms
+   ✓ SIZE_001 — Source files should not exceed 500 lines (1)
+     ✓ should flag oversized source files (advisory) 2636ms
+ ✓ |contract-tests| governance-no-bypass.test.ts (44 tests) 4181ms
+   ✓ GOV-BYPASS-001 — No shadow AI provider imports in apps (9)
+     ✓ union-eyes — no direct AI provider imports 731ms
+   ✓ GOV-BYPASS-002 — No raw audit table writes in app code (9)
+     ✓ union-eyes — no raw audit table manipulation 692ms
+   ✓ GOV-BYPASS-003 — No hardcoded access bypass patterns in apps (9)
+     ✓ union-eyes — no hardcoded governance bypass flags 693ms
+   ✓ GOV-BYPASS-006 — No process.exit in app code (9)
+     ✓ union-eyes — no process.exit() outside allowed files 665ms
+fatal: Invalid revision range 0000000000000000000000000000000000000000..deadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+ ✓ |contract-tests| migration-safety-gate.test.ts (33 tests) 11653ms
+   ✓ 11: transient OS-level spawn failures retry instead of failing closed immediately (6)
+     ✓ getChangedFiles recovers from a transient exec failure via retry 506ms
+     ✓ default retry budget survives a burst of transient failures longer than the original incident window 10525ms
+   ✓ 10: historical P4 merge simulation against a disposable git repository (1)
+     ✓ detects both the nested migration and the canonical runbook across a real commit range 564ms
+ ✓ |contract-tests| golden-path-invariants.test.ts (20 tests) 4055ms
+ ✓ |contract-tests| phantom-deps.test.ts (172 tests) 9835ms
+   ✓ Phantom Dependencies — STUDIO-01 contract (172)
+     ✓ apps/union-eyes (30)
+       ✓ @nzila/ai-sdk is actually imported (not a phantom dependency) 386ms
+       ✓ @nzila/attestation-visibility is actually imported (not a phantom dependency) 1047ms
+       ✓ @nzila/continuity-review is actually imported (not a phantom dependency) 400ms
+       ✓ @nzila/crm-hubspot is actually imported (not a phantom dependency) 713ms
+       ✓ @nzila/governance-middleware is actually imported (not a phantom dependency) 397ms
+       ✓ @nzila/governance-operations is actually imported (not a phantom dependency) 399ms
+       ✓ @nzila/governance-otel is actually imported (not a phantom dependency) 395ms
+       ✓ @nzila/governance-review is actually imported (not a phantom dependency) 409ms
+       ✓ @nzila/ml-sdk is actually imported (not a phantom dependency) 321ms
+       ✓ @nzila/oci-confidence is actually imported (not a phantom dependency) 407ms
+       ✓ @nzila/operational-convergence is actually imported (not a phantom dependency) 476ms
+       ✓ @nzila/platform-pilot-metrics is actually imported (not a phantom dependency) 325ms
+       ✓ @nzila/reality-env is actually imported (not a phantom dependency) 488ms
+       ✓ @nzila/stabilization-signals is actually imported (not a phantom dependency) 403ms
+       ✓ @nzila/ui is actually imported (not a phantom dependency) 314ms
+       ✓ @nzila/workload-intelligence is actually imported (not a phantom dependency) 585ms
+ ✓ |contract-tests| server-action-auth-required.test.ts (5 tests) 5818ms
+   ✓ SERVER_ACTION_AUTH_REQUIRED_001 — Every server action must gate on authentication (2)
+     ✓ every "use server" file across all apps calls an auth guard 5776ms
+ ✓ |contract-tests| invariants.test.ts (13 tests) 2473ms
+   ✓ INV-01: no-shadow-ai (2)
+     ✓ no app file directly imports provider AI SDK (static imports) 1331ms
+   ✓ INV-02: no-shadow-ml (1)
+     ✓ no app file directly imports ML tables from @nzila/db/schema 1115ms
+ ✓ |contract-tests| encryption-validation.test.ts (4 tests) 1917ms
+   ✓ CRYPTO_004 — No weak crypto for security purposes (1)
+     ✓ should not use MD5 or SHA-1 for security-critical operations 1477ms
+ ✓ |contract-tests| runtime-governance-integrity.test.ts (21 tests) 6299ms
+   ✓ runtime governance artifact integrity (21)
+     ✓ emits the canonical package schema and hashes artifact bytes rather than its location 323ms
+     ✓ changes the evidence digest when bytes at the same location change 467ms
+     ✓ writes a canonical ledger record containing the full validated attestation and refuses replacement 683ms
+     ✓ refuses evidence modified after attestation issuance 453ms
+     ✓ allows exactly one concurrent append of the same attestation 511ms
+     ✓ rejects path traversal in a supplied ledger identifier and nested forbidden payload identifiers 448ms
+ ✓ |contract-tests| cross-org-breach-http.test.ts (37 tests) 1728ms
+   ✓ SEC-ORG-ISO-002: HTTP cross-org breach prevention (35)
+     ✓ shared DB queries do not join across org boundaries (1)
+       ✓ no route file contains raw SQL joins without org filter 335ms
+ ❯ |contract-tests| no-console.test.ts (2 tests | 1 failed) 1476ms
+   ❯ NO_CONSOLE_001 — No console in runtime code (2)
+     × no governance exceptions are expired 4ms
+     ✓ no runtime code uses console.* (unless excepted) 1471ms
+ ✓ |contract-tests| data-residency-runtime-verifier.test.ts (1 test) 7456ms
+   ✓ Data residency runtime verifier (1)
+     ✓ generates a runtime report in non-enforced mode 7455ms
+ ✓ |contract-tests| safe-remove-worktree.test.ts (13 tests) 2257ms
+   ✓ CLI (1)
+     ✓ exits 2 with REFUSED for the main checkout and 0 for a dry run 442ms
+ ✓ |contract-tests| merge-authority-surface.test.ts (67 tests) 2709ms
+   ✓ merge authority surface (43)
+     ✓ does not let any workflow job publish a canonical authority name 443ms
+   ✓ phase 1 NOT_APPLICABLE publication (3)
+     ✓ posts terminal NOT_APPLICABLE checks on DEFER_TO_CI and the CI reporter keeps them 517ms
+   ✓ phase 2 supersession (8)
+     ✓ publishes the frozen head from a cancelled run without rerunning expensive work 730ms
+     ✓ retries the first 504 and still posts every required name 348ms
+ ❯ |contract-tests| stack-authority.test.ts (7 tests | 1 failed) 2330ms
+   ❯ STACK_AUTHORITY_001 — Stack authority enforcement (7)
+     ✓ Django-authoritative apps must not contain direct Drizzle mutations in app-layer TS files 42ms
+     ✓ TS-authoritative apps must not introduce a Django backend 1ms
+     ✓ all apps are classified in the Stack Authority matrix 0ms
+     ✓ union-eyes app-layer mutations must use withRLSContext or withSystemContext 847ms
+     ✓ Django-authoritative apps must not contain aliased Drizzle mutations (AST) 73ms
+     ✓ union-eyes app-layer aliased mutations must use withRLSContext or withSystemContext (AST) 1362ms
+     × no expired exceptions for STACK_AUTHORITY_001 3ms
+ ✓ |contract-tests| dora-collector-hardening.test.ts (2 tests) 1711ms
+   ✓ DORA collector hardening (2)
+     ✓ writes a well-formed output document with predictive signal 834ms
+     ✓ fails closed when enforce mode threshold is violated 876ms
+ ✓ |contract-tests| ue-demo-mode-surface.test.ts (6 tests) 1128ms
+   ✓ Union Eyes demo mode surfaces (6)
+     ✓ pilot data generators are only imported from pilot-specific surfaces 1123ms
+ ✓ |contract-tests| app-maturity-enforcement.test.ts (4 tests) 843ms
+   ✓ App maturity enforcement (4)
+     ✓ pilot apps only expose demo data in explicit pilot or demo-gated paths 840ms
+ ✓ |contract-tests| ue-auth-reality.test.ts (2 tests) 1293ms
+   ✓ UE_AUTH_REALITY_001 — Clerk stale reference regression guard (2)
+     ✓ finds no Clerk references in active UE runtime files 1287ms
+ ✓ |contract-tests| observability-coverage.test.ts (4 tests) 589ms
+   ✓ Observability coverage (4)
+     ✓ pilot and production apps declare a telemetry or structured logging surface 324ms
+ ✓ |contract-tests| ts-strict.test.ts (2 tests) 833ms
+   ✓ TS_STRICT_001 — No strict:false anywhere (2)
+     ✓ no tsconfig has strict: false (unless excepted) 832ms
+stderr | api-authz-coverage.test.ts > API Authorization Contract (INV-04) > every route file should import from @nzila/* packages, not relative ../../ chains 3+ deep
+Routes with deep relative imports (should use @nzila/* packages):
+apps/control-plane/app/api/control-plane/system-state/route.ts
+apps/platform-admin/app/api/admin/org/route.ts
+apps/platform-admin/app/api/admin/set-active-org/route.ts
+apps/platform-admin/app/api/entity-graph/edges/route.ts
+apps/platform-admin/app/api/entity-graph/nodes/route.ts
+apps/platform-admin/app/api/itsm-config/approvals/[id]/decide/route.ts
+apps/platform-admin/app/api/itsm-config/approvals/route.ts
+apps/platform-admin/app/api/itsm-config/automation-rules/[id]/route.ts
+apps/platform-admin/app/api/itsm-config/automation-rules/route.ts
+apps/platform-admin/app/api/itsm-config/queues/[id]/route.ts
+apps/platform-admin/app/api/itsm-config/queues/route.ts
+apps/platform-admin/app/api/itsm-config/sla-profiles/[id]/route.ts
+apps/platform-admin/app/api/itsm-config/sla-profiles/route.ts
+apps/platform-admin/app/api/itsm-config/ticket-types/[type]/fields/[fieldId]/route.ts
+apps/platform-admin/app/api/itsm-config/ticket-types/[type]/fields/route.ts
+apps/platform-admin/app/api/sage/workspaces/[workspaceId]/route.ts
+apps/platform-admin/app/api/sage/workspaces/[workspaceId]/summary/route.ts
+apps/platform-admin/app/api/sage/workspaces/route.ts
+apps/trustcore-trustops/app/api/mandates/[mandateId]/transition/route.ts
+apps/union-eyes/app/api/oci/report/[assessmentId]/route.ts
+apps/union-eyes/app/api/oci/results/[id]/route.ts
+apps/union-eyes/app/api/ocra/[assessmentId]/answer/route.ts
+apps/union-eyes/app/api/ocra/[assessmentId]/claim/route.ts
+apps/union-eyes/app/api/ocra/[assessmentId]/profile/route.ts
+apps/union-eyes/app/api/ocra/[assessmentId]/submit/route.ts
+apps/union-eyes/app/api/ocra/report/[assessmentId]/route.ts
+apps/union-eyes/app/api/ocra/results/[id]/route.ts
+
+ ✓ |contract-tests| api-authz-coverage.test.ts (4 tests) 498ms
+ ✓ |contract-tests| org-isolation.test.ts (21 tests) 1094ms
+ ✓ |contract-tests| no-vercel-blob.test.ts (8 tests) 861ms
+   ✓ No direct @vercel/blob imports in app source (8)
+     ✓ union-eyes — no source files import @vercel/blob 590ms
+ ✓ |contract-tests| integration-dispatcher-enforced.test.ts (31 tests) 729ms
+ ✓ |contract-tests| mutation-idempotency.test.ts (11 tests) 380ms
+   ✓ MUTATION_IDEMPOTENCY_REQUIRED_001 - Universal Idempotency Enforcement (11)
+     ✓ MUTATION_IDEMPOTENCY_REQUIRED_001: every mutation route is covered by idempotency enforcement 371ms
+stderr | ue-no-raw-db.test.ts > INV-31b — UE Sensitive-Domain Raw DB Classification > registry has no stale entries (every classification maps to a real direct-DB file)
+[INV-31b] Stale classification entries (file gone or no longer uses direct DB):
+  - app/api/admin/database/optimize/route.ts
+  - app/api/admin/seed-cupe-pilot/route.ts
+  - app/api/cases/[caseId]/export/route.ts
+  - app/api/dues/arrears/[id]/payment/route.ts
+  - app/api/dues/reconciliation/auto-match/route.ts
+  - app/api/governance/board-packets/[id]/route.ts
+  - app/api/governance/board-packets/route.ts
+  - app/api/governance/elections/sessions/[id]/route.ts
+  - app/api/governance/lifecycle/policies/[id]/approvals/route.ts
+  - app/api/governance/lifecycle/policies/route.ts
+  - app/api/grievances/[id]/access/route.ts
+  - app/api/grievances/[id]/assign/route.ts
+  - app/api/grievances/[id]/convert/route.ts
+  - app/api/grievances/[id]/documents/route.ts
+  - app/api/grievances/[id]/priority-override/route.ts
+  - app/api/grievances/[id]/status/route.ts
+  - app/api/grievances/import/route.ts
+  - app/api/grievances/route.ts
+  - app/api/organizations/[id]/ancestors/route.ts
+  - app/api/organizations/[id]/descendants/route.ts
+  - app/api/organizations/[id]/members/route.ts
+  - app/api/organizations/hierarchy/route.ts
+  - app/api/organizations/route.ts
+  - app/api/organizations/search/route.ts
+  - app/api/pilot/bootstrap/cupe/route.ts
+  - app/api/pilot/current/route.ts
+  - app/api/pilot/demo-data/route.ts
+  - app/api/pilot/onboarding/route.ts
+  - app/api/pilot/overview/route.ts
+  - app/api/documents/repository/[id]/route.ts
+  - app/api/grievances/[id]/route.ts
+  - app/api/pilot/events/route.ts
+
+ ✓ |contract-tests| ue-no-raw-db.test.ts (13 tests) 712ms
+   ✓ INV-31 — UE App-Layer DB Access Is RLS-Guarded (5)
+     ✓ no unguarded raw DB access in app-layer code 361ms
+     ✓ no raw postgres driver imports in app-layer code 346ms
+ ✓ |contract-tests| ai-integration.test.ts (37 tests) 504ms
+ ✓ |contract-tests| api-schema-contracts.test.ts (14 tests) 433ms
+ ✓ |contract-tests| vertical-governance.test.ts (1274 tests) 183ms
+ ✓ |contract-tests| no-fake-production-behavior.test.ts (1 test) 307ms
+   ✓ No fake production behavior in runtime APIs (1)
+     ✓ forbids TODOs and fake fallbacks in active app API handlers 306ms
+ ❯ |contract-tests| arch-layer.test.ts (2 tests | 1 failed) 518ms
+   ❯ ARCH_LAYER_001 — No DB/repo direct access from route handlers (2)
+     × no governance exceptions are expired 4ms
+     ✓ route handlers do not import from prohibited DB/repo modules (unless excepted) 514ms
+ ✓ |contract-tests| org-scope-provability.test.ts (12 tests) 428ms
+ ✓ |contract-tests| zonga-brand-governance.test.ts (20 tests) 68ms
+ ✓ |contract-tests| data-residency.test.ts (4 tests) 558ms
+ ✓ |contract-tests| ci-feedback-performance.test.ts (65 tests) 781ms
+   ✓ owner-declared routine build scope (3)
+     ✓ retains the seven chosen apps and partitions the entire selected build universe 439ms
+ ✓ |contract-tests| registry-org-scope.test.ts (2 tests) 266ms
+ ✓ |contract-tests| api-completeness.test.ts (1 test) 260ms
+ ✓ |contract-tests| ue-retired-routes.test.ts (4 tests) 239ms
+ ✓ |contract-tests| observability-unification.test.ts (29 tests) 329ms
+   ✓ OBS-001: API routes do not use bare console.log (1)
+     ✓ API route files avoid console.log (use structured logger) 324ms
+ ✓ |contract-tests| org-scope-enforcement.test.ts (5 tests) 672ms
+   ✓ Org-scope enforcement patterns (5)
+     ✓ ORG-ENFC-001: org-scoped apps use withOrgScope or requireOrgAccess in API routes 409ms
+stderr | ue-audited-mutations.test.ts > INV-34 — UE Mutations Are Audited > no unaudited mutations in API route handlers
+WARNING: 1 unaudited mutations in API routes:
+  app/api/elections/[id]/route.ts:79 — [db.update() — use getAuditedDb().update()] const [row] = await db.update(councilElections).set(updates).where(eq(councilElections.id, params.id)).returning();
+
+ ✓ |contract-tests| ue-audited-mutations.test.ts (3 tests) 383ms
+   ✓ INV-34 — UE Mutations Are Audited (3)
+     ✓ no unaudited mutations in API route handlers 380ms
+ ✓ |contract-tests| authz-regression.test.ts (15 tests) 318ms
+ ✓ |contract-tests| capital-engine-v2.test.ts (5 tests) 1103ms
+   ✓ capital engine v2 (5)
+     ✓ scenario math is stable for stacked scenarios 1076ms
+ ✓ |contract-tests| telemetry-coverage.test.ts (16 tests) 450ms
+ ✓ |contract-tests| ue-route-aliases.test.ts (8 tests) 285ms
+ ✓ |contract-tests| ue-component-boundary.test.ts (3 tests) 444ms
+ ✓ |contract-tests| ue-document-runtime-deps.test.ts (6 tests) 582ms
+ ✓ |contract-tests| onboarding-kpi-github-enrichment.test.ts (1 test) 870ms
+   ✓ Onboarding KPI GitHub enrichment (1)
+     ✓ produces github_enrichment section without failing when API unavailable 869ms
+ ✓ |contract-tests| jurisdiction-sovereignty.test.ts (22 tests) 460ms
+ ✓ |contract-tests| cost-collector-hardening.test.ts (4 tests) 788ms
+   ✓ Cost collector hardening (4)
+     ✓ invokes Azure CLI through the platform command shim 551ms
+ ✓ |contract-tests| seed-replay.test.ts (5 tests) 126ms
+ ✓ |contract-tests| portfolio-governance.test.ts (5 tests) 691ms
+   ✓ portfolio governance (5)
+     ✓ produces stable generated artifacts from the same canonical catalog 442ms
+ ✓ |contract-tests| feature-flag-evaluation.test.ts (12 tests) 466ms
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=16/16 missing=none
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=16/16 missing=none
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/4 posted=15/16 missing=Merge Authority / Lint & Typecheck
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=2/4 posted=16/16 missing=none
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/5 posted=15/16 missing=Merge Authority / Lint & Typecheck
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=2/5 posted=15/16 missing=Merge Authority / Lint & Typecheck
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=15/16 missing=Merge Authority / Lint & Typecheck
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=16/16 missing=none
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/6 posted=15/16 missing=Merge Authority / Lint & Typecheck
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1081 posted=16/16 missing=none
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=15/16 missing=Merge Authority / Lint & Typecheck
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=16/16 missing=none
+retrying list/read after listing secret-scan.yml runs failed (502): gateway; budget remains
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/5 posted=0/16 missing=Merge Authority / Lint & Typecheck, Merge Authority / Unit Tests, Merge Authority / Schema Integrity, Merge Authority / PostgreSQL RLS, Merge Authority / Migration Chain, Merge Authority / Affected Build, Merge Authority / Architectural Contracts, Merge Authority / Repository Inventory, Merge Authority / Governance Integrity, Merge Authority / Hash Chain Integrity, Merge Authority / Operating Layer, Merge Authority / IaC Security, Merge Authority / Ops Documentation, Gitleaks, TruffleHog OSS, Docker Secret Policy
+retrying list/read after listing secret-scan.yml runs failed (504): gateway; budget remains
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=2/5 posted=0/16 missing=Merge Authority / Lint & Typecheck, Merge Authority / Unit Tests, Merge Authority / Schema Integrity, Merge Authority / PostgreSQL RLS, Merge Authority / Migration Chain, Merge Authority / Affected Build, Merge Authority / Architectural Contracts, Merge Authority / Repository Inventory, Merge Authority / Governance Integrity, Merge Authority / Hash Chain Integrity, Merge Authority / Operating Layer, Merge Authority / IaC Security, Merge Authority / Ops Documentation, Gitleaks, TruffleHog OSS, Docker Secret Policy
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=3/5 posted=16/16 missing=none
+reconcile head=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb attempt=1/1 posted=15/16 missing=Merge Authority / Lint & Typecheck
+ ✓ |contract-tests| merge-authority-convergence.test.ts (12 tests) 628ms
+   ✓ phase 2 required-context convergence (12)
+     ✓ redteam re-entry: completion job publishes a late terminal result for the frozen run SHA 600ms
+ ✓ |contract-tests| org-isolation-runtime.test.ts (9 tests) 370ms
+ ✓ |contract-tests| ue-layer-boundary.test.ts (8 tests) 238ms
+ ✓ |contract-tests| audit-mutation-coverage.test.ts (11 tests) 314ms
+ ✓ |contract-tests| abr-governance-bridge-only.test.ts (4 tests) 31ms
+ ✓ |contract-tests| ue-agent-coordination.test.ts (5 tests) 368ms
+ ✓ |contract-tests| capital-allocation.test.ts (5 tests) 383ms
+ ✓ |contract-tests| union-eyes-p4-authority-rollout.test.ts (11 tests) 204ms
+ ✓ |contract-tests| env-contract.test.ts (17 tests) 155ms
+ ✓ |contract-tests| strategic-resilience-hardening.test.ts (2 tests) 221ms
+ ✓ |contract-tests| zonga-clamav-upload-hardening.test.ts (4 tests) 115ms
+ ✓ |contract-tests| migration-fault-tolerance.test.ts (10 tests) 25ms
+ ✓ |contract-tests| control-plane-authority.test.ts (170 tests) 121ms
+ ✓ |contract-tests| integration-healthcheck-required.test.ts (10 tests) 93ms
+ ✓ |contract-tests| workflow-context-availability.test.ts (72 tests) 133ms
+ ✓ |contract-tests| migration-immutability.test.ts (4 tests) 77ms
+ ✓ |contract-tests| commerce-invariants.test.ts (74 tests) 24ms
+ ✓ |contract-tests| cora-readonly.test.ts (7 tests) 57ms
+ ✓ |contract-tests| migration-policy.test.ts (11 tests) 19ms
+ ✓ |contract-tests| governance-runtime-budget.test.ts (2 tests) 129ms
+ ✓ |contract-tests| dashboard-no-hardcode.test.ts (2109 tests) 121ms
+ ✓ |contract-tests| liuna-readiness-pack-contract.test.ts (18 tests) 104ms
+ ✓ |contract-tests| migration-replay.test.ts (7 tests) 41ms
+ ✓ |contract-tests| tool-fabric-baseline-seeds.test.ts (12 tests) 73ms
+ ✓ |contract-tests| schema-snapshot-sync.test.ts (6 tests) 53ms
+ ✓ |contract-tests| ue-evidence-adoption.test.ts (13 tests) 153ms
+ ✓ |contract-tests| abr-governance-bridge.test.ts (20 tests) 10ms
+ ✓ |contract-tests| ue-domain-service-boundary.test.ts (10 tests) 79ms
+ ✓ |contract-tests| zonga-phase2-actions.test.ts (50 tests) 7ms
+ ✓ |contract-tests| domain-vs-audit.test.ts (4 tests) 62ms
+ ✓ |contract-tests| abr-dispatcher-only.test.ts (5 tests) 49ms
+ ✓ |contract-tests| abr-org-context.test.ts (3 tests) 52ms
+ ✓ |contract-tests| ue-v2-container-probes.test.ts (7 tests) 278ms
+ ✓ |contract-tests| trade-contracts.test.ts (71 tests) 24ms
+ ✓ |contract-tests| gdpr-compliance.test.ts (4 tests) 92ms
+ ✓ |contract-tests| abr-org-isolation.test.ts (6 tests) 23ms
+ ✓ |contract-tests| abr-todo-policy.test.ts (2 tests) 34ms
+ ✓ |contract-tests| api-route-otel.test.ts (131 tests) 17ms
+ ✓ |contract-tests| trustcore-org-isolation.test.ts (3 tests) 26ms
+ ❯ |contract-tests| server-action-org-scoping.test.ts (3 tests | 1 failed) 34ms
+   ❯ ORG_REQUIRED_SERVER_ACTIONS_001 — Server actions must use resolveOrgContext (2)
+     ✓ every "use server" action file imports resolveOrgContext 22ms
+     × no expired exceptions for ORG_REQUIRED_SERVER_ACTIONS_001 3ms
+   ✓ NO_BARE_AUTH_IN_ACTIONS_001 — No bare auth() in migrated action files (1)
+     ✓ files with resolveOrgContext must not also import bare auth() from @nzila/platform-auth 9ms
+ ✓ |contract-tests| ue-forbidden-vocabulary.test.ts (2 tests) 44ms
+ ✓ |contract-tests| governance-rules.unit.test.ts (23 tests) 38ms
+ ✓ |contract-tests| union-eyes-automation-rules-ownership.test.ts (5 tests) 36ms
+ ✓ |contract-tests| evidence-lifecycle.test.ts (48 tests) 57ms
+ ✓ |contract-tests| abr-bridge-boundary.test.ts (19 tests) 42ms
+ ✓ |contract-tests| performance-regression-enforcement.test.ts (4 tests) 30ms
+ ✓ |contract-tests| audit-immutability.test.ts (9 tests) 36ms
+ ✓ |contract-tests| ci-cd-hardening.test.ts (28 tests) 12ms
+ ✓ |contract-tests| platform-api-surface.test.ts (237 tests) 38ms
+ ✓ |contract-tests| agri-boundary.test.ts (58 tests) 27ms
+ ✓ |contract-tests| ue-persona-access.test.ts (385 tests) 33ms
+ ❯ |contract-tests| no-raw-db-in-actions.test.ts (3 tests | 1 failed) 17ms
+   ❯ NO_RAW_DB_IN_ACTIONS_001 — No raw DB access in server action files (3)
+     ✓ discovers action files to scan 1ms
+     ✓ no action file imports raw or unscoped DB clients 12ms
+     × no expired exceptions for NO_RAW_DB_IN_ACTIONS_001 3ms
+ ✓ |contract-tests| operating-layer-multiservice-harness.test.ts (2 tests) 28ms
+ ✓ |contract-tests| zonga-dr-restore-readiness.test.ts (4 tests) 19ms
+ ✓ |contract-tests| policy-enforcement-wiring.test.ts (33 tests) 25ms
+ ✓ |contract-tests| affected-build-plan.test.ts (11 tests) 27ms
+ ✓ |contract-tests| cfo-pages.test.ts (141 tests) 20ms
+ ✓ |contract-tests| integration-adapter-exists.test.ts (26 tests) 9ms
+ ✓ |contract-tests| union-eyes-fsm-enforcement.test.ts (3 tests) 13ms
+ ✓ |contract-tests| schema-lifecycle-drift.test.ts (5 tests) 27ms
+ ✓ |contract-tests| trade-cars-boundary.test.ts (38 tests) 9ms
+ ✓ |contract-tests| perf-budget-gate.test.ts (8 tests) 15ms
+ ✓ |contract-tests| instrumentation-mandatory.test.ts (23 tests) 5ms
+ ✓ |contract-tests| control-manifest-invariants.test.ts (110 tests) 17ms
+ ✓ |contract-tests| governance-enforcement-audit.test.ts (24 tests) 20ms
+ ✓ |contract-tests| nacp-features.test.ts (76 tests) 13ms
+ ✓ |contract-tests| zonga-phase2-pages.test.ts (107 tests) 17ms
+ ✓ |contract-tests| integration-chaos-prod-guard.test.ts (13 tests) 17ms
+ ✓ |contract-tests| commerce-stack.test.ts (27 tests) 16ms
+ ✓ |contract-tests| telemetry-manifest-enforcement.test.ts (53 tests) 11ms
+ ✓ |contract-tests| union-eyes-dr-restore-readiness.test.ts (4 tests) 7ms
+ ✓ |contract-tests| gate-authority.test.ts (17 tests) 15ms
+ ✓ |contract-tests| pilot-api-entitlement.test.ts (14 tests) 14ms
+ ✓ |contract-tests| enforcement-hardening.test.ts (33 tests) 19ms
+ ✓ |contract-tests| sage-proof-run-consistency.test.ts (8 tests) 21ms
+ ✓ |contract-tests| hash-chain-drift.test.ts (25 tests) 17ms
+ ✓ |contract-tests| ue-validator-paths.test.ts (5 tests) 12ms
+ ✓ |contract-tests| evidence-universal-coverage.test.ts (46 tests) 10ms
+ ✓ |contract-tests| evidence-coverage.test.ts (23 tests) 4ms
+ ✓ |contract-tests| ue-ai-client-attribution.test.ts (3 tests) 8ms
+ ✓ |contract-tests| tool-fabric-baseline-routes.test.ts (8 tests) 13ms
+ ✓ |contract-tests| context-semantics.test.ts (16 tests) 9ms
+ ✓ |contract-tests| ai-inventory-integrity.test.ts (38 tests) 12ms
+ ✓ |contract-tests| eslint-governance.test.ts (13 tests) 18ms
+ ✓ |contract-tests| audit-taxonomy.test.ts (25 tests) 7ms
+ ✓ |contract-tests| sage-records-destruction-invariants.test.ts (8 tests) 7ms
+ ✓ |contract-tests| platform-adoption-exceptions.test.ts (43 tests) 6ms
+ ✓ |contract-tests| health-routes.test.ts (39 tests) 9ms
+ ✓ |contract-tests| rate-limiting.test.ts (23 tests) 6ms
+ ✓ |contract-tests| org-required.test.ts (2 tests) 11ms
+ ✓ |contract-tests| agri-db-org-scoping.test.ts (26 tests) 8ms
+ ✓ |contract-tests| stack-authority-ast.test.ts (10 tests) 10ms
+ ✓ |contract-tests| dues-invariants.test.ts (8 tests) 14ms
+ ✓ |contract-tests| canonical-schema-enforcement.test.ts (9 tests) 8ms
+ ✓ |contract-tests| zonga-actions.test.ts (59 tests) 7ms
+ ✓ |contract-tests| cost-policy-enforced.test.ts (6 tests) 9ms
+ ✓ |contract-tests| platform-observability-invariants.test.ts (11 tests) 12ms
+ ✓ |contract-tests| platform-evidence-invariants.test.ts (13 tests) 9ms
+ ✓ |contract-tests| sage-proof-run-005-consistency.test.ts (9 tests) 16ms
+ ✓ |contract-tests| trustcore-trustops-org-isolation.test.ts (6 tests) 12ms
+ ✓ |contract-tests| integration-webhook-contracts.test.ts (22 tests) 7ms
+stderr | api-versioning.test.ts > API_VERSION_001 — API apps should adopt versioned routes > should have versioned API route directories (/api/v1/ or /api/v2/)
+API versioning adoption: 1/9 apps
+[API_VERSION_001] apps/console/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+[API_VERSION_001] apps/web/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+[API_VERSION_001] apps/partners/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+[API_VERSION_001] apps/zonga/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+[API_VERSION_001] apps/agrimo/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+[API_VERSION_001] apps/cfo/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+[API_VERSION_001] apps/trade/app/api/
+  Fix: Add versioned route prefix (e.g., /api/v1/) for public-facing API routes
+
+stderr | api-versioning.test.ts > API_VERSION_002 — Consistent versioning within apps > versioned apps should not have unversioned mutation routes alongside versioned ones
+Mixed versioning detected:
+[API_VERSION_002] apps/union-eyes/app/api/__tests__
+  Value: __tests__
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/activities
+  Value: activities
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/agreements
+  Value: agreements
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/ai
+  Value: ai
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/alerts
+  Value: alerts
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/analytics
+  Value: analytics
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/arbitration
+  Value: arbitration
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/arbitrations
+  Value: arbitrations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/arrears
+  Value: arrears
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/assignment-profiles
+  Value: assignment-profiles
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/assurance
+  Value: assurance
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/audits
+  Value: audits
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/bargaining
+  Value: bargaining
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/bargaining-notes
+  Value: bargaining-notes
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/billing
+  Value: billing
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/breaks
+  Value: breaks
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/bulk-import
+  Value: bulk-import
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/calendar
+  Value: calendar
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/calendar-sync
+  Value: calendar-sync
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/calendars
+  Value: calendars
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/carbon
+  Value: carbon
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/case-studies
+  Value: case-studies
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cases
+  Value: cases
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cba-intelligence
+  Value: cba-intelligence
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cbas
+  Value: cbas
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/chatbot
+  Value: chatbot
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/claims
+  Value: claims
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/clause-library
+  Value: clause-library
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/clauses
+  Value: clauses
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/clc
+  Value: clc
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cnesst
+  Value: cnesst
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cognition
+  Value: cognition
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/committees
+  Value: committees
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/communications
+  Value: communications
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/compliance
+  Value: compliance
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/consent
+  Value: consent
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/contact
+  Value: contact
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/content
+  Value: content
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/continuity
+  Value: continuity
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/contracts
+  Value: contracts
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cope
+  Value: cope
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/correspondence
+  Value: correspondence
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/cron
+  Value: cron
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/currency
+  Value: currency
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/dashboard
+  Value: dashboard
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/deadlines
+  Value: deadlines
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/debug
+  Value: debug
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/deprecations
+  Value: deprecations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/dispatch
+  Value: dispatch
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/docs
+  Value: docs
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/documents
+  Value: documents
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/dues
+  Value: dues
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/education
+  Value: education
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/elections
+  Value: elections
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/emergency
+  Value: emergency
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/employer-execution
+  Value: employer-execution
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/employers
+  Value: employers
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/enterprise
+  Value: enterprise
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/entitlements
+  Value: entitlements
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/equity
+  Value: equity
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/events
+  Value: events
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/evidence
+  Value: evidence
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/executive
+  Value: executive
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/exit-interviews
+  Value: exit-interviews
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/exports
+  Value: exports
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/extensions
+  Value: extensions
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/external
+  Value: external
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/external-data
+  Value: external-data
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/feature-flags
+  Value: feature-flags
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/federations
+  Value: federations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/finance
+  Value: finance
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/financial
+  Value: financial
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/gdpr
+  Value: gdpr
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/governance
+  Value: governance
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/graphql
+  Value: graphql
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/grievance-deadlines
+  Value: grievance-deadlines
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/grievances
+  Value: grievances
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/health-safety
+  Value: health-safety
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/healthwelfare
+  Value: healthwelfare
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/icra
+  Value: icra
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/integrations
+  Value: integrations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/intelligence
+  Value: intelligence
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/investigations
+  Value: investigations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/jurisdiction
+  Value: jurisdiction
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/jurisdiction-rules
+  Value: jurisdiction-rules
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/knowledge-base
+  Value: knowledge-base
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/labour-standards
+  Value: labour-standards
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/locals
+  Value: locals
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/location
+  Value: location
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/meeting-rooms
+  Value: meeting-rooms
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/member
+  Value: member
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/members
+  Value: members
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/messages
+  Value: messages
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/messaging
+  Value: messaging
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/metrics
+  Value: metrics
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/ml
+  Value: ml
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/mobile
+  Value: mobile
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/movement-insights
+  Value: movement-insights
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/negotiations
+  Value: negotiations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/notifications
+  Value: notifications
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/oci
+  Value: oci
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/ocra
+  Value: ocra
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/onboarding
+  Value: onboarding
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/org
+  Value: org
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/organization
+  Value: organization
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/organizations
+  Value: organizations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/organizer
+  Value: organizer
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/organizing
+  Value: organizing
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/payments
+  Value: payments
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/pension
+  Value: pension
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/pilot
+  Value: pilot
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/platform
+  Value: platform
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/portal
+  Value: portal
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/precedents
+  Value: precedents
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/privacy
+  Value: privacy
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/profile
+  Value: profile
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/ready
+  Value: ready
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/reconciliation
+  Value: reconciliation
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/reports
+  Value: reports
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/reviews
+  Value: reviews
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/rewards
+  Value: rewards
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/satisfaction
+  Value: satisfaction
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/scim
+  Value: scim
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/search
+  Value: search
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/security
+  Value: security
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/settings
+  Value: settings
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/signatures
+  Value: signatures
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/social-media
+  Value: social-media
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/staging-proof
+  Value: staging-proof
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/stewards
+  Value: stewards
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/storage
+  Value: storage
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/strike
+  Value: strike
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/strike-fund
+  Value: strike-fund
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/support
+  Value: support
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/targets
+  Value: targets
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/tax
+  Value: tax
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/tenant
+  Value: tenant
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/test-auth
+  Value: test-auth
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/testimonials
+  Value: testimonials
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/triage-designations
+  Value: triage-designations
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/union-eyes
+  Value: union-eyes
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/units
+  Value: units
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/upload
+  Value: upload
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/users
+  Value: users
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/version
+  Value: version
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/vocabulary
+  Value: vocabulary
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/voice
+  Value: voice
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/voting
+  Value: voting
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/wcb
+  Value: wcb
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/workaid
+  Value: workaid
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/workbench
+  Value: workbench
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/workbook
+  Value: workbook
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/workflow
+  Value: workflow
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/worksites
+  Value: worksites
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+[API_VERSION_002] apps/union-eyes/app/api/workspace
+  Value: workspace
+  Fix: Move under /api/v1/ or /api/v2/ for consistency
+
+ ✓ |contract-tests| api-versioning.test.ts (2 tests) 8ms
+ ✓ |contract-tests| precommit-guardrails.test.ts (13 tests) 15ms
+ ✓ |contract-tests| agri-actions.test.ts (40 tests) 8ms
+ ✓ |contract-tests| trade-actions.test.ts (40 tests) 7ms
+ ✓ |contract-tests| release-attestation.test.ts (3 tests) 6ms
+ ✓ |contract-tests| pilot-metrics-governance.test.ts (14 tests) 9ms
+ ✓ |contract-tests| simulation-safety.test.ts (7 tests) 10ms
+ ✓ |contract-tests| console-ai-management-real.test.ts (3 tests) 3ms
+ ✓ |contract-tests| route-manifest.test.ts (8 tests) 7ms
+ ✓ |contract-tests| ue-rls-org-context.test.ts (6 tests) 3ms
+ ✓ |contract-tests| cupe-seed-scenarios.test.ts (6 tests) 8ms
+ ✓ |contract-tests| platform-events-invariants.test.ts (9 tests) 9ms
+ ✓ |contract-tests| sovereign-egress-allowlist.test.ts (10 tests) 5ms
+ ✓ |contract-tests| zonga-e2e-domain.test.ts (35 tests) 9ms
+ ✓ |contract-tests| org-isolation-stress.test.ts (10 tests) 9ms
+ ✓ |contract-tests| zonga-pages.test.ts (56 tests) 8ms
+ ✓ |contract-tests| registry-alignment.test.ts (8 tests) 7ms
+ ✓ |contract-tests| console-ue-symbiosis.test.ts (2 tests) 3ms
+ ✓ |contract-tests| pilot-mode.test.ts (23 tests) 8ms
+ ✓ |contract-tests| dependency-policy-gated.test.ts (8 tests) 9ms
+ ✓ |contract-tests| property-based-scale-enforcement.test.ts (3 tests) 9ms
+ ✓ |contract-tests| tool-fabric-baseline-logging.test.ts (4 tests) 6ms
+ ✓ |contract-tests| sdk-contracts.test.ts (11 tests) 4ms
+ ✓ |contract-tests| cfo-actions.test.ts (81 tests) 8ms
+ ✓ |contract-tests| platform-control-plane-invariants.test.ts (12 tests) 7ms
+ ✓ |contract-tests| coverage-gates.test.ts (9 tests) 8ms
+ ✓ |contract-tests| evidence-chain-integrity.test.ts (3 tests) 5ms
+ ✓ |contract-tests| platform-compliance-invariants.test.ts (14 tests) 8ms
+ ✓ |contract-tests| fsm-core.test.ts (13 tests) 6ms
+ ✓ |contract-tests| zonga-dashboard-kpi-hardening.test.ts (4 tests) 4ms
+ ✓ |contract-tests| observability-metrics-enforcement.test.ts (3 tests) 2ms
+ ✓ |contract-tests| onboarding-core.test.ts (18 tests) 6ms
+ ✓ |contract-tests| p1-features.test.ts (77 tests) 7ms
+ ✓ |contract-tests| request-id-propagation.test.ts (8 tests) 5ms
+ ✓ |contract-tests| zonga-regional.test.ts (182 tests) 6ms
+ ✓ |contract-tests| nacp-evidence-classification.test.ts (15 tests) 4ms
+ ✓ |contract-tests| evidence-mandatory.test.ts (7 tests) 6ms
+ ✓ |contract-tests| agri-app-config.test.ts (20 tests) 7ms
+ ✓ |contract-tests| affected-typecheck-plan.test.ts (21 tests) 5ms
+ ✓ |contract-tests| console-workspace-navigation.test.ts (2 tests) 4ms
+ ✓ |contract-tests| audit-enforcement.test.ts (12 tests) 4ms
+ ✓ |contract-tests| trade-fsm.test.ts (14 tests) 6ms
+ ✓ |contract-tests| zonga-monetization-finalization.test.ts (23 tests) 8ms
+ ✓ |contract-tests| integration-retry-dlq.test.ts (12 tests) 6ms
+ ❯ |contract-tests| contract-meta.test.ts (3 tests | 1 failed) 8ms
+   ❯ CONTRACT_META_001 — Contracts are fast + deterministic (3)
+     ✓ all exception files parse as valid JSON with required fields 3ms
+     × no exception entries are expired fleet-wide 5ms
+     ✓ contract test files exist for each governance rule 0ms
+ ✓ |contract-tests| ingestion-core.test.ts (14 tests) 5ms
+ ✓ |contract-tests| fin-key-lifecycle.test.ts (16 tests) 5ms
+ ✓ |contract-tests| access-review-validation.test.ts (10 tests) 3ms
+ ✓ |contract-tests| tool-fabric-baseline-services.test.ts (26 tests) 7ms
+ ✓ |contract-tests| traction-engine.test.ts (6 tests) 4ms
+ ✓ |contract-tests| slo-gate-real-sources.test.ts (17 tests) 12ms
+ ✓ |contract-tests| console-ai-org-context.test.ts (2 tests) 5ms
+stderr | ue-org-column-audit.test.ts > INV-34 — UE Org-Column Completeness Audit > all org-bearing tables have an explicit org column (no silent exemption)
+[INV-34] Tables with no org column not on any allowlist:
+  - ab_test_variants (export: abTestVariants, file: ab-testing-schema.ts)
+  - ab_test_assignments (export: abTestAssignments, file: ab-testing-schema.ts)
+  - ab_test_events (export: abTestEvents, file: ab-testing-schema.ts)
+  - chat_messages (export: chatMessages, file: ai-chatbot-schema.ts)
+  - ai_safety_filters (export: aiSafetyFilters, file: ai-chatbot-schema.ts)
+  - alert_executions (export: alertExecutions, file: alerting-automation-schema.ts)
+  - alert_recipients (export: alertRecipients, file: alerting-automation-schema.ts)
+  - benchmark_categories (export: benchmarkCategories, file: analytics-reporting-schema.ts)
+  - arbitration_precedents (export: arbitrationPrecedents, file: arbitration-precedents-schema.ts)
+  - precedent_tags (export: precedentTags, file: arbitration-precedents-schema.ts)
+  - precedent_citations (export: precedentCitations, file: arbitration-precedents-schema.ts)
+  - autopay_settings (export: autoPaySettings, file: autopay-settings-schema.ts)
+  - bargaining_proposals (export: bargainingProposals, file: bargaining-negotiations-schema.ts)
+  - tentative_agreements (export: tentativeAgreements, file: bargaining-negotiations-schema.ts)
+  - negotiation_sessions (export: negotiationSessions, file: bargaining-negotiations-schema.ts)
+  - bargaining_team_members (export: bargainingTeamMembers, file: bargaining-negotiations-schema.ts)
+  - board_packet_distributions (export: boardPacketDistributions, file: board-packet-schema.ts)
+  - wage_progressions (export: wageProgressions, file: cba-clauses-schema.ts)
+  - benefit_comparisons (export: benefitComparisons, file: cba-clauses-schema.ts)
+  - arbitration_decisions (export: arbitrationDecisions, file: cba-intelligence-schema.ts)
+  - arbitrator_profiles (export: arbitratorProfiles, file: cba-intelligence-schema.ts)
+  - cba_footnotes (export: cbaFootnotes, file: cba-intelligence-schema.ts)
+  - certification_types (export: certificationTypes, file: certification-management-schema.ts)
+  - staff_certifications (export: staffCertifications, file: certification-management-schema.ts)
+  - continuing_education (export: continuingEducation, file: certification-management-schema.ts)
+  - license_renewals (export: licenseRenewals, file: certification-management-schema.ts)
+  - certification_alerts (export: certificationAlerts, file: certification-management-schema.ts)
+  - certification_compliance_reports (export: certificationComplianceReports, file: certification-management-schema.ts)
+  - certification_audit_log (export: certificationAuditLog, file: certification-management-schema.ts)
+  - claim_updates (export: claimUpdates, file: claims-schema.ts)
+  - clc_union_density (export: clcUnionDensity, file: clc-partnership-schema.ts)
+  - clc_bargaining_trends (export: clcBargainingTrends, file: clc-partnership-schema.ts)
+  - clc_sync_log (export: clcSyncLog, file: clc-partnership-schema.ts)
+  - clc_oauth_tokens (export: clcOAuthTokens, file: clc-partnership-schema.ts)
+  - clc_chart_of_accounts (export: clcChartOfAccounts, file: clc-per-capita-schema.ts)
+  - remittance_approvals (export: remittanceApprovals, file: clc-per-capita-schema.ts)
+  - clc_webhook_log (export: clcWebhookLog, file: clc-per-capita-schema.ts)
+  - clc_webhook_log (export: clcWebhookLog, file: clc-sync-audit-schema.ts)
+  - cba_version_history (export: cbaVersionHistory, file: collective-agreements-schema.ts)
+  - cba_contacts (export: cbaContacts, file: collective-agreements-schema.ts)
+  - committee_meeting_attendees (export: committeeMeetingAttendees, file: committee-workspace-schema.ts)
+  - dsr_activity_log (export: dsrActivityLog, file: data-governance-schema.ts)
+  - deadline_reminder_executions (export: deadlineReminderExecutions, file: deadline-engine-schema.ts)
+  - document_signers (export: documentSigners, file: e-signature-schema.ts)
+  - signature_audit_trail (export: signatureAuditTrail, file: e-signature-schema.ts)
+  - data_classification_policy (export: dataClassificationPolicy, file: employer-non-interference-schema.ts)
+  - data_classification_registry (export: dataClassificationRegistry, file: employer-non-interference-schema.ts)
+  - firewall_access_rules (export: firewallAccessRules, file: employer-non-interference-schema.ts)
+  - employer_access_attempts (export: employerAccessAttempts, file: employer-non-interference-schema.ts)
+  - access_justification_requests (export: accessJustificationRequests, file: employer-non-interference-schema.ts)
+  - union_only_data_tags (export: unionOnlyDataTags, file: employer-non-interference-schema.ts)
+  - firewall_violations (export: firewallViolations, file: employer-non-interference-schema.ts)
+  - firewall_compliance_audit (export: firewallComplianceAudit, file: employer-non-interference-schema.ts)
+  - swiss_cold_storage (export: swissColdStorage, file: force-majeure-schema.ts)
+  - break_glass_system (export: breakGlassSystem, file: force-majeure-schema.ts)
+  - disaster_recovery_drills (export: disasterRecoveryDrills, file: force-majeure-schema.ts)
+  - key_holder_registry (export: keyHolderRegistry, file: force-majeure-schema.ts)
+  - recovery_time_objectives (export: recoveryTimeObjectives, file: force-majeure-schema.ts)
+  - emergency_declarations (export: emergencyDeclarations, file: force-majeure-schema.ts)
+  - break_glass_activations (export: breakGlassActivations, file: force-majeure-schema.ts)
+  - conflict_of_interest_policy (export: conflictOfInterestPolicy, file: founder-conflict-schema.ts)
+  - blind_trust_registry (export: blindTrustRegistry, file: founder-conflict-schema.ts)
+  - conflict_disclosures (export: conflictDisclosures, file: founder-conflict-schema.ts)
+  - arms_length_verification (export: armsLengthVerification, file: founder-conflict-schema.ts)
+  - recusal_tracking (export: recusalTracking, file: founder-conflict-schema.ts)
+  - conflict_audit_log (export: conflictAuditLog, file: founder-conflict-schema.ts)
+  - geofences (export: geofences, file: geofence-privacy-schema.ts)
+  - location_tracking_audit (export: locationTrackingAudit, file: geofence-privacy-schema.ts)
+  - location_tracking_config (export: locationTrackingConfig, file: geofence-privacy-schema.ts)
+  - golden_shares (export: goldenShares, file: governance-schema.ts)
+  - reserved_matter_votes (export: reservedMatterVotes, file: governance-schema.ts)
+  - mission_audits (export: missionAudits, file: governance-schema.ts)
+  - governance_events (export: governanceEvents, file: governance-schema.ts)
+  - council_elections (export: councilElections, file: governance-schema.ts)
+  - grievance_deadlines (export: grievanceDeadlines, file: grievance-schema.ts)
+  - grievance_deadlines (export: grievanceDeadlines, file: grievance-workflow-schema.ts)
+  - icra_organizations (export: icraOrganizations, file: icra-schema.ts)
+  - icra_assessment_answers (export: icraAssessmentAnswers, file: icra-schema.ts)
+  - icra_maturity_profiles (export: icraMaturityProfiles, file: icra-schema.ts)
+  - icra_continuity_scores (export: icraContinuityScores, file: icra-schema.ts)
+  - icra_governance_flags (export: icraGovernanceFlags, file: icra-schema.ts)
+  - icra_operational_indicators (export: icraOperationalIndicators, file: icra-schema.ts)
+  - icra_followup_recommendations (export: icraFollowupRecommendations, file: icra-schema.ts)
+  - icra_benchmark_groups (export: icraBenchmarkGroups, file: icra-schema.ts)
+  - icra_anonymized_metrics (export: icraAnonymizedMetrics, file: icra-schema.ts)
+  - ingestion_records (export: ingestionRecords, file: ingestion-schema.ts)
+  - duplicate_group_members (export: duplicateGroupMembers, file: ingestion-schema.ts)
+  - integration_sync_logs (export: integrationSyncLogs, file: integration-schema.ts)
+  - country_address_formats (export: countryAddressFormats, file: international-address-schema.ts)
+  - address_validation_cache (export: addressValidationCache, file: international-address-schema.ts)
+  - address_change_history (export: addressChangeHistory, file: international-address-schema.ts)
+  - fmv_policy (export: fmvPolicy, file: joint-trust-fmv-schema.ts)
+  - cpi_data (export: cpiData, file: joint-trust-fmv-schema.ts)
+  - fmv_benchmarks (export: fmvBenchmarks, file: joint-trust-fmv-schema.ts)
+  - procurement_requests (export: procurementRequests, file: joint-trust-fmv-schema.ts)
+  - procurement_bids (export: procurementBids, file: joint-trust-fmv-schema.ts)
+  - independent_appraisals (export: independentAppraisals, file: joint-trust-fmv-schema.ts)
+  - cpi_adjusted_pricing (export: cpiAdjustedPricing, file: joint-trust-fmv-schema.ts)
+  - fmv_violations (export: fmvViolations, file: joint-trust-fmv-schema.ts)
+  - fmv_audit_log (export: fmvAuditLog, file: joint-trust-fmv-schema.ts)
+  - lrb_agreements (export: lrbAgreements, file: lrb-agreements-schema.ts)
+  - lrb_sync_log (export: lrbSyncLog, file: lrb-agreements-schema.ts)
+  - messages (export: messages, file: messages-schema.ts)
+  - message_read_receipts (export: messageReadReceipts, file: messages-schema.ts)
+  - newsletter_list_subscribers (export: newsletterListSubscribers, file: newsletter-schema.ts)
+  - newsletter_recipients (export: newsletterRecipients, file: newsletter-schema.ts)
+  - newsletter_engagement (export: newsletterEngagement, file: newsletter-schema.ts)
+  - policy_evaluations (export: policyEvaluations, file: policy-engine-schema.ts)
+  - policy_exceptions (export: policyExceptions, file: policy-engine-schema.ts)
+  - profiles (export: profilesTable, file: profiles-schema.ts)
+  - provincial_privacy_config (export: provincialPrivacyConfig, file: provincial-privacy-schema.ts)
+  - provincial_consent (export: provincialConsent, file: provincial-privacy-schema.ts)
+  - privacy_breaches (export: privacyBreaches, file: provincial-privacy-schema.ts)
+  - provincial_data_handling (export: provincialDataHandling, file: provincial-privacy-schema.ts)
+  - data_subject_access_requests (export: dataSubjectAccessRequests, file: provincial-privacy-schema.ts)
+  - push_deliveries (export: pushDeliveries, file: push-notifications.ts)
+  - webhook_receipts (export: webhookReceipts, file: recognition-rewards-schema.ts)
+  - shared_clause_library (export: sharedClauseLibrary, file: shared-clause-library-schema.ts)
+  - clause_library_tags (export: clauseLibraryTags, file: shared-clause-library-schema.ts)
+  - cross_org_access_log (export: crossOrgAccessLog, file: sharing-permissions-schema.ts)
+  - signers (export: signers, file: signature-workflows-schema.ts)
+  - signature_audit_log (export: signatureAuditLog, file: signature-workflows-schema.ts)
+  - signature_verification (export: signatureVerification, file: signature-workflows-schema.ts)
+  - sms_campaign_recipients (export: smsCampaignRecipients, file: sms-communications-schema.ts)
+  - staging_proof_nonce_uses (export: stagingProofNonceUses, file: staging-proof-schema.ts)
+  - staging_proof_runs (export: stagingProofRuns, file: staging-proof-schema.ts)
+  - staging_proof_run_events (export: stagingProofRunEvents, file: staging-proof-schema.ts)
+  - t4a_tax_slips (export: t4aTaxSlips, file: strike-fund-tax-schema.ts)
+  - rl1_tax_slips (export: rl1TaxSlips, file: strike-fund-tax-schema.ts)
+  - tax_year_end_processing (export: taxYearEndProcessing, file: strike-fund-tax-schema.ts)
+  - weekly_threshold_tracking (export: weeklyThresholdTracking, file: strike-fund-tax-schema.ts)
+  - currency_enforcement_policy (export: currencyEnforcementPolicy, file: transfer-pricing-schema.ts)
+  - bank_of_canada_rates (export: bankOfCanadaRates, file: transfer-pricing-schema.ts)
+  - transaction_currency_conversions (export: transactionCurrencyConversions, file: transfer-pricing-schema.ts)
+  - currency_enforcement_violations (export: currencyEnforcementViolations, file: transfer-pricing-schema.ts)
+  - t106_filing_tracking (export: t106FilingTracking, file: transfer-pricing-schema.ts)
+  - transfer_pricing_documentation (export: transferPricingDocumentation, file: transfer-pricing-schema.ts)
+  - fx_rate_audit_log (export: fxRateAuditLog, file: transfer-pricing-schema.ts)
+  - currency_enforcement_audit (export: currencyEnforcementAudit, file: transfer-pricing-schema.ts)
+  - exchange_rates (export: exchangeRates, file: transfer-pricing-schema.ts)
+  - cross_border_transactions (export: crossBorderTransactions, file: transfer-pricing-schema.ts)
+  - committee_memberships (export: committeeMemberships, file: union-structure-schema.ts)
+  - user_uuid_mapping (export: userUuidMapping, file: user-uuid-mapping-schema.ts)
+  - voting_options (export: votingOptions, file: voting-schema.ts)
+  - voter_eligibility (export: voterEligibility, file: voting-schema.ts)
+  - votes (export: votes, file: voting-schema.ts)
+  - voting_notifications (export: votingNotifications, file: voting-schema.ts)
+  - voting_audit_log (export: votingAuditLog, file: voting-schema.ts)
+  - wage_benchmarks (export: wageBenchmarks, file: wage-benchmarks-schema.ts)
+  - union_density (export: unionDensity, file: wage-benchmarks-schema.ts)
+  - cost_of_living_data (export: costOfLivingData, file: wage-benchmarks-schema.ts)
+  - contribution_rates (export: contributionRates, file: wage-benchmarks-schema.ts)
+  - external_data_sync_log (export: externalDataSyncLog, file: wage-benchmarks-schema.ts)
+  - stripe_connect_accounts (export: stripeConnectAccounts, file: whiplash-prevention-schema.ts)
+  - payment_classification_policy (export: paymentClassificationPolicy, file: whiplash-prevention-schema.ts)
+  - payment_routing_rules (export: paymentRoutingRules, file: whiplash-prevention-schema.ts)
+  - separated_payment_transactions (export: separatedPaymentTransactions, file: whiplash-prevention-schema.ts)
+  - whiplash_violations (export: whiplashViolations, file: whiplash-prevention-schema.ts)
+  - strike_fund_payment_audit (export: strikeFundPaymentAudit, file: whiplash-prevention-schema.ts)
+  - account_balance_reconciliation (export: accountBalanceReconciliation, file: whiplash-prevention-schema.ts)
+  - whiplash_prevention_audit (export: whiplashPreventionAudit, file: whiplash-prevention-schema.ts)
+  - workbooks (export: workbooks, file: workbook-schema.ts)
+  - workbook_modules (export: workbookModules, file: workbook-schema.ts)
+  - workbook_memory_holders (export: workbookMemoryHolders, file: workbook-schema.ts)
+  - workbook_stewardship_signals (export: workbookStewardshipSignals, file: workbook-schema.ts)
+  - workbook_governance_lineage_entries (export: workbookGovernanceLineageEntries, file: workbook-schema.ts)
+  - workbook_continuity_breakpoints (export: workbookContinuityBreakpoints, file: workbook-schema.ts)
+  - workbook_modernization_alignment (export: workbookModernizationAlignment, file: workbook-schema.ts)
+  - workbook_transformation_roadmap (export: workbookTransformationRoadmap, file: workbook-schema.ts)
+  - workbook_purchases (export: workbookPurchases, file: workbook-schema.ts)
+  - workbook_checkout_intents (export: workbookCheckoutIntents, file: workbook-schema.ts)
+  - testimonials (export: testimonials, file: domains/marketing.ts)
+  - pilot_applications (export: pilotApplications, file: domains/marketing.ts)
+  - movement_trends (export: movementTrends, file: domains/marketing.ts)
+  - clause_embeddings (export: clauseEmbeddings, file: domains/agreements/clause-embeddings.ts)
+  - wage_progressions (export: wageProgressions, file: domains/agreements/clauses.ts)
+  - benefit_comparisons (export: benefitComparisons, file: domains/agreements/clauses.ts)
+  - cba_version_history (export: cbaVersionHistory, file: domains/agreements/collective-agreements.ts)
+  - cba_contacts (export: cbaContacts, file: domains/agreements/collective-agreements.ts)
+  - arbitration_decisions (export: arbitrationDecisions, file: domains/agreements/intelligence.ts)
+  - arbitrator_profiles (export: arbitratorProfiles, file: domains/agreements/intelligence.ts)
+  - cba_footnotes (export: cbaFootnotes, file: domains/agreements/intelligence.ts)
+  - shared_clause_library (export: sharedClauseLibrary, file: domains/agreements/shared-library.ts)
+  - clause_library_tags (export: clauseLibraryTags, file: domains/agreements/shared-library.ts)
+  - benchmark_categories (export: benchmarkCategories, file: domains/analytics/reporting.ts)
+  - cba_intel_benchmark_snapshots (export: cbaIntelBenchmarkSnapshots, file: domains/cba-intelligence/benchmarks.ts)
+  - cba_intel_documents (export: cbaIntelDocuments, file: domains/cba-intelligence/documents.ts)
+  - cba_intel_extraction_runs (export: cbaIntelExtractionRuns, file: domains/cba-intelligence/extraction.ts)
+  - cba_intel_findings (export: cbaIntelFindings, file: domains/cba-intelligence/extraction.ts)
+  - cba_intel_agreements (export: cbaIntelAgreements, file: domains/cba-intelligence/extraction.ts)
+  - cba_intel_wage_adjustments (export: cbaIntelWageAdjustments, file: domains/cba-intelligence/extraction.ts)
+  - cba_intel_clauses (export: cbaIntelClauses, file: domains/cba-intelligence/extraction.ts)
+  - cba_intel_freshness_log (export: cbaIntelFreshnessLog, file: domains/cba-intelligence/freshness.ts)
+  - cba_intel_ingestion_jobs (export: cbaIntelIngestionJobs, file: domains/cba-intelligence/ingestion.ts)
+  - cba_intel_review_decisions (export: cbaIntelReviewDecisions, file: domains/cba-intelligence/review.ts)
+  - cba_intel_sources (export: cbaIntelSources, file: domains/cba-intelligence/source-registry.ts)
+  - grievance_events (export: grievanceEvents, file: domains/claims/grievance-lifecycle.ts)
+  - grievance_deadlines (export: grievanceDeadlines, file: domains/claims/grievances.ts)
+  - grievance_deadlines (export: grievanceDeadlines, file: domains/claims/workflows.ts)
+  - contact_submissions (export: contactSubmissions, file: domains/communications/contact-submissions.ts)
+  - email_address_suppressions (export: emailAddressSuppressions, file: domains/communications/email-address-suppressions.ts)
+  - newsletter_list_subscribers (export: newsletterListSubscribers, file: domains/communications/newsletters.ts)
+  - newsletter_recipients (export: newsletterRecipients, file: domains/communications/newsletters.ts)
+  - newsletter_engagement (export: newsletterEngagement, file: domains/communications/newsletters.ts)
+  - push_deliveries (export: pushDeliveries, file: domains/communications/push-notifications.ts)
+  - sms_campaign_recipients (export: smsCampaignRecipients, file: domains/communications/sms.ts)
+  - certification_types (export: certificationTypes, file: domains/compliance/certifications.ts)
+  - staff_certifications (export: staffCertifications, file: domains/compliance/certifications.ts)
+  - continuing_education (export: continuingEducation, file: domains/compliance/certifications.ts)
+  - license_renewals (export: licenseRenewals, file: domains/compliance/certifications.ts)
+  - certification_alerts (export: certificationAlerts, file: domains/compliance/certifications.ts)
+  - certification_compliance_reports (export: certificationComplianceReports, file: domains/compliance/certifications.ts)
+  - certification_audit_log (export: certificationAuditLog, file: domains/compliance/certifications.ts)
+  - employer_reports (export: employerReports, file: domains/compliance/employer-compliance.ts)
+  - data_classification_policy (export: dataClassificationPolicy, file: domains/compliance/employer-interference.ts)
+  - data_classification_registry (export: dataClassificationRegistry, file: domains/compliance/employer-interference.ts)
+  - firewall_access_rules (export: firewallAccessRules, file: domains/compliance/employer-interference.ts)
+  - employer_access_attempts (export: employerAccessAttempts, file: domains/compliance/employer-interference.ts)
+  - access_justification_requests (export: accessJustificationRequests, file: domains/compliance/employer-interference.ts)
+  - union_only_data_tags (export: unionOnlyDataTags, file: domains/compliance/employer-interference.ts)
+  - firewall_violations (export: firewallViolations, file: domains/compliance/employer-interference.ts)
+  - firewall_compliance_audit (export: firewallComplianceAudit, file: domains/compliance/employer-interference.ts)
+  - equity_consent_notice_versions (export: equityConsentNoticeVersions, file: domains/compliance/equity-privacy.ts)
+  - swiss_cold_storage (export: swissColdStorage, file: domains/compliance/force-majeure.ts)
+  - break_glass_system (export: breakGlassSystem, file: domains/compliance/force-majeure.ts)
+  - disaster_recovery_drills (export: disasterRecoveryDrills, file: domains/compliance/force-majeure.ts)
+  - key_holder_registry (export: keyHolderRegistry, file: domains/compliance/force-majeure.ts)
+  - recovery_time_objectives (export: recoveryTimeObjectives, file: domains/compliance/force-majeure.ts)
+  - emergency_declarations (export: emergencyDeclarations, file: domains/compliance/force-majeure.ts)
+  - break_glass_activations (export: breakGlassActivations, file: domains/compliance/force-majeure.ts)
+  - geofences (export: geofences, file: domains/compliance/geofence.ts)
+  - location_tracking_audit (export: locationTrackingAudit, file: domains/compliance/geofence.ts)
+  - location_tracking_config (export: locationTrackingConfig, file: domains/compliance/geofence.ts)
+  - foreign_workers (export: foreignWorkers, file: domains/compliance/immigration.ts)
+  - lmbp_letters (export: lmbpLetters, file: domains/compliance/immigration.ts)
+  - gss_applications (export: gssApplications, file: domains/compliance/immigration.ts)
+  - mentorships (export: mentorships, file: domains/compliance/immigration.ts)
+  - lmbp_compliance_alerts (export: lmbpComplianceAlerts, file: domains/compliance/immigration.ts)
+  - lmbp_compliance_reports (export: lmbpComplianceReports, file: domains/compliance/immigration.ts)
+  - band_councils (export: bandCouncils, file: domains/compliance/indigenous-data.ts)
+  - band_council_consent (export: bandCouncilConsent, file: domains/compliance/indigenous-data.ts)
+  - indigenous_member_data (export: indigenousMemberData, file: domains/compliance/indigenous-data.ts)
+  - indigenous_data_access_log (export: indigenousDataAccessLog, file: domains/compliance/indigenous-data.ts)
+  - indigenous_data_sharing_agreements (export: indigenousDataSharingAgreements, file: domains/compliance/indigenous-data.ts)
+  - traditional_knowledge_registry (export: traditionalKnowledgeRegistry, file: domains/compliance/indigenous-data.ts)
+  - provincial_privacy_config (export: provincialPrivacyConfig, file: domains/compliance/provincial-privacy.ts)
+  - provincial_consent (export: provincialConsent, file: domains/compliance/provincial-privacy.ts)
+  - privacy_breaches (export: privacyBreaches, file: domains/compliance/provincial-privacy.ts)
+  - provincial_data_handling (export: provincialDataHandling, file: domains/compliance/provincial-privacy.ts)
+  - data_subject_access_requests (export: dataSubjectAccessRequests, file: domains/compliance/provincial-privacy.ts)
+  - statutory_rule_versions (export: statutoryRuleVersions, file: domains/compliance/statutory-rules.ts)
+  - stripe_connect_accounts (export: stripeConnectAccounts, file: domains/compliance/whiplash.ts)
+  - payment_classification_policy (export: paymentClassificationPolicy, file: domains/compliance/whiplash.ts)
+  - payment_routing_rules (export: paymentRoutingRules, file: domains/compliance/whiplash.ts)
+  - separated_payment_transactions (export: separatedPaymentTransactions, file: domains/compliance/whiplash.ts)
+  - whiplash_violations (export: whiplashViolations, file: domains/compliance/whiplash.ts)
+  - strike_fund_payment_audit (export: strikeFundPaymentAudit, file: domains/compliance/whiplash.ts)
+  - account_balance_reconciliation (export: accountBalanceReconciliation, file: domains/compliance/whiplash.ts)
+  - whiplash_prevention_audit (export: whiplashPreventionAudit, file: domains/compliance/whiplash.ts)
+  - wage_benchmarks (export: wageBenchmarks, file: domains/data/benchmarks.ts)
+  - union_density (export: unionDensity, file: domains/data/benchmarks.ts)
+  - cost_of_living_data (export: costOfLivingData, file: domains/data/benchmarks.ts)
+  - contribution_rates (export: contributionRates, file: domains/data/benchmarks.ts)
+  - external_data_sync_log (export: externalDataSyncLog, file: domains/data/benchmarks.ts)
+  - lrb_agreements (export: lrbAgreements, file: domains/data/lrb.ts)
+  - lrb_sync_log (export: lrbSyncLog, file: domains/data/lrb.ts)
+  - arbitration_precedents (export: arbitrationPrecedents, file: domains/data/precedents.ts)
+  - precedent_tags (export: precedentTags, file: domains/data/precedents.ts)
+  - precedent_citations (export: precedentCitations, file: domains/data/precedents.ts)
+  - dispatch_assignments (export: dispatchAssignments, file: domains/dispatch/dispatch.ts)
+  - correspondence_recipients (export: correspondenceRecipients, file: domains/documents/correspondence.ts)
+  - correspondence_audit_trail (export: correspondenceAuditTrail, file: domains/documents/correspondence.ts)
+  - document_signers (export: documentSigners, file: domains/documents/signatures.ts)
+  - signature_audit_trail (export: signatureAuditTrail, file: domains/documents/signatures.ts)
+  - signers (export: signers, file: domains/documents/workflows.ts)
+  - signature_audit_log (export: signatureAuditLog, file: domains/documents/workflows.ts)
+  - signature_verification (export: signatureVerification, file: domains/documents/workflows.ts)
+  - federation_remittances (export: federationRemittances, file: domains/federation/federation-schema.ts)
+  - allocation_rule_versions (export: allocationRuleVersions, file: domains/finance/allocation.ts)
+  - allocation_run_lines (export: allocationRunLines, file: domains/finance/allocation.ts)
+  - allocation_basis_snapshots (export: allocationBasisSnapshots, file: domains/finance/allocation.ts)
+  - autopay_settings (export: autoPaySettings, file: domains/finance/autopay.ts)
+  - contract_line_items (export: contractLineItems, file: domains/finance/contracts.ts)
+  - dunning_policies (export: dunningPolicies, file: domains/finance/dunning.ts)
+  - dunning_steps (export: dunningSteps, file: domains/finance/dunning.ts)
+  - subscription_plans (export: subscriptionPlans, file: domains/finance/platform-billing.ts)
+  - platform_invoice_line_items (export: platformInvoiceLineItems, file: domains/finance/platform-billing.ts)
+  - payment_allocations (export: paymentAllocations, file: domains/finance/platform-billing.ts)
+  - pricing_templates (export: pricingTemplates, file: domains/finance/pricing-templates.ts)
+  - pricing_template_modules (export: pricingTemplateModules, file: domains/finance/pricing-templates.ts)
+  - pricing_discount_rules (export: pricingDiscountRules, file: domains/finance/pricing-templates.ts)
+  - pricing_regional_deployments (export: pricingRegionalDeployments, file: domains/finance/pricing-templates.ts)
+  - reconciliation_matches (export: reconciliationMatches, file: domains/finance/reconciliation.ts)
+  - t4a_tax_slips (export: t4aTaxSlips, file: domains/finance/taxes.ts)
+  - rl1_tax_slips (export: rl1TaxSlips, file: domains/finance/taxes.ts)
+  - tax_year_end_processing (export: taxYearEndProcessing, file: domains/finance/taxes.ts)
+  - weekly_threshold_tracking (export: weeklyThresholdTracking, file: domains/finance/taxes.ts)
+  - fee_settlement_batches (export: feeSettlementBatches, file: domains/finance/transaction-fees.ts)
+  - currency_enforcement_policy (export: currencyEnforcementPolicy, file: domains/finance/transfer-pricing.ts)
+  - bank_of_canada_rates (export: bankOfCanadaRates, file: domains/finance/transfer-pricing.ts)
+  - transaction_currency_conversions (export: transactionCurrencyConversions, file: domains/finance/transfer-pricing.ts)
+  - currency_enforcement_violations (export: currencyEnforcementViolations, file: domains/finance/transfer-pricing.ts)
+  - t106_filing_tracking (export: t106FilingTracking, file: domains/finance/transfer-pricing.ts)
+  - transfer_pricing_documentation (export: transferPricingDocumentation, file: domains/finance/transfer-pricing.ts)
+  - fx_rate_audit_log (export: fxRateAuditLog, file: domains/finance/transfer-pricing.ts)
+  - currency_enforcement_audit (export: currencyEnforcementAudit, file: domains/finance/transfer-pricing.ts)
+  - exchange_rates (export: exchangeRates, file: domains/finance/transfer-pricing.ts)
+  - cross_border_transactions (export: crossBorderTransactions, file: domains/finance/transfer-pricing.ts)
+  - usage_meters (export: usageMeters, file: domains/finance/usage-metering.ts)
+  - conflict_of_interest_policy (export: conflictOfInterestPolicy, file: domains/governance/conflicts.ts)
+  - blind_trust_registry (export: blindTrustRegistry, file: domains/governance/conflicts.ts)
+  - conflict_disclosures (export: conflictDisclosures, file: domains/governance/conflicts.ts)
+  - arms_length_verification (export: armsLengthVerification, file: domains/governance/conflicts.ts)
+  - recusal_tracking (export: recusalTracking, file: domains/governance/conflicts.ts)
+  - conflict_audit_log (export: conflictAuditLog, file: domains/governance/conflicts.ts)
+  - golden_shares (export: goldenShares, file: domains/governance/governance.ts)
+  - reserved_matter_votes (export: reservedMatterVotes, file: domains/governance/governance.ts)
+  - mission_audits (export: missionAudits, file: domains/governance/governance.ts)
+  - governance_events (export: governanceEvents, file: domains/governance/governance.ts)
+  - council_elections (export: councilElections, file: domains/governance/governance.ts)
+  - voting_options (export: votingOptions, file: domains/governance/voting.ts)
+  - voter_eligibility (export: voterEligibility, file: domains/governance/voting.ts)
+  - votes (export: votes, file: domains/governance/voting.ts)
+  - voting_notifications (export: votingNotifications, file: domains/governance/voting.ts)
+  - voting_audit_log (export: votingAuditLog, file: domains/governance/voting.ts)
+  - wcag_success_criteria (export: wcagSuccessCriteria, file: domains/infrastructure/accessibility.ts)
+  - country_address_formats (export: countryAddressFormats, file: domains/infrastructure/addresses.ts)
+  - address_validation_cache (export: addressValidationCache, file: domains/infrastructure/addresses.ts)
+  - address_change_history (export: addressChangeHistory, file: domains/infrastructure/addresses.ts)
+  - alert_executions (export: alertExecutions, file: domains/infrastructure/alerting.ts)
+  - alert_recipients (export: alertRecipients, file: domains/infrastructure/alerting.ts)
+  - award_history (export: awardHistory, file: domains/infrastructure/awards.ts)
+  - budget_reservations (export: budgetReservations, file: domains/infrastructure/awards.ts)
+  - clc_webhook_log (export: clcWebhookLog, file: domains/infrastructure/clc-audit.ts)
+  - clc_union_density (export: clcUnionDensity, file: domains/infrastructure/clc-partnership.ts)
+  - clc_bargaining_trends (export: clcBargainingTrends, file: domains/infrastructure/clc-partnership.ts)
+  - clc_sync_log (export: clcSyncLog, file: domains/infrastructure/clc-partnership.ts)
+  - clc_oauth_tokens (export: clcOAuthTokens, file: domains/infrastructure/clc-partnership.ts)
+  - clc_chart_of_accounts (export: clcChartOfAccounts, file: domains/infrastructure/clc-per-capita.ts)
+  - remittance_approvals (export: remittanceApprovals, file: domains/infrastructure/clc-per-capita.ts)
+  - clc_webhook_log (export: clcWebhookLog, file: domains/infrastructure/clc-per-capita.ts)
+  - organizing_form_template_versions (export: organizingFormTemplateVersions, file: domains/infrastructure/organizing.ts)
+  - public_intake_audit_events (export: publicIntakeAuditEvents, file: domains/infrastructure/public-intake-audit.ts)
+  - webhook_receipts (export: webhookReceipts, file: domains/infrastructure/rewards.ts)
+  - cross_org_access_log (export: crossOrgAccessLog, file: domains/infrastructure/sharing.ts)
+  - ticket_comments (export: ticketComments, file: domains/infrastructure/support.ts)
+  - ticket_history (export: ticketHistory, file: domains/infrastructure/support.ts)
+  - sla_policies (export: slaPolices, file: domains/infrastructure/support.ts)
+  - knowledge_base_articles (export: knowledgeBaseArticles, file: domains/infrastructure/support.ts)
+  - fmv_policy (export: fmvPolicy, file: domains/infrastructure/trust-fmv.ts)
+  - cpi_data (export: cpiData, file: domains/infrastructure/trust-fmv.ts)
+  - fmv_benchmarks (export: fmvBenchmarks, file: domains/infrastructure/trust-fmv.ts)
+  - procurement_requests (export: procurementRequests, file: domains/infrastructure/trust-fmv.ts)
+  - procurement_bids (export: procurementBids, file: domains/infrastructure/trust-fmv.ts)
+  - independent_appraisals (export: independentAppraisals, file: domains/infrastructure/trust-fmv.ts)
+  - cpi_adjusted_pricing (export: cpiAdjustedPricing, file: domains/infrastructure/trust-fmv.ts)
+  - fmv_violations (export: fmvViolations, file: domains/infrastructure/trust-fmv.ts)
+  - fmv_audit_log (export: fmvAuditLog, file: domains/infrastructure/trust-fmv.ts)
+  - user_uuid_mapping (export: userUuidMapping, file: domains/infrastructure/uuid-mapping.ts)
+  - role_definitions (export: roleDefinitions, file: domains/member/enhanced-rbac.ts)
+  - segment_executions (export: segmentExecutions, file: domains/member/member-segments.ts)
+  - pending_profiles (export: pendingProfilesTable, file: domains/member/pending-profiles.ts)
+  - profiles (export: profilesTable, file: domains/member/profiles.ts)
+  - chat_messages (export: chatMessages, file: domains/ml/chatbot.ts)
+  - ai_safety_filters (export: aiSafetyFilters, file: domains/ml/chatbot.ts)
+  - pilot_contact_verifications (export: pilotContactVerifications, file: domains/pilot/pilot-contact-lifecycle.ts)
+  - pilot_crm_disclosure_outbox (export: pilotCrmDisclosureOutbox, file: domains/pilot/pilot-contact-lifecycle.ts)
+Add to GLOBAL_TABLE_ALLOWLIST (this test) or UE_NON_ORG_SCOPED_TABLES (org-registry.ts) with a documented reason.
+
+stderr | ue-org-column-audit.test.ts > INV-34 — UE Org-Column Completeness Audit > all tables in GLOBAL_TABLE_ALLOWLIST actually exist in the schema
+[INV-34] GLOBAL_TABLE_ALLOWLIST entries not found in schema (possibly renamed/removed):
+  - workflow_statuses
+  - policy_definitions
+  - role_permissions
+  - grievance_categories
+  - document_types
+  - schema_migrations
+  - migrations
+  - drizzle_migrations
+  - _nzila_migrations
+  - audit_events
+  - audit_log
+  - sessions
+  - refresh_tokens
+  - oauth_states
+
+stdout | ue-org-column-audit.test.ts > INV-34 — UE Org-Column Completeness Audit > total unscoped table count is tracked (INV-34 drift guard)
+[INV-34] Table audit: 908 total, 540 org-scoped, 368 without org column, 1 allowlisted as global/reference
+
+ ✓ |contract-tests| ue-org-column-audit.test.ts (7 tests) 5ms
+ ✓ |contract-tests| api-contracts.test.ts (11 tests) 6ms
+ ✓ |contract-tests| evidence-seal.test.ts (16 tests) 5ms
+ ✓ |contract-tests| scoped-dal-negative.test.ts (17 tests) 6ms
+ ✓ |contract-tests| ai-governance-operating-intelligence.test.ts (7 tests) 5ms
+ ✓ |contract-tests| trade-evidence.test.ts (6 tests) 4ms
+ ✓ |contract-tests| scale-envelope.test.ts (10 tests) 4ms
+ ✓ |contract-tests| slo-gate-seeded-harness.test.ts (10 tests) 7ms
+ ✓ |contract-tests| api-guards-mandatory.test.ts (21 tests) 6ms
+ ✓ |contract-tests| operating-layer-e2e-hardening.test.ts (2 tests) 9ms
+ ✓ |contract-tests| rate-limiting-required.test.ts (6 tests) 4ms
+ ✓ |contract-tests| agri-integrations.test.ts (6 tests) 3ms
+ ✓ |contract-tests| abr-identity-vault.test.ts (14 tests) 4ms
+ ✓ |contract-tests| partners-features.test.ts (73 tests) 5ms
+ ✓ |contract-tests| privilege-escalation.test.ts (17 tests) 5ms
+ ✓ |contract-tests| ai-reasoning-envelope.test.ts (12 tests) 4ms
+ ✓ |contract-tests| console-hubspot-lifecycle.test.ts (4 tests) 6ms
+ ✓ |contract-tests| nacp-evidence-terminal.test.ts (5 tests) 4ms
+stderr | ue-org-scoped-registry.test.ts > INV-33 — UE Org-Scoped Table Registry Consistency > every UE table with org_id is in the UE_ORG_SCOPED registry
+WARNING: 492 UE tables with org_id not yet in registry:
+  - ab_tests (export: abTests, file: ab-testing-schema.ts)
+  - chat_sessions (export: chatSessions, file: ai-chatbot-schema.ts)
+  - knowledge_base (export: knowledgeBase, file: ai-chatbot-schema.ts)
+  - ai_usage_metrics (export: aiUsageMetrics, file: ai-chatbot-schema.ts)
+  - ai_budgets (export: aiBudgets, file: ai-chatbot-schema.ts)
+  - alert_rules (export: alertRules, file: alerting-automation-schema.ts)
+  - analytics_metrics (export: analyticsMetrics, file: analytics.ts)
+  - kpi_configurations (export: kpiConfigurations, file: analytics.ts)
+  - ml_predictions (export: mlPredictions, file: analytics.ts)
+  - trend_analyses (export: trendAnalyses, file: analytics.ts)
+  - insight_recommendations (export: insightRecommendations, file: analytics.ts)
+  - customer_nps_surveys (export: customerNpsSurveys, file: analytics.ts)
+  - customer_onboarding_milestones (export: customerOnboardingMilestones, file: analytics.ts)
+  - negotiations (export: negotiations, file: bargaining-negotiations-schema.ts)
+  - board_packets (export: boardPackets, file: board-packet-schema.ts)
+  - calendars (export: calendars, file: calendar-schema.ts)
+  - event_attendees (export: eventAttendees, file: calendar-schema.ts)
+  - meeting_rooms (export: meetingRooms, file: calendar-schema.ts)
+  - room_bookings (export: roomBookings, file: calendar-schema.ts)
+  - external_calendar_connections (export: externalCalendarConnections, file: calendar-schema.ts)
+  - event_reminders (export: eventReminders, file: calendar-schema.ts)
+  - clause_comparisons (export: clauseComparisons, file: cba-clauses-schema.ts)
+  - bargaining_notes (export: bargainingNotes, file: cba-intelligence-schema.ts)
+  - claims (export: claims, file: claims-schema.ts)
+  - claim_status_transitions (export: claimStatusTransitions, file: claims-schema.ts)
+  - per_capita_remittances (export: perCapitaRemittances, file: clc-per-capita-schema.ts)
+  - clc_sync_log (export: clcSyncLog, file: clc-per-capita-schema.ts)
+  - organization_contacts (export: organizationContacts, file: clc-per-capita-schema.ts)
+  - notification_log (export: notificationLog, file: clc-per-capita-schema.ts)
+  - clc_organization_sync_log (export: clcOrganizationSyncLog, file: clc-sync-audit-schema.ts)
+  - chart_of_accounts (export: chartOfAccounts, file: clc-sync-audit-schema.ts)
+  - clc_sync_log (export: clcSyncLog, file: clc-sync-schema.ts)
+  - clc_webhook_log (export: clcWebhookLog, file: clc-sync-schema.ts)
+  - cms_pages (export: cmsPages, file: cms-website-schema.ts)
+  - cms_media_library (export: cmsMediaLibrary, file: cms-website-schema.ts)
+  - donation_campaigns (export: donationCampaigns, file: cms-website-schema.ts)
+  - donation_receipts (export: donationReceipts, file: cms-website-schema.ts)
+  - collective_agreements (export: collectiveAgreements, file: collective-agreements-schema.ts)
+  - committee_meetings (export: committeeMeetings, file: committee-workspace-schema.ts)
+  - committee_action_items (export: committeeActionItems, file: committee-workspace-schema.ts)
+  - committee_documents (export: committeeDocuments, file: committee-workspace-schema.ts)
+  - committee_intelligence_snapshots (export: committeeIntelligenceSnapshots, file: committee-workspace-schema.ts)
+  - communication_analytics (export: communicationAnalytics, file: communication-analytics-schema.ts)
+  - user_engagement_scores (export: userEngagementScores, file: communication-analytics-schema.ts)
+  - communication_preferences (export: communicationPreferences, file: communication-analytics-schema.ts)
+  - congress_memberships (export: congressMemberships, file: congress-memberships-schema.ts)
+  - dsr_requests (export: dsrRequests, file: data-governance-schema.ts)
+  - data_residency_configs (export: dataResidencyConfigs, file: data-governance-schema.ts)
+  - consent_records (export: consentRecords, file: data-governance-schema.ts)
+  - deadline_reminders (export: deadlineReminders, file: deadline-engine-schema.ts)
+  - deadline_audit_events (export: deadlineAuditEvents, file: deadline-engine-schema.ts)
+  - deadline_reassignment_convergence (export: deadlineReassignmentConvergence, file: deadline-engine-schema.ts)
+  - deadline_rules (export: deadlineRules, file: deadlines-schema.ts)
+  - claim_deadlines (export: deadlines, file: deadlines-schema.ts)
+  - holidays (export: holidays, file: deadlines-schema.ts)
+  - defensibility_packs (export: defensibilityPacks, file: defensibility-packs-schema.ts)
+  - document_folders (export: documentFolders, file: documents-schema.ts)
+  - document_versions (export: documentVersions, file: documents-schema.ts)
+  - document_links (export: documentLinks, file: documents-schema.ts)
+  - document_access_grants (export: documentAccessGrants, file: documents-schema.ts)
+  - case_documents (export: caseDocuments, file: documents-schema.ts)
+  - document_intakes (export: documentIntakes, file: documents-schema.ts)
+  - document_transcript_revisions (export: documentTranscriptRevisions, file: documents-schema.ts)
+  - document_transcript_publications (export: documentTranscriptPublications, file: documents-schema.ts)
+  - dues_rates (export: duesRates, file: dues-finance-schema.ts)
+  - member_dues_ledger (export: memberDuesLedger, file: dues-finance-schema.ts)
+  - member_arrears (export: memberArrears, file: dues-finance-schema.ts)
+  - remittance_line_items (export: remittanceLineItems, file: dues-finance-schema.ts)
+  - remittance_exceptions (export: remittanceExceptions, file: dues-finance-schema.ts)
+  - payment_plans (export: paymentPlans, file: dues-finance-schema.ts)
+  - financial_periods (export: financialPeriods, file: dues-finance-schema.ts)
+  - payroll_deductions (export: payrollDeductions, file: dues-finance-schema.ts)
+  - member_dues_issues (export: memberDuesIssues, file: dues-finance-schema.ts)
+  - signature_documents (export: signatureDocuments, file: e-signature-schema.ts)
+  - training_courses (export: trainingCourses, file: education-training-schema.ts)
+  - course_sessions (export: courseSessions, file: education-training-schema.ts)
+  - course_registrations (export: courseRegistrations, file: education-training-schema.ts)
+  - member_certifications (export: memberCertifications, file: education-training-schema.ts)
+  - training_programs (export: trainingPrograms, file: education-training-schema.ts)
+  - payments (export: payments, file: financial-payments-schema.ts)
+  - payment_cycles (export: paymentCycles, file: financial-payments-schema.ts)
+  - payment_methods (export: paymentMethods, file: financial-payments-schema.ts)
+  - bank_reconciliation (export: bankReconciliation, file: financial-payments-schema.ts)
+  - payment_disputes (export: paymentDisputes, file: financial-payments-schema.ts)
+  - ue_governance_job_execution_state (export: jobExecutionState, file: gate-13-job-cancellation-governance.ts)
+  - ue_governance_job_cancellation_request (export: jobCancellationRequest, file: gate-13-job-cancellation-governance.ts)
+  - ue_governance_job_cancellation_audit_event (export: jobCancellationAuditEvent, file: gate-13-job-cancellation-governance.ts)
+  - ue_governance_job_reconciliation_pass (export: jobReconciliationPass, file: gate-13-job-cancellation-governance.ts)
+  - user_consents (export: userConsents, file: gdpr-compliance-schema.ts)
+  - cookie_consents (export: cookieConsents, file: gdpr-compliance-schema.ts)
+  - gdpr_data_requests (export: gdprDataRequests, file: gdpr-compliance-schema.ts)
+  - data_anonymization_log (export: dataAnonymizationLog, file: gdpr-compliance-schema.ts)
+  - member_location_consent (export: memberLocationConsent, file: geofence-privacy-schema.ts)
+  - location_tracking (export: locationTracking, file: geofence-privacy-schema.ts)
+  - geofence_events (export: geofenceEvents, file: geofence-privacy-schema.ts)
+  - location_deletion_log (export: locationDeletionLog, file: geofence-privacy-schema.ts)
+  - arbitrations (export: arbitrations, file: grievance-schema.ts)
+  - settlements (export: settlements, file: grievance-schema.ts)
+  - grievance_stages (export: grievanceStages, file: grievance-workflow-schema.ts)
+  - grievance_assignments (export: grievanceAssignments, file: grievance-workflow-schema.ts)
+  - grievance_documents (export: grievanceDocuments, file: grievance-workflow-schema.ts)
+  - grievance_settlements (export: grievanceSettlements, file: grievance-workflow-schema.ts)
+  - grievance_communications (export: grievanceCommunications, file: grievance-workflow-schema.ts)
+  - grievance_approvals (export: grievanceApprovals, file: grievance-workflow-schema.ts)
+  - icra_assessments (export: icraAssessments, file: icra-schema.ts)
+  - ingestion_batches (export: ingestionBatches, file: ingestion-schema.ts)
+  - grievance_timeline_events (export: grievanceTimelineEvents, file: ingestion-schema.ts)
+  - duplicate_groups (export: duplicateGroups, file: ingestion-schema.ts)
+  - data_quality_warnings (export: dataQualityWarnings, file: ingestion-schema.ts)
+  - webhook_subscriptions (export: webhookSubscriptions, file: integration-schema.ts)
+  - api_integrations (export: apiIntegrations, file: integration-schema.ts)
+  - api_access_tokens (export: apiAccessTokens, file: integration-schema.ts)
+  - international_addresses (export: internationalAddresses, file: international-address-schema.ts)
+  - member_contact_preferences (export: memberContactPreferences, file: member-profile-v2-schema.ts)
+  - member_employment_details (export: memberEmploymentDetails, file: member-profile-v2-schema.ts)
+  - member_consents (export: memberConsents, file: member-profile-v2-schema.ts)
+  - member_documents (export: memberDocuments, file: member-profile-v2-schema.ts)
+  - member_history_events (export: memberHistoryEvents, file: member-profile-v2-schema.ts)
+  - message_threads (export: messageThreads, file: messages-schema.ts)
+  - triage_designations (export: triageDesignations, file: messages-schema.ts)
+  - message_thread_assignments (export: messageThreadAssignments, file: messages-schema.ts)
+  - message_thread_lifecycle (export: messageThreadLifecycle, file: messages-schema.ts)
+  - message_retention_policies (export: messageRetentionPolicies, file: messages-schema.ts)
+  - message_thread_reads (export: messageThreadReads, file: messages-schema.ts)
+  - ml_predictions (export: mlPredictions, file: ml-predictions-schema.ts)
+  - model_metadata (export: modelMetadata, file: ml-predictions-schema.ts)
+  - mobile_devices (export: mobileDevices, file: mobile-devices-schema.ts)
+  - mobile_notifications (export: mobileNotifications, file: mobile-devices-schema.ts)
+  - mobile_analytics (export: mobileAnalytics, file: mobile-devices-schema.ts)
+  - mobile_app_config (export: mobileAppConfig, file: mobile-devices-schema.ts)
+  - newsletter_distribution_lists (export: newsletterDistributionLists, file: newsletter-schema.ts)
+  - user_notification_preferences (export: userNotificationPreferences, file: notifications-schema.ts)
+  - notification_tracking (export: notificationTracking, file: notifications-schema.ts)
+  - in_app_notifications (export: inAppNotifications, file: notifications-schema.ts)
+  - notifications (export: notifications, file: notifications-schema.ts)
+  - notification_delivery_log (export: notificationDeliveryLog, file: notifications-schema.ts)
+  - organizing_campaigns (export: organizingCampaigns, file: organizing-tools-schema.ts)
+  - policy_rules (export: policyRules, file: policy-engine-schema.ts)
+  - retention_policies (export: retentionPolicies, file: policy-engine-schema.ts)
+  - legal_holds (export: legalHolds, file: policy-engine-schema.ts)
+  - push_devices (export: pushDevices, file: push-notifications.ts)
+  - push_notifications (export: pushNotifications, file: push-notifications.ts)
+  - shopify_config (export: shopifyConfig, file: recognition-rewards-schema.ts)
+  - reports (export: reports, file: reports-schema.ts)
+  - representation_authorities (export: representationAuthorities, file: representation-authority-schema.ts)
+  - external_matter_access_grants (export: externalMatterAccessGrants, file: representation-authority-schema.ts)
+  - external_document_access_grants (export: externalDocumentAccessGrants, file: representation-authority-schema.ts)
+  - organization_sharing_settings (export: organizationSharingSettings, file: sharing-permissions-schema.ts)
+  - signature_workflows (export: signatureWorkflows, file: signature-workflows-schema.ts)
+  - sms_templates (export: smsTemplates, file: sms-communications-schema.ts)
+  - sms_campaigns (export: smsCampaigns, file: sms-communications-schema.ts)
+  - sms_conversations (export: smsConversations, file: sms-communications-schema.ts)
+  - sms_opt_outs (export: smsOptOuts, file: sms-communications-schema.ts)
+  - social_accounts (export: socialAccounts, file: social-media-schema.ts)
+  - social_posts (export: socialPosts, file: social-media-schema.ts)
+  - social_campaigns (export: socialCampaigns, file: social-media-schema.ts)
+  - social_analytics (export: socialAnalytics, file: social-media-schema.ts)
+  - sso_providers (export: ssoProviders, file: sso-scim-schema.ts)
+  - sso_provider_versions (export: ssoProviderVersions, file: sso-scim-schema.ts)
+  - sso_oidc_attempts (export: ssoOidcAttempts, file: sso-scim-schema.ts)
+  - scim_configurations (export: scimConfigurations, file: sso-scim-schema.ts)
+  - sso_sessions (export: ssoSessions, file: sso-scim-schema.ts)
+  - scim_events_log (export: scimEventsLog, file: sso-scim-schema.ts)
+  - scim_provisioned_users (export: scimProvisionedUsers, file: sso-scim-schema.ts)
+  - mfa_configurations (export: mfaConfigurations, file: sso-scim-schema.ts)
+  - employers (export: employers, file: union-structure-schema.ts)
+  - worksites (export: worksites, file: union-structure-schema.ts)
+  - bargaining_units (export: bargainingUnits, file: union-structure-schema.ts)
+  - committees (export: committees, file: union-structure-schema.ts)
+  - steward_assignments (export: stewardAssignments, file: union-structure-schema.ts)
+  - role_tenure_history (export: roleTenureHistory, file: union-structure-schema.ts)
+  - user_sessions (export: userSessions, file: user-management-schema.ts)
+  - case_studies (export: caseStudies, file: domains/marketing.ts)
+  - pilot_metrics (export: pilotMetrics, file: domains/marketing.ts)
+  - data_aggregation_consent (export: dataAggregationConsent, file: domains/marketing.ts)
+  - clause_comparisons (export: clauseComparisons, file: domains/agreements/clauses.ts)
+  - collective_agreements (export: collectiveAgreements, file: domains/agreements/collective-agreements.ts)
+  - bargaining_notes (export: bargainingNotes, file: domains/agreements/intelligence.ts)
+  - shared_clause_versions (export: sharedClauseVersions, file: domains/agreements/shared-library.ts)
+  - analytics_metrics (export: analyticsMetrics, file: domains/analytics/analytics.ts)
+  - kpi_configurations (export: kpiConfigurations, file: domains/analytics/analytics.ts)
+  - ml_predictions (export: mlPredictions, file: domains/analytics/analytics.ts)
+  - trend_analyses (export: trendAnalyses, file: domains/analytics/analytics.ts)
+  - insight_recommendations (export: insightRecommendations, file: domains/analytics/analytics.ts)
+  - report_field_grants (export: reportFieldGrants, file: domains/analytics/reporting.ts)
+  - report_disclosure_receipts (export: reportDisclosureReceipts, file: domains/analytics/reporting.ts)
+  - reports (export: reports, file: domains/analytics/reports.ts)
+  - case_territories (export: caseTerritories, file: domains/claims/case-authority-scope.ts)
+  - case_authority_scopes (export: caseAuthorityScopes, file: domains/claims/case-authority-scope.ts)
+  - case_scope_proposals (export: caseScopeProposals, file: domains/claims/case-authority-scope.ts)
+  - case_respondents (export: caseRespondents, file: domains/claims/case-authority-scope.ts)
+  - deadline_rules (export: deadlineRules, file: domains/claims/deadlines.ts)
+  - claim_deadlines (export: deadlines, file: domains/claims/deadlines.ts)
+  - holidays (export: holidays, file: domains/claims/deadlines.ts)
+  - grievance_case_access_assignments (export: grievanceCaseAccessAssignments, file: domains/claims/grievance-lifecycle.ts)
+  - arbitrations (export: arbitrations, file: domains/claims/grievances.ts)
+  - settlements (export: settlements, file: domains/claims/grievances.ts)
+  - satisfaction_surveys (export: satisfactionSurveys, file: domains/claims/satisfaction.ts)
+  - satisfaction_survey_responded (export: satisfactionSurveyResponded, file: domains/claims/satisfaction.ts)
+  - grievance_stages (export: grievanceStages, file: domains/claims/workflows.ts)
+  - grievance_transitions (export: grievanceTransitions, file: domains/claims/workflows.ts)
+  - grievance_assignments (export: grievanceAssignments, file: domains/claims/workflows.ts)
+  - grievance_documents (export: grievanceDocuments, file: domains/claims/workflows.ts)
+  - grievance_settlements (export: grievanceSettlements, file: domains/claims/workflows.ts)
+  - grievance_communications (export: grievanceCommunications, file: domains/claims/workflows.ts)
+  - grievance_approvals (export: grievanceApprovals, file: domains/claims/workflows.ts)
+  - communication_analytics (export: communicationAnalytics, file: domains/communications/analytics.ts)
+  - user_engagement_scores (export: userEngagementScores, file: domains/communications/analytics.ts)
+  - communication_preferences (export: communicationPreferences, file: domains/communications/analytics.ts)
+  - message_templates (export: messageTemplates, file: domains/communications/campaigns.ts)
+  - campaigns (export: campaigns, file: domains/communications/campaigns.ts)
+  - message_log (export: messageLog, file: domains/communications/campaigns.ts)
+  - campaign_delivery_outbox (export: campaignDeliveryOutbox, file: domains/communications/campaigns.ts)
+  - communication_preferences (export: communicationPreferences, file: domains/communications/campaigns.ts)
+  - consent_records (export: consentRecords, file: domains/communications/campaigns.ts)
+  - employer_contacts (export: employerContacts, file: domains/communications/employer-communications.ts)
+  - employer_communications (export: employerCommunications, file: domains/communications/employer-communications.ts)
+  - newsletter_distribution_lists (export: newsletterDistributionLists, file: domains/communications/newsletters.ts)
+  - user_notification_preferences (export: userNotificationPreferences, file: domains/communications/notifications.ts)
+  - notification_tracking (export: notificationTracking, file: domains/communications/notifications.ts)
+  - in_app_notifications (export: inAppNotifications, file: domains/communications/notifications.ts)
+  - notifications (export: notifications, file: domains/communications/notifications.ts)
+  - notification_delivery_log (export: notificationDeliveryLog, file: domains/communications/notifications.ts)
+  - organizer_tasks (export: organizerTasks, file: domains/communications/organizer-workflows.ts)
+  - public_content (export: publicContent, file: domains/communications/public-content.ts)
+  - push_devices (export: pushDevices, file: domains/communications/push-notifications.ts)
+  - push_notifications (export: pushNotifications, file: domains/communications/push-notifications.ts)
+  - sms_templates (export: smsTemplates, file: domains/communications/sms.ts)
+  - sms_campaigns (export: smsCampaigns, file: domains/communications/sms.ts)
+  - sms_conversations (export: smsConversations, file: domains/communications/sms.ts)
+  - sms_opt_outs (export: smsOptOuts, file: domains/communications/sms.ts)
+  - survey_questions (export: surveyQuestions, file: domains/communications/surveys.ts)
+  - survey_questionnaire_versions (export: surveyQuestionnaireVersions, file: domains/communications/surveys.ts)
+  - survey_anonymous_participations (export: surveyAnonymousParticipations, file: domains/communications/surveys.ts)
+  - survey_answers (export: surveyAnswers, file: domains/communications/surveys.ts)
+  - polls (export: polls, file: domains/communications/surveys.ts)
+  - poll_votes (export: pollVotes, file: domains/communications/surveys.ts)
+  - compliance_alerts (export: complianceAlerts, file: domains/compliance/employer-compliance.ts)
+  - equity_purpose_consents (export: equityPurposeConsents, file: domains/compliance/equity-privacy.ts)
+  - equity_self_identification_records (export: equitySelfIdentificationRecords, file: domains/compliance/equity-privacy.ts)
+  - equity_disclosure_grants (export: equityDisclosureGrants, file: domains/compliance/equity-privacy.ts)
+  - user_consents (export: userConsents, file: domains/compliance/gdpr.ts)
+  - cookie_consents (export: cookieConsents, file: domains/compliance/gdpr.ts)
+  - gdpr_data_requests (export: gdprDataRequests, file: domains/compliance/gdpr.ts)
+  - data_anonymization_log (export: dataAnonymizationLog, file: domains/compliance/gdpr.ts)
+  - member_location_consent (export: memberLocationConsent, file: domains/compliance/geofence.ts)
+  - location_tracking (export: locationTracking, file: domains/compliance/geofence.ts)
+  - geofence_events (export: geofenceEvents, file: domains/compliance/geofence.ts)
+  - location_deletion_log (export: locationDeletionLog, file: domains/compliance/geofence.ts)
+  - pci_dss_saq_assessments (export: pciDssSaqAssessments, file: domains/compliance/pci-dss.ts)
+  - pci_dss_requirements (export: pciDssRequirements, file: domains/compliance/pci-dss.ts)
+  - pci_dss_quarterly_scans (export: pciDssQuarterlyScans, file: domains/compliance/pci-dss.ts)
+  - pci_dss_encryption_keys (export: pciDssEncryptionKeys, file: domains/compliance/pci-dss.ts)
+  - external_invoices (export: externalInvoices, file: domains/data/accounting.ts)
+  - external_payments (export: externalPayments, file: domains/data/accounting.ts)
+  - external_customers (export: externalCustomers, file: domains/data/accounting.ts)
+  - external_accounts (export: externalAccounts, file: domains/data/accounting.ts)
+  - external_communication_channels (export: externalCommunicationChannels, file: domains/data/communication.ts)
+  - external_communication_messages (export: externalCommunicationMessages, file: domains/data/communication.ts)
+  - external_communication_users (export: externalCommunicationUsers, file: domains/data/communication.ts)
+  - external_communication_files (export: externalCommunicationFiles, file: domains/data/communication.ts)
+  - congress_memberships (export: congressMemberships, file: domains/data/congress.ts)
+  - external_document_sites (export: externalDocumentSites, file: domains/data/documents.ts)
+  - external_document_libraries (export: externalDocumentLibraries, file: domains/data/documents.ts)
+  - external_document_files (export: externalDocumentFiles, file: domains/data/documents.ts)
+  - external_document_permissions (export: externalDocumentPermissions, file: domains/data/documents.ts)
+  - external_employees (export: externalEmployees, file: domains/data/hris.ts)
+  - external_positions (export: externalPositions, file: domains/data/hris.ts)
+  - external_departments (export: externalDepartments, file: domains/data/hris.ts)
+  - external_benefit_plans (export: externalBenefitPlans, file: domains/data/insurance.ts)
+  - external_benefit_enrollments (export: externalBenefitEnrollments, file: domains/data/insurance.ts)
+  - external_benefit_dependents (export: externalBenefitDependents, file: domains/data/insurance.ts)
+  - external_benefit_coverage (export: externalBenefitCoverage, file: domains/data/insurance.ts)
+  - external_insurance_claims (export: externalInsuranceClaims, file: domains/data/insurance.ts)
+  - external_insurance_policies (export: externalInsurancePolicies, file: domains/data/insurance.ts)
+  - external_insurance_beneficiaries (export: externalInsuranceBeneficiaries, file: domains/data/insurance.ts)
+  - external_benefit_utilization (export: externalBenefitUtilization, file: domains/data/insurance.ts)
+  - external_lms_courses (export: externalLmsCourses, file: domains/data/lms.ts)
+  - external_lms_enrollments (export: externalLmsEnrollments, file: domains/data/lms.ts)
+  - external_lms_progress (export: externalLmsProgress, file: domains/data/lms.ts)
+  - external_lms_completions (export: externalLmsCompletions, file: domains/data/lms.ts)
+  - external_lms_learners (export: externalLmsLearners, file: domains/data/lms.ts)
+  - dispatch_requests (export: dispatchRequests, file: domains/dispatch/dispatch.ts)
+  - dispatch_rules (export: dispatchRules, file: domains/dispatch/dispatch.ts)
+  - user_signatures (export: userSignatures, file: domains/documents/correspondence.ts)
+  - correspondence (export: correspondence, file: domains/documents/correspondence.ts)
+  - signature_documents (export: signatureDocuments, file: domains/documents/signatures.ts)
+  - signature_workflows (export: signatureWorkflows, file: domains/documents/workflows.ts)
+  - employer_execution_artifacts (export: employerExecutionArtifacts, file: domains/employer-execution/employer-artifacts.ts)
+  - employer_execution_replays (export: employerExecutionReplays, file: domains/employer-execution/employer-artifacts.ts)
+  - employer_replay_intents (export: employerReplayIntents, file: domains/employer-execution/employer-artifacts.ts)
+  - employer_execution_evidence_links (export: employerExecutionEvidenceLinks, file: domains/employer-execution/employer-artifacts.ts)
+  - employer_execution_compliance_events (export: employerExecutionComplianceEvents, file: domains/employer-execution/employer-compliance.ts)
+  - cba_rule_versions (export: cbaRuleVersions, file: domains/employer-execution/employer-execution-core.ts)
+  - cba_rule_set_items (export: cbaRuleSetItems, file: domains/employer-execution/employer-execution-core.ts)
+  - employer_payroll_runs (export: employerPayrollRuns, file: domains/employer-execution/employer-payroll-runs.ts)
+  - employer_payroll_run_items (export: employerPayrollRunItems, file: domains/employer-execution/employer-payroll-runs.ts)
+  - employer_remittance_runs (export: employerRemittanceRuns, file: domains/employer-execution/employer-remittance-runs.ts)
+  - employer_remittance_submissions (export: employerRemittanceSubmissions, file: domains/employer-execution/employer-remittance-runs.ts)
+  - employer_remittance_run_items (export: employerRemittanceRunItems, file: domains/employer-execution/employer-remittance-runs.ts)
+  - employer_execution_profiles (export: employerExecutionProfiles, file: domains/employer-execution/employer-runtime-profile.ts)
+  - employer_timesheet_batches (export: employerTimesheetBatches, file: domains/employer-execution/employer-timesheets.ts)
+  - employer_timesheet_entries (export: employerTimesheetEntries, file: domains/employer-execution/employer-timesheets.ts)
+  - federations (export: federations, file: domains/federation/federation-schema.ts)
+  - chart_of_accounts (export: chartOfAccounts, file: domains/finance/accounting.ts)
+  - cost_centers (export: costCenters, file: domains/finance/accounting.ts)
+  - gl_account_mappings (export: glAccountMappings, file: domains/finance/accounting.ts)
+  - gl_transaction_log (export: glTransactionLog, file: domains/finance/accounting.ts)
+  - gl_trial_balance (export: glTrialBalance, file: domains/finance/accounting.ts)
+  - allocation_rules (export: allocationRules, file: domains/finance/allocation.ts)
+  - allocation_runs (export: allocationRuns, file: domains/finance/allocation.ts)
+  - chargeback_statements (export: chargebackStatements, file: domains/finance/allocation.ts)
+  - organization_billing_config (export: organizationBillingConfig, file: domains/finance/billing-config.ts)
+  - contract_covered_orgs (export: contractCoveredOrgs, file: domains/finance/contract-amendments.ts)
+  - commercial_contracts (export: commercialContracts, file: domains/finance/contracts.ts)
+  - org_entitlements (export: orgEntitlements, file: domains/finance/contracts.ts)
+  - entitlement_usage_log (export: entitlementUsageLog, file: domains/finance/contracts.ts)
+  - dues_assignments (export: duesAssignments, file: domains/finance/dues-assignments.ts)
+  - dunning_cases (export: dunningCases, file: domains/finance/dunning.ts)
+  - subscription_events_log (export: subscriptionEventsLog, file: domains/finance/dunning.ts)
+  - payments (export: payments, file: domains/finance/payments.ts)
+  - payment_cycles (export: paymentCycles, file: domains/finance/payments.ts)
+  - payment_methods (export: paymentMethods, file: domains/finance/payments.ts)
+  - bank_reconciliation (export: bankReconciliation, file: domains/finance/payments.ts)
+  - payment_disputes (export: paymentDisputes, file: domains/finance/payments.ts)
+  - pension_plans (export: pensionPlans, file: domains/finance/pension.ts)
+  - pension_members (export: pensionMembers, file: domains/finance/pension.ts)
+  - pension_contributions (export: pensionContributions, file: domains/finance/pension.ts)
+  - pension_benefit_claims (export: pensionBenefitClaims, file: domains/finance/pension.ts)
+  - pension_t4a_records (export: pensionT4aRecords, file: domains/finance/pension.ts)
+  - pension_trustees (export: pensionTrustees, file: domains/finance/pension.ts)
+  - pension_trustee_meetings (export: pensionTrusteeMeetings, file: domains/finance/pension.ts)
+  - pension_trustee_mandates (export: pensionTrusteeMandates, file: domains/finance/pension.ts)
+  - pension_trustee_decisions (export: pensionTrusteeDecisions, file: domains/finance/pension.ts)
+  - pension_benefit_claim_evidence (export: pensionBenefitClaimEvidence, file: domains/finance/pension.ts)
+  - pension_benefit_settlement_handoffs (export: pensionBenefitSettlementHandoffs, file: domains/finance/pension.ts)
+  - billing_accounts (export: billingAccounts, file: domains/finance/platform-billing.ts)
+  - org_subscriptions (export: orgSubscriptions, file: domains/finance/platform-billing.ts)
+  - billing_periods (export: billingPeriods, file: domains/finance/platform-billing.ts)
+  - billing_automation_mandates (export: billingAutomationMandates, file: domains/finance/platform-billing.ts)
+  - billing_automation_runs (export: billingAutomationRuns, file: domains/finance/platform-billing.ts)
+  - platform_invoices (export: platformInvoices, file: domains/finance/platform-billing.ts)
+  - platform_payments (export: platformPayments, file: domains/finance/platform-billing.ts)
+  - billing_subscriptions (export: billingSubscriptions, file: domains/finance/platform-billing.ts)
+  - platform_cost_ledger_entries (export: platformCostLedgerEntries, file: domains/finance/platform-ledger.ts)
+  - reconciliation_runs (export: reconciliationRuns, file: domains/finance/reconciliation.ts)
+  - reconciliation_exceptions (export: reconciliationExceptions, file: domains/finance/reconciliation.ts)
+  - reconciliation_resolution_decisions (export: reconciliationResolutionDecisions, file: domains/finance/reconciliation.ts)
+  - reconciliation_resolution_postings (export: reconciliationResolutionPostings, file: domains/finance/reconciliation.ts)
+  - strike_fund_disbursements (export: strikeFundDisbursements, file: domains/finance/taxes.ts)
+  - transaction_fee_rules (export: transactionFeeRules, file: domains/finance/transaction-fees.ts)
+  - transaction_fee_events (export: transactionFeeEvents, file: domains/finance/transaction-fees.ts)
+  - fee_settlement_lines (export: feeSettlementLines, file: domains/finance/transaction-fees.ts)
+  - fee_adjustments (export: feeAdjustments, file: domains/finance/transaction-fees.ts)
+  - usage_events (export: usageEvents, file: domains/finance/usage-metering.ts)
+  - usage_aggregates (export: usageAggregates, file: domains/finance/usage-metering.ts)
+  - voice_usage_reservations (export: voiceUsageReservations, file: domains/finance/usage-metering.ts)
+  - chart_of_accounts (export: chartOfAccounts, file: domains/financial/chart-of-accounts.ts)
+  - account_mappings (export: accountMappings, file: domains/financial/chart-of-accounts.ts)
+  - cnesst_filings (export: cneesstFilings, file: domains/health-safety/cnesst-schema.ts)
+  - right_of_refusal_events (export: rightOfRefusalEvents, file: domains/health-safety/cnesst-schema.ts)
+  - preventive_withdrawals (export: preventiveWithdrawals, file: domains/health-safety/cnesst-schema.ts)
+  - joint_hs_committees (export: jointHsCommittees, file: domains/health-safety/cnesst-schema.ts)
+  - pay_equity_exercises (export: payEquityExercises, file: domains/health-safety/cnesst-schema.ts)
+  - anti_scab_violations (export: antiScabViolations, file: domains/health-safety/cnesst-schema.ts)
+  - workplace_incidents (export: workplaceIncidents, file: domains/health-safety/health-safety-schema.ts)
+  - safety_inspections (export: safetyInspections, file: domains/health-safety/health-safety-schema.ts)
+  - hazard_reports (export: hazardReports, file: domains/health-safety/health-safety-schema.ts)
+  - safety_training_records (export: safetyTrainingRecords, file: domains/health-safety/health-safety-schema.ts)
+  - ppe_equipment (export: ppeEquipment, file: domains/health-safety/health-safety-schema.ts)
+  - wcb_claims (export: wcbClaims, file: domains/health-safety/provincial-wcb-schema.ts)
+  - wcb_employer_assessments (export: wcbEmployerAssessments, file: domains/health-safety/provincial-wcb-schema.ts)
+  - accessibility_audits (export: accessibilityAudits, file: domains/infrastructure/accessibility.ts)
+  - accessibility_issues (export: accessibilityIssues, file: domains/infrastructure/accessibility.ts)
+  - international_addresses (export: internationalAddresses, file: domains/infrastructure/addresses.ts)
+  - alert_rules (export: alertRules, file: domains/infrastructure/alerting.ts)
+  - security_events (export: publicSecurityEvents, file: domains/infrastructure/audit.ts)
+  - security_posture_checks (export: securityPostureChecks, file: domains/infrastructure/audit.ts)
+  - clc_organization_sync_log (export: clcOrganizationSyncLog, file: domains/infrastructure/clc-audit.ts)
+  - chart_of_accounts (export: chartOfAccounts, file: domains/infrastructure/clc-audit.ts)
+  - per_capita_remittances (export: perCapitaRemittances, file: domains/infrastructure/clc-per-capita.ts)
+  - clc_sync_log (export: clcSyncLog, file: domains/infrastructure/clc-per-capita.ts)
+  - organization_contacts (export: organizationContacts, file: domains/infrastructure/clc-per-capita.ts)
+  - notification_log (export: notificationLog, file: domains/infrastructure/clc-per-capita.ts)
+  - clc_sync_log (export: clcSyncLog, file: domains/infrastructure/clc-sync.ts)
+  - clc_webhook_log (export: clcWebhookLog, file: domains/infrastructure/clc-sync.ts)
+  - cms_pages (export: cmsPages, file: domains/infrastructure/cms.ts)
+  - cms_media_library (export: cmsMediaLibrary, file: domains/infrastructure/cms.ts)
+  - donation_campaigns (export: donationCampaigns, file: domains/infrastructure/cms.ts)
+  - donation_receipts (export: donationReceipts, file: domains/infrastructure/cms.ts)
+  - defensibility_packs (export: defensibilityPacks, file: domains/infrastructure/defensibility.ts)
+  - chart_of_accounts (export: chartOfAccounts, file: domains/infrastructure/erp.ts)
+  - gl_account_mappings (export: glAccountMappings, file: domains/infrastructure/erp.ts)
+  - sync_jobs (export: syncJobs, file: domains/infrastructure/erp.ts)
+  - financial_audit_log (export: financialAuditLog, file: domains/infrastructure/erp.ts)
+  - currency_exchange_rates (export: currencyExchangeRates, file: domains/infrastructure/erp.ts)
+  - exit_interviews (export: exitInterviews, file: domains/infrastructure/exit-interviews.ts)
+  - exit_interview_sessions (export: exitInterviewSessions, file: domains/infrastructure/exit-interviews.ts)
+  - exit_interview_documents (export: exitInterviewDocuments, file: domains/infrastructure/exit-interviews.ts)
+  - exit_interview_events (export: exitInterviewEvents, file: domains/infrastructure/exit-interviews.ts)
+  - integration_configs (export: integrationConfigs, file: domains/infrastructure/integrations.ts)
+  - integration_config_versions (export: integrationConfigVersions, file: domains/infrastructure/integrations.ts)
+  - integration_credential_bindings (export: integrationCredentialBindings, file: domains/infrastructure/integrations.ts)
+  - integration_sync_log (export: integrationSyncLog, file: domains/infrastructure/integrations.ts)
+  - webhook_events (export: webhookEvents, file: domains/infrastructure/integrations.ts)
+  - integration_sync_schedules (export: integrationSyncSchedules, file: domains/infrastructure/integrations.ts)
+  - integration_api_keys (export: integrationApiKeys, file: domains/infrastructure/integrations.ts)
+  - integration_webhooks (export: integrationWebhooks, file: domains/infrastructure/integrations.ts)
+  - integration_partners (export: integrationPartners, file: domains/infrastructure/integrations.ts)
+  - organizing_campaigns (export: organizingCampaigns, file: domains/infrastructure/organizing.ts)
+  - organizing_form_generation_receipts (export: organizingFormGenerationReceipts, file: domains/infrastructure/organizing.ts)
+  - shopify_config (export: shopifyConfig, file: domains/infrastructure/rewards.ts)
+  - shopify_webhook_secret_versions (export: shopifyWebhookSecretVersions, file: domains/infrastructure/rewards.ts)
+  - organization_sharing_settings (export: organizationSharingSettings, file: domains/infrastructure/sharing.ts)
+  - social_accounts (export: socialAccounts, file: domains/infrastructure/social-media.ts)
+  - social_posts (export: socialPosts, file: domains/infrastructure/social-media.ts)
+  - social_campaigns (export: socialCampaigns, file: domains/infrastructure/social-media.ts)
+  - social_analytics (export: socialAnalytics, file: domains/infrastructure/social-media.ts)
+  - support_tickets (export: supportTickets, file: domains/infrastructure/support.ts)
+  - member_addresses (export: memberAddresses, file: domains/member/addresses.ts)
+  - member_roles (export: memberRoles, file: domains/member/enhanced-rbac.ts)
+  - permission_exceptions (export: permissionExceptions, file: domains/member/enhanced-rbac.ts)
+  - rbac_audit_log (export: rbacAuditLog, file: domains/member/enhanced-rbac.ts)
+  - member_jurisdiction_preferences (export: memberJurisdictionPreferences, file: domains/member/jurisdiction-preferences.ts)
+  - break_policies (export: breakPolicies, file: domains/member/member-breaks.ts)
+  - member_breaks (export: memberBreaks, file: domains/member/member-breaks.ts)
+  - member_employment (export: memberEmployment, file: domains/member/member-employment.ts)
+  - employment_history (export: employmentHistory, file: domains/member/member-employment.ts)
+  - member_leaves (export: memberLeaves, file: domains/member/member-employment.ts)
+  - job_classifications (export: jobClassifications, file: domains/member/member-employment.ts)
+  - member_segments (export: memberSegments, file: domains/member/member-segments.ts)
+  - segment_exports (export: segmentExports, file: domains/member/member-segments.ts)
+  - stewards (export: stewards, file: domains/member/stewards.ts)
+  - ai_clause_reasonings (export: aiClauseReasonings, file: domains/ml/ai-clause-reasoning.ts)
+  - ai_copilot_sessions (export: aiCopilotSessions, file: domains/ml/ai-copilot-sessions.ts)
+  - ai_grievance_triages (export: aiGrievanceTriages, file: domains/ml/ai-grievance-triage.ts)
+  - ai_insight_reports (export: aiInsightReports, file: domains/ml/ai-insight-reports.ts)
+  - ue_authority_issuance_rules (export: ueAuthorityIssuanceRules, file: domains/ml/authority-kernel.ts)
+  - ue_authority_mandates (export: ueAuthorityMandates, file: domains/ml/authority-kernel.ts)
+  - ue_authority_resource_relationships (export: ueAuthorityResourceRelationships, file: domains/ml/authority-kernel.ts)
+  - ue_authority_delegations (export: ueAuthorityDelegations, file: domains/ml/authority-kernel.ts)
+  - ue_authority_recusals (export: ueAuthorityRecusals, file: domains/ml/authority-kernel.ts)
+  - ue_authority_disclosure_consents (export: ueAuthorityDisclosureConsents, file: domains/ml/authority-kernel.ts)
+  - ue_authority_approval_requests (export: ueAuthorityApprovalRequests, file: domains/ml/authority-kernel.ts)
+  - ue_authority_approval_decisions (export: ueAuthorityApprovalDecisions, file: domains/ml/authority-kernel.ts)
+  - ue_authority_events (export: ueAuthorityEvents, file: domains/ml/authority-kernel.ts)
+  - ue_authority_acceptances (export: ueAuthorityAcceptances, file: domains/ml/authority-kernel.ts)
+  - ue_authority_requests (export: ueAuthorityRequests, file: domains/ml/authority-kernel.ts)
+  - ue_authority_financial_steps (export: ueAuthorityFinancialSteps, file: domains/ml/authority-kernel.ts)
+  - ue_authority_reviews (export: ueAuthorityReviews, file: domains/ml/authority-kernel.ts)
+  - ue_authority_workaid_matters (export: ueAuthorityWorkaidMatters, file: domains/ml/authority-kernel.ts)
+  - ue_authority_counsel_engagements (export: ueAuthorityCounselEngagements, file: domains/ml/authority-kernel.ts)
+  - ue_authority_counsel_nonces (export: ueAuthorityCounselNonces, file: domains/ml/authority-kernel.ts)
+  - ue_authority_workaid_consent_texts (export: ueAuthorityWorkaidConsentTexts, file: domains/ml/authority-kernel.ts)
+  - ue_authority_workaid_consent_grants (export: ueAuthorityWorkaidConsentGrants, file: domains/ml/authority-kernel.ts)
+  - ue_authority_workaid_document_auths (export: ueAuthorityWorkaidDocumentAuths, file: domains/ml/authority-kernel.ts)
+  - ue_authority_workaid_shares (export: ueAuthorityWorkaidShares, file: domains/ml/authority-kernel.ts)
+  - ue_authority_workaid_counsel_access (export: ueAuthorityWorkaidCounselAccess, file: domains/ml/authority-kernel.ts)
+  - chat_sessions (export: chatSessions, file: domains/ml/chatbot.ts)
+  - knowledge_base (export: knowledgeBase, file: domains/ml/chatbot.ts)
+  - ai_usage_metrics (export: aiUsageMetrics, file: domains/ml/chatbot.ts)
+  - ai_budgets (export: aiBudgets, file: domains/ml/chatbot.ts)
+  - employer_risk_scores (export: employerRiskScores, file: domains/ml/employer-risk-scores.ts)
+  - ue_cognition_memory (export: ueCognitionMemory, file: domains/ml/knowledge-transfer-runtime.ts)
+  - ue_reasoning_sessions (export: ueReasoningSessions, file: domains/ml/knowledge-transfer-runtime.ts)
+  - ue_copilot_conversations (export: ueCopilotConversations, file: domains/ml/knowledge-transfer-runtime.ts)
+  - ue_verified_dependency_evidence (export: ueVerifiedDependencyEvidence, file: domains/ml/knowledge-transfer-runtime.ts)
+  - ue_graph_node_alias (export: ueGraphNodeAlias, file: domains/ml/knowledge-transfer-runtime.ts)
+  - ml_predictions (export: mlPredictions, file: domains/ml/predictions.ts)
+  - ml_prediction_feedback (export: mlPredictionFeedback, file: domains/ml/predictions.ts)
+  - model_metadata (export: modelMetadata, file: domains/ml/predictions.ts)
+  - pilot_commercial_offers (export: pilotCommercialOffers, file: domains/pilot/pilot-commercial-governance.ts)
+  - pilot_commercial_acceptances (export: pilotCommercialAcceptances, file: domains/pilot/pilot-commercial-governance.ts)
+  - pilot_evidence_assessments (export: pilotEvidenceAssessments, file: domains/pilot/pilot-commercial-governance.ts)
+  - pilot_demo_seeds (export: pilotDemoSeeds, file: domains/pilot/pilot-demo-seeds.ts)
+  - pilot_enrollments (export: pilotEnrollments, file: domains/pilot/pilot-enrollments.ts)
+  - pilot_events (export: pilotEvents, file: domains/pilot/pilot-events.ts)
+  - pilot_feedback (export: pilotFeedback, file: domains/pilot/pilot-feedback.ts)
+  - pilot_fixture_rows (export: pilotFixtureRows, file: domains/pilot/pilot-fixture-rows.ts)
+  - pilot_milestones (export: pilotMilestones, file: domains/pilot/pilot-milestones.ts)
+  - pilot_checklist_items (export: pilotChecklistItems, file: domains/pilot/pilot-onboarding.ts)
+  - calendars (export: calendars, file: domains/scheduling/calendar.ts)
+  - event_attendees (export: eventAttendees, file: domains/scheduling/calendar.ts)
+  - meeting_rooms (export: meetingRooms, file: domains/scheduling/calendar.ts)
+  - room_bookings (export: roomBookings, file: domains/scheduling/calendar.ts)
+  - external_calendar_connections (export: externalCalendarConnections, file: domains/scheduling/calendar.ts)
+  - event_reminders (export: eventReminders, file: domains/scheduling/calendar.ts)
+  - training_courses (export: trainingCourses, file: domains/scheduling/training.ts)
+  - course_sessions (export: courseSessions, file: domains/scheduling/training.ts)
+  - course_registrations (export: courseRegistrations, file: domains/scheduling/training.ts)
+  - member_certifications (export: memberCertifications, file: domains/scheduling/training.ts)
+  - training_programs (export: trainingPrograms, file: domains/scheduling/training.ts)
+
+ ✓ |contract-tests| ue-org-scoped-registry.test.ts (6 tests) 3ms
+ ✓ |contract-tests| ga-gate-required.test.ts (10 tests) 4ms
+ ✓ |contract-tests| data-lifecycle-manifest.test.ts (6 tests) 5ms
+ ✓ |contract-tests| abr-dual-control.test.ts (16 tests) 4ms
+ ✓ |contract-tests| truth-manifest-coherence.test.ts (8 tests) 4ms
+ ✓ |contract-tests| abr-need-to-know.test.ts (15 tests) 3ms
+ ✓ |contract-tests| console-nav-config.test.ts (103 tests) 6ms
+ ✓ |contract-tests| evidence-seal-mandatory.test.ts (11 tests) 5ms
+ ✓ |contract-tests| mil-integration.test.ts (33 tests) 4ms
+ ✓ |contract-tests| abr-ops-envelope.test.ts (5 tests) 5ms
+ ✓ |contract-tests| ue-ai-knowledge-tenant-contract.test.ts (4 tests) 4ms
+ ✓ |contract-tests| integration-audit-required.test.ts (7 tests) 10ms
+ ✓ |contract-tests| tool-fabric-baseline-proof-order.test.ts (3 tests) 3ms
+ ✓ |contract-tests| evidence-pack-integration.test.ts (13 tests) 5ms
+ ✓ |contract-tests| agri-evidence.test.ts (6 tests) 3ms
+ ✓ |contract-tests| union-eyes/ue-vocabulary-validation.test.ts (19 tests) 4ms
+ ✓ |contract-tests| cross-app-health-consistency.test.ts (5 tests) 3ms
+ ✓ |contract-tests| slo-gate-real-metrics.test.ts (5 tests) 3ms
+ ✓ |contract-tests| slo-policy.test.ts (6 tests) 2ms
+ ✓ |contract-tests| console-integration-slo.test.ts (5 tests) 4ms
+ ✓ |contract-tests| platform-drift-guard.test.ts (53 tests) 3ms
+ ✓ |contract-tests| nacp-integrity-no-stubs.test.ts (4 tests) 3ms
+ ✓ |contract-tests| privilege-escalation-runtime.test.ts (24 tests) 3ms
+ ✓ |contract-tests| cross-org-auth.test.ts (4 tests) 4ms
+ ✓ |contract-tests| alerting-integrity.test.ts (9 tests) 3ms
+ ✓ |contract-tests| ai-validation-matrix-accountability.test.ts (3 tests) 2ms
+ ✓ |contract-tests| agri-core-structure.test.ts (10 tests) 5ms
+ ✓ |contract-tests| tamper-simulation.test.ts (17 tests) 4ms
+ ✓ |contract-tests| console-union-eyes-auth-parity.test.ts (4 tests) 5ms
+ ✓ |contract-tests| platform-admin-version-truth.test.ts (3 tests) 2ms
+ ✓ |contract-tests| governance-proof-harness.test.ts (15 tests) 4ms
+ ✓ |contract-tests| icra-capability-deploy-gate.test.ts (7 tests) 4ms
+ ✓ |contract-tests| rbac-property-based.test.ts (7 tests) 5ms
+ ✓ |contract-tests| abr-evidence-packs.test.ts (9 tests) 3ms
+ ✓ |contract-tests| union-eyes-admin-ux-polish.test.ts (4 tests) 5ms
+ ✓ |contract-tests| abr-audit-taxonomy.test.ts (9 tests) 3ms
+ ✓ |contract-tests| union-eyes-production-promotion-gate.test.ts (5 tests) 3ms
+ ✓ |contract-tests| governance-profiles.test.ts (6 tests) 3ms
+ ✓ |contract-tests| union-eyes-dashboard-kpi-hardening.test.ts (3 tests) 4ms
+ ✓ |contract-tests| ue-cupe4373-authz-no-bypass.test.ts (2 tests) 3ms
+ ✓ |contract-tests| abr-unused-endpoints.test.ts (5 tests) 3ms
+ ✓ |contract-tests| dast-workflow-enforcement.test.ts (4 tests) 3ms
+ ✓ |contract-tests| webhook-hygiene.test.ts (8 tests) 5ms
+ ✓ |contract-tests| ue-role-graph.test.ts (11 tests) 3ms
+ ✓ |contract-tests| no-duplicate-evidence-generator.test.ts (18 tests) 3ms
+ ✓ |contract-tests| oncall-alerting.test.ts (7 tests) 2ms
+ ✓ |contract-tests| union-eyes-malware-scan-enforcement.test.ts (3 tests) 3ms
+ ✓ |contract-tests| union-eyes-offboarding-auth-boundary.test.ts (3 tests) 5ms
+ ✓ |contract-tests| union-eyes-evidence-export-capability.test.ts (3 tests) 2ms
+ ✓ |contract-tests| cross-org-e2e-access.test.ts (13 tests) 3ms
+ ✓ |contract-tests| ue-world-class-readiness.test.ts (6 tests) 2ms
+ ✓ |contract-tests| db-real.test.ts (12 tests) 2ms
+ ✓ |contract-tests| union-eyes-ai-copilot-boundary.test.ts (4 tests) 4ms
+ ✓ |contract-tests| trade-integrations.test.ts (6 tests) 3ms
+ ✓ |contract-tests| attestation-signed.test.ts (7 tests) 3ms
+ ✓ |contract-tests| org-scoped-registry.test.ts (8 tests) 2ms
+ ✓ |contract-tests| orchestrator-runtime-contract.test.ts (3 tests) 2ms
+ ✓ |contract-tests| gitops-app-selection.test.ts (5 tests) 2ms
+ ✓ |contract-tests| console-hubspot-opportunity.test.ts (1 test) 2ms
+ ✓ |contract-tests| ue-release-readiness.test.ts (5 tests) 2ms
+ ✓ |contract-tests| container-node-runtime.test.ts (1 test) 2ms
+ ✓ |contract-tests| data-inventory-integrity.test.ts (12 tests) 3ms
+ ✓ |contract-tests| pilot-metrics-e2e-proof.test.ts (5 tests) 2ms
+ ✓ |contract-tests| no-direct-stripe.test.ts (8 tests) 2ms
+ ✓ |contract-tests| console-clean-slate.test.ts (3 tests) 2ms
+ ✓ |contract-tests| ue-server-time-zone.test.ts (3 tests) 2ms
+ ✓ |contract-tests| mil-deprecation-guard.test.ts (2 tests) 2ms
+ ✓ |contract-tests| ai-remediation-checklist.test.ts (3 tests) 2ms
+ ✓ |contract-tests| union-eyes-resend-deploy-wiring.test.ts (2 tests) 2ms
+ ✓ |contract-tests| crypto-integrity.test.ts (3 tests) 2ms
+ ✓ |contract-tests| console-legacy-coverage.test.ts (2 tests) 2ms
+ ✓ |contract-tests| sre-runtime-evidence.test.ts (5 tests) 2ms
+ ✓ |contract-tests| metric-classification.test.ts (3 tests) 2ms
+ ✓ |contract-tests| ue-evidence-seal.test.ts (4 tests) 3ms
+ ✓ |contract-tests| test-dir-convention.test.ts (1 test) 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |contract-tests| arch-layer.test.ts > ARCH_LAYER_001 — No DB/repo direct access from route handlers > no governance exceptions are expired
+AssertionError: Expired ARCH_LAYER_001 exceptions:
+  apps/console/** expired 2026-11-17 (owner: platform-team)
+  apps/union-eyes/** expired 2026-11-17 (owner: union-eyes-team)
+  apps/flow/** expired 2026-11-17 (owner: commerce-team)
+  apps/control-plane/** expired 2026-11-17 (owner: platform-team)
+  apps/nzila-hq/** expired 2026-11-17 (owner: platform-core): expected [ …(5) ] to have a length of +0 but got 5
+
+- Expected
++ Received
+
+- 0
++ 5
+
+ ❯ arch-layer.test.ts:95:7
+     93|         .map((e) => `  ${e.path} expired ${e.expiresOn} (owner: ${e.ow…
+     94|         .join('\n')}`,
+     95|     ).toHaveLength(0)
+       |       ^
+     96|   })
+     97|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  |contract-tests| contract-meta.test.ts > CONTRACT_META_001 — Contracts are fast + deterministic > no exception entries are expired fleet-wide
+AssertionError: Expired governance exceptions:
+[ARCH_LAYER_001] apps/console/** expired 2026-11-17 (owner: platform-team, file: arch-layer.json)
+[ARCH_LAYER_001] apps/union-eyes/** expired 2026-11-17 (owner: union-eyes-team, file: arch-layer.json)
+[ARCH_LAYER_001] apps/flow/** expired 2026-11-17 (owner: commerce-team, file: arch-layer.json)
+[ARCH_LAYER_001] apps/control-plane/** expired 2026-11-17 (owner: platform-team, file: arch-layer.json)
+[ARCH_LAYER_001] apps/nzila-hq/** expired 2026-11-17 (owner: platform-core, file: arch-layer.json)
+[NO_CONSOLE_001] apps/union-eyes/lib/console-wrapper.ts expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/cfo/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/cfo/app/*/dashboard/*/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/cfo/app/*/dashboard/*/*/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/zonga/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/zonga/app/*/dashboard/*/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/partners/app/**/admin/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/partners/app/**/portal/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/nacp-exams/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/console/components/ui/ErrorPanel.tsx expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_CONSOLE_001] apps/nzila-hq/components/primitives/ErrorPanel.tsx expired 2026-11-17 (owner: platform-core, file: no-console.json)
+[NO_CONSOLE_001] apps/union-eyes/instrumentation.ts expired 2026-11-17 (owner: platform-team, file: no-console.json)
+[NO_DIRECT_PROVIDER] apps/union-eyes/lib/stripe.ts expired 2026-11-17 (owner: union-eyes-team, file: no-direct-provider.json)
+[NO_DIRECT_PROVIDER] apps/union-eyes/services/financial-service/src/services/notification-service.ts expired 2026-11-17 (owner: union-eyes-team, file: no-direct-provider.json)
+[NO_DIRECT_PROVIDER] apps/union-eyes/services/twilio-sms-service.ts expired 2026-11-17 (owner: union-eyes-team, file: no-direct-provider.json)
+[NO_RAW_DB_IN_ACTIONS_001] apps/union-eyes/actions/admin-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: no-raw-db-in-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/advisory-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/audit-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/client-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/import-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/integration-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/ledger-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/misc-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/notification-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/platform-admin-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/report-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/security-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/cfo/lib/actions/workflow-actions.ts expired 2026-11-17 (owner: @nzila/cfo, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/partners/lib/actions/admin-actions.ts expired 2026-11-17 (owner: @nzila/partners, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/partners/lib/actions/ai-deal-actions.ts expired 2026-11-17 (owner: @nzila/partners, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/partners/lib/actions/certification-actions.ts expired 2026-11-17 (owner: @nzila/partners, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/partners/lib/actions/commission-actions.ts expired 2026-11-17 (owner: @nzila/partners, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/partners/lib/actions/deal-actions.ts expired 2026-11-17 (owner: @nzila/partners, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/union-eyes/actions/analytics-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/union-eyes/actions/member-employment-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/union-eyes/actions/rewards-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/union-eyes/actions/admin-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/zonga/lib/actions/download-actions.ts expired 2026-11-17 (owner: @nzila/zonga, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/zonga/lib/actions/listener-actions.ts expired 2026-11-17 (owner: @nzila/zonga, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/zonga/lib/actions/notification-actions.ts expired 2026-11-17 (owner: @nzila/zonga, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/zonga/lib/actions/search-actions.ts expired 2026-11-17 (owner: @nzila/zonga, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/zonga/lib/actions/social-actions.ts expired 2026-11-17 (owner: @nzila/zonga, file: org-required-server-actions.json)
+[ORG_REQUIRED_SERVER_ACTIONS_001] apps/zonga/lib/actions/streaming-actions.ts expired 2026-11-17 (owner: @nzila/zonga, file: org-required-server-actions.json)
+[platform-concern-adoption] apps/partners expired 2026-11-17 (owner: commerce-team, file: platform-concern-adoption-exceptions.json)
+[STACK_AUTHORITY_001] apps/union-eyes/actions/admin-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/actions/analytics-actions.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/app/api/portal/dues/pay/route.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/app/*/dashboard/layout.tsx expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/app/api/grievances/**/route.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/app/api/cases/intake/route.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/app/api/cases/*/escalate/route.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json)
+[STACK_AUTHORITY_001] apps/union-eyes/app/api/exit-interviews/**/route.ts expired 2026-11-17 (owner: @nzila/union-eyes, file: stack-authority.json): expected [ …(57) ] to have a length of +0 but got 57
+
+- Expected
++ Received
+
+- 0
++ 57
+
+ ❯ contract-meta.test.ts:84:7
+     82|       expired,
+     83|       `Expired governance exceptions:\n${expired.join('\n')}`,
+     84|     ).toHaveLength(0)
+       |       ^
+     85|   })
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  |contract-tests| db-boundary.test.ts > INV-06 — No raw DB access in application layer > no app file imports raw database drivers (postgres, pg)
+AssertionError: Direct database driver imports forbidden in app code.
+Violations:
+apps/union-eyes/e2e/helpers/runtime-fixture-observations.ts: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "apps/union-eyes/e2e/helpers/runtime-fixture-observations.ts",
++ ]
+
+ ❯ db-boundary.test.ts:167:7
+    165|       violations,
+    166|       `Direct database driver imports forbidden in app code.\nViolatio…
+    167|     ).toEqual([])
+       |       ^
+    168|   })
+    169|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  |contract-tests| no-console.test.ts > NO_CONSOLE_001 — No console in runtime code > no governance exceptions are expired
+AssertionError: Expired NO_CONSOLE_001 exceptions:
+  apps/union-eyes/lib/console-wrapper.ts expired 2026-11-17 (owner: platform-team)
+  apps/cfo/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/cfo/app/*/dashboard/*/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/cfo/app/*/dashboard/*/*/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/zonga/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/zonga/app/*/dashboard/*/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/partners/app/**/admin/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/partners/app/**/portal/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/nacp-exams/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/console/components/ui/ErrorPanel.tsx expired 2026-11-17 (owner: platform-team)
+  apps/nzila-hq/components/primitives/ErrorPanel.tsx expired 2026-11-17 (owner: platform-core)
+  apps/union-eyes/instrumentation.ts expired 2026-11-17 (owner: platform-team): expected [ { …(4) }, { …(4) }, { …(4) }, …(9) ] to have a length of +0 but got 12
+
+- Expected
++ Received
+
+- 0
++ 12
+
+ ❯ no-console.test.ts:81:7
+     79|         .map((e) => `  ${e.path} expired ${e.expiresOn} (owner: ${e.ow…
+     80|         .join('\n')}`,
+     81|     ).toHaveLength(0)
+       |       ^
+     82|   })
+     83|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  |contract-tests| no-raw-db-in-actions.test.ts > NO_RAW_DB_IN_ACTIONS_001 — No raw DB access in server action files > no expired exceptions for NO_RAW_DB_IN_ACTIONS_001
+AssertionError: 1 expired exception(s) — migrate the file or extend the deadline: expected [ { …(4) } ] to have a length of +0 but got 1
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ no-raw-db-in-actions.test.ts:166:7
+    164|       `${exceptions.expiredEntries.length} expired exception(s) — ` +
+    165|         'migrate the file or extend the deadline',
+    166|     ).toHaveLength(0)
+       |       ^
+    167|   })
+    168| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  |contract-tests| server-action-org-scoping.test.ts > ORG_REQUIRED_SERVER_ACTIONS_001 — Server actions must use resolveOrgContext > no expired exceptions for ORG_REQUIRED_SERVER_ACTIONS_001
+AssertionError: 27 expired exception(s): expected [ { …(4) }, { …(4) }, { …(4) }, …(24) ] to have a length of +0 but got 27
+
+- Expected
++ Received
+
+- 0
++ 27
+
+ ❯ server-action-org-scoping.test.ts:96:7
+     94|       exceptionFile.expiredEntries,
+     95|       `${exceptionFile.expiredEntries.length} expired exception(s)`,
+     96|     ).toHaveLength(0)
+       |       ^
+     97|   })
+     98| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  |contract-tests| stack-authority.test.ts > STACK_AUTHORITY_001 — Stack authority enforcement > no expired exceptions for STACK_AUTHORITY_001
+AssertionError: 8 expired exception(s) in stack-authority.json: expected [ { …(4) }, { …(4) }, { …(4) }, …(5) ] to have a length of +0 but got 8
+
+- Expected
++ Received
+
+- 0
++ 8
+
+ ❯ stack-authority.test.ts:471:7
+    469|       exceptionFile.expiredEntries,
+    470|       `${exceptionFile.expiredEntries.length} expired exception(s) in …
+    471|     ).toHaveLength(0)
+       |       ^
+    472|   })
+    473| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  7 failed | 302 passed (309)
+      Tests  7 failed | 10139 passed (10146)
+   Start at  20:22:46
+   Duration  289.64s (tests 92%, import 6%, transform 2%)
+
+    Isolate  309 workers spawned · ~89ms startup each (spawn + environment, per file)
+             at least ~27.48s faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/full-contract-v8.json
+ ELIFECYCLE  Command failed with exit code 1.

@@ -10,12 +10,6 @@
       "expiresOn": "2026-11-17"
     },
     {
-      "path": "apps/union-eyes/**",
-      "owner": "union-eyes-team",
-      "justification": "Django-migrated app with direct DB access patterns. Migration tracked alongside console/partners. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A04, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",
-      "expiresOn": "2026-11-17"
-    },
-    {
       "path": "apps/flow/**",
       "owner": "commerce-team",
       "justification": "Flow commerce app — legacy direct DB access in API routes. Migration to service layer tracked in docs/migration/ENFORCEMENT_UPGRADE.md [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via register entry A05, docs/architecture/TOOL_FABRIC_OWNER_APPROVAL_MATRIX.md]",

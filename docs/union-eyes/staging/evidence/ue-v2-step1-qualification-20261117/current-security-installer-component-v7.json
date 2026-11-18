@@ -1,0 +1,72 @@
+{
+  "schema": "ue-step1-component-qualification-v7",
+  "recordedAt": "2026-11-18T02:12:34.735091+00:00",
+  "finalCandidateSha": null,
+  "source": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "7d357c34b3eaead351236240459372725282fcb455990c4c73bae0e71f05f443"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "fabf41c3b80232d22409bd3ca02d7dc4f604c44946e8a37d6e41bf4abf331007"
+    }
+  ],
+  "actualNativeV8Diagnostic": {
+    "counts": {
+      "numTotalTests": 3,
+      "numPassedTests": 2,
+      "numFailedTests": 1,
+      "numPendingTests": 0
+    },
+    "trace": {
+      "index": 9,
+      "kind": "CreateFunctionStmt",
+      "currentRole": "ue_v2_owner",
+      "function": "user_management.ue_framework_actor_authorized()",
+      "sqlstate": "42501",
+      "deniedKind": "function",
+      "deniedIdentity": "ue_framework_actor_authorized"
+    },
+    "sourceChangedDuringRun": false,
+    "rawPrivatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v8.json",
+    "rawSha256": "1e927316a4b81fd3dfaebc1813bcebdb9012e9212192a294d468c4c2b8254cc2",
+    "templateModified": false
+  },
+  "diagnosis": "SQL-language CREATE/REPLACE failed before returning; post-CREATE restoration was too late. The source owner reader EXECUTE entry had been removed by quarantine.",
+  "repair": "Restore only final source ACLs for the two independently immutable-preimage-qualified existing framework replacements before source function compilation, preserving immediate post-CREATE and final exact-source restoration. No installer-only grant, extra role, RLS disablement or source function body change.",
+  "creatorMembershipSource": "Canonical role source explicitly gives INHERIT ue_v2_owner membership in the framework function-owner reader role with inheritance/set enabled; actual effectiveness remains to be proved by native v9.",
+  "checks": {
+    "installer": {
+      "passed": 59,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-installer-unit-v13.log"
+    },
+    "nodeLoaderAndStages": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-stage-unit-v10.log"
+    },
+    "lint": {
+      "exitCode": 0,
+      "log": "current-security-installer-lint-v13.log"
+    }
+  },
+  "artifacts": {
+    "current-security-installer-unit-v13.log": "c53acd09f04f61d01f65b3f6e3da273d555c682e7edfaf04581ab1091f9bc0c5",
+    "current-security-stage-unit-v10.log": "771168695e83623d82bacdc4d30fb49dec364e90eb446b7ed71cbe2682c24ead",
+    "current-security-installer-lint-v13.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+  },
+  "required": "Actual native v9 after the parent heavy-job lease; current repaired transition has not passed native qualification.",
+  "readiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "5dc745e78fca47572ab1c544427b02032a81d019f181fc7633fd82b244f7431e",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v7.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

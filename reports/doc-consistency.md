@@ -1,28 +1,28 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-11-17T21:15:10.555Z
+> Generated: 2026-11-18T00:05:29.330Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Files Scanned | 2814 |
-| Total Findings | 3060 |
+| Total Findings | 3061 |
 | Errors | 0 |
-| Warnings | 1225 |
+| Warnings | 1226 |
 | Info | 1835 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1788 |
-| stale-reference | 1030 |
+| naming-inconsistency | 1790 |
+| stale-reference | 1031 |
 | missing-package-readme | 111 |
 | stale-package-ref | 84 |
-| stale-date | 47 |
+| stale-date | 45 |
 
-## stale-reference (1030)
+## stale-reference (1031)
 
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:124` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -838,6 +838,7 @@
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:137` — Possible broken link: [Reference: AI Gateway](../reference/ai-gateway.md)
 - 🟡 `docs/categories/stakeholders/tutorials/adding-ai.md:138` — Possible broken link: [Explanation: AI Risk Management](../explanation/ai-risk-management.md)
 - 🟡 `docs/categories/stakeholders/tutorials/first-app.md:135` — Possible broken link: [Reference: Package Catalogue](../reference/packages.md)
+- 🟡 `docs/documentation-index.md:1894` — Possible broken link: [docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md](docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md)
 - 🟡 `governance/README.md:17` — Possible broken link: [releases/](./releases/)
 - 🟡 `governance/business/README.md:158` — Possible broken link: [Portfolio Deep Dive Analysis](../PORTFOLIO_DEEP_DIVE.md)
 - 🟡 `governance/business/README.md:159` — Possible broken link: [Migration Plan](../MIGRATION_PLAN.md)
@@ -1142,7 +1143,7 @@
 - 🟡 `docs/union-eyes/reality-remediation/deadline-engine/00-charter.md:39` — References @nzila/union-eyes-demo but package does not exist
 - 🟡 `governance/business/investor-materials/one-pager-abr.md:7` — References @nzila/abr but package does not exist
 
-## naming-inconsistency (1788)
+## naming-inconsistency (1790)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -2847,6 +2848,8 @@
 - ℹ️ `docs/union-eyes/staging/UE_V2_REAL_ENTRA_RUNTIME_REPAIR.md:3` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/staging/evidence/ue-v2-document-runtime-packaging-20261116/README.md:7` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/staging/evidence/ue-v2-privacy-self-service-20261116/README.md:9` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md:20` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md:72` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md:9` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md:10` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md:13` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2933,55 +2936,53 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `governance/security/design-reviews/2026-09-23-ue-rbac-system-context.md:10` — "organizationId" should be "org_id" (tenant identifier)
 
-## stale-date (47)
+## stale-date (45)
 
-- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 212 days old — may be stale
-- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 211 days old — may be stale
-- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 223 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 211 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 211 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 211 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-04" is 197 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md:3` — Document date "2026-05-04" is 197 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 211 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 218 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 194 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 217 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 207 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 207 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 208 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 200 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 200 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 200 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 200 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 214 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 214 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 214 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 214 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 214 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 214 days old — may be stale
+- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 213 days old — may be stale
+- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 224 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 219 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 195 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 218 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 208 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 208 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 209 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 215 days old — may be stale
 - ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 208 days old — may be stale
-- ℹ️ `docs/compliance/soc2/vendor-assurance-index.md:5` — Document date "2026-06-07" is 163 days old — may be stale
-- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 176 days old — may be stale
-- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 176 days old — may be stale
-- ℹ️ `governance/ai/AI_REMEDIATION_CHECKLIST.md:3` — Document date "2026-06-07" is 163 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `governance/ai/UE_RELEASE_READINESS.md:3` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/WORLD_CLASS_SCORECARD.md:3` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/platform-cognition/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/platform-cognition/kill-switch-drill.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/platform-cognition/monitoring-plan.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/human-oversight.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/kill-switch-drill.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/monitoring-plan.md:4` — Document date "2026-06-08" is 162 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "2026-07-03" is 137 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "2026-07-03" is 137 days old — may be stale
+- ℹ️ `docs/compliance/soc2/vendor-assurance-index.md:5` — Document date "2026-06-07" is 164 days old — may be stale
+- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 177 days old — may be stale
+- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 177 days old — may be stale
+- ℹ️ `governance/ai/AI_REMEDIATION_CHECKLIST.md:3` — Document date "2026-06-07" is 164 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/UE_RELEASE_READINESS.md:3` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/WORLD_CLASS_SCORECARD.md:3` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/platform-cognition/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/platform-cognition/kill-switch-drill.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/platform-cognition/monitoring-plan.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/human-oversight.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/kill-switch-drill.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/monitoring-plan.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "2026-07-03" is 138 days old — may be stale
 
 ## missing-package-readme (111)
 

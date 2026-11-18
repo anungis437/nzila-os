@@ -1,8 +1,15 @@
+import {
+  membershipCatalogProjectionSql,
+  type CanonicalPostgresMajor,
+} from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import type pg from 'pg'
 import { AUTH_BUSINESS_FUNCTION_CATALOG_QUERY, authBusinessFunctionViolations } from './auth-sql'
 import {
   AUTH_EXECUTION_ROLES,
   AUTH_PRIVILEGE_EXPECTATIONS,
+  authColumnPrivilegeAllowed,
+  authSystemColumnPrivilegeAllowed,
+  authTablePrivilegeAllowed,
   AUTH_FUNCTION_EXPECTATIONS,
   AUTH_PUBLIC_BINDING_EXPECTATIONS,
   AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
@@ -13,7 +20,11 @@ import {
 const QUEUED_MAIL_AUTH_USER_COLUMNS = ['email', 'email_verified', 'locale'] as const
 
 /** Live effective ACL comparison against an independently authored contract. */
-export async function inspectAuthPrivilegeExpectations(client: pg.Client) {
+export async function inspectAuthPrivilegeExpectations(
+  client: pg.Client,
+  options: { postgresMajor?: CanonicalPostgresMajor } = {},
+) {
+  const membershipProjection = membershipCatalogProjectionSql(options.postgresMajor)
   const failures: string[] = []
   const roles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
   const authRoles: readonly string[] = Object.values(AUTH_EXECUTION_ROLES)
@@ -49,7 +60,7 @@ export async function inspectAuthPrivilegeExpectations(client: pg.Client) {
   }
   const memberships = (
     await client.query(
-      `SELECT member.rolname AS member,granted.rolname AS granted,m.admin_option,m.inherit_option,m.set_option
+      `SELECT member.rolname AS member,granted.rolname AS granted,${membershipProjection.adminOption} AS admin_option,${membershipProjection.inheritOption} AS inherit_option,${membershipProjection.setOption} AS set_option
     FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member JOIN pg_roles granted ON granted.oid=m.roleid
     WHERE member.rolname=ANY($1)`,
       [roles],
@@ -58,9 +69,9 @@ export async function inspectAuthPrivilegeExpectations(client: pg.Client) {
   for (const row of memberships) {
     if (
       !AUTH_ROLE_MEMBERSHIP_EXPECTATIONS[row.member]?.includes(row.granted) ||
-      row.admin_option ||
-      row.inherit_option ||
-      !row.set_option
+      row.admin_option !== false ||
+      row.inherit_option !== false ||
+      row.set_option !== true
     )
       failures.push(`${row.member}->${row.granted}: unexpected or unsafe membership`)
   }
@@ -73,16 +84,17 @@ export async function inspectAuthPrivilegeExpectations(client: pg.Client) {
       role: string
       table_name: string
       column_name: string
+      attribute_number: number
       privilege: string
       allowed: boolean
     }>(
       `
-    SELECT r.role,c.relname AS table_name,a.attname AS column_name,v.privilege,
+    SELECT r.role,c.relname AS table_name,a.attname AS column_name,a.attnum AS attribute_number,v.privilege,
       has_column_privilege(r.role,c.oid,a.attname,v.privilege) AS allowed
     FROM unnest($1::text[]) r(role) CROSS JOIN pg_attribute a
     JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
     CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
-    WHERE n.nspname='user_management' AND c.relkind='r' AND a.attnum>0 AND NOT a.attisdropped`,
+    WHERE n.nspname='user_management' AND c.relkind='r' AND a.attnum<>0 AND NOT a.attisdropped`,
       [roles],
     )
   ).rows
@@ -93,8 +105,10 @@ export async function inspectAuthPrivilegeExpectations(client: pg.Client) {
       row.table_name === 'users' &&
       row.privilege === 'SELECT' &&
       (QUEUED_MAIL_AUTH_USER_COLUMNS as readonly string[]).includes(row.column_name)
-    const allowed =
-      expected === '*' || Boolean(expected?.includes(row.column_name)) || mailRecipientColumn
+    const allowed = row.attribute_number < 0
+      ? authSystemColumnPrivilegeAllowed(row.role, row.table_name, row.column_name, row.privilege)
+      : authColumnPrivilegeAllowed(row.table_name, row.column_name, expected) ||
+      (mailRecipientColumn && authColumnPrivilegeAllowed('users', row.column_name, QUEUED_MAIL_AUTH_USER_COLUMNS))
     if (row.allowed !== allowed)
       failures.push(
         `${row.role}:${row.table_name}.${row.column_name}:${row.privilege} expected=${allowed}`,
@@ -106,13 +120,13 @@ export async function inspectAuthPrivilegeExpectations(client: pg.Client) {
     SELECT r.role,c.relname AS table_name,v.privilege,has_table_privilege(r.role,c.oid,v.privilege) AS allowed,
       c.relrowsecurity,c.relforcerowsecurity,owner.rolname AS owner
     FROM unnest($1::text[]) r(role) CROSS JOIN pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-    JOIN pg_roles owner ON owner.oid=c.relowner CROSS JOIN unnest(ARRAY['DELETE','TRUNCATE','TRIGGER']) v(privilege)
+    JOIN pg_roles owner ON owner.oid=c.relowner CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES','DELETE','TRUNCATE','TRIGGER']) v(privilege)
     WHERE n.nspname='user_management' AND c.relkind='r'`,
       [roles],
     )
   ).rows
   for (const row of tables) {
-    const allowed = AUTH_PRIVILEGE_EXPECTATIONS[row.role]?.[row.table_name]?.[row.privilege] === '*'
+    const allowed = authTablePrivilegeAllowed(row.privilege, AUTH_PRIVILEGE_EXPECTATIONS[row.role]?.[row.table_name]?.[row.privilege])
     if (
       row.allowed !== allowed ||
       !row.relrowsecurity ||

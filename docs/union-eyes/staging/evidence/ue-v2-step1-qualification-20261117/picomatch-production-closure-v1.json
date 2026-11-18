@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-11-18T00:23:35.579Z",
+  "scope": "Union Eyes declared production+optional manifest dependency closure; no devDependencies, all architectures, not final application image",
+  "lockfileSha256": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0",
+  "importerCount": 63,
+  "snapshotCount": 1622,
+  "picomatchPaths": [
+    [
+      "apps/union-eyes",
+      "@sentry/nextjs@10.75.2(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.212.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(next@16.4.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(@types/node@25.5.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(webpack@5.105.2(lightningcss@1.32.0)(postcss@8.5.25))",
+      "@rollup/plugin-commonjs@28.0.1(rollup@4.60.4)",
+      "picomatch@4.0.7(patch_hash=84f9739f825f963ad0896f3320add6fa2f0ea137ce1a4c57c6eb0827fdd45d36)"
+    ]
+  ],
+  "unresolved": [
+    "snapshot:square-legacy@square@39.1.1"
+  ],
+  "closureDigest": "5e02a4b39809b47ed2eacfda994eeaaaba088ef7f7dd26e104598bee5ede4a04",
+  "rawAuditHighUnwaived": true,
+  "finalCandidateSha": null,
+  "finalImageMateriality": "UNEXECUTED"
+}

@@ -430,10 +430,10 @@ setIsSubmitting(false);
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="new-case-title" className="block text-sm font-semibold text-gray-900 mb-2">
                     {t('forms.caseTitle')} *
                   </label>
-                  <input
+                  <input id="new-case-title"
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
@@ -453,10 +453,10 @@ setIsSubmitting(false);
                 {/* Category and Priority */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-category" className="block text-sm font-semibold text-gray-900 mb-2">
                       {t('forms.category')} *
                     </label>
-                    <select
+                    <select id="new-case-category"
                       value={formData.category}
                       onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -477,10 +477,10 @@ setIsSubmitting(false);
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-priority" className="block text-sm font-semibold text-gray-900 mb-2">
                       {t('priority.label')} *
                     </label>
-                    <select
+                    <select id="new-case-priority"
                       value={formData.priority}
                       onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as CasePriority }))}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -495,10 +495,10 @@ setIsSubmitting(false);
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="new-case-description" className="block text-sm font-semibold text-gray-900 mb-2">
                     {t('forms.detailedDescription')} *
                   </label>
-                  <textarea
+                  <textarea id="new-case-description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder={t('forms.descriptionPlaceholder')}
@@ -533,11 +533,11 @@ setIsSubmitting(false);
                 {/* Date and Location */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-incident-date" className="block text-sm font-semibold text-gray-900 mb-2">
                       <Calendar size={16} className="inline mr-1" />
                       {t('forms.whenOccurred')} *
                     </label>
-                    <input
+                    <input id="new-case-incident-date"
                       type="date"
                       value={formData.date}
                       onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
@@ -555,11 +555,11 @@ setIsSubmitting(false);
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-location" className="block text-sm font-semibold text-gray-900 mb-2">
                       <MapPin size={16} className="inline mr-1" />
                       {t('forms.location')}
                     </label>
-                    <input
+                    <input id="new-case-location"
                       type="text"
                       value={formData.location}
                       onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
@@ -571,11 +571,11 @@ setIsSubmitting(false);
 
                 {/* Witnesses */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="new-case-witnesses" className="block text-sm font-semibold text-gray-900 mb-2">
                     <Users size={16} className="inline mr-1" />
                     {t('forms.witnesses')}
                   </label>
-                  <input
+                  <input id="new-case-witnesses"
                     type="text"
                     value={formData.witnesses}
                     onChange={(e) => setFormData(prev => ({ ...prev, witnesses: e.target.value }))}
@@ -649,13 +649,13 @@ setIsSubmitting(false);
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:gap-4">
                   <motion.button
                     type="submit"
                     disabled={isSubmitting}
                     whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                     whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                    className="flex-1 px-6 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="min-w-0 flex-1 whitespace-normal px-6 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -670,10 +670,10 @@ setIsSubmitting(false);
                     )}
                   </motion.button>
 
-                  <Link href={returnHref} className="shrink-0">
+                  <Link href={returnHref} className="w-full sm:w-auto sm:shrink-0">
                     <button
                       type="button"
-                      className="px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                      className="w-full px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
                     >
                       {t('common.cancel')}
                     </button>

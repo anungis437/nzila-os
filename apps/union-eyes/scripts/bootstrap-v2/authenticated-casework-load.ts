@@ -7,7 +7,8 @@ import { withBearerOrgBinding } from '../../../../packages/platform-auth/src/org
 import { computeTotp } from '../../../../packages/platform-auth/src/mfa/totp'
 import { DEFAULT_ISSUANCE_TEMPLATES } from '../../lib/authority/issuance'
 import { activeMembershipSource } from '../../lib/authority/store/active-membership-source'
-import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
+import { CANONICAL_ORGANIZATION_AUTHORITY } from '../../lib/auth/organization-authority'
+import { runAuthorityTransaction, type AuthorityContext, type SqlExecutor } from '../../lib/authority/store/executor'
 import {
   activateIssuanceRule,
   draftIssuanceRule,
@@ -250,12 +251,15 @@ async function jsonRequest(
   }
   return { response, body }
 }
-async function login(
+export async function login(
   base: string,
   person: { id: string; email: string },
   password: string,
   mfaSecret: string,
+  organizationId: string,
 ) {
+  assertOwnedLocalOrigin(base)
+  assert.ok(UUID.test(organizationId), 'OWNED_ORGANIZATION_REQUIRED')
   const initial = await jsonRequest(base, '/api/auth/login', {
     method: 'POST',
     body: { email: person.email, password },
@@ -269,15 +273,41 @@ async function login(
     body: { challengeToken: result.mfaChallengeToken, code: computeTotp(mfaSecret) },
   })
   assert.equal(mfa.response.status, 200, 'OWNED_MFA_FAILED')
+  assert.equal((mfa.body as Record<string, unknown>).ok, true, 'OWNED_MFA_CONFIRMATION_REQUIRED')
   assert.equal((mfa.body as Record<string, unknown>).userId, person.id)
   const cookie = mfa.response.headers
     .getSetCookie()
     .map((v) => v.split(';')[0])
     .join('; ')
   assert.ok(cookie.includes('nzila_session='), 'REAL_SESSION_COOKIE_REQUIRED')
-  return cookie
+  const selected = await jsonRequest(base, '/api/organizations/switch', {
+    method: 'POST', cookie, body: { organizationId },
+  })
+  assert.equal(selected.response.status, 200, 'OWNED_ORGANIZATION_SELECTION_FAILED')
+  const selection = selected.body as Record<string, unknown>
+  assert.equal(selection.success, true, 'OWNED_ORGANIZATION_CONFIRMATION_REQUIRED')
+  assert.equal(selection.organizationAuthority, CANONICAL_ORGANIZATION_AUTHORITY)
+  assert.equal(selection.activeOrganizationId, organizationId, 'OWNED_ORGANIZATION_SUBSTITUTED')
+  assert.ok(selection.organization && typeof selection.organization === 'object' &&
+    'id' in selection.organization && selection.organization.id === organizationId, 'OWNED_ORGANIZATION_METADATA_SUBSTITUTED')
+  const boundCookie = selected.response.headers.getSetCookie().map((value) => value.split(';')[0]).join('; ')
+  assert.ok(boundCookie.includes('nzila_session='), 'ROTATED_BOUND_SESSION_REQUIRED')
+  assert.notEqual(boundCookie, cookie, 'UNBOUND_SESSION_MUST_BE_ROTATED')
+  return boundCookie
 }
-async function governPrimaryAssignment(input: {
+/** Dedicated NOINHERIT fixture connection; keep the role inside its owned transaction. */
+export async function runOwnedRuntimeAuthorityTransaction<T>(
+  connection: SqlExecutor,
+  context: AuthorityContext,
+  operation: (executor: SqlExecutor) => Promise<T>,
+) {
+  return runAuthorityTransaction(connection, context, async (executor) => {
+    await executor.query('SET LOCAL ROLE union_eyes_runtime')
+    return operation(executor)
+  })
+}
+
+export async function governPrimaryAssignment(input: {
   fixture: OwnedLoadFixture
   cookies: Map<string, string>
   runtimeUrl: string
@@ -309,7 +339,7 @@ async function governPrimaryAssignment(input: {
         const client = new pg.Client({ connectionString: input.runtimeUrl })
         await client.connect()
         try {
-          return await runAuthorityTransaction(
+          return await runOwnedRuntimeAuthorityTransaction(
             client,
             {
               organizationId: binding.organizationId,
@@ -525,7 +555,7 @@ export async function runAuthenticatedCaseworkLoad(input: {
   }
   const cookies = new Map<string, string>()
   for (const role of roles)
-    cookies.set(role, await login(base, f.people[role], input.password, input.mfaSecret))
+    cookies.set(role, await login(base, f.people[role], input.password, input.mfaSecret, f.organizationId))
   const relationshipId = await governPrimaryAssignment({
     fixture: f,
     cookies,

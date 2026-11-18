@@ -20,6 +20,7 @@ export default defineProject({
       'next-auth': resolve(__dirname, './__mocks__/next-auth.ts'),
       '@nzila/platform-auth/entra/server': resolve(__dirname, './__mocks__/platform-auth-server.ts'),
       '@nzila/os-core/hash': resolve(ROOT, 'packages/os-core/src/hash.ts'),
+      '@nzila/os-core/browser-diagnostics': resolve(ROOT, 'packages/os-core/src/telemetry/browser.ts'),
       '@nzila/os-core/rateLimit': resolve(ROOT, 'packages/os-core/src/rateLimit.ts'),
       '@nzila/os-core/telemetry': resolve(ROOT, 'packages/os-core/src/telemetry/index.ts'),
       '@nzila/os-core/policy': resolve(ROOT, 'packages/os-core/src/policy/index.ts'),

@@ -10,6 +10,7 @@ import { storageAuthorityManifest } from '../../db/rls-storage-authority'
 import type { StorageAuthorityEntry } from '../../db/rls-storage-authority'
 import { AUTH_EXECUTION_ROLES } from './auth-sql'
 import { platformIdentityBindings } from '../../../../packages/db/src/schema/platform-authorization'
+import * as currentPlatformAuthSchema from '../../../../packages/db/src/schema/auth'
 import { reconcileCurrentAuthority } from './current-authority'
 import { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 import { SYSTEM_COLUMN_READ_CONTRACTS } from './service-column-contracts'
@@ -452,6 +453,122 @@ interface DrizzleSnapshotJson {
   >
   enums: Record<string, { name: string; schema?: string; values: string[] }>
   schemas?: Record<string, unknown>
+}
+
+/** The canonical auth declaration producer is shared with the additive
+ * legacy bootstrap; neither caller derives declarations from a live catalog. */
+export async function buildCurrentPlatformAuthSource() {
+  const drizzleKit = await import('drizzle-kit/api')
+  const generateDrizzleJson = (input: Record<string, unknown>) =>
+    drizzleKit.generateDrizzleJson(input as never) as unknown as DrizzleSnapshotJson
+  const generateMigration = (from: DrizzleSnapshotJson, to: DrizzleSnapshotJson) =>
+    drizzleKit.generateMigration(from as never, to as never) as Promise<string[]>
+  const authSource = 'packages/db/src/schema/auth.ts'
+  const authSchema: Record<string, unknown> = currentPlatformAuthSchema
+  const authDigest = hash(readFileSync(path.join(root, ...authSource.split('/')), 'utf8'))
+  const statements: V2Plan['statements'] = []
+  const tables: SourceTable[] = []
+  statements.push({
+    canonicalId: 'CURRENT_SCHEMA:user_management',
+    sql: 'CREATE SCHEMA user_management AUTHORIZATION ue_v2_owner;',
+    source: authSource,
+    sourceDigest: authDigest,
+  })
+  for (const [symbol, table] of Object.entries(authSchema).sort(([a], [b]) => a.localeCompare(b))) {
+    if (!is(table, PgTable)) continue
+    const config = getTableConfig(table)
+    if (config.schema !== 'user_management')
+      throw new Error(`UE_V2_PLATFORM_AUTH_SCOPE_MISMATCH:${config.name}`)
+    const snapshot = generateDrizzleJson({ [symbol]: table })
+    snapshot.schemas = {}
+    const ddl = await generateMigration(generateDrizzleJson({}), snapshot)
+    for (const [index, sql] of ddl.entries()) {
+      assertNoProtectedConstraintDrop(sql)
+      statements.push({
+        canonicalId: `PLATFORM_AUTH_CURRENT:${config.name}:${index}`,
+        sql,
+        source: authSource,
+        sourceDigest: authDigest,
+      })
+    }
+    tables.push({
+      name: `user_management.${config.name}`,
+      columns: config.columns.map((column) => ({
+        name: column.name,
+        type: column.getSQLType(),
+        notNull: column.notNull,
+      })),
+      authority: null,
+      source: authSource,
+      sourceDigest: authDigest,
+      foreignKeys: [],
+    })
+  }
+  return { source: authSource, sourceDigest: authDigest, statements, tables }
+}
+
+/** The single current declaration producer shared by the source plan and the
+ * data-preserving legacy bootstrap. It never consults a live database. */
+export async function buildCurrentPlatformIdentitySource() {
+  const drizzleKit = await import('drizzle-kit/api')
+  const generateDrizzleJson = (input: Record<string, unknown>) =>
+    drizzleKit.generateDrizzleJson(input as never) as unknown as DrizzleSnapshotJson
+  const generateMigration = (from: DrizzleSnapshotJson, to: DrizzleSnapshotJson) =>
+    drizzleKit.generateMigration(from as never, to as never) as Promise<string[]>
+  const bindingSource = 'packages/db/src/schema/platform-authorization.ts'
+  const bindingDigest = hash(readFileSync(path.join(root, ...bindingSource.split('/')), 'utf8'))
+  const statements: V2Plan['statements'] = []
+  const bindingConfig = getTableConfig(platformIdentityBindings)
+  const bindingSnapshot = generateDrizzleJson({ platformIdentityBindings })
+  for (const [index, sql] of (
+    await generateMigration(generateDrizzleJson({}), bindingSnapshot)
+  ).entries()) {
+    assertNoProtectedConstraintDrop(sql)
+    statements.push({
+      canonicalId: `PLATFORM_IDENTITY_CURRENT:${index}`,
+      sql,
+      source: bindingSource,
+      sourceDigest: bindingDigest,
+    })
+  }
+  const table: SourceTable = {
+    name: bindingConfig.name,
+    source: bindingSource,
+    sourceDigest: bindingDigest,
+    columns: bindingConfig.columns.map((column) => ({
+      name: column.name,
+      type: column.getSQLType(),
+      notNull: column.notNull,
+    })),
+    foreignKeys: [
+      {
+        column: 'platform_user_id',
+        table: 'user_management.users',
+        referencedColumn: 'user_id',
+      },
+    ],
+    authority: {
+      table: bindingConfig.name,
+      classification: 'CONTAINED_NO_AUTHORITY',
+      reason:
+        'No ordinary or legacy system authority; canonical provider resolver receives independently qualified column-only auth grants.',
+      supportingCapability: ['packages/platform-auth/src/provider-identity.ts'],
+      requiredRuntimePrivileges: [],
+      requiredSystemPrivileges: [],
+      invocationAuthority: 'NONE',
+      dbExecutionPrincipal: 'NONE',
+      reviewPriority: 'NONE',
+    },
+  }
+  const decision = {
+    relation: bindingConfig.name,
+    disposition: 'CANONICAL_SHARED_AUTH_IDENTITY_BINDING',
+    source: bindingSource,
+    sourceDigest: bindingDigest,
+    rationale:
+      'Authenticated current provider resolver requires immutable verified subject binding and canonical auth-user FK; ordinary and legacy system roles receive no authority.',
+  }
+  return { source: bindingSource, sourceDigest: bindingDigest, statements, table, decision }
 }
 
 export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
@@ -1169,101 +1286,15 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
         ),
       })
   }
-  const authSource = 'packages/db/src/schema/auth.ts'
-  const authSchema: Record<string, unknown> = createRequire(import.meta.url)(
-    path.join(root, ...authSource.split('/')),
-  )
-  const authDigest = hash(readFileSync(path.join(root, ...authSource.split('/')), 'utf8'))
-  commitments[authSource] = authDigest
-  statements.push({
-    canonicalId: 'CURRENT_SCHEMA:user_management',
-    sql: 'CREATE SCHEMA user_management AUTHORIZATION ue_v2_owner;',
-    source: authSource,
-    sourceDigest: authDigest,
-  })
-  for (const [symbol, table] of Object.entries(authSchema).sort(([a], [b]) => a.localeCompare(b))) {
-    if (!is(table, PgTable)) continue
-    const config = getTableConfig(table)
-    if (config.schema !== 'user_management')
-      throw new Error(`UE_V2_PLATFORM_AUTH_SCOPE_MISMATCH:${config.name}`)
-    const snapshot = generateDrizzleJson({ [symbol]: table })
-    snapshot.schemas = {}
-    const ddl = await generateMigration(generateDrizzleJson({}), snapshot)
-    for (const [index, sql] of ddl.entries()) {
-      assertNoProtectedConstraintDrop(sql)
-      statements.push({
-        canonicalId: `PLATFORM_AUTH_CURRENT:${config.name}:${index}`,
-        sql,
-        source: authSource,
-        sourceDigest: authDigest,
-      })
-    }
-    tables.push({
-      name: `user_management.${config.name}`,
-      columns: config.columns.map((column) => ({
-        name: column.name,
-        type: column.getSQLType(),
-        notNull: column.notNull,
-      })),
-      authority: null,
-      source: authSource,
-      sourceDigest: authDigest,
-      foreignKeys: [],
-    })
-  }
-  const bindingSource = 'packages/db/src/schema/platform-authorization.ts'
-  const bindingDigest = hash(readFileSync(path.join(root, ...bindingSource.split('/')), 'utf8'))
-  commitments[bindingSource] = bindingDigest
-  const bindingConfig = getTableConfig(platformIdentityBindings)
-  const bindingSnapshot = generateDrizzleJson({ platformIdentityBindings })
-  for (const [index, sql] of (
-    await generateMigration(generateDrizzleJson({}), bindingSnapshot)
-  ).entries()) {
-    assertNoProtectedConstraintDrop(sql)
-    statements.push({
-      canonicalId: `PLATFORM_IDENTITY_CURRENT:${index}`,
-      sql,
-      source: bindingSource,
-      sourceDigest: bindingDigest,
-    })
-  }
-  tables.push({
-    name: bindingConfig.name,
-    source: bindingSource,
-    sourceDigest: bindingDigest,
-    columns: bindingConfig.columns.map((column) => ({
-      name: column.name,
-      type: column.getSQLType(),
-      notNull: column.notNull,
-    })),
-    foreignKeys: [
-      {
-        column: 'platform_user_id',
-        table: 'user_management.users',
-        referencedColumn: 'user_id',
-      },
-    ],
-    authority: {
-      table: bindingConfig.name,
-      classification: 'CONTAINED_NO_AUTHORITY',
-      reason:
-        'No ordinary or legacy system authority; canonical provider resolver receives independently qualified column-only auth grants.',
-      supportingCapability: ['packages/platform-auth/src/provider-identity.ts'],
-      requiredRuntimePrivileges: [],
-      requiredSystemPrivileges: [],
-      invocationAuthority: 'NONE',
-      dbExecutionPrincipal: 'NONE',
-      reviewPriority: 'NONE',
-    },
-  })
-  decisions.push({
-    relation: bindingConfig.name,
-    disposition: 'CANONICAL_SHARED_AUTH_IDENTITY_BINDING',
-    source: bindingSource,
-    sourceDigest: bindingDigest,
-    rationale:
-      'Authenticated current provider resolver requires immutable verified subject binding and canonical auth-user FK; ordinary and legacy system roles receive no authority.',
-  })
+  const auth = await buildCurrentPlatformAuthSource()
+  commitments[auth.source] = auth.sourceDigest
+  statements.push(...auth.statements)
+  tables.push(...auth.tables)
+  const identity = await buildCurrentPlatformIdentitySource()
+  commitments[identity.source] = identity.sourceDigest
+  statements.push(...identity.statements)
+  tables.push(identity.table)
+  decisions.push(identity.decision)
   const enumStatements = [...enums]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, sql]) => ({

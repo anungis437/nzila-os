@@ -84,8 +84,8 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import { appendFileSync } from 'node:fs'
-          import { runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
-          const connection = runtimeEnv().DATABASE_URL
+          import { operatorDatabaseUrl } from './tooling/scripts/ue-runtime-up.mjs'
+          const connection = operatorDatabaseUrl()
           console.log('::add-mask::' + new URL(connection).password)
           const onDatabase = (database, host) => {
             const url = new URL(connection)
@@ -106,7 +106,7 @@ jobs:
 
       - name: Create the scratch database for the legacy RLS-enforcement suites
         shell: bash
-        run: docker exec ue-runtime-pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ue_rls_scratch'
+        run: docker exec ue-runtime-pg psql -U uev2admin -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ue_rls_scratch'
 
       # pgvector is an optional extension: the stock image does not carry it, so the database above was built without it and platform 0063 left
       # knowledge_base.embedding out. semantic-search.postgres.test.ts proves that state first, then enables the extension in its own clone and proves
@@ -116,7 +116,7 @@ jobs:
         run: |
           set -euo pipefail
           docker exec ue-runtime-pg bash -c 'apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "postgresql-${PG_MAJOR}-pgvector"'
-          version="$(docker exec ue-runtime-pg psql -U postgres -d postgres -Atc "SELECT default_version FROM pg_available_extensions WHERE name = 'vector'")"
+          version="$(docker exec ue-runtime-pg psql -U uev2admin -d postgres -Atc "SELECT default_version FROM pg_available_extensions WHERE name = 'vector'")"
           test -n "$version"
           echo "pgvector $version is available to the disposable server"
 

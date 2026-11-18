@@ -1796,7 +1796,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -1811,7 +1811,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 351,
-              "testTitle": "a delegation dies with the delegator\u2019s identity under the v2 reader too, but the DELEGATOR\u2019s own session state is irrelevant"
+              "testTitle": "a delegation dies with the delegator’s identity under the v2 reader too, but the DELEGATOR’s own session state is irrelevant"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -1883,7 +1883,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -3051,7 +3051,7 @@
       "id": "C10",
       "action": "Senior representative supervision",
       "state": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
-      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
+      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01–SR22 are not all certified.",
       "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -3461,7 +3461,7 @@
       ],
       "historicalActionObservation": {
         "state": "PARTIAL_STAGED",
-        "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
+        "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01–SR22 are not all certified.",
         "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
@@ -3553,7 +3553,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 374,
-              "testTitle": "succession ends the outgoing holder\u2019s office and delegations and installs the successor atomically"
+              "testTitle": "succession ends the outgoing holder’s office and delegations and installs the successor atomically"
             },
             {
               "path": "apps/union-eyes/lib/deadline-engine/__tests__/assignment-sync.test.ts",
@@ -3579,12 +3579,12 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 55,
-              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain\u2019s rule"
+              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain’s rule"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 100,
-              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule\u2019s approval"
+              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule’s approval"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
@@ -3599,7 +3599,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 168,
-              "testTitle": "office installation needs independent approval and the holder\u2019s acceptance"
+              "testTitle": "office installation needs independent approval and the holder’s acceptance"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
@@ -3625,12 +3625,12 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 55,
-              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain\u2019s rule"
+              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain’s rule"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 100,
-              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule\u2019s approval"
+              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule’s approval"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
@@ -4842,7 +4842,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 125,
-              "testTitle": "allows a linked document under the kernel\u2019s case:process_ocr, and only with a live case relationship"
+              "testTitle": "allows a linked document under the kernel’s case:process_ocr, and only with a live case relationship"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -4883,7 +4883,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 88,
-              "testTitle": "denies a document\u2019s own uploader until the institution adopts a member policy"
+              "testTitle": "denies a document’s own uploader until the institution adopts a member policy"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -4908,7 +4908,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 156,
-              "testTitle": "does not reveal another organization\u2019s document, and refuses a malformed identifier"
+              "testTitle": "does not reveal another organization’s document, and refuses a malformed identifier"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -4918,7 +4918,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 182,
-              "testTitle": "refuses to extract from bytes that are not the version\u2019s recorded content"
+              "testTitle": "refuses to extract from bytes that are not the version’s recorded content"
             }
           ],
           "state": "NOT_EXECUTED_AT_FINAL_INTEGRATED_CANDIDATE",
@@ -4929,7 +4929,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 156,
-              "testTitle": "does not reveal another organization\u2019s document, and refuses a malformed identifier"
+              "testTitle": "does not reveal another organization’s document, and refuses a malformed identifier"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -5442,7 +5442,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
               "line": 68,
-              "testTitle": "shows the figures the loader returned, read for the caller\u2019s own organization"
+              "testTitle": "shows the figures the loader returned, read for the caller’s own organization"
             },
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
@@ -5467,7 +5467,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/list-pages.test.tsx",
               "line": 191,
-              "testTitle": "shows \u2014 for an audience nothing counted and for every delivery counter the row does not record, never 0"
+              "testTitle": "shows — for an audience nothing counted and for every delivery counter the row does not record, never 0"
             },
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/list-pages.test.tsx",
@@ -5523,7 +5523,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/list-pages.test.tsx",
               "line": 150,
-              "testTitle": "shows the error and \"\u2014\" in place of the figures when the route refuses"
+              "testTitle": "shows the error and \"—\" in place of the figures when the route refuses"
             }
           ],
           "state": "NOT_EXECUTED_AT_FINAL_INTEGRATED_CANDIDATE",
@@ -5534,7 +5534,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
               "line": 68,
-              "testTitle": "shows the figures the loader returned, read for the caller\u2019s own organization"
+              "testTitle": "shows the figures the loader returned, read for the caller’s own organization"
             },
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
@@ -5781,7 +5781,7 @@
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
               "line": 64,
-              "testTitle": "another tenant and a platform identity see none of the primary organization\u2019s cases"
+              "testTitle": "another tenant and a platform identity see none of the primary organization’s cases"
             },
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
@@ -5807,7 +5807,7 @@
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
               "line": 64,
-              "testTitle": "another tenant and a platform identity see none of the primary organization\u2019s cases"
+              "testTitle": "another tenant and a platform identity see none of the primary organization’s cases"
             },
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
@@ -7029,7 +7029,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -7044,7 +7044,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 351,
-              "testTitle": "a delegation dies with the delegator\u2019s identity under the v2 reader too, but the DELEGATOR\u2019s own session state is irrelevant"
+              "testTitle": "a delegation dies with the delegator’s identity under the v2 reader too, but the DELEGATOR’s own session state is irrelevant"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -7081,7 +7081,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -10001,7 +10001,7 @@
     "scopeInput": "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
     "semanticReview": "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_SEMANTIC_REVIEW_20261117.json",
     "executionBoundary": {
-      "currentMandate": "2026-11-17 owner execution mandate, sections1\u20132,5\u201310: engineering remediation and qualification within Step1; no staging/production promotion, no Step2 and no live data mutation.",
+      "currentMandate": "2026-11-17 owner execution mandate, sections1–2,5–10: engineering remediation and qualification within Step1; no staging/production promotion, no Step2 and no live data mutation.",
       "precedence": "The older scopeFreeze sentence that postponed technical completeness is superseded by the same scope branch semantic review step1ExecutionContinuation and the current explicit execution mandate. Historical owner decisions and adoption states remain unchanged.",
       "step1": [
         "Source discovery and permanent remediation",
@@ -11069,9 +11069,9 @@
     "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117",
     "sourceProofNeverInheritsPriorRuntimeAcceptance": true,
     "latestEngineeringObservation": {
-      "recordedAt": "2026-11-17T20:53:12.112864+00:00",
-      "state": "INTEGRATION_AND_QUALIFICATION_IN_PROGRESS",
-      "interimEvidence": "evidence/ue-v2-step1-qualification-20261117/supply-and-regression-validation-v2.json",
+      "recordedAt": "2026-11-18T02:12:52.151371+00:00",
+      "state": "INTEGRATED_STEP_1_REMEDIATION_AND_QUALIFICATION_OPEN",
+      "interimEvidence": "evidence/ue-v2-step1-qualification-20261117/source-plan-generation-v10.json",
       "confirmedCorrections": [
         "Canonical authority reads schema-qualified; tenant/system/nested transactions explicitly place pg_temp last. Actual native temporary-relation regression passed.",
         "Counsel case-conflict checks include source-derived creator relationships and acquire transaction admission locks before facts.",
@@ -11079,27 +11079,49 @@
         "New source-owned status journal binds history and atomic audit to the real transaction; native component proof exists, combined bootstrap remains open.",
         "English/French state-only queued mail uses the exact live recipient locale through a bounded companion column read.",
         "Current Django constraint metadata uses an isolated collector; conditional index is emitted once, not silently ignored.",
-        "Three newly orphaned legacy template/timeline modules and their standalone tests retired; existing orphan ceiling unchanged. Canonical case history and durable state-only mail remain live."
+        "Three newly orphaned legacy template/timeline modules and their standalone tests retired; existing orphan ceiling unchanged. Canonical case history and durable state-only mail remain live.",
+        "Restricted auth installer keeps its existing temporary schema CREATE grant until the final function ownership transfer; final privilege contract unchanged. Native restricted-role regression passed before final candidate requalification.",
+        "Evidence CLI no longer downgrades cryptographic failures to unsigned success; canonical attestations bind actual local evidence bytes. Focused regression and interim receipts exist, final candidate rebind remains required.",
+        "Python actual hashlocked dependency audit now covers the deployment lock; certifi-only patch applied with hash-verified exact artifact.",
+        "Financial compatibility APIs are contained at request boundary; metadata serializers must never permit a member to delete real financial rows. Positive finance implementation remains excluded.",
+        "Current-source auth column grants exclude six preserved sensitive legacy fields; actual SQL-engine counterexample and 100 focused corrected cases are on file. Native final proof remains pending.",
+        "Source-derived auth schema upgrade adds only three nullable/no-default magic-link metadata fields and preserves prior data; partial/drifted schemas are refused.",
+        "PR1268 represented-member disclosure binding integrated after a reproduced denial regression; 25 related pure-kernel cases pass. No WorkAid feature activation.",
+        "NAR proof persistence uses its actual separate platform connection through a service; grievance import operations take their authorized transaction. 54 component and79 scope controls pass;11 obsolete exceptions retired without changing gate tests or expiry dates.",
+        "Stripe facade now imports its type from the existing platform adapter; one unnecessary provider exception retired,23 related checks pass. No finance features implemented.",
+        "Only the obsolete Partners/contracts exception retired; the unchanged platform concern gate passes. Its empty adapter scaffold proves no feature implementation."
       ],
       "interimValidation": {
-        "rootLint": "172 tasks passed; 0 errors; existing warnings retained",
-        "rootTypecheck": "238 tasks passed",
-        "ueTypecheck": "passed",
+        "rootLint": "PRIOR_INTERIM172_TASKS_PASS; NEW_INTEGRATION_RERUN_REQUIRED",
+        "rootTypecheck": "LATEST_COMPLETED_V7_FAILED235_OF238_TASKS_SUCCESSFUL; FOUR_ERRORS_REPAIRED; V8_RUNNING",
+        "ueTypecheck": "PRIOR_APPLICATION_V6_PASS; FINAL_INTEGRATED_RERUN_REQUIRED",
         "all13DiscoveredFailureFiles": "184 tests passed in targeted rerun",
         "wholeCandidateFullRegression": "REQUIRED_FINAL_RERUN",
-        "wholeBootstrap": "FAILED_INTEGRATION_RUNS_RETAINED_CORRECTIONS_UNDER_RETEST",
-        "dependencyAudit": "FAIL_HIGH_PICOMATCH_1247710_NO_OFFICIAL_PATCHED_RELEASE"
+        "wholeBootstrap": "RESTRICTED_INSTALLER_REPAIR_NATIVE_1_OF_1_PASS; V9_RESOURCE_FAILURE; V10_INTERRUPTED_AFTER_CONTAINED_SERVICE_SCOPE_ASSERTION",
+        "dependencyAudit": "FAIL_HIGH_PICOMATCH_1247710_NO_OFFICIAL_PATCHED_RELEASE",
+        "rootTestFast": "PREVIOUS_RUN_INTERRUPTED_HOST_RESTART_NO_FINAL_RESULT; FINAL_RERUN_REQUIRED",
+        "pythonLockedAudit": "87_DEPENDENCIES_ZERO_FINDINGS_AFTER_CERTIFI_2026_10_19; FINAL_CANDIDATE_REBIND_REQUIRED",
+        "architecturalContracts": "V8_REPORTED10139_PASS7_FAIL0_PENDING; FULL_RAW_ASSERTIONS_PRESERVED; PERMANENT_EXCEPTION_REPAIRS_IN_PROGRESS",
+        "secretScanFullHistory": "FAILED67_FINDINGS_ALL_ANCESTORS_OF_MAIN; CONTAINMENT_AND_MATERIALITY_REVIEW_IN_PROGRESS",
+        "productionNextHttpBrowserLoad": "SOURCE_HARNESS_PRESENT; ACTUAL_BUILD_HTTP_BROWSER_AND_MEASURED_LOAD_STILL_UNPROVEN",
+        "expandedManifestTypecheck": "V4_PASS_AFTER_FIVE_AST_TYPING_REPAIRS; INSTALLER_CHANGED_AFTERWARD_FINAL_RERUN_REQUIRED",
+        "historicalSecurityTransition": "V8_NATIVE2_PASS1_FAIL; EXACT_FRAMEWORK_CREATE_FUNCTION_PERMISSION_COUNTEREXAMPLE; CORRECTION_PENDING_REAL_RERUN",
+        "authSourceColumns": "100_FOCUSED_PASS;12_RETAINED_FIELD_READS_DENIED; NATIVE_FINAL_PENDING"
       },
       "remainingQualification": [
-        "Freeze exact integrated commit and regenerate bound inventory/evidence",
-        "Whole native bootstrap and managed installer with physical guard/catalog admission",
-        "Full monorepo and Union Eyes final regression with every skipped/excluded check accounted for",
-        "Disposable application build, HTTP, browser, bilingual/mobile/accessibility and measured load",
-        "Applicable security/secret/container/CUPE/reliability/access-review/attestation and evidence checks",
-        "Final adversarial review and exact canonical action-evidence reconciliation"
+        "Finish and qualify the actual historical-to-current security upgrade, exact old-data preservation, rollback, second-install NOOP, and real Node MJS database hook.",
+        "Qualify native auth/session/tenant/physical-guard purpose boundaries on the integrated schema, including direct sensitive finance denial; no finance feature implementation.",
+        "Complete protected external resource-read qualification and production execution for the canonical required external matter/document scope, without resurrecting forgeable legacy grants or issuing live authority.",
+        "Resolve actual remaining architecture and scoped-server-action defects behind expired fleet exceptions; preserve existing gates, institutional scope and dates. Complete provider-boundary remediation where required.",
+        "Freeze one exact integrated source candidate and run all prescribed root checks, full application/backend regressions, native PostgreSQL15/16, BootstrapV2 cleanroom/provenance and recovery checks.",
+        "Execute actual disposable production build, authenticated HTTP and browser journeys across EN/FR desktop/mobile, accessibility and unchanged measured performance acceptance.",
+        "Complete dependency/container/SBOM/license/secret/security-design/access/reliability/runtime-governance qualification. Raw Picomatch HIGH remains unresolved, exact image license materiality and four historical credential revocations remain unverified.",
+        "Complete final adversarial falsification and bind each of22 functional plus15 operational action chains to substantive exact-candidate positive/denial/tenant/lifecycle/audit/recovery evidence, then seal and verify canonical evidence.",
+        "Keep Step2 live stakeholder/provider/inbox/environment qualification and every staging/production promotion held; historical777 closures and live Azure data preserved."
       ],
       "step2Held": true,
-      "stagingAndProductionPromoted": false
+      "stagingAndProductionPromoted": false,
+      "executionRecoveryEvidence": "evidence/ue-v2-step1-qualification-20261117/interrupted-qualification-v1.json"
     },
     "readonlyStagingPreflight": {
       "evidence": "evidence/ue-v2-step1-qualification-20261117/readonly-staging-authority-preflight-v3.json",

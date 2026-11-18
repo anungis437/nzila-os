@@ -1,0 +1,622 @@
+{
+  "schema": "UE_STEP1_EVIDENCE_PUBLICATION_DERIVATION_V1",
+  "preparedAt": "2026-11-18T02:29:15.052231+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "scope": "New uncommitted Step1 cohort publication only; not a test rerun, acceptance, promotion or history rewrite",
+  "classification": {
+    "originalStagedFindings": 43,
+    "shaDigestSerializationFindings": 37,
+    "databaseUrlLogFindings": 6
+  },
+  "policy": "Readable JSON digest records and explicit database-URL redaction; unchanged scanner configuration/rules; no encoding, escaping or allowlist changes",
+  "rawPreservation": {
+    "archiveRoot": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1",
+    "directoryMode": "0700",
+    "fileMode": "0600",
+    "originalsRetainedByteForByte": true
+  },
+  "protectedCommittedReceipts": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/supply-and-regression-validation-v2.json",
+      "sha256": "bca4319a0c1629b94cbc3dcaabdd1ac405a085a32bb24b72332619c28ef18966"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/supply-chain-validation-v1.json",
+      "sha256": "2252f36712866184053a0fc9f1a012d8f7f757f315cb63798a70c1b1f5aa11fb"
+    }
+  ],
+  "sourceHashMapFieldsNormalized": 24,
+  "compiledOutputDigestsPreserved": 2,
+  "refreshedArtifactReferences": [
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-bindings-v1.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-v1.json",
+      "algorithm": "SHA-256",
+      "originalValue": "e8af561909f0d9790e95ce6ea8b75a9dd1740a9080ee63fd8df71b73f29cacd6",
+      "publishedValue": "d5c532a8026dbfa71d59a1612674be38d082758863af8253e96c8a20f3f4ab5c"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-native-counterexamples-v2.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v5-source.json",
+      "algorithm": "SHA-256",
+      "originalValue": "0698679ea5cc325c6ccb7c0425f6c5f7a19fea3a9668facec56bb1c2ed172401",
+      "publishedValue": "4a6791070c83aeec3b49b10b853cbfd04276ad5609317827772bb897acb21a46"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-native-counterexamples-v2.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v6-source.json",
+      "algorithm": "SHA-256",
+      "originalValue": "3094c9ed726e706005f9b89e7ad4d67f0006e208523d5428558abcc3c60fd3a2",
+      "publishedValue": "9eb64d705f2321c40cdab18233928cf1b44c97bc3d4f8188085368c7eff44b10"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/integrated-counterexamples-v1.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v3-source.json",
+      "algorithm": "SHA-256",
+      "originalValue": "37d3f7561170c964e1ecfee7b19be7ae9327a6f3ae5ee6841b4dcb3c5e2b7526",
+      "publishedValue": "e8c5f0d4d363ee5c2d3e7f3efb747bce02a119639db044b41f13486dc54a1d19"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/integrated-counterexamples-v1.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v4-source.json",
+      "algorithm": "SHA-256",
+      "originalValue": "c687759b0b58718e0a59a67cfd216fa77c125774f72473cf322c4e1c8c8e4bd0",
+      "publishedValue": "239909045de0e61b5f8fe45d1ab09de48f88d316117086b6ebe029d7a73c36da"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-canonical-fixture-migration-v1.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-canonical-fixture-local-v1.txt",
+      "algorithm": "SHA-256",
+      "originalValue": "5c8f78b07982082440c3a432582833d5e68822cd6f0b648c8dc979feca461690",
+      "publishedValue": "17c13e7a9c5a40d684cffbbe6510232936181579c35f24ff95a9c7bcce2cddef"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/owned-runtime-credentials-repair-v1.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/owned-runtime-credentials-red-v1.txt",
+      "algorithm": "SHA-256",
+      "originalValue": "25b3f91323a557dca4ff148be124f6fc996fb159e5b3f8839ff38d5a5481d018",
+      "publishedValue": "95be1f1130d50ef1dbf3c46a605eb81528ae1c538ed18de33f6434afa9fd2531"
+    },
+    {
+      "parentPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/source-plan-generation-v10.json",
+      "artifactPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v7-source.json",
+      "algorithm": "SHA-256",
+      "originalValue": "5b092dde94ad477d79abed94e82ffea347e5fdf5be3d812d857547a174c9304c",
+      "publishedValue": "26e8880751733ad78dd6b19dae4c71aa3a0cc9f8a2270c57f9614fccf0e37a59"
+    }
+  ],
+  "derivatives": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/application-typecheck-v6.json",
+      "originalSha256": "114b3306486e477e873670f1dd26d333548bc5916e72e9c0e29e7c1ba2957cbf",
+      "sha256": "12295f76598a37b099f7a8069bf16b84e1163850cd707f0b3c200b1be1c82091",
+      "originalBytes": 2319,
+      "bytes": 3318,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/application-typecheck-v6.json",
+        "sha256": "114b3306486e477e873670f1dd26d333548bc5916e72e9c0e29e7c1ba2957cbf",
+        "bytes": 2319,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-bindings-v1.json",
+      "originalSha256": "1bbce380b6f2e5e9b452772f5c556d05484c7b2b3d3db57eb47eb7052e0ec45b",
+      "sha256": "e5fa30cd9ee6b8a9346e8801c58cc4929810fe951b8c142ca720e0c2abd864f3",
+      "originalBytes": 1044,
+      "bytes": 1649,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/auth-retained-columns-counterexample-bindings-v1.json",
+        "sha256": "1bbce380b6f2e5e9b452772f5c556d05484c7b2b3d3db57eb47eb7052e0ec45b",
+        "bytes": 1044,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Refresh attached published artifact hashes and byte counts after child derivation"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-v1.json",
+      "originalSha256": "e8af561909f0d9790e95ce6ea8b75a9dd1740a9080ee63fd8df71b73f29cacd6",
+      "sha256": "d5c532a8026dbfa71d59a1612674be38d082758863af8253e96c8a20f3f4ab5c",
+      "originalBytes": 5197,
+      "bytes": 6037,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/auth-retained-columns-counterexample-v1.json",
+        "sha256": "e8af561909f0d9790e95ce6ea8b75a9dd1740a9080ee63fd8df71b73f29cacd6",
+        "bytes": 5197,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Represent compiled output digest with producer identity and explicit algorithm/value; digest unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-source-column-confinement-v1.json",
+      "originalSha256": "b815750afa38d6851d0f7a979de99dd4bea7f116a5aedcfa6b925b5343d8db12",
+      "sha256": "e50d1b21943d7624981bd2e258e54381c26f42020e69afb2c12599b9b0024fc8",
+      "originalBytes": 8886,
+      "bytes": 9720,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/auth-source-column-confinement-v1.json",
+        "sha256": "b815750afa38d6851d0f7a979de99dd4bea7f116a5aedcfa6b925b5343d8db12",
+        "bytes": 8886,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Represent compiled output digest with producer identity and explicit algorithm/value; digest unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-membership-integration-subproof-v1.json",
+      "originalSha256": "618057d775fa3c4ef158a6876ba76f15abd558a6c16f8c92832b3c9797905579",
+      "sha256": "6dd2069b6e761dfc63e8a9dd25366b6b961f49b04d1b28bd9085863e49a08605",
+      "originalBytes": 4496,
+      "bytes": 5439,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/authority-membership-integration-subproof-v1.json",
+        "sha256": "618057d775fa3c4ef158a6876ba76f15abd558a6c16f8c92832b3c9797905579",
+        "bytes": 4496,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/backend-register-generation-v1.json",
+      "originalSha256": "66e7d5920def19ee87d9f20c428a395d9e58f0bd05d03380f95f54bc9dc61c27",
+      "sha256": "de54243e94808dd0c98d8f0020f58c98d563d97303a18fd650825b40bb4ca04a",
+      "originalBytes": 40808,
+      "bytes": 52795,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/backend-register-generation-v1.json",
+        "sha256": "66e7d5920def19ee87d9f20c428a395d9e58f0bd05d03380f95f54bc9dc61c27",
+        "bytes": 40808,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-source-subproof-v1.json",
+      "originalSha256": "3b92b92a56d824a2275701e6a7f9ceca928b9368bd08e74a185ef4a63b3c609f",
+      "sha256": "dad9eb0088210a5691d358c81bfc5cdec98d20a7ed3f7b8f53c41c16822b9bc0",
+      "originalBytes": 6370,
+      "bytes": 7409,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/browser-ui-source-subproof-v1.json",
+        "sha256": "3b92b92a56d824a2275701e6a7f9ceca928b9368bd08e74a185ef4a63b3c609f",
+        "bytes": 6370,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-source-subproof-v2.json",
+      "originalSha256": "788a0ba10d6ad545ae40243f2b7a7fbbc52d13367454892628edf651a70aa2d2",
+      "sha256": "330322089f32522553cd240d34df60f1977044b10cfbaf986d6eb1b549b6f6b4",
+      "originalBytes": 8373,
+      "bytes": 9450,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/browser-ui-source-subproof-v2.json",
+        "sha256": "788a0ba10d6ad545ae40243f2b7a7fbbc52d13367454892628edf651a70aa2d2",
+        "bytes": 8373,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-component-v2.json",
+      "originalSha256": "55172a5ebddf231a8f70f93db56e2c3c442ff3566dfe3a1ebf8cf0895e067278",
+      "sha256": "351c13752bb6ead7ebbd0e276dcbfc4f01ed9c0628be038ac5489f02627f6eda",
+      "originalBytes": 3990,
+      "bytes": 4852,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v2.json",
+        "sha256": "55172a5ebddf231a8f70f93db56e2c3c442ff3566dfe3a1ebf8cf0895e067278",
+        "bytes": 3990,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-component-v3.json",
+      "originalSha256": "d5887b9e20e2af1635dd645c1f000cf00fb5865b2a88055cb9c6e0b955c52aed",
+      "sha256": "a1543b9123de22feb6f95bf852b58d41d8b812f05ecc4a46484278a43a6ca64f",
+      "originalBytes": 2146,
+      "bytes": 2818,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v3.json",
+        "sha256": "d5887b9e20e2af1635dd645c1f000cf00fb5865b2a88055cb9c6e0b955c52aed",
+        "bytes": 2146,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-component-v4.json",
+      "originalSha256": "d98fdedb121c555a427ab2763c599edbb9d3dc2c56397b2a8386d805e59dca2b",
+      "sha256": "b310caad0884263fc04ab99168d5e6cd181748eb713dbe42731bde06e085f97c",
+      "originalBytes": 5192,
+      "bytes": 5978,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v4.json",
+        "sha256": "d98fdedb121c555a427ab2763c599edbb9d3dc2c56397b2a8386d805e59dca2b",
+        "bytes": 5192,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-component-v5.json",
+      "originalSha256": "16cf7d677df87817694890d3ee4213a325e3798353fd9405b5aae55c7e2230d9",
+      "sha256": "99a8387e03cde756dc023428262eba150b9a1a275bd9196ac7219ec698b1ca76",
+      "originalBytes": 5499,
+      "bytes": 6285,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v5.json",
+        "sha256": "16cf7d677df87817694890d3ee4213a325e3798353fd9405b5aae55c7e2230d9",
+        "bytes": 5499,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-component-v6.json",
+      "originalSha256": "a354bbc4129fbda5c304a8dca8c03037cbd23b54dcafcbcc59b6953adccc1a49",
+      "sha256": "7cbccd901503192c3e5dcc86554209fab52aeddd255128be89ce5af9595aa7b7",
+      "originalBytes": 2682,
+      "bytes": 3354,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v6.json",
+        "sha256": "a354bbc4129fbda5c304a8dca8c03037cbd23b54dcafcbcc59b6953adccc1a49",
+        "bytes": 2682,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-component-v7.json",
+      "originalSha256": "5dc745e78fca47572ab1c544427b02032a81d019f181fc7633fd82b244f7431e",
+      "sha256": "097763687eb674ae86565068116478d98ff598e57bfdbb8142f6f86c9bee1825",
+      "originalBytes": 2872,
+      "bytes": 3544,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v7.json",
+        "sha256": "5dc745e78fca47572ab1c544427b02032a81d019f181fc7633fd82b244f7431e",
+        "bytes": 2872,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v3-source.json",
+      "originalSha256": "37d3f7561170c964e1ecfee7b19be7ae9327a6f3ae5ee6841b4dcb3c5e2b7526",
+      "sha256": "e8c5f0d4d363ee5c2d3e7f3efb747bce02a119639db044b41f13486dc54a1d19",
+      "originalBytes": 1574,
+      "bytes": 2516,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-native-v3-source.json",
+        "sha256": "37d3f7561170c964e1ecfee7b19be7ae9327a6f3ae5ee6841b4dcb3c5e2b7526",
+        "bytes": 1574,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v4-source.json",
+      "originalSha256": "c687759b0b58718e0a59a67cfd216fa77c125774f72473cf322c4e1c8c8e4bd0",
+      "sha256": "239909045de0e61b5f8fe45d1ab09de48f88d316117086b6ebe029d7a73c36da",
+      "originalBytes": 1574,
+      "bytes": 2516,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-native-v4-source.json",
+        "sha256": "c687759b0b58718e0a59a67cfd216fa77c125774f72473cf322c4e1c8c8e4bd0",
+        "bytes": 1574,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v5-source.json",
+      "originalSha256": "0698679ea5cc325c6ccb7c0425f6c5f7a19fea3a9668facec56bb1c2ed172401",
+      "sha256": "4a6791070c83aeec3b49b10b853cbfd04276ad5609317827772bb897acb21a46",
+      "originalBytes": 1574,
+      "bytes": 2516,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-native-v5-source.json",
+        "sha256": "0698679ea5cc325c6ccb7c0425f6c5f7a19fea3a9668facec56bb1c2ed172401",
+        "bytes": 1574,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v6-source.json",
+      "originalSha256": "3094c9ed726e706005f9b89e7ad4d67f0006e208523d5428558abcc3c60fd3a2",
+      "sha256": "9eb64d705f2321c40cdab18233928cf1b44c97bc3d4f8188085368c7eff44b10",
+      "originalBytes": 1574,
+      "bytes": 2516,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-native-v6-source.json",
+        "sha256": "3094c9ed726e706005f9b89e7ad4d67f0006e208523d5428558abcc3c60fd3a2",
+        "bytes": 1574,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v7-source.json",
+      "originalSha256": "5b092dde94ad477d79abed94e82ffea347e5fdf5be3d812d857547a174c9304c",
+      "sha256": "26e8880751733ad78dd6b19dae4c71aa3a0cc9f8a2270c57f9614fccf0e37a59",
+      "originalBytes": 111415,
+      "bytes": 144353,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-native-v7-source.json",
+        "sha256": "5b092dde94ad477d79abed94e82ffea347e5fdf5be3d812d857547a174c9304c",
+        "bytes": 111415,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-native-counterexamples-v2.json",
+      "originalSha256": "56ca58a3066db499724aff78ae002d04efcba9190be9d341b0375f892f180af2",
+      "sha256": "cf057f7f8ff00cb506c64199f5e84381a246a7124804a2c5cd2f26164296ef95",
+      "originalBytes": 2047,
+      "bytes": 2646,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-native-counterexamples-v2.json",
+        "sha256": "56ca58a3066db499724aff78ae002d04efcba9190be9d341b0375f892f180af2",
+        "bytes": 2047,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Refresh attached published artifact hashes and byte counts after child derivation"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-cli-qualification-v2.json",
+      "originalSha256": "4ff2a8869d8673b1cd1bb54268c53178644cc218fbb62c6ce115aa21639c5423",
+      "sha256": "6ba57d786714535f00e318b9b727a642d3a15ba914d8bc5403d4f1a92808933e",
+      "originalBytes": 3017,
+      "bytes": 3755,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/evidence-cli-qualification-v2.json",
+        "sha256": "4ff2a8869d8673b1cd1bb54268c53178644cc218fbb62c6ce115aa21639c5423",
+        "bytes": 3017,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/integrated-counterexamples-v1.json",
+      "originalSha256": "dcf74d3d50c865ed5ac5967467b61ae4cc4351ec630ddf9c805d7a87deb7c080",
+      "sha256": "6e601934fe623f24aa4e2acdcb5219b714aedc0bc34fc995e750fa61aba87355",
+      "originalBytes": 3539,
+      "bytes": 4125,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/integrated-counterexamples-v1.json",
+        "sha256": "dcf74d3d50c865ed5ac5967467b61ae4cc4351ec630ddf9c805d7a87deb7c080",
+        "bytes": 3539,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Refresh attached published artifact hashes and byte counts after child derivation"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/legacy-fixture-source-snapshot-v1.json",
+      "originalSha256": "cdae43c0cbeee898d979acfb820afa65e9602d7044287ce133883da45b8de323",
+      "sha256": "8c0aef37e3b8c302e0be3d1d281c15317056bf0dec0d9246965244e3cbac959b",
+      "originalBytes": 961,
+      "bytes": 1665,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/legacy-fixture-source-snapshot-v1.json",
+        "sha256": "cdae43c0cbeee898d979acfb820afa65e9602d7044287ce133883da45b8de323",
+        "bytes": 961,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-canonical-fixture-local-v1.txt",
+      "originalSha256": "5c8f78b07982082440c3a432582833d5e68822cd6f0b648c8dc979feca461690",
+      "sha256": "17c13e7a9c5a40d684cffbbe6510232936181579c35f24ff95a9c7bcce2cddef",
+      "originalBytes": 41712,
+      "bytes": 41924,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/native-canonical-fixture-local-v1.txt",
+        "sha256": "5c8f78b07982082440c3a432582833d5e68822cd6f0b648c8dc979feca461690",
+        "bytes": 41712,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Replace database URL tokens with [DATABASE_URL_REDACTED]; preserve remaining test output and declare derivative header"
+      ],
+      "redactedDatabaseUrlTokens": 3
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-canonical-fixture-migration-v1.json",
+      "originalSha256": "a2f555bab4f60b317049f4b973a67f3bd01fd738297b9324457d69b739690e28",
+      "sha256": "80eb18721e481b286ece812b196fd24ff892fcf85a4b553d2e88c9ea302fbf52",
+      "originalBytes": 20588,
+      "bytes": 21182,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/native-canonical-fixture-migration-v1.json",
+        "sha256": "a2f555bab4f60b317049f4b973a67f3bd01fd738297b9324457d69b739690e28",
+        "bytes": 20588,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Refresh attached published artifact hashes and byte counts after child derivation"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/owned-runtime-credentials-red-v1.txt",
+      "originalSha256": "25b3f91323a557dca4ff148be124f6fc996fb159e5b3f8839ff38d5a5481d018",
+      "sha256": "95be1f1130d50ef1dbf3c46a605eb81528ae1c538ed18de33f6434afa9fd2531",
+      "originalBytes": 12645,
+      "bytes": 12755,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/owned-runtime-credentials-red-v1.txt",
+        "sha256": "25b3f91323a557dca4ff148be124f6fc996fb159e5b3f8839ff38d5a5481d018",
+        "bytes": 12645,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Replace database URL tokens with [DATABASE_URL_REDACTED]; preserve remaining test output and declare derivative header"
+      ],
+      "redactedDatabaseUrlTokens": 6
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/owned-runtime-credentials-repair-v1.json",
+      "originalSha256": "12103c0a17d9774142422c6c7370a233b77e5bbaa556429fb71ef32d2494bf0e",
+      "sha256": "9b85814e00059fe7c7c908b54c06951c0b0ff0bcc9219daefe15b5d969b92c40",
+      "originalBytes": 7994,
+      "bytes": 8738,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/owned-runtime-credentials-repair-v1.json",
+        "sha256": "12103c0a17d9774142422c6c7370a233b77e5bbaa556429fb71ef32d2494bf0e",
+        "bytes": 7994,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged",
+        "Refresh attached published artifact hashes and byte counts after child derivation"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-and-billing-recapture-v1.json",
+      "originalSha256": "57aa59cb1ec5e71ea6e3e76d9468c995787f1c9552e837060e0ced0823a02823",
+      "sha256": "82c37635935639e1e9529069024b4b3bc950ca46314695b4f1526fc400f36938",
+      "originalBytes": 11741,
+      "bytes": 12638,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/python-lock-and-billing-recapture-v1.json",
+        "sha256": "57aa59cb1ec5e71ea6e3e76d9468c995787f1c9552e837060e0ced0823a02823",
+        "bytes": 11741,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-postrestart-repairs-v2.json",
+      "originalSha256": "8ac0287ee515f9dda139ed612de2a2233c954bc7b9b4a0acee0f1a4183693a4e",
+      "sha256": "62110fd94ea93979ab366dffd3bda8688b8ae3a3a6ee47fba2ae99064a168e30",
+      "originalBytes": 4004,
+      "bytes": 4854,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/root-postrestart-repairs-v2.json",
+        "sha256": "8ac0287ee515f9dda139ed612de2a2233c954bc7b9b4a0acee0f1a4183693a4e",
+        "bytes": 4004,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/source-plan-generation-v10.json",
+      "originalSha256": "2ff97fceff2022a815fc03bb83706c6a65d1ae02363b81bd1a768cbf51249bc2",
+      "sha256": "45334f5063a3b847399f4a9a1f93c04f795be78b640346d7f7a8043449095f33",
+      "originalBytes": 2643,
+      "bytes": 3226,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/source-plan-generation-v10.json",
+        "sha256": "2ff97fceff2022a815fc03bb83706c6a65d1ae02363b81bd1a768cbf51249bc2",
+        "bytes": 2643,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Refresh attached published artifact hashes and byte counts after child derivation"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/stripe-facade-exception-retirement-v1.json",
+      "originalSha256": "b11caafed84b3d47f38a091e63ca5b39b2d22bb9fea9b3a40129f1d026fc9396",
+      "sha256": "500a1c81cc195527e631082b89c337ce515dd7c338d6ed956d2a374fdddcfbe9",
+      "originalBytes": 2197,
+      "bytes": 2867,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/stripe-facade-exception-retirement-v1.json",
+        "sha256": "b11caafed84b3d47f38a091e63ca5b39b2d22bb9fea9b3a40129f1d026fc9396",
+        "bytes": 2197,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/supply-security-validation-v3.json",
+      "originalSha256": "a8895df4f8a151980311d8242e46fbdf2aba984cf1d87cb37ee562f334a57849",
+      "sha256": "b4da475c281a2a8111069ca7b038c09293f028c1c7ccff73e1223d51982b6279",
+      "originalBytes": 5663,
+      "bytes": 6629,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/supply-security-validation-v3.json",
+        "sha256": "a8895df4f8a151980311d8242e46fbdf2aba984cf1d87cb37ee562f334a57849",
+        "bytes": 5663,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/supply-security-validation-v4.json",
+      "originalSha256": "a1cccfbdce16011887a07e7510efe21a014d2dd27bfc095a974ba8c800f1d66b",
+      "sha256": "8dad8523cd4e0c43c2d7aea3c3c54f15c9fd37d33275dc2bc1a8626b0f639d19",
+      "originalBytes": 5194,
+      "bytes": 6160,
+      "originalPrivateArchive": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/supply-security-validation-v4.json",
+        "sha256": "a1cccfbdce16011887a07e7510efe21a014d2dd27bfc095a974ba8c800f1d66b",
+        "bytes": 5194,
+        "mode": "0600"
+      },
+      "transformations": [
+        "Serialize source digests as readable path/sha256 record arrays; path and digest values unchanged"
+      ]
+    }
+  ],
+  "qualification": "Publication hygiene only. Test verdicts and environment limitations remain those of the preserved original evidence."
+}

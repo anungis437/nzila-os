@@ -249,6 +249,50 @@ export function readCatalogContract(repoRoot) {
   return JSON.parse(fs.readFileSync(contractPath, 'utf8'))
 }
 
+/** The current overlay is compiled from the committed source plan. Historical
+ * storage decisions remain a separate immutable input, never live ACL facts. */
+export function readCurrentCatalogContract(repoRoot) {
+  const base = readCatalogContract(repoRoot)
+  if (catalogContractDigest(base.payload) !== base.digest) throw new Error('Historical catalog contract digest differs')
+  const overlay = JSON.parse(fs.readFileSync(path.join(repoRoot, 'apps/union-eyes/lib/operations/catalog-v2-decisions.json'), 'utf8'))
+  const current = overlay.currentSecurity
+  const plan = JSON.parse(fs.readFileSync(path.join(repoRoot, 'docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'), 'utf8'))
+  if (!current || current.contractVersion !== '1' || current.sourcePlanDigest !== catalogContractDigest(plan)
+    || !Array.isArray(current.currentFunctions) || current.currentFunctions.length < 1)
+    throw new Error('Current catalog source projection is absent or stale')
+  const payload = {
+    ...structuredClone(base.payload),
+    entries: overlay.entries.map(({ decision: _decision, ...entry }) => entry),
+    nonPublic: current.nonPublic,
+    runtimeSchemaUsage: current.runtimeSchemaUsage,
+    systemSchemaUsage: current.systemSchemaUsage,
+    approvedColumnGrants: current.approvedColumnGrants,
+    dedicatedRolePrivileges: current.dedicatedRolePrivileges,
+    currentFunctions: current.currentFunctions,
+    requiredSessionPolicy: current.requiredSessionPolicy,
+  }
+  return { payload, digest: catalogContractDigest(payload) }
+}
+
+export function assertCurrentCatalogContract(repoRoot, candidate) {
+  const expected = readCurrentCatalogContract(repoRoot)
+  if (!candidate || catalogContractDigest(candidate.payload) !== candidate.digest
+    || candidate.digest !== expected.digest || JSON.stringify(candidate.payload) !== JSON.stringify(expected.payload))
+    throw new Error('Exact current source catalog contract required')
+  return expected
+}
+
+/** Read-only. The mandatory installer performs all changes and independent
+ * auth/framework/physical verification in its own atomic transaction. */
+export async function verifyCurrentCatalogAuthority(client, { repoRoot, currentContract, environment } = {}) {
+  const contract = assertCurrentCatalogContract(repoRoot, currentContract)
+  const report = assessCatalogAdmission(contract, await loadAdmissionSnapshots(client), environment)
+  if (!report.ok) throw new Error(`Current catalog privilege preflight failed:\n${report.violations.join('\n')}`)
+  return { applied: false, schemaMigrationComplete: true, securityPolicyVerified: true,
+    runtimePrivilegesVerified: true, applicationReady: false, manifestEntries: contract.payload.entries.length,
+    catalogContractDigest: contract.digest }
+}
+
 export function assertCatalogContractCurrent(repoRoot) {
   const contract = readCatalogContract(repoRoot)
   if (catalogContractDigest(contract.payload) !== contract.digest) {
@@ -366,7 +410,9 @@ export async function remediateCatalogAuthority(client, { repoRoot }) {
  * verification rolls back the grants and leaves the preceding revoke
  * committed, so the failure path does not keep the broad envelope.
  */
-export async function activateCatalogPrivileges(client, { repoRoot, enforce }) {
+export async function activateCatalogPrivileges(client, { repoRoot, enforce, currentContract }) {
+  if (currentContract !== undefined)
+    return verifyCurrentCatalogAuthority(client, { repoRoot, currentContract })
   const manifest = loadAuthorityManifest(repoRoot)
   const roles = await client.query(
     `SELECT rolname FROM pg_roles WHERE rolname IN ('union_eyes_runtime', 'union_eyes_system')`,

@@ -158,7 +158,7 @@ describe('case persistence boundary on canonical auth and forced RLS',()=>{
   await f.seed(async()=>{
    await f.db.query(`INSERT INTO public.ue_authority_mandates(organization_id,principal_user_id,kind,powers,scope,source_instrument,granted_by,status,effective_at,expires_at)
     VALUES($1,'supervisor','supervisory',ARRAY['read','transition','write_notes','comment','assign'],$2,'Synthetic bounded mandate','independent','active',now()-interval '1 hour',now()+interval '1 day'),
-    ($1,'delegator','executive_office',ARRAY['transition','write_notes','comment','assign'],'{}','Synthetic office','independent','active',now()-interval '1 hour',now()+interval '1 day')`,[f.org,{resourceIds:[f.caseId]}])
+    ($1,'delegator','executive_office',ARRAY['transition','write_notes','comment','assign'],$2,'Synthetic office','independent','active',now()-interval '1 hour',now()+interval '1 day')`,[f.org,{resourceIds:[f.caseId]}])
    await f.db.query(`INSERT INTO public.ue_authority_delegations(id,organization_id,delegator_user_id,delegate_user_id,office,actions,resource_types,effective_at,expires_at)
     VALUES($1,$2,'delegator','delegate','president',ARRAY['case:transition','case:write_notes','case:comment','case:assign'],ARRAY['case'],now()-interval '1 hour',now()+interval '1 day')`,[delegation,f.org])
   })
@@ -176,6 +176,12 @@ describe('case persistence boundary on canonical auth and forced RLS',()=>{
   }
   for(const user of [f.actor,'collaborator',f.member,'supervisor','unrelated','delegate'])
    for(const action of ['case:transition','case:close','case:disclose_to_member','case:write_notes','case:comment','case:assign'] as const)await compare(user,action,user==='delegate'?delegation:undefined)
+  await f.seed(()=>f.db.query("UPDATE public.ue_authority_mandates SET scope=$1 WHERE principal_user_id='delegator'",[{resourceIds:[randomUUID()]}]))
+  await compare('delegate','case:transition',delegation)
+  await expect(f.tenant('delegate',async tx=>{await tx.query("SELECT set_config('app.authority_delegation_id',$1,true)",[delegation]);await tx.query("UPDATE public.claims SET status='investigation' WHERE claim_id=$1",[f.caseId]);await f.history(tx,'delegate');await f.audit(tx,'delegate')})).rejects.toThrow('CASE_TRANSITION_AUTHORITY_REQUIRED')
+  expect((await f.db.query('SELECT status FROM public.claims WHERE claim_id=$1',[f.caseId])).rows[0].status).toBe('under_review')
+  await f.seed(()=>f.db.query("UPDATE public.ue_authority_mandates SET scope=$1 WHERE principal_user_id='delegator'",[{resourceIds:[f.caseId]}]))
+  await compare('delegate','case:transition',delegation)
   await f.seed(()=>f.db.query("UPDATE user_management.organization_users SET is_active=false WHERE user_id='delegator'"))
   await compare('delegate','case:transition',delegation)
   await f.seed(()=>f.db.query("UPDATE user_management.organization_users SET is_active=true WHERE user_id='delegator'"))

@@ -1,0 +1,68 @@
+{
+  "scope": "INTERIM_GENERATION_AND_MANIFEST_TYPECHECK",
+  "at": "2026-11-18T02:08:02.511786+00:00",
+  "deterministicSelfTest": true,
+  "tables": 780,
+  "statements": 6315,
+  "decisions": 300,
+  "exclusions": 35,
+  "compilerSecurityBlockers": 0,
+  "sourceCommitments": 848,
+  "expandedManifestTypecheck": {
+    "command": "pnpm exec tsc --noEmit --project apps/union-eyes/scripts/bootstrap-v2/manifest-typecheck.json",
+    "exitCode": 0
+  },
+  "sourceBindingsObservedAfterRuns": [
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "e2cb9deabdf586c8f38cbafda6b65e66c6d425a4725f2240cfbcdc697e4aa0f1"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-v2-decisions.json",
+      "sha256": "3ce28439f64f29e36a12f952c0a2c656546701545bec5cc49f8954412d60d0dd"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-typecheck.json",
+      "sha256": "c060cbb4f9d140dc8e05ddbf48b4a3daca2e1805d6dd40bebed54e824fbdee8f"
+    }
+  ],
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/source-plan-v10.log",
+      "sha256": "c92d7d99bb15405ded03cb41ff8309ca979fe2895158c5dac6ef80ddcd48e0fe"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-catalog-v10.log",
+      "sha256": "ac926a2ee18668416692243e8fbc0081589f65a94f376af74fcba3efd7bb8a46"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/expanded-manifest-typecheck-v4.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v7.json",
+      "sha256": "d869ce4b020fa88eae8b0f90e6ed3f5177ed27c02515d0e52a2c65e44bad4266"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v7.txt",
+      "sha256": "1e4a42ce92f3d9f483840b4b9a086025a9ebf0208d3ef9d6680bbf53b6e22a28"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v7-source.json",
+      "sha256": "26e8880751733ad78dd6b19dae4c71aa3a0cc9f8a2270c57f9614fccf0e37a59"
+    }
+  ],
+  "limits": [
+    "Generation and typechecking do not prove actual runtime security.",
+    "Nativev7 remained2PASS1FAIL due functionpermission; source unchanged during thatrun.",
+    "Installer diagnostic changedafterthecompiler pass; final integrated rerun remains required."
+  ],
+  "finalCandidateQualified": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "2ff97fceff2022a815fc03bb83706c6a65d1ae02363b81bd1a768cbf51249bc2",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/source-plan-generation-v10.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

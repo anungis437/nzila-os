@@ -33,6 +33,28 @@ export function reconcileCurrentAuthority(
       reviewPriority: 'NONE',
     }
   }
+  // Preserve the existing canonical containment decisions. An inherited legacy
+  // tenant label cannot manufacture a missing current ownership relationship.
+  const containedOwner = model.table === 'arbitration_decisions'
+    ? 'apps/union-eyes/backend/bargaining/models.py'
+    : model.table === 'signature_audit_trail'
+      ? 'apps/union-eyes/backend/content/models.py'
+      : null
+  if (containedOwner) {
+    if (model.source !== containedOwner)
+      throw new Error(`UE_V2_CONTAINED_CURRENT_OWNER_REQUIRED:${model.table}`)
+    return {
+      table: model.table,
+      classification: 'CONTAINED_NO_AUTHORITY',
+      reason: 'Preserved canonical V2 containment: the current source lacks a separately qualified ownership or parent relationship. Preserve historical rows and deny all ordinary/system access; this does not implement or qualify the unavailable operation.',
+      supportingCapability: [model.source, 'apps/union-eyes/scripts/bootstrap-v2/current-authority.ts'],
+      requiredRuntimePrivileges: [],
+      requiredSystemPrivileges: [],
+      invocationAuthority: 'NONE',
+      dbExecutionPrincipal: 'NONE',
+      reviewPriority: 'NONE',
+    }
+  }
   if (model.table === 'claim_status_transitions') {
     if (model.source !== 'apps/union-eyes/backend/grievances/models.py' ||
       !model.columns.some(column => column.name === 'transaction_id' && column.type === 'bigint'))
@@ -58,22 +80,22 @@ export function reconcileCurrentAuthority(
       organization.foreignKey?.table !== 'organizations' ||
       organization.foreignKey.column !== 'id'
     )
-      throw new Error('UE_V2_DONATION_METADATA_ORGANIZATION_SOURCE_REQUIRED')
+      throw new Error('UE_V2_DONATION_BASE_BOUNDARY_SOURCE_REQUIRED')
     return {
       table: model.table,
-      classification: 'TENANT_RLS_REQUIRED',
+      classification: 'CONTAINED_NO_AUTHORITY',
       reason:
-        'Prospective V2 decision: the current Django Donations model is operational organization-owned metadata with an indispensable UUID organization FK. Its authenticated ModelViewSet CRUD uses live canonical membership and organization-scoped RLS. This does not merge or qualify the separate financial database, payment processing, ledgers or the historical caller projection.',
+        'Base-release financial boundary: Donations is a financial record containing amount, payment status, donor details and provider references. A metadata-only serializer cannot authorize deleting that underlying record. Preserve all data and historical authority evidence; current financial compatibility routes deny every principal, with no ordinary or system table privileges. Positive financial persistence is excluded from this release.',
       supportingCapability: [
         'backend/billing/models.py',
         'backend/billing/views.py',
         'backend/billing/serializers.py',
         'backend/auth_core/mixins.py',
       ],
-      requiredRuntimePrivileges: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
+      requiredRuntimePrivileges: [],
       requiredSystemPrivileges: [],
-      invocationAuthority: 'TENANT_USER',
-      dbExecutionPrincipal: 'TENANT_RUNTIME',
+      invocationAuthority: 'NONE',
+      dbExecutionPrincipal: 'NONE',
       reviewPriority: 'NONE',
     }
   }
