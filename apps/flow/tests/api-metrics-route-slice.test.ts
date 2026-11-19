@@ -12,7 +12,8 @@ const { mockAuthenticateUser, mockWithRequestContext, mockWithSpan, mockDbSelect
 )
 
 vi.mock('@/lib/api-guards', () => ({
-  authenticateGlobalOperator: mockAuthenticateUser,
+  GLOBAL_OPERATOR_ROLES: ['platform_admin'],
+  requirePlatformRole: mockAuthenticateUser,
   withRequestContext: mockWithRequestContext,
 }))
 

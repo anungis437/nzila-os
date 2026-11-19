@@ -5,8 +5,8 @@
  * No Next server/browser, live institution/provider or deployment claim. */
 import { createHash, randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { NativeReaderHooks, NativeReaderPort } from '@/lib/external-resource-read/__tests__/fixtures/native-reader-store'
-import { nativeExternalReaderFixture } from '@/lib/external-resource-read/__tests__/fixtures/native-reader-store'
+import type { NativeReaderHooks, NativeReaderPort } from './fixtures/native-external-reader-store'
+import { nativeExternalReaderFixture } from './fixtures/native-external-reader-store'
 import { awaitNativePhase, deferred, observeNativeAdvisoryWait } from '@/lib/external-resource-read/__tests__/fixtures/native-read-coordination'
 import { reconcileAuthorityAudit } from '@/lib/authority/store/audit'
 

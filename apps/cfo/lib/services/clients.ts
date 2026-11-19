@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { orgs, auditLog } from '@nzila/db/schema'
+import { orgs } from '@nzila/db/schema'
 import { assertCfoContextPermission, CfoScopeError, type CfoActionContext } from '@/lib/resolve-org'
-import { appendCfoPrimaryAudit } from './cfo-records'
+import { appendCfoLegacyAuditRow, appendCfoPrimaryAudit } from './cfo-records'
 export const clientInput = z
   .object({
     name: z.string().trim().min(1),
@@ -45,9 +45,8 @@ export async function createCfoClient(
     })
     .returning({ id: orgs.id })
   if (!created) throw new Error('Client was not stored')
-  await context.db.insert(auditLog).values({
+  await appendCfoLegacyAuditRow(context, {
     action: 'client.created',
-    actorId: context.userId,
     entityType: 'org',
     orgId: created.id,
     metadata: { clientId: created.id, source: 'cfo', authority: 'platform' },

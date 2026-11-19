@@ -4,6 +4,7 @@ import { auth, currentUser } from '@nzila/platform-auth/entra/server'
 import type { ZongaOrgContext } from '@nzila/zonga-core/types'
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 import { sql } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
 import {
   activeZongaMemberships,
   withZongaTransaction,
@@ -89,6 +90,31 @@ export function resolveOrgContext<T>(
   operation: (context: OrganizationActionContext) => Promise<T>,
 ): Promise<T>
 export async function resolveOrgContext<T>(
+  purpose?: 'personal' | 'published' | 'organization',
+  options?: { organizationId?: string } | ((context: ListenerActionContext) => Promise<T>),
+  operation?: (context: OrganizationActionContext) => Promise<T>,
+): Promise<T | ZongaOrgContext> {
+  if (purpose === undefined) return resolveScopedContext<T>(purpose, options, operation)
+  try {
+    return await resolveScopedContext<T>(purpose, options, operation)
+  } catch (error) {
+    // Single structured-log choke point for every callback-form action:
+    // refusals (403/501) are warnings, anything else is an error. Rethrown —
+    // failures are never converted into an empty or successful result.
+    const status =
+      error instanceof ZongaScopeError || error instanceof ZongaUnavailableError
+        ? error.status
+        : 500
+    logger[status === 500 ? 'error' : 'warn']('Zonga action failed', {
+      purpose,
+      status,
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+      message: error instanceof Error ? error.message : undefined,
+    })
+    throw error
+  }
+}
+async function resolveScopedContext<T>(
   purpose?: 'personal' | 'published' | 'organization',
   options?: { organizationId?: string } | ((context: ListenerActionContext) => Promise<T>),
   operation?: (context: OrganizationActionContext) => Promise<T>,

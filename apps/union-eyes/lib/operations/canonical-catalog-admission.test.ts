@@ -76,12 +76,23 @@ describe('canonical catalog admission', () => {
     }
   })
 
-  it('uses table-level system SELECT without requiring redundant service column ACLs', () => {
-    for (const table of ['commercial_contracts', 'external_data_sync_log']) {
-      const entry = canonical.payload.entries.find(entry => entry.table === table)!
-      expect(entry.system).toContain('SELECT')
-      expect(canonical.payload.approvedColumnGrants.some(grant => grant.table === table)).toBe(false)
-    }
+  it('grants these service reads only as exact column SELECTs, never table-level', () => {
+    // commercial_contracts: the system role has no privilege at all (native matrix asserts 42501 for
+    // every statement); the runtime reads exactly four module-admission columns.
+    const contracts = canonical.payload.entries.find(entry => entry.table === 'commercial_contracts')!
+    expect(contracts.system).toEqual([])
+    expect(contracts.runtime).not.toContain('SELECT')
+    expect(canonical.payload.approvedColumnGrants.filter(grant => grant.table === 'commercial_contracts')).toEqual([
+      expect.objectContaining({ role: 'union_eyes_runtime', privilege: 'SELECT', columns: ['expiration_date', 'id', 'organization_id', 'status'], grantable: false }),
+    ])
+    // external_data_sync_log: the sync worker reads the thirteen overview fields by exact column grant;
+    // table-level SELECT would widen it to every column.
+    const syncLog = canonical.payload.entries.find(entry => entry.table === 'external_data_sync_log')!
+    expect(syncLog.system).not.toContain('SELECT')
+    const syncGrants = canonical.payload.approvedColumnGrants.filter(grant => grant.table === 'external_data_sync_log')
+    expect(syncGrants).toHaveLength(1)
+    expect(syncGrants[0]).toMatchObject({ role: 'union_eyes_system', privilege: 'SELECT', grantable: false })
+    expect(syncGrants[0].columns).toHaveLength(13)
   })
 
   it('does not repair or re-sign a corrupt packaged contract', () => {

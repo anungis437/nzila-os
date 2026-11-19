@@ -3,10 +3,14 @@
  *
  * Structural invariants for the CFO app's server actions:
  *   1. Every action file must use 'use server' directive
- *   2. Every action must call `auth()` for authentication
- *   3. Every mutating action must call evidence pipeline
- *   4. Every action must use the structured logger
- *   5. Every action must import from platformDb
+ *   2. Every exported action must authenticate and authorize through the single
+ *      verified resolver `resolveOrgContext` (lib/resolve-org.ts), which calls
+ *      `auth()` from @nzila/platform-auth and `requirePermission()`
+ *   3. Every real mutation must leave a tamper-evident, tenant-scoped audit record
+ *      in the same transaction; no evidence may be attested for work not done
+ *   4. Every action file must use the structured logger
+ *   5. Every action must reach the database only through the governed platformDb
+ *      transaction opened by the resolver — never by importing a client itself
  *
  * @invariant CFO-ACT-01: Server action auth guard
  * @invariant CFO-ACT-02: Evidence pipeline integration
@@ -17,7 +21,49 @@ import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = join(__dirname, '../..')
-const CFO_ACTIONS = join(ROOT, 'apps', 'cfo', 'lib', 'actions')
+const CFO_APP = join(ROOT, 'apps', 'cfo')
+const CFO_ACTIONS = join(CFO_APP, 'lib', 'actions')
+const RESOLVE_ORG = join(CFO_APP, 'lib', 'resolve-org.ts')
+const ACTION_CONTEXT = join(CFO_APP, 'queries', 'action-context.ts')
+const CFO_SERVICES = join(CFO_APP, 'lib', 'services')
+
+const read = (path: string) => readFileSync(path, 'utf-8')
+const readAction = (file: string) => read(join(CFO_ACTIONS, file))
+const readService = (file: string) => read(join(CFO_SERVICES, file))
+
+/**
+ * Split a source file into its exported async functions: name -> source text
+ * from the `export async function` keyword up to the next top-level export.
+ */
+function exportedActions(content: string): Map<string, string> {
+  const starts = [...content.matchAll(/^export async function (\w+)/gm)]
+  const result = new Map<string, string>()
+  starts.forEach((match, i) => {
+    const from = match.index ?? 0
+    const rest = content.slice(from + match[0].length)
+    const nextExport = rest.search(/^export /m)
+    const to = i + 1 < starts.length ? (starts[i + 1].index ?? content.length) : content.length
+    const end = nextExport === -1 ? to : Math.min(to, from + match[0].length + nextExport)
+    result.set(match[1], content.slice(from, end))
+  })
+  return result
+}
+
+/** Body of a top-level (exported or not) function declaration in a file. */
+function functionBody(content: string, name: string): string {
+  const match = new RegExp(`^(?:export )?(?:async )?function ${name}\\b`, 'm').exec(content)
+  if (!match) return ''
+  const rest = content.slice(match.index + match[0].length)
+  const next = rest.search(/^(?:export |async function |function |const |interface |type )/m)
+  return content.slice(
+    match.index,
+    next === -1 ? content.length : match.index + match[0].length + next,
+  )
+}
+
+/** A verified resolver entry with a declared purpose and a concrete permission. */
+const RESOLVER_CALL =
+  /resolveOrgContext\(\s*'(?:organization|collection|platform|personal|resource)',\s*\{\s*permission:\s*'[a-z_]+:[a-z_]+'/
 
 const ACTION_FILES = [
   'client-actions.ts',
@@ -52,35 +98,129 @@ describe('CFO-ACT-01 — Every action file uses "use server" directive', () => {
   }
 })
 
-describe('CFO-ACT-01 — Every action file calls auth()', () => {
+// Authentication moved out of each action file into the single verified
+// resolver. The guarantee is asserted at its real location (resolve-org.ts)
+// AND every exported action is required to enter through it.
+describe('CFO-ACT-01 — auth() is enforced by the shared resolver', () => {
+  const content = read(RESOLVE_ORG)
+
+  it('resolve-org.ts authenticates via auth() from @nzila/platform-auth', () => {
+    expect(content).toMatch(/import \{ auth \} from '@nzila\/platform-auth\/entra\/server'/)
+    expect(content).toContain('await auth()')
+  })
+
+  it('resolveOrgContext rejects a missing identity before any work', () => {
+    const body = functionBody(content, 'resolveOrgContext')
+    expect(body).toContain('const actor = await auth()')
+    expect(body).toMatch(/!userId[\s\S]*throw new CfoScopeError\('Unauthorized'\)/)
+    // Authorization of the declared permission happens before the transaction.
+    expect(body).toContain('requirePermission(options.permission, userId)')
+    expect(body.indexOf('requirePermission(')).toBeLessThan(
+      body.indexOf('withCfoActionTransaction('),
+    )
+  })
+})
+
+describe('CFO-ACT-01 — Every exported action authenticates through resolveOrgContext', () => {
   for (const file of ACTION_FILES) {
-    it(`${file} authenticates via auth()`, () => {
+    it(`${file} routes every exported action through resolveOrgContext`, () => {
       const path = join(CFO_ACTIONS, file)
       if (!existsSync(path)) return
-      const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('auth()')
-      expect(content).toContain('@nzila/platform-auth')
+      const content = read(path)
+      expect(content).toMatch(
+        /import \{[^}]*\bresolveOrgContext\b[^}]*\} from '@\/lib\/resolve-org'/,
+      )
+      const actions = exportedActions(content)
+      expect(actions.size).toBeGreaterThan(0)
+      const unguarded = [...actions].filter(([, body]) => !RESOLVER_CALL.test(body)).map(([n]) => n)
+      expect(unguarded, `actions not entering resolveOrgContext: ${unguarded.join(', ')}`).toEqual(
+        [],
+      )
     })
   }
 })
 
-describe('CFO-ACT-02 — Mutating actions use evidence pipeline', () => {
-  const MUTATING_FILES = [
-    'ledger-actions.ts',
-    'report-actions.ts',
-    'integration-actions.ts',
-    'advisory-actions.ts',
-  ]
+describe('CFO-ACT-02 — Mutating actions leave tamper-evident, tenant-scoped evidence', () => {
+  // The os-core evidence pack (buildEvidencePackFromAction/processEvidencePack)
+  // ran on a separate connection after the work, under `orgId: 'platform'` or
+  // the provider name. Real mutations now append a hash-chained `audit_events`
+  // row for the VERIFIED organization in the SAME transaction (mandatory: the
+  // transaction fails if it is not stored). No-op work attests nothing.
+  it('the primary audit writer is hash-chained, org-scoped and mandatory', () => {
+    const records = readService('cfo-records.ts')
+    const writer = functionBody(records, 'appendPrimaryAudit')
+    expect(writer).toContain('assertCfoActionContext(context)')
+    expect(writer).toContain('computeCanonicalHash(')
+    expect(writer).toContain('.insert(auditEvents)')
+    expect(writer).toContain("throw new Error('CFO_MANDATORY_AUDIT_NOT_STORED')")
+    expect(writer).toMatch(
+      /context\.organizationId !== event\.organizationId\)\s*throw new CfoScopeError/,
+    )
+    expect(functionBody(records, 'createCfoRecord')).toContain('appendPrimaryAudit(context')
+  })
 
-  for (const file of MUTATING_FILES) {
-    it(`${file} integrates evidence pipeline`, () => {
-      const path = join(CFO_ACTIONS, file)
-      if (!existsSync(path)) return
-      const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('buildEvidencePackFromAction')
-      expect(content).toContain('processEvidencePack')
-    })
-  }
+  it('report-actions.ts: generateReport records the report with a primary audit event', () => {
+    const action = exportedActions(readAction('report-actions.ts')).get('generateReport') ?? ''
+    expect(action).toContain('generateScopedReport(context, input)')
+    const service = functionBody(readService('reports.ts'), 'generateScopedReport')
+    expect(service).toContain("context.purpose !== 'organization'")
+    expect(service).toMatch(/createCfoRecord\(context, \{\s*action: 'report\.generated'/)
+    expect(service).toContain('evidenceRefs: [`audit_log:${row.id}`]')
+  })
+
+  it('advisory-actions.ts: askAdvisor appends a primary audit event for the verified org', () => {
+    const action = exportedActions(readAction('advisory-actions.ts')).get('askAdvisor') ?? ''
+    expect(action).toMatch(
+      /appendCfoPrimaryAudit\(context, \{\s*organizationId: context\.organizationId/,
+    )
+    expect(action).toContain(
+      "cfoAuthoritySource(context, context.organizationId, 'advisory_ai:use')",
+    )
+    expect(action).toContain('evidenceRefs: [`audit_events:${receipt.id}`]')
+  })
+
+  it('ledger-actions.ts: runReconciliation performs no fake run and attests nothing', () => {
+    // It used to "reconcile" matchPayoutsToDeposits([], []) and seal evidence for
+    // org 'platform'. With no verified source data it must now refuse honestly.
+    const action = exportedActions(readAction('ledger-actions.ts')).get('runReconciliation') ?? ''
+    expect(action).toContain("permission: 'ledger:write'")
+    expect(action).toContain(
+      "throw new CfoCapabilityUnavailableError('RECONCILIATION_SOURCE_UNAVAILABLE')",
+    )
+    expect(action).not.toContain('matchPayoutsToDeposits')
+    expect(action).not.toContain('processEvidencePack')
+  })
+
+  it('integration-actions.ts: triggerSync claims no sync and records an honest receipt', () => {
+    // It used to report "sync completed" after a connectivity probe and seal
+    // evidence under `orgId: provider`. Now it states that no synchronization
+    // was performed and stores a receipt of the check in the same transaction.
+    const action = exportedActions(readAction('integration-actions.ts')).get('triggerSync') ?? ''
+    expect(action).toContain('checkIntegration(context, provider)')
+    const service = functionBody(readService('integrations.ts'), 'checkIntegration')
+    expect(service).toContain("action: 'integration.connectivity_checked'")
+    expect(service).toContain("throw new Error('Integration receipt was not stored')")
+    expect(service).toContain('no synchronization was performed')
+    expect(service).not.toMatch(/sync completed/i)
+  })
+
+  it('capability-unavailable responses are HTTP 501, never a success', () => {
+    const content = readService('capability-unavailable.ts')
+    expect(content).toContain('readonly status = 501')
+  })
+
+  it('no action or service attests evidence for a fabricated organization', () => {
+    const files = [
+      ...ACTION_FILES.map((f) => join(CFO_ACTIONS, f)),
+      ...['reports.ts', 'integrations.ts', 'cfo-records.ts'].map((f) => join(CFO_SERVICES, f)),
+    ]
+    for (const path of files) {
+      const content = read(path)
+      expect(content, path).not.toMatch(/orgId:\s*[^,\n]*'platform'/)
+      expect(content, path).not.toMatch(/orgId:\s*provider\b/)
+      expect(content, path).not.toContain('processEvidencePack')
+    }
+  })
 })
 
 describe('CFO-ACT-03 — Every action file uses structured logger', () => {
@@ -88,19 +228,40 @@ describe('CFO-ACT-03 — Every action file uses structured logger', () => {
     it(`${file} imports logger`, () => {
       const path = join(CFO_ACTIONS, file)
       if (!existsSync(path)) return
-      const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('logger')
+      const content = read(path)
+      expect(content).toContain("import { logger } from '@/lib/logger'")
+      expect(content).toMatch(/logger\.(?:error|warn|info)\(/)
+      expect(content).not.toMatch(/console\.(?:log|error|warn|info)\(/)
     })
   }
 })
 
-describe('CFO-ACT — Action files use platformDb', () => {
+// Direct platformDb access moved out of action files (NO_RAW_DB_IN_ACTIONS_001 /
+// ORG_REQUIRED_SERVER_ACTIONS_001). The guarantee — all CFO action DB access goes
+// through the governed @nzila/db/platform client — is asserted where it now lives.
+describe('CFO-ACT — Action DB access goes through the governed platformDb transaction', () => {
+  it('queries/action-context.ts opens the action transaction on platformDb', () => {
+    const content = read(ACTION_CONTEXT)
+    expect(content).toContain("import { platformDb } from '@nzila/db/platform'")
+    expect(functionBody(content, 'withCfoActionTransaction')).toContain(
+      'return platformDb.transaction(operation)',
+    )
+  })
+
+  it('resolve-org.ts hands actions only that transaction', () => {
+    expect(functionBody(read(RESOLVE_ORG), 'resolveOrgContext')).toContain(
+      'return withCfoActionTransaction(async (db) =>',
+    )
+  })
+
   for (const file of ACTION_FILES) {
-    it(`${file} imports platformDb`, () => {
+    it(`${file} does not open its own database client`, () => {
       const path = join(CFO_ACTIONS, file)
       if (!existsSync(path)) return
-      const content = readFileSync(path, 'utf-8')
-      expect(content).toContain('platformDb')
+      const content = read(path)
+      expect(content).not.toContain('platformDb')
+      expect(content).not.toMatch(/from '@nzila\/db(?:\/platform|\/raw|\/client)?'/)
+      expect(content).not.toMatch(/from 'drizzle-orm\/(?:postgres-js|node-postgres|neon-http)'/)
     })
   }
 })
@@ -124,10 +285,14 @@ describe('CFO-ACT — Ledger actions contract', () => {
     expect(content).toContain('export async function getFinancialOverview')
   })
 
-  it('runReconciliation uses commerce reconciliation', () => {
-    const path = join(CFO_ACTIONS, 'ledger-actions.ts')
-    const content = readFileSync(path, 'utf-8')
-    expect(content).toContain('matchPayoutsToDeposits')
+  it('runReconciliation refuses honestly until verified source data exists', () => {
+    // The old assertion required matchPayoutsToDeposits, which was only ever
+    // called on two empty arrays — a reconciliation that matched nothing yet
+    // reported close readiness. Without a verified payout/deposit source the
+    // action must surface RECONCILIATION_SOURCE_UNAVAILABLE (HTTP 501) instead.
+    const action = exportedActions(readAction('ledger-actions.ts')).get('runReconciliation') ?? ''
+    expect(action).toContain("CfoCapabilityUnavailableError('RECONCILIATION_SOURCE_UNAVAILABLE')")
+    expect(action).not.toMatch(/matchPayoutsToDeposits\(\s*\[\]\s*,\s*\[\]\s*\)/)
   })
 })
 
@@ -141,9 +306,13 @@ describe('CFO-ACT — Report actions contract', () => {
   })
 
   it('generateReport uses AI for narratives', () => {
-    const path = join(CFO_ACTIONS, 'report-actions.ts')
-    const content = readFileSync(path, 'utf-8')
-    expect(content).toContain('runAICompletion')
+    // Narrative generation moved into the report service; the action delegates to it.
+    const action = exportedActions(readAction('report-actions.ts')).get('generateReport') ?? ''
+    expect(action).toContain('generateScopedReport(context, input)')
+    const service = functionBody(readService('reports.ts'), 'generateScopedReport')
+    expect(service).toMatch(/runAICompletion(?:Detailed)?\(/)
+    // The AI call is attributed to the verified organization, never 'platform'.
+    expect(service).toContain('orgId: context.organizationId')
   })
 })
 
@@ -253,9 +422,19 @@ describe('CFO-ACT — Platform admin actions contract', () => {
   })
 
   it('enforces RBAC via requirePermission', () => {
-    const path = join(CFO_ACTIONS, 'platform-admin-actions.ts')
-    const content = readFileSync(path, 'utf-8')
-    expect(content).toContain('requirePermission')
+    // RBAC moved into resolveOrgContext: every admin action must declare the
+    // 'platform' purpose with platform_admin:manage, and the resolver must call
+    // requirePermission and refuse a non-platform role for that purpose.
+    const actions = exportedActions(readAction('platform-admin-actions.ts'))
+    expect(actions.size).toBeGreaterThan(0)
+    for (const [name, body] of actions) {
+      expect(body, name).toMatch(
+        /resolveOrgContext\(\s*'platform',\s*\{\s*permission:\s*'platform_admin:manage'\s*\}/,
+      )
+    }
+    const resolver = functionBody(read(RESOLVE_ORG), 'resolveOrgContext')
+    expect(resolver).toContain('requirePermission(options.permission, userId)')
+    expect(resolver).toContain("if (purpose === 'platform' && !platform) throw new CfoScopeError()")
   })
 })
 

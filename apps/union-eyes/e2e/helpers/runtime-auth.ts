@@ -6,6 +6,7 @@ import { CANONICAL_ORGANIZATION_AUTHORITY } from '../../lib/auth/organization-au
 import { readRuntimeFixtureAuth } from '../../scripts/runtime/fixture-auth'
 
 type State = Awaited<ReturnType<APIRequestContext['storageState']>>
+// ga-check:exempt — E2E harness: per-run browser session cache, never application persistence.
 const sessions = new Map<string, Promise<State>>()
 const baseUrl = () => {
   const url = new URL(process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3002')

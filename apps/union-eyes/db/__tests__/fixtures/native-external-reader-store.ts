@@ -1,13 +1,15 @@
 /** Native fixture ONLY. The existing native project owns its clone and four
  * restricted LOGINs. No schema/compiler replay, role, policy or grant changes.
- * Every institutional actor is synthetic, never customer/founder adoption. */
+ * Every institutional actor is synthetic, never customer/founder adoption.
+ * It opens raw driver connections, so it lives with the other native harnesses
+ * under db/__tests__, never under lib/ (application code). */
 import assert from 'node:assert/strict'
 import { createHash, randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { sql, type SQL } from 'drizzle-orm'
 import { PgDialect } from 'drizzle-orm/pg-core'
-import { authDb, withAuthContext } from '../../../../../../packages/platform-auth/src/auth-db'
-import { AUTH_EXECUTION_ROLES } from '../../../../../../packages/db/src/auth-storage-authority/execution-boundary'
+import { authDb, withAuthContext } from '../../../../../packages/platform-auth/src/auth-db'
+import { AUTH_EXECUTION_ROLES } from '../../../../../packages/db/src/auth-storage-authority/execution-boundary'
 import { createNativeCanonicalSession, nativeActionUrl, setNativeBusinessContext,
   type NativeCanonicalSession } from '@/scripts/runtime/native-canonical-fixture'
 import { seedMembership, type Db } from '@/db/__tests__/authority-kernel-harness'
@@ -18,9 +20,9 @@ import { openApprovalRequest, recordApprovalDecision } from '@/lib/authority/sto
 import { membershipSourceViaDefiner } from '@/lib/authority/store/platform-identity'
 import type { SqlExecutor } from '@/lib/authority/store/executor'
 import { DEFAULT_ISSUANCE_TEMPLATES, type IssuanceDomain, type IssuanceOperation } from '@/lib/authority/issuance'
-import { externalReadCatalogViolations, inspectExternalRead } from '../../catalog'
+import { externalReadCatalogViolations, inspectExternalRead } from '@/lib/external-resource-read/catalog'
 import { EXTERNAL_READ_AUTHORIZATION, EXTERNAL_READ_POWER, EXTERNAL_READ_QUALIFICATION,
-  externalReadQualificationHash, parseExternalReadQualification } from '../../qualification'
+  externalReadQualificationHash, parseExternalReadQualification } from '@/lib/external-resource-read/qualification'
 
 const identifier = (value: string) => { assert.match(value, /^[a-z][a-z0-9_]{0,62}$/); return '"' + value + '"' }
 const port = (client: pg.Client | pg.PoolClient): SqlExecutor => ({ query: async <T>(text: string, params?: unknown[]) =>

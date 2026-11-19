@@ -103,8 +103,7 @@ export const authorityKernelEntries: StorageAuthorityEntry[] = [
       'A proposed consent text supplied by the institution. UPDATE is limited by trigger to adoption by a different executive or withdrawal by the proposer. Adoption is what inserts a current consent text. No wording is stored by the migration.',
       ['SELECT', 'INSERT', 'UPDATE'],
     ),
-    scopeDisposition: 'OTHER_EXPLICITLY_JUSTIFIED' as const,
-    reason: 'Direct organization_id uuid NOT NULL, created by unqualified platform migration 0036 and protected by scoped 0028 (FORCE RLS). Not a Drizzle census declaration: the census stays 231 until VS Code regenerates it. A proposal is not current consent wording. Reached only through lib/authority/store/workaid-disclosure inside runAuthorityTransaction on the tenant runtime identity. No DELETE. No schema authority.',
+    reason: 'Direct organization_id uuid NOT NULL, created by unqualified platform migration 0036 and protected by scoped 0028 (FORCE RLS). Declared in Drizzle (db/schema/domains/ml/authority-kernel.ts, retained 0036 shape), so it is in the canonical public-schema scope and needs no scopeDisposition. A proposal is not current consent wording. Reached only through lib/authority/store/workaid-disclosure inside runAuthorityTransaction on the tenant runtime identity. No DELETE. No schema authority.',
     supportingCapability: [
       ...WORKAID_SUPPORT,
       'db/migrations-platform/0036_workaid_consent_wording_proposals.sql',

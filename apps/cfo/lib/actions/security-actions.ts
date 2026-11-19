@@ -8,9 +8,10 @@
  */
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { CfoScopeError, resolveOrgContext } from '@/lib/resolve-org'
 import { cfoRows } from '@/queries/action-context'
 import { legacyCfoAuditPredicate } from '@/lib/services/cfo-records'
 import { z } from 'zod'
@@ -214,13 +215,37 @@ export async function listSecurityEvents(opts?: {
   )
 }
 
+/** Log a failed security mutation and rethrow it unchanged; invalidate the
+ * security dashboard only after a committed, successful change. */
+async function securityMutation(
+  operation: string,
+  run: () => Promise<{ success: boolean }>,
+): Promise<{ success: boolean }> {
+  let result: { success: boolean }
+  try {
+    result = await run()
+  } catch (error) {
+    if (!(error instanceof CfoScopeError)) logger.error(`${operation} failed`, { error })
+    throw error
+  }
+  if (!result.success) return result
+  try {
+    revalidatePath('/dashboard/security')
+  } catch {
+    logger.warn('Security cache invalidation unavailable after commit')
+  }
+  return result
+}
+
 export async function resolveSecurityEvent(eventId: string): Promise<{ success: boolean }> {
-  return resolveOrgContext('resource', { permission: 'security:manage' }, (context) =>
-    changeLegacySecurityRecord(context, eventId, {
-      action: 'security.event',
-      patch: { resolved: true },
-      receipt: 'security.event.resolved',
-    }),
+  return securityMutation('resolveSecurityEvent', () =>
+    resolveOrgContext('resource', { permission: 'security:manage' }, (context) =>
+      changeLegacySecurityRecord(context, eventId, {
+        action: 'security.event',
+        patch: { resolved: true },
+        receipt: 'security.event.resolved',
+      }),
+    ),
   )
 }
 
@@ -255,12 +280,14 @@ export async function updateIncidentStatus(
   incidentId: string,
   status: Incident['status'],
 ): Promise<{ success: boolean }> {
-  return resolveOrgContext('resource', { permission: 'security:manage' }, (context) =>
-    changeLegacySecurityRecord(context, incidentId, {
-      action: 'security.incident',
-      patch: { status: z.enum(['open', 'investigating', 'contained', 'resolved']).parse(status) },
-      receipt: 'security.incident.status_changed',
-    }),
+  return securityMutation('updateIncidentStatus', () =>
+    resolveOrgContext('resource', { permission: 'security:manage' }, (context) =>
+      changeLegacySecurityRecord(context, incidentId, {
+        action: 'security.incident',
+        patch: { status: z.enum(['open', 'investigating', 'contained', 'resolved']).parse(status) },
+        receipt: 'security.incident.status_changed',
+      }),
+    ),
   )
 }
 

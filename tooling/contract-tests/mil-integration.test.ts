@@ -150,6 +150,38 @@ describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
     'reconciliation/process/route.ts',
   ];
 
+  /**
+   * Finance/dues persistence is excluded from the base release: these handlers
+   * call requireBaseFinancialAuthority(), which unconditionally throws a 501
+   * before any I/O. withApi's entitlement check is itself a database read, so a
+   * route behind that boundary deliberately carries no `entitlement:` (it would
+   * run I/O before the refusal). Such a route is accepted only when EVERY
+   * withApi handler hits the boundary before any await, DB, transaction or audit
+   * call — i.e. no entitled operation is reachable at all.
+   */
+  function isBaseReleaseFinanceBoundary(src: string): boolean {
+    if (!/import\s*\{\s*requireBaseFinancialAuthority\s*\}\s*from\s*['"]@\/lib\/finance\/base-release-boundary['"]/.test(src)) return false;
+    const handlers = src.split(/\bwithApi\s*\(/).slice(1);
+    if (handlers.length === 0) return false;
+    return handlers.every((segment) => {
+      const start = segment.search(/\basync\s*\(/);
+      if (start < 0) return false;
+      const body = segment.slice(start);
+      const boundary = body.indexOf('requireBaseFinancialAuthority()');
+      if (boundary < 0) return false;
+      const firstEffect = body.slice(body.indexOf('=>')).search(/\bawait\b|\bdb\.|\btx\.|withRLSContext\s*\(|withSystemContext\s*\(|persistAtomicAudit\s*\(|\breturn\b/);
+      return firstEffect < 0 || boundary < body.indexOf('=>') + firstEffect;
+    });
+  }
+
+  it('the base-release finance boundary refuses unconditionally with 501', () => {
+    const boundary = read(join(UE, 'lib', 'finance', 'base-release-boundary.ts'));
+    expect(boundary).toMatch(/readonly status = 501/);
+    expect(boundary).toMatch(/export function requireBaseFinancialAuthority\(\): void \{\s*throw new BaseFinancialCapabilityUnavailable\(\)\s*\}/);
+    const imports = [...boundary.matchAll(/from\s+['"]([^'"]+)['"]/g)].map((m) => m[1]);
+    expect(imports).toEqual(['@/lib/api/errors']);
+  });
+
   for (const route of entitledRoutes) {
     const file = read(join(API, route));
     const label = route.replace(/\/route\.ts$/, '');
@@ -160,7 +192,7 @@ describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
         file.includes('entitlement:') ||
         file.includes('requireEntitlement') ||
         file.includes('withEntitlement');
-      expect(hasEntitlement).toBe(true);
+      expect(hasEntitlement || isBaseReleaseFinanceBoundary(file)).toBe(true);
     });
   }
 

@@ -114,12 +114,13 @@ describe('API rate-limit guard', () => {
       '/api/communications/webhooks/resend',
       '/api/integrations/shopify/webhooks',
       '/api/cron/daily',
-      '/api/rewards/cron',
       '/api/auth/login',
       '/api/auth',
     ]) expect(isGuardExempt(path, 'POST'), path).toBe(true)
     expect(isGuardExempt('/api/cases', 'OPTIONS')).toBe(true)
     // A path that merely looks like a callback, with no route behind it, is not exempt.
     for (const path of ['/api/cases/intake', '/api/public/intake', '/api/export/all', '/api/authority/anything', '/api/webhooks/stripe']) expect(isGuardExempt(path, 'POST'), path).toBe(false)
+    // A cron route taken off the schedule (retired, answering 501) is ordinary traffic again: it is limited.
+    expect(isGuardExempt('/api/rewards/cron', 'POST')).toBe(false)
   })
 })

@@ -923,9 +923,12 @@ export async function* iterateRuntimeSecurityReports(
         )
         cases.push('FOREIGN_TENANT_UPDATE_DENIED')
         await scoped(runtimeClient, 'union_eyes_runtime', 0, async () => {
+          // Targets the seeded own row: source workflows (the guarded case fixture) legitimately
+          // add more rows to this tenant, and an unfiltered write of one value would collide on
+          // unique columns. Foreign isolation is proven separately (FOREIGN_TENANT_UPDATE_DENIED).
           const result = await runtimeClient.query(
-            `UPDATE ${relation(rule.table)} SET ${quote(writable.name)}=$1`,
-            [syntheticParameter(writable.type, rows[0][writable.name])],
+            `UPDATE ${relation(rule.table)} SET ${quote(writable.name)}=$1 WHERE ctid=$2::tid`,
+            [syntheticParameter(writable.type, rows[0][writable.name]), rows[0].ue_v2_ctid],
           )
           assert.equal(result.rowCount, 1, 'UE_V2_OWN_TENANT_UPDATE_DENIED')
         })

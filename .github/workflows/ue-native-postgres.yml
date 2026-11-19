@@ -21,7 +21,7 @@ concurrency:
 jobs:
   combined-schema:
     name: Combined Django + Drizzle PostgreSQL ${{ matrix.pg }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     timeout-minutes: 60
     strategy:
       fail-fast: false

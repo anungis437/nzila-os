@@ -395,7 +395,8 @@ export function compileSecurity(plan: V2Plan) {
         const using = privilege === 'SELECT' ? predicate : writePredicate
         if (!using) throw new Error(`UE_V2_WRITE_PREDICATE_REQUIRED:${table.name}`)
         const authenticated = plan.authExecution
-          ? `${AUTH_BUSINESS_ORG_PREDICATE}((${org})::uuid)`
+          ? // Session-only inputs: one evaluation per statement (InitPlan), not per row.
+            `(SELECT ${AUTH_BUSINESS_ORG_PREDICATE}((${org})::uuid))`
           : `${user} IS NOT NULL`
         const guard = `(${authenticated} AND (${using}))`
         const checkGuard = `(${authenticated} AND (${checkPredicate}))`

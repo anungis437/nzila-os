@@ -37,22 +37,26 @@ export async function authenticateUser(): Promise<
   return { ok: true, userId }
 }
 
-/** Global commerce totals require a platform assignment, never an org role.
- * auth() exposes verified Entra app assignments in sessionClaims.roles. Its
- * has({ role }) also accepts org roles, so it is unsuitable for this boundary.
+/** Platform roles that may read global (cross-organization) Flow operational aggregates. */
+export const GLOBAL_OPERATOR_ROLES = ['platform_admin', 'studio_admin', 'ops', 'platform.admin', 'system.admin'] as const
+
+/**
+ * Guard for platform-level routes (not org-scoped), named and shaped like the console/cfo guard of the same name.
+ * Global commerce totals require a platform assignment, never an org role. auth() exposes verified Entra app
+ * assignments in sessionClaims.roles; its has({ role }) also accepts org roles, so it is unsuitable for this boundary.
+ * No allowed role means no access.
  */
-export async function authenticateGlobalOperator(): Promise<
-  { ok: true; userId: string; platformRole: string } | { ok: false; response: NextResponse }
-> {
+export async function requirePlatformRole(
+  ...allowed: readonly string[]
+): Promise<{ ok: true; userId: string; platformRole: string } | { ok: false; response: NextResponse }> {
   const session = await auth()
   if (!session.userId) {
     return { ok: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
   const roles = session.sessionClaims?.roles
-  const operatorRoles = ['platform_admin', 'studio_admin', 'ops', 'platform.admin', 'system.admin']
   const platformRole =
     Array.isArray(roles) && roles.every((role) => typeof role === 'string')
-      ? roles.find((role: string) => operatorRoles.includes(role))
+      ? roles.find((role: string) => allowed.includes(role))
       : undefined
   if (!platformRole) {
     return {

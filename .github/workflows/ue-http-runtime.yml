@@ -30,7 +30,7 @@ concurrency:
 jobs:
   v2-engineering-runtime:
     name: V2 production build, real login, four browser profiles and full casework load
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     timeout-minutes: 90
     env:
       UE_V2_PYTHON_IMAGE: python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce
@@ -122,7 +122,7 @@ jobs:
 
   synthetic-browser-runtime:
     name: Production-build HTTP, cross-tenant and restart QA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5

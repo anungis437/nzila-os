@@ -222,6 +222,20 @@ const verified = new WeakMap<
 
 /** Generic emitters cannot mint the protected origin operation. Only the
  * fresh-record creator below calls the private writer with that identity. */
+/**
+ * Writes the legacy audit_log row that CFO read models count (for example client totals).
+ * It is an audit record of a mutation already performed in the same transaction, owned here
+ * with every other CFO audit_log write; it never replaces appendCfoPrimaryAudit.
+ */
+export async function appendCfoLegacyAuditRow(
+  context: CfoActionContext,
+  row: { action: string; entityType: string; orgId: string; metadata: Record<string, unknown> },
+) {
+  await context.db
+    .insert(auditLog)
+    .values({ ...row, actorId: context.userId })
+}
+
 export async function appendCfoPrimaryAudit(
   context: CfoActionContext,
   event: Parameters<typeof appendPrimaryAudit>[1],

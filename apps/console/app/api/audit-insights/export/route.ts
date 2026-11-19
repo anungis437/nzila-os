@@ -7,10 +7,17 @@ import { buildAuditInsightsCsv } from '@/lib/services/audit-inspection-service'
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateUser, getOrgMembership } from '@/lib/api-guards'
+import { withSpan } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+  // The export query and its structured log moved to audit-inspection-service;
+  // the route keeps its own request span so the export path stays traced.
+  return withSpan('api.audit-insights.export', {}, () => exportAuditInsights(req))
+}
+
+async function exportAuditInsights(req: NextRequest) {
   const authResult = await authenticateUser()
   if (!authResult.ok) return authResult.response
 

@@ -178,6 +178,11 @@ export const READ_ONLY_POST_ROUTES = [
   // ai/classify, ai/match-precedents, ai/search and ai/summarize now write an atomic audit record, so they are audited routes, not read-only.
   // The education reminder job only reads and sends email; it writes no row, and its per-send outcome is the job result.
   'cron/education-reminders/route.ts',
+  // Signed provider callbacks for base-release exclusions: after signature verification, payment and fulfillment events
+  // answer HTTP 501 (dues payments and rewards fulfillment are not in the base release) and every other topic is ignored.
+  // Neither writes a row; they return to audited routes only when that processing is implemented again.
+  'integrations/shopify/webhooks/route.ts',
+  'payments/webhooks/paypal/route.ts',
   'ai/mamba/route.ts', 'ai/pension/plans/[id]/trustee-summary/route.ts',
   'ai/semantic-search/route.ts', 'carbon/validate/route.ts',
   // voice/transcribe writes an atomic audit record of each transcription, so it is an audited route, not read-only.

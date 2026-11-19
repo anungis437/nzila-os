@@ -3,20 +3,20 @@
  "summary": {
   "routes": 1044,
   "mutating": 712,
-  "kernel": 67,
+  "kernel": 64,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 15,
    "CRUD_FACTORY": 133,
    "DELEGATED": 18,
-   "NONE": 25,
+   "NONE": 24,
    "ORG_AUTH": 13,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 238,
-   "ROLE_AUTH": 103,
+   "RETIRED": 239,
+   "ROLE_AUTH": 101,
    "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 418,
+   "WITH_API": 420,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -24,32 +24,32 @@
    "CAPABILITY_TOKEN": 9,
    "CRUD_FACTORY": 82,
    "DELEGATED": 10,
-   "NONE": 10,
+   "NONE": 9,
    "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 223,
-   "ROLE_AUTH": 55,
+   "RETIRED": 224,
+   "ROLE_AUTH": 53,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 262
+   "WITH_API": 264
   },
   "mutatingByAudit": {
    "ATOMIC": 173,
    "ATOMIC_SERVICE": 137,
-   "COMPUTE_ONLY": 32,
+   "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 25,
    "NO_WRITES_FOUND": 9,
-   "NONE": 225
+   "NONE": 223
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 82,
-   "NONE": 322,
+   "NONE": 334,
    "SYSTEM_CONTEXT": 58,
-   "TENANT_TX": 249
+   "TENANT_TX": 237
   }
  },
  "routes": [
@@ -4693,7 +4693,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -4706,7 +4706,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -5592,7 +5592,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "INTENT_OUTCOME"
   },
   {
@@ -5605,7 +5605,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "COMPUTE_ONLY"
   },
   {
@@ -5629,7 +5629,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "AMBIENT_DB",
    "audit": "READ_ONLY"
   },
   {
@@ -5641,7 +5641,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -5689,7 +5689,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -5701,7 +5701,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -5725,7 +5725,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -5749,7 +5749,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -5774,7 +5774,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7583,7 +7583,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7595,7 +7595,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7609,7 +7609,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7621,7 +7621,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7633,7 +7633,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7645,7 +7645,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7658,7 +7658,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7670,7 +7670,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7683,7 +7683,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -7704,7 +7704,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -7716,7 +7716,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "ROLE_AUTH",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -7731,7 +7731,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -8996,7 +8996,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "intelligence/route.ts",
@@ -10901,7 +10901,7 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "COMPUTE_ONLY"
   },
   {
    "route": "payments/webhooks/stripe/route.ts",
@@ -11924,7 +11924,7 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "NONE",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
@@ -12989,9 +12989,9 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": true,
+   "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -13001,9 +13001,9 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": true,
+   "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {
@@ -13014,9 +13014,9 @@
    ],
    "mutating": true,
    "guard": "SESSION_AUTH",
-   "kernel": true,
+   "kernel": false,
    "subordinate": null,
-   "data": "TENANT_TX",
+   "data": "NONE",
    "audit": "ATOMIC_SERVICE"
   },
   {

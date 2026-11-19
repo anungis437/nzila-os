@@ -1,6 +1,7 @@
 /** Exact canonical recipients; unbound historical UUID rows remain unserved. */
 'use server'
 import { sql } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 import { resolveOrgContext, ZongaScopeError, isZongaId } from '@/lib/resolve-org'
 import { zongaRows } from '@/queries/action-context'
 import {
@@ -37,7 +38,7 @@ export async function getUnreadCount(): Promise<number> {
   })
 }
 export async function markAsRead(notificationId: string): Promise<{ success: boolean }> {
-  return resolveOrgContext('personal', async (context) => {
+  const result = await resolveOrgContext('personal', async (context) => {
     if (!isZongaId(notificationId)) throw new ZongaScopeError()
     const [row] = zongaRows<{ id: string }>(
       await context.db.execute(
@@ -46,14 +47,19 @@ export async function markAsRead(notificationId: string): Promise<{ success: boo
     )
     return { success: !!row }
   })
+  // Invalidate only after the scoped transaction has committed a real change.
+  if (result.success) revalidatePath('/dashboard/notifications')
+  return result
 }
 export async function markAllRead(): Promise<{ success: boolean }> {
-  return resolveOrgContext('personal', async (context) => {
+  const result = await resolveOrgContext('personal', async (context) => {
     await context.db.execute(
       sql`UPDATE public.zonga_notifications SET read=true WHERE recipient_user_id=${context.actorId} AND user_id IS NULL AND read=false`,
     )
     return { success: true }
   })
+  revalidatePath('/dashboard/notifications')
+  return result
 }
 export async function createNotification(
   data: NotificationRequest,

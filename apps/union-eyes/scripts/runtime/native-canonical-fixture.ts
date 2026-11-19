@@ -142,6 +142,7 @@ export interface NativeCanonicalSession {
   withBinding<T>(operation: (binding: AuthenticatedOrgBinding) => Promise<T>): Promise<T>
   revoke(): Promise<void>
 }
+// ga-check:exempt — native test fixture: sessions it created this run, revoked on teardown; not persistence.
 const sessions = new Map<string, NativeCanonicalSession>()
 
 /** Call after operator seeds commit: the production auth gateway uses a separate connection.
