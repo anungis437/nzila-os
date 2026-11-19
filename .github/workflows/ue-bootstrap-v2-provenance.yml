@@ -140,3 +140,75 @@ jobs:
           git diff --exit-code -- .
           ':(exclude)artifacts/ue-v2-local-vault-*.json'
           ':(exclude)artifacts/ue-v2-production-key-authority-*.json'
+
+  # The full native runtime security matrix (runtime-security-native, 363 cases) on a clean runner, bound to
+  # the dispatched SHA. It is too long for every pull request, and a developer machine under memory pressure
+  # swaps the database VM until the per-table 120 s limit trips, so qualification runs here, on demand.
+  runtime-security-native:
+    name: Native runtime security matrix (dispatch only)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Build the hash-locked Linux x86_64 cp311 wheelhouse in the pinned interpreter image
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheelhouse="$RUNNER_TEMP/ue-v2-wheelhouse"
+          mkdir -p "$wheelhouse"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$wheelhouse:/wheels" \
+            "$UE_V2_PYTHON_IMAGE" \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+              --require-hashes --no-deps --only-binary=:all: \
+              -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$wheelhouse"/*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$wheelhouse" >> "$GITHUB_ENV"
+
+      - name: Pull the pinned PostgreSQL image the native fixture runs with --pull never
+        run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+
+      - name: Run the full native runtime security matrix
+        working-directory: apps/union-eyes
+        env:
+          NODE_ENV: test
+          NODE_OPTIONS: --max-old-space-size=6144
+          UE_CANONICAL_BOOTSTRAP_V2: '1'
+          UE_V2_NATIVE_MANIFEST: '1'
+          QA_TEST_ENV: 'false'
+          UE_QA_GATE: 'false'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ue-runtime-security-native"
+          pnpm exec vitest run --config vitest.heavy.config.ts scripts/bootstrap-v2/runtime-security-native.test.ts \
+            --maxWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/ue-runtime-security-native/results.json"
+
+      - name: Every native case ran and passed (none skipped)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e '
+            const r = require(process.argv[1])
+            const summary = { sha: process.env.GITHUB_SHA, total: r.numTotalTests, passed: r.numPassedTests, failed: r.numFailedTests, pending: r.numPendingTests + (r.numTodoTests || 0) }
+            console.log(JSON.stringify(summary))
+            if (summary.total === 0 || summary.failed !== 0 || summary.pending !== 0 || summary.passed !== summary.total) process.exit(1)
+          ' "$RUNNER_TEMP/ue-runtime-security-native/results.json"
+
+      - name: Preserve the native matrix report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-runtime-security-native-${{ github.sha }}
+          path: ${{ runner.temp }}/ue-runtime-security-native/results.json
+          retention-days: 90
+          if-no-files-found: warn
