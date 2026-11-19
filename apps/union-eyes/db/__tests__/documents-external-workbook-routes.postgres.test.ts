@@ -256,6 +256,8 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
     await newOrganization(ORG_A, `Documents A ${tag}`)
     await newOrganization(ORG_B, `Documents B ${tag}`)
     for (const [user, org, role] of [[memberA, ORG_A, 'member'], [stewardA, ORG_A, 'steward'], [memberB, ORG_B, 'member'], [stewardB, ORG_B, 'steward'], [peerA, ORG_A, 'steward'], [peerB, ORG_B, 'steward']] as const) harness.setRole(user, org, role)
+    // The workbook claimant is a member of the claiming organization: their own user context is a real canonical session.
+    harness.setRole(claimant, ORG_A, 'member')
     state.userOrganization.set(claimant, ORG_A)
     state.userOrganization.set(peerA, ORG_A)
     state.userOrganization.set(peerB, ORG_B)

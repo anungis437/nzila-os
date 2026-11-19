@@ -53,6 +53,9 @@ describe.skipIf(!URL)('the dashboard layout bootstrap on the combined schema, as
     await insertOrganization(admin, tag, { id: DEFAULT_ORG })
     await insertOrganization(admin, tag, { id: QC_ORG, province: 'QC' })
     await insertOrganization(admin, tag, { id: OTHER_ORG })
+    // The member who opens the dashboard of each organization whose province is read: a real canonical member with a real session.
+    await harness.declareCaller(`province-reader-qc-${tag}`, QC_ORG, 'member')
+    await harness.declareCaller(`province-reader-other-${tag}`, OTHER_ORG, 'member')
   }, 120_000)
 
   afterAll(async () => {
@@ -292,7 +295,7 @@ describe.skipIf(!URL)('the dashboard layout bootstrap on the combined schema, as
     })
 
     it('control: another organization\'s context cannot read it, and no organization at all reads nothing', async () => {
-      const asOther = await harness.tenant(RUNTIME_ROLE, OTHER_ORG, null, (tx) => tx.select({ id: schema!.organizations.id }).from(schema!.organizations))
+      const asOther = await harness.tenant(RUNTIME_ROLE, OTHER_ORG, `province-reader-other-${tag}`, (tx) => tx.select({ id: schema!.organizations.id }).from(schema!.organizations))
       expect(asOther.map((row) => row.id)).toEqual([OTHER_ORG])
       expect(await harness.tenant(RUNTIME_ROLE, null, null, (tx) => tx.select({ id: schema!.organizations.id }).from(schema!.organizations))).toEqual([])
     })

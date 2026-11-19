@@ -96,6 +96,10 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     await admin.query(`INSERT INTO integration_partners (organization_id, name, provider, category) VALUES ($1, $2, 'p', 'hris'), ($3, $4, 'p', 'hris')`, [ORG_A, `Partner A ${tag}`, ORG_B, `Partner B ${tag}`])
     await admin.query(`INSERT INTO integration_configs (organization_id, type, provider, credentials, settings, enabled) VALUES ($1, 'hris', 'workday', '{}'::jsonb, '{"k":"a"}'::jsonb, true), ($2, 'hris', 'adp', '{}'::jsonb, '{"k":"b"}'::jsonb, false)`, [ORG_A, ORG_B])
     await admin.query(`INSERT INTO platform_services (service_name, status) VALUES ($1, 'healthy'), ($2, 'down') ON CONFLICT (service_name) DO UPDATE SET status = EXCLUDED.status`, [`web-${tag}`, `queue-${tag}`])
+    // The administrator who opens each organization's dashboards: a real canonical member acting through a real session.
+    await savepointHarness.declareCaller(U.adminA, ORG_A, 'admin')
+    await savepointHarness.declareCaller(user('adminB'), ORG_B, 'admin')
+    await savepointHarness.declareCaller(user('platformAdmin'), PLATFORM_ORG, 'admin')
 
 
   })
@@ -190,13 +194,17 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
   })
 
   describe('the platform settings', () => {
-    it('reads the settings, the keys and the services of the platform organization the person belongs to', async () => {
+    it('reads the settings and the keys of the platform organization the person belongs to, and reports the services unavailable', async () => {
       const rows = await platformSettings!.loadPlatformSettings(PLATFORM_ORG)
 
       expect(rows).toMatchObject({ settings: { sessionTimeout: 45 }, featuresEnabled: ['feature-x'] })
       expect(rows?.apiKeys.map((key) => key.name)).toEqual([`Platform key ${tag}`])
       expect(rows?.apiKeys[0]).toMatchObject({ status: 'active', scopes: ['platform'], requestCount: 3 })
-      expect(rows?.services.find((service) => service.serviceName === `queue-${tag}`)?.status).toBe('down')
+      // platform_services is CONTAINED_NO_AUTHORITY in the canonical decisions: unavailable (null), never an empty or invented list.
+      expect(rows?.services).toBeNull()
+      for (const role of [RUNTIME_ROLE, SYSTEM_ROLE]) {
+        expect(await refusedBy(savepointHarness.context(role, null, null, (tx) => tx.execute(sql`SELECT 1 FROM platform_services`)))).toMatch(/permission denied/)
+      }
     })
 
     it('has no platform settings for an organization that is not a platform one, and never shows another organization key', async () => {

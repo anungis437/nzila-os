@@ -23,17 +23,34 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const state = vi.hoisted(() => ({ admin: null as unknown, pool: null as unknown, als: null as unknown, schema: null as unknown }))
 
 type Tx = ReturnType<typeof drizzle>
 
+/** The declared reader of an organization: a real canonical member whose live session the tenant transaction carries. */
+const readerOf = (organizationId: string) => nativeTenantReaderId(organizationId)
+
 async function inRole<T>(role: string, organizationId: string | null, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  // The canonical topology admits a tenant statement only inside a verified business session (ue_v2_verified_business_session).
+  if (role === 'union_eyes_runtime' && organizationId)
+    return withNativeCanonicalActor(readerOf(organizationId), organizationId, (binding) => inRoleBound(role, organizationId, fn, binding))
+  return inRoleBound(role, organizationId, fn)
+}
+
+async function inRoleBound<T>(role: string, organizationId: string | null, fn: (tx: Tx) => Promise<T>, binding?: AuthenticatedOrgBinding): Promise<T> {
   const client = await (state.pool as pg.Pool).connect()
   try {
     await client.query('BEGIN')
     await client.query(`SET LOCAL ROLE ${role}`)
     if (organizationId) await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId])
+    if (binding) await setNativeBusinessContext(client, binding)
     const db = drizzle(client, { schema: state.schema as never })
     const execute = db.execute.bind(db)
     ;(db as unknown as { execute: unknown }).execute = async (q: never) => (await execute(q)).rows
@@ -118,6 +135,7 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
     await insertOrg(O.d, `Local D ${tag}`, 'local', [O.fed2, O.d], true)
     // The congress is an organization of its own: a membership names it by foreign key.
     await insertOrg(O.congress, `Congress ${tag}`, 'congress', [O.congress], false)
+    for (const org of Object.values(O)) await seedDeclaredCanonicalActor(admin, readerOf(org), org, 'member')
     // A and C are active members of a congress; D is CLC-affiliated but holds no membership; B is neither. None of it admits a reader: the
     // federation and congress levels are readable by the owner only.
     for (const org of [O.a, O.c]) {
@@ -180,6 +198,7 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
   it('an organization outside every hierarchy and membership reads only what is public', async () => {
     const stranger = randomUUID()
     await insertOrg(stranger, `Stranger ${tag}`, 'local', [stranger], false)
+    await seedDeclaredCanonicalActor(admin, readerOf(stranger), stranger, 'member')
     expect(keysOf(await listed(stranger))).toEqual(['a-public'])
   })
 
@@ -231,15 +250,30 @@ describe.skipIf(!URL)('shared clause visibility on the combined schema, as the r
     expect(await tagsFor(O.b, 'a-federation')).toEqual([])
   })
 
-  it('no ue_clause_* function exists any more, and no SECURITY DEFINER function is executable by a business role', async () => {
+  it('no ue_clause_* function exists any more, and a business role executes only the SECURITY DEFINER functions the current source grants it', async () => {
     const helpers = await admin.query(`SELECT proname FROM pg_proc WHERE proname LIKE 'ue_clause_%'`)
     expect(helpers.rows).toEqual([])
+    // The canonical design deliberately exposes a few definer checks (case authority, external read, queued mail) owned by isolated,
+    // non-login reader roles; each is declared in the compiled current-security source with its exact EXECUTE grantees. Nothing else, and
+    // never PUBLIC, may be executable by a business role.
+    const decisions = JSON.parse(readFileSync(resolve(__dirname, '../../lib/operations/catalog-v2-decisions.json'), 'utf8')) as {
+      currentSecurity: { currentFunctions: { schema: string; name: string; executeAcl: { role: string }[] }[] } }
+    const declared = new Set(decisions.currentSecurity.currentFunctions.filter((fn) => fn.schema === 'public')
+      .flatMap((fn) => fn.executeAcl.map((grant) => `${fn.name}:${grant.role}`)))
     const definers = await admin.query(
-      `SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
-        WHERE p.prosecdef AND n.nspname = 'public'
-          AND (has_function_privilege('union_eyes_runtime', p.oid, 'EXECUTE') OR has_function_privilege('union_eyes_system', p.oid, 'EXECUTE') OR has_function_privilege('public', p.oid, 'EXECUTE'))`,
+      `SELECT p.proname, r.rolname AS role, owner.rolcanlogin AS owner_login, owner.rolname AS owner,
+              has_function_privilege('public', p.oid, 'EXECUTE') AS public_execute
+         FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace JOIN pg_roles owner ON owner.oid = p.proowner
+         CROSS JOIN (VALUES ('union_eyes_runtime'), ('union_eyes_system')) AS r(rolname)
+        WHERE p.prosecdef AND n.nspname = 'public' AND has_function_privilege(r.rolname, p.oid, 'EXECUTE')`,
     )
-    expect(definers.rows).toEqual([])
+    expect(definers.rows.length).toBeGreaterThan(0)
+    for (const row of definers.rows) {
+      expect(declared.has(`${row.proname}:${row.role}`), `${row.proname} executable by ${row.role}`).toBe(true)
+      expect(row.public_execute, row.proname).toBe(false)
+      expect(row.owner_login, row.proname).toBe(false)
+      expect(['union_eyes_runtime', 'union_eyes_system'], row.proname).not.toContain(row.owner)
+    }
   })
 
   it("the owner's name is read by id on the system role, only for a source the projection may disclose", async () => {

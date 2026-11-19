@@ -20,27 +20,39 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 // The user is the authenticated session user: the real withRLSContext takes app.current_user_id from the session, and the audit insert policy
 // requires the audit row's user to be that user.
-const state = vi.hoisted(() => ({ pool: null as unknown, schema: null as unknown, user: '' }))
+const state = vi.hoisted(() => ({ pool: null as unknown, schema: null as unknown, user: '', members: new Set<string>() }))
 
 async function inRole<T>(organizationId: string, userId: string, work: (tx: unknown) => Promise<T>): Promise<T> {
-  const client = await (state.pool as pg.Pool).connect()
-  try {
-    return await drizzle(client, { schema: state.schema as never }).transaction(async (tx) => {
-      await tx.execute(sql.raw('SET LOCAL ROLE union_eyes_runtime'))
-      await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId}, true), set_config('app.current_user_id', ${userId}, true)`)
-      return work(tx)
-    })
-  } finally {
-    client.release()
+  const run = async (binding?: AuthenticatedOrgBinding) => {
+    const client = await (state.pool as pg.Pool).connect()
+    try {
+      return await drizzle(client, { schema: state.schema as never }).transaction(async (tx) => {
+        await tx.execute(sql.raw('SET LOCAL ROLE union_eyes_runtime'))
+        await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId}, true), set_config('app.current_user_id', ${userId}, true)`)
+        // The canonical topology admits a tenant statement only in the actor's verified business session (ue_v2_verified_business_session).
+        if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
+        return work(tx)
+      })
+    } finally {
+      client.release()
+    }
   }
+  // Only a member of the organization has a session there; anyone else acts with none and sees nothing, as production refuses them.
+  const member = organizationId && userId && state.members.has(`${userId}|${organizationId}`)
+  return member ? withNativeCanonicalActor(userId, organizationId, run) : run()
 }
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: (ctx: { organizationId: string; userId?: string }, work: (tx: unknown) => Promise<unknown>) => inRole(ctx.organizationId, ctx.userId ?? state.user, work),
+  // The authenticated session user; a read that names none is opened by the organization's declared page caller (a member of it).
+  withRLSContext: (ctx: { organizationId: string; userId?: string }, work: (tx: unknown) => Promise<unknown>) =>
+    inRole(ctx.organizationId, ctx.userId || state.user || nativeTenantReaderId(ctx.organizationId || 'none'), work),
   withSystemContext: () => { throw new Error('the signature reads never use the system role') },
 }))
 vi.mock('@/db', () => ({ db: new Proxy({}, { get() { throw new Error('the signature reads never use the shared handle') } }) }))
@@ -78,6 +90,11 @@ describe.skipIf(!URL)('the e-signature reads on the combined schema, as the real
          VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
         [org, slug, slug],
       )
+    }
+    // The sender and the signer are members of the document's organization; the person typed in as a signer belongs to the other one.
+    for (const [user, org] of [[U.sender, ORG_A], [U.signer, ORG_A], [U.foreign, ORG_B], [nativeTenantReaderId(ORG_A), ORG_A], [nativeTenantReaderId(ORG_B), ORG_B]] as const) {
+      await seedDeclaredCanonicalActor(admin, user, org, 'member')
+      state.members.add(`${user}|${org}`)
     }
     await admin.query(
       `INSERT INTO signature_documents (id, organization_id, title, document_type, file_url, file_name, file_size_bytes, file_hash, provider, status, sent_by, require_authentication, sequential_signing, allow_decline, allow_reassign, created_at, updated_at)

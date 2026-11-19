@@ -20,6 +20,7 @@ import { RUNTIME_ROLE, SYSTEM_ROLE, type AuditRecord } from './native-route-harn
 import assert from 'node:assert/strict'
 import { nativeActionUrl, installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
 
 export { RUNTIME_ROLE, SYSTEM_ROLE }
 export type { AuditRecord }
@@ -32,12 +33,19 @@ interface Scope {
 }
 
 const scopes = new AsyncLocalStorage<Scope>()
+/** The authenticated caller of the request being handled, as production's auth() answers it inside a route. */
+const callers = new AsyncLocalStorage<{ userId: string }>()
 let pool: pg.Pool | null = null
 let systemPool: pg.Pool | null = null
 let runtimePool: pg.Pool | null = null
 let ambient: Db | null = null
 let schema: Record<string, unknown> | null = null
 let auditFailure: Error | null = null
+let operatorPool: pg.Pool | null = null
+// ga-check:exempt test-harness state: operator seeds of declared actors, settled before any canonical session is opened.
+let declarations: Promise<void> = Promise.resolve()
+// ga-check:exempt test-harness state: the declared caller who opens an organization's pages (the authenticated user production's auth() answers).
+const pageCallers = new Map<string, string>()
 
 /**
  * The application's postgres-js driver returns the rows of a raw `execute` as an array; node-postgres returns `{ rows }`. A handle, and every transaction (a savepoint, when it is
@@ -63,6 +71,9 @@ export const savepointHarness = {
     systemPool = new pg.Pool({ connectionString: nativeActionUrl(SYSTEM_ROLE, url), max: 4 })
     runtimePool = new pg.Pool({ connectionString: nativeActionUrl(RUNTIME_ROLE, url), max: 4, options: `-c role=${RUNTIME_ROLE}` })
     ambient = emulateDriver(drizzle(runtimePool, { schema: schema as never }))
+    operatorPool = new pg.Pool({ connectionString: url, max: 1 })
+    declarations = Promise.resolve()
+    pageCallers.clear()
     const admin = new pg.Client({ connectionString: url })
     await admin.connect()
     return admin
@@ -72,14 +83,60 @@ export const savepointHarness = {
     await pool?.end()
     await systemPool?.end()
     await runtimePool?.end()
+    await declarations.catch(() => undefined)
+    await operatorPool?.end()
     pool = null
     systemPool = null
     runtimePool = null
+    operatorPool = null
     ambient = null
+  },
+
+  /**
+   * Declares a fixture actor: the operator seeds its canonical user and active membership with the role (native-declared-actor.ts). The session
+   * it acts through is still issued by the production auth gateway and re-read by the policies. Declare after the organization exists.
+   */
+  declare(userId: string, organizationId: string, role: string): Promise<void> {
+    if (!operatorPool) throw new Error('savepoint harness not started: declare actors after start()')
+    const operator = operatorPool
+    declarations = declarations.then(() => seedDeclaredCanonicalActor(operator, userId, organizationId, role))
+    const settled = declarations
+    settled.catch(() => undefined)
+    return settled
+  },
+
+  /**
+   * Declares the authenticated user who opens the organization's pages: production's withRLSContext takes the actor from auth(), never from
+   * the context map, so a service that passes only { organizationId } acts as this caller. An organization with no declared caller gets no
+   * session, and the runtime role sees nothing of it.
+   */
+  declareCaller(userId: string, organizationId: string, role: string): Promise<void> {
+    pageCallers.set(organizationId, userId)
+    return savepointHarness.declare(userId, organizationId, role)
   },
 
   failNextAudit(error: Error = new Error('audit sink unavailable')): void {
     auditFailure = error
+  },
+
+  /** Runs a handled request of this authenticated caller: a withRLSContext that names no user acts as them (see contextModule). */
+  asCaller<T>(userId: string | null | undefined, work: () => Promise<T>): Promise<T> {
+    return userId ? callers.run({ userId }, work) : work()
+  },
+
+  /**
+   * A page or route request of a live member, as production serves it in canonical mode: one live binding held for the request and the
+   * canonical request scope established from it (lib/auth/canonical-context.ts withCanonicalApiContext), so in-request organization and role
+   * reads (getOrganizationIdForUser, hasRoleInOrganization, ...) answer from the session. The member must have been declared.
+   */
+  async asCanonicalRequest<T>(userId: string, organizationId: string, work: () => Promise<T>): Promise<T> {
+    await declarations
+    const [{ withCanonicalRequestScope }, { canonicalMembershipRole }] = await Promise.all([
+      import('@/lib/auth/canonical-request-scope'), import('@/lib/auth/canonical-membership-role')])
+    return withNativeCanonicalActor(userId, organizationId, (binding) => withCanonicalRequestScope(binding, {
+      userId: binding.userId, organizationId: binding.organizationId, role: canonicalMembershipRole(binding.role, binding.isSystemAdmin),
+      email: `${binding.userId}@example.test`, firstName: null, lastName: null, isSystemAdmin: binding.isSystemAdmin,
+    }, work))
   },
 
   /** One context: the role, the organization and the user the policies read, in a transaction whose nested transactions are savepoints. */
@@ -87,6 +144,7 @@ export const savepointHarness = {
     assert.ok(role === RUNTIME_ROLE || role === SYSTEM_ROLE, 'Native action role must be declared')
     const selectedPool = role === SYSTEM_ROLE ? systemPool : pool
     if (!selectedPool || !schema) throw new Error('savepoint harness not started')
+    await declarations
     const execute = async (binding?: AuthenticatedOrgBinding) => {
       const client = await selectedPool.connect()
       const scope: Scope = { pending: [], tx: null as unknown as Db }
@@ -106,8 +164,10 @@ export const savepointHarness = {
         client.release()
       }
     }
-    return role === RUNTIME_ROLE && userId && organizationId
-      ? withNativeCanonicalActor(userId, organizationId, execute)
+    // A tenant context of an organization with no named user acts as that organization's declared page caller, if it has one.
+    const actor = userId ?? (role === RUNTIME_ROLE && organizationId ? pageCallers.get(organizationId) ?? null : null)
+    return role === RUNTIME_ROLE && actor && organizationId
+      ? withNativeCanonicalActor(actor, organizationId, execute)
       : execute()
   },
 }
@@ -124,7 +184,8 @@ export const ambientDb = new Proxy({}, {
 export const contextModule = {
   withSystemContext: <T>(work: (tx: Db) => Promise<T>) => savepointHarness.context(SYSTEM_ROLE, null, null, work),
   withRLSContext: <T>(context: { organizationId: string; userId?: string }, work: (tx: Db) => Promise<T>) =>
-    savepointHarness.context(RUNTIME_ROLE, context.organizationId, context.userId ?? null, work),
+    savepointHarness.context(RUNTIME_ROLE, context.organizationId,
+      context.userId ?? callers.getStore()?.userId ?? pageCallers.get(context.organizationId) ?? null, work),
   /** The runtime role as one named user (and organization): what a claimant of a workbook, a person with no organization, acts as. */
   withExplicitUserContext: <T>(userId: string, work: () => Promise<T>, organizationId?: string) =>
     savepointHarness.context(RUNTIME_ROLE, organizationId ?? null, userId, () => work()),

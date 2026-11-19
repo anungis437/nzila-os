@@ -21,6 +21,7 @@ import { memory as cognitionMemory } from '@nzila/platform-cognition-core'
 import { setUeCognitionStoreRoot } from '@nzila/ue-cognition'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -60,6 +61,8 @@ describe.skipIf(!URL)('the cognition and executive dashboard reads on the combin
     admin = await harness.start(URL!)
     await insertOrganization(admin, tag, { id: ORG_A })
     await insertOrganization(admin, tag, { id: ORG_B })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
 
     ids.stewardRowA = (await admin.query(`INSERT INTO stewards (org_id, user_id, active, max_caseload, current_caseload) VALUES ($1, $2, true, 10, 4) RETURNING id::text AS id`, [ORG_A, repUserA])).rows[0].id
     await admin.query(`INSERT INTO stewards (org_id, user_id, active, max_caseload, current_caseload) VALUES ($1, $2, false, 10, 9), ($3, $4, true, 8, 8)`, [ORG_A, stewardA, ORG_B, randomUUID()])

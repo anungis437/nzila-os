@@ -34,6 +34,8 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import { eq, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { serializeRawDates } from '@/db/driver-dates'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const APP_ROOT = join(__dirname, '..', '..')
@@ -41,11 +43,13 @@ const state = vi.hoisted(() => ({ db: null as unknown, tx: null as unknown, user
 
 async function inRole<T>(organizationId: string, userId: string, work: (tx: unknown) => Promise<T>): Promise<T> {
   const db = state.db as { transaction: <R>(fn: (tx: { execute: (query: unknown) => Promise<unknown> }) => Promise<R>) => Promise<R> }
-  return db.transaction(async (tx) => {
+  // The canonical topology admits a tenant statement only inside the actor's verified business session (ue_v2_verified_business_session).
+  return withNativeCanonicalActor(userId, organizationId, (binding) => db.transaction(async (tx) => {
     await tx.execute(sql.raw('SET LOCAL ROLE union_eyes_runtime'))
-    await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId}, true), set_config('app.current_user_id', ${userId}, true)`)
+    await tx.execute(sql`SET LOCAL search_path=pg_catalog,public,pg_temp`)
+    await installNativeBusinessContext((statement) => tx.execute(statement), binding)
     return work(tx)
-  })
+  }))
 }
 
 // Outside a tenant transaction the shared handle is the raw pool; inside a request it is that request's transaction, which is what state.tx binds it to.
@@ -200,6 +204,8 @@ describe.skipIf(!URL)('semantic search on the combined schema, as the real runti
         [id, name, `sem-${sfx}-${id.slice(0, 6)}`],
       )
     }
+    // The one person who searches, a real canonical member of both organizations acting through a real session in each.
+    for (const organizationId of [ORG_A, ORG_B]) await seedDeclaredCanonicalActor(admin, USER, organizationId, 'steward')
     // Start from a database without the vector column, whichever way the template was built: the clone is disposable.
     await admin.query('ALTER TABLE knowledge_base DROP COLUMN IF EXISTS embedding')
     await admin.query('DROP EXTENSION IF EXISTS vector')
@@ -439,7 +445,7 @@ describe.skipIf(!URL)('semantic search on the combined schema, as the real runti
       expect(
         await rows(`SELECT source_type, source_id, organization_id::text org, embedding_model, (embedding <=> $2::vector) AS distance FROM knowledge_base WHERE id = $1`, [knowledgeBaseId, literal(E2)]),
       ).toEqual([{ source_type: 'exit_interview', source_id: interview, org: ORG_A, embedding_model: 'text-embedding-3-small', distance: 0 }])
-      const actions = (await rows(`SELECT action FROM audit_security.audit_logs WHERE resource_id = $1 ORDER BY created_at`, [interview])).map((row) => row.action)
+      const actions = (await rows(`SELECT action FROM public.audit_logs WHERE resource_id::text = $1 ORDER BY created_at`, [interview])) /* canonical mode writes the hash-chained public.audit_logs */.map((row) => row.action)
       expect(actions).toEqual(expect.arrayContaining(['exit_interview.index.embed.requested', 'exit_interview.index.embed.completed', 'exit_interview.index']))
 
       const found = await new chatbot!.RAGService().searchDocuments('x', { organizationId: ORG_A, similarityThreshold: 0.9, readableLevels: ['public_internal'] })
@@ -458,7 +464,7 @@ describe.skipIf(!URL)('semantic search on the combined schema, as the real runti
       expect(result).toEqual({ indexed: false, reason: 'Indexing failed', failed: true })
       expect(await rows(`SELECT indexing_status::text status, knowledge_base_id FROM exit_interviews WHERE id = $1`, [interview])).toEqual([{ status: 'failed', knowledge_base_id: null }])
       expect(await rows(`SELECT 1 FROM knowledge_base WHERE source_id = $1`, [interview])).toHaveLength(0)
-      const actions = (await rows(`SELECT action FROM audit_security.audit_logs WHERE resource_id = $1`, [interview])).map((row) => row.action)
+      const actions = (await rows(`SELECT action FROM public.audit_logs WHERE resource_id::text = $1`, [interview])).map((row) => row.action)
       expect(actions).toContain('exit_interview.index.failed')
       expect(actions).not.toContain('exit_interview.index')
     })

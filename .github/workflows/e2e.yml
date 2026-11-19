@@ -87,6 +87,7 @@ jobs:
           exit 1
 
       - name: Build app
+        if: matrix.app != 'union-eyes'
         id: app-build
         run: pnpm --filter @nzila/${{ matrix.app }} build
         env:
@@ -101,6 +102,7 @@ jobs:
           QA_TEST_ENV: 'true'
 
       - name: Stage standalone static assets
+        if: matrix.app != 'union-eyes'
         # Next.js `output: 'standalone'` produces a minimal server bundle but
         # intentionally does NOT copy `.next/static` or `public` into the
         # standalone folder (the Dockerfile normally does this). The E2E harness
@@ -129,71 +131,57 @@ jobs:
           fi
           echo "Staged $(find "$STANDALONE_APP/.next/static" -type f | wc -l) static files into standalone output"
 
-      - name: Set up Python (Django-owned schema prerequisites)
+      - name: Set up Python 3.11 with the locked Django runtime (canonical runtime prerequisite)
         if: matrix.app == 'union-eyes'
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.11.14'
+          cache: pip
+          cache-dependency-path: apps/union-eyes/backend/requirements.lock
 
-      - name: Bootstrap Union Eyes E2E database (synthetic)
+      - name: Install locked Django dependencies
         if: matrix.app == 'union-eyes'
+        run: python -m pip install --require-hashes -r apps/union-eyes/backend/requirements.lock
+
+      # The bootstrap converges the canonical V2 security source, which requires the canonical operator and real
+      # bearer-bound fixtures; the former ci-superuser, non-canonical database with seeded test sessions is no longer
+      # a supported runtime. Provision exactly as the production-build HTTP QA job does, then serve the production app.
+      - name: Start the canonical synthetic Union Eyes runtime (database, fixtures, production app)
+        id: ue-runtime
+        if: matrix.app == 'union-eyes'
+        timeout-minutes: 45
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -euo pipefail
           if [ -n "${AZURE_CLIENT_ID:-}${AZURE_TENANT_ID:-}${AZURE_SUBSCRIPTION_ID:-}${AZURE_STORAGE_ACCOUNT_KEY:-}${PERF_AUTH_TOKEN:-}" ]; then
             echo "::error::Synthetic Union Eyes E2E received privileged credentials"
             exit 1
           fi
+          test -z "$(docker ps -aq --filter name='^/ue-runtime-pg$')"
+          node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild
 
-          # Empty PG15 with vector extension support. No snapshot retrieve.
-          # Retry image pull — Docker Hub intermittently returns 502.
-          for attempt in 1 2 3 4 5; do
-            if docker pull pgvector/pgvector:pg15; then
-              break
-            fi
-            echo "docker pull attempt ${attempt} failed; sleeping $((attempt * 5))s"
-            sleep $((attempt * 5))
-            if [ "$attempt" -eq 5 ]; then
-              echo "::error::Failed to pull pgvector/pgvector:pg15 after 5 attempts"
-              exit 1
-            fi
-          done
-          docker run --name ci-e2e-postgres             -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e             -p 5432:5432 -d pgvector/pgvector:pg15
-          timeout 90 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
-
-          # Roles expected by RLS helpers (idempotent).
-          docker exec -i ci-e2e-postgres psql -U ci -d ci_e2e <<'SQL'
-          DO $$ BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
-              CREATE ROLE union_eyes_runtime LOGIN PASSWORD 'ci';
-            END IF;
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system') THEN
-              CREATE ROLE union_eyes_system LOGIN PASSWORD 'ci';
-            END IF;
-          END $$;
-          GRANT ALL ON DATABASE ci_e2e TO union_eyes_runtime, union_eyes_system;
-          GRANT ALL ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
-          SQL
-
-          # The platform SQL (0013 onward) extends tables that the Django backend owns (message_threads, payments,
-          # documents, ...), so Django migrates first, as in production. Synthetic, credential-free database only.
-          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
-          (cd apps/union-eyes/backend && PGHOST=localhost PGPORT=5432 PGUSER=ci PGPASSWORD=ci PGDATABASE=ci_e2e python manage.py migrate --noinput)
-
-          # QA_TEST_ENV selects the credential-free baseline inside db:migrate.
-          # UE_DB_RESTORE_SNAPSHOT_URL stays unset, so no canonical snapshot is restored.
-          unset UE_DB_RESTORE_SNAPSHOT_URL || true
-          export PGSSLMODE=disable
-          export POSTGRES_MAJOR=15
-          pnpm --filter @nzila/union-eyes db:migrate
-          pnpm --filter @nzila/union-eyes seed:test-env
-        env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          QA_TEST_ENV: 'true'
-          POSTGRES_MAJOR: '15'
-          PGSSLMODE: disable
+      - name: Point Playwright at the owned canonical runtime without printing credentials
+        if: matrix.app == 'union-eyes'
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs'
+          import { operatorDatabaseUrl, runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
+          const operator = operatorDatabaseUrl()
+          const env = runtimeEnv()
+          console.log('::add-mask::' + new URL(operator).password)
+          appendFileSync(process.env.GITHUB_ENV, [
+            'UE_CANONICAL_BOOTSTRAP_V2=1',
+            'PLAYWRIGHT_TEST_AUTH=false',
+            'PLAYWRIGHT_BASE_URL=' + env.PLAYWRIGHT_BASE_URL,
+            'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
+            // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
+            'DATABASE_URL=' + operator,
+          ].join('\n') + '\n')
+          NODE
 
       - name: Start app
+        if: matrix.app != 'union-eyes'
         run: |
           node apps/${{ matrix.app }}/.next/standalone/apps/${{ matrix.app }}/server.js >/tmp/app-server.log 2>&1 &
           # Wait for the server to be ready
@@ -224,6 +212,7 @@ jobs:
           ORCHESTRATOR_API_URL: http://localhost:4000
 
       - name: Run Playwright tests
+        if: matrix.app != 'union-eyes'
         id: playwright
         run: pnpm --filter @nzila/${{ matrix.app }} e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
@@ -243,6 +232,13 @@ jobs:
       # build against the synthetic database, public routes only. No token and no
       # staging target are involved. It runs after Playwright so it cannot skew the
       # shard, and only on shard 1 so the load is applied once per pull request.
+
+      - name: Run Playwright tests (canonical Union Eyes runtime, real password and MFA login)
+        id: ue-playwright
+        if: matrix.app == 'union-eyes'
+        run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
+        env:
+          CI: true
       - name: Install k6 (application performance smoke)
         if: matrix.app == 'union-eyes' && matrix.shard == 1
         run: |
@@ -261,7 +257,7 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/ue-k6"
           k6 run \
             --env PROFILE=ci \
-            --env BASE_URL="http://localhost:${{ matrix.port }}" \
+            --env BASE_URL="http://127.0.0.1:${{ matrix.port }}" \
             --summary-export="${RUNNER_TEMP}/ue-k6/k6-summary.json" \
             tests/load/smoke.js
 
@@ -316,6 +312,10 @@ jobs:
           path: /tmp/app-server.log
           retention-days: 14
 
+      - name: Remove the owned disposable Union Eyes runtime
+        if: always() && matrix.app == 'union-eyes'
+        run: node tooling/scripts/ue-runtime-up.mjs down
+
       - name: Record Union Eyes shard outcome
         if: always() && matrix.app == 'union-eyes'
         env:
@@ -323,8 +323,8 @@ jobs:
           UE_E2E_MODE: synthetic-pr
           UE_SHARD: ${{ matrix.shard }}
           UE_JOB_STATUS: ${{ job.status }}
-          UE_BUILD_OUTCOME: ${{ steps.app-build.outcome }}
-          UE_PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          UE_BUILD_OUTCOME: ${{ steps.ue-runtime.outcome }}
+          UE_PLAYWRIGHT_OUTCOME: ${{ steps.ue-playwright.outcome }}
           UE_PERFORMANCE_OUTCOME: ${{ matrix.shard == 1 && steps.ue-perf-smoke.outcome || 'not-required' }}
         run: node tooling/ci/ue-e2e-shard-receipts.mjs write "${RUNNER_TEMP}/ue-shard/receipt.json"
 
@@ -425,132 +425,56 @@ jobs:
           done
           exit 1
 
-      - name: Build app
-        id: app-build
-        run: pnpm --filter @nzila/union-eyes build
-        env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
-          AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
-          NEXT_PUBLIC_APP_URL: http://localhost:${{ matrix.port }}
-          QA_TEST_ENV: 'true'
-
-      - name: Stage standalone static assets
-        run: |
-          set -euo pipefail
-          APP_DIR="apps/union-eyes"
-          STANDALONE_APP="$APP_DIR/.next/standalone/apps/union-eyes"
-          if [ ! -f "$STANDALONE_APP/server.js" ]; then
-            echo "::error::Standalone server not found at $STANDALONE_APP/server.js"
-            exit 1
-          fi
-          mkdir -p "$STANDALONE_APP/.next"
-          cp -r "$APP_DIR/.next/static" "$STANDALONE_APP/.next/static"
-          if [ -d "$APP_DIR/public" ]; then
-            cp -r "$APP_DIR/public" "$STANDALONE_APP/public"
-          fi
-          if [ -z "$(ls -A "$STANDALONE_APP/.next/static/chunks" 2>/dev/null)" ]; then
-            echo "::error::No static chunks staged into standalone output"
-            exit 1
-          fi
-
-      - name: Set up Python (Django-owned schema prerequisites)
-        uses: actions/setup-python@v7
+      - name: Set up Python 3.11 with the locked Django runtime (canonical runtime prerequisite)
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.11.14'
+          cache: pip
+          cache-dependency-path: apps/union-eyes/backend/requirements.lock
 
-      - name: Bootstrap Union Eyes E2E database (synthetic)
+      - name: Install locked Django dependencies
+        run: python -m pip install --require-hashes -r apps/union-eyes/backend/requirements.lock
+
+      # The bootstrap converges the canonical V2 security source, which requires the canonical operator and real
+      # bearer-bound fixtures; the former ci-superuser, non-canonical database with seeded test sessions is no longer
+      # a supported runtime. Provision exactly as the production-build HTTP QA job does, then serve the production app.
+      - name: Start the canonical synthetic Union Eyes runtime (database, fixtures, production app)
+        id: ue-runtime
+        timeout-minutes: 45
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -euo pipefail
           if [ -n "${AZURE_CLIENT_ID:-}${AZURE_TENANT_ID:-}${AZURE_SUBSCRIPTION_ID:-}${AZURE_STORAGE_ACCOUNT_KEY:-}${PERF_AUTH_TOKEN:-}" ]; then
             echo "::error::Synthetic Union Eyes E2E received privileged credentials"
             exit 1
           fi
+          test -z "$(docker ps -aq --filter name='^/ue-runtime-pg$')"
+          node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild
 
-          # Empty PG15 with vector extension support. No snapshot retrieve.
-          # Retry image pull — Docker Hub intermittently returns 502.
-          for attempt in 1 2 3 4 5; do
-            if docker pull pgvector/pgvector:pg15; then
-              break
-            fi
-            echo "docker pull attempt ${attempt} failed; sleeping $((attempt * 5))s"
-            sleep $((attempt * 5))
-            if [ "$attempt" -eq 5 ]; then
-              echo "::error::Failed to pull pgvector/pgvector:pg15 after 5 attempts"
-              exit 1
-            fi
-          done
-          docker run --name ci-e2e-postgres             -e POSTGRES_USER=ci -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=ci_e2e             -p 5432:5432 -d pgvector/pgvector:pg15
-          timeout 90 bash -c 'until docker exec ci-e2e-postgres pg_isready -U ci -d ci_e2e; do sleep 2; done'
-
-          # Roles expected by RLS helpers (idempotent).
-          docker exec -i ci-e2e-postgres psql -U ci -d ci_e2e <<'SQL'
-          DO $$ BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_runtime') THEN
-              CREATE ROLE union_eyes_runtime LOGIN PASSWORD 'ci';
-            END IF;
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'union_eyes_system') THEN
-              CREATE ROLE union_eyes_system LOGIN PASSWORD 'ci';
-            END IF;
-          END $$;
-          GRANT ALL ON DATABASE ci_e2e TO union_eyes_runtime, union_eyes_system;
-          GRANT ALL ON SCHEMA public TO union_eyes_runtime, union_eyes_system;
-          SQL
-
-          # The platform SQL (0013 onward) extends tables that the Django backend owns (message_threads, payments,
-          # documents, ...), so Django migrates first, as in production. Synthetic, credential-free database only.
-          python -m pip install --disable-pip-version-check -r apps/union-eyes/backend/requirements.txt
-          (cd apps/union-eyes/backend && PGHOST=localhost PGPORT=5432 PGUSER=ci PGPASSWORD=ci PGDATABASE=ci_e2e python manage.py migrate --noinput)
-
-          # QA_TEST_ENV selects the credential-free baseline inside db:migrate.
-          # UE_DB_RESTORE_SNAPSHOT_URL stays unset, so no canonical snapshot is restored.
-          unset UE_DB_RESTORE_SNAPSHOT_URL || true
-          export PGSSLMODE=disable
-          export POSTGRES_MAJOR=15
-          pnpm --filter @nzila/union-eyes db:migrate
-          pnpm --filter @nzila/union-eyes seed:test-env
-        env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          QA_TEST_ENV: 'true'
-          POSTGRES_MAJOR: '15'
-          PGSSLMODE: disable
-
-      - name: Start app
+      - name: Point Playwright at the owned canonical runtime without printing credentials
         run: |
-          node apps/union-eyes/.next/standalone/apps/union-eyes/server.js >/tmp/app-server.log 2>&1 &
-          timeout 60 bash -c 'until curl -sf http://localhost:${{ matrix.port }}/ > /dev/null 2>&1 || curl -sf http://localhost:${{ matrix.port }}/api/health > /dev/null 2>&1; do sleep 2; done'
-        env:
-          AUTH_SECRET: ci_e2e_placeholder_secret_32chars_xxxx
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          NODE_ENV: production
-          PORT: ${{ matrix.port }}
-          QA_TEST_ENV: 'true'
-          PLAYWRIGHT_TEST_AUTH: 'true'
-          UE_E2E_RISK_BYPASS: 'true'
-          UE_ENVIRONMENT: local
-          UE_CANONICAL_BOOTSTRAP_V2: '0'
-          NEXT_LOG_LEVEL: debug
-          DEBUG: 'next:*'
-          CONTROL_PLANE_API_KEY: ci-e2e-placeholder-key
-          CONTROL_PLANE_URL: http://localhost:3010
-          UNION_EYES_URL: http://localhost:3002
-          ORCHESTRATOR_API_URL: http://localhost:4000
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs'
+          import { operatorDatabaseUrl, runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
+          const operator = operatorDatabaseUrl()
+          const env = runtimeEnv()
+          console.log('::add-mask::' + new URL(operator).password)
+          appendFileSync(process.env.GITHUB_ENV, [
+            'UE_CANONICAL_BOOTSTRAP_V2=1',
+            'PLAYWRIGHT_TEST_AUTH=false',
+            'PLAYWRIGHT_BASE_URL=' + env.PLAYWRIGHT_BASE_URL,
+            'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
+            // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
+            'DATABASE_URL=' + operator,
+          ].join('\n') + '\n')
+          NODE
 
-      - name: Run Playwright tests
-        id: playwright
+      - name: Run Playwright tests (canonical Union Eyes runtime, real password and MFA login)
+        id: ue-playwright
         run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          SYSTEM_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_e2e
-          PLAYWRIGHT_TEST_AUTH: 'true'
-          WEB_URL: http://localhost:${{ matrix.port }}
-          CONSOLE_URL: http://localhost:${{ matrix.port }}
-          FLOW_URL: http://localhost:${{ matrix.port }}
-          PARTNERS_URL: http://localhost:${{ matrix.port }}
-          CFO_URL: http://localhost:${{ matrix.port }}
-          PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -586,6 +510,10 @@ jobs:
           path: /tmp/app-server.log
           retention-days: 14
 
+      - name: Remove the owned disposable Union Eyes runtime
+        if: always()
+        run: node tooling/scripts/ue-runtime-up.mjs down
+
       - name: Record canonical Union Eyes shard outcome
         if: always()
         env:
@@ -593,8 +521,8 @@ jobs:
           UE_E2E_MODE: canonical-main
           UE_SHARD: ${{ matrix.shard }}
           UE_JOB_STATUS: ${{ job.status }}
-          UE_BUILD_OUTCOME: ${{ steps.app-build.outcome }}
-          UE_PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          UE_BUILD_OUTCOME: ${{ steps.ue-runtime.outcome }}
+          UE_PLAYWRIGHT_OUTCOME: ${{ steps.ue-playwright.outcome }}
           UE_PERFORMANCE_OUTCOME: not-required
         run: node tooling/ci/ue-e2e-shard-receipts.mjs write "${RUNNER_TEMP}/ue-shard/receipt.json"
 

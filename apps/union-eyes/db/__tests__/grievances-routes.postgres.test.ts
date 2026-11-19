@@ -39,17 +39,9 @@ vi.mock('@/db', async () => ({ db: (await import('./native-route-harness')).ambi
 vi.mock('@/lib/db/with-rls-context', async () => (await import('./native-route-harness')).rlsContextModule)
 vi.mock('@/lib/audit/atomic-audit', async () => ({ persistAtomicAudit: (await import('./native-route-harness')).recordAudit }))
 vi.mock('@/lib/api/with-api', async () => ({ withApi: (await import('./native-route-harness')).emulatedWithApi }))
-// This fixture uses legacy self-only identity RLS, not a V2 authenticated
-// business session. Supply the real canonical fact query through its read-only
-// system transport; do not invent candidate membership or replace eligibility.
-vi.mock('@/lib/authority/store/active-membership-source', async () => {
-  const { canonicalMembershipSource } = await import('@/lib/authority/store/identity')
-  const { harness, SYSTEM_ROLE } = await import('./native-route-harness')
-  return { activeMembershipSource: async (_exec: unknown, organizationId: string, userIds: string[]) => {
-    const { drizzleExecutor } = await import('@/lib/authority/store/route-adapter')
-    return harness.tenant(SYSTEM_ROLE, null, null, tx => canonicalMembershipSource(drizzleExecutor(tx), organizationId, userIds))
-  } }
-})
+// Membership facts come from the production source the canonical topology answers: activeMembershipSource reads them through the
+// reader-owned definer inside the caller's verified session (the runtime role holds no grant on user_management tables, and the system
+// role no usage of that schema). Candidate membership is the declared actors' real canonical rows, never invented.
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api-auth-guard')>()
   const { roleInOrganization } = await import('./native-route-harness')
@@ -244,7 +236,14 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
 
     it('withholds the grievance from an organization member who has no relationship to it', async () => {
       const grievance = await newGrievance(ORG_A, memberA)
-      expect((await run(detail!.GET, asStrangerA, { params: { id: grievance } })).status).toBe(403)
+      // The route no longer decides this itself: with no case access, it asks the authority kernel for case:read, and the kernel
+      // (mocked at its boundary; covered by its own native tests) refuses a member with no relationship to the matter.
+      state.kernelAllows = false
+      try {
+        expect(await rejection(run(detail!.GET, asStrangerA, { params: { id: grievance } }))).toMatchObject({ code: 'FORBIDDEN' })
+      } finally {
+        state.kernelAllows = true
+      }
     })
   })
 
@@ -280,8 +279,9 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
     it('refuses a caller without authority over the matter, whatever their role', async () => {
       const grievance = await newGrievance(ORG_A, officerA, { status: 'filed' })
       state.kernelAllows = false
-      const response = await run(status!.PATCH, asStewardA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'acknowledged' }) })
-      expect(response.status).toBe(403)
+      // The kernel's refusal is thrown as ApiError FORBIDDEN (the production withApi answers it 403); the emulated wrapper surfaces it as is.
+      const refused = await rejection(run(status!.PATCH, asStewardA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'acknowledged' }) }))
+      expect(refused).toMatchObject({ code: 'FORBIDDEN' })
       state.kernelAllows = true
       expect((await grievanceRow(grievance))?.status).toBe('filed')
     })

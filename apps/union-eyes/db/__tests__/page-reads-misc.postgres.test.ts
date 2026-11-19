@@ -27,7 +27,8 @@ vi.mock('@/services/governance-service', () => ({
   },
 }))
 
-const { savepointHarness, RUNTIME_ROLE } = await import('./native-savepoint-harness')
+const { savepointHarness, RUNTIME_ROLE, SYSTEM_ROLE } = await import('./native-savepoint-harness')
+const { sql } = await import('drizzle-orm')
 const trust = URL ? await import('@/lib/trust/system-metrics') : null
 const platformServices = URL ? await import('@/lib/operations/platform-services') : null
 const featureFlags = URL ? await import('@/lib/services/feature-flags') : null
@@ -53,6 +54,9 @@ describe.skipIf(!URL)('small page reads on the combined schema, as the real role
     await audit(ORG_A, '40 days')
     await audit(ORG_B, '1 day')
     await audit(ORG_B, '2 days')
+    // The member who opens each organization's trust page: a real canonical member acting through a real session.
+    await savepointHarness.declareCaller(`trust-reader-a-${tag}`, ORG_A, 'member')
+    await savepointHarness.declareCaller(`trust-reader-b-${tag}`, ORG_B, 'member')
   }, 180_000)
 
   afterAll(async () => {
@@ -146,23 +150,33 @@ describe.skipIf(!URL)('small page reads on the combined schema, as the real role
   })
 
   describe('census findings that need no organization', () => {
-    it('reads the platform services with no organization set: the table is reference data with no row-level security', async () => {
+    it('refuses the platform services read in canonical mode: the table has no current source authority, and no role may read it', async () => {
       await admin.query(`INSERT INTO platform_services (service_name, status) VALUES ($1, 'healthy'), ($2, 'down') ON CONFLICT (service_name) DO UPDATE SET status = EXCLUDED.status`, [`web-${tag}`, `queue-${tag}`])
 
-      const overview = await platformServices!.loadPlatformServices()
-
-      expect(overview.services.map((service) => service.serviceName)).toEqual(expect.arrayContaining([`web-${tag}`, `queue-${tag}`]))
-      expect(overview.services.find((service) => service.serviceName === `queue-${tag}`)?.status).toBe('down')
-      expect(overview.totalServices).toBe(overview.services.length)
-      expect(overview.downServices).toBeGreaterThanOrEqual(1)
+      // The operations page shows a thrown read as a failure, never as an empty or healthy service list.
+      await expect(platformServices!.loadPlatformServices()).rejects.toMatchObject({ code: 'PLATFORM_SERVICES_UNAVAILABLE' })
+      for (const role of [RUNTIME_ROLE, SYSTEM_ROLE]) {
+        const refused = await savepointHarness.context(role, null, null, (tx) => tx.execute(sql`SELECT 1 FROM platform_services`))
+          .then(() => '', (error: { message?: string; cause?: { message?: string } }) => `${error.message} ${error.cause?.message ?? ''}`)
+        expect(refused).toMatch(/permission denied for table platform_services/)
+      }
     })
 
-    it('evaluates a feature flag with no organization set: the flags are reference data with no row-level security', async () => {
+    it('evaluates a feature flag for a caller in any organization, and fails closed with no verified session', async () => {
       await admin.query(`INSERT INTO feature_flags (name, type, enabled) VALUES ($1, 'boolean', true), ($2, 'boolean', false)`, [`on-${tag}`, `off-${tag}`])
 
-      expect(await featureFlags!.evaluateFeature(`on-${tag}`, {})).toMatchObject({ enabled: true })
-      expect(await featureFlags!.evaluateFeature(`off-${tag}`, {})).toMatchObject({ enabled: false, reason: 'Feature globally disabled' })
-      expect(await featureFlags!.evaluateFeature(`missing-${tag}`, {})).toMatchObject({ enabled: false, reason: 'Feature flag not found in database' })
+      // The flags carry no organization, but the canonical topology admits a runtime read of them only inside a verified business session
+      // (ue_v2_verified_business_session, RESTRICTIVE): any member's session, in either organization, reads the same global flags (the
+      // source compiler declares GLOBAL_REFERENCE_DATA's permissive predicate as true; scripts/bootstrap-v2/security.ts).
+      for (const [organizationId, caller] of [[ORG_A, `trust-reader-a-${tag}`], [ORG_B, `trust-reader-b-${tag}`]]) {
+        await savepointHarness.context(RUNTIME_ROLE, organizationId, caller, async () => {
+          expect(await featureFlags!.evaluateFeature(`on-${tag}`, {})).toMatchObject({ enabled: true })
+          expect(await featureFlags!.evaluateFeature(`off-${tag}`, {})).toMatchObject({ enabled: false, reason: 'Feature globally disabled' })
+          expect(await featureFlags!.evaluateFeature(`missing-${tag}`, {})).toMatchObject({ enabled: false, reason: 'Feature flag not found in database' })
+        })
+      }
+      // With no session the runtime role reads no flag, so an enabled flag evaluates disabled: closed, never open.
+      expect(await featureFlags!.evaluateFeature(`on-${tag}`, {})).toMatchObject({ enabled: false, reason: 'Feature flag not found in database' })
     })
   })
 })
