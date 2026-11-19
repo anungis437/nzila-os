@@ -25,7 +25,8 @@ import {
 import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '@/tests/fixtures/test-users'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
-import { seedQaCaseAssignments } from './seed-test-env-kernel'
+import { runQaRuntimeActor, seedQaCaseAssignments } from './seed-test-env-kernel'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { PLATFORM_MODULES } from '@/services/platform-economics/entitlement-guard'
 
 /** Synthetic grants for the QA organizations only; idempotent and marked so they can never be mistaken for a contract. */
@@ -389,39 +390,48 @@ async function seed(): Promise<void> {
     )
   })
 
-  // Initial synthetic history is source data, with schema drift refused.
-  await db.transaction(async (tx) => {
-    await tx.insert(claimUpdates).values(
-      casesFixture.map((c, index) => ({
-        // Snapshot claim_updates.id/update_id often NOT NULL without server DEFAULT.
-        id: randomUUID(),
-        updateId: randomUUID(),
-        // The FK targets claims.id, which is the row id inserted above.
-        claimId: claimRowIds.get(c.claimId)!,
-        updateType: 'seed_baseline',
-        message: `Deterministic QA baseline #${index + 1}`,
-        createdBy: c.memberId,
-        isInternal: false,
-        visibilityScope: 'member' as const,
-        metadata: {
-          seed: true,
-          narRequired: true,
-          decisionRequired: true,
-        },
-        createdAt: NOW,
-        updatedAt: NOW,
-      })),
-    )
-  })
-
   // Case authority is relationship-based: give the QA steward the QA cases (synthetic fixture, audited by the store).
   writeRuntimeFixtureAuth(authFixture)
-  const assignments = await seedQaCaseAssignments(operatorUrl, {
+  const qaContext = {
     runtimeUrl,
     sessions: Object.fromEntries(
       Object.entries(authFixture.users).map(([id, person]) => [id, person.sessionToken]),
     ),
-  })
+  }
+  // Initial synthetic history: each case's member adds one note to their own case through the
+  // application's path (bearer-bound runtime session, the note and its audit record in one transaction),
+  // exactly as POST /api/cases/[caseId]/notes does. The deferred history-audit guard refuses history
+  // written any other way, including by the operator.
+  for (const [index, c] of casesFixture.entries()) {
+    const message = `Deterministic QA baseline #${index + 1}`
+    await runQaRuntimeActor(qaContext, c.memberId, async (tx) => {
+      const [note] = await tx
+        .insert(claimUpdates)
+        .values({
+          // Snapshot claim_updates.id/update_id are NOT NULL without a server DEFAULT.
+          id: randomUUID(),
+          updateId: randomUUID(),
+          // The FK targets claims.id, the row id inserted above.
+          claimId: claimRowIds.get(c.claimId)!,
+          updateType: 'note',
+          message,
+          createdBy: c.memberId,
+          isInternal: false,
+          visibilityScope: 'member',
+        })
+        .returning()
+      if (!note?.updateId) throw new Error('QA baseline history row was not written')
+      await persistAtomicAudit(tx, {
+        organizationId: c.organizationId,
+        userId: c.memberId,
+        action: 'case.note.add',
+        resourceType: 'claim_updates',
+        resourceId: note.updateId,
+        details: { event: 'CASE_NOTE_ADDED', caseId: c.claimId, isInternal: false, contentLength: message.length },
+      })
+    })
+  }
+  const assignments = await seedQaCaseAssignments(operatorUrl, qaContext)
   console.log(`[ue:seed:test-env] QA case assignments created: ${assignments}`)
 
   // Module entitlements are institutional grants. The QA organizations get synthetic, clearly marked grants for every module

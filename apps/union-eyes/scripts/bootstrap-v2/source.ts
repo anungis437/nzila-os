@@ -792,6 +792,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts',
     'apps/union-eyes/scripts/bootstrap-v2/runtime-report-order.ts',
     'apps/union-eyes/scripts/bootstrap-v2/runtime-guarded-case-fixtures.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-workflow-fixtures.ts',
     'apps/union-eyes/lib/workflow-engine.ts',
     'apps/union-eyes/lib/audit/atomic-audit.ts',
     'apps/union-eyes/lib/cases/case-authorization.ts',

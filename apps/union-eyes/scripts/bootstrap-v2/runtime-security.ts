@@ -35,6 +35,12 @@ import {
   type GuardedCaseRuntimeResult,
 } from './runtime-guarded-case-fixtures'
 import {
+  isWorkflowRuntimeTable,
+  prepareWorkflowRuntimeSecurity,
+  workflowReportComplete,
+  type WorkflowRuntimeQualification,
+} from './runtime-workflow-fixtures'
+import {
   assertRestrictedRuntimeTransaction,
   assertRuntimeQualificationActive,
   completeRuntimeColumnReport,
@@ -76,6 +82,7 @@ export function runtimeActorClassReportComplete(
   if (!report || report.table !== rule.table || report.status !== 'PASS') return false
   if (GUARDED_CASE_RUNTIME_TABLES.some((table) => table === rule.table))
     return guardedCaseReportComplete(report)
+  if (isWorkflowRuntimeTable(rule.table)) return workflowReportComplete(report)
   if (RUNTIME_COLUMN_PRIVILEGE_CONTRACTS[rule.table])
     return completeRuntimeColumnReport(
       report,
@@ -384,6 +391,8 @@ export async function* iterateRuntimeSecurityReports(
       cache.set(name, rows)
       return rows
     }
+    // Workflow-owned rows exist only as their workflows produce them; there is no synthetic parent.
+    assert(!isWorkflowRuntimeTable(name), `SOURCE_WORKFLOW_ROWS_REQUIRED:${name}`)
     if (seedFailures.has(name))
       throw new Error(`UE_V2_SYNTHETIC_PARENT_FAILED:${name}:${seedFailures.get(name)}`)
     assert.notEqual(name, 'recognition_awards', 'OPERATOR_NOMINATION_SEED_FORBIDDEN')
@@ -462,6 +471,19 @@ export async function* iterateRuntimeSecurityReports(
       })()
     return guardedPending
   }
+  let workflowPending: Promise<WorkflowRuntimeQualification> | undefined
+  const resolveWorkflow = () =>
+    (workflowPending ??= (async () => {
+      assert(runtimeSessions && plan.authExecution, 'SOURCE_WORKFLOW_CANONICAL_SESSIONS_REQUIRED')
+      return prepareWorkflowRuntimeSecurity({
+        operator: seedClient,
+        runtime: runtimeClient,
+        system: systemClient,
+        sessions: runtimeSessions,
+        plan,
+        guarded: await resolveGuarded(),
+      })
+    })())
   const dialect = new PgDialect()
   const scoped = async <T>(
     client: pg.Client,
@@ -690,6 +712,18 @@ export async function* iterateRuntimeSecurityReports(
           report && guardedCaseReportComplete(report),
           `SOURCE_GUARDED_TABLE_PROOF_REQUIRED:${rule.table}`,
         )
+        reports.push(report)
+        yield report
+        continue
+      }
+      // Kernel and conversation records are changed only through their audited workflows, which the
+      // workflow fixture drives in real sessions; raw synthetic writes are refused, never substituted.
+      if (isWorkflowRuntimeTable(rule.table)) {
+        assertRuntimeQualificationActive(control?.signal)
+        const report = await (await resolveWorkflow()).qualifyTable(rule.table)
+        assertRuntimeQualificationActive(control?.signal)
+        if (report.status === 'PASS')
+          assert(workflowReportComplete(report), `SOURCE_WORKFLOW_TABLE_PROOF_REQUIRED:${rule.table}`)
         reports.push(report)
         yield report
         continue

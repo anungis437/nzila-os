@@ -2,6 +2,7 @@
  * Every expectation comes from the current producer and declared columns. */
 import { EXTERNAL_READ_COLUMN_GRANTS, EXTERNAL_READ_FUNCTIONS, EXTERNAL_READ_OWNER, EXTERNAL_READ_STORAGE_TABLES, EXTERNAL_READ_TRIGGER_TABLES, EXTERNAL_READ_PREREQUISITE_CONTRACTS } from './source'
 import { EXTERNAL_AUTHORIZER_LIVE_FUNCTION } from './auth-bridge'
+import { PRIVATE_ROLE_ISOLATED_SQL } from '../operations/catalog-admission-core.mjs'
 type Row = Record<string, unknown>
 const literal = (value: string) => `'${value.replaceAll("'", "''")}'`
 const allFunctions = [...EXTERNAL_READ_FUNCTIONS.map(fn => ({ ...fn, owner: EXTERNAL_READ_OWNER })), EXTERNAL_AUTHORIZER_LIVE_FUNCTION]
@@ -9,7 +10,7 @@ const names = allFunctions.map(fn => literal(fn.name)).join(',')
 const tables = EXTERNAL_READ_COLUMN_GRANTS.map(table => literal(table.table)).join(',')
 export const EXTERNAL_READ_CATALOG_QUERIES = {
   role: `SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolbypassrls,
-    NOT EXISTS(SELECT FROM pg_auth_members m WHERE m.roleid=r.oid OR m.member=r.oid) AS isolated,
+    ${PRIVATE_ROLE_ISOLATED_SQL} AS isolated,
     has_schema_privilege(r.oid,'public','USAGE') AS public_usage,has_schema_privilege(r.oid,'public','CREATE') AS public_create,
     has_schema_privilege(r.oid,'public','USAGE WITH GRANT OPTION') AS public_grant_option,
     has_schema_privilege(r.oid,'user_management','USAGE') AS auth_usage,has_schema_privilege(r.oid,'user_management','CREATE') AS auth_create,

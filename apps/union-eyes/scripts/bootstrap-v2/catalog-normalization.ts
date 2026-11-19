@@ -8,12 +8,11 @@ export function canonicalDumpExpression(sql: string): string {
   while (i < sql.length) {
     const start = i
     if (sql[i] === "'" || sql[i] === '"') {
+      // Deparsed text uses standard-conforming literals, where a backslash is an ordinary character.
+      // An escape-string literal (E'...') is the one form where it is not; leave such text unrewritten.
+      if (sql[i] === "'" && /(^|[^A-Za-z0-9_$])[Ee]$/.test(sql.slice(Math.max(0, i - 2), i))) return sql
       const quote = sql[i++]
       while (i < sql.length) {
-        if (sql[i] === '\\') {
-          i += 2
-          continue
-        }
         if (sql[i++] === quote) {
           if (sql[i] === quote) {
             i++
@@ -68,7 +67,10 @@ function parseAndTree(sql: string): AndNode | null {
   const root: AndNode = { open: false, parts: [] }
   const stack: AndNode[] = [root]
   let text = ''
+  let refused = false
   const flush = () => {
+    // A sub-SELECT's WHERE clause could absorb a flattened operand in pretty-printed text; never rewrite it.
+    if (/\bSELECT\b/i.test(text)) refused = true
     if (text) stack[stack.length - 1].parts.push(text)
     text = ''
   }
@@ -110,7 +112,7 @@ function parseAndTree(sql: string): AndNode | null {
     text += c
   }
   flush()
-  return stack.length === 1 ? root : null
+  return stack.length === 1 && !refused ? root : null
 }
 
 const renderAnd = (node: AndNode): string => {

@@ -67,9 +67,19 @@ type Row = Record<string, unknown>
 export interface GuardedCaseRuntimeResult {
   reports: ColumnTableReport[]
   seedRows: Partial<Record<GuardedTable, [Row, Row]>>
+  /** The live institutional parties a later source workflow continues from (complete runs only). */
+  parties?: [GuardedCaseParty, GuardedCaseParty]
+}
+/** A party exactly as the guarded workflow left it: its people, its case and its case assignment. */
+export interface GuardedCaseParty {
+  party: FixtureParty
+  claimRowId: string
+  caseId: string
+  assignmentRelationshipId: string
 }
 type Actor = { userId: string; organizationId: string }
-interface FixtureParty {
+export type GuardedActor = Actor
+export interface FixtureParty {
   organizationId: string
   member: Actor
   officer: Actor
@@ -86,7 +96,7 @@ export interface GuardedCaseRuntimeInput {
   organizationIds: readonly [string, string]
 }
 const deps = { memberships: activeMembershipSource }
-const exactDenied = (error: unknown): boolean => {
+export const exactDenied = (error: unknown): boolean => {
   if (!error || typeof error !== 'object') return false
   const value = error as { code?: unknown; cause?: unknown }
   return value.code === '42501' || exactDenied(value.cause)
@@ -101,10 +111,10 @@ const missingAudit = (error: unknown): boolean => {
   )
 }
 const quote = (name: string) => `"${name.replaceAll('"', '""')}"`
-const failureSummary = (error: unknown): string => {
+export const failureSummary = (error: unknown, extraMarkers: readonly string[] = []): string => {
   if (!error || typeof error !== 'object') return 'GUARDED_CASE_UNKNOWN_FAILURE'
   const value = error as { cause?: unknown; code?: unknown; name?: unknown; message?: unknown }
-  if (value.cause) return failureSummary(value.cause)
+  if (value.cause) return failureSummary(value.cause, extraMarkers)
   const name =
     typeof value.name === 'string' &&
     [
@@ -141,6 +151,7 @@ const failureSummary = (error: unknown): string => {
     'EXACT_STATE_PROJECTION_REQUIRED',
     'PRIMARY_CASE_HANDLER_REQUIRED',
     'NO_ADOPTED_CASE_SCOPE_AMENDMENT_RULE',
+    ...extraMarkers,
   ].find((item) => message.startsWith(item))
   return `${name}:${code}${marker ? ':' + marker : ''}:sha256=${createHash('sha256').update(message).digest('hex')}`
 }
@@ -289,25 +300,25 @@ const guardedHistoryTables = [
     'notification_delivery_log',
   ]),
 ]
-type HistorySnapshot = Map<string, { ids: string[]; digest: string }>
-async function readHistory(
+export type HistorySnapshot = Map<string, { ids: string[]; digest: string }>
+/** Exact row bytes of every named relation (each keyed by a uuid `id`), read by the owner. */
+export async function readFixtureHistory(
   operator: pg.Client,
+  tables: readonly string[],
   original?: HistorySnapshot,
 ): Promise<HistorySnapshot> {
   const rows = (
     await operator.query<{ source_table: string; id: string; row: string }>(
-      guardedHistoryTables
+      tables
         .map(
           (name, index) =>
             `SELECT '${name}'::text AS source_table,id::text AS id,to_jsonb(t)::text AS row FROM public.${quote(name)} t${original ? ` WHERE id=ANY($${index + 1}::uuid[])` : ''}`,
         )
         .join(' UNION ALL ') + ' ORDER BY source_table,id',
-      original ? guardedHistoryTables.map((name) => original.get(name)!.ids) : [],
+      original ? tables.map((name) => original.get(name)!.ids) : [],
     )
   ).rows
-  const grouped = new Map(
-    guardedHistoryTables.map((name) => [name, [] as { id: string; row: string }[]]),
-  )
+  const grouped = new Map(tables.map((name) => [name, [] as { id: string; row: string }[]]))
   for (const row of rows) {
     const target = grouped.get(row.source_table)
     assert(target, 'UNEXPECTED_GUARDED_HISTORY_RELATION')
@@ -323,11 +334,44 @@ async function readHistory(
     ]),
   )
 }
-const history = (operator: pg.Client) => readHistory(operator)
-async function assertHistory(operator: pg.Client, before: HistorySnapshot, originalOnly = false) {
-  const after = await readHistory(operator, originalOnly ? before : undefined)
+export async function assertFixtureHistory(
+  operator: pg.Client,
+  tables: readonly string[],
+  before: HistorySnapshot,
+  label: string,
+  originalOnly = false,
+) {
+  const after = await readFixtureHistory(operator, tables, originalOnly ? before : undefined)
   for (const [name, expected] of before)
-    assert.equal(after.get(name)?.digest, expected.digest, `GUARDED_CASE_HISTORY_CHANGED:${name}`)
+    assert.equal(after.get(name)?.digest, expected.digest, `${label}:${name}`)
+}
+const history = (operator: pg.Client) => readFixtureHistory(operator, guardedHistoryTables)
+const assertHistory = (operator: pg.Client, before: HistorySnapshot, originalOnly = false) =>
+  assertFixtureHistory(
+    operator,
+    guardedHistoryTables,
+    before,
+    'GUARDED_CASE_HISTORY_CHANGED',
+    originalOnly,
+  )
+
+/** One canonical active login and membership, written by the owner exactly as prepareParty does. */
+export async function createGuardedActor(
+  operator: pg.Client,
+  organizationId: string,
+  role: string,
+  systemAdmin = false,
+): Promise<Actor> {
+  const userId = randomUUID()
+  await operator.query(
+    "INSERT INTO user_management.users(user_id,email,is_active,lifecycle_state,is_system_admin,email_verified) VALUES($1,$2,true,'active',$3,true)",
+    [userId, `guarded-${userId}@example.invalid`, systemAdmin],
+  )
+  await operator.query(
+    'INSERT INTO user_management.organization_users(user_id,organization_id,role,is_active) VALUES($1,$2,$3,true)',
+    [userId, organizationId, role],
+  )
+  return { userId, organizationId }
 }
 
 async function prepareParty(operator: pg.Client, organizationId: string): Promise<FixtureParty> {
@@ -343,18 +387,8 @@ async function prepareParty(operator: pg.Client, organizationId: string): Promis
     'member',
   ]
   const actors: Actor[] = []
-  for (const [index, role] of roles.entries()) {
-    const userId = randomUUID()
-    await operator.query(
-      "INSERT INTO user_management.users(user_id,email,is_active,lifecycle_state,is_system_admin,email_verified) VALUES($1,$2,true,'active',$3,true)",
-      [userId, `guarded-${userId}@example.invalid`, index === 8],
-    )
-    await operator.query(
-      'INSERT INTO user_management.organization_users(user_id,organization_id,role,is_active) VALUES($1,$2,$3,true)',
-      [userId, organizationId, role],
-    )
-    actors.push({ userId, organizationId })
-  }
+  for (const [index, role] of roles.entries())
+    actors.push(await createGuardedActor(operator, organizationId, role, index === 8))
   return {
     organizationId,
     member: actors[0],
@@ -365,28 +399,23 @@ async function prepareParty(operator: pg.Client, organizationId: string): Promis
   }
 }
 
+export type GuardedWithin = <T>(
+  actor: Actor,
+  operation: (tx: RLSTx, exec: SqlExecutor) => Promise<T>,
+  options?: {
+    rollback?: boolean
+    missing?: 'user' | 'org' | 'bearer'
+    foreignOrg?: string
+    actorClass?: GuardedActorClass
+  },
+) => Promise<T>
 /**
- * Case status transitions queue a sealed member notification in the same transaction, so the
- * disposable run needs a correspondence signing key. A synthetic key is scoped to this run and
- * the caller's value is restored afterwards (same pattern as member-letter-delivery.native).
+ * The owned loopback database, a genuinely restricted runtime LOGIN and a production-issued
+ * canonical session for every actor transaction. Shared by every source-workflow fixture.
  */
-const SYNTHETIC_CORRESPONDENCE_KEY = 'synthetic-native-guarded-case-correspondence-key-0001'
-export async function qualifyGuardedCaseRuntimeSecurity(
-  input: GuardedCaseRuntimeInput,
-): Promise<GuardedCaseRuntimeResult> {
-  const priorKey = process.env.EVIDENCE_SEAL_KEY
-  process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_CORRESPONDENCE_KEY
-  try {
-    return await qualifyGuardedCaseRuntimeSecurityWithKey(input)
-  } finally {
-    if (priorKey === undefined) delete process.env.EVIDENCE_SEAL_KEY
-    else process.env.EVIDENCE_SEAL_KEY = priorKey
-  }
-}
-async function qualifyGuardedCaseRuntimeSecurityWithKey(
-  input: GuardedCaseRuntimeInput,
-): Promise<GuardedCaseRuntimeResult> {
-  assert(input.plan.authExecution, 'GUARDED_CASE_CANONICAL_AUTH_REQUIRED')
+export function openGuardedSessionHarness(
+  input: Pick<GuardedCaseRuntimeInput, 'operator' | 'runtime' | 'system' | 'sessions'>,
+): { databaseName: string; within: GuardedWithin; end: () => Promise<void> } {
   const databaseName = input.operator.database
   assert.ok(typeof databaseName === 'string', 'GUARDED_CASE_DATABASE_REQUIRED')
   assert.match(databaseName, /^ue_[a-zA-Z0-9_]+$/)
@@ -406,7 +435,6 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
   )
   assert.equal(input.runtime.port, input.operator.port, 'GUARDED_CASE_SAME_SERVER_REQUIRED')
   assert.notEqual(input.runtime.user, input.operator.user, 'GUARDED_CASE_RESTRICTED_LOGIN_REQUIRED')
-  assert.equal(new Set(input.organizationIds).size, 2, 'GUARDED_CASE_TWO_ORGANIZATIONS_REQUIRED')
   const connection = postgres({
     host: input.runtime.host,
     port: input.runtime.port,
@@ -418,22 +446,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
     onnotice: () => {},
   })
   const database = drizzle(connection, { schema })
-  const cases = new Map<GuardedTable, string[]>(
-    GUARDED_CASE_RUNTIME_TABLES.map((table) => [table, []]),
-  )
-  const observed = new Map<GuardedTable, [string[], string[]]>(
-    GUARDED_CASE_RUNTIME_TABLES.map((table) => [table, [[], []]]),
-  )
-  const within = <T>(
-    actor: Actor,
-    operation: (tx: RLSTx, exec: SqlExecutor) => Promise<T>,
-    options: {
-      rollback?: boolean
-      missing?: 'user' | 'org' | 'bearer'
-      foreignOrg?: string
-      actorClass?: GuardedActorClass
-    } = {},
-  ) =>
+  const within: GuardedWithin = (actor, operation, options = {}) =>
     input.sessions
       .withActor(
         actor.userId,
@@ -480,9 +493,102 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
         }),
       )
       .catch((error) => {
-        if (options.rollback && error instanceof GuardedRollback) return error.value as T
+        if (options.rollback && error instanceof GuardedRollback) return error.value as never
         throw error
       })
+  return { databaseName, within, end: () => connection.end({ timeout: 5 }) }
+}
+
+/** Independent approvers vote in their own canonical sessions; the decision ids are returned. */
+export async function voteGuardedApproval(
+  within: GuardedWithin,
+  party: FixtureParty,
+  request: string,
+  approvers: readonly Actor[] = party.executives.slice(1),
+): Promise<string[]> {
+  const decisions: string[] = []
+  for (const approver of approvers)
+    decisions.push(
+      (
+        await within(approver, (_tx, exec) =>
+          recordApprovalDecision(exec, deps, {
+            organizationId: party.organizationId,
+            approvalRequestId: request,
+            approverUserId: approver.userId,
+            decision: 'approved',
+          }),
+        )
+      ).decisionId,
+    )
+  return decisions
+}
+
+/** The real adoption ceremony: draft, request, two independent votes, then a separate activation. */
+export async function adoptGuardedIssuanceRule(
+  within: GuardedWithin,
+  party: FixtureParty,
+  template: Omit<IssuanceRuleTemplate, 'rationale'>,
+): Promise<{ ruleId: string; approvalRequestId: string; decisionIds: string[] }> {
+  const drafter = party.executives[0]
+  const id = await within(drafter, (_tx, exec) =>
+    draftIssuanceRule(exec, deps, {
+      ...template,
+      organizationId: party.organizationId,
+      draftedBy: drafter.userId,
+    }),
+  )
+  const request = await within(drafter, (_tx, exec) =>
+    requestRuleAdoption(exec, deps, {
+      organizationId: party.organizationId,
+      ruleId: id,
+      actorUserId: drafter.userId,
+      sourceInstrument: `Disposable qualification only; source protocol ${id}`,
+      namedApproverIds: party.executives.slice(1).map((actor) => actor.userId),
+    }),
+  )
+  const decisionIds = await voteGuardedApproval(within, party, request)
+  await within(party.executives[1], (_tx, exec) =>
+    activateIssuanceRule(exec, deps, {
+      organizationId: party.organizationId,
+      ruleId: id,
+      actorUserId: party.executives[1].userId,
+      approvalRequestId: request,
+    }),
+  )
+  return { ruleId: id, approvalRequestId: request, decisionIds }
+}
+
+/**
+ * Case status transitions queue a sealed member notification in the same transaction, so the
+ * disposable run needs a correspondence signing key. A synthetic key is scoped to this run and
+ * the caller's value is restored afterwards (same pattern as member-letter-delivery.native).
+ */
+const SYNTHETIC_CORRESPONDENCE_KEY = 'synthetic-native-guarded-case-correspondence-key-0001'
+export async function qualifyGuardedCaseRuntimeSecurity(
+  input: GuardedCaseRuntimeInput,
+): Promise<GuardedCaseRuntimeResult> {
+  const priorKey = process.env.EVIDENCE_SEAL_KEY
+  process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_CORRESPONDENCE_KEY
+  try {
+    return await qualifyGuardedCaseRuntimeSecurityWithKey(input)
+  } finally {
+    if (priorKey === undefined) delete process.env.EVIDENCE_SEAL_KEY
+    else process.env.EVIDENCE_SEAL_KEY = priorKey
+  }
+}
+async function qualifyGuardedCaseRuntimeSecurityWithKey(
+  input: GuardedCaseRuntimeInput,
+): Promise<GuardedCaseRuntimeResult> {
+  assert(input.plan.authExecution, 'GUARDED_CASE_CANONICAL_AUTH_REQUIRED')
+  assert.equal(new Set(input.organizationIds).size, 2, 'GUARDED_CASE_TWO_ORGANIZATIONS_REQUIRED')
+  const harness = openGuardedSessionHarness(input)
+  const within = harness.within
+  const cases = new Map<GuardedTable, string[]>(
+    GUARDED_CASE_RUNTIME_TABLES.map((table) => [table, []]),
+  )
+  const observed = new Map<GuardedTable, [string[], string[]]>(
+    GUARDED_CASE_RUNTIME_TABLES.map((table) => [table, [[], []]]),
+  )
   try {
     for (const table of GUARDED_CASE_RUNTIME_TABLES) {
       const source = input.plan.tables.find((entry) => entry.name === table)
@@ -537,53 +643,10 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
       const { updateClaimStatusById } = await import('../../lib/workflow-engine')
       return updateClaimStatusById(...args)
     }
-    const vote = async (
-      party: FixtureParty,
-      request: string,
-      approvers = party.executives.slice(1),
-    ) => {
-      for (const approver of approvers)
-        await within(approver, (_tx, exec) =>
-          recordApprovalDecision(exec, deps, {
-            organizationId: party.organizationId,
-            approvalRequestId: request,
-            approverUserId: approver.userId,
-            decision: 'approved',
-          }),
-        )
-    }
-    const adopt = async (
-      party: FixtureParty,
-      template: Omit<IssuanceRuleTemplate, 'rationale'>,
-    ) => {
-      const drafter = party.executives[0]
-      const id = await within(drafter, (_tx, exec) =>
-        draftIssuanceRule(exec, deps, {
-          ...template,
-          organizationId: party.organizationId,
-          draftedBy: drafter.userId,
-        }),
-      )
-      const request = await within(drafter, (_tx, exec) =>
-        requestRuleAdoption(exec, deps, {
-          organizationId: party.organizationId,
-          ruleId: id,
-          actorUserId: drafter.userId,
-          sourceInstrument: `Disposable qualification only; source protocol ${id}`,
-          namedApproverIds: party.executives.slice(1).map((actor) => actor.userId),
-        }),
-      )
-      await vote(party, request)
-      await within(party.executives[1], (_tx, exec) =>
-        activateIssuanceRule(exec, deps, {
-          organizationId: party.organizationId,
-          ruleId: id,
-          actorUserId: party.executives[1].userId,
-          approvalRequestId: request,
-        }),
-      )
-      return id
-    }
+    const vote = (party: FixtureParty, request: string, approvers = party.executives.slice(1)) =>
+      voteGuardedApproval(within, party, request, approvers)
+    const adopt = async (party: FixtureParty, template: Omit<IssuanceRuleTemplate, 'rationale'>) =>
+      (await adoptGuardedIssuanceRule(within, party, template)).ruleId
     const created: Array<{
       party: FixtureParty
       claim: typeof claims.$inferSelect
@@ -591,6 +654,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
       ruleId: string
       proposalId: string
       approvalId: string
+      assignmentRelationshipId: string
     }> = []
     for (const [index, party] of parties.entries()) {
       const claim = await createClaim(party.member)
@@ -656,7 +720,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
           holderUserId: party.officer.userId,
         }),
       )
-      await within(party.officer, (_tx, exec) =>
+      const assignmentRelationshipId = await within(party.officer, (_tx, exec) =>
         assignCase(exec, deps, {
           organizationId: party.organizationId,
           issuerUserId: party.officer.userId,
@@ -707,6 +771,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
         ruleId,
         proposalId: proposal.proposalId,
         approvalId: proposal.approvalRequestId,
+        assignmentRelationshipId,
       })
       for (const table of [
         'case_scope_proposals',
@@ -1074,7 +1139,11 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
       try {
         await input.system.query('SET LOCAL search_path = pg_catalog, public, pg_temp')
         await input.system.query('SET LOCAL ROLE union_eyes_system')
-        await assertRestrictedRuntimeTransaction(input.system, 'union_eyes_system', databaseName)
+        await assertRestrictedRuntimeTransaction(
+          input.system,
+          'union_eyes_system',
+          harness.databaseName,
+        )
         const allowed = ['claims', 'claim_updates', 'claim_status_transitions'].includes(table)
         const operation = () =>
           input.system.query(
@@ -1121,7 +1190,14 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
       assert(guardedCaseReportComplete(report), `INCOMPLETE_GUARDED_CASE_REPORT:${table}`)
       return report
     })
-    const result = { reports, seedRows }
+    const [first, second] = created.map((entry): GuardedCaseParty => ({
+      party: entry.party,
+      claimRowId: entry.claim.id,
+      caseId: entry.claim.claimId,
+      assignmentRelationshipId: entry.assignmentRelationshipId,
+    }))
+    assert(first && second && created.length === 2, 'GUARDED_CASE_TWO_PARTIES_REQUIRED')
+    const result: GuardedCaseRuntimeResult = { reports, seedRows, parties: [first, second] }
     assertGuardedCaseSeedRows(result, input.organizationIds)
     return result
   } catch (error) {
@@ -1135,7 +1211,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
       seedRows: {},
     }
   } finally {
-    await connection.end({ timeout: 5 })
+    await harness.end()
   }
 }
 class GuardedRollback<T = unknown> extends Error {

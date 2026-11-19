@@ -14,6 +14,7 @@ import {
   GUARDED_CASE_RUNTIME_TABLES,
   guardedCaseReportComplete,
 } from './runtime-guarded-case-fixtures'
+import { isWorkflowRuntimeTable, workflowReportComplete } from './runtime-workflow-fixtures'
 import { openRuntimeSessionFactory } from './runtime-column-fixtures'
 import { RUNTIME_COLUMN_PRIVILEGE_CONTRACTS } from './service-column-contracts'
 import { SYNC_LOG_OVERVIEW_COLUMNS } from '../../lib/dashboard-reads/data-source-contract'
@@ -78,6 +79,28 @@ native('current tenant positive writes with genuine restricted execution', () =>
     GUARDED_CASE_RUNTIME_TABLES,
     Object.keys(RUNTIME_COLUMN_PRIVILEGE_CONTRACTS),
   )
+  // Independent oracle: the exact guard refusal of a direct write that bypasses each workflow.
+  const workflowRefusals: Record<string, string> = {
+    message_thread_assignments: '23001:ASSIGNMENT_NOT_THREAD_STATE',
+    message_thread_lifecycle: '23001:LIFECYCLE_NOT_THREAD_STATE',
+    ue_authority_acceptances: '42501:ONLY_THE_HOLDER_MAY_ACCEPT',
+    ue_authority_approval_decisions: '42501:ALREADY_DECIDED',
+    ue_authority_approval_requests: '23514:AUDIT_LINK_MISSING',
+    ue_authority_counsel_engagements: '23514:AUDIT_LINK_MISSING',
+    ue_authority_delegations: '42501:ISSUER_AUTHORITY_REQUIRED',
+    ue_authority_disclosure_consents: '23514:AUDIT_LINK_MISSING',
+    ue_authority_events: '42501:EVENT_RECORDING_TRIGGER_ONLY',
+    ue_authority_issuance_rules: '42501:ISSUANCE_RULE_MUST_START_DRAFT',
+    ue_authority_mandates: '42501:APPROVAL_NOT_SATISFIED',
+    ue_authority_recusals: '23514:AUDIT_LINK_MISSING',
+    ue_authority_resource_relationships: '42501:NO_ACTIVE_ISSUANCE_RULE',
+    ue_authority_reviews: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_consent_grants: '23514:WORKAID_GRANT_INVALID',
+    ue_authority_workaid_consent_texts: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_document_auths: '23514:WORKAID_DOCAUTH_INVALID',
+    ue_authority_workaid_matters: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_shares: '23514:AUDIT_LINK_MISSING',
+  }
   let runtimeSessions: ReturnType<typeof openRuntimeSessionFactory> | undefined
   let iterator: ReturnType<typeof iterateRuntimeSecurityReports> | undefined
   const reportControl: { signal?: AbortSignal } = {}
@@ -872,6 +895,54 @@ native('current tenant positive writes with genuine restricted execution', () =>
         expect(
           report.cases.some((name) =>
             /FIXTURE_MUTATIONS_ROLLED_BACK|OWN_INSERT_ALLOWED_CONSTRAINT_VERIFIED/.test(name),
+          ),
+        ).toBe(false)
+        return
+      }
+      if (isWorkflowRuntimeTable(rule.table)) {
+        // Kernel and conversation records exist only as their audited workflows produce them. A
+        // direct write is a bypass that the physical guard must refuse; it is never a positive.
+        expect(Object.hasOwn(workflowRefusals, rule.table), rule.table).toBe(true)
+        expect(workflowReportComplete(report), rule.table).toBe(true)
+        const workflowWitnesses = [
+          'OWN_WORKFLOW_OPERATION_ROWS_VERIFIED',
+          'BIDIRECTIONAL_TENANT_READ_ISOLATION',
+          'MISSING_AND_FOREIGN_CONTEXT_DENIED',
+          'WORKFLOW_BYPASS_DENIED_FOR_EVERY_ACTOR_CLASS',
+          'FAILED_MUTATION_HISTORY_UNCHANGED',
+          'ORIGINAL_WORKFLOW_ROWS_PRESERVED',
+          'SOURCE_SYSTEM_BOUNDARY_VERIFIED',
+          `RAW_BYPASS_REFUSAL:${workflowRefusals[rule.table]}`,
+        ]
+        for (const witness of workflowWitnesses)
+          expect(report.cases.filter((name) => name === `${rule.table}:${witness}`)).toHaveLength(1)
+        const workflowActorWitnesses = [
+          'LIVE_SOURCE_CLASS_VERIFIED',
+          'OWN_TENANT_READ_OBSERVED',
+          'FOREIGN_TENANT_READ_DENIED',
+          'MISSING_USER_READ_DENIED',
+          'MISSING_ORG_READ_DENIED',
+          'MISSING_BEARER_READ_DENIED',
+          'FOREIGN_ORG_CONTEXT_READ_DENIED',
+          'RAW_WORKFLOW_BYPASS_REFUSED',
+          'DENIED_WRITE_HISTORY_UNCHANGED',
+        ]
+        for (const actorClass of ['MEMBER', 'ORG_ADMIN', 'PLATFORM_ADMIN'])
+          for (const party of ['ORG_A', 'ORG_B'])
+            for (const witness of workflowActorWitnesses)
+              expect(
+                report.cases.filter(
+                  (name) => name === `${rule.table}:${actorClass}:${party}:${witness}`,
+                ),
+              ).toHaveLength(1)
+        expect(report.cases).toHaveLength(
+          workflowWitnesses.length + 3 * 2 * workflowActorWitnesses.length,
+        )
+        expect(
+          report.cases.some((name) =>
+            /FIXTURE_MUTATIONS_ROLLED_BACK|OWN_INSERT_ALLOWED|OWN_UPDATE_ALLOWED|OWN_TENANT_INSERT_ALLOWED/.test(
+              name,
+            ),
           ),
         ).toBe(false)
         return

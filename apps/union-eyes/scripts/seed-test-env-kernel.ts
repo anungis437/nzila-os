@@ -1,7 +1,12 @@
 /** Owned disposable fixtures: real bearer-bound governance, never role/GUC impersonation. */
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
-import { withBearerOrgBinding } from '@nzila/platform-auth/org-binding'
+import { sql } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { authenticatedOrgBindingSql, withBearerOrgBinding } from '@nzila/platform-auth/org-binding'
+import * as schema from '@/db/schema'
+import type { RLSTx } from '@/lib/db/with-rls-context'
+import { withCanonicalTenantScope } from '@/lib/db/canonical-transaction-scope'
 import { runAuthorityTransaction, type SqlExecutor } from '@/lib/authority/store/executor'
 import { activeMembershipSource } from '@/lib/authority/store/active-membership-source'
 import {
@@ -45,20 +50,7 @@ export async function runQaAuthorityActor<T>(
   userId: string,
   operation: (tx: SqlExecutor) => Promise<T>,
 ): Promise<T> {
-  if (process.env.QA_TEST_ENV !== 'true' || process.env.UE_CANONICAL_BOOTSTRAP_V2 !== '1')
-    throw new Error('Owned canonical QA context required')
-  const fixture = Object.values(UE_TEST_USERS).find((user) => user.userId === userId)
-  const sessionToken = context.sessions[userId]
-  const target = new URL(context.runtimeUrl)
-  if (
-    !fixture ||
-    fixture.status !== 'active' ||
-    !sessionToken ||
-    target.hostname !== '127.0.0.1' ||
-    target.username !== 'ue_runtime_web' ||
-    target.pathname !== '/ue_runtime'
-  )
-    throw new Error('Bounded active runtime fixture required')
+  const { fixture, sessionToken } = admitQaActor(context, userId)
   return withBearerOrgBinding(
     sessionToken,
     { organizationId: fixture.orgId, expectedActorUserId: userId },
@@ -78,6 +70,53 @@ export async function runQaAuthorityActor<T>(
             return operation(tx)
           },
         )
+      } finally {
+        await client.end()
+      }
+    },
+  )
+}
+
+function admitQaActor(context: QaAuthorityContext, userId: string) {
+  if (process.env.QA_TEST_ENV !== 'true' || process.env.UE_CANONICAL_BOOTSTRAP_V2 !== '1')
+    throw new Error('Owned canonical QA context required')
+  const fixture = Object.values(UE_TEST_USERS).find((user) => user.userId === userId)
+  const sessionToken = context.sessions[userId]
+  const target = new URL(context.runtimeUrl)
+  if (
+    !fixture ||
+    fixture.status !== 'active' ||
+    !sessionToken ||
+    target.hostname !== '127.0.0.1' ||
+    target.username !== 'ue_runtime_web' ||
+    target.pathname !== '/ue_runtime'
+  )
+    throw new Error('Bounded active runtime fixture required')
+  return { fixture, sessionToken }
+}
+
+/** The same bounded actor admission, with the application's own Drizzle transaction shape: the
+ * restricted runtime role, the bearer-bound principal and organization, and the canonical tenant scope
+ * (as withRLSContext gives a request). Nothing is impersonated. */
+export async function runQaRuntimeActor<T>(
+  context: QaAuthorityContext,
+  userId: string,
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T> {
+  const { fixture, sessionToken } = admitQaActor(context, userId)
+  return withBearerOrgBinding(
+    sessionToken,
+    { organizationId: fixture.orgId, expectedActorUserId: userId },
+    async (binding) => {
+      const client = new pg.Client({ connectionString: context.runtimeUrl })
+      await client.connect()
+      try {
+        return await drizzle(client, { schema }).transaction(async (tx) => {
+          await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
+          await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
+          await tx.execute(authenticatedOrgBindingSql(binding))
+          return withCanonicalTenantScope(tx as unknown as RLSTx, binding, operation)
+        })
       } finally {
         await client.end()
       }

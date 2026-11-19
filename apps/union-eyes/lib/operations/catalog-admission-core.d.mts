@@ -21,6 +21,7 @@ export type CatalogAdmissionReport = {
   violations: string[]
 }
 
+export const PRIVATE_ROLE_ISOLATED_SQL: string
 export const admissionQueries: CatalogQuery[]
 
 export function externalReadRoleViolations(expectedFunctions: unknown, snapshots: Record<string, CatalogRow[]>): string[]

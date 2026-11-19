@@ -91,6 +91,20 @@ describe('PostgreSQL dump catalog equivalence without weakening authority', () =
     ])
       expect(canonicalAndChains(text)).toBe(text)
   })
+  it('keeps a backslash literal from desynchronizing the scanner (standard-conforming strings)', () => {
+    const before = "CHECK (((s = '\\'::text) OR (s = '(ARRAY[''::character varying])::text[]'::text)))"
+    const other = "CHECK (((s = '\'::text) OR (s = 'ARRAY[(''::character varying)::text]'::text)))"
+    expect(canonicalDumpExpression(before)).toBe(before)
+    const constraint = (definition: string) => ({ kind: 'constraint', id: 't.c', definition: { type: 'c', definition } })
+    expect(catalogDigest([constraint(before)])).not.toBe(catalogDigest([constraint(other)]))
+    // An escape-string literal is left unrewritten rather than guessed at.
+    const escaped = `CHECK ((s = E'\\'::text) AND (role = ANY (${arrayCast})))`
+    expect(canonicalDumpExpression(escaped)).toBe(escaped)
+  })
+  it('never flattens through a sub-SELECT', () => {
+    const text = '(( SELECT true FROM t WHERE (a AND b)) AND c)'
+    expect(canonicalAndChains(text)).toBe(text)
+  })
   it('treats only the default owner-only table ACL as equivalent to NULL', () => {
     expect(catalogDigest([relation(null)])).toBe(
       catalogDigest([relation('{ue_v2_owner=arwdDxt/ue_v2_owner}')]),

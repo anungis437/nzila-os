@@ -1,5 +1,6 @@
 /** Source-owned additive physical protections. No released migration or supplied SQL is executed. */
 import { createHash } from 'node:crypto'
+import { canonicalAndChains, canonicalDumpExpression } from '../../scripts/bootstrap-v2/catalog-normalization'
 export type Row = Record<string, unknown>
 export type Execute = (sql: string) => Promise<Row[]>
 export interface PhysicalGuardContract {
@@ -71,6 +72,10 @@ const normalized = (s: unknown) =>
     .replace(/\s+/g, ' ')
     .replace(/REFERENCES public\./g, 'REFERENCES ')
     .trim()
+/** A constraint restored from pg_dump may reparse into a different but lossless deparse (varchar-array
+ * casts pushed into elements, BETWEEN's nested AND flattened); compare through the same canonical forms
+ * the catalog digest uses. Every literal, operator and column stays significant. */
+const normalizedConstraint = (s: unknown) => canonicalAndChains(canonicalDumpExpression(normalized(s)))
 export function compileGuardFunction(fn: PhysicalGuardContract['functions'][number]): string[] {
   const volatility =
     fn.volatility === 'i' ? 'IMMUTABLE' : fn.volatility === 's' ? 'STABLE' : 'VOLATILE'
@@ -156,7 +161,7 @@ export function planPhysicalGuards(contract: PhysicalGuardContract, snapshot: Ph
           (row) =>
             row.table_name === spec.table_name &&
             row.type === spec.type &&
-            normalized(row.definition) === normalized(spec.definition),
+            normalizedConstraint(row.definition) === normalizedConstraint(spec.definition),
         )
     if (!rows.length) {
       statements.push(
@@ -167,7 +172,7 @@ export function planPhysicalGuards(contract: PhysicalGuardContract, snapshot: Ph
     if (
       rows.length !== 1 ||
       rows[0].type !== spec.type ||
-      normalized(rows[0].definition) !== normalized(spec.definition) ||
+      normalizedConstraint(rows[0].definition) !== normalizedConstraint(spec.definition) ||
       rows[0].convalidated !== true ||
       rows[0].condeferrable !== false ||
       rows[0].condeferred !== false

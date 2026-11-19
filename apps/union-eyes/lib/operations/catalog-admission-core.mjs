@@ -8,6 +8,24 @@ import { createHash } from 'node:crypto'
 
 const PRIVILEGE_ORDER = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
 
+/**
+ * A private function-owner role is isolated when it is a member of no role and nothing holds it, except
+ * at most the one edge PostgreSQL 16 records, non-revocably, when a non-superuser CREATEROLE login
+ * creates a role: ADMIN only (no INHERIT, no SET), granted by a superuser (the bootstrap one). That edge confers
+ * none of the role's privileges. PostgreSQL 15 has no such edge (and no inherit/set columns), so there
+ * every edge is refused. `r` is the pg_roles row being judged.
+ */
+export const PRIVATE_ROLE_ISOLATED_SQL = `(NOT EXISTS(SELECT FROM pg_catalog.pg_auth_members m WHERE m.member=r.oid)
+      AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_auth_members m WHERE m.roleid=r.oid)
+        = (SELECT pg_catalog.count(*) FROM pg_catalog.pg_auth_members m
+            JOIN pg_catalog.pg_roles holder ON holder.oid=m.member
+            JOIN pg_catalog.pg_roles grantor ON grantor.oid=m.grantor
+            WHERE m.roleid=r.oid AND m.admin_option
+              AND COALESCE((pg_catalog.to_jsonb(m)->>'inherit_option')::boolean,true) IS FALSE
+              AND COALESCE((pg_catalog.to_jsonb(m)->>'set_option')::boolean,true) IS FALSE
+              AND grantor.rolsuper AND holder.rolcreaterole AND NOT holder.rolsuper)
+      AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_auth_members m WHERE m.roleid=r.oid) <= 1)`
+
 export const admissionQueries = [
   {
     name: 'roles',
@@ -26,7 +44,7 @@ export const admissionQueries = [
   {
     name: 'externalReadRole',
     sql: `SELECT r.rolname,r.rolsuper,r.rolinherit,r.rolcreaterole,r.rolcreatedb,r.rolcanlogin,r.rolbypassrls,
-      NOT EXISTS(SELECT FROM pg_catalog.pg_auth_members m WHERE m.roleid=r.oid OR m.member=r.oid) AS isolated,
+      ${PRIVATE_ROLE_ISOLATED_SQL} AS isolated,
       pg_catalog.has_schema_privilege(r.oid,'public','USAGE') AS public_usage,
       pg_catalog.has_schema_privilege(r.oid,'public','CREATE') AS public_create,
       pg_catalog.has_schema_privilege(r.oid,'public','USAGE WITH GRANT OPTION') AS public_grant_option,
