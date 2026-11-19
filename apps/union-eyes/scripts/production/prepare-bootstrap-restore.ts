@@ -13,7 +13,10 @@
  *     and revokes it again before the dump ends,
  *   - gives ue_v2_owner a SET-only membership in the isolated external-read owner and that role CREATE on
  *     public for the restore only (PostgreSQL 16 requires both to hand it function ownership), then
- *     revokes both before the dump ends, exactly as the installer's external-read finalization does.
+ *     revokes both before the dump ends, exactly as the installer's external-read finalization does,
+ *   - applies every ACL entry pg_dump lists as owned by that isolated role while SET to that role, as the
+ *     installer does: the SET-only membership confers none of the owner's privileges, so the dump's
+ *     REVOKE/GRANT run as ue_v2_owner would only warn and leave PUBLIC EXECUTE on SECURITY DEFINER code.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -28,6 +31,8 @@ const roles = FUNCTION_OWNER_ROLES.join(',')
 export const ISOLATED_EXTERNAL_READ_OWNER = 'ue_external_read_reader'
 const EXTERNAL_OWNER_SET_GRANT = `DO $ue_restore_external$ BEGIN IF current_setting('server_version_num')::integer>=160000 THEN EXECUTE 'GRANT ${ISOLATED_EXTERNAL_READ_OWNER} TO ue_v2_owner WITH ADMIN FALSE,INHERIT FALSE,SET TRUE'; ELSE GRANT ${ISOLATED_EXTERNAL_READ_OWNER} TO ue_v2_owner; END IF; END $ue_restore_external$;`
 const EXTENSION_LINE = 'CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;'
+const TOC_HEADER = /^-- Name: .*; Type: [A-Z ]+; Schema: [^;]*; Owner: [^;]*$/
+const EXTERNAL_OWNED_ACL_HEADER = new RegExp(`^-- Name: .*; Type: ACL; Schema: [^;]*; Owner: ${ISOLATED_EXTERNAL_READ_OWNER}$`)
 
 export function transformSchemaDump(
   dump: string,
@@ -40,7 +45,13 @@ export function transformSchemaDump(
   let restrictSeen = 0
   let userManagementSeen = 0
   let unrestrictSeen = 0
+  let externalAclOpen = false
+  let externalAclEntries = 0
   for (const line of dump.split('\n')) {
+    if (externalAclOpen && (TOC_HEADER.test(line) || line.startsWith('\\unrestrict'))) {
+      out.push('SET ROLE ue_v2_owner;')
+      externalAclOpen = false
+    }
     if (line === EXTENSION_LINE) {
       extensionLines++
       continue
@@ -59,6 +70,11 @@ export function transformSchemaDump(
       out.push('SET ROLE ue_v2_owner;')
       out.push(`GRANT CREATE ON SCHEMA public TO ${roles},${ISOLATED_EXTERNAL_READ_OWNER};`)
     }
+    if (EXTERNAL_OWNED_ACL_HEADER.test(line)) {
+      externalAclEntries++
+      externalAclOpen = true
+      out.push(`SET ROLE ${ISOLATED_EXTERNAL_READ_OWNER};`)
+    }
     if (line === 'ALTER SCHEMA user_management OWNER TO ue_v2_owner;') {
       userManagementSeen++
       out.push(`GRANT CREATE ON SCHEMA user_management TO ${roles};`)
@@ -71,6 +87,12 @@ export function transformSchemaDump(
     throw new Error('UE_RESTORE_EXPECTED_ONE_RESTRICT_MARKER_PAIR')
   if (userManagementSeen !== 1)
     throw new Error('UE_RESTORE_EXPECTED_ONE_USER_MANAGEMENT_OWNER_LINE')
+  if (externalAclOpen) throw new Error('UE_RESTORE_EXTERNAL_ACL_SECTION_UNTERMINATED')
+  const externalOwnedObjects = dump
+    .split('\n')
+    .filter((line) => new RegExp(` OWNER TO ${ISOLATED_EXTERNAL_READ_OWNER};$`).test(line)).length
+  if (externalOwnedObjects > 0 && externalAclEntries === 0)
+    throw new Error('UE_RESTORE_EXTERNAL_OWNED_OBJECTS_WITHOUT_OWNER_ACLS')
   return out.join('\n')
 }
 

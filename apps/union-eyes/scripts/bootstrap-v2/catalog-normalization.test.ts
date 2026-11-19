@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonicalCatalogObject, canonicalDumpExpression } from './catalog-normalization'
+import { canonicalAndChains, canonicalCatalogObject, canonicalDumpExpression } from './catalog-normalization'
 import { catalogDigest } from './installer'
 
 const arrayCast = "(ARRAY['member'::character varying, 'admin'::character varying])::text[]"
@@ -58,6 +58,38 @@ describe('PostgreSQL dump catalog equivalence without weakening authority', () =
     expect(canonicalDumpExpression('(ARRAY[NULL::character varying])::text[]')).toBe(
       '(ARRAY[NULL::character varying])::text[]',
     )
+  })
+  it('recognizes the measured BETWEEN nested-AND reparse and nothing that changes meaning', () => {
+    const installed =
+      "CHECK (((referred_categories IS NULL) OR (((cardinality(referred_categories) >= 1) AND (cardinality(referred_categories) <= 8)) AND (NOT ('*'::text = ANY (referred_categories))))))"
+    const restored =
+      "CHECK (((referred_categories IS NULL) OR ((cardinality(referred_categories) >= 1) AND (cardinality(referred_categories) <= 8) AND (NOT ('*'::text = ANY (referred_categories))))))"
+    expect(canonicalAndChains(installed)).toBe(restored)
+    expect(canonicalAndChains(restored)).toBe(restored)
+    const constraint = (definition: string) => ({
+      kind: 'constraint',
+      id: 'ue_authority_workaid_matters.ue_authority_workaid_referred_categories_chk',
+      definition: { type: 'c', definition },
+    })
+    expect(catalogDigest([constraint(installed)])).toBe(catalogDigest([constraint(restored)]))
+    expect(catalogDigest([constraint(installed)])).not.toBe(
+      catalogDigest([constraint(restored.replace('<= 8', '<= 9'))]),
+    )
+    // An OR inside the nested group is not associative with the outer AND.
+    expect(canonicalAndChains('((a OR b) AND c)')).toBe('((a OR b) AND c)')
+    expect(canonicalAndChains('(((a AND b) OR c) AND d)')).toBe('(((a AND b) OR c) AND d)')
+    // A nested AND under OR, NOT, a function argument list or a cast is not an AND operand.
+    for (const text of [
+      '((a AND b) OR c)',
+      '(NOT (a AND b) AND c)',
+      'f((a AND b), c)',
+      '((a AND b))::boolean AND c',
+      "('(x AND y) AND z' AND c)",
+      '("(a AND b)" AND c)',
+      '$q$((a AND b) AND c)$q$',
+      '-- ((a AND b) AND c)',
+    ])
+      expect(canonicalAndChains(text)).toBe(text)
   })
   it('treats only the default owner-only table ACL as equivalent to NULL', () => {
     expect(catalogDigest([relation(null)])).toBe(
