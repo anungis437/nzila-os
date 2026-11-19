@@ -7,20 +7,36 @@
  * person who performs it, continuing from the parties the guarded case fixture installed. No
  * released SQL, role grant, trigger, policy, CHECK or caller verdict is substituted or relaxed.
  *
- * Not qualified here, because the base release has no reachable workflow for them:
- *   ue_authority_counsel_nonces and ue_authority_workaid_counsel_access are written only inside a
- *   counsel-assertion verification (lib/authority/store/counsel.ts createAssertionBackedCounselVerifier,
- *   lib/authority/store/workaid-disclosure.ts readWorkAidCounselManifest), which needs a
- *   deployment-supplied CounselAssertionVerifier. None ships (lib/authority/store/enforce.ts
- *   EnforcementDeps.counsel; capability UE-WORKAID-UNION-SIDE-DISCLOSURE), so every counsel act
- *   fails closed with COUNSEL_NOT_VERIFIABLE and no such row can be produced honestly.
+ * Counsel rows (ue_authority_counsel_nonces, ue_authority_workaid_counsel_access) are produced only by
+ * the shipped counsel pipeline: readWorkAidCounselManifest with createAssertionBackedCounselVerifier as
+ * deps.counsel, in the engaged counsel's own bearer-bound session, so authenticateCounselAssertion checks
+ * the envelope, the allowed issuer and the signature before the durable nonce store consumes the nonce.
+ * The ONLY fixture part is the CounselAssertionVerifier signature port, a genuine Ed25519 verification
+ * against a key generated for this run. That proves the database boundary, not the product capability:
+ * no production verifier ships, so the product stays COUNSEL_NOT_VERIFIABLE, recorded on each counsel
+ * report as counselCapability NOT_PROVEN_NO_PRODUCTION_VERIFIER.
  */
 import assert from 'node:assert/strict'
-import { createHash, randomUUID } from 'node:crypto'
+import {
+  createHash,
+  generateKeyPairSync,
+  randomUUID,
+  sign,
+  verify,
+  type KeyObject,
+} from 'node:crypto'
 import type pg from 'pg'
+import {
+  COUNSEL_AUDIENCE,
+  type CounselAssertion,
+  type CounselAssertionVerifier,
+} from '../../lib/authority/counsel-boundary'
 import { DEFAULT_ISSUANCE_TEMPLATES } from '../../lib/authority/issuance'
 import { activeMembershipSource } from '../../lib/authority/store/active-membership-source'
-import { recordCounselEngagement } from '../../lib/authority/store/counsel'
+import {
+  createAssertionBackedCounselVerifier,
+  recordCounselEngagement,
+} from '../../lib/authority/store/counsel'
 import type { SqlExecutor } from '../../lib/authority/store/executor'
 import { isUuid } from '../../lib/authority/store/executor'
 import {
@@ -35,6 +51,7 @@ import {
   authoriseWorkAidDocument,
   createWorkAidShare,
   grantWorkAidConsent,
+  readWorkAidCounselManifest,
   recordConsentText,
   referMatterToWorkAid,
 } from '../../lib/authority/store/workaid-disclosure'
@@ -68,6 +85,7 @@ export const WORKFLOW_RUNTIME_TABLES = [
   'ue_authority_approval_decisions',
   'ue_authority_approval_requests',
   'ue_authority_counsel_engagements',
+  'ue_authority_counsel_nonces',
   'ue_authority_delegations',
   'ue_authority_disclosure_consents',
   'ue_authority_events',
@@ -78,6 +96,7 @@ export const WORKFLOW_RUNTIME_TABLES = [
   'ue_authority_reviews',
   'ue_authority_workaid_consent_grants',
   'ue_authority_workaid_consent_texts',
+  'ue_authority_workaid_counsel_access',
   'ue_authority_workaid_document_auths',
   'ue_authority_workaid_matters',
   'ue_authority_workaid_shares',
@@ -119,6 +138,7 @@ export const WORKFLOW_RAW_BYPASS_REFUSALS: Readonly<Record<WorkflowTable, string
   ue_authority_approval_decisions: '42501:ALREADY_DECIDED',
   ue_authority_approval_requests: '23514:AUDIT_LINK_MISSING',
   ue_authority_counsel_engagements: '23514:AUDIT_LINK_MISSING',
+  ue_authority_counsel_nonces: '23514:AUDIT_LINK_MISSING',
   ue_authority_delegations: '42501:ISSUER_AUTHORITY_REQUIRED',
   ue_authority_disclosure_consents: '23514:AUDIT_LINK_MISSING',
   ue_authority_events: '42501:EVENT_RECORDING_TRIGGER_ONLY',
@@ -129,6 +149,7 @@ export const WORKFLOW_RAW_BYPASS_REFUSALS: Readonly<Record<WorkflowTable, string
   ue_authority_reviews: '23514:AUDIT_LINK_MISSING',
   ue_authority_workaid_consent_grants: '23514:WORKAID_GRANT_INVALID',
   ue_authority_workaid_consent_texts: '23514:AUDIT_LINK_MISSING',
+  ue_authority_workaid_counsel_access: '23514:AUDIT_LINK_MISSING',
   ue_authority_workaid_document_auths: '23514:WORKAID_DOCAUTH_INVALID',
   ue_authority_workaid_matters: '23514:AUDIT_LINK_MISSING',
   ue_authority_workaid_shares: '23514:AUDIT_LINK_MISSING',
@@ -141,8 +162,26 @@ const actorCaseNames = (table: string) =>
     ),
   )
 
+/** Counsel-written relations, produced through the counsel assertion pipeline. */
+export const COUNSEL_RUNTIME_TABLES = [
+  'ue_authority_counsel_nonces',
+  'ue_authority_workaid_counsel_access',
+] as const satisfies readonly WorkflowTable[]
+export const isCounselRuntimeTable = (name: string) =>
+  COUNSEL_RUNTIME_TABLES.some((table) => table === name)
+export const COUNSEL_PIPELINE_CASES = [
+  'COUNSEL_SIGNATURE_FIXTURE_KEY_VERIFIED',
+  'TAMPERED_ASSERTION_SIGNATURE_REFUSED',
+  'NONCE_SINGLE_USE_REPLAY_REFUSED',
+] as const
+/** The database boundary is qualified; the product counsel capability is not (no production verifier). */
+export const COUNSEL_CAPABILITY = 'NOT_PROVEN_NO_PRODUCTION_VERIFIER' as const
+export interface WorkflowTableReport extends ColumnTableReport {
+  counselCapability?: typeof COUNSEL_CAPABILITY
+}
+
 /** Every report must carry its own observed workflow, isolation and refusal evidence, exactly once. */
-export function workflowReportComplete(report: ColumnTableReport): boolean {
+export function workflowReportComplete(report: WorkflowTableReport): boolean {
   if (
     !isWorkflowRuntimeTable(report.table) ||
     report.status !== 'PASS' ||
@@ -150,10 +189,18 @@ export function workflowReportComplete(report: ColumnTableReport): boolean {
     Object.hasOwn(report, 'failedProof')
   )
     return false
+  const counsel = isCounselRuntimeTable(report.table)
+  if (
+    counsel
+      ? report.counselCapability !== COUNSEL_CAPABILITY
+      : Object.hasOwn(report, 'counselCapability')
+  )
+    return false
   const refusal = `${report.table}:RAW_BYPASS_REFUSAL:${WORKFLOW_RAW_BYPASS_REFUSALS[report.table]}`
   const required = [
     ...WORKFLOW_REQUIRED_CASES.map((name) => `${report.table}:${name}`),
     refusal,
+    ...(counsel ? COUNSEL_PIPELINE_CASES.map((name) => `${report.table}:${name}`) : []),
     ...actorCaseNames(report.table),
   ]
   return (
@@ -166,6 +213,7 @@ type PartyIds = Record<WorkflowTable, string[]>
 interface WorkflowParty extends GuardedCaseParty {
   admin: GuardedActor
   counselUserId: string
+  counselPipeline: { signatureVerified: boolean; tamperRefused: boolean; replayRefused: boolean }
   officeRuleId: string
   delegationRuleId: string
   officeApprovalRequestId: string
@@ -189,7 +237,7 @@ export interface WorkflowRuntimeInput {
   guarded: GuardedCaseRuntimeResult
 }
 export interface WorkflowRuntimeQualification {
-  qualifyTable(table: WorkflowTable): Promise<ColumnTableReport>
+  qualifyTable(table: WorkflowTable): Promise<WorkflowTableReport>
 }
 
 const deps = { memberships: activeMembershipSource }
@@ -216,6 +264,12 @@ const WORKFLOW_HISTORY_TABLES = [
   ]),
 ]
 const WORKFLOW_MARKERS = [
+  'COUNSEL_NOT_VERIFIED',
+  'COUNSEL_NOT_VERIFIABLE',
+  'COUNSEL_NEEDS_SEPARATE_CAPACITY',
+  'COUNSEL_CONFLICTING_CAPACITY',
+  'COUNSEL_ACCESS_REFUSED',
+  'CONSENT_NOT_LIVE',
   'AUDIT_LINK_MISSING',
   'ISSUER_AUTHORITY_REQUIRED',
   'NO_ACTIVE_ISSUANCE_RULE',
@@ -346,13 +400,12 @@ async function produceWorkflowRows(
       const ids = emptyIds()
       ids.ue_authority_resource_relationships.push(guarded.assignmentRelationshipId)
       setStage('ACTORS')
-      // An organization administrator grants the messages designation; counsel is an external principal.
+      // An organization administrator grants the messages designation. Counsel is a plain member who
+      // acts only under a separate, barrier-protected member-counsel engagement: a canonical bearer
+      // session needs a live membership, and a member holds no conflicting union capacity.
       const admin = await createGuardedActor(input.operator, org, 'admin')
-      const counselUserId = randomUUID()
-      await input.operator.query(
-        "INSERT INTO user_management.users(user_id,email,is_active,lifecycle_state,is_system_admin,email_verified) VALUES($1,$2,true,'active',false,true)",
-        [counselUserId, `workflow-counsel-${counselUserId}@example.invalid`],
-      )
+      const counsel = await createGuardedActor(input.operator, org, 'member')
+      const counselUserId = counsel.userId
       setStage('ADOPT_RULES')
       const rules: Record<'executive_office' | 'delegation', string> = {
         executive_office: '',
@@ -632,13 +685,21 @@ async function produceWorkflowRows(
             recorderUserId: vicePresident.userId,
             matterId,
             counselUserId,
-            capacity: 'external_counsel',
-            informationBarrier: false,
+            capacity: 'member_counsel',
+            informationBarrier: true,
             effectiveAt: new Date(now() - 60_000),
             expiresAt: new Date(now() + 90 * 86_400_000),
           }),
         ),
       )
+      setStage('COUNSEL_PIPELINE')
+      const counselPipeline = await runCounselPipeline(input.operator, within, {
+        counsel,
+        organizationId: org,
+        matterId,
+        foreignMemberUserId: party.member.userId,
+        ids,
+      })
       setStage('MESSAGING')
       // Administrator designates the steward to triage; the member writes; the steward assigns the
       // officer; the member closes their own conversation.
@@ -709,6 +770,7 @@ async function produceWorkflowRows(
         ...guarded,
         admin,
         counselUserId,
+        counselPipeline,
         officeRuleId: rules.executive_office,
         delegationRuleId: rules.delegation,
         officeApprovalRequestId,
@@ -732,6 +794,183 @@ async function produceWorkflowRows(
   } finally {
     await harness.end()
   }
+}
+
+/** The counsel-side issuer this run trusts, and the Ed25519 key it alone holds for this run. */
+const COUNSEL_FIXTURE_ISSUER = 'qualification-counsel-gateway'
+/** Canonical signed bytes: every assertion field, in a fixed order, with instants in ISO form. */
+const canonicalCounselAssertion = (assertion: CounselAssertion): Buffer =>
+  Buffer.from(
+    JSON.stringify([
+      assertion.issuer,
+      assertion.audience,
+      assertion.subject,
+      assertion.organizationId,
+      assertion.matterId,
+      assertion.nonce,
+      assertion.issuedAt.toISOString(),
+      assertion.expiresAt.toISOString(),
+    ]),
+    'utf8',
+  )
+/**
+ * The deployment-supplied signature port, implemented as a real Ed25519 verification of the exact
+ * canonical bytes against the issuer's public key. Any changed field, or a signature made over
+ * other bytes, verifies false; anything unreadable is false.
+ */
+export function ed25519CounselAssertionVerifier(
+  publicKey: KeyObject,
+  signature: Buffer,
+): CounselAssertionVerifier {
+  assert.equal(publicKey.asymmetricKeyType, 'ed25519', 'WORKFLOW_COUNSEL_KEY_MUST_BE_ED25519')
+  assert.equal(publicKey.type, 'public', 'WORKFLOW_COUNSEL_PUBLIC_KEY_REQUIRED')
+  return {
+    async verifySignature(assertion) {
+      try {
+        return verify(null, canonicalCounselAssertion(assertion), publicKey, signature) === true
+      } catch {
+        return false
+      }
+    },
+  }
+}
+
+/**
+ * Counsel reads the manifest of the referred matter in their own session through the shipped
+ * pipeline (envelope, issuer, signature, durable single-use nonce, counsel capacity, live consent),
+ * which writes the nonce and the access record with their audits. A forged signature and a replay
+ * of the accepted assertion are then refused, leaving every history byte unchanged.
+ */
+async function runCounselPipeline(
+  operator: pg.Client,
+  within: GuardedWithin,
+  input: {
+    counsel: GuardedActor
+    organizationId: string
+    matterId: string
+    foreignMemberUserId: string
+    ids: PartyIds
+  },
+): Promise<WorkflowParty['counselPipeline']> {
+  const { counsel, organizationId, matterId } = input
+  const keys = generateKeyPairSync('ed25519')
+  const assertion: CounselAssertion = {
+    issuer: COUNSEL_FIXTURE_ISSUER,
+    audience: COUNSEL_AUDIENCE,
+    subject: counsel.userId,
+    organizationId,
+    matterId,
+    nonce: `qualification-${randomUUID()}`,
+    issuedAt: new Date(now() - 30_000),
+    expiresAt: new Date(now() + 150_000),
+  }
+  const signature = sign(null, canonicalCounselAssertion(assertion), keys.privateKey)
+  const port = ed25519CounselAssertionVerifier(keys.publicKey, signature)
+  assert.equal(
+    await port.verifySignature(assertion),
+    true,
+    'WORKFLOW_COUNSEL_SIGNATURE_NOT_VERIFIED',
+  )
+  for (const tampered of [
+    { ...assertion, subject: input.foreignMemberUserId },
+    { ...assertion, nonce: `${assertion.nonce}-x` },
+    { ...assertion, matterId: randomUUID() },
+    { ...assertion, expiresAt: new Date(assertion.expiresAt.getTime() + 1) },
+  ])
+    assert.equal(await port.verifySignature(tampered), false, 'WORKFLOW_COUNSEL_TAMPER_VERIFIED')
+  const other = generateKeyPairSync('ed25519')
+  assert.equal(
+    await ed25519CounselAssertionVerifier(other.publicKey, signature).verifySignature(assertion),
+    false,
+    'WORKFLOW_COUNSEL_FOREIGN_KEY_VERIFIED',
+  )
+  const read = (presented: CounselAssertion) =>
+    within(counsel, (_tx, exec) =>
+      readWorkAidCounselManifest(
+        exec,
+        {
+          memberships: activeMembershipSource,
+          counsel: createAssertionBackedCounselVerifier({
+            assertion: presented,
+            allowedIssuers: [COUNSEL_FIXTURE_ISSUER],
+            signatureVerifier: port,
+          }),
+        },
+        { organizationId, counselUserId: counsel.userId, matterId },
+      ),
+    )
+  const manifest = await read(assertion)
+  assert.equal(manifest.matterId, matterId, 'WORKFLOW_COUNSEL_MANIFEST_MATTER_REQUIRED')
+  assert.equal(manifest.counselSideState, 'union_record_only')
+  assert.deepEqual(
+    manifest.releasedCategories,
+    ['case_summary', 'documents'],
+    'WORKFLOW_COUNSEL_MANIFEST_RELEASE_REQUIRED',
+  )
+  const observed = await within(counsel, async (_tx, exec) => ({
+    nonces: (
+      await exec.query<{ id: string }>(
+        'SELECT id::text AS id FROM public.ue_authority_counsel_nonces WHERE organization_id=$1 AND matter_id=$2 AND consumed_by=$3 AND nonce_hash=$4',
+        [
+          organizationId,
+          matterId,
+          counsel.userId,
+          createHash('sha256').update(assertion.nonce).digest('hex'),
+        ],
+      )
+    ).rows.map((row) => row.id),
+    access: (
+      await exec.query<{ id: string }>(
+        'SELECT id::text AS id FROM public.ue_authority_workaid_counsel_access WHERE organization_id=$1 AND matter_id=$2 AND counsel_user_id=$3',
+        [organizationId, matterId, counsel.userId],
+      )
+    ).rows.map((row) => row.id),
+  }))
+  assert.equal(observed.nonces.length, 1, 'WORKFLOW_COUNSEL_NONCE_REQUIRED')
+  assert.equal(observed.access.length, 1, 'WORKFLOW_COUNSEL_ACCESS_REQUIRED')
+  input.ids.ue_authority_counsel_nonces.push(...observed.nonces)
+  input.ids.ue_authority_workaid_counsel_access.push(...observed.access)
+  const refusal = async (attempt: Promise<unknown>) => {
+    try {
+      await attempt
+    } catch (error) {
+      return databaseRefusal(error)
+    }
+    return 'ACCEPTED'
+  }
+  const before = await readFixtureHistory(operator, WORKFLOW_HISTORY_TABLES)
+  // The accepted signature presented with a fresh nonce: refused at the signature, so no nonce burns.
+  const forged = await refusal(read({ ...assertion, nonce: `qualification-${randomUUID()}` }))
+  assert.equal(
+    forged,
+    'NOCODE:COUNSEL_NOT_VERIFIED',
+    `WORKFLOW_COUNSEL_FORGERY_NOT_REFUSED:${forged.replace(':', '_')}`,
+  )
+  await assertFixtureHistory(
+    operator,
+    WORKFLOW_HISTORY_TABLES,
+    before,
+    'WORKFLOW_COUNSEL_FORGERY_CHANGED_HISTORY',
+  )
+  // The genuinely signed assertion presented again: its nonce is already consumed, so it is refused.
+  const replay = await refusal(read(assertion))
+  assert.equal(
+    replay,
+    'NOCODE:COUNSEL_NOT_VERIFIED',
+    `WORKFLOW_COUNSEL_REPLAY_NOT_REFUSED:${replay.replace(':', '_')}`,
+  )
+  await assertFixtureHistory(
+    operator,
+    WORKFLOW_HISTORY_TABLES,
+    before,
+    'WORKFLOW_COUNSEL_REPLAY_CHANGED_HISTORY',
+  )
+  const nonceRows = await operator.query<{ count: string }>(
+    'SELECT count(*)::text AS count FROM public.ue_authority_counsel_nonces WHERE organization_id=$1 AND matter_id=$2',
+    [organizationId, matterId],
+  )
+  assert.equal(nonceRows.rows[0].count, '1', 'WORKFLOW_COUNSEL_SECOND_NONCE_WRITTEN')
+  return { signatureVerified: true, tamperRefused: true, replayRefused: true }
 }
 
 /**
@@ -846,6 +1085,21 @@ function rawBypass(
         sql: "INSERT INTO public.ue_authority_counsel_engagements(organization_id,matter_id,counsel_user_id,capacity,information_barrier,recorded_by,effective_at,expires_at) VALUES($1,$2,$3,'external_counsel',false,$4,now(),now()+interval '1 day')",
         params: [org, party.matterId, randomUUID(), user],
       }
+    case 'ue_authority_counsel_nonces':
+      return {
+        sql: "INSERT INTO public.ue_authority_counsel_nonces(organization_id,matter_id,nonce_hash,consumed_by,expires_at) VALUES($1,$2,$3,$4,now()+interval '1 minute')",
+        params: [
+          org,
+          party.matterId,
+          createHash('sha256').update(randomUUID()).digest('hex'),
+          user,
+        ],
+      }
+    case 'ue_authority_workaid_counsel_access':
+      return {
+        sql: 'INSERT INTO public.ue_authority_workaid_counsel_access(organization_id,matter_id,counsel_user_id,shares_served) VALUES($1,$2,$3,0)',
+        params: [org, party.matterId, user],
+      }
     case 'ue_authority_delegations':
       return {
         sql: "INSERT INTO public.ue_authority_delegations(organization_id,delegator_user_id,delegate_user_id,office,actions,resource_types,effective_at,expires_at,issuance_rule_id) VALUES($1,$2,$3,'Disposable bypass',ARRAY['case:read'],ARRAY['case'],now()-interval '1 minute',now()+interval '1 day',$4)",
@@ -928,8 +1182,10 @@ async function qualifyWorkflowTable(
   parties: readonly [WorkflowParty, WorkflowParty],
   original: ReadonlyMap<WorkflowTable, string>,
   table: WorkflowTable,
-): Promise<ColumnTableReport> {
+): Promise<WorkflowTableReport> {
   const cases: string[] = []
+  const counselTable = isCounselRuntimeTable(table)
+  const counselField = counselTable ? { counselCapability: COUNSEL_CAPABILITY } : {}
   const mark = (name: string) => {
     const key = `${table}:${name}`
     assert(!cases.includes(key), `WORKFLOW_DUPLICATE_OBSERVATION:${table}`)
@@ -957,6 +1213,24 @@ async function qualifyWorkflowTable(
     for (const party of parties)
       assert(party.ids[table].length > 0, `WORKFLOW_BOTH_POSITIVE_ROWS_REQUIRED:${table}`)
     mark('OWN_WORKFLOW_OPERATION_ROWS_VERIFIED')
+    if (counselTable) {
+      // Observed for both parties while the counsel rows were produced (runCounselPipeline).
+      assert(
+        parties.every((party) => party.counselPipeline.signatureVerified),
+        `WORKFLOW_COUNSEL_SIGNATURE_PROOF_REQUIRED:${table}`,
+      )
+      mark('COUNSEL_SIGNATURE_FIXTURE_KEY_VERIFIED')
+      assert(
+        parties.every((party) => party.counselPipeline.tamperRefused),
+        `WORKFLOW_COUNSEL_TAMPER_PROOF_REQUIRED:${table}`,
+      )
+      mark('TAMPERED_ASSERTION_SIGNATURE_REFUSED')
+      assert(
+        parties.every((party) => party.counselPipeline.replayRefused),
+        `WORKFLOW_COUNSEL_REPLAY_PROOF_REQUIRED:${table}`,
+      )
+      mark('NONCE_SINGLE_USE_REPLAY_REFUSED')
+    }
     stage = 'MEMBER_ISOLATION'
     for (const [index, party] of parties.entries()) {
       const expected = party.ids[table],
@@ -1098,11 +1372,11 @@ async function qualifyWorkflowTable(
       await input.system.query('ROLLBACK')
     }
     mark('SOURCE_SYSTEM_BOUNDARY_VERIFIED')
-    const report: ColumnTableReport = { table, status: 'PASS', cases }
+    const report: WorkflowTableReport = { table, status: 'PASS', cases, ...counselField }
     assert(workflowReportComplete(report), `WORKFLOW_INCOMPLETE_REPORT:${table}`)
     return report
   } catch (error) {
-    return { table, status: 'FAIL', cases, failure: summary(stage, error) }
+    return { table, status: 'FAIL', cases, failure: summary(stage, error), ...counselField }
   } finally {
     await harness.end()
   }

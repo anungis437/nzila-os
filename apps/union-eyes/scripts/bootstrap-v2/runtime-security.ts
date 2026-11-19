@@ -9,7 +9,7 @@ import {
   qualifyFeeAdjustmentWriteOwnedResult,
 } from './fee-adjustment-native-proof'
 import { hash, quote, type V2Plan } from './source'
-import { OWNERSHIP_PROTECTED_CLASSES, type SecurityRule } from './security'
+import { compileSecurity, OWNERSHIP_PROTECTED_CLASSES, type SecurityRule } from './security'
 import { ENFORCEMENT_GEOMETRY_OVERRIDES } from '../rls-enforcement/enforcement-geometry-overrides'
 import {
   ZERO_SYSTEM_MUTATION_TABLES,
@@ -1576,6 +1576,10 @@ export async function* iterateRuntimeSecurityReports(
       (error: unknown) => code(error) === '42501',
     )
   }
+  // Zero SYSTEM authority is a property of the plan's complete compiled security source. The caller's
+  // `rules` may be only the subset it qualifies (the tenant matrix passes RLS_REQUIRED tables), and
+  // several zero-SYSTEM tables are CONTAINED_NO_AUTHORITY, so they are never looked up there.
+  const planSecurity = compileSecurity(plan).rules
   const zeroSystemReports: {
     table: string
     status: 'PASS' | 'FAIL'
@@ -1585,7 +1589,7 @@ export async function* iterateRuntimeSecurityReports(
   for (const table of ZERO_SYSTEM_MUTATION_TABLES) {
     const cases: string[] = []
     try {
-      const source = rules.find((rule) => rule.table === table)
+      const source = planSecurity.find((rule) => rule.table === table)
       assert(
         source &&
           source.status === 'COMPLETE' &&

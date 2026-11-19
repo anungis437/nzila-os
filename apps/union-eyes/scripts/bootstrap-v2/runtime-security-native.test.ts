@@ -87,6 +87,7 @@ native('current tenant positive writes with genuine restricted execution', () =>
     ue_authority_approval_decisions: '42501:ALREADY_DECIDED',
     ue_authority_approval_requests: '23514:AUDIT_LINK_MISSING',
     ue_authority_counsel_engagements: '23514:AUDIT_LINK_MISSING',
+    ue_authority_counsel_nonces: '23514:AUDIT_LINK_MISSING',
     ue_authority_delegations: '42501:ISSUER_AUTHORITY_REQUIRED',
     ue_authority_disclosure_consents: '23514:AUDIT_LINK_MISSING',
     ue_authority_events: '42501:EVENT_RECORDING_TRIGGER_ONLY',
@@ -97,6 +98,7 @@ native('current tenant positive writes with genuine restricted execution', () =>
     ue_authority_reviews: '23514:AUDIT_LINK_MISSING',
     ue_authority_workaid_consent_grants: '23514:WORKAID_GRANT_INVALID',
     ue_authority_workaid_consent_texts: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_counsel_access: '23514:AUDIT_LINK_MISSING',
     ue_authority_workaid_document_auths: '23514:WORKAID_DOCAUTH_INVALID',
     ue_authority_workaid_matters: '23514:AUDIT_LINK_MISSING',
     ue_authority_workaid_shares: '23514:AUDIT_LINK_MISSING',
@@ -914,6 +916,21 @@ native('current tenant positive writes with genuine restricted execution', () =>
           'SOURCE_SYSTEM_BOUNDARY_VERIFIED',
           `RAW_BYPASS_REFUSAL:${workflowRefusals[rule.table]}`,
         ]
+        // Counsel rows come only through the shipped counsel assertion pipeline, whose signature port
+        // is a fixture Ed25519 key. The product capability stays unproven: no production verifier.
+        const counselTable = [
+          'ue_authority_counsel_nonces',
+          'ue_authority_workaid_counsel_access',
+        ].includes(rule.table)
+        if (counselTable)
+          workflowWitnesses.push(
+            'COUNSEL_SIGNATURE_FIXTURE_KEY_VERIFIED',
+            'TAMPERED_ASSERTION_SIGNATURE_REFUSED',
+            'NONCE_SINGLE_USE_REPLAY_REFUSED',
+          )
+        const counselCapability = (report as { counselCapability?: unknown }).counselCapability
+        if (counselTable) expect(counselCapability).toBe('NOT_PROVEN_NO_PRODUCTION_VERIFIER')
+        else expect(Object.hasOwn(report, 'counselCapability')).toBe(false)
         for (const witness of workflowWitnesses)
           expect(report.cases.filter((name) => name === `${rule.table}:${witness}`)).toHaveLength(1)
         const workflowActorWitnesses = [
