@@ -533,7 +533,8 @@ native('current tenant positive writes with genuine restricted execution', () =>
       for (const sessionState of ['expired', 'revoked'] as const) {
         await seed.query(
           sessionState === 'expired'
-            ? "UPDATE user_management.user_sessions SET expires_at=now()-interval '1 second' WHERE user_id=$1"
+            ? // A genuinely expired session: valid_expiry requires expires_at > created_at.
+              "UPDATE user_management.user_sessions SET created_at=now()-interval '2 hours',expires_at=now()-interval '1 second' WHERE user_id=$1"
             : 'UPDATE user_management.user_sessions SET is_active=false WHERE user_id=$1',
           [frontendIdentity.actor],
         )

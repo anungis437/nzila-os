@@ -346,7 +346,7 @@ async function prepareParty(operator: pg.Client, organizationId: string): Promis
   for (const [index, role] of roles.entries()) {
     const userId = randomUUID()
     await operator.query(
-      "INSERT INTO user_management.users(user_id,email,is_active,lifecycle_state,is_system_admin) VALUES($1,$2,true,'active',$3)",
+      "INSERT INTO user_management.users(user_id,email,is_active,lifecycle_state,is_system_admin,email_verified) VALUES($1,$2,true,'active',$3,true)",
       [userId, `guarded-${userId}@example.invalid`, index === 8],
     )
     await operator.query(
@@ -365,7 +365,25 @@ async function prepareParty(operator: pg.Client, organizationId: string): Promis
   }
 }
 
+/**
+ * Case status transitions queue a sealed member notification in the same transaction, so the
+ * disposable run needs a correspondence signing key. A synthetic key is scoped to this run and
+ * the caller's value is restored afterwards (same pattern as member-letter-delivery.native).
+ */
+const SYNTHETIC_CORRESPONDENCE_KEY = 'synthetic-native-guarded-case-correspondence-key-0001'
 export async function qualifyGuardedCaseRuntimeSecurity(
+  input: GuardedCaseRuntimeInput,
+): Promise<GuardedCaseRuntimeResult> {
+  const priorKey = process.env.EVIDENCE_SEAL_KEY
+  process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_CORRESPONDENCE_KEY
+  try {
+    return await qualifyGuardedCaseRuntimeSecurityWithKey(input)
+  } finally {
+    if (priorKey === undefined) delete process.env.EVIDENCE_SEAL_KEY
+    else process.env.EVIDENCE_SEAL_KEY = priorKey
+  }
+}
+async function qualifyGuardedCaseRuntimeSecurityWithKey(
   input: GuardedCaseRuntimeInput,
 ): Promise<GuardedCaseRuntimeResult> {
   assert(input.plan.authExecution, 'GUARDED_CASE_CANONICAL_AUTH_REQUIRED')
@@ -650,14 +668,17 @@ export async function qualifyGuardedCaseRuntimeSecurity(
       const transition = await within(party.handler, (tx) =>
         transitionCase(
           claim.claimId,
-          'under_review',
+          // submitted -> assigned (steward, no minimum time in state): the handler was just
+          // assigned, and 'assigned' -> 'investigation' below is then immediately lawful.
+          // 'under_review' holds a claim for 24h, which a single run cannot satisfy honestly.
+          'assigned',
           party.handler.userId,
           'Disposable source workflow qualification',
           tx,
         ),
       )
       assert.equal(transition.success, true, transition.error)
-      assert.equal(transition.claim?.status, 'under_review')
+      assert.equal(transition.claim?.status, 'assigned')
       const proposal = await within(party.officer, (_tx, exec) =>
         proposeCaseScope(exec, deps, {
           organizationId: party.organizationId,
@@ -734,7 +755,7 @@ export async function qualifyGuardedCaseRuntimeSecurity(
           const journal = (
             await exec.query<{ id: string }>(
               `SELECT id::text FROM public.claim_status_transitions
-          WHERE claim_id=$1 AND from_status='under_review' AND to_status='investigation' AND transaction_id=txid_current()`,
+          WHERE claim_id=$1 AND from_status='assigned' AND to_status='investigation' AND transaction_id=txid_current()`,
               [claim.id],
             )
           ).rows
@@ -1077,7 +1098,7 @@ export async function qualifyGuardedCaseRuntimeSecurity(
             ? (
                 await within(party.member, (_tx, exec) =>
                   exec.query<{ id: string }>(
-                    "SELECT id::text AS id FROM public.claim_status_transitions WHERE claim_id=$1 AND from_status='submitted' AND to_status='under_review'",
+                    "SELECT id::text AS id FROM public.claim_status_transitions WHERE claim_id=$1 AND from_status='submitted' AND to_status='assigned'",
                     [claim.id],
                   ),
                 )

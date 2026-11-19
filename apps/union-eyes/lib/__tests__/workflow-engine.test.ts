@@ -93,7 +93,7 @@ vi.mock('@/lib/cases/case-authorization', () => ({ getCaseActor: mocks.actor, fi
   caseReadScope: vi.fn(), requireKernelCaseAction: mocks.requireAction }));
 vi.mock('@/lib/authority/store/route-adapter', () => ({ decideCase: mocks.decideCase,decideCaseCapabilitiesBatch:mocks.batch }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
-vi.mock('@/lib/workflow/case-status-delivery', () => ({ queueCaseStatusEmail: mocks.queueMail }));
+vi.mock('@/lib/workflow/case-status-delivery', () => ({ queueCaseStatusEmailOrRecordRefusal: mocks.queueMail }));
 
 /* ── imports ───────────────────────────────────────────────────────────────── */
 import {

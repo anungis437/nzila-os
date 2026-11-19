@@ -27,6 +27,33 @@ export async function queueCaseStatusEmail(tx:RLSTx,input:{organizationId:string
     resourceType:'notification_queue',resourceId:id,details:{caseId:input.caseId,recipientId:input.recipientId}})
   return id
 }
+/** True only for the database's own refusal to mint a queued-mail capability (ue_issue_queued_case_mail). */
+export function isQueuedMailMintDenied(error:unknown):boolean {
+  for(let current:unknown=error,depth=0;current&&depth<8;current=(current as {cause?:unknown}).cause,depth++){
+    const candidate=current as {message?:unknown;code?:unknown}
+    if(candidate.code==='42501'&&candidate.message==='QUEUED_MAIL_MINT_DENIED')return true
+  }
+  return false
+}
+
+/**
+ * A status change is the handler's authorized act; the member notice is a consequence of it.
+ * The notice is queued inside a savepoint. When the database refuses to mint its capability
+ * (recipient without a verified active email, ambiguous membership, or no live authority for the
+ * notice), only the notice is rolled back and the refusal is audited, so the transition still
+ * commits and nothing is sent. Every other failure aborts the whole transaction as before.
+ */
+export async function queueCaseStatusEmailOrRecordRefusal(tx:RLSTx,input:Parameters<typeof queueCaseStatusEmail>[1]):Promise<{queued:true;id:string}|{queued:false}> {
+  try{
+    const id=await tx.transaction(savepoint=>queueCaseStatusEmail(savepoint as RLSTx,input))
+    return {queued:true,id}
+  }catch(error){
+    if(!isQueuedMailMintDenied(error))throw error
+    await persistAtomicAudit(tx,{organizationId:input.organizationId,userId:input.queuedBy,action:'case.status_email_not_queued',
+      resourceType:'claims',resourceId:input.caseId,details:{recipientId:input.recipientId,newStatus:input.newStatus,reason:'QUEUED_MAIL_MINT_DENIED'}})
+    return {queued:false}
+  }
+}
 async function record(tx:RLSTx,row:QueueRow,event:string,details:Record<string,unknown>={}) {
   await tx.insert(notificationDeliveryLog).values({organizationId:row.organizationId,notificationId:row.id,event,
     eventTimestamp:new Date(),providerId:'resend',externalEventId:typeof details.providerMessageId==='string'?details.providerMessageId:null,details})

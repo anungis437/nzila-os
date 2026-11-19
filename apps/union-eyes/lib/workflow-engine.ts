@@ -41,7 +41,7 @@ import { getCaseActor, findReadableCase, caseReadScope, requireKernelCaseAction 
 import { ApiError } from '@/lib/api/errors';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { decideCase } from '@/lib/authority/store/route-adapter';
-import { queueCaseStatusEmail } from '@/lib/workflow/case-status-delivery';
+import { queueCaseStatusEmailOrRecordRefusal } from '@/lib/workflow/case-status-delivery';
 
 // Define valid status transitions
 export const STATUS_TRANSITIONS = {
@@ -476,7 +476,7 @@ export async function updateClaimStatus(
         slaCompliant: validation.metadata?.slaCompliant ?? null, daysInState: validation.metadata?.daysInState ?? null,
         warnings: validation.warnings ?? [], hasUnresolvedCriticalSignals,
         nextDeadline: validation.metadata?.nextDeadline?.toISOString() ?? null } } });
-    if (claim.memberId) await queueCaseStatusEmail(tx, { organizationId: actor.organizationId,
+    if (claim.memberId) await queueCaseStatusEmailOrRecordRefusal(tx, { organizationId: actor.organizationId,
       caseId: claim.claimId, queuedBy: actor.userId, recipientId: claim.memberId, previousStatus: currentStatus, newStatus });
     return { success: true, claim: updatedClaim };
 }
