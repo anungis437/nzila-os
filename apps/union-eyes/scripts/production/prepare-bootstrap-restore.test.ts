@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   FUNCTION_OWNER_ROLES,
+  ISOLATED_EXTERNAL_READ_OWNER,
   transformReceiptDump,
   transformSchemaDump,
 } from './prepare-bootstrap-restore'
@@ -27,7 +28,11 @@ describe('bootstrap restore transform', () => {
     const out = transformSchemaDump(dump)
     const lines = out.split('\n')
     expect(out).not.toContain('CREATE EXTENSION')
-    expect(lines[lines.indexOf('\\restrict abc123') + 1]).toBe('SET ROLE ue_v2_owner;')
+    const restrict = lines.indexOf('\\restrict abc123')
+    // The isolated external-read owner is granted to ue_v2_owner (SET only) by the operator login,
+    // then the restore runs as ue_v2_owner.
+    expect(lines[restrict + 1]).toContain(`GRANT ${ISOLATED_EXTERNAL_READ_OWNER} TO ue_v2_owner WITH ADMIN FALSE,INHERIT FALSE,SET TRUE`)
+    expect(lines[restrict + 2]).toBe('SET ROLE ue_v2_owner;')
     for (const role of FUNCTION_OWNER_ROLES) {
       expect(out).toContain(role)
     }
@@ -44,6 +49,14 @@ describe('bootstrap restore transform', () => {
     expect(revokePublic).toBeGreaterThan(grantPublic)
     expect(revokeUm).toBeGreaterThan(grantUm)
     expect(unrestrict).toBeGreaterThan(revokeUm)
+    // The external-read owner's CREATE and membership are restore-only too.
+    expect(lines[grantPublic]).toContain(ISOLATED_EXTERNAL_READ_OWNER)
+    expect(lines[revokePublic]).toContain(ISOLATED_EXTERNAL_READ_OWNER)
+    const reset = lines.indexOf('RESET ROLE;')
+    const revokeMembership = lines.indexOf(`REVOKE ${ISOLATED_EXTERNAL_READ_OWNER} FROM ue_v2_owner;`)
+    expect(reset).toBeGreaterThan(revokeUm)
+    expect(revokeMembership).toBe(reset + 1)
+    expect(unrestrict).toBe(revokeMembership + 1)
   })
 
   it('refuses a dump with CRLF endings, which corrupts function bodies', () => {

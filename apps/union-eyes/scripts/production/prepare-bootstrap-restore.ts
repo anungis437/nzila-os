@@ -10,7 +10,10 @@
  *   - drops "CREATE EXTENSION vector" (the operator creates it; the platform owns that extension),
  *   - restores as the schema owner (SET ROLE ue_v2_owner),
  *   - grants CREATE on public and user_management to the four function-owner roles for the restore only
- *     and revokes it again before the dump ends.
+ *     and revokes it again before the dump ends,
+ *   - gives ue_v2_owner a SET-only membership in the isolated external-read owner and that role CREATE on
+ *     public for the restore only (PostgreSQL 16 requires both to hand it function ownership), then
+ *     revokes both before the dump ends, exactly as the installer's external-read finalization does.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -22,6 +25,8 @@ export const FUNCTION_OWNER_ROLES = [
   'ue_framework_authority_reader',
 ] as const
 const roles = FUNCTION_OWNER_ROLES.join(',')
+export const ISOLATED_EXTERNAL_READ_OWNER = 'ue_external_read_reader'
+const EXTERNAL_OWNER_SET_GRANT = `DO $ue_restore_external$ BEGIN IF current_setting('server_version_num')::integer>=160000 THEN EXECUTE 'GRANT ${ISOLATED_EXTERNAL_READ_OWNER} TO ue_v2_owner WITH ADMIN FALSE,INHERIT FALSE,SET TRUE'; ELSE GRANT ${ISOLATED_EXTERNAL_READ_OWNER} TO ue_v2_owner; END IF; END $ue_restore_external$;`
 const EXTENSION_LINE = 'CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;'
 
 export function transformSchemaDump(
@@ -42,14 +47,17 @@ export function transformSchemaDump(
     }
     if (line.startsWith('\\unrestrict')) {
       unrestrictSeen++
-      out.push(`REVOKE CREATE ON SCHEMA public FROM ${roles};`)
+      out.push(`REVOKE CREATE ON SCHEMA public FROM ${roles},${ISOLATED_EXTERNAL_READ_OWNER};`)
       out.push(`REVOKE CREATE ON SCHEMA user_management FROM ${roles};`)
+      out.push('RESET ROLE;')
+      out.push(`REVOKE ${ISOLATED_EXTERNAL_READ_OWNER} FROM ue_v2_owner;`)
     }
     out.push(line)
     if (line.startsWith('\\restrict')) {
       restrictSeen++
+      out.push(EXTERNAL_OWNER_SET_GRANT)
       out.push('SET ROLE ue_v2_owner;')
-      out.push(`GRANT CREATE ON SCHEMA public TO ${roles};`)
+      out.push(`GRANT CREATE ON SCHEMA public TO ${roles},${ISOLATED_EXTERNAL_READ_OWNER};`)
     }
     if (line === 'ALTER SCHEMA user_management OWNER TO ue_v2_owner;') {
       userManagementSeen++
