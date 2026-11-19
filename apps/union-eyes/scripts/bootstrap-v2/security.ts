@@ -362,7 +362,17 @@ export function compileSecurity(plan: V2Plan) {
           `(${quote(foreignKey.column)} IS NULL OR EXISTS (SELECT 1 FROM ${ref(parent.name)} v2_fk WHERE v2_fk.${quote(foreignKey.referencedColumn)} = ${quote(table.name)}.${quote(foreignKey.column)}))`,
         ]
       })
-      const allParentChecks = [...parentChecks, ...containedParentChecks]
+      // grievances.represented_member_user_id references user_management.users through a physical
+      // guard (case-scope-physical-guards.ts), not a source-declared FK, so the loop above never sees
+      // it. Existence alone let a grievance name a member of another organization; the represented
+      // member must be an active member of the row's own organization.
+      const guardDeclaredMemberAttributions =
+        plan.authExecution && table.name === 'grievances'
+          ? [
+              `("represented_member_user_id" IS NULL OR ${AUTH_BUSINESS_MEMBER_PARENT_PREDICATE}("represented_member_user_id"::text, (${org})::uuid))`,
+            ]
+          : []
+      const allParentChecks = [...parentChecks, ...guardDeclaredMemberAttributions, ...containedParentChecks]
       if (allParentChecks.length)
         checkPredicate = `(${checkPredicate}) AND ${allParentChecks.join(' AND ')}`
     }

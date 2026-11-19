@@ -142,6 +142,33 @@ function value(column: Column, party: number, organizationId: string, userId: st
   return `${party}-${hash(`${column.table}:${column.name}`).slice(0, 12)}`.slice(0, limit)
 }
 
+/**
+ * User attribution columns that a table's physical guard makes immutable once written
+ * (db/auth/case-primary-domain-guards.ts CASE_IDENTITY_IMMUTABLE, db/auth/messaging-physical-guards.ts
+ * message_reads_guard). Re-pointing them to another same-organization user must be refused.
+ */
+const IDENTITY_IMMUTABLE_ATTRIBUTION: Readonly<Record<string, { columns: readonly string[]; refusal: RegExp }>> = {
+  grievances: {
+    columns: ['created_by', 'grievant_id', 'represented_member_user_id'],
+    refusal: /^CASE_IDENTITY_IMMUTABLE$/,
+  },
+  message_thread_reads: {
+    columns: ['user_id', 'thread_id', 'organization_id'],
+    refusal: /^message_thread_reads: identity of a read marker is immutable$/,
+  },
+}
+
+/**
+ * A cross-tenant write is refused either by RLS (42501) or, first, by the table's own BEFORE
+ * physical guard. message_reads_guard refuses with restrict_violation (23001) when a marker does not
+ * belong to a conversation of its tenant; that is the same denial, raised earlier.
+ */
+const RESTRICT_VIOLATION_GUARDED_TABLES: ReadonlySet<string> = new Set(['message_thread_reads'])
+function refusedByPolicyOrGuard(table: string, error: unknown): boolean {
+  const sqlState = (error as { code?: unknown })?.code
+  return sqlState === '42501' || (RESTRICT_VIOLATION_GUARDED_TABLES.has(table) && sqlState === '23001')
+}
+
 export async function* iterateRuntimeSecurityReports(
   seedClient: pg.Client,
   runtimeClient: pg.Client,
@@ -228,6 +255,37 @@ export async function* iterateRuntimeSecurityReports(
   }
   const seedFailures = new Map<string, string>()
   const proposed = new Map<string, [Row, Row]>()
+  // Physical actor guards (ue_authority_guard_actor) require each listed column to equal the
+  // transaction principal. Fixtures are written the way production writes them: the party's actor
+  // fills those columns and is the principal of the transaction that inserts the row.
+  const actorGuards = new Map<string, { insert: string[]; update: string[] }>()
+  for (const row of (
+    await seedClient.query<{ table_name: string; definition: string }>(
+      `SELECT c.relname AS table_name, pg_get_triggerdef(t.oid) AS definition FROM pg_trigger t
+         JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='public' AND t.tgname='ue_authority_guard_actor' AND NOT t.tgisinternal`,
+    )
+  ).rows) {
+    const args = row.definition.match(/ue_authority_guard_actor\('([^']*)', '([^']*)'\)/)
+    assert(args, `UE_V2_ACTOR_GUARD_ARGUMENTS_UNPARSED:${row.table_name}`)
+    const list = (value: string) => value.split(',').map((name) => name.trim()).filter(Boolean)
+    actorGuards.set(row.table_name, { insert: list(args[1]), update: list(args[2]) })
+  }
+  const insertActorColumns = (table: string) => actorGuards.get(table)?.insert ?? []
+  /** Inserts as the row's own actor when the table guards actor columns; resets the principal after. */
+  const insertAsActor = async <T extends pg.QueryResultRow>(table: string, row: Row, sql: string, parameters: unknown[]) => {
+    const actorColumn = insertActorColumns(table).find((name) => row[name] !== undefined && row[name] !== null)
+    if (!actorColumn) return seedClient.query<T>(sql, parameters)
+    const prior = (
+      await seedClient.query<{ value: string | null }>("SELECT current_setting('app.current_user_id',true) AS value")
+    ).rows[0]?.value ?? ''
+    await seedClient.query("SELECT set_config('app.current_user_id',$1,true)", [String(row[actorColumn])])
+    try {
+      return await seedClient.query<T>(sql, parameters)
+    } finally {
+      await seedClient.query("SELECT set_config('app.current_user_id',$1,true)", [prior])
+    }
+  }
   const fixtureRows = new Map<string, (party: number) => Row>()
   for (const table of plan.tables) {
     const geometry = ENFORCEMENT_GEOMETRY_OVERRIDES.find((entry) => entry.table === table.name)
@@ -258,6 +316,7 @@ export async function* iterateRuntimeSecurityReports(
               typeof scalarDefault !== 'object'
                 ? scalarDefault
                 : modelColumn?.choices?.[0]
+            if (insertActorColumns(table.name).includes(column.name)) return [column.name, actorUsers[party]]
             return [
               column.name,
               ['organization_id', 'org_id', 'user_id', 'claimed_by_user_id'].includes(
@@ -268,7 +327,10 @@ export async function* iterateRuntimeSecurityReports(
             ]
           }),
       )
-    fixtureRows.set(table.name, syntheticRow)
+    fixtureRows.set(table.name, (party: number) => ({
+      ...syntheticRow(party),
+      ...(metadataOverrides[table.name] ?? {}),
+    }))
     proposed.set(table.name, [syntheticRow(0), syntheticRow(1)])
   }
   const metadataOverrides: Record<string, Row> = {
@@ -293,6 +355,23 @@ export async function* iterateRuntimeSecurityReports(
       current_usage: 0,
     },
     contract_covered_orgs: { role: 'local', deactivated_at: null },
+    // Valid shapes under the tables' own CHECK constraints (no constraint is relaxed).
+    triage_designations: {
+      scope: 'messages',
+      granted_at: new Date(Date.now() - 86400000).toISOString(),
+      expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+    },
+    organizing_form_template_versions: { source_digest: 'a'.repeat(64) },
+    ue_authority_resource_relationships: { origin: 'explicit' },
+    // assign: no source staff, a target staff, through a triage designation.
+    message_thread_assignments: {
+      action: 'assign',
+      acted_via: 'triage_designation',
+      from_staff_id: null,
+      to_staff_id: 'ue-v2-synthetic-staff',
+    },
+    // close by a thread member: no hold, so no hold reference.
+    message_thread_lifecycle: { action: 'close', acted_via: 'thread_member', reference: null },
   }
   for (const [name, overrides] of Object.entries(metadataOverrides))
     for (const row of proposed.get(name) ?? []) Object.assign(row, overrides)
@@ -329,7 +408,9 @@ export async function* iterateRuntimeSecurityReports(
       const inserted: Row[] = []
       for (const row of rows) {
         const names = Object.keys(row)
-        const result = await seedClient.query<Row>(
+        const result = await insertAsActor<Row>(
+          name,
+          row,
           `INSERT INTO ${relation(name)} (${names.map(quote).join(',')}) VALUES (${names.map((_, index) => `$${index + 1}`).join(',')}) RETURNING *,ctid::text AS ue_v2_ctid`,
           names.map((column) => row[column]),
         )
@@ -476,7 +557,9 @@ export async function* iterateRuntimeSecurityReports(
         if (name === target && !seedTarget) return row
         assert.notEqual(name, 'recognition_awards', 'OPERATOR_NOMINATION_SEED_FORBIDDEN')
         const names = Object.keys(row)
-        const inserted = await seedClient.query<Row>(
+        const inserted = await insertAsActor<Row>(
+          name,
+          row,
           `INSERT INTO ${relation(name)} (${names.map(quote).join(',')}) VALUES (${names.map((_, index) => `$${index + 1}`).join(',')}) RETURNING *,ctid::text AS ue_v2_ctid`,
           names.map((name) => row[name]),
         )
@@ -650,7 +733,7 @@ export async function* iterateRuntimeSecurityReports(
             scoped(systemClient, 'union_eyes_system', candidate.party, () =>
               systemClient.query(statement, parameters),
             ),
-            (error: unknown) => code(error) === '42501',
+            (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
           )
         const insertSql = `INSERT INTO ${relation(rule.table)} (${insertColumns.map((column) => quote(column.name)).join(',')}) VALUES (${insertColumns.map((_, index) => `$${index + 1}`).join(',')})`
         const insertParameters = insertColumns.map((column) =>
@@ -771,7 +854,7 @@ export async function* iterateRuntimeSecurityReports(
         for (const role of ['ue_v2_owner', 'union_eyes_system']) {
           await assert.rejects(
             runtimeClient.query(`SET ROLE ${quote(role)}`),
-            (error: unknown) => code(error) === '42501',
+            (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
           )
         }
         cases.push('ORDINARY_LOGIN_CANNOT_ESCALATE_TO_SYSTEM_OR_OWNER')
@@ -905,7 +988,7 @@ export async function* iterateRuntimeSecurityReports(
             await runtimeClient.query('SET LOCAL row_security = off')
             await runtimeClient.query(`SELECT * FROM ${relation(rule.table)}`)
           }),
-          (error: unknown) => code(error) === '42501',
+          (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
         )
         cases.push('ORDINARY_ROLE_ROW_SECURITY_BYPASS_DENIED')
       }
@@ -959,14 +1042,24 @@ export async function* iterateRuntimeSecurityReports(
             for (const key of cache.keys()) if (!priorParentSeeds.has(key)) cache.delete(key)
             throw error
           }
-          await denied(() =>
+          const foreignParentUpdate = () =>
             scoped(runtimeClient, 'union_eyes_runtime', 0, () =>
               runtimeClient.query(
                 `UPDATE ${relation(rule.table)} SET ${quote(fk.column)}=$1 WHERE ctid=$2::tid`,
                 [parentRows[1][fk.referenced], rows[0].ue_v2_ctid],
               ),
-            ),
-          )
+            )
+          const immutableIdentity = IDENTITY_IMMUTABLE_ATTRIBUTION[rule.table]
+          if (immutableIdentity?.columns.includes(fk.column)) {
+            // The identity column cannot move at all, so the foreign-tenant re-point is refused by the guard.
+            await assert.rejects(
+              foreignParentUpdate,
+              // RLS (42501) or the table's own physical guard (restrict_violation, 23001) may refuse first.
+              (error: unknown) => code(error) === '42501' || code(error) === '23001' || immutableIdentity.refusal.test(failureText(error)),
+            )
+          } else {
+            await denied(foreignParentUpdate)
+          }
           cases.push(`EXISTING_FOREIGN_TENANT_FK_DENIED:${fk.column}`)
           if (
             plan.authExecution &&
@@ -980,9 +1073,15 @@ export async function* iterateRuntimeSecurityReports(
                   [sameOrgParent, rows[0].ue_v2_ctid],
                 ),
               )
+            const immutable = IDENTITY_IMMUTABLE_ATTRIBUTION[rule.table]
             if (rule.table === 'ai_usage_metrics' && fk.column === 'user_id') {
               await denied(updateParent)
               cases.push(`SAME_ORG_OTHER_USER_OWN_PARENT_DENIED:${fk.column}`)
+            } else if (immutable?.columns.includes(fk.column)) {
+              await assert.rejects(updateParent, (error: unknown) =>
+                immutable.refusal.test(failureText(error)),
+              )
+              cases.push(`IDENTITY_IMMUTABLE_ATTRIBUTION_REFUSED:${fk.column}`)
             } else {
               const result = await updateParent()
               assert.equal(result.rowCount, 1, 'UE_V2_SAME_ORG_ATTRIBUTION_PARENT_DENIED')
@@ -1028,6 +1127,8 @@ export async function* iterateRuntimeSecurityReports(
               ].includes(column.name) &&
               !foreignKeys.some((fk) => fk.table === rule.table && fk.column === column.name) &&
               !column.labels?.length &&
+              // A value pinned to satisfy the table's own CHECK constraint is not free to vary.
+              !(column.name in (metadataOverrides[rule.table] ?? {})) &&
               (column.type === 'uuid' || /^(?:character varying|varchar|text)/.test(column.type)),
           )
           if (!mutable) {
@@ -1064,7 +1165,7 @@ export async function* iterateRuntimeSecurityReports(
               insertColumns.map((column) => syntheticParameter(column.type, rows[1][column.name])),
             ),
           ),
-          (error: unknown) => code(error) === '42501',
+          (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
         )
         cases.push('FOREIGN_TENANT_INSERT_RLS_DENIED')
         const authParents = plan.authExecution
@@ -1085,14 +1186,35 @@ export async function* iterateRuntimeSecurityReports(
              GROUP BY i.indexrelid`,
             [relation(rule.table)],
           )
+          // Every unique key other than id gets one freely varying, non-tenant, non-FK text/uuid
+          // column, so the attribution inserts never collide with the seeded row. Null values stay
+          // null (a partial unique key does not apply to them).
+          const varyingKeyColumns = keys.rows
+            .filter((key) => !(key.columns.length === 1 && key.columns[0] === 'id'))
+            .map((key) =>
+              key.columns.find(
+                (name) =>
+                  !['organization_id', 'org_id'].includes(name) &&
+                  !foreignKeys.some((fk) => fk.table === rule.table && fk.column === name) &&
+                  insertColumns.some(
+                    (column) =>
+                      column.name === name &&
+                      (column.type === 'uuid' || /^(?:character varying|varchar|text)/.test(column.type)),
+                  ),
+              ),
+            )
           assert(
             insertColumns.some((column) => column.name === 'id' && column.type === 'uuid') &&
-              keys.rows.length > 0 &&
-              keys.rows.every((key) => key.columns.length === 1 && key.columns[0] === 'id'),
+              keys.rows.some((key) => key.columns.length === 1 && key.columns[0] === 'id') &&
+              varyingKeyColumns.every((name) => name !== undefined),
             `UE_V2_AUTH_PARENT_INSERT_UNIQUE_FIXTURE_REQUIRED:${rule.table}`,
           )
+          const freshKeyValue = (column: Column) =>
+            column.type === 'uuid'
+              ? randomUUID()
+              : `ue-v2-${randomUUID()}`.slice(0, Number(column.type.match(/\((\d+)\)/)?.[1] ?? 100))
           for (const fk of authParents) {
-            const insertParent = (parentUserId: string) =>
+            const insertParent = (parentUserId: string): Promise<pg.QueryResult> =>
               scoped(runtimeClient, 'union_eyes_runtime', 0, () =>
                 runtimeClient.query(
                   `INSERT INTO ${relation(rule.table)} (${insertColumns.map((column) => quote(column.name)).join(',')}) VALUES (${insertColumns.map((_, index) => `$${index + 1}`).join(',')})`,
@@ -1103,7 +1225,9 @@ export async function* iterateRuntimeSecurityReports(
                         ? randomUUID()
                         : column.name === fk.column
                           ? parentUserId
-                          : rows[0][column.name],
+                          : varyingKeyColumns.includes(column.name) && rows[0][column.name] != null
+                            ? freshKeyValue(column)
+                            : rows[0][column.name],
                     ),
                   ),
                 ),
@@ -1116,13 +1240,13 @@ export async function* iterateRuntimeSecurityReports(
             cases.push(`OWN_AUTH_PARENT_INSERT_ALLOWED_AND_ROLLED_BACK:${fk.column}`)
             await assert.rejects(
               insertParent(userIds[1]),
-              (error: unknown) => code(error) === '42501',
+              (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
             )
             cases.push(`OWN_ORG_FOREIGN_AUTH_PARENT_INSERT_DENIED:${fk.column}`)
             if (rule.table === 'ai_usage_metrics' && fk.column === 'user_id') {
               await assert.rejects(
                 insertParent(sameOrgParent),
-                (error: unknown) => code(error) === '42501',
+                (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
               )
               cases.push(`SAME_ORG_OTHER_USER_OWN_PARENT_INSERT_DENIED:${fk.column}`)
             } else {
@@ -1276,7 +1400,7 @@ export async function* iterateRuntimeSecurityReports(
                 () => runtimeClient.query(sql, parameters),
                 'bearer',
               ),
-              (error: unknown) => code(error) === '42501',
+              (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
             )
             assert.equal(
               (
@@ -1291,7 +1415,7 @@ export async function* iterateRuntimeSecurityReports(
               scoped(runtimeClient, 'union_eyes_runtime', 0, () =>
                 runtimeClient.query(sql, parameters),
               ),
-              (error: unknown) => code(error) === '42501',
+              (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
             )
             const parentConstraints = new Map<string, ForeignKey[]>()
             for (const fk of foreignKeys.filter((entry) => entry.table === rule.table)) {
@@ -1353,7 +1477,7 @@ export async function* iterateRuntimeSecurityReports(
                     ),
                   ),
                 ),
-                (error: unknown) => code(error) === '42501',
+                (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
               )
               cases.push(`${actorClass}:EXISTING_FOREIGN_PARENT_INSERT_DENIED:${constraint}`)
             }
@@ -1388,7 +1512,7 @@ export async function* iterateRuntimeSecurityReports(
               scoped(runtimeClient, 'union_eyes_runtime', own.party, () =>
                 runtimeClient.query(operation.sql, operation.parameters),
               ),
-              (error: unknown) => code(error) === '42501',
+              (error: unknown) => refusedByPolicyOrGuard(rule.table, error),
             )
             cases.push(`${actorClass}:SOURCE_UNAUTHORIZED_${operation.privilege}_DENIED`)
           }
