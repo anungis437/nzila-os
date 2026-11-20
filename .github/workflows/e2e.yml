@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     name: ${{ matrix.app == 'union-eyes' && format('UE E2E worker ({0}/4)', matrix.shard) || format('E2E · {0}', matrix.app) }}
     # Pull-request code is untrusted. These shared steps never select the staging
     # environment, never requests id-token, and never reads Azure or performance
@@ -341,7 +341,7 @@ jobs:
   # post-job cleanup, without coupling UE evidence to another application's job.
   e2e-ue-pr:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     name: ${{ format('UE PR E2E worker ({0}/4)', matrix.shard) }}
     permissions:
       contents: read
@@ -361,7 +361,7 @@ jobs:
   # restoring a legacy staging snapshot. It needs no Azure token and no staging environment.
   e2e-canonical:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     name: ${{ format('UE E2E worker ({0}/4)', matrix.shard) }}
     permissions:
       contents: read
@@ -611,7 +611,7 @@ jobs:
     name: E2E · union-eyes
     needs: [e2e-ue-pr, e2e-canonical]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     permissions:
       contents: read
       actions: read
