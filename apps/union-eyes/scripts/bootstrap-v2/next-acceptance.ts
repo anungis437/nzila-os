@@ -600,6 +600,7 @@ export async function runNextAcceptance() {
       env.AUTH_SECRET,
       env.AUTH_MFA_ENCRYPTION_KEY,
       env.VOTING_SECRET,
+      env.CRON_SECRET,
       httpFixture.password,
       httpFixture.mfaSecret,
       ...vault.secrets,
