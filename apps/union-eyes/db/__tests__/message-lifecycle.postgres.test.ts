@@ -21,19 +21,26 @@ import { seedMembership, U as AuthorityUser, type Db } from './authority-kernel-
 import { kit } from './authority-kernel-testkit'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import type { RLSTx } from '@/lib/db/with-rls-context'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
-const state = vi.hoisted(() => ({ db: null as unknown }))
+const state = vi.hoisted(() => ({ db: null as unknown, live: null as null | ((userId: string, organizationId: string) => Promise<boolean>) }))
 
 type Tx = { execute: (q: unknown) => Promise<unknown> }
 type Role = 'union_eyes_runtime' | 'union_eyes_system'
+// Canonical V2: a runtime transaction runs in the actor's own verified business session (ue_v2_verified_business_session), which the
+// request binder opens only for a live canonical member; anyone else (no membership, a revoked one) runs with no session and is refused.
 async function inRole<T>(role: Role, org: string, user: string, work: (tx: RLSTx) => Promise<T>): Promise<T> {
-  return (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
-    await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
-    await tx.execute(sql`SELECT set_config('app.current_user_id', ${user}, true), set_config('app.current_org_id', ${org}, true)`)
-    return work(tx as unknown as RLSTx)
-  })
+  const run = (binding?: Parameters<typeof installNativeBusinessContext>[1]) =>
+    (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
+      await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${user}, true), set_config('app.current_org_id', ${org}, true)`)
+      if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
+      return work(tx as unknown as RLSTx)
+    })
+  if (role === 'union_eyes_runtime' && state.live && (await state.live(user, org))) return withNativeCanonicalActor(user, org, (binding) => run(binding))
+  return run()
 }
 
 const access = URL ? await import('@/lib/messaging/thread-access') : null
@@ -88,17 +95,24 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
     await admin.query(`INSERT INTO messages (thread_id, sender_id, sender_role, content) VALUES ($1,$2,'member',$3)`, [id, memberId, BODY])
     return id
   }
-  const setMembership = (userId: string, patch: { status?: string; role?: string; deleted?: boolean }) =>
-    admin.query(`UPDATE organization_members SET status = coalesce($2, status), role = coalesce($3, role), deleted_at = CASE WHEN $4::boolean THEN now() ELSE NULL END WHERE user_id = $1 AND organization_id = $5`, [
+  // The membership the canonical topology reads live is user_management.organization_users; the compatibility projection is kept in step.
+  const setMembership = async (userId: string, patch: { status?: string; role?: string; deleted?: boolean }) => {
+    await admin.query(`UPDATE organization_members SET status = coalesce($2, status), role = coalesce($3, role), deleted_at = CASE WHEN $4::boolean THEN now() ELSE NULL END WHERE user_id = $1 AND organization_id = $5`, [
       userId, patch.status ?? null, patch.role ?? null, patch.deleted ?? false, ORG_A,
     ])
+    await admin.query(`UPDATE user_management.organization_users SET role = coalesce($2, role), is_active = $3 WHERE user_id = $1 AND organization_id = $4`, [
+      userId, patch.role ?? null, (patch.status === undefined || patch.status === 'active') && !patch.deleted, ORG_A,
+    ])
+  }
   const status = async (id: string) => (await admin.query(`SELECT status, is_archived FROM message_threads WHERE id = $1`, [id])).rows[0] as { status: string; is_archived: boolean }
   const lifecycleRows = (id: string) => count(`SELECT count(*) AS n FROM message_thread_lifecycle WHERE thread_id = $1`, [id])
 
   beforeAll(async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+    expect(process.env.UE_CANONICAL_BOOTSTRAP_V2, 'this suite runs on the canonical topology').toBe('1')
     admin = new pg.Client({ connectionString: URL })
     await admin.connect()
+    state.live = async (userId, organizationId) => (await admin.query(`SELECT 1 FROM user_management.users u JOIN user_management.organization_users m ON m.user_id = u.user_id
+      WHERE u.user_id = $1 AND u.is_active AND u.lifecycle_state = 'active' AND m.organization_id = $2::uuid AND m.is_active`, [userId, organizationId])).rows.length > 0
     const d: Db = { exec: (s) => admin.query(s), query: (s, p) => admin.query(s, p as unknown[]) as never }
     for (const [org, slug] of [[ORG_A, `ml-a-${sfx}`], [ORG_B, `ml-b-${sfx}`]]) {
       await admin.query(
@@ -113,7 +127,7 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
     ]
     for (const [user, org, role] of roster) {
       await seedMembership(d, user, org, role)
-      // Outside Canonical V2 a staff actor's live membership is read per request from the compatibility projection.
+      // The compatibility projection the legacy lineage read; canonical V2 reads user_management.organization_users (seeded above).
       await admin.query(
         `INSERT INTO organization_members (id, created_at, updated_at, user_id, role, status, is_primary, organization_id, name, email) VALUES (gen_random_uuid(), now(), now(), $1, $2, 'active', false, $3, $1, $1 || '@example.test')`,
         [user, role, org],
@@ -139,7 +153,6 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
     await admin?.end()
   })
   afterEach(async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     await clearFaults()
   })
 
@@ -260,13 +273,11 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await count(`SELECT count(*) AS n FROM message_thread_assignments WHERE thread_id = $1`, [id])).toBe(0)
     })
 
-    it('reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role', async (ctx) => {
-      // The predicate belongs to the Canonical V2 auth topology (db/auth/conversation-assignee-predicate.ts), which the
-      // combined Django + legacy-bootstrap database does not install. Without it this path is NOT proven here: skip, do not pass.
+    it('reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role', async () => {
+      // The predicate belongs to the Canonical V2 auth topology (db/auth/conversation-assignee-predicate.ts), which this database installs.
       const installed = await admin.query(`SELECT 1 FROM pg_proc WHERE proname = 'ue_conversation_assignee_authorized'`)
-      if (installed.rows.length === 0) return ctx.skip()
+      expect(installed.rows).toHaveLength(1)
       const id = await mkThread(U.member, { staffId: U.steward })
-      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
       // The predicate reads the canonical user_management membership seeded above, never the compatibility projection.
       expect(await as(steward, (tx) => access!.findReadableThread(tx, steward, id))).not.toBeNull()
       await admin.query(`UPDATE user_management.organization_users SET is_active = false WHERE user_id = $1 AND organization_id = $2`, [U.steward, ORG_A])
@@ -326,9 +337,8 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await lifecycleRows(id)).toBe(1)
       await clearFaults()
 
-      // Under Canonical V2 the same decision is audited on the hash chain and rolls back against that sink too.
+      // Canonical V2 audits the same decision on the hash chain, and it rolls back against that sink too.
       const v2 = await mkThread(U.member)
-      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
       await failAudit('messages.thread.close')
       await rejectsWith(as(member, (tx) => lifecycle!.changeThreadLifecycle(tx, member, v2, 'close')), /injected audit fault/)
       expect(await status(v2)).toEqual({ status: 'open', is_archived: false })
@@ -601,9 +611,10 @@ describe.skipIf(!URL)('conversation lifecycle, retention and read markers on the
       expect(await lifecycleRows(threadId)).toBe(1)
       expect(await audits('messages.thread.hold_place', threadId)).toBe(1)
       const stored = await admin.query<{ reference: string; metadata: string }>(
-        `SELECT l.reference, coalesce(a.metadata::text, '') AS metadata
+        // Canonical V2 audits on the hash-chained public.audit_logs, whose details are the record's metadata.
+        `SELECT l.reference, coalesce(a.details::text, '') AS metadata
            FROM message_thread_lifecycle l
-           JOIN audit_security.audit_logs a ON a.resource_id = l.thread_id AND a.action = 'messages.thread.hold_place'
+           JOIN public.audit_logs a ON a.resource_id = l.thread_id::text AND a.action = 'messages.thread.hold_place'
           WHERE l.thread_id = $1`,
         [threadId],
       )

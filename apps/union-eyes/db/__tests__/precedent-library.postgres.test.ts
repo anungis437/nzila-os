@@ -19,7 +19,7 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { inArray } from 'drizzle-orm'
+import { inArray, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
@@ -79,7 +79,6 @@ describe.skipIf(!URL)('the precedent library on the combined schema, as the real
   let pool: pg.Pool
   let runtimePool: pg.Pool
   let schema: typeof import('@/db/schema')
-  let baseline: { total: number; byOutcome: Record<string, number> }
 
   const caseNumber = (key: string) => `${tag}-${key}`
   const keyOf = (id: string) => (Object.entries(ids) as [Key, string][]).find(([, value]) => value === id)?.[0]
@@ -138,8 +137,6 @@ describe.skipIf(!URL)('the precedent library on the combined schema, as the real
     await insertOrg(O.b, `Precedent Local B ${tag}`)
     await insertOrg(O.other, `Precedent Local Other ${tag}`)
 
-    const stats = await service!.getPrecedentStatistics()
-    baseline = { total: stats.total, byOutcome: Object.fromEntries(stats.byOutcome.map((row) => [String(row.outcome), row.count])) }
 
     const adminDb = drizzle(admin, { schema: schema as never })
     const rows: [Key, ReturnType<typeof decision>][] = [
@@ -166,202 +163,78 @@ describe.skipIf(!URL)('the precedent library on the combined schema, as the real
     await admin?.end().catch(() => undefined)
   })
 
-  describe('the service reads only public, unrestricted decisions', () => {
-    it('returns a decision by id or by case number exactly when it is public and unrestricted, and never its full text unless asked', async () => {
-      for (const key of Object.keys(ids) as Key[]) {
-        const readable = PUBLIC_UNRESTRICTED.includes(key)
-        const byId = await service!.getPrecedentById(ids[key])
-        const byCase = await service!.getPrecedentByCaseNumber(caseNumber(key))
-        expect(byId?.id ?? null, `${key} by id`).toBe(readable ? ids[key] : null)
-        expect(byCase?.id ?? null, `${key} by case number`).toBe(readable ? ids[key] : null)
-        if (readable) {
-          expect((byId as { fullText?: string }).fullText).toBeUndefined()
-          expect((await service!.getPrecedentById(ids[key], { includeFullText: true }))?.fullText).toBe(`Full text of ${key} ${tag}`)
-        }
-      }
-    })
+  // Canonical V2 contains arbitration_decisions (lib/operations/catalog-v2-decisions.json: CONTAINED_NO_AUTHORITY, no runtime and no system
+  // grant; "this does not implement or qualify the unavailable operation"). The public/private reading rules this file proved under the legacy
+  // lineage cannot be exercised: no application role reaches the table. What holds instead, at the same strength: every service entry point
+  // and every library route answers 501 NOT_IMPLEMENTED before any statement, nothing is written, and the database refuses both roles, so no
+  // decision - public, private, restricted, pending or ownerless - is ever read or changed through the application.
+  const notImplemented = { status: 501, code: 'NOT_IMPLEMENTED', storage: 'arbitration_decisions' }
+  const snapshotOfDecisions = async () =>
+    (await admin.query(`SELECT id::text, case_number, is_public, access_restrictions, citation_count, updated_at FROM arbitration_decisions WHERE case_number LIKE $1 ORDER BY id`, [`${tag}-%`])).rows
 
-    it('lists exactly the readable decisions, newest first, with the right total, and pages, sorts and filters them', async () => {
-      const all = await service!.listPrecedents({ searchQuery: tag })
-      expect(all.total).toBe(4)
-      expect(keysOfRows(all.precedents)).toEqual(['pubA', 'pubBLow', 'pubBMedium', 'platform'])
-
-      const byCitations = await service!.listPrecedents({ searchQuery: tag }, { sortBy: 'citationCount', sortOrder: 'desc' })
-      expect(keysOfRows(byCitations.precedents)).toEqual(['pubBLow', 'pubA', 'platform', 'pubBMedium'])
-
-      const second = await service!.listPrecedents({ searchQuery: tag }, { page: 2, limit: 2 })
-      expect(keysOfRows(second.precedents)).toEqual(['pubBMedium', 'platform'])
-      expect(second.total).toBe(4)
-
-      expect(keysOfRows((await service!.listPrecedents({ searchQuery: tag, precedentValue: ['high'] })).precedents)).toEqual(['pubA'])
-      expect(keysOfRows((await service!.listPrecedents({ searchQuery: tag, sector: 'health' })).precedents)).toEqual(['platform'])
-      expect(keysOfRows((await service!.listPrecedents({ searchQuery: tag, dateFrom: new Date('2025-01-15'), dateTo: new Date('2025-02-15') })).precedents)).toEqual(['pubBLow'])
-    })
-
-    it('searches only the readable decisions and ranks the most valuable first, then the most cited', async () => {
-      const found = await service!.searchPrecedents(tag)
-      // high, then medium (the more cited first), then low
-      expect(keysOfRows(found)).toEqual(['pubA', 'platform', 'pubBMedium', 'pubBLow'])
-      expect(keysOfRows(await service!.searchPrecedents(tag, { precedentValue: ['low'] }))).toEqual(['pubBLow'])
-      expect(await service!.searchPrecedents(`${tag}-privA`)).toEqual([])
-      expect(await service!.searchPrecedents(`${tag}-restrictedA`)).toEqual([])
-    })
-
-    it('finds by issue type only among the readable decisions, most valuable first', async () => {
-      const wages = await service!.getPrecedentsByIssueType('wages', 50)
-      expect(keysOfRows(wages)).toEqual(['pubA', 'pubBMedium', 'pubBLow'])
-    })
-
-    it('finds related decisions among the readable ones that share an issue type and a sector, and none for a decision that is not readable', async () => {
-      expect(keysOfRows(await service!.getRelatedPrecedents(ids.pubA))).toEqual(['pubBMedium', 'pubBLow'])
-      expect(await service!.getRelatedPrecedents(ids.privA)).toEqual([])
-    })
-
-    it('relates nothing to a decision that has no issue type and no sector, instead of every readable decision', async () => {
-      const adminDb = drizzle(admin, { schema: schema as never })
-      const [bare] = await adminDb
-        .insert(schema.arbitrationDecisions)
-        .values({ ...decision('pubA', { owner: O.a, isPublic: true, value: 'high', outcome: 'grievance_upheld', issues: [], sector: 'public', citations: 0, date: '2025-05-01' }), caseNumber: caseNumber('bare'), issueTypes: null, sector: null } as never)
-        .returning({ id: schema.arbitrationDecisions.id })
-      createdIds.push(bare.id)
-      try {
-        expect(await service!.getRelatedPrecedents(bare.id)).toEqual([])
-      } finally {
-        await admin.query('DELETE FROM arbitration_decisions WHERE id = $1', [bare.id])
-      }
-    })
-
-    it('counts and ranks only the readable decisions', async () => {
-      const stats = await service!.getPrecedentStatistics()
-      expect(stats.total - baseline.total).toBe(4)
-      const delta = (outcome: string) => (stats.byOutcome.find((row) => row.outcome === outcome)?.count ?? 0) - (baseline.byOutcome[outcome] ?? 0)
-      expect([delta('grievance_upheld'), delta('grievance_denied'), delta('partial_success')]).toEqual([2, 1, 1])
-
-      const cited = await service!.getMostCitedPrecedents(500)
-      expect(keysOfRows(cited)).toEqual(['pubBLow', 'pubA', 'platform', 'pubBMedium'])
+  describe('the service answers 501 before it reaches the database', () => {
+    it('refuses every reader and writer of the library, and changes no decision', async () => {
+      const before = await snapshotOfDecisions()
+      expect(before).toHaveLength(8)
+      const calls: Array<[string, () => Promise<unknown>]> = [
+        ['getPrecedentById', () => service!.getPrecedentById(ids.pubA)],
+        ['getPrecedentByCaseNumber', () => service!.getPrecedentByCaseNumber(caseNumber('pubA'))],
+        ['listPrecedents', () => service!.listPrecedents({}, { page: 1, limit: 100 })],
+        ['searchPrecedents', () => service!.searchPrecedents('wages')],
+        ['getPrecedentsByIssueType', () => service!.getPrecedentsByIssueType('wages')],
+        ['getRelatedPrecedents', () => service!.getRelatedPrecedents(ids.pubA)],
+        ['getPrecedentStatistics', () => service!.getPrecedentStatistics()],
+        ['getMostCitedPrecedents', () => service!.getMostCitedPrecedents()],
+        ['updateArbitratorStats', () => service!.updateArbitratorStats(`Arbitrator ${tag}`)],
+        ['createPrecedent', () => (service!.createPrecedent as (...a: unknown[]) => Promise<unknown>)({ organizationId: O.a }, { caseNumber: caseNumber('new'), caseTitle: 'x' })],
+        ['updatePrecedent', () => (service!.updatePrecedent as (...a: unknown[]) => Promise<unknown>)({ organizationId: O.a }, ids.privA, { caseTitle: 'changed' })],
+        ['deletePrecedent', () => service!.deletePrecedent({ organizationId: O.a }, ids.privA)],
+      ]
+      for (const [name, call] of calls) await expect(call(), name).rejects.toMatchObject(notImplemented)
+      expect(await snapshotOfDecisions()).toEqual(before)
     })
   })
 
-  describe('row-level security agrees, as the tenant runtime role', () => {
-    const visibleTo = async (org: string | null) => {
-      const client = await pool.connect()
-      try {
-        await client.query('BEGIN')
-        await client.query('SET LOCAL ROLE union_eyes_runtime')
-        if (org) await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [org])
-        const { rows } = await client.query(`SELECT id::text AS id FROM arbitration_decisions WHERE case_number LIKE $1`, [`${tag}-%`])
-        await client.query('ROLLBACK')
-        return rows.map((row) => keyOf(row.id)).sort()
-      } finally {
-        client.release()
+  describe('the database refuses both application roles', () => {
+    it('grants neither the runtime nor the system role any privilege on arbitration_decisions, and refuses their reads and writes', async () => {
+      for (const role of ['union_eyes_runtime', 'union_eyes_system']) {
+        for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'DELETE'])
+          expect((await admin.query(`SELECT has_any_column_privilege($1, 'public.arbitration_decisions', $2) AS ok`, [role, privilege === 'DELETE' ? 'SELECT' : privilege])).rows[0].ok
+            || (await admin.query(`SELECT has_table_privilege($1, 'public.arbitration_decisions', $2) AS ok`, [role, privilege])).rows[0].ok, `${role} ${privilege}`).toBe(false)
+        await expect(inRole(role, role === 'union_eyes_runtime' ? O.a : null, (tx) => tx.execute(sql`SELECT id FROM arbitration_decisions`))).rejects.toMatchObject({ cause: { code: '42501' } })
+        await expect(inRole(role, role === 'union_eyes_runtime' ? O.a : null, (tx) => tx.execute(sql`UPDATE arbitration_decisions SET citation_count = citation_count + 1`))).rejects.toMatchObject({ cause: { code: '42501' } })
       }
-    }
-
-    it('shows a tenant what is public and unrestricted and what it supplied, and nobody else\'s', async () => {
-      expect(await visibleTo(null)).toEqual([...PUBLIC_UNRESTRICTED].sort())
-      expect(await visibleTo(O.a)).toEqual([...PUBLIC_UNRESTRICTED, 'privA', 'restrictedA', 'pendingA'].sort())
-      expect(await visibleTo(O.b)).toEqual([...PUBLIC_UNRESTRICTED].sort())
-      expect(await visibleTo(O.other)).toEqual([...PUBLIC_UNRESTRICTED].sort())
-    })
-
-    it('refuses a tenant a write that is not its own: a row owned by another organization or by nobody, and a change to what it does not own', async () => {
-      const codeOf = async (work: () => Promise<unknown>) => {
-        try {
-          await work()
-          return null
-        } catch (error) {
-          const e = error as { code?: string; cause?: { code?: string } }
-          return e.cause?.code ?? e.code ?? 'other'
-        }
-      }
-      const row = (owner: string | null) => ({ ...decision('pubA', { owner, isPublic: false, value: 'high', outcome: 'grievance_upheld', issues: ['wages'], sector: 'public', citations: 0, date: '2025-06-01' }), caseNumber: caseNumber(`rls-${randomUUID().slice(0, 6)}`) })
-      for (const owner of [O.b, null]) {
-        expect(await codeOf(() => inRole('union_eyes_runtime', O.a, (tx) => tx.insert(schema.arbitrationDecisions).values(row(owner) as never))), `owner ${owner}`).toBe('42501')
-      }
-      const foreign = [ids.pubBLow, ids.platform]
-      const changed = await inRole('union_eyes_runtime', O.a, (tx) =>
-        tx.update(schema.arbitrationDecisions).set({ caseTitle: 'Taken over' }).where(inArray(schema.arbitrationDecisions.id, foreign)).returning({ id: schema.arbitrationDecisions.id }),
-      )
-      const removed = await inRole('union_eyes_runtime', O.a, (tx) =>
-        tx.delete(schema.arbitrationDecisions).where(inArray(schema.arbitrationDecisions.id, foreign)).returning({ id: schema.arbitrationDecisions.id }),
-      )
-      expect([changed, removed]).toEqual([[], []])
     })
   })
 
-  describe('writes belong to the supplying organization', () => {
-    const base = () => ({
-      caseNumber: `${tag}-created-${randomUUID().slice(0, 6)}`,
-      caseTitle: `Created ${tag}`,
-      tribunal: enumValue(schema.arbitrationDecisions.tribunal) as never,
-      decisionType: enumValue(schema.arbitrationDecisions.decisionType) as never,
-      decisionDate: new Date('2025-04-01'),
-      arbitrator: `Created ${randomUUID()}`,
-      union: `Union ${tag}`,
-      employer: `Employer ${tag}`,
-      outcome: 'grievance_upheld' as never,
-      precedentValue: 'high' as never,
-      fullText: 'Created text',
-      issueTypes: ['wages'],
-    })
-
-    it('creates a decision owned by the supplier, not public and pending review, whatever the caller sends', async () => {
-      const created = await service!.createPrecedent({ organizationId: O.a }, { ...base(), isPublic: true, accessRestrictions: '', sourceOrganizationId: O.b } as never)
-      createdIds.push(created.id)
-      expect(created.sourceOrganizationId).toBe(O.a)
-      expect(created.isPublic).toBe(false)
-      expect(created.accessRestrictions).toBe('pending_review')
-      // not readable through the library until it is reviewed
-      expect(await service!.getPrecedentById(created.id)).toBeNull()
-    })
-
-    it('lets only the supplier change or delete it', async () => {
-      const created = await service!.createPrecedent({ organizationId: O.a }, base() as never)
-      createdIds.push(created.id)
-      expect(await service!.updatePrecedent({ organizationId: O.b }, created.id, { caseTitle: 'Taken over' })).toBeNull()
-      expect(await service!.deletePrecedent({ organizationId: O.b }, created.id)).toBe(false)
-      expect((await service!.updatePrecedent({ organizationId: O.a }, created.id, { caseTitle: 'Retitled' }))?.caseTitle).toBe('Retitled')
-      const [still] = (await admin.query('SELECT case_title, is_public, source_organization_id FROM arbitration_decisions WHERE id = $1', [created.id])).rows
-      expect([still.case_title, still.is_public, still.source_organization_id]).toEqual(['Retitled', false, O.a])
-      expect(await service!.deletePrecedent({ organizationId: O.a }, created.id)).toBe(true)
-    })
-
-    it('never lets a tenant change or delete a decision nobody owns, or one another organization owns', async () => {
-      expect(await service!.updatePrecedent({ organizationId: O.a }, ids.platform, { caseTitle: 'Rewritten' })).toBeNull()
-      expect(await service!.deletePrecedent({ organizationId: O.a }, ids.platform)).toBe(false)
-      expect(await service!.updatePrecedent({ organizationId: O.a }, ids.pubBLow, { caseTitle: 'Rewritten' })).toBeNull()
-      expect(await service!.deletePrecedent({ organizationId: O.a }, ids.pubBLow)).toBe(false)
-      const titles = (await admin.query('SELECT case_title FROM arbitration_decisions WHERE id = ANY($1::uuid[])', [[ids.platform, ids.pubBLow]])).rows.map((row) => row.case_title)
-      expect(titles.sort()).toEqual([`Decision platform ${tag}`, `Decision pubBLow ${tag}`].sort())
-    })
-  })
-
-  describe('the library routes answer the same set', () => {
-    type Page = { data?: { id: string; caseNumber?: string }[]; items?: { id: string; caseNumber?: string }[] }
-    const asCaller = <T>(org: string, work: () => Promise<T>) => inRole('union_eyes_runtime', org, async () => work())
-    const listed = async (org: string) => {
-      const result = (await asCaller(org, () =>
-        (collection!.GET as unknown as (ctx: unknown) => Promise<Page>)({ request: new Request('http://localhost/api/arbitration/precedents?limit=100'), organizationId: org, userId: 'user-1' }),
-      )) as Page
-      return keysOfRows(((result.data ?? result.items ?? []) as { id: string; caseNumber?: string }[]).map((row) => ({ id: row.id, caseNumber: row.caseNumber })))
-    }
-    const fetched = (org: string, key: Key) =>
-      asCaller(org, () => (item!.GET as unknown as (ctx: unknown) => Promise<{ data: { id: string } }>)({ params: { id: ids[key] }, organizationId: org, userId: 'user-1' }))
-
-    it('lists exactly the public unrestricted decisions to every organization, including the owner of the private ones', async () => {
-      for (const org of [O.a, O.b, O.other]) expect(await listed(org), `organization ${org}`).toEqual(expect.arrayContaining(PUBLIC_UNRESTRICTED))
-      for (const org of [O.a, O.b, O.other]) {
-        const keys = await listed(org)
-        expect(keys.filter((key) => !PUBLIC_UNRESTRICTED.includes(key as Key)), `organization ${org}`).toEqual([])
+  describe('the library routes answer 501', () => {
+    const body = async (response: Response) => (await response.json()) as Record<string, unknown>
+    it('the collection and item routes answer 501 NOT_IMPLEMENTED to every method, and change nothing', async () => {
+      const before = await snapshotOfDecisions()
+      const responses: Array<[string, Response]> = [
+        ['collection GET', await (collection!.GET as unknown as (...a: unknown[]) => Promise<Response>)(new Request('http://localhost/api/arbitration/precedents?limit=100'))],
+        ['collection POST', await (collection!.POST as unknown as (...a: unknown[]) => Promise<Response>)(new Request('http://localhost/api/arbitration/precedents', { method: 'POST', body: JSON.stringify({ caseTitle: 'x' }) }))],
+        ['item GET', await (item!.GET as unknown as (...a: unknown[]) => Promise<Response>)(new Request(`http://localhost/api/arbitration/precedents/${ids.pubA}`), { params: Promise.resolve({ id: ids.pubA }) })],
+        ['item PATCH', await (item!.PATCH as unknown as (...a: unknown[]) => Promise<Response>)(new Request(`http://localhost/api/arbitration/precedents/${ids.privA}`, { method: 'PATCH', body: '{}' }), { params: Promise.resolve({ id: ids.privA }) })],
+        ['item DELETE', await (item!.DELETE as unknown as (...a: unknown[]) => Promise<Response>)(new Request(`http://localhost/api/arbitration/precedents/${ids.privA}`, { method: 'DELETE' }), { params: Promise.resolve({ id: ids.privA }) })],
+      ]
+      for (const [name, response] of responses) {
+        expect(response.status, name).toBe(501)
+        expect(response.headers.get('X-Error-Code'), name).toBe('NOT_IMPLEMENTED')
+        const payload = await body(response)
+        expect(payload, name).toMatchObject({ code: 'NOT_IMPLEMENTED', capabilityState: 'NOT_IMPLEMENTED' })
+        expect(payload, name).not.toHaveProperty('data')
       }
+      expect(await snapshotOfDecisions()).toEqual(before)
     })
 
-    it('returns a readable decision and reports a private, restricted or pending one as not found, even to its owner', async () => {
-      for (const org of [O.a, O.b]) expect((await fetched(org, 'pubA')).data.id).toBe(ids.pubA)
-      for (const key of ['privA', 'restrictedA', 'pendingA', 'privNobody'] as Key[]) {
-        await expect(fetched(O.a, key), `${key} as its owner`).rejects.toMatchObject({ code: expect.stringMatching(/NOT_FOUND/i) })
-        await expect(fetched(O.b, key), `${key} as another organization`).rejects.toMatchObject({ code: expect.stringMatching(/NOT_FOUND/i) })
-      }
+    it('/api/precedents and its search answer 501 before reading anything', async () => {
+      const precedents = await import('@/app/api/precedents/route')
+      const search = await import('@/app/api/precedents/search/route')
+      const ctx = (request: Request) => ({ request, organizationId: O.a, userId: 'user-1' })
+      await expect((precedents.GET as unknown as (c: unknown) => Promise<unknown>)(ctx(new Request('http://localhost/api/precedents')))).rejects.toMatchObject(notImplemented)
+      await expect((precedents.POST as unknown as (c: unknown) => Promise<unknown>)(ctx(new Request('http://localhost/api/precedents', { method: 'POST', body: '{}' })))).rejects.toMatchObject(notImplemented)
+      await expect((search.POST as unknown as (c: unknown) => Promise<unknown>)(ctx(new Request('http://localhost/api/precedents/search', { method: 'POST', body: JSON.stringify({ query: 'wages' }) })))).rejects.toMatchObject(notImplemented)
     })
   })
 })

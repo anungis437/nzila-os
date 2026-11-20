@@ -424,6 +424,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-step1-integrated-20261117",
         "note": "Forward-only prerequisites for current canonical case-security installation: FORCE RLS and no application policy on four new Django case-scope relations, plus source-backed defaults for future inserts. No historical row backfill or authority is inferred. Mandatory source-bound auth/session/physical compilers and native qualification remain required before runtime activation."
+      },
+      {
+        "tag": "0062_case_scope_model_defaults",
+        "sha256": "1ad85e63d87edbe4dbbb9e97c7bc3328215dd7117e1cd168506c588a81e7ba20",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-step1-integration-20261118",
+        "note": "Forward-only database defaults for the Django BaseModel id/created_at/updated_at fields of the four case-scope relations (gen_random_uuid(), CURRENT_TIMESTAMP), exactly as the canonical V2 source plan installs them. Future inserts only; no row is changed."
       }
     ],
     "platform": [

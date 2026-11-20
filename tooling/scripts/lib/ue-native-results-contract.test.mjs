@@ -127,7 +127,8 @@ describe('native results contract against the repository', () => {
 
   it('names only real files with a reason in the committed expected skips', () => {
     const { skippedTests } = JSON.parse(readFileSync(join(here, 'ue-native-expected-skips.json'), 'utf8'))
-    assert.ok(skippedTests.length >= 1)
+    // An empty list is the strictest contract: no native test may skip. Every entry that exists must name a real file and a reason.
+    assert.ok(Array.isArray(skippedTests))
     for (const skip of skippedTests) {
       assert.ok(files.includes(skip.file), `${skip.file} is not a native test file`)
       assert.ok(String(skip.reason).length > 40, `${skip.file} needs a real reason`)

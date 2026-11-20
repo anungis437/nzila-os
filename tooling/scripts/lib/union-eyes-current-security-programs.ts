@@ -22,9 +22,10 @@ import type { CanonicalPostgresMajor } from '../../../packages/db/src/auth-stora
 import { compileExternalReadRolePreparationSql, compileExternalReadSql, compileExternalReadRoleFinalizationSql } from '../../../apps/union-eyes/lib/external-resource-read/source'
 import { compileExternalAuthBridgeSql } from '../../../apps/union-eyes/lib/external-resource-read/auth-bridge'
 import { REWARD_NOMINATION_GUARDS } from '../../../apps/union-eyes/db/auth/reward-nomination-guards'
+import { AUDIT_AUTHOR_GUARDS } from '../../../apps/union-eyes/db/auth/audit-author-guards'
 import { projectSourcePhysicalTriggers } from '../../../apps/union-eyes/scripts/bootstrap-v2/physical-trigger-source'
 
-export const CURRENT_CASE_GUARDS = [AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS, REWARD_NOMINATION_GUARDS] as const
+export const CURRENT_CASE_GUARDS = [AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS, REWARD_NOMINATION_GUARDS, AUDIT_AUTHOR_GUARDS] as const
 
 export function loadCurrentSecurityPlan(root: string): V2Plan {
   const plan = JSON.parse(readFileSync(path.join(root, 'docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'), 'utf8')) as V2Plan

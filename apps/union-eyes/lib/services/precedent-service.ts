@@ -9,6 +9,7 @@
  * - Claim-to-precedent matching
  */
 
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { db } from "@/db/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
@@ -113,6 +114,7 @@ export async function getPrecedentById(
   id: string,
   options: PrecedentSearchOptions = {}
 ): Promise<ArbitrationDecisionSummary | null> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const decision = await db.query.arbitrationDecisions.findFirst({
       where: and(eq(arbitrationDecisions.id, id), sharedDecisions()),
@@ -142,6 +144,7 @@ export async function getPrecedentById(
 export async function getPrecedentByCaseNumber(
   caseNumber: string
 ): Promise<ArbitrationDecision | null> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const decision = await db.query.arbitrationDecisions.findFirst({
       where: and(eq(arbitrationDecisions.caseNumber, caseNumber), sharedDecisions()),
@@ -161,6 +164,7 @@ export async function listPrecedents(
   filters: PrecedentFilters = {},
   pagination: { page?: number; limit?: number; sortBy?: string; sortOrder?: "asc" | "desc" } = {}
 ): Promise<{ precedents: ArbitrationDecision[]; total: number; page: number; limit: number }> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const {
       page = 1,
@@ -270,6 +274,7 @@ export async function createPrecedent(
   scope: { organizationId: string },
   data: Omit<NewArbitrationDecision, 'sourceOrganizationId' | 'isPublic' | 'accessRestrictions'>,
 ): Promise<ArbitrationDecision> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     // The decision is owned by the organization that supplies it and is not shared until it is reviewed, whatever the caller sends.
     const [newDecision] = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
@@ -304,6 +309,7 @@ export async function updatePrecedent(
   id: string,
   data: Partial<Omit<NewArbitrationDecision, 'id' | 'sourceOrganizationId' | 'isPublic' | 'accessRestrictions'>>,
 ): Promise<ArbitrationDecision | null> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     // Only the supplying organization changes its decision; publication and ownership are not editable here.
     const [updated] = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
@@ -326,6 +332,7 @@ export async function updatePrecedent(
  * Delete a precedent
  */
 export async function deletePrecedent(scope: { organizationId: string }, id: string): Promise<boolean> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const removed = await withRLSContext({ organizationId: scope.organizationId }, (tx) => tx
       .delete(arbitrationDecisions)
@@ -351,6 +358,7 @@ export async function searchPrecedents(
   filters: Omit<PrecedentFilters, "searchQuery"> = {},
   limit: number = 50
 ): Promise<ArbitrationDecision[]> {
+  requireContainedStorageAuthority('arbitration_decisions');
   const precedentValues = checkedValues<PrecedentValueFilter>(filters.precedentValue, arbitrationDecisions.precedentValue?.enumValues, 'precedentValue');
   const tribunals = checkedValues<TribunalFilter>(filters.tribunal, arbitrationDecisions.tribunal?.enumValues, 'tribunal');
   try {
@@ -394,6 +402,7 @@ export async function getPrecedentsByIssueType(
   limit: number = 20,
   jurisdictions: string[] = [],
 ): Promise<ArbitrationDecision[]> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     // This would use JSONB operations in production
     const results = await db
@@ -421,6 +430,7 @@ export async function getRelatedPrecedents(
   decisionId: string,
   limit: number = 10
 ): Promise<ArbitrationDecision[]> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const decision = await getPrecedentById(decisionId, { includeFullText: false });
     
@@ -487,6 +497,7 @@ export async function getArbitratorProfile(name: string): Promise<ArbitratorProf
  * This should be called after adding/updating decisions
  */
 export async function updateArbitratorStats(arbitratorName: string): Promise<void> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     // Get all decisions by this arbitrator
     const decisions = await db
@@ -587,6 +598,7 @@ export async function getTopArbitrators(limit: number = 20): Promise<ArbitratorP
  * Get precedent statistics
  */
 export async function getPrecedentStatistics(jurisdictions: string[] = []) {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const scope = and(sharedDecisions(), jurisdictions.length > 0 ? inArray(arbitrationDecisions.jurisdiction, jurisdictions) : undefined);
     const byOutcome = await db
@@ -627,6 +639,7 @@ export async function getPrecedentStatistics(jurisdictions: string[] = []) {
  * Get most cited precedents
  */
 export async function getMostCitedPrecedents(limit: number = 10, jurisdictions: string[] = []): Promise<ArbitrationDecision[]> {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     const precedents = await db
       .select()

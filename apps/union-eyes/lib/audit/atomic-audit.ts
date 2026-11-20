@@ -18,10 +18,17 @@ export async function persistAtomicAudit(
   entry: CanonicalAuditEntry,
   outcome: 'success' | 'failure' = 'success',
 ): Promise<void> {
-  // The canonical ledger has no outcome column: a failure (a recorded denial) is kept in its details, so it never reads as a success.
-  if (await appendMandatoryAudit(tx, outcome === 'failure' ? { ...entry, details: { ...entry.details, outcome: 'failure' } } : entry)) return
-
   const systemActor = entry.userId?.startsWith('system:') ?? false
+  // The canonical ledger has no outcome column: a failure (a recorded denial) is kept in its details, so it never reads as a success.
+  // A system actor is not a user: as in the legacy ledger, it is stored with no user and named in the details. The ledger binds a
+  // named user to the transaction's own session (db/auth/audit-author-guards.ts).
+  const canonical: CanonicalAuditEntry = {
+    ...entry,
+    userId: systemActor ? null : entry.userId,
+    details: { ...entry.details, ...(systemActor ? { actor: entry.userId } : {}), ...(outcome === 'failure' ? { outcome: 'failure' } : {}) },
+  }
+  if (await appendMandatoryAudit(tx, canonical)) return
+
   const resourceIsUuid = entry.resourceId ? UUID.test(entry.resourceId) : false
   await tx.insert(auditLogs).values({
     action: entry.action,

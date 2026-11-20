@@ -8221,7 +8221,7 @@
   ],
   "currentSecurity": {
     "contractVersion": "1",
-    "sourcePlanDigest": "623216c989a9bf8bc31741ad7a3e56594cc311e779318c55e7b0ec9441baa8e7",
+    "sourcePlanDigest": "404883cbce5281a6ececfccc99437aef971279b2f34a3a3353e7e3b3c55734d5",
     "currentFunctions": [
       {
         "schema": "public",
@@ -8453,6 +8453,34 @@
         "signature": "public.triage_guard()",
         "owner": "ue_v2_owner",
         "bodyDigest": "eecbf52753ffd511adee57e75e07d1d84266a8440aef8af14a0f2ffea3d01400",
+        "language": "plpgsql",
+        "volatility": "v",
+        "definer": false,
+        "strict": false,
+        "leakproof": false,
+        "returns": "trigger",
+        "returnsSet": false,
+        "argumentNames": null,
+        "argumentModes": null,
+        "allArgumentTypes": [],
+        "defaultCount": 0,
+        "defaults": null,
+        "config": [
+          "search_path=pg_catalog, public"
+        ],
+        "executeAcl": [
+          {
+            "role": "ue_v2_owner",
+            "grantable": false
+          }
+        ]
+      },
+      {
+        "schema": "public",
+        "name": "ue_audit_guard_author",
+        "signature": "public.ue_audit_guard_author()",
+        "owner": "ue_v2_owner",
+        "bodyDigest": "ee457e124f18466eac6e2a3ca2a7fa3e8dc99bebee80f32df3f983a919610f44",
         "language": "plpgsql",
         "volatility": "v",
         "definer": false,
@@ -14602,6 +14630,24 @@
       }
     ],
     "requiredPhysicalTriggers": [
+      {
+        "schema": "public",
+        "table_name": "audit_logs",
+        "table_owner": "ue_v2_owner",
+        "name": "ue_audit_author_guard",
+        "function_schema": "public",
+        "function_name": "ue_audit_guard_author",
+        "tgtype": 7,
+        "tgdeferrable": false,
+        "tginitdeferred": false,
+        "args_hex": "",
+        "exclusive": false,
+        "is_constraint": false,
+        "columns": [],
+        "old_table": null,
+        "new_table": null,
+        "condition": null
+      },
       {
         "schema": "public",
         "table_name": "bargaining_units",

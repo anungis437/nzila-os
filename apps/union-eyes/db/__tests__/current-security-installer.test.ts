@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { assertEveryGrantAdmitted, assertFinalPublicSchemaPrivileges, assertNoPartialCurrentSecurityFunctions, declaredApplicationPolicies, planDeclaredAdmissionPolicies, executeCurrentCompanionPrograms, executeCurrentFrameworkProgram, executeRetainedPublicSchemaProgram, joinCurrentSecurityPrograms, planCanonicalOwnership, planCanonicalRoleConvergence, planCurrentAuthColumnConvergence, planCurrentFrameworkProgram, planCurrentIdentityCreation, planCurrentRlsFlagConvergence, planRetainedPublicSchemaExecution, planVerifiedFrameworkExecuteRestore, type CurrentAuthColumn, type CurrentPublicSchemaExecution } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
+import { assertEveryGrantAdmitted, assertFinalPublicSchemaPrivileges, assertNoPartialCurrentSecurityFunctions, declaredApplicationPolicies, planDeclaredAdmissionPolicies, planRetainedFunctionExecute, retainedFunctionExecuteViolations, RETAINED_FUNCTION_EXECUTE, executeCurrentCompanionPrograms, executeCurrentFrameworkProgram, executeRetainedPublicSchemaProgram, joinCurrentSecurityPrograms, planCanonicalOwnership, planCanonicalRoleConvergence, planCurrentAuthColumnConvergence, planCurrentFrameworkProgram, planCurrentIdentityCreation, planCurrentRlsFlagConvergence, planRetainedPublicSchemaExecution, planVerifiedFrameworkExecuteRestore, type CurrentAuthColumn, type CurrentPublicSchemaExecution } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
 import { frameworkPolicyPreimageQuery, planExistingFrameworkPolicies, planLegacyActivationConstraintTransition, planLegacyPhysicalFunctionAdoption, type LegacyActivationConstraint } from '../../../../tooling/scripts/lib/union-eyes-current-security-preimage'
 import { projectCurrentCompilerSecurity } from '../../../../tooling/scripts/lib/union-eyes-current-security-contract'
 import { currentSecurityPrograms } from '../../../../tooling/scripts/lib/union-eyes-current-security-programs'
@@ -608,6 +608,26 @@ describe('all current-source RLS metadata converges without replaying legacy res
     // A runtime policy keeps the session binding the source compiles into it; nothing else is installed.
     expect(repair.statements[0]).toContain('user_management.auth_business_org_authorized')
     expect(planDeclaredAdmissionPolicies(declared, [], []).statements).toEqual([])
+  })
+
+  it('restores EXECUTE on the retained workbook helper to the system role only, and nothing when the helper is absent', () => {
+    expect(RETAINED_FUNCTION_EXECUTE).toEqual([{ name: 'ue_is_workbook_system_principal', callers: ['union_eyes_system'] }])
+    const row = (role: string, allowed: boolean) => ({ name: 'ue_is_workbook_system_principal', args: '', definer: false, role, allowed, public_execute: false })
+    expect(planRetainedFunctionExecute([row('union_eyes_runtime', false), row('union_eyes_system', false)])).toEqual([
+      'GRANT EXECUTE ON FUNCTION public."ue_is_workbook_system_principal"() TO "union_eyes_system"',
+    ])
+    expect(planRetainedFunctionExecute([])).toEqual([])
+    // A definer or an overloaded helper is refused rather than granted.
+    expect(() => planRetainedFunctionExecute([{ ...row('union_eyes_system', false), definer: true }])).toThrow(/security-invoker/)
+    expect(() => planRetainedFunctionExecute([{ ...row('union_eyes_system', false), args: 'text' }])).toThrow(/argument-less/)
+    expect(retainedFunctionExecuteViolations([row('union_eyes_runtime', false), row('union_eyes_system', true)])).toEqual([])
+    expect(retainedFunctionExecuteViolations([row('union_eyes_runtime', true), row('union_eyes_system', true)])).toEqual([
+      'union_eyes_runtime:ue_is_workbook_system_principal: retained helper EXECUTE differs from its declared callers',
+    ])
+    expect(retainedFunctionExecuteViolations([row('union_eyes_system', false)])).toHaveLength(1)
+    expect(retainedFunctionExecuteViolations([{ ...row('union_eyes_system', true), public_execute: true }])).toEqual([
+      'PUBLIC:ue_is_workbook_system_principal: retained helper is executable by PUBLIC',
+    ])
   })
 
   it('refuses a granted command the source declares no policy for, and a declared name already taken by a non-admitting policy', async () => {

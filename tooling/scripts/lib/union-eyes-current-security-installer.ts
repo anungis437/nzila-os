@@ -527,6 +527,51 @@ export function assertEveryGrantAdmitted(gaps: readonly Row[]) {
     gaps.map(gap => `${String(gap.role)}:${String(gap.table)}:${String(gap.cmd)}`).join(', '))
 }
 
+/**
+ * Retained security-invoker helpers that a retained physical guard calls in the writer's own role. The blanket function REVOKE in
+ * the convergence removes every application EXECUTE; each helper here gets back exactly its declared callers and no other role.
+ * - ue_is_workbook_system_principal (cache 0013): the workbooks trigger ue_workbook_credential_authority calls it on every
+ *   INSERT/UPDATE, and the canonical catalog grants union_eyes_system SELECT/INSERT/UPDATE on workbooks. Without EXECUTE every
+ *   system workbook write is refused with "permission denied for function"; the runtime role stays refused.
+ * A helper that is absent (the canonical V2 source plan has neither the helper nor its trigger) is granted nothing.
+ */
+export const RETAINED_FUNCTION_EXECUTE: readonly { name: string; callers: readonly string[] }[] = [
+  { name: 'ue_is_workbook_system_principal', callers: ['union_eyes_system'] },
+]
+export const RETAINED_FUNCTION_ACL_QUERY = `SELECT p.proname AS name,pg_catalog.pg_get_function_identity_arguments(p.oid) AS args,p.prosecdef AS definer,
+  r.rolname AS role,pg_catalog.has_function_privilege(r.rolname,p.oid,'EXECUTE') AS allowed,pg_catalog.has_function_privilege('public',p.oid,'EXECUTE') AS public_execute
+  FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+  CROSS JOIN (VALUES ('union_eyes_runtime'),('union_eyes_system')) r(rolname)
+  WHERE n.nspname='public' AND p.proname IN (${RETAINED_FUNCTION_EXECUTE.map(fn => `'${fn.name}'`).join(',')}) ORDER BY 1,4`
+
+export function planRetainedFunctionExecute(rows: readonly Row[]): string[] {
+  const statements: string[] = []
+  for (const fn of RETAINED_FUNCTION_EXECUTE) {
+    const present = rows.filter(row => row.name === fn.name)
+    if (!present.length) continue
+    if (present.some(row => row.args !== '' || row.definer !== false))
+      throw new Error(`Retained helper ${fn.name} must be one argument-less security-invoker function`)
+    if (fn.callers.length) statements.push(`GRANT EXECUTE ON FUNCTION public.${q(fn.name)}() TO ${fn.callers.map(q).join(',')}`)
+  }
+  return statements
+}
+
+export function retainedFunctionExecuteViolations(rows: readonly Row[]): string[] {
+  const violations: string[] = []
+  for (const row of rows) {
+    const fn = RETAINED_FUNCTION_EXECUTE.find(entry => entry.name === row.name)
+    if (!fn) continue
+    if (row.public_execute !== false) violations.push(`PUBLIC:${fn.name}: retained helper is executable by PUBLIC`)
+    if (row.allowed !== fn.callers.includes(String(row.role))) violations.push(`${String(row.role)}:${fn.name}: retained helper EXECUTE differs from its declared callers`)
+  }
+  return violations
+}
+
+function assertRetainedFunctionExecute(rows: readonly Row[]) {
+  const violations = retainedFunctionExecuteViolations(rows)
+  if (violations.length) throw new Error('Retained helper execute authority differs: ' + violations.join(', '))
+}
+
 export interface RetainedPublicSchemaAuthority {
   owner: string; effective_owner: string; can_set_owner: boolean;
 }
@@ -797,6 +842,7 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
     await verifyCurrentRlsFlags(plan, execute)
     await verifyFinalPublicSchemaPrivileges(publicSchemaPrivileges, execute)
     assertEveryGrantAdmitted(await execute(UNADMITTED_GRANT_QUERY))
+    assertRetainedFunctionExecute(await execute(RETAINED_FUNCTION_ACL_QUERY))
     const verified = await validateCurrent(client, options.repoRoot, plan, projection, currentContract, major)
     return { profile: 'CURRENT_SOURCE', applied: false, sourcePlanDigest, currentContract, ...verified,
       securityPolicyVerified: true, runtimePrivilegesVerified: true, applicationReady: false }
@@ -945,6 +991,10 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
     }
   }
   await asRole(originalRole, projection.programs.externalRead.finalize)
+  // The retained helper keeps its historical owner (the bootstrap operator); only that owner can restore its declared callers.
+  const retainedFunctionGrants = planRetainedFunctionExecute(await execute(RETAINED_FUNCTION_ACL_QUERY))
+  for (const sql of retainedFunctionGrants) await asRole(originalRole, sql)
+  assertRetainedFunctionExecute(await execute(RETAINED_FUNCTION_ACL_QUERY))
   for (const sql of scopePolicySql) await execute(sql)
   for (const sql of containedParent.statements) await execute(sql)
   const admission = planDeclaredAdmissionPolicies(await declaredApplicationPolicies(projection.security.statements),
@@ -964,7 +1014,7 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
     identitySourceDigest: identityCreation.sourceDigest,
     externalReadSourceDigest: externalCreation.sourceDigest,
     sourceTablesCreated: [identityCreation.table.name, ...externalCreation.tables.map(table => table.name)],
-    containedParentPoliciesAdded: containedParent.targets, declaredAdmissionPoliciesAdded: admission.installed,
+    containedParentPoliciesAdded: containedParent.targets, declaredAdmissionPoliciesAdded: admission.installed, retainedFunctionGrants,
     authColumnsAdded: authColumns.addedColumns, authSchemaSourceDigest: authColumns.sourceDigest,
     activationConstraintReplaced: activationTransition.statements.length > 0, activationReferenceSha256: activationTransition.referenceSha256,
     rlsFlagStatementsApplied: rlsFlags.statements.length, rlsRelationsVerified,

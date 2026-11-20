@@ -117,7 +117,7 @@ describe('catalog snapshot PostgreSQL semantics', () => {
     expect((await database.query("SELECT oid FROM pg_namespace WHERE nspname='user_management'")).rows).toEqual([])
   }, 20_000)
 
-  it('compares all 57 source PG16 catalog reads while preserving rejection of the actual unsupported PGlite version', async () => {
+  it('compares all 61 source PG16 catalog reads while preserving rejection of the actual unsupported PGlite version', async () => {
     database = new PGlite()
     // Disposable local PostgreSQL catalog only; no Azure/live database or auth mock.
     for (const role of [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']) {
@@ -136,8 +136,9 @@ describe('catalog snapshot PostgreSQL semantics', () => {
     const statements = [...admissionQueries.map(query => query.sql), ...canonicalAdmissionQueriesForMajor(16)]
     // Fourteen core reads, thirty existing canonical reads, seven protected
     // external reads and the additive contained-parent policy census.
-    // The new physical contract contributes four reads plus the core trigger census.
-    expect(statements).toHaveLength(57)
+    // The new physical contract contributes four reads plus the core trigger census; the audit author
+    // guard (db/auth/audit-author-guards.ts) is a further physical contract with its own four reads.
+    expect(statements).toHaveLength(61)
     const serialRows = new Map<string, CatalogRow[]>(), serialCalls: string[] = []
     const serialReport = await assessFixture(async statement => {
       serialCalls.push(statement)

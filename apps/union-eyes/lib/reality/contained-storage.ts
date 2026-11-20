@@ -21,6 +21,8 @@ export const CONTAINED_STORAGE_REASONS = {
     'Payment records are not available: payments are outside this release, and the current source grants no application role authority over them',
   signature_audit_trail:
     'The e-signature audit trail is not available: the current source grants no application role authority over it, so no signature event can be recorded or read with its required trail',
+  arbitration_decisions:
+    'The arbitration precedent library is not available: the current source has no qualified ownership for arbitration decisions and grants no application role authority over them',
 } as const
 
 export type ContainedStorage = keyof typeof CONTAINED_STORAGE_REASONS
@@ -31,6 +33,21 @@ export class ContainedStorageUnavailable extends ApiError {
     super(ErrorCode.NOT_IMPLEMENTED, CONTAINED_STORAGE_REASONS[storage])
     this.name = 'ContainedStorageUnavailable'
   }
+}
+
+/** The same refusal as a response, for a handler produced outside withApi (lib/api/crud-factory routes). */
+export function containedStorageResponse(storage: ContainedStorage): Response {
+  const error = new ContainedStorageUnavailable(storage)
+  return Response.json({ code: 'NOT_IMPLEMENTED', message: error.message, capabilityState: 'NOT_IMPLEMENTED', timestamp: new Date().toISOString() },
+    { status: 501, headers: { 'X-Error-Code': 'NOT_IMPLEMENTED' } })
+}
+
+/** Wraps route handlers so a canonical deployment answers 501 before the handler (or any statement) runs. */
+export function containedStorageHandlers<H extends Record<string, (...args: never[]) => Promise<Response>>>(storage: ContainedStorage, handlers: H): H {
+  const wrapped: Record<string, unknown> = {}
+  for (const [method, handler] of Object.entries(handlers))
+    wrapped[method] = (...args: never[]) => (currentStateContextEnabled() ? Promise.resolve(containedStorageResponse(storage)) : handler(...args))
+  return wrapped as H
 }
 
 /** Source boundary: call it first, before any database, provider or audit side effect. */

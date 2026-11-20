@@ -113,13 +113,24 @@ describe.skipIf(!URL)('mandatory audit on real PostgreSQL as the runtime role', 
 
   it('refuses an audit record attributed to a different principal than the transaction\'s, and the mutation rolls back', async () => {
     await seedUser(adapt(admin), 'user_someone_else')
+    // The ledger binds its author to the session (db/auth/audit-author-guards.ts, ue_audit_author_guard).
     await expect(
       runtimeTx(ORG, async (tx) => {
         await tx.execute(dues('fault-forged-actor'))
         await persistAtomicAudit(tx, { ...entry('fault.forged_actor'), userId: 'user_someone_else' })
       }),
-    ).rejects.toThrow()
+    ).rejects.toSatisfy((error: unknown) => /AUDIT_AUTHOR_SESSION_REQUIRED/.test(`${(error as Error)?.message} ${((error as { cause?: Error })?.cause)?.message}`))
     expect(await countDues('fault-forged-actor')).toBe(0)
+    expect(await countAudits('fault.forged_actor')).toBe(0)
+    // The same record in the actor's own name, and a system actor's record (stored with no user, the actor in its details), are admitted.
+    await runtimeTx(ORG, async (tx) => {
+      await tx.execute(dues('fault-own-actor'))
+      await persistAtomicAudit(tx, entry('fault.own_actor'))
+      await persistAtomicAudit(tx, { ...entry('fault.system_actor'), userId: 'system:fault-probe' })
+    })
+    expect(await countDues('fault-own-actor')).toBe(1)
+    expect((await admin.query(`SELECT user_id FROM public.audit_logs WHERE action = 'fault.own_actor'`)).rows).toEqual([{ user_id: ACTOR }])
+    expect((await admin.query(`SELECT user_id, details->>'actor' AS actor FROM public.audit_logs WHERE action = 'fault.system_actor'`)).rows).toEqual([{ user_id: null, actor: 'system:fault-probe' }])
   })
 
   it('a denial recorded in its own transaction survives the rollback of the refused operation', async () => {

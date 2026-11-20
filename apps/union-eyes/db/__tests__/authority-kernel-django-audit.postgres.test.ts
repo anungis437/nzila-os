@@ -33,7 +33,9 @@ describe.skipIf(!ENABLED)('authority audit against the real Django audit_logs', 
 
   const pgEnv = () => {
     const u = new globalThis.URL(URL!)
-    return { ...process.env, DJANGO_SETTINGS_MODULE: 'config.settings', DJANGO_SECRET_KEY: 'authority-test-only', DJANGO_DEBUG: 'True',
+    // Django runs here as an offline migration and verification tool over an operator connection, not as a canonical web or worker
+    // process (its canonical settings refuse that), so the child process is not canonical.
+    return { ...process.env, DJANGO_SETTINGS_MODULE: 'config.settings', DJANGO_SECRET_KEY: 'authority-test-only', UE_CANONICAL_BOOTSTRAP_V2: '0', DJANGO_DEBUG: 'True',
       PGDATABASE: dbName, PGUSER: decodeURIComponent(u.username), PGPASSWORD: decodeURIComponent(u.password), PGHOST: u.hostname, PGPORT: u.port || '5432', REDIS_URL: 'redis://127.0.0.1:6379/15' }
   }
   const python = (args: string[]) => spawnSync(process.env.UE_CLEANROOM_PYTHON || 'python', args, { cwd: BACKEND, env: pgEnv(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })

@@ -2,9 +2,24 @@
   "purpose": "The only native PostgreSQL tests that may be skipped in the combined-schema CI job, each with the reason. A skip is never counted as a pass. An entry that no longer skips fails the contract, so it must be removed.",
   "skippedTests": [
     {
-      "file": "message-lifecycle.postgres.test.ts",
-      "title": "reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role",
-      "reason": "Needs the Canonical V2 auth topology (user_management.auth_business_org_authorized and ue_conversation_assignee_authorized), which the legacy-topology combined database this job builds does not install. The test skips itself instead of passing, so that path is not proven by this job."
+      "file": "current-security-installer.native.test.ts",
+      "title": "refuses an altered legacy policy and preserves the entire security state and history",
+      "reason": "Separate released-to-current cohort: it converges a supplied genuine released-topology (legacy) template, which needs UE_CURRENT_SECURITY_NATIVE_PROOF=1, UE_CURRENT_SECURITY_LEGACY_OWNER_URL and UE_CURRENT_SECURITY_ADMIN_URL with UE_NATIVE_TEMPLATE_URL unset. This job builds only the canonical template and runs no legacy-topology database, so the file skips itself; that transition is not proven here."
+    },
+    {
+      "file": "current-security-installer.native.test.ts",
+      "title": "rolls back roles, owners, ACLs and functions after a real database failure during the transition",
+      "reason": "Separate released-to-current cohort: it converges a supplied genuine released-topology (legacy) template, which needs UE_CURRENT_SECURITY_NATIVE_PROOF=1, UE_CURRENT_SECURITY_LEGACY_OWNER_URL and UE_CURRENT_SECURITY_ADMIN_URL with UE_NATIVE_TEMPLATE_URL unset. This job builds only the canonical template and runs no legacy-topology database, so the file skips itself; that transition is not proven here."
+    },
+    {
+      "file": "current-security-installer.native.test.ts",
+      "title": "restores the exact old constraint and full state after a real failure following its current replacement",
+      "reason": "Separate released-to-current cohort: it converges a supplied genuine released-topology (legacy) template, which needs UE_CURRENT_SECURITY_NATIVE_PROOF=1, UE_CURRENT_SECURITY_LEGACY_OWNER_URL and UE_CURRENT_SECURITY_ADMIN_URL with UE_NATIVE_TEMPLATE_URL unset. This job builds only the canonical template and runs no legacy-topology database, so the file skips itself; that transition is not proven here."
+    },
+    {
+      "file": "current-security-installer.native.test.ts",
+      "title": "qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP",
+      "reason": "Separate released-to-current cohort: it converges a supplied genuine released-topology (legacy) template, which needs UE_CURRENT_SECURITY_NATIVE_PROOF=1, UE_CURRENT_SECURITY_LEGACY_OWNER_URL and UE_CURRENT_SECURITY_ADMIN_URL with UE_NATIVE_TEMPLATE_URL unset. This job builds only the canonical template and runs no legacy-topology database, so the file skips itself; that transition is not proven here."
     }
   ]
 }

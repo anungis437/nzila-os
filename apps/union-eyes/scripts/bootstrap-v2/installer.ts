@@ -4,6 +4,7 @@ import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guar
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
 import { AUTHORITY_ISSUER_GUARDS } from '../../db/auth/authority-issuer-guards'
 import { REWARD_NOMINATION_GUARDS } from '../../db/auth/reward-nomination-guards'
+import { AUDIT_AUTHOR_GUARDS } from '../../db/auth/audit-author-guards'
 import { compileQueuedCaseMailSql } from '../../db/auth/queued-case-mail'
 import { inspectPhysicalGuards, planPhysicalGuards } from '../../db/auth/physical-guard-catalog'
 import assert from 'node:assert/strict'
@@ -297,6 +298,14 @@ export async function createCurrentState(
     const guards = planPhysicalGuards(contract, await inspectPhysicalGuards(contract, async sql => (await client.query(sql)).rows))
     for (const [index, sql] of guards.statements.entries()) await execute({
       canonicalId: `CURRENT_REWARD_NOMINATION_GUARD:${index}`, sql,
+      source: contract.source, sourceDigest: producerBytes(contract.source),
+    })
+  }
+  if (plan.authExecution && plan.tables.some(table => table.name === 'audit_logs')) {
+    const contract = AUDIT_AUTHOR_GUARDS
+    const guards = planPhysicalGuards(contract, await inspectPhysicalGuards(contract, async sql => (await client.query(sql)).rows))
+    for (const [index, sql] of guards.statements.entries()) await execute({
+      canonicalId: `CURRENT_AUDIT_AUTHOR_GUARD:${index}`, sql,
       source: contract.source, sourceDigest: producerBytes(contract.source),
     })
   }

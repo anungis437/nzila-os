@@ -4,6 +4,7 @@ import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guar
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '../../db/auth/case-scope-physical-guards'
 import { AUTHORITY_ISSUER_GUARDS } from '../../db/auth/authority-issuer-guards'
 import { REWARD_NOMINATION_GUARDS } from '../../db/auth/reward-nomination-guards'
+import { AUDIT_AUTHOR_GUARDS } from '../../db/auth/audit-author-guards'
 import {
   QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY,
   QUEUED_CASE_MAIL_FUNCTION_SIGNATURES,
@@ -130,6 +131,8 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan, o
   if (plan.authExecution) mismatches.push(...caseDomainSupportViolations((await client.query(CASE_DOMAIN_SUPPORT_CATALOG_QUERY)).rows))
   if (plan.authExecution && plan.tables.some(table => table.name === 'recognition_awards'))
     await qualifyPhysicalContract(REWARD_NOMINATION_GUARDS)
+  if (plan.authExecution && plan.tables.some(table => table.name === 'audit_logs'))
+    await qualifyPhysicalContract(AUDIT_AUTHOR_GUARDS)
   const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client, options) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)
   const frameworkPrivileges = plan.frameworkExecution

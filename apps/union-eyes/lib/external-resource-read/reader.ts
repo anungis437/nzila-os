@@ -49,9 +49,18 @@ async function invoke(resource: ExternalReadResource, operation: string, expecte
 }
 
 class ExternalReadDenied extends Error {}
+function unauthenticated(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  if ('code' in error && error.code === 'UNAUTHENTICATED') return true
+  return 'cause' in error ? unauthenticated((error as { cause?: unknown }).cause) : false
+}
 function denied(error: unknown): boolean {
   if (error instanceof ExternalReadDenied) return true
   if (!error || typeof error !== 'object') return false
+  // The driver wraps the database's refusal (EXTERNAL_READ_DENIED, SQLSTATE 42501) in a query error whose cause carries the code:
+  // that refusal is a 403, never a 503 "unavailable".
+  const cause = 'cause' in error ? (error as { cause?: unknown }).cause : null
+  if (cause && typeof cause === 'object' && 'code' in cause && denied(cause)) return true
   const code = 'code' in error ? error.code : null
   return code === '42501' || code === 'MEMBERSHIP_REQUIRED' || code === 'ROLE_REQUIRED' || code === 'ACTOR_MISMATCH'
     || code === 'UNAUTHENTICATED' || code === 'SESSION_AUTHORITY_REQUIRED'
@@ -93,6 +102,8 @@ export async function readCanonicalExternalResource(operation: ExternalReadOpera
     } })
   } catch (error) {
     if (error instanceof BlobTooLargeError) return NextResponse.json({ error: 'This file is too large to download here' }, { status: 413 })
+    // No authenticated session at all is not a refusal of an identified subject: 401, as every other route answers it.
+    if (unauthenticated(error)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     if (denied(error)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     // Error objects may contain bound credentials or storage references. Report
     // only a fixed event and release no projection or bytes on any failure.

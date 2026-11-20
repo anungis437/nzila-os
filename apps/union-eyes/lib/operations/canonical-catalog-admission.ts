@@ -2,6 +2,7 @@ import { AUTHORITY_PHYSICAL_GUARDS } from '@/db/auth/authority-physical-guards'
 import { CASE_SCOPE_PHYSICAL_GUARDS } from '@/db/auth/case-scope-physical-guards'
 import { AUTHORITY_ISSUER_GUARDS } from '@/db/auth/authority-issuer-guards'
 import { REWARD_NOMINATION_GUARDS } from '@/db/auth/reward-nomination-guards'
+import { AUDIT_AUTHOR_GUARDS } from '@/db/auth/audit-author-guards'
 import { CASE_PRIMARY_DOMAIN_GUARDS, CASE_DOMAIN_SUPPORT_CATALOG_QUERY, caseDomainSupportViolations } from '@/db/auth/case-primary-domain-guards'
 import { QUEUED_CASE_MAIL_FUNCTION_CATALOG_QUERY, queuedCaseMailFunctionViolations } from '@/db/auth/queued-case-mail'
 import { physicalGuardQueries, physicalGuardViolations, type PhysicalTriggerDescriptor } from '@/db/auth/physical-guard-catalog'
@@ -58,7 +59,7 @@ export type CurrentOverlay = {
   }
 }
 const currentOverlay = v2Decisions as unknown as CurrentOverlay
-const physicalContracts = [AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS, REWARD_NOMINATION_GUARDS]
+const physicalContracts = [AUTHORITY_PHYSICAL_GUARDS, CASE_SCOPE_PHYSICAL_GUARDS, AUTHORITY_ISSUER_GUARDS, CASE_PRIMARY_DOMAIN_GUARDS, REWARD_NOMINATION_GUARDS, AUDIT_AUTHOR_GUARDS]
 
 /** The canonical source projection replaces current permissions, never history.
  * A corrupt base or an ungenerated current overlay remains a denial. */

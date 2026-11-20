@@ -225,7 +225,11 @@ export async function roleInOrganization(userId: string, organizationId: string)
   const established = (() => { try { return currentCanonicalRequest() } catch { return null } })()
   if (established && established.binding.userId === userId && established.binding.organizationId.toLowerCase() === organizationId.toLowerCase())
     return established.binding.role
-  try { return await withNativeCanonicalActor(userId, organizationId, async (binding) => binding.role) }
+  // As production's binder: someone with no live canonical membership is MEMBERSHIP_REQUIRED before any session is issued.
+  try {
+    if (operatorPool) await requireLiveCanonicalMembership(operatorPool, userId, organizationId)
+    return await withNativeCanonicalActor(userId, organizationId, async (binding) => binding.role)
+  }
   catch (error) {
     if (error && typeof error === 'object' && 'code' in error &&
       ['UNAUTHENTICATED', 'MEMBERSHIP_REQUIRED', 'SESSION_AUTHORITY_REQUIRED'].includes(String(error.code))) return null
