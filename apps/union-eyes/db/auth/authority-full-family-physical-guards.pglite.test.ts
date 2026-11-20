@@ -67,7 +67,9 @@ describe('complete retained authority physical guard family', () => {
         ["INSERT INTO ue_authority_workaid_shares(organization_id,matter_id,consent_id,kind,categories,created_by) VALUES($1,$2,$2,'categories',ARRAY['case_summary'],'actor')", bad, /WORKAID_SHARE_INVALID/],
         ["INSERT INTO ue_authority_workaid_matters(organization_id,member_user_id,case_id,referred_by,referred_categories) VALUES($1,'member',$2,'actor',ARRAY['*'])", bad, /REFERRAL_SCOPE_REQUIRED/],
         ["INSERT INTO ue_authority_workaid_counsel_access(organization_id,matter_id,counsel_user_id,shares_served) VALUES($1,$2,'forged',1)", bad, /ACTOR_NOT_SESSION/],
-        ["INSERT INTO ue_authority_financial_steps(organization_id,subject_id,step,actor) VALUES($1,$2,'executed','actor')", bad, /STATE_NOT_ELIGIBLE/],
+        // Finance persistence is excluded from the base release: no application role holds a privilege on financial steps, so a forged
+        // step is refused by the privilege check before its STATE_NOT_ELIGIBLE guard is reached.
+        ["INSERT INTO ue_authority_financial_steps(organization_id,subject_id,step,actor) VALUES($1,$2,'executed','actor')", bad, /permission denied for table ue_authority_financial_steps/],
       ]
       for (const [sql, id, expected] of cases) await expect(f.act(sql, [f.org, id])).rejects.toThrow(expected)
       await expect(f.act("INSERT INTO ue_authority_workaid_consent_texts(organization_id,version,body,body_sha256,recorded_by,effective_at) VALUES($1,'v1','unverified source',repeat('0',64),'actor',now())", [f.org])).rejects.toThrow(/ue_authority_wa_text_hash_chk/)

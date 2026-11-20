@@ -67,11 +67,14 @@ export function sourcePhysicalTriggers(contracts: readonly PhysicalGuardContract
 }
 const literal = (s: string) => `'${s.replaceAll("'", "''")}'`
 const quote = (s: string) => `"${s.replaceAll('"', '""')}"`
+/** pg_get_constraintdef qualifies a public object as public.<name> whenever the inspecting session cannot see public in its
+ * effective search path (a login without USAGE on public, such as the runtime login, never can). The object is the same either way;
+ * any other schema still prints its own name and stays significant. Quoted text is never rewritten. */
+const withoutPublicQualifier = (text: string) =>
+  text.split(/('(?:[^']|'')*'|"(?:[^"]|"")*")/).map((part, index) =>
+    index % 2 ? part : part.replace(/(^|[^\w."$])public\.(?=[a-z_])/gi, '$1')).join('')
 const normalized = (s: unknown) =>
-  String(s ?? '')
-    .replace(/\s+/g, ' ')
-    .replace(/REFERENCES public\./g, 'REFERENCES ')
-    .trim()
+  withoutPublicQualifier(String(s ?? '').replace(/\s+/g, ' ')).trim()
 /** A constraint restored from pg_dump may reparse into a different but lossless deparse (varchar-array
  * casts pushed into elements, BETWEEN's nested AND flattened); compare through the same canonical forms
  * the catalog digest uses. Every literal, operator and column stays significant. */

@@ -2556,25 +2556,6 @@
    "table": "audit_logs",
    "write_only": []
   },
-  "core.serializers.AutomationExecutionLogSerializer": {
-   "read_only": [
-    "created_at",
-    "id",
-    "updated_at"
-   ],
-   "readable": [
-    "created_at",
-    "id",
-    "rule",
-    "triggered_by",
-    "updated_at"
-   ],
-   "required": [
-    "rule"
-   ],
-   "table": "automation_execution_log",
-   "write_only": []
-  },
   "core.serializers.AutomationSchedulesSerializer": {
    "read_only": [
     "created_at",

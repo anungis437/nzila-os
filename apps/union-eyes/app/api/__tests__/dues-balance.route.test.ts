@@ -1,4 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = {
+  status: 501,
+  code: ErrorCode.NOT_IMPLEMENTED,
+  message: 'Finance and dues persistence are not available in this release.',
+};
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -103,157 +110,33 @@ describe('/api/dues/balance route', () => {
     expect(m.select).not.toHaveBeenCalled();
   });
 
-  it('returns available: false when the member has zero ledger rows at all', async () => {
-    m.select.mockImplementationOnce(mockAggregate(ZERO_ROW, whereCalls));
-
-    const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_no_data', organizationId: 'org_1' });
-
-    // NO DATA != ZERO BALANCE: indistinguishable in shape from the
-    // missing-context case, and must NOT claim paid_up/$0.
-    expect(result).toEqual({
-      source: 'unavailable',
-      available: false,
-      currentBalance: null,
-      balanceStatus: null,
-      isInArrears: null,
-      arrearsAmount: null,
-      lastPayment: null,
-    });
-    expect(m.select).toHaveBeenCalledTimes(1);
-    // The mocked aggregate row simulates exactly what the real
-    // status='posted' SQL filter would return for a member with zero rows.
-  });
-
-  it('returns available: false when the member has only PENDING ledger rows (no posted activity)', async () => {
-    // A real status='posted' filter would exclude pending rows entirely,
-    // so the aggregate returns postedCount: 0 — never a fabricated balance.
-    m.select.mockImplementationOnce(mockAggregate(ZERO_ROW, whereCalls));
-
-    const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_pending_only', organizationId: 'org_1' });
-
-    expect(result).toMatchObject({ source: 'unavailable', available: false });
-    expect(m.select).toHaveBeenCalledTimes(1);
-  });
-
-  it('returns available: false when the member has only REVERSED ledger rows (no posted activity)', async () => {
-    m.select.mockImplementationOnce(mockAggregate(ZERO_ROW, whereCalls));
-
-    const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_reversed_only', organizationId: 'org_1' });
-
-    expect(result).toMatchObject({ source: 'unavailable', available: false });
-    expect(m.select).toHaveBeenCalledTimes(1);
-  });
-
-  it('returns available: false when the member has only VOIDED ledger rows (no posted activity)', async () => {
-    m.select.mockImplementationOnce(mockAggregate(ZERO_ROW, whereCalls));
-
-    const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_voided_only', organizationId: 'org_1' });
-
-    expect(result).toMatchObject({ source: 'unavailable', available: false });
-    expect(m.select).toHaveBeenCalledTimes(1);
-  });
-
-  it('computes a real owing balance from at least one posted ledger row, scoped to the authenticated member', async () => {
+  it.each([
+    ['no ledger rows at all', ZERO_ROW, []],
+    ['only non-posted ledger rows (pending, reversed or voided)', ZERO_ROW, []],
+    [
+      'posted rows that would net to an owing balance',
+      { ...ZERO_ROW, postedCount: '2', totalCharges: '100.00', totalPayments: '40.00' },
+      [{ amount: '40.00', date: new Date('2026-06-15T00:00:00.000Z') }],
+    ],
+    [
+      'posted rows that would net to paid up',
+      { ...ZERO_ROW, postedCount: '2', totalCharges: '25.00', totalPayments: '25.00' },
+      [{ amount: '25.00', date: new Date('2026-06-01T00:00:00.000Z') }],
+    ],
+    [
+      'posted rows that would net to a credit',
+      { ...ZERO_ROW, postedCount: '2', totalCharges: '25.00', totalPayments: '40.00' },
+      [{ amount: '40.00', date: new Date('2026-06-10T00:00:00.000Z') }],
+    ],
+  ])('refuses with 501 and fabricates no balance, whatever the ledger holds (%s)', async (_label, row, lastPayments) => {
     m.select
-      .mockImplementationOnce(
-        mockAggregate(
-          {
-            postedCount: '2',
-            totalCharges: '100.00',
-            totalPayments: '40.00',
-            totalCredits: '0.00',
-            totalAdjustments: '0.00',
-            totalWriteOffs: '0.00',
-          },
-          whereCalls,
-        ),
-      )
-      .mockImplementationOnce(
-        mockLastPayment([{ amount: '40.00', date: new Date('2026-06-15T00:00:00.000Z') }], whereCalls),
-      );
+      .mockImplementationOnce(mockAggregate(row, whereCalls))
+      .mockImplementationOnce(mockLastPayment(lastPayments, whereCalls));
 
     const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_1', organizationId: 'org_1' });
+    await expect(GET({ userId: 'user_1', organizationId: 'org_1' })).rejects.toMatchObject(REFUSAL);
 
-    expect(result).toMatchObject({
-      source: 'native',
-      available: true,
-      currentBalance: 60,
-      balanceStatus: 'owing',
-      isInArrears: true,
-      arrearsAmount: 60,
-      lastPayment: { amount: 40, date: '2026-06-15T00:00:00.000Z' },
-    });
-    expect(typeof (result as { asOf: string }).asOf).toBe('string');
-    expect(whereCalls).toHaveLength(2);
-  });
-
-  it('reports a genuine paid_up $0 balance when at least one posted row exists and nets to zero', async () => {
-    m.select
-      .mockImplementationOnce(
-        mockAggregate(
-          {
-            postedCount: '2',
-            totalCharges: '25.00',
-            totalPayments: '25.00',
-            totalCredits: '0.00',
-            totalAdjustments: '0.00',
-            totalWriteOffs: '0.00',
-          },
-          whereCalls,
-        ),
-      )
-      .mockImplementationOnce(
-        mockLastPayment([{ amount: '25.00', date: new Date('2026-06-01T00:00:00.000Z') }], whereCalls),
-      );
-
-    const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_2', organizationId: 'org_1' });
-
-    expect(result).toMatchObject({
-      source: 'native',
-      available: true,
-      currentBalance: 0,
-      balanceStatus: 'paid_up',
-      isInArrears: false,
-      arrearsAmount: 0,
-      lastPayment: { amount: 25, date: '2026-06-01T00:00:00.000Z' },
-    });
-  });
-
-  it('reports a genuine credit balance when posted payments exceed posted charges', async () => {
-    m.select
-      .mockImplementationOnce(
-        mockAggregate(
-          {
-            postedCount: '2',
-            totalCharges: '25.00',
-            totalPayments: '40.00',
-            totalCredits: '0.00',
-            totalAdjustments: '0.00',
-            totalWriteOffs: '0.00',
-          },
-          whereCalls,
-        ),
-      )
-      .mockImplementationOnce(
-        mockLastPayment([{ amount: '40.00', date: new Date('2026-06-10T00:00:00.000Z') }], whereCalls),
-      );
-
-    const { GET } = await loadRoute();
-    const result = await GET({ userId: 'user_3', organizationId: 'org_1' });
-
-    expect(result).toMatchObject({
-      source: 'native',
-      available: true,
-      currentBalance: -15,
-      balanceStatus: 'credit',
-      isInArrears: false,
-      arrearsAmount: 0,
-    });
+    expect(m.select).not.toHaveBeenCalled();
+    expect(whereCalls).toHaveLength(0);
   });
 });

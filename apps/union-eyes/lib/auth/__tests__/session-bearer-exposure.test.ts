@@ -45,7 +45,10 @@ describe('UE-CONV-A-004 source ratchets', () => {
         'apps/union-eyes/scripts/bootstrap-v2/framework-runtime.ts',
         'apps/union-eyes/scripts/bootstrap-v2/framework-sql.ts',
         'apps/union-eyes/scripts/bootstrap-v2/framework_application.py',
+        // Native qualification fixtures blank the bearer only to prove a missing session is denied.
+        'apps/union-eyes/scripts/bootstrap-v2/runtime-guarded-case-fixtures.ts',
         'apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts',
+        'apps/union-eyes/scripts/bootstrap-v2/runtime-session-proof.ts',
         'packages/db/src/auth-storage-authority/org-session-authority.ts',
         'packages/platform-auth/src/org-binding.ts',
       ].sort(),

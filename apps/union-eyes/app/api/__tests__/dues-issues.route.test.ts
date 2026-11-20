@@ -1,4 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = {
+  status: 501,
+  code: ErrorCode.NOT_IMPLEMENTED,
+  message: 'Finance and dues persistence are not available in this release.',
+};
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -8,7 +15,8 @@ const m = vi.hoisted(() => ({
   select: vi.fn(),
 }));
 
-vi.mock('@/lib/api/framework', () => ({
+vi.mock('@/lib/api/framework', async () => ({
+  z: (await import('zod')).z,
   withApi: m.withApi,
   ApiError: { badRequest: m.badRequest, notFound: m.notFound },
 }));
@@ -39,53 +47,23 @@ describe('/api/dues/issues route', () => {
     m.notFound.mockImplementation((resource: string) => Object.assign(new Error(`${resource} not found`), { status: 404 }));
   });
 
-  it('actually persists the reported issue via db.insert (no fabricated success ack)', async () => {
-    const values = vi.fn();
-    const returning = vi.fn(async () => [
-      {
-        id: 'issue_1',
-        organizationId: 'org_1',
-        userId: 'user_1',
-        issueType: 'missing_deduction',
-        subject: 'Dues missing from March pay stub',
-        description: 'No dues line item appears on my March 15 pay stub.',
-        status: 'open',
-      },
-    ]);
-    m.insert.mockImplementation((table: unknown) => ({
-      values: (v: unknown) => {
-        values(table, v);
-        return { returning };
-      },
-    }));
-
+  it('refuses a valid report with 501 and writes, reads and audits nothing', async () => {
     const { POST } = await loadRoute();
-    const result = await POST({
-      organizationId: 'org_1',
-      userId: 'user_1',
-      body: {
-        issueType: 'missing_deduction',
-        subject: 'Dues missing from March pay stub',
-        description: 'No dues line item appears on my March 15 pay stub.',
-      },
-    });
-
-    expect(m.insert).toHaveBeenCalledTimes(1);
-    expect(audit.tx).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'dues.issue.report', userId: 'user_1', organizationId: 'org_1' }));
-    expect(returning).toHaveBeenCalledTimes(1);
-    expect(values).toHaveBeenCalledWith(
-      { id: 'id' },
-      expect.objectContaining({
+    await expect(
+      POST({
         organizationId: 'org_1',
         userId: 'user_1',
-        issueType: 'missing_deduction',
-        status: 'open',
+        body: {
+          issueType: 'missing_deduction',
+          subject: 'Dues missing from March pay stub',
+          description: 'No dues line item appears on my March 15 pay stub.',
+        },
       }),
-    );
-    expect(result).toEqual({
-      success: true,
-      issue: expect.objectContaining({ id: 'issue_1', status: 'open' }),
-    });
+    ).rejects.toMatchObject(REFUSAL);
+
+    expect(m.insert).not.toHaveBeenCalled();
+    expect(m.select).not.toHaveBeenCalled();
+    expect(audit.tx).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid issueType before touching the database', async () => {
@@ -155,34 +133,16 @@ describe('/api/dues/issues route', () => {
       expect(m.insert).not.toHaveBeenCalled();
     });
 
-    it('files a report about one of the caller\'s own deductions, and checks the deduction against the organization and the caller', async () => {
-      const where = vi.fn(() => ({ limit: vi.fn(async () => [{ id: 'deduction-1' }]) }));
-      m.select.mockReturnValue({ from: () => ({ where }) });
-      const returning = vi.fn(async () => [{ id: 'issue_1', status: 'open' }]);
-      const values = vi.fn(() => ({ returning }));
-      m.insert.mockReturnValue({ values });
-      const deductionId = '0f8fad5b-d9cb-469f-a165-70867728950e';
-
-      await file({ ...valid, payrollDeductionId: deductionId, expectedAmount: 45.5 });
-
-      const condition = (where.mock.calls[0] as unknown[])[0] as { queryChunks?: unknown[] };
-      expect(JSON.stringify(condition)).toContain(deductionId);
-      expect(JSON.stringify(condition)).toContain('org_1');
-      expect(JSON.stringify(condition)).toContain('user_1');
-      expect(values).toHaveBeenCalledWith(expect.objectContaining({ payrollDeductionId: deductionId, expectedAmount: '45.50', userId: 'user_1', organizationId: 'org_1', status: 'open' }));
-    });
-
-    it('reports a deduction that is not the caller\'s exactly as one that does not exist, and writes nothing', async () => {
-      m.select.mockReturnValue({ from: () => ({ where: () => ({ limit: async () => [] }) }) });
-      await expect(file({ ...valid, payrollDeductionId: '0f8fad5b-d9cb-469f-a165-70867728950e' })).rejects.toMatchObject({ status: 404, message: 'Payroll deduction not found' });
+    it.each([
+      ['one of the caller\'s own deductions', { payrollDeductionId: '0f8fad5b-d9cb-469f-a165-70867728950e', expectedAmount: 45.5 }],
+      ['a deduction that is not the caller\'s or does not exist', { payrollDeductionId: '0f8fad5b-d9cb-469f-a165-70867728950e' }],
+      ['no deduction', {}],
+    ])('refuses a well-formed report about %s with 501 before any deduction is read or issue written', async (_label, extra) => {
+      m.select.mockReturnValue({ from: () => ({ where: () => ({ limit: async () => [{ id: 'deduction-1' }] }) }) });
+      await expect(file({ ...valid, ...extra })).rejects.toMatchObject(REFUSAL);
+      expect(m.select).not.toHaveBeenCalled();
       expect(m.insert).not.toHaveBeenCalled();
       expect(audit.tx).not.toHaveBeenCalled();
-    });
-
-    it('never reads a deduction when the report names none', async () => {
-      m.insert.mockReturnValue({ values: () => ({ returning: async () => [{ id: 'issue_2' }] }) });
-      await file(valid);
-      expect(m.select).not.toHaveBeenCalled();
     });
   });
 });

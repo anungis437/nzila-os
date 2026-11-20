@@ -2,6 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => {
   const makeError = (status: number, message: string) => Object.assign(new Error(message), { status });
+  // A constructible class (the base-release boundary extends it on import) that keeps the status-carrying factories.
+  class StatusApiError extends Error {
+    code: string;
+    constructor(code: string, message: string) {
+      super(message);
+      this.code = code;
+    }
+    static badRequest = (message: string) => makeError(400, message);
+    static forbidden = (message: string) => makeError(403, message);
+    static notFound = (message: string) => makeError(404, message);
+    static conflict = (message: string) => makeError(409, message);
+    static internal = (message: string) => makeError(500, message);
+  }
   return {
     selectQueue: [] as unknown[][],
     locks: [] as unknown[],
@@ -13,13 +26,7 @@ const m = vi.hoisted(() => {
     persistAtomicAudit: vi.fn(),
     createEvidencePack: vi.fn(),
     sha256: vi.fn(),
-    ApiError: {
-      badRequest: (message: string) => makeError(400, message),
-      forbidden: (message: string) => makeError(403, message),
-      notFound: (message: string) => makeError(404, message),
-      conflict: (message: string) => makeError(409, message),
-      internal: (message: string) => makeError(500, message),
-    },
+    ApiError: StatusApiError,
   };
 });
 
@@ -55,7 +62,10 @@ vi.mock('@/lib/api/framework', async () => {
   };
 });
 // The real run-duties rules and the real _guard run; only the error type is swapped for one that carries a status.
-vi.mock('@/lib/api/errors', () => ({ ApiError: m.ApiError }));
+vi.mock('@/lib/api/errors', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/api/errors')>()),
+  ApiError: m.ApiError,
+}));
 vi.mock('@/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: m.requireLiveFinancialMandate }));

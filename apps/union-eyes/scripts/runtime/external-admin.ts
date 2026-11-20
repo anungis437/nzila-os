@@ -11,7 +11,7 @@
  *   tsx scripts/runtime/external-admin.ts expire          the matter grant expired a minute ago
  *   tsx scripts/runtime/external-admin.ts authority-lapse the authority expired but the matter grant is still active
  *
- * Dev tooling only. It refuses to run unless QA_TEST_ENV=true.
+ * Dev tooling only. It refuses to run outside the owned canonical QA runtime (ownedRuntimeOperatorUrl: QA_TEST_ENV=true).
  */
 import pg from 'pg'
 import { randomUUID } from 'node:crypto'

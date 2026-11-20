@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -21,6 +22,10 @@ async function loadRoute() {
 }
 
 const PERIOD = '12345678-1234-1234-1234-123456789012';
+async function expectRefused(response: Response) {
+  expect(response.status).toBe(501);
+  expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' });
+}
 const ctx = { organizationId: 'org_1', userId: 'u1' };
 const post = (body: unknown) => new NextRequest('http://localhost/api/finance/invoices', {
   method: 'POST',
@@ -36,33 +41,22 @@ describe('finance/invoices route', () => {
     m.generateInvoice.mockResolvedValue({ id: 'inv_new' });
   });
 
-  it('asks the wrapper for the role each handler had, the entitlement, and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for the role each handler had; no entitlement or tenant transaction is declared because the base release refuses first', async () => {
     const { GET, POST } = await loadRoute();
-    expect(declaredOptions(GET)).toMatchObject({ auth: { minRole: 'secretary_treasurer' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'officer' } });
-    expect(declaredOptions(POST)).toMatchObject({ auth: { minRole: 'admin' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'admin' } });
+    expect(declaredOptions(GET)).toMatchObject({ auth: { minRole: 'secretary_treasurer' }, rlsOrgContext: false, registry: { audience: 'officer' } });
+    expect(declaredOptions(POST)).toMatchObject({ auth: { minRole: 'admin' }, rlsOrgContext: false, registry: { audience: 'admin' } });
+    expect(declaredOptions(GET)).not.toHaveProperty('entitlement');
+    expect(declaredOptions(POST)).not.toHaveProperty('entitlement');
   });
 
-  it('GET returns 403 when entitlement check fails, and reads nothing', async () => {
+  it.each([
+    ['no paging', ''],
+    ['an oversized page and an offset', '?limit=999&offset=10'],
+  ])('GET with %s is refused as not implemented, consulting no entitlement and reading no invoices', async (_name, query) => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('Entitlement missing'));
-    const response = await GET(new NextRequest('http://localhost/api/finance/invoices'), ctx);
-    expect(response.status).toBe(403);
+    await expectRefused(await GET(new NextRequest(`http://localhost/api/finance/invoices${query}`), ctx));
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
     expect(m.getInvoices).not.toHaveBeenCalled();
-  });
-
-  it('GET pages through the caller organization\'s invoices, with the size capped', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/finance/invoices?limit=999&offset=10'), ctx);
-    const json = await response.json();
-    expect(response.status).toBe(200);
-    expect(m.getInvoices).toHaveBeenCalledWith('org_1', 200, 10);
-    expect(json.meta).toEqual({ total: 1, limit: 200, offset: 10 });
-  });
-
-  it('GET defaults to the first page of 50', async () => {
-    const { GET } = await loadRoute();
-    await GET(new NextRequest('http://localhost/api/finance/invoices'), ctx);
-    expect(m.getInvoices).toHaveBeenCalledWith('org_1', 50, 0);
   });
 
   it('GET answers a size or offset that is not a whole number in range as a client error, never as a query fault', async () => {
@@ -72,13 +66,6 @@ describe('finance/invoices route', () => {
       expect(response.status, query).toBe(400);
     }
     expect(m.getInvoices).not.toHaveBeenCalled();
-  });
-
-  it('GET returns 500 when invoice fetch throws', async () => {
-    const { GET } = await loadRoute();
-    m.getInvoices.mockRejectedValueOnce(new Error('db error'));
-    const response = await GET(new NextRequest('http://localhost/api/finance/invoices'), ctx);
-    expect(response.status).toBe(500);
   });
 
   it('POST returns validation error for invalid JSON', async () => {
@@ -94,10 +81,10 @@ describe('finance/invoices route', () => {
     expect(m.generateInvoice).not.toHaveBeenCalled();
   });
 
-  it('POST generates the invoice for the caller organization and user, whatever the body says', async () => {
+  it('POST with a valid body is refused as not implemented and generates no invoice', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(post({ billingPeriodId: PERIOD, organizationId: 'org_other' }), ctx);
-    expect(response.status).toBe(200);
-    expect(m.generateInvoice).toHaveBeenCalledWith({ organizationId: 'org_1', billingPeriodId: PERIOD, createdBy: 'u1' });
+    await expectRefused(await POST(post({ billingPeriodId: PERIOD, organizationId: 'org_other' }), ctx));
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    expect(m.generateInvoice).not.toHaveBeenCalled();
   });
 });

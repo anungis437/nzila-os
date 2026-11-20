@@ -1,5 +1,11 @@
-import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = {
+  status: 501,
+  code: ErrorCode.NOT_IMPLEMENTED,
+  message: 'Finance and dues persistence are not available in this release.',
+};
 
 const EMPLOYER_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -89,59 +95,36 @@ describe('dues/remittances/upload route', () => {
     expect(config.auth.minRole).toBeUndefined();
   });
 
-  it('preserves the original bytes and records hash, stored path and an unparsed state', async () => {
-    const file = csv();
-    const expectedHash = createHash('sha256').update(Buffer.from('a,b\n1,2')).digest('hex');
-
-    const { POST } = await loadRoute();
-    const result: any = await POST(ctx(request(file, validMeta)));
-
-    expect(m.putBlob).toHaveBeenCalledTimes(1);
-    const [path, bytes] = m.putBlob.mock.calls[0];
-    expect(path).toContain(`remittances/org_1/${expectedHash}`);
-    expect((bytes as Buffer).toString()).toBe('a,b\n1,2');
-
-    expect(m.insertValues).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fileHash: expectedHash,
-        fileUrl: 'remittances/org_1/stored.csv',
-        processingStatus: 'pending',
-        organizationId: 'org_1',
-      }),
-    );
-    expect(result.ingestion).toEqual({
-      state: 'SOURCE_PRESERVED_UNPARSED',
-      parsed: false,
-      matched: false,
-      reconciled: false,
-      totalsArePlaceholders: true,
-    });
-    expect(result.remittance.processingStatus).toBe('pending');
-  });
-
-  it('creates no record and reports failure when source preservation fails', async () => {
-    m.putBlob.mockRejectedValueOnce(new Error('storage down'));
-    const { POST } = await loadRoute();
-
-    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toThrow('nothing was recorded');
-    expect(m.db.insert).not.toHaveBeenCalled();
-  });
-
-  it('removes the preserved bytes if the record insert fails', async () => {
-    m.insertValues.mockReturnValueOnce({ returning: async () => { throw new Error('db down'); } });
-    const { POST } = await loadRoute();
-
-    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toThrow('db down');
-    expect(m.deleteBlob).toHaveBeenCalledWith('remittances/org_1/stored.csv');
-  });
-
-  it('rejects a duplicate file for the same organization without storing it again', async () => {
-    m.existing = [{ id: 'rem_existing' }];
-    const { POST } = await loadRoute();
-
-    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toThrow('already been uploaded');
+  const expectNothingDone = () => {
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
+    expect(m.db.select).not.toHaveBeenCalled();
     expect(m.putBlob).not.toHaveBeenCalled();
+    expect(m.deleteBlob).not.toHaveBeenCalled();
     expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.insertValues).not.toHaveBeenCalled();
+    expect(audit.tx).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+  };
+
+  it('refuses a valid upload with 501 before preserving bytes, checking a mandate, or recording anything', async () => {
+    const { POST } = await loadRoute();
+    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toMatchObject(REFUSAL);
+    expectNothingDone();
+  });
+
+  it.each([
+    ['a file that is a duplicate of one already recorded', () => { m.existing = [{ id: 'rem_existing' }]; }],
+    ['storage that would fail', () => m.putBlob.mockRejectedValue(new Error('storage down'))],
+    ['a record insert that would fail', () => m.insertValues.mockReturnValue({ returning: async () => { throw new Error('db down'); } })],
+    ['an audit that would fail', () => audit.tx.mockRejectedValue(new Error('audit down'))],
+    ['an evidence pack that would fail', () => m.buildUnionEvidencePack.mockRejectedValue(new Error('evidence failure'))],
+    ['no financial mandate issued', () => m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('No financial mandate has been issued in this organization.'), { status: 403 }))],
+  ])('answers 501 for %s, because none of that work is reached', async (_label, arrange) => {
+    arrange();
+    const { POST } = await loadRoute();
+    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toMatchObject(REFUSAL);
+    expectNothingDone();
+    expect(m.logger.warn).not.toHaveBeenCalled();
   });
 
   it('rejects empty, unsupported-type and invalid-period uploads', async () => {
@@ -182,34 +165,5 @@ describe('dues/remittances/upload route', () => {
     await expect(POST(ctx(request(csv(), { employerId: EMPLOYER_ID })))).rejects.toThrow(
       'periodStart and periodEnd are required in metadata',
     );
-  });
-
-  it('logs warning if evidence pack creation fails', async () => {
-    m.buildUnionEvidencePack.mockRejectedValueOnce(new Error('evidence failure'));
-    const { POST } = await loadRoute();
-    const result: any = await POST(ctx(request(csv(), validMeta)));
-    await Promise.resolve();
-
-    expect(result.remittance.id).toBe('rem_1');
-    expect(m.logger.warn).toHaveBeenCalled();
-  });
-
-  it('records the upload and its audit together, and removes the preserved bytes when the audit fails', async () => {
-    const { POST } = await loadRoute();
-    await POST(ctx(request(csv(), validMeta)));
-    expect(audit.tx).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'dues.remittance.upload', userId: 'u1', organizationId: 'org_1' }));
-
-    audit.tx.mockRejectedValue(new Error('audit down'));
-    m.deleteBlob.mockClear();
-    await expect(POST(ctx(request(new File(['x,y\n3,4'], 'second.csv', { type: 'text/csv' }), validMeta)))).rejects.toThrow('audit down');
-    expect(m.deleteBlob).toHaveBeenCalledWith('remittances/org_1/stored.csv');
-  });
-
-  it('preserves nothing and inserts nothing when no financial mandate has been issued', async () => {
-    m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('No financial mandate has been issued in this organization.'), { status: 403 }));
-    const { POST } = await loadRoute();
-    await expect(POST(ctx(request(csv(), validMeta)))).rejects.toThrow(/financial mandate/);
-    expect(m.putBlob).not.toHaveBeenCalled();
-    expect(m.db.insert).not.toHaveBeenCalled();
   });
 });

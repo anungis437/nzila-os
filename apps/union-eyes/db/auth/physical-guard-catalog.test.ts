@@ -31,6 +31,18 @@ describe('physical guard constraint comparison', () => {
     expect(planPhysicalGuards(contract, snapshot(installed)).statements).toEqual([])
     expect(planPhysicalGuards(contract, snapshot(restored)).statements).toEqual([])
   })
+  it('treats a public qualifier added for a session that cannot see public as the same object', () => {
+    const declared = 'CHECK ((cardinality(approved_by) = cardinality(ue_authority_distinct_text((approved_by)::text[]))))'
+    const asRuntimeLogin = 'CHECK ((cardinality(approved_by) = cardinality(public.ue_authority_distinct_text((approved_by)::text[]))))'
+    const guard: PhysicalGuardContract = { ...contract, constraints: [{ ...contract.constraints[0], definition: declared }] }
+    expect(planPhysicalGuards(guard, snapshot(asRuntimeLogin)).statements).toEqual([])
+    // Another schema, or a quoted literal that merely mentions public., stays significant.
+    for (const changed of [
+      asRuntimeLogin.replace('public.ue_authority', 'attacker.ue_authority'),
+      declared.replace('approved_by)::text[]', "approved_by)::text[] || 'public.x'::text"),
+    ])
+      expect(() => planPhysicalGuards(guard, snapshot(changed))).toThrow(/differs; replacement refused/)
+  })
   it('still refuses any change in meaning', () => {
     for (const changed of [
       restored.replace('<= 8', '<= 9'),

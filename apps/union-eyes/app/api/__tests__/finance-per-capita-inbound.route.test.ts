@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -22,6 +23,8 @@ async function loadRoute() {
   return import('../finance/per-capita/inbound/route');
 }
 
+const REFUSAL = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
+
 describe('finance/per-capita/inbound route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -33,23 +36,17 @@ describe('finance/per-capita/inbound route', () => {
     m.getRemittanceStatusForParent.mockResolvedValue([{ totalDue: 10, totalPaid: 4, totalOverdue: 6 }]);
   });
 
-  it('returns an empty payload when the organization is not a parent', async () => {
+  it.each([
+    ['a non-parent organization', [{ childCount: '0' }], {}],
+    ['a parent organization', [{ childCount: '2' }], { year: 2026 }],
+  ])('is refused with 501 before any mandate, database or remittance work, for %s', async (_label, executeRows, query) => {
+    m.db.execute.mockResolvedValue(executeRows);
     const { GET } = await loadRoute();
-    const result = await GET({ organizationId: 'org_1', userId: 'u1', query: {} });
 
-    expect(result.isParentOrg).toBe(false);
-    expect(result.childCount).toBe(0);
-    expect(result.totals).toEqual({ totalDue: 0, totalPaid: 0, totalOverdue: 0 });
-  });
-
-  it('returns remittance totals for a parent org', async () => {
-    m.db.execute.mockResolvedValueOnce([{ childCount: '2' }]);
-    const { GET } = await loadRoute();
-    const result = await GET({ organizationId: 'org_1', userId: 'u1', query: { year: 2026 } });
-
-    expect(result.isParentOrg).toBe(true);
-    expect(result.childCount).toBe(2);
-    expect(result.totals).toEqual({ totalDue: 10, totalPaid: 4, totalOverdue: 6 });
-    expect(m.getRemittanceStatusForParent).toHaveBeenCalledWith('org_1', 2026);
+    await expect(GET({ organizationId: 'org_1', userId: 'u1', query })).rejects.toMatchObject(REFUSAL);
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.db.execute).not.toHaveBeenCalled();
+    expect(m.getRemittanceStatusForParent).not.toHaveBeenCalled();
   });
 });

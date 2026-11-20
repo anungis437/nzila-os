@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
+const refused = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL };
+
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   badRequest: vi.fn(),
@@ -48,59 +53,45 @@ describe('dues/arrears/[id]/reminder route', () => {
     audit.op.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
   });
 
-  it('throws 404 when arrears record does not exist', async () => {
-    const where1 = vi.fn().mockResolvedValue([]);
-    const from1 = vi.fn().mockReturnValue({ where: where1 });
-    m.db.select.mockReturnValueOnce({ from: from1 });
+  const nothingRan = () => {
+    expect(m.db.select).not.toHaveBeenCalled();
+    expect(m.getNotificationService).not.toHaveBeenCalled();
+    expect(m.notifySend).not.toHaveBeenCalled();
+    expect(audit.op).not.toHaveBeenCalled();
+    expect(m.logger.info).not.toHaveBeenCalled();
+  };
 
+  it('throws 400 before the boundary when organization or user context is missing', async () => {
     const { POST } = await loadRoute();
-
-    await expect(
-      POST({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'u1' }),
-    ).rejects.toMatchObject({ status: 404 });
+    await expect(POST({ params: { id: 'member_1' }, organizationId: '', userId: 'u1' })).rejects.toMatchObject({ status: 400 });
+    expect(m.db.select).not.toHaveBeenCalled();
   });
 
-  it('throws 400 when member email is missing', async () => {
-    const where1 = vi.fn().mockResolvedValue([{ id: 'ar_1', totalOwed: '150.50' }]);
-    const where2 = vi.fn().mockResolvedValue([{ name: 'No Email', email: '' }]);
+  it('refuses with 501 NOT_IMPLEMENTED, not 404, when the arrears record does not exist: nothing is looked up', async () => {
+    m.db.select.mockReturnValueOnce({ from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }) });
+    const { POST } = await loadRoute();
+    await expect(POST({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject(refused);
+    nothingRan();
+  });
+
+  it('refuses with 501 NOT_IMPLEMENTED, not 400, when the member has no email: nothing is looked up', async () => {
     const from = vi.fn()
-      .mockReturnValueOnce({ where: where1 })
-      .mockReturnValueOnce({ where: where2 });
+      .mockReturnValueOnce({ where: vi.fn().mockResolvedValue([{ id: 'ar_1', totalOwed: '150.50' }]) })
+      .mockReturnValueOnce({ where: vi.fn().mockResolvedValue([{ name: 'No Email', email: '' }]) });
+    m.db.select.mockReturnValue({ from });
+    const { POST } = await loadRoute();
+    await expect(POST({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject(refused);
+    nothingRan();
+  });
+
+  it('refuses with 501 NOT_IMPLEMENTED for a member who could be reminded: no reminder is sent, audited or logged as sent', async () => {
+    const from = vi.fn()
+      .mockReturnValueOnce({ where: vi.fn().mockResolvedValue([{ id: 'ar_1', totalOwed: '200.00' }]) })
+      .mockReturnValueOnce({ where: vi.fn().mockResolvedValue([{ name: 'Alex', email: 'alex@example.com' }]) });
     m.db.select.mockReturnValue({ from });
 
     const { POST } = await loadRoute();
-
-    await expect(
-      POST({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'u1' }),
-    ).rejects.toMatchObject({ status: 400 });
-  });
-
-  it('sends reminder and returns sent=true', async () => {
-    const where1 = vi.fn().mockResolvedValue([{ id: 'ar_1', totalOwed: '200.00' }]);
-    const where2 = vi.fn().mockResolvedValue([{ name: 'Alex', email: 'alex@example.com' }]);
-    const from = vi.fn()
-      .mockReturnValueOnce({ where: where1 })
-      .mockReturnValueOnce({ where: where2 });
-    m.db.select.mockReturnValue({ from });
-
-    const { POST } = await loadRoute();
-    const result = await POST({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'u1' });
-
-    expect(result).toEqual({ sent: true });
-    expect(m.notifySend).toHaveBeenCalledTimes(1);
-    expect(m.logger.info).toHaveBeenCalledWith('Arrears reminder sent', { memberId: 'member_1', amountOwed: '200.00' });
-  });
-
-  it('records the reminder as an audited operation before sending', async () => {
-    m.db.select
-      .mockReturnValueOnce({ from: () => ({ where: async () => [{ id: 'arr1', totalOwed: '10' }] }) })
-      .mockReturnValueOnce({ from: () => ({ where: async () => [{ name: 'M', email: 'm@x.test' }] }) });
-    const { POST } = await loadRoute();
-    await (POST as any)({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'treasurer' });
-    expect(audit.op).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'dues.arrears.reminder', organizationId: 'org_1', userId: 'treasurer', resourceId: 'arr1' }),
-      expect.any(Function),
-    );
-    expect(m.notifySend).toHaveBeenCalledTimes(1);
+    await expect(POST({ params: { id: 'member_1' }, organizationId: 'org_1', userId: 'treasurer' })).rejects.toMatchObject(refused);
+    nothingRan();
   });
 });

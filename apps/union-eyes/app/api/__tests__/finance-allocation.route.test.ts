@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode as ApiErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -19,29 +20,16 @@ vi.mock('@/services/platform-economics', () => ({
   createAllocationRule: m.createAllocationRule,
 }));
 
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: {
-    AUTH_REQUIRED: 'AUTH_REQUIRED',
-    FORBIDDEN: 'FORBIDDEN',
-    VALIDATION_ERROR: 'VALIDATION_ERROR',
-    INTERNAL_ERROR: 'INTERNAL_ERROR',
-  },
-  standardErrorResponse: (code: string, message: string, details?: unknown) => {
-    const status =
-      code === 'AUTH_REQUIRED' ? 401 :
-      code === 'FORBIDDEN' ? 403 :
-      code === 'INTERNAL_ERROR' ? 500 :
-      400;
-    return new Response(JSON.stringify({ code, message, details }), { status });
-  },
-  standardSuccessResponse: (data: unknown) =>
-    new Response(JSON.stringify({ data }), { status: 200 }),
-}));
+vi.mock('@/lib/api/standardized-responses', async () => (await import('./standard-responses-double')).standardResponsesDouble());
 
 async function loadRoute() {
   return import('../finance/allocation/route');
 }
 
+async function expectRefused(response: Response) {
+  expect(response.status).toBe(501);
+  expect(await response.json()).toMatchObject({ code: ApiErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' });
+}
 const ctx = { organizationId: 'org_1', userId: 'u1' };
 
 describe('finance/allocation route', () => {
@@ -53,48 +41,32 @@ describe('finance/allocation route', () => {
   });
 
   describe('what the route asks of the wrapper', () => {
-    it('lists rules for a secretary-treasurer, in the organization\'s own transaction, behind the allocation entitlement', async () => {
+    it('lists rules for a secretary-treasurer; no entitlement or tenant transaction is declared because the base release refuses first', async () => {
       const { GET } = await loadRoute();
       expect(declaredOptions(GET)).toMatchObject({
         auth: { minRole: 'secretary_treasurer' },
-        entitlement: 'allocation_engine',
-        rlsOrgContext: true,
+        rlsOrgContext: false,
         registry: { audience: 'officer', evidenceRequired: true },
       });
+      expect(declaredOptions(GET)).not.toHaveProperty('entitlement');
     });
 
-    it('creates rules only for an administrator, in the organization\'s own transaction, behind the allocation entitlement', async () => {
+    it('creates rules only for an administrator; no entitlement or tenant transaction is declared because the base release refuses first', async () => {
       const { POST } = await loadRoute();
       expect(declaredOptions(POST)).toMatchObject({
         auth: { minRole: 'admin' },
-        entitlement: 'allocation_engine',
-        rlsOrgContext: true,
+        rlsOrgContext: false,
         registry: { audience: 'admin', evidenceRequired: true },
       });
+      expect(declaredOptions(POST)).not.toHaveProperty('entitlement');
     });
   });
 
-  it('GET returns 403 when entitlement check fails, without reading rules', async () => {
+  it('GET is refused as not implemented, consulting no entitlement and reading no rules', async () => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('Entitlement missing'));
-    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx);
-    expect(response.status).toBe(403);
-    expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'allocation_engine', 'u1');
+    await expectRefused(await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx));
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
     expect(m.getAllocationRules).not.toHaveBeenCalled();
-  });
-
-  it('GET returns allocation rules of the caller organization', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx);
-    expect(response.status).toBe(200);
-    expect(m.getAllocationRules).toHaveBeenCalledWith('org_1');
-  });
-
-  it('GET reports a read that failed as a 500, never as an empty list', async () => {
-    const { GET } = await loadRoute();
-    m.getAllocationRules.mockRejectedValueOnce(new Error('db down'));
-    const response = await GET(new NextRequest('http://localhost/api/finance/allocation'), ctx);
-    expect(response.status).toBe(500);
   });
 
   it('POST returns validation error for invalid JSON', async () => {
@@ -124,7 +96,7 @@ describe('finance/allocation route', () => {
     expect(m.createAllocationRule).not.toHaveBeenCalled();
   });
 
-  it('POST creates the rule for the caller organization and user, whatever the body says', async () => {
+  it('POST with a valid body is refused as not implemented and creates no rule', async () => {
     const { POST } = await loadRoute();
     const response = await POST(
       new NextRequest('http://localhost/api/finance/allocation', {
@@ -142,12 +114,8 @@ describe('finance/allocation route', () => {
       }),
       ctx,
     );
-    expect(response.status).toBe(200);
-    expect(m.createAllocationRule).toHaveBeenCalledWith(expect.objectContaining({
-      organizationId: 'org_1',
-      createdBy: 'u1',
-      name: 'Weighted Rule',
-      method: 'weighted_hybrid',
-    }));
+    await expectRefused(response);
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    expect(m.createAllocationRule).not.toHaveBeenCalled();
   });
 });
