@@ -13,7 +13,6 @@ import {
   seedAuthenticatedCaseworkFixtures,
 } from './authenticated-casework-load'
 import { PLATFORM_ORGANIZATION_ID } from '../../lib/authority/platform-organization'
-import { seedSyntheticPlatformOrganization, type PlatformStaffCeremony } from './platform-staff-ceremony'
 
 export interface HttpObservation {
   name: string
@@ -73,8 +72,15 @@ export async function seedNextHttpSmoke(
        ($4,$2,'admin',true,true,now())`,
     [actor, organizations[0], organizations[1], administrator],
   )
-  // Synthetic stand-ins for the platform appointments only Nzila's deciding authority can make (platform-staff-ceremony.ts).
-  const platformExecutives = await seedSyntheticPlatformOrganization(seed)
+  // The platform organization the owner creates once; the administrator starts as an unappointed platform officer.
+  await seed.query(
+    `INSERT INTO public.organizations
+      (id,name,slug,organization_type,hierarchy_path,hierarchy_level,sectors,clc_affiliated,
+       member_count,active_member_count,settings,features_enabled,status,remittance_day,created_at,updated_at)
+     VALUES ($1,'Synthetic platform organization','ue-http-platform-'||$2,'platform',ARRAY[]::text[],0,
+       ARRAY[]::varchar[],false,0,0,'{}',ARRAY[]::text[],'active',15,now(),now())`,
+    [PLATFORM_ORGANIZATION_ID, randomUUID()],
+  )
   await seed.query(
     `INSERT INTO user_management.organization_users (user_id,organization_id,role,is_primary,is_active,joined_at)
      VALUES ($1,$2,'officer',false,true,now())`,
@@ -88,7 +94,7 @@ export async function seedNextHttpSmoke(
         encryptedMfaSecret,
       })
     : null
-  return { organizations, actor, administrator, password, mfaSecret, loadFixture, platformExecutives }
+  return { organizations, actor, administrator, password, mfaSecret, loadFixture }
 }
 
 export async function runNextHttpSmoke(
@@ -100,7 +106,6 @@ export async function runNextHttpSmoke(
     duesInitiationStatuses?: number[]
     documentRepositoryStatuses?: number[]
     authenticatedCaseworkLoad?: { runtimeUrl: string; authUrl: string }
-    platformStaff?: PlatformStaffCeremony
   } = {},
 ) {
   const { actor, administrator, password, organizations, mfaSecret } = fixture
@@ -291,15 +296,19 @@ export async function runNextHttpSmoke(
     'UPDATE user_management.organization_users SET is_active=true WHERE user_id=$1 AND organization_id=$2',
     [actor, organizations[1]],
   )
-  // Platform-wide writes (lib/platform/platform-staff.ts): eligibility alone never suffices, a platform_staff mandate is exercised
-  // only from the platform organization, and every refusal is audited with nothing written.
-  const platformStaff = options.platformStaff
-  assert.ok(platformStaff, 'The platform-staff ceremony is required for the organization-write journey')
+  // Platform-wide writes (lib/platform/platform-staff.ts): only the appointed platform executive (or a mandated officer) may
+  // create an organization; every exercise and every refusal is audited, and a refusal writes nothing.
   const createPayload = () => {
     const slug = `ue-http-created-${randomUUID()}`
     return { slug, body: { name: 'Synthetic HTTP child', slug, type: 'local', parentId: organizations[0] } }
   }
   const organizationCount = async () => Number((await seed.query('SELECT count(*)::int AS n FROM public.organizations')).rows[0].n)
+  const platformAudit = (organizationId: string, userId: string, action: string, key: string, value: string) =>
+    seed.query(
+      `SELECT 1 FROM public.audit_logs WHERE organization_id=$1::uuid AND user_id=$2 AND action=$3
+         AND resource_type='platform_authority' AND details->>$4=$5`,
+      [organizationId, userId, action, key, value],
+    )
   const refusedWrite = async (
     name: string,
     requestCookie: string,
@@ -312,11 +321,7 @@ export async function runNextHttpSmoke(
     assert.equal(persisted.rowCount, 0, `${name}: a refused organization write persisted`)
     assert.equal(await organizationCount(), before, `${name}: a refused organization write changed the organization count`)
     if (audited) {
-      const denial = await seed.query(
-        `SELECT 1 FROM public.audit_logs WHERE organization_id=$1::uuid AND user_id=$2 AND action='platform.organization.manage.denied'
-           AND resource_type='platform_authority' AND details->>'reason'=$3`,
-        [audited.organizationId, audited.userId, audited.reason],
-      )
+      const denial = await platformAudit(audited.organizationId, audited.userId, 'platform.organization.manage.denied', 'reason', audited.reason)
       assert.ok((denial.rowCount ?? 0) >= 1, `${name}: the refusal was not audited with reason ${audited.reason}`)
     }
   }
@@ -338,8 +343,8 @@ export async function runNextHttpSmoke(
     },
   )
   adminCookie = cookies(adminSelection.response)
-  // Foreign tenant: an eligible platform administrator acting from a customer organization cannot reach platform authority.
-  await refusedWrite('platform-administrator-in-customer-organization-refused', adminCookie, {
+  // Eligible but not appointed, acting from a customer organization: refused.
+  await refusedWrite('unappointed-platform-administrator-in-customer-organization-refused', adminCookie, {
     organizationId: organizations[0],
     userId: administrator,
     reason: 'not_acting_from_platform_organization',
@@ -350,19 +355,19 @@ export async function runNextHttpSmoke(
     body: { organizationId: PLATFORM_ORGANIZATION_ID },
   })
   const platformCookie = cookies(platformSelection.response)
-  // Unauthorized: eligible and acting from the platform organization, but holding no mandate yet.
-  await refusedWrite('unmandated-platform-administrator-refused', platformCookie, {
+  // A platform officer without a mandate: refused.
+  await refusedWrite('unappointed-platform-officer-refused', platformCookie, {
     organizationId: PLATFORM_ORGANIZATION_ID,
     userId: administrator,
     reason: 'no_live_scoped_platform_staff_mandate',
   })
-  // A customer organization's executive cannot draft platform-wide authority at all.
-  await platformStaff.refuseCustomerDraft(organizations[0])
-  // The lawful path: adopted issue and revoke rules, then an independently approved, accepted, time-bound mandate.
-  const rules = await platformStaff.adoptRules()
-  const mandateId = await platformStaff.issue(administrator, ['platform.organization.manage'], new Date(Date.now() + 30 * 86_400_000))
+  // The owner's one-time appointment: an executive membership in the platform organization.
+  await seed.query(
+    "UPDATE user_management.organization_users SET role='executive' WHERE user_id=$1 AND organization_id=$2",
+    [administrator, PLATFORM_ORGANIZATION_ID],
+  )
   const authorized = createPayload()
-  const created = await request('mandated-platform-officer-organization-write', '/api/organizations', [201], {
+  const created = await request('platform-executive-organization-write', '/api/organizations', [201], {
     method: 'POST',
     cookie: platformCookie,
     body: authorized.body,
@@ -381,37 +386,18 @@ export async function runNextHttpSmoke(
     [persisted.rows[0].id, administrator, persisted.rows[0].id],
   )
   assert.equal(createdAudit.rowCount, 1, 'the authorized organization write was not audited exactly once')
-  const mandate = await seed.query(
-    `SELECT m.kind,m.powers,m.issuance_rule_id::text AS rule,m.granted_by,
-            (SELECT count(*)::int FROM public.ue_authority_acceptances a WHERE a.instrument_id=m.id AND a.accepted_by=m.principal_user_id) AS accepted
-       FROM public.ue_authority_mandates m WHERE m.id=$1 AND m.organization_id=$2 AND m.principal_user_id=$3`,
-    [mandateId, PLATFORM_ORGANIZATION_ID, administrator],
+  const exercise = await platformAudit(PLATFORM_ORGANIZATION_ID, administrator, 'platform.organization.manage.authorized', 'basis', 'platform_executive')
+  assert.ok((exercise.rowCount ?? 0) >= 1, 'the platform executive exercise was not audited')
+  // Removing the appointment ends the authority at once.
+  await seed.query(
+    "UPDATE user_management.organization_users SET role='officer' WHERE user_id=$1 AND organization_id=$2",
+    [administrator, PLATFORM_ORGANIZATION_ID],
   )
-  assert.equal(mandate.rowCount, 1)
-  assert.equal(mandate.rows[0].kind, 'platform_staff')
-  assert.deepEqual(mandate.rows[0].powers, ['platform.organization.manage'])
-  assert.equal(mandate.rows[0].rule, rules.issue)
-  assert.equal(mandate.rows[0].accepted, 1)
-  // The mandate names one action: it does not reach another platform capability.
-  await request('mandate-does-not-reach-other-platform-capability', '/api/platform/stats', [403], { cookie: platformCookie })
-  // Revoked: the same holder is refused at once, audited, nothing written.
-  await platformStaff.revoke(mandateId)
-  await refusedWrite('revoked-platform-mandate-refused', platformCookie, {
+  await refusedWrite('removed-platform-executive-refused', platformCookie, {
     organizationId: PLATFORM_ORGANIZATION_ID,
     userId: administrator,
     reason: 'no_live_scoped_platform_staff_mandate',
   })
-  // Expired: a fresh, lawfully issued but short mandate stops authorizing when its term ends.
-  const expiresAt = new Date(Date.now() + 20_000)
-  await platformStaff.issue(administrator, ['platform.organization.manage'], expiresAt)
-  await new Promise((resolve) => setTimeout(resolve, Math.max(0, expiresAt.getTime() - Date.now()) + 1_000))
-  await refusedWrite('expired-platform-mandate-refused', platformCookie, {
-    organizationId: PLATFORM_ORGANIZATION_ID,
-    userId: administrator,
-    reason: 'no_live_scoped_platform_staff_mandate',
-  })
-  const platformCeremony = await platformStaff.close()
-  assert.equal(platformCeremony.sessionsClosed, true, 'platform ceremony sessions were not closed')
   // G5 critical journeys: role change and claim, dues payment, scheduled SYSTEM flow, revocation.
   const journeyClaim = {
     claimType: 'other',
@@ -603,9 +589,8 @@ export async function runNextHttpSmoke(
     systemWrite: 'AUTHORIZED_AND_PERSISTED_ORDINARY_CALLER_DENIED',
     vault: 'OWNED_VAULT_ENCRYPTED_WRITE_DECRYPTED_RELOAD',
     platformStaff: {
-      mechanism: 'GOVERNED_KERNEL_CEREMONY_SYNTHETIC_PLATFORM_OFFICERS',
-      refusals: ['UNAUTHORIZED', 'FOREIGN_TENANT', 'UNMANDATED', 'OTHER_CAPABILITY', 'REVOKED', 'EXPIRED', 'CUSTOMER_DRAFT'],
-      institutionalAppointment: 'NOT_PROVEN_DECISION_DEPENDENCY',
+      mechanism: 'PLATFORM_EXECUTIVE_APPOINTMENT',
+      refusals: ['UNAUTHORIZED', 'FOREIGN_TENANT', 'UNAPPOINTED', 'REMOVED_EXECUTIVE'],
     },
     limitations: ['Representative HTTP smoke is not complete caller or financial qualification.'],
   }

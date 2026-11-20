@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const m = vi.hoisted(() => {
   class TestApiError extends Error {
@@ -18,11 +18,18 @@ const m = vi.hoisted(() => {
   }
 })
 
+const EXECUTIVE = vi.hoisted(() => ({ rows: (() => Promise.resolve([] as unknown[])) as () => Promise<unknown[]> }))
 vi.mock('@/lib/api/framework', () => ({ ApiError: m.ApiError }))
 vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdminUser }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }))
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }))
 vi.mock('@/lib/logger', () => ({ logger: { error: m.loggerError, info: vi.fn(), warn: vi.fn(), debug: vi.fn() } }))
+
+vi.mock('@nzila/db/schema', () => ({ authOrganizationUsers: { userId: 'user_id', organizationId: 'organization_id', isActive: 'is_active', role: 'role' } }))
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  withAuthContext: (_context: unknown, work: () => unknown) => work(),
+  authDb: { select: () => ({ from: () => ({ where: () => ({ limit: () => EXECUTIVE.rows() }) }) }) },
+}))
 
 import { PLATFORM_CAPABILITIES, requirePlatformStaffAuthority } from '../platform-staff'
 
@@ -151,5 +158,38 @@ describe('requirePlatformStaffAuthority', () => {
     const { UE_SYSTEM_ORG_ID } = await vi.importActual<typeof import('@/lib/ai/ai-client')>('@/lib/ai/ai-client')
     const { PLATFORM_ORGANIZATION_ID } = await import('@/lib/authority/platform-organization')
     expect(PLATFORM_ORGANIZATION_ID).toBe(UE_SYSTEM_ORG_ID)
+  })
+
+  describe('the platform executive (the owner appointment)', () => {
+    beforeEach(() => { EXECUTIVE.rows = () => Promise.resolve([{ role: 'executive' }]) })
+    afterEach(() => { EXECUTIVE.rows = () => Promise.resolve([]) })
+
+    it('acts from any organization with no mandate, and every exercise is recorded as authorized', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(true)
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.organization.manage')).resolves.toEqual({ userId: 'owner_1', organizationId: 'org_1' })
+      expect(m.execute).not.toHaveBeenCalled()
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith('tx', expect.objectContaining({ organizationId: 'org_1', userId: 'owner_1',
+        action: 'platform.organization.manage.authorized', details: { basis: 'platform_executive' } }), 'success')
+    })
+
+    it('is refused when the exercise cannot be recorded', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(true)
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit store down'))
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+      expect(m.loggerError).toHaveBeenCalledWith('platform_authority_not_recordable', { capability: 'platform.stats.read', error: 'audit store down' })
+    })
+
+    it('confers nothing without platform eligibility', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(false)
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith('tx', expect.objectContaining({ details: { reason: 'not_platform_staff_eligible' } }), 'failure')
+    })
+
+    it('falls back to the mandate path when the appointment cannot be read', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(true)
+      EXECUTIVE.rows = () => Promise.reject(new Error('identity store down'))
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+      expect(m.loggerError).toHaveBeenCalledWith('platform_executive_unverifiable', { capability: 'platform.stats.read', error: 'identity store down' })
+    })
   })
 })

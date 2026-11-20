@@ -6,8 +6,9 @@
  * platform pseudo-organization `PLATFORM_ORGANIZATION_ID` (the existing system sentinel), by the same governed kernel every
  * other mandate uses: an issuance rule drafted by a platform executive, adopted by two independent platform executives
  * under a named institutional instrument, activated, then a per-person, time-bound, independently approved and accepted
- * `platform_staff` mandate. Nothing here names who the platform executives are: a platform membership only exists once the
- * deciding Nzila authority appoints someone (docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md).
+ * `platform_staff` mandate for staff. The platform owner holds standing authority through an `executive` membership in the platform
+ * organization, which they create once (lib/platform/platform-staff.ts; the owner decision is recorded in
+ * docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md).
  */
 import type { Capacity } from './ontology'
 

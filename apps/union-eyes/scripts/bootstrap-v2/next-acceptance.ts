@@ -23,7 +23,6 @@ import { assertCurrentSourceCommitments, folder, hash, root, type V2Plan } from 
 import { openNativeRuntimeFixture } from './native-runtime-fixture'
 import { openLocalVaultFixture } from './local-vault-fixture'
 import { openOwnedRedisFixture } from './owned-redis-fixture'
-import { openPlatformStaffCeremony, type PlatformStaffCeremony } from './platform-staff-ceremony'
 import { runNextHttpSmoke, seedNextHttpSmoke, type HttpObservation } from './next-http-smoke'
 import { browserProofPassed, runBrowserAcceptance } from './browser-acceptance'
 import { AUTHENTICATED_CASEWORK_PROFILE } from './authenticated-casework-load'
@@ -285,10 +284,9 @@ export function verifyNextEngineeringComponents(raw: unknown, rawExit: unknown, 
   assert.equal(http.ordinaryWrite, 'PERSISTED_RELOADED_CANONICAL_ACTOR_AND_ORGANIZATION')
   assert.equal(http.systemWrite, 'AUTHORIZED_AND_PERSISTED_ORDINARY_CALLER_DENIED')
   const platformStaff = proofObject(http.platformStaff, 'platform-staff journey')
-  assert.equal(platformStaff.mechanism, 'GOVERNED_KERNEL_CEREMONY_SYNTHETIC_PLATFORM_OFFICERS')
+  assert.equal(platformStaff.mechanism, 'PLATFORM_EXECUTIVE_APPOINTMENT')
   assert.deepEqual(proofArray(platformStaff.refusals, 'platform-staff refusals').slice().sort(),
-    ['CUSTOMER_DRAFT', 'EXPIRED', 'FOREIGN_TENANT', 'OTHER_CAPABILITY', 'REVOKED', 'UNAUTHORIZED', 'UNMANDATED'])
-  assert.equal(platformStaff.institutionalAppointment, 'NOT_PROVEN_DECISION_DEPENDENCY')
+    ['FOREIGN_TENANT', 'REMOVED_EXECUTIVE', 'UNAPPOINTED', 'UNAUTHORIZED'])
   const observations = proofArray(result.httpObservations, 'HTTP observations')
   assert.ok(observations.length > 0, 'Actual HTTP observations required')
   for (const value of observations) {
@@ -401,7 +399,6 @@ export function verifyNextEngineeringComponents(raw: unknown, rawExit: unknown, 
   assert.ok(proofNumber(vaultUse.wrapsAccepted, 'vault wraps', true) + proofNumber(vaultUse.unwrapsAccepted, 'vault unwraps', true) > 0,
     'The application never used the owned vault key')
   assert.equal(http.vault, 'OWNED_VAULT_ENCRYPTED_WRITE_DECRYPTED_RELOAD')
-  assert.equal(proofObject(result.platformStaffCleanup, 'platform-staff ceremony cleanup').sessionsClosed, true)
   const progress = proofObject(result.processProgressLog, 'sanitized raw progress')
   assert.equal(progress.path, `artifacts/ue-v2-next-progress-${expected.executionId}.log`)
   proofHash(progress.sha256, 'progress log digest')
@@ -547,7 +544,6 @@ export async function runNextAcceptance() {
   let fixture: Awaited<ReturnType<typeof openNativeRuntimeFixture>> | undefined
   let vault: Awaited<ReturnType<typeof openLocalVaultFixture>> | undefined
   let redis: Awaited<ReturnType<typeof openOwnedRedisFixture>> | undefined
-  let platformStaff: PlatformStaffCeremony | undefined
   let child: ChildProcess | undefined
   let output = ''
   const networkObservations: { phase: string; event: Record<string, unknown> }[] = []
@@ -722,22 +718,14 @@ export async function runNextAcceptance() {
     result.serverOutput = redact(output)
     const httpObservations: HttpObservation[] = []
     result.httpObservations = httpObservations
-    assert.ok(fixture.authUrl, 'The platform-staff ceremony needs the owned auth gateway')
-    platformStaff = openPlatformStaffCeremony(
-      { operator: fixture.seed, runtime: fixture.runtime, system: fixture.system, authUrl: fixture.authUrl, authSystemUrl: fixture.authSystemUrl },
-      httpFixture.platformExecutives,
-    )
     const httpSmoke = await runNextHttpSmoke(
       `http://127.0.0.1:${port}`,
       fixture.seed,
       httpFixture,
       httpObservations,
-      {
-        platformStaff,
-        ...(authenticatedCaseworkLoad
-          ? { authenticatedCaseworkLoad: { runtimeUrl: fixture.runtimeUrl, authUrl: fixture.authUrl } }
-          : {}),
-      },
+      authenticatedCaseworkLoad
+        ? { authenticatedCaseworkLoad: { runtimeUrl: fixture.runtimeUrl, authUrl: fixture.authUrl! } }
+        : {},
     )
     result.httpSmoke = httpSmoke
     result.authenticatedCaseworkLoad = httpSmoke.authenticatedCaseworkLoad
@@ -809,11 +797,6 @@ export async function runNextAcceptance() {
     }
     try {
       result.redisCleanup = await redis?.dispose()
-    } catch (error) {
-      failures.push(String(error))
-    }
-    try {
-      result.platformStaffCleanup = platformStaff ? await platformStaff.close() : { sessionsClosed: false }
     } catch (error) {
       failures.push(String(error))
     }

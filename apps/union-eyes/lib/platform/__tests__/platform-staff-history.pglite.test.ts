@@ -15,12 +15,19 @@ const state = vi.hoisted(() => {
   }
   return { ApiError: TestApiError, eligible: vi.fn(), transport: vi.fn(), audit: vi.fn() }
 })
+const EXECUTIVE = vi.hoisted(() => ({ rows: (() => Promise.resolve([] as unknown[])) as () => Promise<unknown[]> }))
 vi.mock('@/lib/api/framework', () => ({ ApiError: state.ApiError }))
 vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: state.eligible }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: state.audit }))
 vi.mock('@/lib/ai/ai-client', () => ({ UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000' }))
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: state.transport }))
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }))
+
+vi.mock('@nzila/db/schema', () => ({ authOrganizationUsers: { userId: 'user_id', organizationId: 'organization_id', isActive: 'is_active', role: 'role' } }))
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  withAuthContext: (_context: unknown, work: () => unknown) => work(),
+  authDb: { select: () => ({ from: () => ({ where: () => ({ limit: () => EXECUTIVE.rows() }) }) }) },
+}))
 import { requirePlatformStaffAuthority } from '../platform-staff'
 
 const SYSTEM_ORG = '00000000-0000-0000-0000-000000000000', tenant = randomUUID(), user = 'synthetic_platform_staff'

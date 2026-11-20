@@ -213,3 +213,26 @@ describe('email-service', () => {
     expect(result[0].email).toBe('good@test.com');
   });
 });
+
+describe('stripHtml plain-text fallback', () => {
+  it('drops every tag and every style or script block, and never emits a tag or a partial one', async () => {
+    const { stripHtml } = await import('../email-service');
+    expect(stripHtml('<p>Hello <b>there</b></p>')).toBe('Hello there');
+    expect(stripHtml('<style>p{color:red}</style>Body')).toBe('Body');
+    expect(stripHtml('<SCRIPT type="x">alert(1)</SCRIPT>ok')).toBe('ok');
+    expect(stripHtml('<stylesheet>x</stylesheet>')).toBe('x');
+    expect(stripHtml('a <unterminated')).toBe('a');
+    expect(stripHtml('<style>never closed')).toBe('');
+    for (const input of ['<scr<script>ipt>alert(1)</script>', '<<style>>x</style>', '<<<b>>>'])
+      expect(stripHtml(input)).not.toContain('<');
+  });
+
+  it('runs in linear time on adversarial markup', async () => {
+    const { stripHtml } = await import('../email-service');
+    const started = Date.now();
+    stripHtml('<style'.repeat(50_000));
+    stripHtml('<'.repeat(200_000));
+    stripHtml('<style>'.repeat(20_000));
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+});

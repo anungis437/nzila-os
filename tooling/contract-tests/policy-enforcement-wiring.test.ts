@@ -128,7 +128,7 @@ describe('INV-PE-01 — enforcePolicies wired into sensitive mutations', () => {
           const routeSrc = readRoute(route.path)
           const post = exportedFunctionBody(routeSrc, 'POST')
           expect(routeSrc).toMatch(
-            new RegExp(`import\\s*\\{[^}]*\\b${route.gate.fn}\\b[^}]*\\}\\s*from\\s*['"]${route.gate.module.replace(/[/@-]/g, '\\$&')}['"]`),
+            new RegExp(`import\\s*\\{[^}]*\\b${route.gate.fn}\\b[^}]*\\}\\s*from\\s*['"]${route.gate.module.replace(/[\\^$.*+?()[\]{}|/@-]/g, '\\$&')}['"]`),
           )
           expect(post).toContain(`${route.gate.fn}(`)
           // …and the route itself carries no DB client that could bypass it.

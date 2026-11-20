@@ -51,7 +51,8 @@ export function compileAuthColumnPrivileges(table: string, privileges: string): 
   const quote = (value: string) => `"${value.replaceAll('"', '""')}"`
   const parts = privileges.split(/,(?![^()]*\))/)
   return parts.map(part => {
-    const match = /^\s*(SELECT|INSERT|UPDATE|REFERENCES|DELETE)\s*(?:\(([^()]*)\))?\s*$/.exec(part)
+    // Trim first so no two whitespace runs can compete for the same characters (linear matching).
+    const match = /^(SELECT|INSERT|UPDATE|REFERENCES|DELETE)(?:\s*\(([^()]*)\))?$/.exec(part.trim())
     if (!match) throw new Error(`INVALID_AUTH_PRIVILEGE:${table}`)
     const [, privilege, explicit] = match
     if (privilege === 'DELETE') {
