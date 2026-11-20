@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  // The platform organization is the single seat of platform-wide authority (lib/authority/platform-organization.ts); no request creates another.
+  // The platform organization is the single seat of platform-wide authority (PLATFORM_ORGANIZATION_ID); no request creates another.
   if (requestedType === 'platform') {
     return NextResponse.json({ error: 'A platform organization cannot be created through this route' }, { status: 400 });
   }
