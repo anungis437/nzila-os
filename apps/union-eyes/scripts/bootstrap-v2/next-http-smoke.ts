@@ -276,24 +276,28 @@ export async function runNextHttpSmoke(
     },
   )
   adminCookie = cookies(adminSelection.response)
-  const created = await request(
-    'authorized-system-organization-write',
+  // A platform-wide write needs a live platform-staff mandate (lib/platform/platform-staff.ts). The base release can issue none:
+  // the platform_staff issuance domain has no issuer capacity until UE-INST-PLATFORM-STAFF-MANDATE-AUTHORITY is decided
+  // (lib/authority/issuance.ts; docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md). So an eligible
+  // platform administrator with a selected membership is refused, the refusal is audited, and no organization is created.
+  await request(
+    'unmandated-platform-administrator-organization-write-refused',
     '/api/organizations',
-    [201],
+    [403],
     {
       method: 'POST',
       cookie: adminCookie,
       body: payload,
     },
   )
-  const persisted = await seed.query(
-    'SELECT id::text,parent_id::text,hierarchy_level FROM public.organizations WHERE slug=$1',
-    [slug],
+  const persisted = await seed.query('SELECT 1 FROM public.organizations WHERE slug=$1', [slug])
+  assert.equal(persisted.rowCount, 0, 'an unmandated platform administrator created an organization')
+  const denial = await seed.query(
+    `SELECT 1 FROM public.audit_logs WHERE organization_id=$1::uuid AND user_id=$2
+       AND action='platform.organization.manage.denied' AND resource_type='platform_authority'`,
+    [organizations[0], administrator],
   )
-  assert.equal(persisted.rowCount, 1)
-  assert.equal(persisted.rows[0].id, created.body.data.id)
-  assert.equal(persisted.rows[0].parent_id, organizations[0])
-  assert.equal(persisted.rows[0].hierarchy_level, 1)
+  assert.ok((denial.rowCount ?? 0) >= 1, 'the unmandated platform write refusal was not audited')
   // G5 critical journeys: role change and claim, dues payment, scheduled SYSTEM flow, revocation.
   const journeyClaim = {
     claimType: 'other',

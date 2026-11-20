@@ -244,7 +244,7 @@ function buildExecutedQualifications(): Map<string, ExecutedQualification> {
         executedCases: [
           'ordinary-system-write-denied',
           'system-actor-without-selected-membership-denied',
-          'authorized-system-organization-write',
+          'unmandated-platform-administrator-organization-write-refused',
         ],
         authMechanism: 'PASSWORD_SESSION_COOKIE_AFTER_MFA',
         actorClass: 'PLATFORM_ADMIN_WITH_SELECTED_MEMBERSHIP',
