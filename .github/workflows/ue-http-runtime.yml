@@ -107,7 +107,7 @@ jobs:
           UE_V2_EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           UE_V2_BROWSER_ACCEPTANCE: '1'
           UE_V2_AUTHENTICATED_CASEWORK_LOAD: '1'
-          UE_V2_NEXT_MAX_HEAP_MB: '4096'
+          UE_V2_NEXT_MAX_HEAP_MB: '6144' # the production build exceeds 4 GB; the HTTP QA job builds at 6 GB on the same runner
           NODE_OPTIONS: --max-old-space-size=2048
         run: pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts --ci-engineering-components
 

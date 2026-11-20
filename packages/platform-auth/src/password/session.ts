@@ -15,6 +15,7 @@ import { authUserSessions } from '@nzila/db/schema'
 import { eq, and, gt, sql } from 'drizzle-orm'
 import { cookies } from 'next/headers'
 import { authDb, getAuthContext, withAuthContext } from '../auth-db'
+import { isLocalQaRuntime } from '../runtime-identity'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -269,10 +270,17 @@ export async function rebindSessionOrganization(options: {
 
 // ─── Cookie Management ──────────────────────────────────────────────────────
 
+/** Secure in every production build, except the owned local QA runtime (isLocalQaRuntime: QA_TEST_ENV=true, UE_ENVIRONMENT=local and
+ * no deployment identity), which serves a production build over plain HTTP on loopback; a Secure cookie would never be sent back there,
+ * so its real password/MFA journeys could not hold a session. Every deployed environment keeps Secure. */
+export function sessionCookieSecure(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
+  return env.NODE_ENV === 'production' && !isLocalQaRuntime(env)
+}
+
 export function sessionCookieAttributes(expiresAt: Date) {
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: sessionCookieSecure(),
     sameSite: 'lax' as const,
     expires: expiresAt,
     path: '/',
@@ -294,7 +302,7 @@ export async function clearSessionCookie(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.set(SESSION_COOKIE_NAME, '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: sessionCookieSecure(),
     sameSite: 'lax',
     expires: new Date(0),
     path: '/',
