@@ -130,25 +130,36 @@ describe.skipIf(!URL)('the e-signature reads on the combined schema, as the real
     expect(await SignatureService.getDocumentStatus(DOC, ORG_A)).toMatchObject({ id: DOC })
   })
 
-  it('answers "not found" for the document of another organization, even to a user typed in as a signer', async () => {
+  // signature_audit_trail has no runtime or system grant in the canonical source (CONTAINED_NO_AUTHORITY): every operation that records or
+  // reads the trail answers 501 NOT_IMPLEMENTED with the reason before any statement (lib/reality/contained-storage.ts).
+  const unavailable = async (work: Promise<unknown>) =>
+    expect(await work.then(() => null, (error: unknown) => error)).toMatchObject({
+      name: 'ContainedStorageUnavailable', code: 'NOT_IMPLEMENTED', status: 501, storage: 'signature_audit_trail' })
+  const trailRows = async () => Number((await admin.query(`SELECT count(*)::int n FROM signature_audit_trail WHERE document_id = $1`, [DOC])).rows[0].n)
+
+  it('answers "not found" for the document of another organization, even to a user typed in as a signer, and refuses the trail to everyone', async () => {
     const { SignatureService, AuditTrailService } = service!
     expect(await SignatureService.verifyDocumentAccess(DOC, U.foreign, ORG_B)).toBe(false)
     expect(await SignatureService.verifyDocumentAccess(DOC, U.sender, ORG_B)).toBe(false)
     expect(await SignatureService.getDocumentSender(DOC, ORG_B)).toBeNull()
     await expect(SignatureService.getDocumentStatus(DOC, ORG_B)).rejects.toThrow('Document not found')
-    expect(await AuditTrailService.getDocumentAudit(DOC, ORG_B)).toEqual([])
-    expect((await AuditTrailService.getDocumentAudit(DOC, ORG_A)).length).toBeGreaterThan(0)
-    await expect(AuditTrailService.generateAuditReport(DOC, ORG_B)).rejects.toThrow('Document not found')
+    for (const org of [ORG_A, ORG_B]) {
+      await unavailable(AuditTrailService.getDocumentAudit(DOC, org))
+      await unavailable(AuditTrailService.generateAuditReport(DOC, org))
+    }
   })
 
-  it('shows another organization no document, signer or trail row, and refuses its update and insert', async () => {
-    for (const table of ['signature_documents', 'document_signers', 'signature_audit_trail']) {
+  it('shows another organization no document or signer row, refuses its update, and the database refuses the trail to every tenant', async () => {
+    for (const table of ['signature_documents', 'document_signers']) {
       expect(await count(ORG_B, U.foreign, table), table).toBe(0)
       expect(await count(ORG_A, U.sender, table), table).toBeGreaterThan(0)
     }
+    const causeOf = (failure: { message?: string; cause?: { message?: string } }) => `${failure.message} ${failure.cause?.message ?? ''}`
+    for (const [org, user] of [[ORG_A, U.sender], [ORG_B, U.foreign]] as const)
+      expect(await count(org, user, 'signature_audit_trail').then(() => '', causeOf)).toMatch(/permission denied for table signature_audit_trail/)
     expect(await raw(ORG_B, U.foreign, sql`UPDATE document_signers SET status = 'signed' WHERE id = ${foreignSignerRow}::uuid RETURNING id`)).toEqual([])
     expect((await admin.query(`SELECT status FROM document_signers WHERE id = $1`, [foreignSignerRow])).rows[0].status).toBe('pending')
-    await expect(raw(ORG_B, U.foreign, sql`INSERT INTO signature_audit_trail (id, document_id, event_type, event_description, timestamp, created_at, updated_at) VALUES (gen_random_uuid(), ${DOC}::uuid, 'document_signed', 'forged', now(), now(), now())`)).rejects.toThrow()
+    expect(await raw(ORG_B, U.foreign, sql`INSERT INTO signature_audit_trail (id, document_id, event_type, event_description, timestamp, created_at, updated_at) VALUES (gen_random_uuid(), ${DOC}::uuid, 'document_signed', 'forged', now(), now(), now())`).then(() => '', causeOf)).toMatch(/permission denied for table signature_audit_trail/)
     expect((await admin.query(`SELECT count(*)::int n FROM signature_audit_trail WHERE document_id = $1 AND event_type = 'document_signed'`, [DOC])).rows[0].n).toBe(0)
     expect(signerRow).toBeTruthy()
   })
@@ -178,36 +189,30 @@ describe.skipIf(!URL)('the e-signature reads on the combined schema, as the real
     await expect(SignatureService.getUserDocuments(U.signer, '')).rejects.toThrow('Organization context required')
   })
 
-  it('lets only the sender remind a signer who has not signed, inside the sender\'s organization', async () => {
+  it('refuses a reminder 501, to the sender as to anyone, in any organization: no reminder is recorded', async () => {
     const { SignatureService } = service!
-    const reminders = async () => Number((await admin.query(`SELECT count(*)::int n FROM signature_audit_trail WHERE document_id = $1 AND event_type = 'reminder_sent'`, [DOC])).rows[0].n)
-    await expect(SignatureService.sendReminder(foreignSignerRow, U.sender, ORG_B)).rejects.toMatchObject({ code: 'FORBIDDEN', message: 'Signer not found' })
-    await expect(SignatureService.sendReminder(foreignSignerRow, U.signer, ORG_A)).rejects.toMatchObject({ code: 'FORBIDDEN' })
-    expect(await reminders()).toBe(0)
-    await SignatureService.sendReminder(foreignSignerRow, U.sender, ORG_A)
-    expect(await reminders()).toBe(1)
+    const before = await trailRows()
+    await unavailable(SignatureService.sendReminder(foreignSignerRow, U.sender, ORG_B))
+    await unavailable(SignatureService.sendReminder(foreignSignerRow, U.signer, ORG_A))
+    await unavailable(SignatureService.sendReminder(foreignSignerRow, U.sender, ORG_A))
+    expect(await trailRows()).toBe(before)
   })
 
-  it('records a signature only for the signer themself, found inside the organization they are authenticated in', async () => {
+  it('refuses to record a signature 501, for the signer themself as for anyone else, in any organization: nothing changes', async () => {
     const { SignatureService } = service!
     state.user = U.signer
     const input = { signatureImageUrl: 'data:image/png;base64,iVBORw0KGgo=', signatureType: 'electronic' as const }
     const status = async (id: string) => (await admin.query(`SELECT status FROM document_signers WHERE id = $1`, [id])).rows[0].status as string
-    // Another organization's session finds nothing, even for a real signer id and the signer's own user id.
-    await expect(SignatureService.recordSignature({ ...input, signerId: signerRow, actorUserId: U.signer, organizationId: ORG_B })).rejects.toMatchObject({ code: 'FORBIDDEN', message: 'Signer not found' })
-    // Inside the organization, only the person the row names may sign it.
-    await expect(SignatureService.recordSignature({ ...input, signerId: signerRow, actorUserId: U.sender, organizationId: ORG_A })).rejects.toMatchObject({ code: 'FORBIDDEN', message: expect.stringContaining('not authorized') })
-    await expect(SignatureService.recordSignature({ ...input, signerId: signerRow, actorUserId: U.signer, organizationId: '' })).rejects.toMatchObject({ code: 'FORBIDDEN' })
+    const before = await trailRows()
+    for (const attempt of [
+      { signerId: signerRow, actorUserId: U.signer, organizationId: ORG_B },
+      { signerId: signerRow, actorUserId: U.sender, organizationId: ORG_A },
+      { signerId: signerRow, actorUserId: U.signer, organizationId: '' },
+      { signerId: signerRow, actorUserId: U.signer, organizationId: ORG_A },
+    ]) await unavailable(SignatureService.recordSignature({ ...input, ...attempt }))
     expect(await status(signerRow)).toBe('pending')
-    expect((await admin.query(`SELECT count(*)::int n FROM signature_audit_trail WHERE document_id = $1 AND event_type = 'document_signed'`, [DOC])).rows[0].n).toBe(0)
-
-    const signed = await SignatureService.recordSignature({ ...input, signerId: signerRow, actorUserId: U.signer, organizationId: ORG_A })
-    expect(signed).toMatchObject({ id: signerRow, status: 'signed' })
-    expect(await status(signerRow)).toBe('signed')
-    expect((await admin.query(`SELECT count(*)::int n FROM signature_audit_trail WHERE document_id = $1 AND event_type = 'document_signed'`, [DOC])).rows[0].n).toBe(1)
-    // A signature already given is not overwritten, and the other signer, who has not signed, is untouched.
-    await expect(SignatureService.recordSignature({ ...input, signerId: signerRow, actorUserId: U.signer, organizationId: ORG_A })).rejects.toMatchObject({ code: 'CONFLICT' })
     expect(await status(foreignSignerRow)).toBe('pending')
+    expect(await trailRows()).toBe(before)
     state.user = ''
   })
 })

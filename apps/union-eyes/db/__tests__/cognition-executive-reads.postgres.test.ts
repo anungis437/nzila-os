@@ -141,9 +141,17 @@ describe.skipIf(!URL)('the cognition and executive dashboard reads on the combin
       expect(empty.compliance.alerts).toEqual([])
     })
 
-    it('counts the executive figures from the organization\'s own members and grievances', async () => {
-      const executive = await kpi!.getExecutiveMetrics({ organizationId: ORG_A, timeframe: 'monthly' })
-      expect(executive.activeGrievances).toBe(2)
+    it('refuses the executive figures 501: they count employer remittances, which the canonical source contains', async () => {
+      // employer_remittances has no runtime or system grant (CONTAINED_NO_AUTHORITY): the figures are refused with the reason before the
+      // cache or any statement, rather than served without the remittances they claim to count.
+      const { cacheGet } = await import('@/lib/services/cache-service')
+      const cacheReads = vi.mocked(cacheGet).mock.calls.length
+      const refused = await kpi!.getExecutiveMetrics({ organizationId: ORG_A, timeframe: 'monthly' }).then(() => null, (error: unknown) => error)
+      expect(refused).toMatchObject({ name: 'ContainedStorageUnavailable', code: 'NOT_IMPLEMENTED', status: 501, storage: 'employer_remittances' })
+      expect(vi.mocked(cacheGet).mock.calls.length).toBe(cacheReads)
+      const denied = await harness.tenant(RUNTIME_ROLE, ORG_A, null, (tx) => tx.select().from(schema!.employerRemittances))
+        .then(() => '', (error: { message?: string; cause?: { message?: string } }) => `${error.message} ${error.cause?.message ?? ''}`)
+      expect(denied).toMatch(/permission denied for table employer_remittances/)
     })
   })
 

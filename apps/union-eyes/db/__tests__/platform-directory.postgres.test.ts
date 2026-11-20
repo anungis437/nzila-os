@@ -19,21 +19,32 @@ import { randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
-const state = vi.hoisted(() => ({ pool: null as unknown, platformAdmins: new Set<string>() }))
+const state = vi.hoisted(() => ({ pool: null as unknown, platformAdmins: new Set<string>(), liveMembers: new Set<string>() }))
 
 type Role = 'union_eyes_runtime' | 'union_eyes_system'
 type Ctx = { organizationId?: string | null; userId?: string | null }
 
 // One transaction as the real role, with the context a real request would carry. execute() returns rows the way the application's
 // postgres-js driver does, so the statements read their results as they do in production.
+// Canonical V2 admits a runtime tenant transaction only in a verified business session (ue_v2_verified_business_session): a caller who
+// is a live canonical member of the organization runs in their own real session, as the request binder would open it.
 async function inRole<T>(role: Role, ctx: Ctx, work: (tx: unknown) => Promise<T>): Promise<T> {
+  if (role === 'union_eyes_runtime' && ctx.organizationId && ctx.userId && state.liveMembers.has(`${ctx.userId}:${ctx.organizationId}`))
+    return withNativeCanonicalActor(ctx.userId, ctx.organizationId, (binding) => inRoleBound(role, ctx, work, binding))
+  return inRoleBound(role, ctx, work)
+}
+async function inRoleBound<T>(role: Role, ctx: Ctx, work: (tx: unknown) => Promise<T>, binding?: AuthenticatedOrgBinding): Promise<T> {
   const client = await (state.pool as pg.Pool).connect()
   try {
     await client.query('BEGIN')
     await client.query(`SET LOCAL ROLE ${role}`)
     await client.query(`SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`, [ctx.organizationId ?? '', ctx.userId ?? ''])
+    if (binding) await setNativeBusinessContext(client, binding)
     const db = drizzle(client)
     const execute = db.execute.bind(db)
     ;(db as unknown as { execute: unknown }).execute = async (query: never) => (await execute(query)).rows
@@ -122,6 +133,11 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
 
     await org(ORG_A, 'A')
     await org(ORG_B, 'B')
+    // The platform administrator and the outsider are each a live member of the organization they act in.
+    for (const [user, organizationId] of [[STAFF, ORG_A], [OUTSIDER, ORG_B]]) {
+      await seedDeclaredCanonicalActor(admin, user, organizationId, 'admin')
+      state.liveMembers.add(`${user}:${organizationId}`)
+    }
     seeded.pat = await member(ORG_A, `pat-${tag}`, 'Pat Morgan', `pat.morgan.${tag}@example.org`)
     seeded.lee = await member(ORG_A, `lee-${tag}`, 'Lee Tran', `lee.tran.${tag}@example.org`)
     seeded.sam = await member(ORG_B, `sam-${tag}`, 'Sam Rivera', `sam.rivera.${tag}@example.org`)

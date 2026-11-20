@@ -32,3 +32,18 @@ export async function seedDeclaredCanonicalActor(operator: OperatorQuery, userId
 
 /** The conventional declared reader of one organization, for a test that reads or writes "as organization X" with no named caller. */
 export const nativeTenantReaderId = (organizationId: string, role = 'member') => `native-${role}-${organizationId.slice(0, 8)}`
+
+/**
+ * What the production binder answers before it issues a session bridge (packages/platform-auth/src/org-binding.ts withResolvedOrgBinding):
+ * no active canonical user, or no active membership in the organization, is MEMBERSHIP_REQUIRED. A fixture opening a request for someone
+ * with neither refuses the same way, instead of failing later on the session row the auth gateway would never have been asked to write.
+ */
+export async function requireLiveCanonicalMembership(operator: { query: (text: string, params?: unknown[]) => Promise<{ rows: unknown[] }> },
+  userId: string, organizationId: string): Promise<void> {
+  const live = await operator.query(`SELECT 1 FROM user_management.users u JOIN user_management.organization_users m ON m.user_id = u.user_id
+    WHERE u.user_id = $1 AND u.is_active AND u.lifecycle_state = 'active' AND m.organization_id = $2::uuid AND m.is_active`, [userId, organizationId])
+  if (!live.rows.length) {
+    const { AuthOrgBindingError } = await import('../../../../packages/platform-auth/src/org-binding')
+    throw new AuthOrgBindingError('MEMBERSHIP_REQUIRED')
+  }
+}

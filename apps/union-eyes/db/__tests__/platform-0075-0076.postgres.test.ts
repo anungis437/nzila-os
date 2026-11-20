@@ -84,7 +84,13 @@ describe.skipIf(!URL)('the enhanced RBAC migrations roll back and apply again', 
     expect(await seeded()).toBe(11)
     expect(await triggers()).toEqual(EXPECTED_TRIGGERS)
     expect(await functions()).toEqual(['rbac_audit_log_append_only', 'rbac_member_organization_guard'])
-    expect(await policies()).toEqual(FULL_POLICIES)
+    // The canonical V2 bootstrap adds its verified-business-session policy, RESTRICTIVE (it can only narrow), on each relation; the
+    // migrations own the rest, and those are exactly what they declare.
+    const all = await policies()
+    expect(all.filter((p) => !p.includes('.ue_v2_'))).toEqual(FULL_POLICIES)
+    expect(all.filter((p) => p.includes('.ue_v2_'))).toEqual(['member_roles', 'permission_exceptions', 'rbac_audit_log'].map((t) => `${t}.ue_v2_verified_business_session`))
+    const v2 = (await admin.query(`SELECT DISTINCT permissive FROM pg_policies WHERE schemaname = 'public' AND tablename = ANY($1) AND policyname LIKE 'ue\\_v2\\_%'`, [['member_roles', 'permission_exceptions', 'rbac_audit_log']])).rows
+    expect(v2).toEqual([{ permissive: 'RESTRICTIVE' }])
   })
 
   describe('0076, the catalog and the guards', () => {

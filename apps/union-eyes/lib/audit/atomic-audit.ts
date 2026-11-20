@@ -18,7 +18,8 @@ export async function persistAtomicAudit(
   entry: CanonicalAuditEntry,
   outcome: 'success' | 'failure' = 'success',
 ): Promise<void> {
-  if (await appendMandatoryAudit(tx, entry)) return
+  // The canonical ledger has no outcome column: a failure (a recorded denial) is kept in its details, so it never reads as a success.
+  if (await appendMandatoryAudit(tx, outcome === 'failure' ? { ...entry, details: { ...entry.details, outcome: 'failure' } } : entry)) return
 
   const systemActor = entry.userId?.startsWith('system:') ?? false
   const resourceIsUuid = entry.resourceId ? UUID.test(entry.resourceId) : false

@@ -15,6 +15,9 @@ import { randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
@@ -27,13 +30,21 @@ const state = vi.hoisted(() => ({
 
 type Tx = ReturnType<typeof drizzle>
 
+// A tenant transaction runs in the verified business session of the organization's declared administrator (a real canonical member), as
+// the canonical topology requires (ue_v2_verified_business_session); the system role and an organization-less handle run with none.
 async function inRole<T>(role: string, organizationId: string | null, fn: (tx: Tx) => Promise<T>): Promise<T> {
+  if (role === 'union_eyes_runtime' && organizationId)
+    return withNativeCanonicalActor(nativeTenantReaderId(organizationId, 'admin'), organizationId, (binding) => inRoleBound(role, organizationId, fn, binding))
+  return inRoleBound(role, organizationId, fn)
+}
+async function inRoleBound<T>(role: string, organizationId: string | null, fn: (tx: Tx) => Promise<T>, binding?: AuthenticatedOrgBinding): Promise<T> {
   const pool = state.pool as pg.Pool
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
     await client.query(`SET LOCAL ROLE ${role}`)
     if (organizationId) await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId])
+    if (binding) await setNativeBusinessContext(client, binding)
     const db = drizzle(client)
     // The production driver returns rows directly from execute(); node-postgres' drizzle wrapper returns a result object.
     const execute = db.execute.bind(db)
@@ -115,12 +126,13 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
     state.admin = drizzle(admin)
     state.pool = pool
     // The runtime and system roles must be able to assume the role: the pool connects as the admin user.
-    for (const [org, slug] of [[ORG_A, `iso-a-${ORG_A.slice(0, 6)}`], [ORG_B, `iso-b-${ORG_B.slice(0, 6)}`]]) {
+    for (const [org, slug] of [[ORG_A, `iso-a-${ORG_A.slice(0, 6)}`], [ORG_B, `iso-b-${ORG_B.slice(0, 6)}`], [ORG_C, `iso-c-${ORG_C.slice(0, 6)}`]]) {
       await admin.query(
         `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
          VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
         [org, slug, slug],
       )
+      await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(org, 'admin'), org, 'admin')
     }
     const precedent = (id: string, org: string, sharing: string, grants: string[] | null = null) =>
       admin.query(
@@ -186,7 +198,8 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       await expect((GET as any)(ctx(ORG_C, P_A_GRANTED))).rejects.toMatchObject({ status: 404 })
       // The grant names one organization: a malformed or empty context never matches it.
       const none = (await inRole('union_eyes_runtime', null, (tx) => (tx as unknown as { $client: pg.Client }).$client.query('SELECT id FROM arbitration_precedents'))) as pg.QueryResult
-      expect(none.rows.map((r: { id: string }) => r.id)).toEqual([P_A_PUBLIC])
+      // Canonical V2: without a verified business session nothing is visible at all, not even the public precedent.
+      expect(none.rows.map((r: { id: string }) => r.id)).toEqual([])
     })
 
     it('revocation takes effect at once: removing the grant makes the precedent not found again, and restoring it admits it', async () => {
@@ -336,9 +349,26 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
     })
   })
 
+  // Member dues collection and settlement are not offered (lib/dues/member-dues-flag.ts; owner decision: dues are handled in an external
+  // system), and the canonical source contains member_dues_ledger and dues_transactions (CONTAINED_NO_AUTHORITY; both are
+  // ZERO_SYSTEM_MUTATION_TABLES). The concurrency proofs become refusal proofs at the same strength: under the same concurrency nothing is
+  // created, credited, reversed or seen, and the provider is never called.
+  const refusedByDatabase = (error: unknown) => {
+    const text = `${(error as { message?: string })?.message ?? ''} ${(error as { cause?: { message?: string } })?.cause?.message ?? ''}`
+    expect(text).toMatch(/permission denied for table (member_dues_ledger|dues_transactions)/)
+  }
+
   describe('dues initiation under real concurrency', () => {
     const USER = `dues-member-${randomUUID().slice(0, 8)}`
     const OTHER = `dues-other-${randomUUID().slice(0, 8)}`
+    const providerCalls: string[] = []
+    const gateway = () => ({
+      paymentIntents: {
+        create: async () => { providerCalls.push('create'); throw new Error('the provider must not be reached') },
+        retrieve: async () => { providerCalls.push('retrieve'); throw new Error('the provider must not be reached') },
+        cancel: async () => { providerCalls.push('cancel'); return {} },
+      },
+    })
 
     beforeAll(async () => {
       for (const [user, amount] of [[USER, 25], [OTHER, 40]] as const) {
@@ -350,85 +380,42 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
       }
     })
 
-    // Provider state is independent of the database: never synthesize a provider
-    // response from a local dues row. All concurrent callers share this fake gateway.
-    const providerCancellationAttempts: string[] = []
-    const providerIntents = new Map<string, {
-      id: string; client_secret: string | null; amount: number; currency: string;
-      metadata: Record<string, string>; status: string
-    }>()
-    const gateway = () => ({
-      paymentIntents: {
-        create: async (params: Record<string, unknown>, options?: { idempotencyKey?: string }) => {
-          const id = `pi_${options?.idempotencyKey}`
-          const existing = providerIntents.get(id)
-          if (existing) return existing
-          const intent = {
-            id, client_secret: 'secret', amount: Number(params.amount), currency: String(params.currency),
-            metadata: params.metadata as Record<string, string>, status: 'requires_payment_method',
-          }
-          providerIntents.set(id, intent)
-          return intent
-        },
-        retrieve: async (id: string) => {
-          const intent = providerIntents.get(id)
-          if (!intent) throw new Error('Provider intent not found')
-          return intent
-        },
-        cancel: async (id: string) => { providerCancellationAttempts.push(id); return {} },
-      },
-    })
-
-    it('ten simultaneous initiations by one member create one payment, on separate connections', async () => {
+    it('ten simultaneous initiations by one member are all refused by the database, on separate connections: no payment, no provider call', async () => {
       const { initiateDuesPayment } = await import('../../lib/dues/dues-payment-service')
-      const results = await Promise.all(
+      const results = await Promise.allSettled(
         Array.from({ length: 10 }, () => initiateDuesPayment({ organizationId: ORG_A, userId: USER, gateway: gateway(), providerConfigured: true })),
       )
-      expect(new Set(results.map((r) => r.paymentId)).size).toBe(1)
-      expect((await scalar(`SELECT count(*)::int AS n FROM dues_transactions WHERE member_id = $1`, [USER])).n).toBe(1)
-      expect((await scalar(`SELECT status FROM dues_transactions WHERE member_id = $1`, [USER])).status).toBe('pending')
+      expect(results.every((r) => r.status === 'rejected')).toBe(true)
+      for (const r of results) refusedByDatabase((r as PromiseRejectedResult).reason)
+      expect((await scalar(`SELECT count(*)::int AS n FROM dues_transactions WHERE member_id = $1`, [USER])).n).toBe(0)
+      expect(providerCalls).toEqual([])
     })
 
-    it('refuses changed dues balance without cancelling or duplicating the original provider intent', async () => {
+    it('a changed dues balance changes nothing either: refused, no payment, no provider intent created or cancelled', async () => {
       const { initiateDuesPayment } = await import('../../lib/dues/dues-payment-service')
-      const before = await admin.query(
-        'SELECT id::text AS id, processor_payment_id, status FROM dues_transactions WHERE member_id = $1 AND organization_id = $2',
-        [USER, ORG_A],
-      )
-      expect(before.rows).toHaveLength(1)
-      const providerIntentCountBefore = providerIntents.size
-      const providerCancellationCountBefore = providerCancellationAttempts.length
       await admin.query(
         `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, balance_before, balance_after, description, status)
          VALUES ($1, $2, 'charge', now(), now(), 5, 25, 30, 'additional assessed dues', 'posted')`,
         [USER, ORG_A],
       )
-      await expect(initiateDuesPayment({
-        organizationId: ORG_A, userId: USER, gateway: gateway(), providerConfigured: true,
-      })).rejects.toMatchObject({ code: 'PENDING_PAYMENT_REQUIRES_RECONCILIATION' })
-      const after = await admin.query(
-        'SELECT id::text AS id, processor_payment_id, status FROM dues_transactions WHERE member_id = $1 AND organization_id = $2',
-        [USER, ORG_A],
-      )
-      expect(after.rows).toEqual(before.rows)
-      expect(after.rows[0].status).toBe('pending')
-      expect(providerIntents.size).toBe(providerIntentCountBefore)
-      expect(providerCancellationAttempts).toHaveLength(providerCancellationCountBefore)
+      refusedByDatabase(await initiateDuesPayment({ organizationId: ORG_A, userId: USER, gateway: gateway(), providerConfigured: true }).then(() => null, (e: unknown) => e))
+      expect((await scalar(`SELECT count(*)::int AS n FROM dues_transactions WHERE member_id = $1`, [USER])).n).toBe(0)
+      expect(providerCalls).toEqual([])
     })
 
-    it('another member and another organization are unaffected, and ORG_B\'s runtime context cannot see the payment', async () => {
+    it('another member is refused alike, and no organization\'s runtime context can read the dues tables', async () => {
       const { initiateDuesPayment } = await import('../../lib/dues/dues-payment-service')
-      const other = await initiateDuesPayment({ organizationId: ORG_A, userId: OTHER, gateway: gateway(), providerConfigured: true })
-      expect(other.amount).toBe('40.00')
-      const visibleToB = (await inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query('SELECT id FROM dues_transactions'))) as pg.QueryResult
-      expect(visibleToB.rows).toEqual([])
+      refusedByDatabase(await initiateDuesPayment({ organizationId: ORG_A, userId: OTHER, gateway: gateway(), providerConfigured: true }).then(() => null, (e: unknown) => e))
+      for (const org of [ORG_A, ORG_B])
+        for (const table of ['dues_transactions', 'member_dues_ledger'])
+          refusedByDatabase(await inRole('union_eyes_runtime', org, (tx) => (tx as unknown as { $client: pg.Client }).$client.query(`SELECT id FROM ${table}`)).then(() => null, (e: unknown) => e))
     })
   })
 
   describe('dues settlement under real concurrency', () => {
     const MEMBER = `settle-member-${randomUUID().slice(0, 8)}`
-    let paymentId = ''
-    let intentId = ''
+    const paymentId = randomUUID()
+    const intentId = `pi_${randomUUID().slice(0, 12)}`
 
     const intent = async (overrides: Record<string, unknown> = {}) => {
       const { DUES_PAYMENT_KIND, DUES_CURRENCY } = await import('../../lib/dues/dues-payment-service')
@@ -447,56 +434,51 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
     }
     const ledgerRows = async () =>
       (await admin.query(`SELECT transaction_type, amount::text AS amount, payment_reference FROM member_dues_ledger WHERE user_id = $1 AND organization_id = $2 AND transaction_type = 'payment'`, [MEMBER, ORG_A])).rows
+    const statusOf = async () => (await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status
 
     beforeAll(async () => {
+      // The pending payment a member would have initiated, seeded by the data owner: no application role can create it.
       await admin.query(
         `INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, transaction_date, effective_date, amount, balance_before, balance_after, description, status)
          VALUES ($1, $2, 'charge', now(), now(), 30, 0, 30, 'monthly dues', 'posted')`,
         [MEMBER, ORG_A],
       )
-      const { initiateDuesPayment } = await import('../../lib/dues/dues-payment-service')
-      const created = await initiateDuesPayment({
-        organizationId: ORG_A,
-        userId: MEMBER,
-        providerConfigured: true,
-        gateway: { paymentIntents: { create: async (_p: unknown, o?: { idempotencyKey?: string }) => ({ id: `pi_${o?.idempotencyKey}`, client_secret: 's' }), cancel: async () => ({}) } },
-      })
-      paymentId = created.paymentId
-      intentId = (await scalar(`SELECT processor_payment_id FROM dues_transactions WHERE id = $1`, [paymentId])).processor_payment_id
+      await admin.query(
+        `INSERT INTO dues_transactions (id, organization_id, member_id, transaction_type, amount, dues_amount, total_amount, period_start, period_end, due_date, status, processor_payment_id)
+         VALUES ($1, $2, $3, 'payment', 30, 30, 30, current_date, current_date, current_date, 'pending', $4)`,
+        [paymentId, ORG_A, MEMBER, intentId],
+      )
     })
 
     it('a tampered amount, member, organization or provider reference never credits the ledger', async () => {
-      await expect(settle('evt_amount', { amount_received: 1 })).rejects.toMatchObject({ code: 'AMOUNT_MISMATCH' })
-      await expect(settle('evt_ref', { id: 'pi_someone_elses' })).rejects.toMatchObject({ code: 'PROVIDER_REFERENCE_MISMATCH' })
-      await expect(settle('evt_member', { metadata: { ue_dues_payment_id: paymentId, organization_id: ORG_A, member_user_id: 'someone-else' } })).rejects.toMatchObject({ code: 'MEMBER_MISMATCH' })
-      await expect(settle('evt_org', { metadata: { ue_dues_payment_id: paymentId, organization_id: ORG_B, member_user_id: MEMBER } })).rejects.toMatchObject({ code: 'ORGANIZATION_MISMATCH' })
+      for (const [eventId, overrides] of [
+        ['evt_amount', { amount_received: 1 }], ['evt_ref', { id: 'pi_someone_elses' }],
+        ['evt_member', { metadata: { ue_dues_payment_id: paymentId, organization_id: ORG_A, member_user_id: 'someone-else' } }],
+        ['evt_org', { metadata: { ue_dues_payment_id: paymentId, organization_id: ORG_B, member_user_id: MEMBER } }],
+      ] as const) expect(await settle(eventId, overrides).then(() => 'settled', () => 'refused')).toBe('refused')
       expect(await ledgerRows()).toEqual([])
-      expect((await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status).toBe('pending')
+      expect(await statusOf()).toBe('pending')
     })
 
-    it('ten simultaneous deliveries of the same payment (distinct event ids) credit the ledger once', async () => {
-      const outcomes = await Promise.all(Array.from({ length: 10 }, (_v, i) => settle(`evt_${i}`)))
-      expect(outcomes.filter((o) => o === 'settled')).toHaveLength(1)
-      expect(outcomes.filter((o) => o === 'duplicate')).toHaveLength(9)
-      const rows = await ledgerRows()
-      expect(rows).toHaveLength(1)
-      expect(rows[0]).toMatchObject({ amount: '30.00', payment_reference: intentId })
-      expect((await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status).toBe('paid')
-      expect(state.audit.filter((e) => e.action === 'dues.settle')).toHaveLength(1)
+    it('ten simultaneous deliveries of the same payment are all refused by the database: the system role holds no dues authority', async () => {
+      const outcomes = await Promise.allSettled(Array.from({ length: 10 }, (_v, i) => settle(`evt_${i}`)))
+      expect(outcomes.every((o) => o.status === 'rejected')).toBe(true)
+      for (const o of outcomes) refusedByDatabase((o as PromiseRejectedResult).reason)
+      expect(await ledgerRows()).toEqual([])
+      expect(await statusOf()).toBe('pending')
+      expect(state.audit.filter((e) => e.action === 'dues.settle')).toHaveLength(0)
     })
 
-    it('a delayed replay long after settlement, and a replay with the same event id, change nothing', async () => {
-      expect(await settle('evt_late')).toBe('duplicate')
-      expect(await settle('evt_0')).toBe('duplicate')
-      expect(await ledgerRows()).toHaveLength(1)
+    it('a delayed replay, and a replay with the same event id, change nothing', async () => {
+      for (const eventId of ['evt_late', 'evt_0']) refusedByDatabase(await settle(eventId).then(() => null, (e: unknown) => e))
+      expect(await ledgerRows()).toEqual([])
     })
 
-    it('a provider failure arriving after settlement does not reverse or re-open it', async () => {
+    it('a provider failure is refused alike and opens or reverses nothing', async () => {
       const { recordDuesPaymentProviderOutcome } = await import('../../lib/dues/dues-settlement')
       const pi = await intent()
-      const outcome = await inRole('union_eyes_system', null, (tx) => recordDuesPaymentProviderOutcome(tx as never, pi as never, 'evt_fail', 'failed'))
-      expect(outcome).toBe('ignored')
-      expect((await scalar(`SELECT status FROM dues_transactions WHERE id = $1`, [paymentId])).status).toBe('paid')
+      refusedByDatabase(await inRole('union_eyes_system', null, (tx) => recordDuesPaymentProviderOutcome(tx as never, pi as never, 'evt_fail', 'failed')).then(() => null, (e: unknown) => e))
+      expect(await statusOf()).toBe('pending')
     })
   })
 
@@ -504,9 +486,17 @@ describe.skipIf(!URL)('remediated routes on the combined schema, as the runtime 
     it('the runtime role in ORG_B sees none of ORG_A\'s recognition awards or pilot events, with or without a predicate', async () => {
       const program = randomUUID()
       const awardType = randomUUID()
-      await admin.query(`INSERT INTO recognition_programs (id, org_id, name) VALUES ($1, $2, 'program')`, [program, ORG_A])
-      await admin.query(`INSERT INTO recognition_award_types (id, org_id, program_id, name, kind, default_credit_amount) VALUES ($1, $2, $3, 'Work Anniversary', 'automated', 5)`, [awardType, ORG_A, program])
-      await admin.query(`INSERT INTO recognition_awards (id, org_id, program_id, award_type_id, recipient_user_id, reason) VALUES (gen_random_uuid(), $1, $2, $3, 'member-1', 'r')`, [ORG_A, program, awardType])
+      const nominator = `nominator-${ORG_A.slice(0, 8)}`
+      const recipient = `nominee-${ORG_A.slice(0, 8)}`
+      await seedDeclaredCanonicalActor(admin, nominator, ORG_A, 'member')
+      await seedDeclaredCanonicalActor(admin, recipient, ORG_A, 'member')
+      await admin.query(`INSERT INTO recognition_programs (id, org_id, name, status) VALUES ($1, $2, 'program', 'active')`, [program, ORG_A])
+      await admin.query(`INSERT INTO recognition_award_types (id, org_id, program_id, name, kind, default_credit_amount) VALUES ($1, $2, $3, 'Peer Thanks', 'peer', 5)`, [awardType, ORG_A, program])
+      // The only award row the canonical guard admits (ue_reward_guard_nomination) is a live member's pending peer nomination of another
+      // live member, written by the runtime role in that member's verified business session.
+      await withNativeCanonicalActor(nominator, ORG_A, (binding) => inRoleBound('union_eyes_runtime', ORG_A, (tx) =>
+        (tx as unknown as { $client: pg.Client }).$client.query(`INSERT INTO recognition_awards (id, org_id, program_id, award_type_id, recipient_user_id, issuer_user_id, reason, status, metadata_json)
+          VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, 'r', 'pending', '{"nomination":true}'::jsonb)`, [ORG_A, program, awardType, recipient, nominator]), binding))
       await admin.query(`INSERT INTO pilot_events (organization_id, user_id, session_id, event_type) VALUES ($1, 'u1', 's1', 'login')`, [ORG_A])
       const q = (sqlText: string) => inRole('union_eyes_runtime', ORG_B, (tx) => (tx as unknown as { $client: pg.Client }).$client.query(sqlText)) as Promise<pg.QueryResult>
       expect((await q('SELECT id FROM recognition_awards')).rows).toEqual([])

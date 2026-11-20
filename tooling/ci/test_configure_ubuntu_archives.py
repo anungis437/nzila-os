@@ -80,6 +80,41 @@ class ArchiveConfigurationTests(unittest.TestCase):
                 self.assertIn('Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg',
                               (root / 'etc/apt/sources.list.d/ubuntu.sources').read_text())
 
+    def test_follows_only_the_exact_cname_chain_the_resolver_returned(self):
+        cname = lambda name, target, ttl=60: {'name': name + '.', 'type': 5, 'TTL': ttl, 'data': target + '.'}
+        a = lambda name, address, ttl=300: {'name': name + '.', 'type': 1, 'TTL': ttl, 'data': address}
+        cdn = 'archive.ubuntu.com.cdn.cloudflare.net'
+        answer = lambda *records: {'Status': 0, 'CD': False, 'TC': False, 'Answer': list(records)}
+        # The measured shape: archive.ubuntu.com is a CDN alias.
+        self.assertEqual(
+            archives.validated_resolution('archive.ubuntu.com', answer(
+                cname('archive.ubuntu.com', cdn), a(cdn, '104.20.28.246'), a(cdn, '172.66.152.176'))),
+            (['104.20.28.246', '172.66.152.176'], 60))
+        # Direct A records still work.
+        self.assertEqual(
+            archives.validated_resolution('archive.ubuntu.com', answer(a('archive.ubuntu.com', '91.189.91.83'))),
+            (['91.189.91.83'], 300))
+        refused = [
+            # A records owned by a name outside the chain are never accepted.
+            answer(cname('archive.ubuntu.com', cdn), a('attacker.example', '203.0.113.9')),
+            answer(a('attacker.example', '203.0.113.9')),
+            # Ambiguous, looping and over-long chains.
+            answer(cname('archive.ubuntu.com', cdn), cname('archive.ubuntu.com', 'other.example'), a(cdn, '104.20.28.246')),
+            answer(cname('archive.ubuntu.com', cdn), cname(cdn, 'archive.ubuntu.com')),
+            answer(*[cname('archive.ubuntu.com' if i == 0 else f'hop{i}.example', f'hop{i + 1}.example') for i in range(10)],
+                   a('hop10.example', '104.20.28.246')),
+            # Every record used needs a positive TTL, including the alias.
+            answer(cname('archive.ubuntu.com', cdn, ttl=0), a(cdn, '104.20.28.246')),
+            # Upstream failure or a truncated answer is never accepted.
+            {'Status': 2, 'CD': False, 'Answer': [a('archive.ubuntu.com', '91.189.91.83')]},
+            {'Status': 0, 'CD': False, 'TC': True, 'Answer': [a('archive.ubuntu.com', '91.189.91.83')]},
+        ]
+        for data in refused:
+            self.assertIsNone(archives.validated_resolution('archive.ubuntu.com', data), data)
+        # A private address at the end of a valid chain is refused outright.
+        with self.assertRaises(SystemExit):
+            archives.validated_resolution('archive.ubuntu.com', answer(cname('archive.ubuntu.com', cdn), a(cdn, '10.1.2.3')))
+
     def test_refuses_private_dns_answers_without_writing_hosts(self):
         with tempfile.TemporaryDirectory() as directory:
             root = self.make_fixture(directory)

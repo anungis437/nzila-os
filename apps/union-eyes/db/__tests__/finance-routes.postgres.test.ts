@@ -19,6 +19,13 @@ import {
 import { insertMember, insertOrganization } from './page-reads-seed'
 import { savepointHarness } from './native-savepoint-harness'
 
+// The rate limiter is not the boundary under test: its per-user counters (FINANCIAL_WRITE: 20 an hour) live in Redis, and this file sends
+// every finance operation for each canonical role, so a real counter answers 429 before the route's own refusal. That boundary answers
+// "allowed" here, as in admin-routes.postgres.test.ts; the route's authentication, role floor, input floor and 501 are all real.
+vi.mock('@/lib/rate-limiter', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/rate-limiter')>()),
+  checkRateLimit: async () => ({ allowed: true, limit: 100, remaining: 99, resetIn: 60 }),
+}))
 vi.mock('@/db', async () => ({ db: (await import('./native-savepoint-harness')).ambientDb }))
 vi.mock('@/db/db', async () => ({ db: (await import('./native-savepoint-harness')).ambientDb }))
 vi.mock('@/lib/db/with-rls-context', async () => {
@@ -483,11 +490,15 @@ describe.skipIf(!URL)('deferred finance HTTP source on actual native canonical s
     ])
       result[table] = (
         await operator.query(
-          `SELECT count(*)::text AS count,md5(COALESCE(string_agg(md5(to_jsonb(t)::text),'' ORDER BY md5(to_jsonb(t)::text)),'')) AS digest FROM public."${table}" t`,
+          // A retired route records its access as deprecated (lib/api/deprecation.ts logDeprecatedAccess): that record is not a finance
+          // effect, and deprecatedAccesses() accounts for it exactly. Every other audit row is part of the unchanged history.
+          `SELECT count(*)::text AS count,md5(COALESCE(string_agg(md5(to_jsonb(t)::text),'' ORDER BY md5(to_jsonb(t)::text)),'')) AS digest FROM public."${table}" t${table === 'audit_logs' ? ` WHERE t.resource_type IS DISTINCT FROM 'deprecated_route'` : ''}`,
         )
       ).rows[0]
     return result
   }
+  const deprecatedAccesses = async () =>
+    (await operator.query(`SELECT action, details#>>'{details,deprecatedPath}' AS path, details#>>'{details,canonicalPath}' AS canonical FROM public.audit_logs WHERE resource_type = 'deprecated_route' ORDER BY created_at, id`)).rows as Array<{ action: string; path: string; canonical: string }>
   beforeAll(async () => {
     expect(
       process.env.UE_CANONICAL_BOOTSTRAP_V2,
@@ -567,6 +578,7 @@ describe.skipIf(!URL)('deferred finance HTTP source on actual native canonical s
     'returns explicit501/403 for every current finance operation as canonical %s with no persisted effect',
     async (role) => {
       const before = await history()
+      const deprecatedBefore = (await deprecatedAccesses()).length
       for (const [index, entry] of cases.entries()) {
         const user = scenarios[role][index]
         const response = await asUser(user, async () => {
@@ -599,6 +611,11 @@ describe.skipIf(!URL)('deferred finance HTTP source on actual native canonical s
         if (role === 'member' && !entry.memberAllowed) expect(response.status).toBe(403)
       }
       expect(await history()).toEqual(before)
+      // Exactly one deprecated-access record per retired-route call, naming that route and no replacement; nothing else.
+      const retired = cases.filter((entry) => entry.module.startsWith('retired'))
+      const recorded = (await deprecatedAccesses()).slice(deprecatedBefore)
+      expect(recorded).toHaveLength(retired.length)
+      for (const row of recorded) expect(row).toMatchObject({ action: 'access', path: expect.stringMatching(/^\/api\/financial\//), canonical: 'none' })
     },
     120000,
   )

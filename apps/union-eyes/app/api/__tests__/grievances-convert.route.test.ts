@@ -147,7 +147,10 @@ describe('grievances/[id]/convert route', () => {
     expect(inserted).toMatchObject({ createdBy: 'u1', relatedGrievanceIds: [INTAKE], status: 'filed', organizationId: 'org_1' });
     expect(inserted.representedMemberUserId).toBe('44444444-4444-4444-8444-444444444444');
     expect(inserted).toMatchObject({isConfidential:true,hasLegalImplications:true});
-    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(2);
+    // The intake's change of status carries the transition-history audit every grievance status change carries.
+    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(3);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.status_change', resourceId: INTAKE,
+      details: expect.objectContaining({ previousState: { status: 'draft' }, newState: { status: 'converted' } }) }));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.convert_intake', resourceId: INTAKE }));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.create_official_case', resourceId: 'g2' }));
   });

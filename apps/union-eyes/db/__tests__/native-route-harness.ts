@@ -18,7 +18,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import assert from 'node:assert/strict'
 import { nativeActionUrl, setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
-import { seedDeclaredCanonicalActor } from './native-declared-actor'
+import { requireLiveCanonicalMembership, seedDeclaredCanonicalActor } from './native-declared-actor'
 
 export { seedDeclaredCanonicalActor }
 
@@ -124,6 +124,23 @@ export const harness = {
     return harness.setRole(userId, organizationId, role)
   },
 
+  /**
+   * A request of this caller outside a wrapped route (a page, a server action), as production serves it in canonical mode: the canonical
+   * request scope of withCanonicalApiContext, held for the request. Someone with no live canonical membership there is refused as the
+   * binder refuses them (MEMBERSHIP_REQUIRED), and no scope is established.
+   */
+  async asCanonicalRequest<T>(userId: string, organizationId: string, work: () => Promise<T>): Promise<T> {
+    if (!operatorPool) throw new Error('route harness not started')
+    await declaredActorsSettled()
+    await requireLiveCanonicalMembership(operatorPool, userId, organizationId)
+    const [{ withCanonicalRequestScope }, { canonicalMembershipRole }] = await Promise.all([
+      import('@/lib/auth/canonical-request-scope'), import('@/lib/auth/canonical-membership-role')])
+    return withNativeCanonicalActor(userId, organizationId, (binding) => withCanonicalRequestScope(binding, {
+      userId: binding.userId, organizationId: binding.organizationId, role: canonicalMembershipRole(binding.role, binding.isSystemAdmin),
+      email: `${binding.userId}@example.test`, firstName: null, lastName: null, isSystemAdmin: binding.isSystemAdmin,
+    }, () => callers.run({ userId }, work)))
+  },
+
   failNextAudit(error: Error = new Error('audit sink unavailable')): void {
     auditFailure = error
   },
@@ -136,21 +153,20 @@ export const harness = {
     const execute = async (binding?: AuthenticatedOrgBinding) => {
       const client = await selectedPool.connect()
       try {
-        await client.query('BEGIN')
-        await client.query(`SET LOCAL ROLE ${role}`)
-        await client.query('SET LOCAL search_path=pg_catalog,public,pg_temp')
-        await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userId ?? ''])
-        await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
-        if (binding) await setNativeBusinessContext(client, binding)
-        const db = drizzle(client, { schema: schema as never })
-        const scope: Scope = { db, pendingAudits: [] }
-        const result = await scopes.run(scope, () => work(db))
-        await client.query('COMMIT')
+        // A drizzle transaction object, as production's withRLSContext hands out: a transaction a handler opens on it is a savepoint inside
+        // this one, never a second BEGIN whose COMMIT would end this transaction (and its role and settings) early.
+        const scope: Scope = { db: null as unknown as RouteDb, pendingAudits: [] }
+        const result = await drizzle(client, { schema: schema as never }).transaction(async (tx) => {
+          await client.query(`SET LOCAL ROLE ${role}`)
+          await client.query('SET LOCAL search_path=pg_catalog,public,pg_temp')
+          await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userId ?? ''])
+          await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
+          if (binding) await setNativeBusinessContext(client, binding)
+          scope.db = tx as unknown as RouteDb
+          return scopes.run(scope, () => work(scope.db))
+        })
         harness.audits.push(...scope.pendingAudits)
         return result
-      } catch (error) {
-        await client.query('ROLLBACK').catch(() => undefined)
-        throw error
       } finally {
         client.release()
       }
@@ -182,7 +198,13 @@ export const rlsContextModule = {
       context.userId ?? callers.getStore()?.userId ?? pageCallers.get(context.organizationId) ?? null, work),
 }
 
-export async function recordAudit(_tx: unknown, entry: AuditRecord): Promise<void> {
+/**
+ * The audit boundary. It records what a committed transaction audited (and discards it on rollback), and, as production's persistAtomicAudit
+ * does in canonical mode, it also appends the real canonical record (lib/audit/mandatory-audit.ts) in the same transaction: the canonical
+ * database's own guards (for example GRIEVANCE_TRANSITION_HISTORY_AUDIT_REQUIRED) require that record before the change may commit.
+ * failNextAudit() makes the next audit throw before anything is written.
+ */
+export async function recordAudit(tx: unknown, entry: AuditRecord): Promise<void> {
   if (auditFailure) {
     const failure = auditFailure
     auditFailure = null
@@ -190,11 +212,19 @@ export async function recordAudit(_tx: unknown, entry: AuditRecord): Promise<voi
   }
   const scope = scopes.getStore()
   if (!scope) throw new Error('an audit was written outside a transaction')
+  const { appendMandatoryAudit } = await import('@/lib/audit/mandatory-audit')
+  await appendMandatoryAudit(tx as never, entry as never)
   scope.pendingAudits.push(entry)
 }
 
 export async function roleInOrganization(userId: string, organizationId: string): Promise<string | null> {
   await declaredActorsSettled()
+  // Inside a handled request the role is the established canonical request's, as production's lookups answer from it: no second binding
+  // (which would also wait on the case locks the request's own transaction holds for that principal).
+  const { currentCanonicalRequest } = await import('@/lib/auth/canonical-request-scope')
+  const established = (() => { try { return currentCanonicalRequest() } catch { return null } })()
+  if (established && established.binding.userId === userId && established.binding.organizationId.toLowerCase() === organizationId.toLowerCase())
+    return established.binding.role
   try { return await withNativeCanonicalActor(userId, organizationId, async (binding) => binding.role) }
   catch (error) {
     if (error && typeof error === 'object' && 'code' in error &&
@@ -204,8 +234,9 @@ export async function roleInOrganization(userId: string, organizationId: string)
 }
 
 interface EmulatedConfig {
-  auth?: { required?: boolean; minRole?: string }
+  auth?: { required?: boolean; minRole?: string; cron?: boolean }
   rlsOrgContext?: boolean
+  requireOrg?: boolean
   openapi?: { summary?: string }
 }
 
@@ -229,8 +260,13 @@ export function emulatedWithApi(config: EmulatedConfig, handler: (ctx: Context) 
         throw ApiError.forbidden()
       }
     }
+    // As lib/api/with-api.ts does in canonical mode (the mode of every native clone): an authenticated, organization-bound route runs in
+    // the caller's tenant transaction unless it opts out (rlsOrgContext: false); requireOrg defaults to requiring authentication.
+    const requireAuth = config.auth?.required !== false && !config.auth?.cron
+    const requireOrg = config.requireOrg ?? requireAuth
+    const tenantTransaction = config.rlsOrgContext === true || (config.rlsOrgContext !== false && requireAuth && requireOrg)
     const handle = () => {
-      if (config.rlsOrgContext && ctx.organizationId && !scopes.getStore()) {
+      if (tenantTransaction && ctx.organizationId && !scopes.getStore()) {
         return harness.tenant(RUNTIME_ROLE, ctx.organizationId, ctx.userId ?? null, () => handler({ ...ctx, role: held ?? undefined }))
       }
       return handler({ ...ctx, role: held ?? undefined })

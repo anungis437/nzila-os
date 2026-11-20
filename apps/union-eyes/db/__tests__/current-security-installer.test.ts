@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { assertFinalPublicSchemaPrivileges, assertNoPartialCurrentSecurityFunctions, executeCurrentCompanionPrograms, executeCurrentFrameworkProgram, executeRetainedPublicSchemaProgram, joinCurrentSecurityPrograms, planCanonicalOwnership, planCanonicalRoleConvergence, planCurrentAuthColumnConvergence, planCurrentFrameworkProgram, planCurrentIdentityCreation, planCurrentRlsFlagConvergence, planRetainedPublicSchemaExecution, planVerifiedFrameworkExecuteRestore, type CurrentAuthColumn, type CurrentPublicSchemaExecution } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
+import { assertEveryGrantAdmitted, assertFinalPublicSchemaPrivileges, assertNoPartialCurrentSecurityFunctions, declaredApplicationPolicies, planDeclaredAdmissionPolicies, executeCurrentCompanionPrograms, executeCurrentFrameworkProgram, executeRetainedPublicSchemaProgram, joinCurrentSecurityPrograms, planCanonicalOwnership, planCanonicalRoleConvergence, planCurrentAuthColumnConvergence, planCurrentFrameworkProgram, planCurrentIdentityCreation, planCurrentRlsFlagConvergence, planRetainedPublicSchemaExecution, planVerifiedFrameworkExecuteRestore, type CurrentAuthColumn, type CurrentPublicSchemaExecution } from '../../../../tooling/scripts/lib/union-eyes-current-security-installer'
 import { frameworkPolicyPreimageQuery, planExistingFrameworkPolicies, planLegacyActivationConstraintTransition, planLegacyPhysicalFunctionAdoption, type LegacyActivationConstraint } from '../../../../tooling/scripts/lib/union-eyes-current-security-preimage'
 import { projectCurrentCompilerSecurity } from '../../../../tooling/scripts/lib/union-eyes-current-security-contract'
 import { currentSecurityPrograms } from '../../../../tooling/scripts/lib/union-eyes-current-security-programs'
@@ -587,6 +587,38 @@ describe('all current-source RLS metadata converges without replaying legacy res
       expect(sql).not.toMatch(/POLICY|GRANT|DISABLE|NO FORCE|\b(?:INSERT|UPDATE|DELETE)\b/)
     }
     expect((await planCurrentRlsFlagConvergence(current, rows(current))).statements).toEqual([])
+  })
+
+  it('installs, for an unadmitted granted command only, the exact policies the source compiler declares for it', async () => {
+    const current = plan()
+    const declared = await declaredApplicationPolicies(compileSecurity(current).statements)
+    const sourceStatements = new Set<string>()
+    for (const source of compileSecurity(current).statements) {
+      const parsed = await parseSql(source)
+      if (!parsed.ok) throw new Error(parsed.message)
+      for (const sql of parsed.texts) sourceStatements.add(sql)
+    }
+    const gaps = [{ role: 'union_eyes_runtime', table: 'feature_flags', cmd: 'r' }, { role: 'union_eyes_system', table: 'role_definitions', cmd: 'r' }]
+    const repair = planDeclaredAdmissionPolicies(declared, gaps, [])
+    expect(repair.installed).toEqual(['feature_flags.ue_v2_select', 'role_definitions.ue_v2_system_select'])
+    for (const sql of repair.statements) {
+      expect(sourceStatements.has(sql)).toBe(true)
+      expect(sql).toMatch(/^CREATE POLICY "ue_v2_(system_)?select" ON public\.".+" FOR SELECT TO union_eyes_(runtime|system) USING/)
+    }
+    // A runtime policy keeps the session binding the source compiles into it; nothing else is installed.
+    expect(repair.statements[0]).toContain('user_management.auth_business_org_authorized')
+    expect(planDeclaredAdmissionPolicies(declared, [], []).statements).toEqual([])
+  })
+
+  it('refuses a granted command the source declares no policy for, and a declared name already taken by a non-admitting policy', async () => {
+    const declared = await declaredApplicationPolicies(compileSecurity(plan()).statements)
+    expect(() => planDeclaredAdmissionPolicies(declared, [{ role: 'union_eyes_runtime', table: 'no_such_relation', cmd: 'r' }], []))
+      .toThrow('Granted relation has no declared admitting policy: union_eyes_runtime no_such_relation r')
+    expect(() => planDeclaredAdmissionPolicies(declared, [{ role: 'union_eyes_runtime', table: 'feature_flags', cmd: 'r' }], [{ table: 'feature_flags', name: 'ue_v2_select' }]))
+      .toThrow('Declared policy name is already taken')
+    expect(() => assertEveryGrantAdmitted([{ role: 'union_eyes_system', table: 'wage_benchmarks', cmd: 'a' }]))
+      .toThrow('Granted relations without an admitting policy remain: union_eyes_system:wage_benchmarks:a')
+    expect(() => assertEveryGrantAdmitted([])).not.toThrow()
   })
 
   it('repairs a missing FORCE flag without rewriting existing ENABLE metadata', async () => {

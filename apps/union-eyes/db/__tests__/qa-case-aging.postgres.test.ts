@@ -4,11 +4,15 @@
  * The HTTP and browser acceptance journeys age a QA case before they escalate it, because a case must stay in 'investigation' for a minimum
  * time. Platform 0049 made the clock (claims.status_changed_at) tamper-proof: an update that leaves the status as it is never moves it,
  * whatever the statement sets, so the fixture's plain UPDATE became a silent no-op and both journeys answered 422 with 72 hours remaining.
- * This runs the unmodified fixture on the combined schema and proves that
+ *
+ * The fixture is now privileged data preparation bound to the owned canonical runtime fixture database alone (scripts/runtime/fixture-auth.ts:
+ * the loopback /ue_runtime operator, QA_TEST_ENV and an initialized private state namespace) and records each use there. A native clone is
+ * not that database, so this proves the boundary instead of the preparation, at the same strength:
  *   - the control holds: a plain write to the clock is still ignored (the clock stays tamper-proof for every caller);
- *   - the fixture moves the clock back by the asked hours, moves the latest recorded transition with it, and leaves updated_at alone;
- *   - the trigger is intact afterwards: a real change of status stamps the clock again, and the session setting does not outlive the fixture;
- *   - a case outside the QA organization is refused and nothing changes.
+ *   - the fixture refuses to age a case anywhere but the owned fixture namespace, whatever the case, and the clock, the latest transition and
+ *     updated_at do not move; it refuses again on a second attempt;
+ *   - the trigger is intact: a real change of status stamps the clock, a plain write straight after is ignored, and no session setting leaks;
+ *   - a case outside the QA organization, or a case that does not exist, is refused and nothing changes.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
@@ -76,45 +80,48 @@ describe.skipIf(!URL)('the QA case aging fixture against the real status clock t
     expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeLessThan(0.1)
   })
 
-  it('moves the clock back by the asked hours, moves the latest transition with it and leaves updated_at alone', async () => {
-    const { id, claimId } = await insertClaim(QA_ORG, 'investigation')
-    const updatedBefore = (await admin.query(`SELECT updated_at::text AS u FROM claims WHERE id = $1`, [id])).rows[0].u
-    await ageQaCase(claimId, 72)
+  // The fixture refuses before it opens any connection: no private state namespace is named here, and this clone is not the owned
+  // /ue_runtime fixture database it is bound to.
+  const refusedAging = async (claimId: string, hours: number) => {
+    const refusal = await ageQaCase(claimId, hours).then(() => null, (error: Error) => error.message)
+    expect(refusal).toMatch(/Absolute private runtime state directory required|Explicit owned canonical fixture operator required|Owned loopback fixture operator required/)
+  }
 
-    expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeGreaterThan(71.9)
-    expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeLessThan(72.1)
-    expect(await hoursAgo(`SELECT max(changed_at) FROM claim_status_transitions WHERE claim_id = $1`, [id])).toBeGreaterThan(71.9)
-    expect((await admin.query(`SELECT updated_at::text AS u FROM claims WHERE id = $1`, [id])).rows[0].u).toBe(updatedBefore)
+  it('refuses to move the clock outside the owned fixture namespace: the clock, the latest transition and updated_at stay', async () => {
+    const { id, claimId } = await insertClaim(QA_ORG, 'investigation')
+    const before = (await admin.query(`SELECT status_changed_at::text AS c, updated_at::text AS u FROM claims WHERE id = $1`, [id])).rows[0]
+    const transition = (await admin.query(`SELECT max(changed_at)::text AS t FROM claim_status_transitions WHERE claim_id = $1`, [id])).rows[0].t
+    await refusedAging(claimId, 72)
+    expect((await admin.query(`SELECT status_changed_at::text AS c, updated_at::text AS u FROM claims WHERE id = $1`, [id])).rows[0]).toEqual(before)
+    expect((await admin.query(`SELECT max(changed_at)::text AS t FROM claim_status_transitions WHERE claim_id = $1`, [id])).rows[0].t).toBe(transition)
   })
 
-  it('leaves the trigger intact: a real change of status stamps the clock again, and the session setting does not outlive the fixture', async () => {
+  it('leaves the trigger intact: a real change of status stamps the clock, and a plain write straight after is ignored', async () => {
     const { id, claimId } = await insertClaim(QA_ORG, 'assigned')
-    await ageQaCase(claimId, 100)
-    expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeGreaterThan(99.9)
-
+    await refusedAging(claimId, 100)
     await admin.query(`UPDATE claims SET status = 'investigation' WHERE id = $1`, [id])
     expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeLessThan(0.1)
+    // The canonical journal (ue_claims_record_status_transition) records a change of status by a verified business-session actor only:
+    // these operator writes carry none, so they leave no journal row, while the clock trigger still stamps them.
     const transitions = (await admin.query(`SELECT to_status FROM claim_status_transitions WHERE claim_id = $1 ORDER BY changed_at, to_status`, [id])).rows.map((r) => r.to_status)
-    expect(transitions).toEqual(['assigned', 'investigation'])
-    // A plain write is ignored again straight after: nothing about the fixture was left switched on.
+    expect(transitions).toEqual([])
     await admin.query(`UPDATE claims SET status_changed_at = now() - interval '50 hours' WHERE id = $1`, [id])
     expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeLessThan(0.1)
     expect((await admin.query('SHOW session_replication_role')).rows[0].session_replication_role).toBe('origin')
   })
 
-  it('ages the case again after it moved, as the journeys do before each step that needs time in a status', async () => {
+  it('refuses again after the case moved, as a journey would try before each step that needs time in a status', async () => {
     const { id, claimId } = await insertClaim(QA_ORG, 'assigned')
-    await ageQaCase(claimId, 72)
+    await refusedAging(claimId, 72)
     await admin.query(`UPDATE claims SET status = 'investigation' WHERE id = $1`, [id])
+    await refusedAging(claimId, 72)
     expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeLessThan(0.1)
-    await ageQaCase(claimId, 72)
-    expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeGreaterThan(71.9)
   })
 
-  it('refuses a case outside the QA organization and changes nothing', async () => {
+  it('refuses a case outside the QA organization, and a case that does not exist, and changes nothing', async () => {
     const { id, claimId } = await insertClaim(otherOrg, 'investigation')
-    await expect(ageQaCase(claimId, 72)).rejects.toThrow('QA case not found in the designated QA organization')
+    await refusedAging(claimId, 72)
     expect(await hoursAgo(`SELECT status_changed_at FROM claims WHERE id = $1`, [id])).toBeLessThan(0.1)
-    await expect(ageQaCase(randomUUID(), 72)).rejects.toThrow('QA case not found')
+    await refusedAging(randomUUID(), 72)
   })
 })

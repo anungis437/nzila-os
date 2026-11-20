@@ -28,7 +28,6 @@ const state = vi.hoisted(() => ({
   caller: { userId: '', organizationId: '' },
   // `${userId}|${grievanceId}` -> the case-relationship decision the authority kernel would give; absent means no relationship.
   caseAccess: new Map<string, Record<string, unknown>>(),
-  kernelAllows: true,
   assigned: [] as Array<{ tx: unknown; params: Record<string, unknown> }>,
   evidence: [] as Array<Record<string, unknown>>,
   logged: [] as Array<Record<string, unknown>>,
@@ -62,16 +61,13 @@ vi.mock('@/lib/services/case-access-service', () => {
     },
   }
 })
-vi.mock('@/lib/cases/case-authorization', async (importOriginal) => {
-  const { ApiError } = await import('@/lib/api/errors')
-  return {
-    ...(await importOriginal<typeof import('@/lib/cases/case-authorization')>()),
-    requireKernelCaseAction: async () => {
-      if (!state.kernelAllows) throw ApiError.forbidden()
-    },
-    hasCaseFilingCapacity: async () => true,
-  }
-})
+// The case-action decision is the real authority kernel (requireKernelCaseAction is not replaced): a caller holds case authority only through
+// a real relationship issued by the real ceremony (grantCaseAssignment below), which is also what the database's own case guard
+// (ue_case_domain_authorized) reads. Only the bulk-filing capacity of the import stays a boundary of its own.
+vi.mock('@/lib/cases/case-authorization', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/cases/case-authorization')>()),
+  hasCaseFilingCapacity: async () => true,
+}))
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: async (entry: Record<string, unknown>) => void state.logged.push(entry),
   auditDataAccess: async (entry: Record<string, unknown>) => void state.logged.push(entry),
@@ -151,6 +147,57 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
   const eventsOf = async (id: string) => (await admin.query(`SELECT event_type FROM grievance_events WHERE grievance_id = $1 ORDER BY created_at, id`, [id])).rows.map((row) => row.event_type as string)
   const allowCase = (userId: string, grievanceId: string, access: Row) => state.caseAccess.set(`${userId}|${grievanceId}`, access)
 
+  // The real case-authority ceremony (scripts/bootstrap-v2/runtime-guarded-case-fixtures.ts): three executives adopt the supervisory and
+  // case-assignment issuance rules in their own sessions (draft, request, two independent votes, a separate activation); for each case an
+  // executive issues a supervisory mandate over that case to an assigner, an executive approves it, the assigner accepts it and assigns the
+  // case. The assignee then holds an explicit, issued 'assignee' relationship: what both the kernel and the database's case guard read.
+  const EXECUTIVES = [`president-${tag}`, `vice-president-${tag}`, `treasurer-${tag}`] as const
+  const ASSIGNER = `assigner-${tag}`
+  const actor = (userId: string) => ({ userId, organizationId: ORG_A })
+  const party = () => ({ organizationId: ORG_A, executives: EXECUTIVES.map(actor) }) as never
+  const within = <T,>(who: { userId: string; organizationId: string }, operation: (tx: never, exec: never) => Promise<T>) =>
+    harness.tenant(RUNTIME_ROLE, who.organizationId, who.userId, async (tx) => {
+      const { drizzleExecutor } = await import('@/lib/authority/store/route-adapter')
+      return operation(tx as never, drizzleExecutor(tx as never) as never)
+    })
+  let rulesAdopted: Promise<void> | null = null
+  const adoptRules = () => (rulesAdopted ??= (async () => {
+    const { adoptGuardedIssuanceRule } = await import('../../scripts/bootstrap-v2/runtime-guarded-case-fixtures')
+    const { DEFAULT_ISSUANCE_TEMPLATES } = await import('@/lib/authority/issuance')
+    for (const [domain, operation] of [['supervisory', 'issue'], ['case_assignment', 'issue']] as const) {
+      const template = DEFAULT_ISSUANCE_TEMPLATES.find((entry) => entry.domain === domain && entry.operation === operation)
+      if (!template) throw new Error(`issuance template ${domain}/${operation} required`)
+      const { rationale: _rationale, ...source } = template
+      await adoptGuardedIssuanceRule(within as never, party(), source)
+    }
+  })())
+  /** A supervisory mandate over one case (powers read and assign), issued, approved and accepted by its holder. */
+  const grantSupervision = async (caseId: string, holderUserId: string) => {
+    await adoptRules()
+    const { activeMembershipSource } = await import('@/lib/authority/store/active-membership-source')
+    const { requestIssuanceApproval, issueMandate, acceptInstrument } = await import('@/lib/authority/store/lifecycle')
+    const { recordApprovalDecision } = await import('@/lib/authority/store/mutations')
+    const deps = { memberships: activeMembershipSource }
+    const mandateId = randomUUID()
+    const mandate = {
+      id: mandateId, instrumentId: mandateId, organizationId: ORG_A, issuerUserId: EXECUTIVES[0], holderUserId,
+      kind: 'supervisory' as const, powers: ['read', 'assign'], scope: { resourceIds: [caseId] },
+      sourceInstrument: `Native grievance route proof ${mandateId}`, effectiveAt: new Date(Date.now() - 60_000), expiresAt: new Date(Date.now() + 86_400_000),
+    }
+    const approval = await within(actor(EXECUTIVES[0]), (_tx, exec) => requestIssuanceApproval(exec, deps as never, { ...mandate, namedApproverIds: [EXECUTIVES[1]] }))
+    await within(actor(EXECUTIVES[1]), (_tx, exec) => recordApprovalDecision(exec, deps as never, { organizationId: ORG_A, approvalRequestId: approval, approverUserId: EXECUTIVES[1], decision: 'approved' }))
+    await within(actor(EXECUTIVES[0]), (_tx, exec) => issueMandate(exec, deps as never, { ...mandate, approvalRequestId: approval }))
+    await within(actor(holderUserId), (_tx, exec) => acceptInstrument(exec, { organizationId: ORG_A, instrumentType: 'mandate', instrumentId: mandateId, holderUserId }))
+  }
+  const grantCaseAssignment = async (caseId: string, assigneeUserId: string) => {
+    await grantSupervision(caseId, ASSIGNER)
+    const { activeMembershipSource } = await import('@/lib/authority/store/active-membership-source')
+    const { assignCase } = await import('@/lib/authority/store/lifecycle')
+    const deps = { memberships: activeMembershipSource }
+    await within(actor(ASSIGNER), (_tx, exec) => assignCase(exec, deps as never, { organizationId: ORG_A, issuerUserId: ASSIGNER, caseId, assigneeUserId, effectiveAt: new Date(Date.now() - 60_000) }))
+  }
+
+
   beforeAll(async () => {
     admin = await harness.start(URL!)
     await newOrganization(ORG_A, `Grievances A ${tag}`)
@@ -160,6 +207,8 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
     harness.setRole(officerA, ORG_A, 'officer')
     harness.setRole(strangerA, ORG_A, 'member')
     harness.setRole(officerB, ORG_B, 'officer')
+    for (const [userId, role] of [[EXECUTIVES[0], 'president'], [EXECUTIVES[1], 'vice_president'], [EXECUTIVES[2], 'secretary_treasurer'], [ASSIGNER, 'officer']] as const)
+      harness.setRole(userId, ORG_A, role)
   }, 60_000)
 
   afterAll(async () => {
@@ -236,14 +285,9 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
 
     it('withholds the grievance from an organization member who has no relationship to it', async () => {
       const grievance = await newGrievance(ORG_A, memberA)
-      // The route no longer decides this itself: with no case access, it asks the authority kernel for case:read, and the kernel
-      // (mocked at its boundary; covered by its own native tests) refuses a member with no relationship to the matter.
-      state.kernelAllows = false
-      try {
-        expect(await rejection(run(detail!.GET, asStrangerA, { params: { id: grievance } }))).toMatchObject({ code: 'FORBIDDEN' })
-      } finally {
-        state.kernelAllows = true
-      }
+      // The route no longer decides this itself: with no case access, it asks the real authority kernel for case:read, and the kernel
+      // refuses a member who holds no relationship to the matter.
+      expect(await rejection(run(detail!.GET, asStrangerA, { params: { id: grievance } }))).toMatchObject({ code: 'FORBIDDEN' })
     })
   })
 
@@ -251,6 +295,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
     it('stores the new status in the caller\'s organization with its event, audited, and stamps closure', async () => {
       const grievance = await newGrievance(ORG_A, officerA, { status: 'filed', unionRepId: undefined })
       allowCase(officerA, grievance, { isPrimaryOwner: true, canViewCase: true })
+      await grantCaseAssignment(grievance, officerA)
       const before = harness.audits.length
       const response = await run(status!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'acknowledged', notes: 'Started' }) })
       expect(response.status).toBe(200)
@@ -269,6 +314,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       expect((await grievanceRow(grievance))?.status).toBe('filed')
 
       allowCase(officerA, grievance, { isPrimaryOwner: true, canViewCase: true })
+      await grantCaseAssignment(grievance, officerA)
       harness.failNextAudit()
       const error = await rejection(run(status!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'acknowledged' }) }))
       expect((error as Error).message).toBe('audit sink unavailable')
@@ -278,11 +324,9 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
 
     it('refuses a caller without authority over the matter, whatever their role', async () => {
       const grievance = await newGrievance(ORG_A, officerA, { status: 'filed' })
-      state.kernelAllows = false
       // The kernel's refusal is thrown as ApiError FORBIDDEN (the production withApi answers it 403); the emulated wrapper surfaces it as is.
       const refused = await rejection(run(status!.PATCH, asStewardA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'acknowledged' }) }))
       expect(refused).toMatchObject({ code: 'FORBIDDEN' })
-      state.kernelAllows = true
       expect((await grievanceRow(grievance))?.status).toBe('filed')
     })
   })
@@ -290,7 +334,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
   describe('POST /api/grievances/[id]/convert and /priority-override', () => {
     it('converts an intake into an official case of the same organization, linked back, with both events and both audits', async () => {
       const intake = await newGrievance(ORG_A, memberA, { status: 'draft', title: `Intake ${tag}` })
-      state.kernelAllows = true
+      await grantCaseAssignment(intake, officerA)
       const before = harness.audits.length
       const response = await run(convert!.POST, asOfficerA, { params: { id: intake }, request: request(`/api/grievances/${intake}/convert`, 'POST', { priority: 'high', notes: 'Convert now' }) })
       expect(response.status).toBe(200)
@@ -298,24 +342,24 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       expect(official).toMatchObject({ organizationId: ORG_A, createdBy: officerA, priority: 'high', status: 'filed' })
       expect(await grievanceRow(intake)).toMatchObject({ status: 'converted' })
       expect((await grievanceRow(official.id as string))?.related_grievance_ids).toEqual([intake])
-      expect(await eventsOf(intake)).toEqual(['converted_to_case'])
+      // The intake's change of status carries the transition history the canonical database requires of every grievance status change.
+      expect((await eventsOf(intake)).sort()).toEqual(['converted_to_case', 'status_changed'])
       expect(await eventsOf(official.id as string)).toEqual(['created'])
-      expect(harness.audits.slice(before).map((entry) => entry.action).sort()).toEqual(['grievance.convert_intake', 'grievance.create_official_case'])
+      expect(harness.audits.slice(before).map((entry) => entry.action).sort()).toEqual(['grievance.convert_intake', 'grievance.create_official_case', 'grievance.status_change'])
     })
 
     it('does not convert another organization\'s intake, or one the kernel refuses (and records the refusal)', async () => {
       const intake = await newGrievance(ORG_A, memberA, { status: 'draft' })
       expect((await run(convert!.POST, asOfficerB, { params: { id: intake }, request: request(`/api/grievances/${intake}/convert`, 'POST', {}) })).status).toBe(404)
-      state.kernelAllows = false
       state.logged.length = 0
       expect((await run(convert!.POST, asOfficerA, { params: { id: intake }, request: request(`/api/grievances/${intake}/convert`, 'POST', {}) })).status).toBe(403)
-      state.kernelAllows = true
       expect(state.logged).toEqual([expect.objectContaining({ eventType: 'AUTHORITY_VIOLATION', action: 'convert_intake', organizationId: ORG_A })])
       expect((await grievanceRow(intake))?.status).toBe('draft')
     })
 
     it('overrides the priority in the caller\'s organization with its event and audit, and not on another organization\'s grievance', async () => {
       const grievance = await newGrievance(ORG_A, memberA, { priority: 'medium' })
+      await grantCaseAssignment(grievance, officerA)
       const before = harness.audits.length
       const body = { newPriority: 'urgent', reason: 'The employer has set a hearing for Friday' }
       expect((await run(priority!.POST, asOfficerB, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/priority-override`, 'POST', body) })).status).toBe(404)
@@ -431,6 +475,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       const foreign = await matchingSteward(ORG_B, 'general')
       const unspecified = await matchingSteward(ORG_A, null)
       const inactive = await matchingSteward(ORG_A, 'general', false)
+      await grantSupervision(grievance, officerA)
       const response = await run(recommend!.POST, asOfficerA, { params: { id: grievance } })
       expect(response.status).toBe(200)
       const candidates = (await json(response)).data as unknown as Array<{ stewardId: string }>
@@ -441,8 +486,11 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       const known = (await admin.query(`SELECT id::text FROM stewards WHERE org_id = $1`, [ORG_A])).rows.map((row) => row.id)
       expect(known).toContain(mine)
       expect(candidates.every((candidate) => known.includes(candidate.stewardId))).toBe(true)
-      // The wrapper turns a refusal the handler throws into the 404; here it is the thrown refusal.
-      expect(await rejection(run(recommend!.POST, asOfficerB, { params: { id: grievance } }))).toMatchObject({ code: 'NOT_FOUND', message: 'Grievance not found' })
+      // Another organization's officer holds no assignment authority over this case: the real kernel refuses before the case is read, and
+      // the answer (403) is the one any caller without authority gets, so it does not say the case exists.
+      const foreignCaller = await run(recommend!.POST, asOfficerB, { params: { id: grievance } })
+      expect(foreignCaller.status).toBe(403)
+      expect(JSON.stringify(await foreignCaller.json())).not.toContain(mine)
     })
 
     it('assigns in the caller\'s organization, commits before the system role converges the reminders, and bumps the caseload in one statement', async () => {
@@ -450,6 +498,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       const stewardId = await steward(ORG_A, 'Quebec')
       const stewardUserId = (await admin.query('SELECT user_id::text FROM stewards WHERE id=$1', [stewardId])).rows[0].user_id
       expect(stewardUserId).not.toBe(stewardId)
+      await grantSupervision(grievance, officerA)
       const before = harness.audits.length
       const response = await run(assign!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/assign`, 'PATCH', { stewardId }) })
       expect(response.status).toBe(200)
@@ -472,6 +521,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       const assignRequest = () => request(`/api/grievances/${grievance}/assign`, 'PATCH', { stewardId })
       expect((await run(assign!.PATCH, asOfficerB, { params: { id: grievance }, request: assignRequest() })).status).toBe(404)
       expect((await rejection(run(assign!.PATCH, asStewardA, { params: { id: grievance }, request: assignRequest() }))) as { code?: string }).toMatchObject({ code: 'FORBIDDEN' })
+      await grantSupervision(grievance, officerA)
       harness.failNextAudit()
       expect(((await rejection(run(assign!.PATCH, asOfficerA, { params: { id: grievance }, request: assignRequest() }))) as Error).message).toBe('audit sink unavailable')
       expect((await admin.query(`SELECT count(*)::int AS n FROM steward_assignments WHERE grievance_id = $1`, [grievance])).rows[0].n).toBe(0)

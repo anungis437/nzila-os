@@ -20,7 +20,7 @@ import { RUNTIME_ROLE, SYSTEM_ROLE, type AuditRecord } from './native-route-harn
 import assert from 'node:assert/strict'
 import { nativeActionUrl, installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
-import { seedDeclaredCanonicalActor } from './native-declared-actor'
+import { requireLiveCanonicalMembership, seedDeclaredCanonicalActor } from './native-declared-actor'
 
 export { RUNTIME_ROLE, SYSTEM_ROLE }
 export type { AuditRecord }
@@ -131,6 +131,8 @@ export const savepointHarness = {
    */
   async asCanonicalRequest<T>(userId: string, organizationId: string, work: () => Promise<T>): Promise<T> {
     await declarations
+    if (!operatorPool) throw new Error('savepoint harness not started')
+    await requireLiveCanonicalMembership(operatorPool, userId, organizationId)
     const [{ withCanonicalRequestScope }, { canonicalMembershipRole }] = await Promise.all([
       import('@/lib/auth/canonical-request-scope'), import('@/lib/auth/canonical-membership-role')])
     return withNativeCanonicalActor(userId, organizationId, (binding) => withCanonicalRequestScope(binding, {

@@ -1607,15 +1607,19 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     id: 'UE-FIN-AFFILIATE-REMITTANCES',
     title: 'CLC / National / federation affiliate remittances',
     state: 'NOT_IMPLEMENTED',
-    ownedBy: ['app/api/admin/clc/remittances/route.ts'],
+    ownedBy: ['app/api/admin/clc/remittances/route.ts', 'lib/organizations/per-capita-standing.ts', 'services/clc/compliance-reports.ts',
+      'app/api/admin/clc/analytics/forecast/route.ts', 'app/api/admin/clc/analytics/annual-report/route.ts',
+      'app/api/admin/clc/analytics/multi-year-trends/route.ts', 'app/api/admin/clc/analytics/trends/route.ts'],
     evidence: [
       'app/api/admin/clc/remittances/** — previously bound to organizationMembers (membership rows served/mutated as remittances; export/submit stubs answered "accepted"); all now answer HTTP 501.',
       'app/api/__tests__/financial-officer-containment.test.ts — asserts no organizationMembers/crudRoutes import and no "accepted" stub.',
-      'app/[locale]/dashboard/federation/remittances/page.tsx — reflects four counts from the remittance records that reached the organization (lib/organizations/per-capita-standing.ts, read in its own context), says dues are handled in an external system, and offers no filter, ledger or export; with no records it says so, and a failed read is an error, not zeros.',
+      'lib/reality/contained-storage.ts — the current canonical source contains per_capita_remittances (CONTAINED_NO_AUTHORITY: no runtime or system grant, lib/operations/catalog-v2-decisions.json). The remittance reflection (lib/organizations/per-capita-standing.ts, read by the federation and CLC dashboards) and the CLC remittance analytics (forecast, annual report, multi-year trends) answer 501 NOT_IMPLEMENTED with the reason before any statement; the dashboards show it as a failed read, never as zeros or a compliant position.',
+      'db/__tests__/affiliate-pages.postgres.test.ts and admin-routes.postgres.test.ts — native PostgreSQL: the 501, no row written, and the database still refusing the table to both application roles.',
     ],
     targetWave: 8,
     notes:
-      'Owner decision (closed): affiliate per-capita remittances are handled in an external system; Union Eyes reflects the records that reach it, read-only, and does not collect, calculate, submit, reconcile or export them. No remittance ledger is to be built here. ' +
+      'Owner decision (closed): affiliate per-capita remittances are handled in an external system; Union Eyes does not collect, calculate, submit, reconcile or export them. No remittance ledger is to be built here. ' +
+      'The read-only reflection of records that reach Union Eyes is also unavailable until the current source grants an application role a reviewed read of per_capita_remittances. ' +
       'Affiliate (per-capita) remittances are distinct from employer payroll-deduction remittances.',
   },
   {

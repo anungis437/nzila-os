@@ -71,8 +71,7 @@ describe.skipIf(!URL)('commercial acceptance denial on real PostgreSQL as the sy
         [contractId, org, billing, `ADN-${contractId.slice(0, 8)}`],
       )
     }
-    // What the manifest now declares for the system role on this table.
-    await admin.query('GRANT SELECT ON commercial_contracts TO union_eyes_system')
+    // Canonical V2 declares no system privilege on commercial_contracts (catalog-v2-decisions: no commercial mutation); nothing is granted here.
   }, 120_000)
 
   afterAll(async () => {
@@ -83,8 +82,10 @@ describe.skipIf(!URL)('commercial acceptance denial on real PostgreSQL as the sy
     await admin?.end().catch(() => undefined)
   })
 
-  it('keeps the claim on the contract as a claim, leaves status and signer untouched, and writes an audit entry with no name', async () => {
+  it('records the refusal with no name and keeps no claim on the contract: canonical V2 gives the system role no commercial authority', async () => {
     const { recordAcceptanceDenial } = await loadModule()
+    const can = (await admin.query(`SELECT has_any_column_privilege('union_eyes_system', 'public.commercial_contracts', 'SELECT') AS r, has_any_column_privilege('union_eyes_system', 'public.commercial_contracts', 'UPDATE') AS w`)).rows[0]
+    expect(can).toEqual({ r: false, w: false })
 
     const recorded = await recordAcceptanceDenial(
       { organizationId: orgA, applicationId: appId, fromState: 'contract_sent', targetState: 'contract_signed', blocked: blocked(), contractId: contractA, claim },
@@ -96,26 +97,21 @@ describe.skipIf(!URL)('commercial acceptance denial on real PostgreSQL as the sy
     const row = await contract(contractA)
     expect(row.status).toBe('pending_approval')
     expect(row.signed_by).toBeNull()
-    expect(row.metadata.counterpartAcceptance).toBeUndefined()
-    expect(row.metadata.source).toBe('pilot-commercial-transition')
-    expect(row.metadata.acceptanceClaims).toEqual([
-      expect.objectContaining({ standing: 'unverified_claim', channelClaimed: 'countersigned_document', evidenceReference: 'doc-123', claimedByRole: 'President', recordedBy: 'platform-admin-1' }),
-    ])
-    expect(JSON.stringify(row.metadata.acceptanceClaims)).not.toContain('Pat Counterpart')
+    expect(row.metadata).toEqual({ source: 'pilot-commercial-transition' })
     const audits = await auditRows('pilot.commercial_transition.acceptance_refused', appId)
     expect(audits).toHaveLength(1)
-    expect(audits[0].details).toMatchObject({ blockedOperation: 'pilot.commercial.contract_signed', evidence: 'operator_recorded_unverified', claimRecorded: true, policyApprovedBy: null })
+    expect(audits[0].details).toMatchObject({ blockedOperation: 'pilot.commercial.contract_signed', evidence: 'operator_recorded_unverified', claimRecorded: false, channelClaimed: 'countersigned_document', contractId: contractA, policyApprovedBy: null })
     expect(JSON.stringify(audits[0].details)).not.toContain('Pat Counterpart')
   })
 
-  it('does not duplicate the same claim when the request is repeated, but records every refusal', async () => {
+  it('records every refusal when the request is repeated, and still keeps no claim', async () => {
     const { recordAcceptanceDenial } = await loadModule()
     await recordAcceptanceDenial(
       { organizationId: orgA, applicationId: appId, fromState: 'contract_sent', targetState: 'contract_signed', blocked: blocked(), contractId: contractA, claim },
       'platform-admin-1',
     )
 
-    expect((await contract(contractA)).metadata.acceptanceClaims).toHaveLength(1)
+    expect((await contract(contractA)).metadata.acceptanceClaims).toBeUndefined()
     expect(await auditRows('pilot.commercial_transition.acceptance_refused', appId)).toHaveLength(2)
   })
 
@@ -154,7 +150,7 @@ describe.skipIf(!URL)('commercial acceptance denial on real PostgreSQL as the sy
       )
 
       expect(recorded).toBe(false)
-      expect(JSON.stringify((await contract(contractA)).metadata.acceptanceClaims)).not.toContain('doc-456')
+      expect((await contract(contractA)).metadata.acceptanceClaims).toBeUndefined()
     } finally {
       await admin.query('DROP TRIGGER IF EXISTS ue_test_refuse_audit ON public.audit_logs')
     }

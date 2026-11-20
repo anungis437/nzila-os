@@ -4,6 +4,7 @@
  * High-level service for managing e-signatures with full audit trail
  */
 
+import { requireContainedStorageAuthority } from "@/lib/reality/contained-storage";
 import { db } from "@/db";
 import {
   signatureDocuments,
@@ -60,6 +61,11 @@ const documentsOfOrganization = (tx: RLSTx, organizationId: string) =>
 
 /**
  * Signature Document Service
+ *
+ * Every operation that records or reads the signature audit trail (create, sync, sign, expire, void, remind, the trail and its report)
+ * is refused 501 before any statement or provider call: the current source contains signature_audit_trail (no runtime or system grant),
+ * and a signature event without its trail is not offered (lib/reality/contained-storage.ts). Reads of the document and its signers that
+ * do not need the trail remain.
  */
 export class SignatureService {
   private static getContentType(fileName: string): string {
@@ -104,6 +110,7 @@ export class SignatureService {
     sequentialSigning?: boolean;
     metadata?: any;
   }): Promise<typeof signatureDocuments.$inferSelect> {
+    requireContainedStorageAuthority('signature_audit_trail');
     // A stored option that nothing can enforce is not accepted and then ignored.
     if (data.requireAuthentication) {
       throw new SignatureAuthorityError("CONFLICT", "A second-factor requirement cannot be honoured: this release has no second factor, so a request that states one is not created");
@@ -311,6 +318,7 @@ export class SignatureService {
    * apply twice.
    */
   static async syncDocumentStatus(documentId: string, organizationId: string): Promise<{ synced: boolean; reason?: string }> {
+    requireContainedStorageAuthority('signature_audit_trail');
     if (!organizationId) return { synced: false, reason: "missing_organization" };
     const document = await withRLSContext({ organizationId }, (tx) =>
       tx.query.signatureDocuments.findFirst({
@@ -488,6 +496,7 @@ export class SignatureService {
     /** The authenticated organization the signer is acting in: the signer and the document are looked up inside it and nowhere else. */
     organizationId: string;
   }) {
+    requireContainedStorageAuthority('signature_audit_trail');
     // What this release can evidence is a signature drawn by an authenticated platform user. A certificate-based ("digital") signature
     // asserts cryptographic evidence and a "wet" one a physical signature; neither exists here, so a record labelled with either would
     // claim evidence it does not hold. They are refused rather than stored under a stronger name.
@@ -658,6 +667,7 @@ export class SignatureService {
     failures: Array<{ documentId: string; reason: string }>;
     truncated: boolean;
   }> {
+    requireContainedStorageAuthority('signature_audit_trail');
     const now = options.now ?? new Date();
     const pageSize = Math.min(Math.max(options.pageSize ?? 100, 1), 500);
     const maxPages = Math.max(options.maxPages ?? 20, 1);
@@ -744,6 +754,7 @@ export class SignatureService {
     reason: string,
     organizationId: string,
   ) {
+    requireContainedStorageAuthority('signature_audit_trail');
     // The document is resolved under the caller's tenant before any provider
     // side effect. A sender's identity alone is not a tenant authorization.
     if (!organizationId) throw new SignatureAuthorityError("FORBIDDEN", "Organization context required");
@@ -828,6 +839,7 @@ export class SignatureService {
    * yet settled on a document that is still open: a reminder says "please sign", which is false for anyone else.
    */
   static async sendReminder(signerId: string, requestedBy: string, organizationId: string) {
+    requireContainedStorageAuthority('signature_audit_trail');
     if (!organizationId || !requestedBy) throw new SignatureAuthorityError("FORBIDDEN", "Organization context required");
     const found = await withRLSContext({ organizationId }, (tx) => this.findSignerInOrganization(tx, signerId, organizationId));
     if (!found) throw new SignatureAuthorityError("FORBIDDEN", "Signer not found");
@@ -939,6 +951,7 @@ export class AuditTrailService {
     geolocation?: any;
     metadata?: any;
   }, exec: RLSTx = db) {
+    requireContainedStorageAuthority('signature_audit_trail');
     // Each event is chained to the one before it, in one transaction with the lock that serializes the document's events.
     await exec.transaction(async (chainTx) => {
       const recordedAt = new Date();
@@ -952,6 +965,7 @@ export class AuditTrailService {
 
   /** Recomputes a document's chain. Rows from before chaining are counted as unchained, not verified. */
   static async verifyChain(documentId: string, exec: RLSTx = db): Promise<ChainVerification> {
+    requireContainedStorageAuthority('signature_audit_trail');
     return verifyChain(await loadChainRows(exec, documentId));
   }
 
@@ -961,6 +975,7 @@ export class AuditTrailService {
    * A trail whose chain does not verify is not sealed.
    */
   static async seal(documentId: string, organizationId: string, tx: RLSTx) {
+    requireContainedStorageAuthority('signature_audit_trail');
     const verification = await this.verifyChain(documentId, tx);
     if (!verification.ok || verification.head === null) return { sealed: false as const };
     await this.log({
@@ -981,6 +996,7 @@ export class AuditTrailService {
   }
 
   static async getDocumentAudit(documentId: string, organizationId: string) {
+    requireContainedStorageAuthority('signature_audit_trail');
     if (!organizationId) throw new Error("Organization context required");
     return withRLSContext({ organizationId }, (tx) =>
       tx.select().from(signatureAuditTrail)
@@ -993,6 +1009,7 @@ export class AuditTrailService {
   }
 
   static async getSignerAudit(signerId: string, organizationId: string) {
+    requireContainedStorageAuthority('signature_audit_trail');
     if (!organizationId) throw new Error("Organization context required");
     return withRLSContext({ organizationId }, (tx) =>
       tx.select().from(signatureAuditTrail)
@@ -1006,6 +1023,7 @@ export class AuditTrailService {
 
   /** Produce a tenant-bound audit report; verify the chain from the same RLS transaction. */
   static async generateAuditReport(documentId: string, organizationId: string) {
+    requireContainedStorageAuthority('signature_audit_trail');
     if (!organizationId) throw new Error("Organization context required");
     return withRLSContext({ organizationId }, async (tx) => {
       const document = await tx.query.signatureDocuments.findFirst({

@@ -138,8 +138,16 @@ export const POST = withApi(
           })
           .returning();
 
-        // Emit lifecycle events
+        // Emit lifecycle events. The intake's change of status carries the same transition history every grievance status change carries
+        // (the status_changed event and the grievance.status_change audit below): the canonical database refuses to commit a grievance
+        // status change without both (ue_check_grievance_transition_audit, GRIEVANCE_TRANSITION_HISTORY_AUDIT_REQUIRED).
         await tx.insert(grievanceEvents).values([
+          {
+            grievanceId: intakeId,
+            eventType: 'status_changed',
+            actorUserId: userId,
+            notes: `Status changed: ${currentStatus} → converted`,
+          },
           {
             grievanceId: intakeId,
             eventType: 'converted_to_case',
@@ -154,7 +162,15 @@ export const POST = withApi(
           },
         ]);
 
-        // Conversion, the new case and both audit records commit together.
+        // Conversion, the new case and the audit records commit together.
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'grievance.status_change',
+          resourceType: 'grievances',
+          resourceId: intakeId,
+          details: { previousState: { status: currentStatus }, newState: { status: 'converted' }, reason: notes ?? null, intakeAction: 'convert_intake' },
+        });
         await persistAtomicAudit(tx, {
           organizationId,
           userId,

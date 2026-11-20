@@ -419,14 +419,16 @@ async function schemaOwnerSql(schemas: Row[], trustedOwner: string) {
   ]
 }
 
-async function compilerTexts(source: string) {
+async function compilerTexts(source: string): Promise<{ sql: string; node: ParseNode }[]> {
   const parsed = await parseSql(source)
   if (!parsed.ok) throw new Error('Current security source SQL must parse')
   return parsed.texts.map((sql, index) => ({ sql, node: parsed.statements[index] }))
 }
 
 /** Apply only actual source ENABLE/FORCE metadata. Historical resource
- * predicates stay intact; full source policy compilation is not replayed. */
+ * predicates stay intact; full source policy compilation is not replayed
+ * (planDeclaredAdmissionPolicies installs the declared policies only where a
+ * granted command would otherwise have no admitting policy). */
 export async function planCurrentRlsFlagConvergence(plan: V2Plan, relations: readonly Row[], options: { identityWillBeCreated?: boolean; externalReadWillBeCreated?: boolean } = {}) {
   const source = compileSecurity(plan)
   if (source.blockers.length) throw new Error('Current source RLS flag authority is unresolved')
@@ -466,6 +468,63 @@ async function verifyCurrentRlsFlags(plan: V2Plan, execute: (sql: string) => Pro
   const current = await planCurrentRlsFlagConvergence(plan, await execute(CURRENT_SECURITY_QUERIES.relations))
   if (current.statements.length) throw new Error('Current source RLS flags remain missing; read-only verification refused')
   return current.inspectedRelations
+}
+
+/** Every (application role, public relation, command) the role holds a grant for under row security, with no permissive policy that
+ * admits it. Under RLS a grant without an admitting policy reads nothing and writes nothing: the declared authority is silently void. */
+export const UNADMITTED_GRANT_QUERY = `SELECT r.rolname AS role,c.relname AS table,v.cmd
+  FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+  CROSS JOIN (VALUES ('union_eyes_runtime'),('union_eyes_system')) AS r(rolname)
+  CROSS JOIN (VALUES ('r','SELECT'),('a','INSERT'),('w','UPDATE'),('d','DELETE')) AS v(cmd,privilege)
+  WHERE n.nspname='public' AND c.relkind IN ('r','p') AND c.relrowsecurity
+    AND CASE WHEN v.privilege='DELETE' THEN pg_catalog.has_table_privilege(r.rolname,c.oid,'DELETE')
+      ELSE pg_catalog.has_any_column_privilege(r.rolname,c.oid,v.privilege) END
+    AND NOT EXISTS (SELECT 1 FROM pg_catalog.pg_policy p WHERE p.polrelid=c.oid AND p.polpermissive AND p.polcmd IN (v.cmd,'*')
+      AND (0=ANY(p.polroles) OR (SELECT o.oid FROM pg_catalog.pg_roles o WHERE o.rolname=r.rolname)=ANY(p.polroles)))
+  ORDER BY 1,2,3`
+
+export interface DeclaredPolicy { table: string; name: string; role: string; cmd: string; sql: string }
+const POLICY_COMMAND: Record<string, string> = { select: 'r', insert: 'a', update: 'w', delete: 'd', all: '*' }
+
+/** The permissive public-schema policies the current source compiler declares for the application roles, with their exact SQL text. */
+export async function declaredApplicationPolicies(statements: readonly string[]): Promise<DeclaredPolicy[]> {
+  const declared: DeclaredPolicy[] = []
+  for (const source of statements) for (const entry of await compilerTexts(source)) {
+    const create = entry.node.CreatePolicyStmt
+    if (!create || create.table?.schemaname !== 'public' || create.permissive !== true) continue // the parser omits a false flag: RESTRICTIVE has none
+    const roles = (create.roles ?? []).map((role: ParseNode) => role.RoleSpec?.rolename)
+    if (roles.length !== 1 || !['union_eyes_runtime', 'union_eyes_system'].includes(roles[0])) continue
+    const cmd = POLICY_COMMAND[String(create.cmd_name)]
+    if (!cmd) throw new Error('Current source policy command is not admitted')
+    declared.push({ table: String(create.table.relname), name: String(create.policy_name), role: roles[0], cmd, sql: entry.sql })
+  }
+  return declared
+}
+
+/**
+ * The historical lineage keeps its own resource predicates, so the source policy program is not replayed wholesale. But a relation the
+ * convergence grants a role under forced row security, with no historical policy admitting that command (GLOBAL_REFERENCE_DATA tables that
+ * had no row security before), would be void. For exactly those (role, relation, command) gaps, install the source-declared policies, as
+ * scripts/bootstrap-v2/security.ts compiles them, and nothing else. A gap the source declares no policy for refuses convergence.
+ */
+export function planDeclaredAdmissionPolicies(declared: readonly DeclaredPolicy[], gaps: readonly Row[], existing: readonly Row[]) {
+  const statements: string[] = []
+  const installed: string[] = []
+  for (const gap of gaps) {
+    const matches = declared.filter(policy => policy.table === gap.table && policy.role === gap.role && (policy.cmd === gap.cmd || policy.cmd === '*'))
+    if (!matches.length) throw new Error(`Granted relation has no declared admitting policy: ${String(gap.role)} ${String(gap.table)} ${String(gap.cmd)}`)
+    for (const policy of matches) {
+      if (existing.some(row => row.table === policy.table && row.name === policy.name))
+        throw new Error(`Declared policy name is already taken by a non-admitting policy: ${policy.table}.${policy.name}`)
+      if (!statements.includes(policy.sql)) { statements.push(policy.sql); installed.push(`${policy.table}.${policy.name}`) }
+    }
+  }
+  return { statements, installed }
+}
+
+export function assertEveryGrantAdmitted(gaps: readonly Row[]) {
+  if (gaps.length) throw new Error('Granted relations without an admitting policy remain: ' +
+    gaps.map(gap => `${String(gap.role)}:${String(gap.table)}:${String(gap.cmd)}`).join(', '))
 }
 
 export interface RetainedPublicSchemaAuthority {
@@ -737,6 +796,7 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
     if (presentTargets.length !== sourceTargets.length) throw new Error('Current source relation prerequisites are missing')
     await verifyCurrentRlsFlags(plan, execute)
     await verifyFinalPublicSchemaPrivileges(publicSchemaPrivileges, execute)
+    assertEveryGrantAdmitted(await execute(UNADMITTED_GRANT_QUERY))
     const verified = await validateCurrent(client, options.repoRoot, plan, projection, currentContract, major)
     return { profile: 'CURRENT_SOURCE', applied: false, sourcePlanDigest, currentContract, ...verified,
       securityPolicyVerified: true, runtimePrivilegesVerified: true, applicationReady: false }
@@ -887,6 +947,11 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
   await asRole(originalRole, projection.programs.externalRead.finalize)
   for (const sql of scopePolicySql) await execute(sql)
   for (const sql of containedParent.statements) await execute(sql)
+  const admission = planDeclaredAdmissionPolicies(await declaredApplicationPolicies(projection.security.statements),
+    await execute(UNADMITTED_GRANT_QUERY),
+    await execute("SELECT c.relname AS table,p.polname AS name FROM pg_catalog.pg_policy p JOIN pg_catalog.pg_class c ON c.oid=p.polrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'"))
+  for (const sql of admission.statements) await execute(sql)
+  assertEveryGrantAdmitted(await execute(UNADMITTED_GRANT_QUERY))
   const session = await planBusinessSessionRepair(execute)
   const sessionReceipt = await applyBusinessSessionRepair(execute, session.fingerprint, sql => asRole('uev2admin', sql))
   await asRole(schemaExecution.owner, 'ALTER SCHEMA public OWNER TO ue_v2_owner')
@@ -899,7 +964,7 @@ export async function installUnionEyesCurrentSecurity(client: pg.Client, options
     identitySourceDigest: identityCreation.sourceDigest,
     externalReadSourceDigest: externalCreation.sourceDigest,
     sourceTablesCreated: [identityCreation.table.name, ...externalCreation.tables.map(table => table.name)],
-    containedParentPoliciesAdded: containedParent.targets,
+    containedParentPoliciesAdded: containedParent.targets, declaredAdmissionPoliciesAdded: admission.installed,
     authColumnsAdded: authColumns.addedColumns, authSchemaSourceDigest: authColumns.sourceDigest,
     activationConstraintReplaced: activationTransition.statements.length > 0, activationReferenceSha256: activationTransition.referenceSha256,
     rlsFlagStatementsApplied: rlsFlags.statements.length, rlsRelationsVerified,
