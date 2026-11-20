@@ -520,13 +520,12 @@ export async function runNextHttpSmoke(
     cookie,
     body: journeyClaim,
   })
-  // Dues are settled only by a verified Stripe webhook (proven natively and in staging). The
-  // hermetic smoke has no rate-limit store or provider, so initiation fails closed and a member
-  // assertion of payment can never credit the ledger.
+  // Member dues payment is not offered in the base release (BaseFinancialCapabilityUnavailable): with the owned Redis the
+  // rate limiter admits the request and the route answers 501, and a member assertion of payment never credits the ledger.
   await request(
-    'dues-initiation-fails-closed-without-rate-limit-store',
+    'dues-initiation-not-implemented',
     '/api/portal/dues/pay',
-    options.duesInitiationStatuses ?? [429],
+    options.duesInitiationStatuses ?? [501],
     {
       method: 'POST',
       cookie,
