@@ -250,7 +250,7 @@ function buildExecutedQualifications(): Map<string, ExecutedQualification> {
         actorClass: 'PLATFORM_ADMIN_WITH_SELECTED_MEMBERSHIP',
         organizationBinding: 'CANONICAL_SELECTED_ORGANIZATION',
         databaseConnectionClass: 'OPERATIONAL_DATABASE',
-        databaseRoleOrContext: 'requireSystemAdmin + withSystemContext',
+        databaseRoleOrContext: 'requirePlatformStaffAuthority(platform.organization.manage) + withSystemContext',
         rlsEnforcement: 'SYSTEM_CONTEXT_BYPASSES_TENANT_RLS_AFTER_ADMIN_GATE',
         serviceSystemAuthority: 'SYSTEM_CONTEXT_REQUIRED',
       },
