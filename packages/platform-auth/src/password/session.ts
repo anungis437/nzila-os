@@ -110,6 +110,32 @@ export async function validateSession(
   return validateSessionWithExecutor(tokenHash, dbExecutor)
 }
 
+/**
+ * The activity stamp must never wait. `user_sessions` carries the per-principal case-mail authority lock
+ * (ue_lock_queued_mail_authority), so a request that validates its session while its own open transaction already holds that
+ * principal's lock (a case intake, for example) would otherwise wait on itself with no way for PostgreSQL to see the cycle.
+ * The stamp is informational only; under contention it is skipped and its savepoint rolled back, and validation is unaffected.
+ */
+async function touchSessionLastUsed(dbExecutor: typeof db, sessionId: string): Promise<void> {
+  try {
+    await dbExecutor.transaction(async (savepoint) => {
+      const [previous] = (await savepoint.execute(
+        sql`SELECT current_setting('lock_timeout') AS value`,
+      )) as unknown as Array<{ value: string }>
+      await savepoint.execute(sql`SELECT set_config('lock_timeout', '100ms', true)`)
+      await savepoint
+        .update(authUserSessions)
+        .set({ lastUsedAt: new Date() })
+        .where(eq(authUserSessions.sessionId, sessionId))
+      await savepoint.execute(sql`SELECT set_config('lock_timeout', ${previous?.value ?? '0'}, true)`)
+    })
+  } catch (error) {
+    const code = (error as { code?: unknown; cause?: { code?: unknown } })?.code ??
+      (error as { cause?: { code?: unknown } })?.cause?.code
+    if (code !== '55P03') throw error
+  }
+}
+
 async function validateSessionWithExecutor(
   tokenHash: string,
   dbExecutor: typeof db,
@@ -134,11 +160,7 @@ async function validateSessionWithExecutor(
 
   if (!session) return null
 
-  // Update last_used_at
-  await dbExecutor
-    .update(authUserSessions)
-    .set({ lastUsedAt: new Date() })
-    .where(eq(authUserSessions.sessionId, session.sessionId))
+  await touchSessionLastUsed(dbExecutor, session.sessionId)
 
   return {
     sessionId: session.sessionId,

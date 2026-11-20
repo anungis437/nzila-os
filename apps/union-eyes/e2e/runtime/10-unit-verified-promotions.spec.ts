@@ -52,12 +52,13 @@ const statusAfterThrottle = async (
 }
 
 test.describe('promotions: rewards export, profile roles, operational metrics, public surface', () => {
-  test('DEF-0B11-PRP rewards export: administrator only, as a no-store CSV; a member, a steward and an anonymous caller are refused', async ({}, testInfo) => {
+  test('DEF-0B11-PRP rewards export: not offered in the base release (501, no CSV) even to an administrator; a member, a steward and an anonymous caller are refused', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    // No institutional rewards authority exists (RewardsInstitutionalAuthorityUnavailable): the administrator gets 501, never data.
     const admin = await (await as(U.adminPrimary)).get('/api/rewards/export?type=awards')
-    expect(admin.status()).toBe(200)
-    expect(admin.headers()['content-type']).toContain('text/csv')
-    expect(admin.headers()['cache-control']).toContain('no-store')
+    expect(admin.status()).toBe(501)
+    expect(admin.headers()['content-type']).not.toContain('text/csv')
+    expect((await admin.json()).code).toBe('NOT_IMPLEMENTED')
     expect(await status(await as(U.memberPrimary), 'get', '/api/rewards/export?type=awards')).toBe(
       403,
     )

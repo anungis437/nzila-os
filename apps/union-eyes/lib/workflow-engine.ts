@@ -19,7 +19,6 @@ import { withRLSContext, type RLSTx } from "./db/with-rls-context";
 import { slaClockStart } from '@/lib/workflow/sla-clock';
 import { claims, claimUpdates } from "../db/schema/claims-schema";
 import { organizationMembers } from "../db/schema/organization-members-schema";
-import { users } from "../db/schema/user-management-schema";
 import { eq, and } from "drizzle-orm";
 import { 
   validateClaimTransition, 
@@ -86,24 +85,14 @@ async function getMemberName(
   tx: RLSTx
 ): Promise<string> {
   try {
+    // The tenant's own member row carries the name. The identity relations (user_management.users) are not readable by the
+    // runtime role under V2; reading them here aborted the caller's transaction (permission denied) even though this was caught.
     const result = await tx
-      .select({
-        displayName: users.displayName,
-        firstName: users.firstName,
-        lastName: users.lastName,
-      })
+      .select({ name: organizationMembers.name })
       .from(organizationMembers)
-      .leftJoin(users, eq(organizationMembers.userId, users.userId))
       .where(eq(organizationMembers.userId, memberId))
       .limit(1);
-    
-    const displayName = result[0]?.displayName;
-    const firstName = result[0]?.firstName;
-    const lastName = result[0]?.lastName;
-
-    if (displayName) return displayName;
-    if (firstName || lastName) return `${firstName || ''} ${lastName || ''}`.trim();
-    return 'Member';
+    return result[0]?.name?.trim() || 'Member';
   } catch (_error) {
 return 'Member';
   }

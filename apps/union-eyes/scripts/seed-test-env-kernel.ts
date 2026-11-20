@@ -219,7 +219,8 @@ async function ensureSupervision(
     kind: 'supervisory' as const,
     powers,
     scope: { resourceIds: caseIds },
-    sourceInstrument,
+    // One active mandate per person, kind and instrument (ue_authority_mandates_active_uq): each exact-case grant cites its own.
+    sourceInstrument: `${sourceInstrument} (grant ${id})`,
     effectiveAt,
     expiresAt,
   }

@@ -36,7 +36,29 @@ export const dynamic = 'force-dynamic';
 
 const narProofAdapter = createPlatformNarProofAdapter();
 
+/**
+ * One canonical organization binding for the whole intake. The filing transaction takes the member's per-principal case-mail
+ * authority lock; any step inside it that opened a fresh binding (the canonical evidence pack resolves the actor) would insert a
+ * session row behind that same lock and wait on its own transaction. Establishing the binding first means every nested step
+ * reuses it. When no binding can be established the handler runs exactly as before and returns its own refusal.
+ */
 export async function POST(request: Request) {
+  if (!currentStateContextEnabled()) return handleIntake(request);
+  const { withCanonicalApiContext } = await import('@/lib/auth/canonical-context');
+  let established = false;
+  try {
+    return await withCanonicalApiContext(() => {
+      established = true;
+      return handleIntake(request);
+    });
+  } catch (error) {
+    // handleIntake never throws (it answers every failure itself), so this is the binding refusing to establish.
+    if (established) throw error;
+    return handleIntake(request);
+  }
+}
+
+async function handleIntake(request: Request) {
   try {
     // 1. Auth check
     const { userId, identityProvider, providerSubject } = await auth();
@@ -194,11 +216,13 @@ export async function POST(request: Request) {
       await persistAtomicAudit(tx, {
         organizationId: orgId,
         userId,
-        action: 'case.intake_submitted',
+        // The database requires every new case's creation audit (ue_check_claim_journal_audit): claim.create, in this transaction.
+        action: 'claim.create',
         resourceType: 'claims',
         resourceId: newClaim.claimId,
         details: {
           event: 'CASE_INTAKE_SUBMITTED',
+          route: '/api/cases/intake',
           caseType: data.caseType,
           priority: data.priority,
           severity,
