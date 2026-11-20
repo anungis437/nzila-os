@@ -9,7 +9,7 @@
  */
 import { randomUUID } from 'node:crypto'
 import { hasPrimaryCaseHandlerOnlyPower } from '../common'
-import { decideIssuance, DEFAULT_ISSUANCE_TEMPLATES, PLACEHOLDER_INSTRUMENT, type IssuanceDecision, type IssuanceDomain, type IssuanceOperation, type IssuanceRule, type IssuanceRuleTemplate, type IssuanceRequest } from '../issuance'
+import { decideIssuance, DEFAULT_ISSUANCE_TEMPLATES, issuanceDomainApplies, PLACEHOLDER_INSTRUMENT, type IssuanceDecision, type IssuanceDomain, type IssuanceOperation, type IssuanceRule, type IssuanceRuleTemplate, type IssuanceRequest } from '../issuance'
 import type { Capacity, Mandate, MandateKind, MandateScope, Membership, ResourceType } from '../ontology'
 import { auditAuthorityMutation } from './audit'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
@@ -142,6 +142,8 @@ export async function draftIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps
   requireUuids(i.organizationId)
   requirePrincipals(i.draftedBy)
   await bindSessionActor(exec, i.draftedBy, 'rule drafter')
+  if (!issuanceDomainApplies(i.domain, i.organizationId))
+    throw new AuthorityStoreError('DENIED', 'platform_staff rules exist only in the platform organization, which drafts no other domain')
   await requireAdopter(exec, deps, i.organizationId, i.draftedBy)
   requireRulePowerCeiling(i.domain, i.operation, i.allowedPowers)
   const row = (
@@ -168,6 +170,7 @@ export async function draftIssuanceRule(exec: SqlExecutor, deps: EnforcementDeps
 export async function draftDefaultIssuanceRules(exec: SqlExecutor, deps: EnforcementDeps, organizationId: string, draftedBy: string): Promise<string[]> {
   const ids: string[] = []
   for (const t of DEFAULT_ISSUANCE_TEMPLATES) {
+    if (!issuanceDomainApplies(t.domain, organizationId)) continue
     const { rationale: _rationale, ...rest } = t
     ids.push(await draftIssuanceRule(exec, deps, { ...rest, organizationId, draftedBy }))
   }

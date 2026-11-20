@@ -85,6 +85,8 @@ jobs:
 
       - name: Pull the exact PostgreSQL 16 fixture image
         run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+      - name: Pull the exact Redis fixture image for production rate limiting
+        run: docker pull redis:7.4-alpine@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
 
       - name: Verify the component evidence parser fails closed
         env:

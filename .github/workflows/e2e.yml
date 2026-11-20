@@ -170,6 +170,7 @@ jobs:
           const operator = operatorDatabaseUrl()
           const env = runtimeEnv()
           console.log('::add-mask::' + new URL(operator).password)
+          console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
           appendFileSync(process.env.GITHUB_ENV, [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'PLAYWRIGHT_TEST_AUTH=false',
@@ -177,6 +178,10 @@ jobs:
             'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
             // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
             'DATABASE_URL=' + operator,
+            // Fixture governance scripts (scripts/runtime/fixture-auth.ts) act through the restricted runtime login and refuse
+            // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
+            'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
+            'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
           ].join('\n') + '\n')
           NODE
 
@@ -460,6 +465,7 @@ jobs:
           const operator = operatorDatabaseUrl()
           const env = runtimeEnv()
           console.log('::add-mask::' + new URL(operator).password)
+          console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
           appendFileSync(process.env.GITHUB_ENV, [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'PLAYWRIGHT_TEST_AUTH=false',
@@ -467,6 +473,10 @@ jobs:
             'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
             // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
             'DATABASE_URL=' + operator,
+            // Fixture governance scripts (scripts/runtime/fixture-auth.ts) act through the restricted runtime login and refuse
+            // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
+            'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
+            'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
           ].join('\n') + '\n')
           NODE
 

@@ -502,7 +502,7 @@ export function openGuardedSessionHarness(
 /** Independent approvers vote in their own canonical sessions; the decision ids are returned. */
 export async function voteGuardedApproval(
   within: GuardedWithin,
-  party: FixtureParty,
+  party: Pick<FixtureParty, 'organizationId' | 'executives'>,
   request: string,
   approvers: readonly Actor[] = party.executives.slice(1),
 ): Promise<string[]> {
@@ -526,7 +526,7 @@ export async function voteGuardedApproval(
 /** The real adoption ceremony: draft, request, two independent votes, then a separate activation. */
 export async function adoptGuardedIssuanceRule(
   within: GuardedWithin,
-  party: FixtureParty,
+  party: Pick<FixtureParty, 'organizationId' | 'executives'>,
   template: Omit<IssuanceRuleTemplate, 'rationale'>,
 ): Promise<{ ruleId: string; approvalRequestId: string; decisionIds: string[] }> {
   const drafter = party.executives[0]

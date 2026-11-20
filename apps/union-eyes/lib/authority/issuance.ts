@@ -14,6 +14,7 @@
  */
 import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower, validInstant, validStringArray } from './common'
 import { dutyConflicts } from './policies/finance'
+import { isPlatformOrganization, PLATFORM_CAPABILITIES } from './platform-organization'
 import {
   POLICY_VERSION,
   type AuthorityFacts,
@@ -43,6 +44,11 @@ export const ISSUANCE_DOMAINS: readonly IssuanceDomain[] = [
 export const ISSUANCE_OPERATIONS: readonly IssuanceOperation[] = ['issue', 'amend', 'suspend', 'revoke', 'lift']
 
 export const PLACEHOLDER_INSTRUMENT = 'PENDING_INSTITUTIONAL_SOURCE'
+
+/** Platform-wide authority belongs to the platform organization alone, and the platform organization confers nothing else. */
+export function issuanceDomainApplies(domain: IssuanceDomain, organizationId: string): boolean {
+  return (domain === 'platform_staff') === isPlatformOrganization(organizationId)
+}
 
 /** Mirrors the ue_authority_deleg_nondelegable_chk CHECK constraint (asserted by a test). */
 export const NON_DELEGABLE_ACTIONS: readonly string[] = [
@@ -144,10 +150,9 @@ const HOLDER_CAPACITIES: Readonly<Record<IssuanceDomain, readonly Capacity[]>> =
   governance_review: ['member'],
   executive_office: ['executive'],
   emergency_access: ['steward', 'chief_steward', 'officer', 'executive', 'financial_officer'],
-  // Empty on purpose: no customer-organization capacity is eligible to hold a platform-wide mandate (./capacity.ts).
-  // hasCapacity() on an empty wanted list is always false, so this domain always denies until a platform-officer
-  // capacity is institutionally defined - see platform-staff-mandate-decision-record.md.
-  platform_staff: [],
+  // Platform capacities exist only in the platform organization (./platform-organization.ts); evaluate() refuses this domain
+  // anywhere else, so no customer-organization officer or executive can ever hold or confer a platform-wide mandate.
+  platform_staff: ['officer', 'executive'],
   delegation: ['officer', 'executive'],
   case_assignment: ['steward', 'chief_steward', 'officer'],
   recusal: ['member'],
@@ -231,6 +236,11 @@ function evaluate(
   if (facts.principal.userId !== req.issuerUserId) return deny({ code: 'PRINCIPAL_MISMATCH' })
   if (facts.memberships.some((m) => m.organizationId !== org)) {
     return deny({ code: 'FOREIGN_TENANT', detail: 'facts include another organization' })
+  }
+
+  // 0. Platform-wide authority is conferred only inside the platform organization, and that organization confers nothing else.
+  if (!issuanceDomainApplies(req.domain, org)) {
+    return deny({ code: 'FOREIGN_TENANT', detail: 'platform_staff authority exists only in the platform organization, which issues no other domain' })
   }
 
   // 1. An active, matching, organization-owned rule is the only source of issuing authority.
@@ -425,6 +435,9 @@ export const DEFAULT_ISSUANCE_TEMPLATES: readonly IssuanceRuleTemplate[] = [
   { domain: 'financial', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Revocation is immediate.' },
   { domain: 'governance_review', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Revocation is immediate.' },
   { domain: 'emergency_access', operation: 'revoke', issuerCapacities: ['executive', 'officer'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Emergency access can always be withdrawn.' },
+  { domain: 'platform_staff', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: [...PLATFORM_CAPABILITIES], maxTermDays: 90, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Platform organization only: a platform executive confers named platform actions on a platform officer for a bounded term, independently approved and accepted. Adoption needs the institutional instrument and two independent platform executives.' },
+  { domain: 'platform_staff', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Platform-wide authority can always be withdrawn at once.' },
+  { domain: 'platform_staff', operation: 'suspend', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Suspend or resume platform-wide authority.' },
   { domain: 'recusal', operation: 'lift', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Never by the recused person; the kernel enforces that.' },
   // Suspension also governs resumption, and must be at least as available as revocation.
   { domain: 'supervisory', operation: 'suspend', issuerCapacities: ['officer', 'executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Suspend or resume a supervisory mandate.' },

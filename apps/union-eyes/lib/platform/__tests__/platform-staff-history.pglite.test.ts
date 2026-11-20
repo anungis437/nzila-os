@@ -25,7 +25,8 @@ import { requirePlatformStaffAuthority } from '../platform-staff'
 
 const SYSTEM_ORG = '00000000-0000-0000-0000-000000000000', tenant = randomUUID(), user = 'synthetic_platform_staff'
 let pg: PGlite
-const actor = { userId: user, organizationId: tenant }
+// A platform mandate is exercised only while acting from the platform organization.
+const actor = { userId: user, organizationId: SYSTEM_ORG }
 interface HistoricalRow { organizationId?: string; principal?: string; kind?: string; powers?: string[]; status?: string;
   effective?: string; expires?: string; revoked?: string | null; accepted?: boolean; acceptedBy?: string; acceptanceOrg?: string }
 
@@ -91,8 +92,18 @@ describe('actual platform gate SQL over retained synthetic platform-staff rows',
   ])('refuses a %s retained row through the actual query', async (_name, row) => {
     await historical(row)
     await expect(requirePlatformStaffAuthority(actor, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
-    expect(state.audit).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ organizationId: tenant,
+    expect(state.audit).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ organizationId: SYSTEM_ORG,
       action: 'platform.stats.read.denied', details: { reason: 'no_live_scoped_platform_staff_mandate' } }), 'failure')
+  })
+
+  it('refuses the same live mandate when its holder acts from a customer organization, and never queries it', async () => {
+    await historical()
+    const fromTenant = { userId: user, organizationId: tenant }
+    await expect(requirePlatformStaffAuthority(fromTenant, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+    expect(state.transport).toHaveBeenCalledTimes(1)
+    expect(state.transport).toHaveBeenCalledWith(fromTenant, expect.any(Function))
+    expect(state.audit).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ organizationId: tenant,
+      details: { reason: 'not_acting_from_platform_organization' } }), 'failure')
   })
 
   it('does not grant another platform responsibility from an otherwise valid historical stats mandate', async () => {

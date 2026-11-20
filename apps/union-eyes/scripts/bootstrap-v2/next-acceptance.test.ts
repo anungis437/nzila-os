@@ -61,7 +61,11 @@ function engineeringFixture() {
     serverRuntimeSmoke: 'PASS', buildDiskWatchdog: { status: 'BUILD_EXITED', cancellationReason: null as string | null,
       minimumObservedAvailableBytes: 2 * 1024 ** 3 },
     httpSmoke: { status: 'PASS', ordinaryWrite: 'PERSISTED_RELOADED_CANONICAL_ACTOR_AND_ORGANIZATION',
-      systemWrite: 'AUTHORIZED_AND_PERSISTED_ORDINARY_CALLER_DENIED', authenticatedCaseworkLoad: load },
+      systemWrite: 'AUTHORIZED_AND_PERSISTED_ORDINARY_CALLER_DENIED', authenticatedCaseworkLoad: load,
+      vault: 'OWNED_VAULT_ENCRYPTED_WRITE_DECRYPTED_RELOAD',
+      platformStaff: { mechanism: 'GOVERNED_KERNEL_CEREMONY_SYNTHETIC_PLATFORM_OFFICERS',
+        refusals: ['UNAUTHORIZED', 'FOREIGN_TENANT', 'UNMANDATED', 'OTHER_CAPABILITY', 'REVOKED', 'EXPIRED', 'CUSTOMER_DRAFT'],
+        institutionalAppointment: 'NOT_PROVEN_DECISION_DEPENDENCY' } },
     httpObservations: [{ name: 'health', path: '/api/health', method: 'GET', status: 200 }],
     authenticatedCaseworkLoad: load,
     browserAcceptance: { status: 'PASS', setup: 'PASS', engine: 'Chromium', engineVersion: '149.0.0.0',
@@ -74,11 +78,14 @@ function engineeringFixture() {
     networkObservations: [{ phase: 'SERVER', event: { allowed: true, targetClass: 'LOOPBACK',
       targetDigest: '6'.repeat(64), transport: 'TCP', port: 54321 } }],
     observedAllowedConnections: 1, observedDeniedNetworkAttempts: 0, externalConnectionTargets: 0,
-    environment: ['DATABASE_URL', 'SYSTEM_DATABASE_URL', 'AUTH_DATABASE_URL', 'AUTH_SYSTEM_DATABASE_URL']
+    environment: ['DATABASE_URL', 'SYSTEM_DATABASE_URL', 'AUTH_DATABASE_URL', 'AUTH_SYSTEM_DATABASE_URL', 'REDIS_URL']
       .map((key) => ({ key, classification: 'OWNED_LOOPBACK_FIXTURE' })),
     cleanup: { ownedServerExited: true, ownedAuthClientsClosed: true, ownedDatabaseRemoved: true,
       ownedSnapshotRemoved: true, ownedStateRemoved: true, errors: [] as string[] },
     vaultCleanup: { ownedIdentityExited: true, ownedVaultExited: true },
+    redisCleanup: { ownedRedisRemoved: true, keysObservedBeforeRemoval: 3 },
+    vaultObservations: { identityAccepted: 1, identityDenied: 0, challenges: 1, keysAccepted: 1, keysDenied: 0, wrapsAccepted: 1, unwrapsAccepted: 1, rotationsAccepted: 0 },
+    platformStaffCleanup: { sessionsClosed: true },
     processProgressLog: { path: `artifacts/ue-v2-next-progress-${expectation.executionId}.log`, phase: 'SERVER', sha256: digest(progressBytes) } }
 }
 const rawExit = () => ({ code: 1, signal: null as string | null, launchError: null as string | null })
@@ -158,6 +165,15 @@ describe('existing V2 engineering component evidence verification (synthetic par
       (fixture: ReturnType<typeof engineeringFixture>) => { fixture.cleanup.ownedSnapshotRemoved = false },
       (fixture: ReturnType<typeof engineeringFixture>) => { fixture.cleanup.errors.push('NOT_CLEAN') },
       (fixture: ReturnType<typeof engineeringFixture>) => { fixture.vaultCleanup.ownedVaultExited = false },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.redisCleanup.ownedRedisRemoved = false },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.platformStaffCleanup.sessionsClosed = false },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.redisCleanup.keysObservedBeforeRemoval = 0 },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.vaultObservations.identityAccepted = 0 },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.vaultObservations.wrapsAccepted = 0; fixture.vaultObservations.unwrapsAccepted = 0 },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.httpSmoke.vault = 'UNEXERCISED' },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.httpSmoke.platformStaff.refusals.pop() },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.httpSmoke.platformStaff.institutionalAppointment = 'PROVEN' },
+      (fixture: ReturnType<typeof engineeringFixture>) => { fixture.environment = fixture.environment.filter((row) => row.key !== 'REDIS_URL') },
       (fixture: ReturnType<typeof engineeringFixture>) => { fixture.browserAcceptance.cleanup.contextsClosed = false },
       (fixture: ReturnType<typeof engineeringFixture>) => { fixture.buildDiskWatchdog.status = 'CANCELLED_OWNED_JOB' },
     ]
