@@ -128,7 +128,7 @@ export function syntheticNextEnvironment(
     UE_ENVIRONMENT: 'test',
     UE_FEATURE_PROFILE: 'internal',
     UE_CANONICAL_BOOTSTRAP_V2: '1',
-    CRON_SECRET: 'ue-v2-cron-secret',
+    CRON_SECRET: randomBytes(48).toString('hex'),
     EMAIL_PROVIDER: 'console',
     DB_POOL_MAX: '2',
     DB_SSL: 'false',
