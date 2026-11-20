@@ -147,7 +147,16 @@ export async function runNextHttpSmoke(
       expected.includes(response.status),
       `${name}: HTTP ${response.status}: ${text.slice(0, 600)}`,
     )
-    return { response, body: text ? JSON.parse(text) : null }
+    // Edge refusals (the proxy's cron check) answer in plain text; only a JSON body is parsed.
+    let body: any = null // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (text) {
+      try {
+        body = JSON.parse(text)
+      } catch {
+        body = text
+      }
+    }
+    return { response, body }
   }
   const cookies = (response: Response) => {
     const values = response.headers.getSetCookie().map((value) => value.split(';')[0])
