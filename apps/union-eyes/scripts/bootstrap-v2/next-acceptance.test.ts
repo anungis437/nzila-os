@@ -266,6 +266,8 @@ describe('isolated actual Next acceptance boundary', () => {
       expect(env.HTTP_PROXY).toBeUndefined()
       expect(env.NODE_OPTIONS).not.toContain('workstation')
       expect(env.NODE_OPTIONS).toContain('--max-old-space-size=4096')
+      expect(env.CRON_SECRET).toMatch(/^[a-f0-9]{96}$/)
+      expect(env.CRON_SECRET).not.toBe('ue-v2-cron-secret')
       expect(env.HOME).not.toContain(path.dirname(path.resolve('local-boundary.cjs')) + path.sep)
       expect(env.SKIP_DB_STARTUP_CHECK).toBeUndefined()
       expect(env.PLAYWRIGHT_TEST_AUTH).toBeUndefined()
