@@ -2,6 +2,15 @@
 import { request, type APIRequestContext, type Page } from '@playwright/test'
 import { computeTotp } from '@nzila/platform-auth/mfa'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '../../tests/fixtures/test-users'
+
+/**
+ * Fixture people holding a Nzila platform-tier title (platform_lead, compliance_manager) in a customer organization without
+ * platform eligibility. Under V2 such a title never selects a customer organization: sign-in succeeds, selection is refused (403).
+ */
+export const PLATFORM_TITLE_WITHOUT_ELIGIBILITY: ReadonlySet<string> = new Set([
+  UE_TEST_USERS.platformOperator.userId,
+  UE_TEST_USERS.auditorReadOnly.userId,
+])
 import { CANONICAL_ORGANIZATION_AUTHORITY } from '../../lib/auth/organization-authority'
 import { readRuntimeFixtureAuth } from '../../scripts/runtime/fixture-auth'
 
@@ -58,6 +67,12 @@ export async function loginRuntimeRequest(ctx: APIRequestContext, userId: string
   const selected = await ctx.post(base + '/api/organizations/switch', {
     data: { organizationId: person.orgId },
   })
+  if (PLATFORM_TITLE_WITHOUT_ELIGIBILITY.has(userId)) {
+    if (selected.status() !== 403)
+      throw new Error(`A platform-tier title selected a customer organization (${selected.status()})`)
+    // Signed in, never selected: every organization-scoped request from this session must be refused.
+    return before
+  }
   if (selected.status() !== 200)
     throw new Error(`Real runtime organization selection failed (${selected.status()})`)
   const selection = (await selected.json()) as {

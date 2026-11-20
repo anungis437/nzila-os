@@ -104,12 +104,15 @@ export async function runNextHttpSmoke(
   observations: HttpObservation[],
   options: {
     duesInitiationStatuses?: number[]
+    /** The running server's CRON_SECRET; there is no default, so a mismatched credential cannot pass unnoticed. */
+    cronSecret?: string
     documentRepositoryStatuses?: number[]
     authenticatedCaseworkLoad?: { runtimeUrl: string; authUrl: string }
   } = {},
 ) {
   const { actor, administrator, password, organizations, mfaSecret } = fixture
-  const cronSecret = process.env.UE_V2_SMOKE_CRON_SECRET ?? 'ue-v2-cron-secret'
+  const cronSecret = options.cronSecret
+  assert.ok(cronSecret && cronSecret.length >= 64, 'The server cron credential is required for the authorized cron journey')
   const request = async (
     name: string,
     route: string,

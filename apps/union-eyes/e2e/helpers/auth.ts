@@ -1,4 +1,5 @@
-import { loginRuntimePage } from './runtime-auth'
+import { loginRuntimePage, PLATFORM_TITLE_WITHOUT_ELIGIBILITY } from './runtime-auth'
+import { test } from '@playwright/test'
 import type { APIRequestContext, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import {
@@ -73,6 +74,11 @@ export async function loginAsRole(page: Page, role: StakeholderRole): Promise<vo
 
   if (process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1') {
     await loginRuntimePage(page, fixture.userId, fixture.orgId)
+    // loginRuntimePage asserted that this title's organization selection was refused; no dashboard journey exists for it.
+    test.skip(
+      PLATFORM_TITLE_WITHOUT_ELIGIBILITY.has(fixture.userId),
+      `${role}: a platform-tier title without platform eligibility cannot select a customer organization (refusal asserted at sign-in)`,
+    )
     await page.context().addCookies(orgContextCookies)
     return
   }

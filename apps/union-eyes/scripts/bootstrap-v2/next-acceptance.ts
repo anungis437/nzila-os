@@ -723,9 +723,12 @@ export async function runNextAcceptance() {
       fixture.seed,
       httpFixture,
       httpObservations,
-      authenticatedCaseworkLoad
-        ? { authenticatedCaseworkLoad: { runtimeUrl: fixture.runtimeUrl, authUrl: fixture.authUrl! } }
-        : {},
+      {
+        cronSecret: env.CRON_SECRET,
+        ...(authenticatedCaseworkLoad
+          ? { authenticatedCaseworkLoad: { runtimeUrl: fixture.runtimeUrl, authUrl: fixture.authUrl! } }
+          : {}),
+      },
     )
     result.httpSmoke = httpSmoke
     result.authenticatedCaseworkLoad = httpSmoke.authenticatedCaseworkLoad

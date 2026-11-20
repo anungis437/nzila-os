@@ -1,6 +1,6 @@
 /** A financial audit title or platform role does not resurrect excluded ledger access. */
 import { test, expect, request } from '@playwright/test'
-import { runtimeRequestAs } from '../helpers/runtime-auth'
+import { PLATFORM_TITLE_WITHOUT_ELIGIBILITY, runtimeRequestAs } from '../helpers/runtime-auth'
 import { financeBoundarySnapshot } from '../../scripts/runtime/runtime-fixture-observations'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 
@@ -25,7 +25,8 @@ test('financial assurance stays denied under actual canonical sessions and discl
     const ctx = await runtimeRequestAs(person.userId, person.orgId)
     try {
       const response = await ctx.get(route)
-      expect([403, 501], person.userId).toContain(response.status())
+      // A platform-tier title never selected an organization (runtime-auth.ts), so its session is refused outright.
+      expect(PLATFORM_TITLE_WITHOUT_ELIGIBILITY.has(person.userId) ? [401, 403] : [403, 501], person.userId).toContain(response.status())
       const payload = await response.json()
       expect(payload.entries).toBeUndefined()
       expect(payload.data?.entries).toBeUndefined()
