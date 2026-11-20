@@ -398,6 +398,13 @@ export async function runNextHttpSmoke(
     userId: administrator,
     reason: 'no_live_scoped_platform_staff_mandate',
   })
+  // Switching rotates the session: the administrator returns to their customer organization on the live platform session.
+  const customerReselection = await request('platform-administrator-switch-back-to-customer-organization', '/api/organizations/switch', [200], {
+    method: 'POST',
+    cookie: platformCookie,
+    body: { organizationId: organizations[0] },
+  })
+  adminCookie = cookies(customerReselection.response)
   // G5 critical journeys: role change and claim, dues payment, scheduled SYSTEM flow, revocation.
   const journeyClaim = {
     claimType: 'other',
