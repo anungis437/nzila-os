@@ -290,6 +290,9 @@
     "federationRemittances": "Suivi des remises"
   },
   "auth": {
+    "footerPartOf": "Fait partie de",
+    "footerPrivacy": "Confidentialité",
+    "footerTerms": "Conditions",
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
     "signOut": "Se déconnecter",
@@ -517,6 +520,7 @@
     "viewAll": "Voir tout"
   },
   "claims": {
+    "removeAttachment": "Retirer la pièce jointe {name}",
     "title": "Dossiers",
     "createClaim": "Créer un dossier",
     "viewClaim": "Voir le dossier",

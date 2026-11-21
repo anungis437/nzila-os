@@ -206,17 +206,35 @@ const stage = (name: string) => { browserStage = name }
 const AXE_SOURCE = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8')
 export const ACCESSIBILITY_BLOCKING_IMPACTS: readonly string[] = ['critical', 'serious']
 export const ACCESSIBILITY_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] as const
-export type AccessibilityViolation = { id: string; impact: string | null; nodes: number }
+export type AccessibilityViolation = {
+  id: string; impact: string | null; nodes: number
+  /** Up to five CSS selectors of the failing elements (structure only, never text content). */
+  targets: string[]
+  /** For colour contrast: the measured foreground, background and ratio of the first failing element. */
+  contrast?: { fg: string; bg: string; ratio: number } | null
+}
 /** True when no violation has a blocking impact (critical or serious). */
 export function accessibilityPassed(violations: readonly AccessibilityViolation[]) {
   return !violations.some((v) => v.impact !== null && ACCESSIBILITY_BLOCKING_IMPACTS.includes(v.impact))
 }
 async function scanAccessibility(page: Page, label: string, record: (violations: AccessibilityViolation[]) => void) {
+  // Measure the settled page people read, not an entrance animation frame: wait (bounded) until no visible element is
+  // still fading in (computed opacity below 1) before the rules run.
+  await page.waitForFunction(() => ![...document.querySelectorAll('body *')].some((el) => {
+    const style = getComputedStyle(el)
+    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && Number(style.opacity) < 1
+  }), undefined, { timeout: 5000 }).catch(() => undefined)
   await page.evaluate(AXE_SOURCE)
   const violations = await page.evaluate(async (tags) => {
-    const axe = (window as unknown as { axe: { run: (ctx: Document, opts: unknown) => Promise<{ violations: { id: string; impact?: string | null; nodes: unknown[] }[] }> } }).axe
+    type AxeNode = { target: unknown[]; any?: { data?: { fgColor?: string; bgColor?: string; contrastRatio?: number } | null }[] }
+    const axe = (window as unknown as { axe: { run: (ctx: Document, opts: unknown) => Promise<{ violations: { id: string; impact?: string | null; nodes: AxeNode[] }[] }> } }).axe
     const result = await axe.run(document, { runOnly: { type: 'tag', values: tags }, resultTypes: ['violations'] })
-    return result.violations.map((v) => ({ id: v.id, impact: v.impact ?? null, nodes: v.nodes.length }))
+    return result.violations.map((v) => {
+      const data = v.id === 'color-contrast' ? v.nodes[0]?.any?.[0]?.data : null
+      return { id: v.id, impact: v.impact ?? null, nodes: v.nodes.length,
+        targets: v.nodes.slice(0, 5).map((n) => n.target.map(String).join(' ').slice(0, 200)),
+        contrast: data && typeof data.contrastRatio === 'number' ? { fg: String(data.fgColor), bg: String(data.bgColor), ratio: data.contrastRatio } : null }
+    })
   }, [...ACCESSIBILITY_TAGS])
   record(violations)
   assert.ok(accessibilityPassed(violations), `ACCESSIBILITY_BLOCKING_VIOLATION`)

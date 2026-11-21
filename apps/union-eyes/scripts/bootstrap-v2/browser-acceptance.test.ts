@@ -88,9 +88,9 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
   it('blocks on critical or serious accessibility violations and records moderate and minor ones', () => {
     expect(ACCESSIBILITY_TAGS).toEqual(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     expect(accessibilityPassed([])).toBe(true)
-    expect(accessibilityPassed([{ id: 'region', impact: 'moderate', nodes: 2 }, { id: 'x', impact: 'minor', nodes: 1 }])).toBe(true)
-    expect(accessibilityPassed([{ id: 'label', impact: 'critical', nodes: 1 }])).toBe(false)
-    expect(accessibilityPassed([{ id: 'color-contrast', impact: 'serious', nodes: 3 }])).toBe(false)
+    expect(accessibilityPassed([{ id: 'region', impact: 'moderate', nodes: 2, targets: [] }, { id: 'x', impact: 'minor', nodes: 1, targets: [] }])).toBe(true)
+    expect(accessibilityPassed([{ id: 'label', impact: 'critical', nodes: 1, targets: ['#x'] }])).toBe(false)
+    expect(accessibilityPassed([{ id: 'color-contrast', impact: 'serious', nodes: 3, targets: ['.a'], contrast: { fg: '#999', bg: '#fff', ratio: 2.6 } }])).toBe(false)
   })
 
   it('keeps only a masked path from a failing response or page', () => {

@@ -16,6 +16,7 @@ import { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface AuthStat {
   value: string;
@@ -53,6 +54,7 @@ export default function AuthPageLayout({
   heroAlt = 'Illustration of a team working together — representing organized labor collaboration',
   isSignUp: _isSignUp = false,
 }: AuthPageLayoutProps) {
+  const auth = useTranslations('auth');
   return (
     <div className="flex min-h-screen">
       {/* ───── Left Panel: Brand ───── */}
@@ -182,8 +184,9 @@ export default function AuthPageLayout({
 
         {/* Footer */}
         <div className="px-6 py-6 text-center border-t border-gray-100">
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-            <span>Part of</span>
+          {/* WCAG 1.4.3: footer text is gray-600 on white (about 7.6:1); the separators are decorative. */}
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+            <span>{auth('footerPartOf')}</span>
             <Link
               href="https://nzilaventures.com"
               target="_blank"
@@ -192,13 +195,13 @@ export default function AuthPageLayout({
             >
               Nzila Ventures
             </Link>
-            <span className="text-gray-300">|</span>
-            <Link href="/legal/privacy" className="hover:text-gray-600 transition-colors">
-              Privacy
+            <span className="text-gray-500" aria-hidden="true">|</span>
+            <Link href="/legal/privacy" className="hover:text-gray-900 transition-colors">
+              {auth('footerPrivacy')}
             </Link>
-            <span className="text-gray-300">|</span>
-            <Link href="/legal/terms" className="hover:text-gray-600 transition-colors">
-              Terms
+            <span className="text-gray-500" aria-hidden="true">|</span>
+            <Link href="/legal/terms" className="hover:text-gray-900 transition-colors">
+              {auth('footerTerms')}
             </Link>
           </div>
         </div>

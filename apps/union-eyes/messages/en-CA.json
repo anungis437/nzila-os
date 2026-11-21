@@ -290,6 +290,9 @@
     "federationRemittances": "Remittance Tracking"
   },
   "auth": {
+    "footerPartOf": "Part of",
+    "footerPrivacy": "Privacy",
+    "footerTerms": "Terms",
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
@@ -517,6 +520,7 @@
     "viewAll": "View All"
   },
   "claims": {
+    "removeAttachment": "Remove attachment {name}",
     "title": "Cases",
     "createClaim": "Submit Intake",
     "viewClaim": "View Case",

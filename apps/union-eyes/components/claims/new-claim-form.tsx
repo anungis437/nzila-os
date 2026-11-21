@@ -353,11 +353,10 @@ setIsSubmitting(false);
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <Link href={returnHref}>
-            <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
-              <ArrowLeft size={20} />
-              {t('claims.backToClaims')}
-            </button>
+          {/* One interactive element: a link styled as the back control, not a button nested in a link. */}
+          <Link href={returnHref} className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
+            <ArrowLeft size={20} aria-hidden="true" />
+            {t('claims.backToClaims')}
           </Link>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('claims.submitNewCase')}</h1>
           <p className="text-gray-600 text-lg">{t('claims.tellUsWhat')}</p>
@@ -643,9 +642,10 @@ setIsSubmitting(false);
                           <button
                             type="button"
                             onClick={() => removeFile(index)}
+                            aria-label={t('claims.removeAttachment', { name: file.name })}
                             className="ml-2 p-1 hover:bg-blue-200 rounded transition-colors"
                           >
-                            <X size={16} className="text-gray-600" />
+                            <X size={16} className="text-gray-600" aria-hidden="true" />
                           </button>
                         </div>
                       ))}
@@ -684,7 +684,7 @@ setIsSubmitting(false);
                     </button>
                   </Link>
                 </div>
-                <p className="text-xs text-gray-400 text-center pt-1">{t('forms.editAnytime')}</p>
+                <p className="text-xs text-gray-600 text-center pt-1">{t('forms.editAnytime')}</p>
               </form>
             </CardContent>
           </Card>
