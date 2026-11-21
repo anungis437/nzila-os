@@ -11271,14 +11271,14 @@
             "correction": "Asserts the absent user through the jar and through the old cookie, and adds that a protected API (/api/users/me/organizations) refuses the revoked cookie with 401."
           },
           {
-            "commit": "PENDING_THIS_PUSH",
+            "commit": "5bc5b3cf9",
             "kind": "HARNESS_VERIFIER",
             "defect": "Component qualification refused the run because the HTTP smoke dues-initiation-not-implemented step answered its required 501 (added in 425d7120c) while the verifier admitted 501 only for legacy-documents-endpoint-not-implemented.",
             "correction": "DECLARED_NOT_IMPLEMENTED_OBSERVATIONS names both honest-501 steps; any other 5xx, or a 500 from either step, still fails; tests pin both directions. The 57ff9b91e CI artifacts verify with the corrected verifier."
           }
         ],
         "fastDiagnostic": "From apps/union-eyes: UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=0 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts runs the real production build, real login and all four browser profiles against owned fixtures without the load profile. The CI component run keeps both flags at 1.",
-        "state": "BROWSER_ACCEPTANCE_PASSED_ON_57FF9B91E_COMPONENT_QUALIFICATION_PENDING_EXACT_HEAD_CI",
+        "state": "PASS_REQUIRED_ENGINEERING_COMPONENTS_ON_5BC5B3CF9",
         "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32",
         "browserAcceptanceObserved": {
           "commit": "57ff9b91e674c18d77fa5ad35d3b2a94f9ad2189",
@@ -11297,12 +11297,32 @@
           "cleanup": "browser and contexts closed, no errors",
           "buildHttpLoad": "nextBuild PASS, HTTP smoke PASS, authenticated casework load PASS",
           "componentQualification": "REFUSED_BY_VERIFIER_ALLOWLIST_DRIFT_CORRECTED_IN_FOLLOWING_COMMIT"
+        },
+        "componentQualification": {
+          "commit": "5bc5b3cf9be2fe4077d227d54c4a257768433501",
+          "ciRun": 44924506693,
+          "status": "PASS_REQUIRED_ENGINEERING_COMPONENTS",
+          "browserAcceptance": {
+            "desktop-en": "11/11",
+            "desktop-fr": "11/11",
+            "mobile-en": "11/11",
+            "mobile-fr": "11/11"
+          },
+          "httpSmoke": "PASS",
+          "authenticatedCaseworkLoad": "PASS",
+          "stagingAcceptance": "NOT_PROVEN",
+          "productionDeployment": false
         }
       },
       "picomatchAdvisory1247710": {
         "evidence": "evidence/ue-v2-step1-qualification-20261117/picomatch-advisory-1247710-verification-v8.json",
-        "state": "PATCHED_RUNTIME_AND_LOCKFILE_VERIFIED_EXACT_HEAD_CI_AUDIT_PENDING",
-        "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
+        "state": "PATCHED_RUNTIME_AND_LOCKFILE_VERIFIED_EXACT_HEAD_AUDIT_PASS",
+        "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32",
+        "exactHeadAudit": {
+          "commit": "5bc5b3cf9be2fe4077d227d54c4a257768433501",
+          "dependencyAuditJob": "pass (runs tooling/security/picomatch-repeated-extglob.test.mjs)",
+          "pnpmAudit": "pass"
+        }
       },
       "obligations": [
         {
@@ -11413,11 +11433,44 @@
         }
       ],
       "residualBlockers": [
-        "Every obligation above remains open on its stated gaps; Step 1 is not closed and no candidate SHA is qualified.",
-        "V2 browser acceptance and the picomatch audit await exact-head CI on the pushed correction.",
-        "Publish required checks failed once on a transient GitHub API 500 listing jobs; GitHub reads in tooling/ci/merge-authority/publish.mjs now retry transient statuses with the existing bounded backoff (contract-tested).",
-        "HTTP QA spec 09 failed once when the external-counsel fixture re-seeded: equal one-hour terms read from two Date.now() calls let the grant end 1 ms after its authority, which the qualification schema correctly refuses. The fixture now derives every term from one clock reading (reproduced against the real schema: old REFUSED, new ACCEPTED)."
-      ]
+        "S1-A01..S1-A06 remain open on the gaps recorded per obligation; Step 1 is not closed and candidateSha stays null.",
+        "Red-Team Adversarial did not run: the workflow is disabled in repository Actions settings (owner decision)."
+      ],
+      "exactHeadCi": {
+        "commit": "5bc5b3cf9be2fe4077d227d54c4a257768433501",
+        "pr": 1269,
+        "checks": {
+          "pass": 128,
+          "fail": 0,
+          "skipping": 11
+        },
+        "codeqlOpenAlerts": 0,
+        "named": {
+          "V2 production build, real login, four browser profiles and full casework load": "pass",
+          "Production-build HTTP, cross-tenant and restart QA": "pass",
+          "Publish required checks": "pass",
+          "Dependency Audit": "pass",
+          "pnpm audit": "pass",
+          "Python dependency audit": "pass",
+          "Governance Baseline / Dependency Audit": "pass",
+          "CodeQL": "pass"
+        },
+        "nativeRuntimeSecurityMatrix": {
+          "ciRun": 44927395362,
+          "event": "workflow_dispatch",
+          "commit": "5bc5b3cf9be2fe4077d227d54c4a257768433501",
+          "total": 363,
+          "passed": 363,
+          "failed": 0,
+          "skipped": 0,
+          "sourcePlanAndSystemMutationProvenance": "success"
+        },
+        "notExecuted": {
+          "Red-Team Adversarial": "workflow disabled in repository Actions settings; enabling it is an owner configuration decision",
+          "Performance Regression Gate, Trivy Container Scan, Generate Pilot Evidence Artifact": "conditional jobs not applicable to this pull request event"
+        },
+        "note": "A later commit that only records this register re-runs CI; these results bind to 5bc5b3cf9."
+      }
     }
   }
 }
