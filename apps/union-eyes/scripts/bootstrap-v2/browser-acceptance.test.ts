@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, expect, it } from 'vitest'
 import {
-  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, maskedPath, responseClass, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
+  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, maskedPath, responseClass, accessibilityPassed, ACCESSIBILITY_TAGS, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
 } from './browser-acceptance'
 
 const origin = 'http://127.0.0.1:43219'
@@ -83,6 +83,14 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
 
   it('classifies an intake response by class only', () => {
     expect([null, 201, 302, 409, 503].map(responseClass)).toEqual(['NONE', '2XX', '3XX', '4XX', '5XX'])
+  })
+
+  it('blocks on critical or serious accessibility violations and records moderate and minor ones', () => {
+    expect(ACCESSIBILITY_TAGS).toEqual(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    expect(accessibilityPassed([])).toBe(true)
+    expect(accessibilityPassed([{ id: 'region', impact: 'moderate', nodes: 2 }, { id: 'x', impact: 'minor', nodes: 1 }])).toBe(true)
+    expect(accessibilityPassed([{ id: 'label', impact: 'critical', nodes: 1 }])).toBe(false)
+    expect(accessibilityPassed([{ id: 'color-contrast', impact: 'serious', nodes: 3 }])).toBe(false)
   })
 
   it('keeps only a masked path from a failing response or page', () => {

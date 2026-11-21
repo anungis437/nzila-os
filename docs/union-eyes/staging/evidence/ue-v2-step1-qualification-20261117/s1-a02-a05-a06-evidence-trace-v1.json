@@ -19043,15 +19043,19 @@
         },
         {
           "operationalItem": "O11",
-          "tests": [],
-          "v2Qualification": "V2 browser journeys: named controls, visible error feedback, keyboard sign-in and reopening, no horizontal overflow, four profiles",
-          "limitation": "Declared accessibility checks only; full WCAG certification is not established."
+          "tests": [
+            "scripts/bootstrap-v2/browser-acceptance.test.ts"
+          ],
+          "v2Qualification": "V2 browser journeys: axe-core WCAG 2.0/2.1 A and AA scans of sign-in, dashboard, intake form, member case list and staff workbench case in all four profiles (critical or serious violations fail), plus named controls, visible error feedback, keyboard sign-in and reopening, no horizontal overflow",
+          "limitation": "Automated WCAG rules on the exercised journeys; a manual WCAG audit with assistive technology is not established."
         },
         {
           "operationalItem": "O12",
-          "tests": [],
+          "tests": [
+            "lib/__tests__/i18n-bilingual-completeness.test.ts"
+          ],
           "v2Qualification": "V2 browser journeys in en-CA and fr-CA on desktop and mobile",
-          "limitation": "The journeys exercised in both languages; every UI state in both languages is not established."
+          "limitation": "Catalog completeness (key parity, ICU arguments, reviewed identical strings) is enforced; translation quality is not machine-verifiable."
         }
       ],
       "evidenceGap": null
@@ -19787,9 +19791,11 @@
         },
         {
           "operationalItem": "O12",
-          "tests": [],
+          "tests": [
+            "lib/__tests__/i18n-bilingual-completeness.test.ts"
+          ],
           "v2Qualification": "V2 browser journeys in en-CA and fr-CA on desktop and mobile",
-          "limitation": "The journeys exercised in both languages; every UI state in both languages is not established."
+          "limitation": "Catalog completeness (key parity, ICU arguments, reviewed identical strings) is enforced; translation quality is not machine-verifiable."
         }
       ],
       "evidenceGap": null
@@ -21673,9 +21679,11 @@
         },
         {
           "operationalItem": "O12",
-          "tests": [],
+          "tests": [
+            "lib/__tests__/i18n-bilingual-completeness.test.ts"
+          ],
           "v2Qualification": "V2 browser journeys in en-CA and fr-CA on desktop and mobile",
-          "limitation": "The journeys exercised in both languages; every UI state in both languages is not established."
+          "limitation": "Catalog completeness (key parity, ICU arguments, reviewed identical strings) is enforced; translation quality is not machine-verifiable."
         }
       ],
       "evidenceGap": null

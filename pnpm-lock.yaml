@@ -2851,6 +2851,9 @@ importers:
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
+      axe-core:
+        specifier: 4.13.0
+        version: 4.13.0
       drizzle-kit:
         specifier: ^0.31.8
         version: 0.31.10

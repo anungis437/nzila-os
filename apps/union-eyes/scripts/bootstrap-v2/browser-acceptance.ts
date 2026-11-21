@@ -1,7 +1,7 @@
 /** Actual Chromium journeys against the owned production Next/V2 fixture. No QA cookies or response stubs. */
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { createRequire } from 'node:module'
 import path from 'node:path'
@@ -70,6 +70,8 @@ interface BrowserResult {
   serverErrors: number
   /** 429 responses the browser received from the owned server (evidence only; a 429 that breaks a journey fails its check). */
   rateLimitedResponses: number
+  /** axe-core WCAG 2.0/2.1 A and AA scans of the journey pages: rule id, impact and node count only (no page text). */
+  accessibilityScans: { profile: string; page: string; violations: { id: string; impact: string | null; nodes: number }[] }[]
   /** Times the modal privacy dialog was answered with the privacy-preserving choice (evidence only). */
   privacyChoicesAnswered: number
   /** Owned-origin paths that answered 5xx, with identifiers masked; no query, body or header is kept. */
@@ -200,9 +202,31 @@ let browserStage = 'START'
 /** The masked path of the last top-level document a journey page navigated to; persisted with a failure. */
 let lastPagePath: string | null = null
 const stage = (name: string) => { browserStage = name }
+/** axe-core is evaluated in the page through Playwright (not an injected <script>), so the app's CSP is not relaxed. */
+const AXE_SOURCE = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8')
+export const ACCESSIBILITY_BLOCKING_IMPACTS: readonly string[] = ['critical', 'serious']
+export const ACCESSIBILITY_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] as const
+export type AccessibilityViolation = { id: string; impact: string | null; nodes: number }
+/** True when no violation has a blocking impact (critical or serious). */
+export function accessibilityPassed(violations: readonly AccessibilityViolation[]) {
+  return !violations.some((v) => v.impact !== null && ACCESSIBILITY_BLOCKING_IMPACTS.includes(v.impact))
+}
+async function scanAccessibility(page: Page, label: string, record: (violations: AccessibilityViolation[]) => void) {
+  await page.evaluate(AXE_SOURCE)
+  const violations = await page.evaluate(async (tags) => {
+    const axe = (window as unknown as { axe: { run: (ctx: Document, opts: unknown) => Promise<{ violations: { id: string; impact?: string | null; nodes: unknown[] }[] }> } }).axe
+    const result = await axe.run(document, { runOnly: { type: 'tag', values: tags }, resultTypes: ['violations'] })
+    return result.violations.map((v) => ({ id: v.id, impact: v.impact ?? null, nodes: v.nodes.length }))
+  }, [...ACCESSIBILITY_TAGS])
+  record(violations)
+  assert.ok(accessibilityPassed(violations), `ACCESSIBILITY_BLOCKING_VIOLATION`)
+  void label
+}
+
 async function uiLogin(input: {
   context: BrowserContext; page: Page; origin: string; locale: string; organizationId: string
   person: { id: string; email: string }; password: string; mfaSecret: string
+  scan?: (page: Page, label: string) => Promise<void>
 }) {
   const copy = input.locale === 'fr-CA' ? fr : en
   const { page, context, origin, person, password, mfaSecret } = input
@@ -212,6 +236,7 @@ async function uiLogin(input: {
   await visible(page, copy.loginForm.welcome)
   stage('SIGN_IN_HYDRATION')
   await page.locator('form[data-hydrated="true"]').first().waitFor({ state: 'attached', timeout: 30000 })
+  if (input.scan) { stage('SIGN_IN_ACCESSIBILITY'); await input.scan(page, 'sign-in') }
   const email = page.getByLabel(copy.auth.email, { exact: true })
   const passwordField = page.getByLabel(copy.auth.password, { exact: true })
   await email.fill(person.email)
@@ -268,6 +293,7 @@ async function uiLogin(input: {
   stage('SESSION_COOKIE')
   const session = (await ownedCookies(context, origin)).find((cookie) => cookie.name === 'nzila_session')
   assert.ok(session?.value && session.httpOnly, 'REAL_HTTP_ONLY_SESSION_REQUIRED')
+  if (input.scan) { stage('DASHBOARD_ACCESSIBILITY'); await input.scan(page, 'dashboard') }
   stage('SESSION_ORGANIZATION')
   const selection = await context.request.get(origin + '/api/users/me/organizations', {
     headers: await sessionHeaders(context, origin), timeout: 30000,
@@ -287,7 +313,7 @@ export async function runBrowserAcceptance(input: {
 }): Promise<BrowserResult> {
   const result: BrowserResult = {
     status: 'FAIL', engine: null, engineVersion: null, profiles: [], setup: 'UNEXECUTED',
-    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0, privacyChoicesAnswered: 0, serverErrorPaths: [],
+    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0, accessibilityScans: [], privacyChoicesAnswered: 0, serverErrorPaths: [],
     cleanup: { browserClosed: false, contextsClosed: false, errors: [] },
     limitations: [
       'Owned disposable production Next/native V2 proof only; no staging, production, real inbox or live customer acceptance.',
@@ -443,8 +469,10 @@ export async function runBrowserAcceptance(input: {
         const member = await open(profile); scope.push(member.context)
         const staff = await open(profile); scope.push(staff.context)
         let createdId = '', createdNumber = '', deadlineId = '', memberCookie = ''
+        const scan = (page: Page, label: string) => scanAccessibility(page, label,
+          (violations) => { result.accessibilityScans.push({ profile: profile.id, page: label, violations }) })
         const memberLogin = { ...member, origin, locale: profile.locale, organizationId: fixture.organizationId,
-          person: fixture.people.member, password: input.fixture.password, mfaSecret: input.fixture.mfaSecret }
+          person: fixture.people.member, password: input.fixture.password, mfaSecret: input.fixture.mfaSecret, scan }
         await step('member-password-totp-ui', async () => { memberCookie = await uiLogin(memberLogin) })
         await step('member-intake-labels-and-create', async () => {
           const startedAt = new Date()
@@ -465,6 +493,8 @@ export async function runBrowserAcceptance(input: {
             copy.forms.whenOccurred, copy.forms.location, copy.forms.witnesses]) {
             await member.page.getByLabel(name, { exact: false }).waitFor({ state: 'visible' })
           }
+          stage('INTAKE_ACCESSIBILITY')
+          await scan(member.page, 'intake-form')
           await noOverflow(member.page)
           await member.page.getByLabel(copy.forms.caseTitle, { exact: false }).fill(`Owned browser intake ${fixture.ownership} ${profile.id}`)
           await member.page.getByLabel(copy.forms.category, { exact: false }).selectOption('Safety')
@@ -521,6 +551,7 @@ export async function runBrowserAcceptance(input: {
           await visible(member.page, copy.claimsPage.memberTitle)
           const link = member.page.locator(`[data-testid="member-case-list"] a[href="/${profile.locale}/dashboard/claims/${createdId}"]:visible`).first()
           await link.waitFor({ state: 'visible' })
+          await scan(member.page, 'member-case-list')
           await noOverflow(member.page)
           await link.focus()
           await link.press('Enter')
@@ -544,6 +575,8 @@ export async function runBrowserAcceptance(input: {
           const details = staff.page.locator(`[id="case-details-${encodeURIComponent(fixture.assignedCaseId)}"]`)
           await details.waitFor({ state: 'visible' })
           await details.getByTestId('case-deadlines').getByLabel(copy.caseDeadlines.name, { exact: true }).waitFor({ state: 'visible' })
+          stage('STAFF_ACCESSIBILITY')
+          await scan(staff.page, 'staff-workbench-case')
           await noOverflow(staff.page)
         })
         const deadlineName = `Owned browser deadline ${profile.id} ${fixture.ownership.slice(0, 8)}`
