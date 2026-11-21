@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "status": "APPROVED_EXPLICIT_FOUNDER_REPLY",
+  "change": "CHG-2026-0114",
+  "recordedAt": "2026-11-21T21:09:50.968385+00:00",
+  "explicitFounderReply": "everything is authorized.. everything still not done is authorized to be done",
+  "precedingFounderReply": "implement everything missing still, reenable it, make sure it works",
+  "previousApprovedEnd": "2026-11-18T03:00:00Z",
+  "endsAt": "2026-11-23T03:00:00Z",
+  "resolvedTorontoEnd": "2026-11-22 22:00 America/Toronto",
+  "explicitExactEndProvided": false,
+  "operatorResolution": "The founder authorized completing all remaining Union Eyes V2 Step 1 work, including staging deployment and qualification. The founder gave no exact end; the operator books a bounded window ending 10 p.m. Toronto on November 22. This is an operator-resolved window, not a quoted exact time.",
+  "currentCandidate": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+  "currentPr": 1269,
+  "pullRequestHead": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
+  "scope": "Build, deploy and qualify merge commit 57728a2a (PR #1269, V2 Step 1 integration) on the existing dedicated V2 staging stack through the main-only build and deploy workflows, reviewed no-delete what-if and the protected ue-staging environment, then run the deployed real-session, real-navigation and rollback-rehearsal qualification.",
+  "founderAccountsRepresentOnePerson": [
+    "anungis",
+    "anungis437"
+  ],
+  "productionAuthorized": false,
+  "financeFeatureImplementationAuthorized": false,
+  "liveDataResetAuthorized": false,
+  "phase3bAuthorized": false,
+  "liveDataAndOriginalEvidenceMustBePreserved": true,
+  "priorApprovalReceiptSha256": "afbc241644896bc81929315f725654530cae73627fdf15a1c2c1feb8c199bc20"
+}
