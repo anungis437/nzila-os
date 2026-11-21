@@ -156,8 +156,12 @@ async function sessionHeaders(context: BrowserContext, origin: string, extra: Re
   return cookie ? { ...extra, cookie } : extra
 }
 function actualResponse(page: Page, endpoint: string, method: string) {
-  return page.waitForResponse((response) => new URL(response.url()).pathname === endpoint &&
+  const pending = page.waitForResponse((response) => new URL(response.url()).pathname === endpoint &&
     response.request().method() === method, { timeout: 45000 })
+  // A wait abandoned because the action before it failed must not reject unobserved and kill the process before the receipt
+  // is written; awaiting it still throws.
+  pending.catch(() => undefined)
+  return pending
 }
 /** The last fixed stage a journey reached; persisted with a failure so a timeout says what it was waiting for. */
 let browserStage = 'START'
@@ -206,10 +210,12 @@ async function uiLogin(input: {
   assert.equal(challenge.userId, person.id, 'MFA_IDENTITY_SUBSTITUTION')
   stage('ORGANIZATION_OR_DASHBOARD')
   const organizationChoice = page.getByRole('combobox', { name: copy.loginForm.organization, exact: true })
-  const next = await Promise.race([
-    organizationChoice.waitFor({ state: 'visible', timeout: 45000 }).then(() => 'CHOICE'),
-    page.waitForURL((url) => url.pathname.startsWith(`/${input.locale}/dashboard`), { timeout: 45000 }).then(() => 'BOUND'),
-  ])
+  const choice = organizationChoice.waitFor({ state: 'visible', timeout: 45000 }).then(() => 'CHOICE' as const)
+  const bound = page.waitForURL((url) => url.pathname.startsWith(`/${input.locale}/dashboard`), { timeout: 45000 })
+    .then(() => 'BOUND' as const)
+  // The losing wait keeps running and later rejects; observe it so it cannot become an unhandled rejection.
+  choice.catch(() => undefined); bound.catch(() => undefined)
+  const next = await Promise.race([choice, bound])
   if (next === 'CHOICE') {
     const offered = await organizationChoice.locator('option:not([value=""])').count()
     assert.ok(offered > 0, 'NO_OFFERED_ORGANIZATION')
@@ -261,6 +267,10 @@ export async function runBrowserAcceptance(input: {
   const contexts = new Set<BrowserContext>()
   let fixture: OwnedLoadFixture
   const origin = assertOwnedLocalOrigin(input.origin)
+  // Any other stray rejection during the browser run is recorded as a cleanup failure (the proof fails) instead of killing the
+  // process before a receipt exists.
+  const strayRejection = () => { result.cleanup.errors.push('UNHANDLED_BROWSER_REJECTION') }
+  process.on('unhandledRejection', strayRejection)
   const close = async (context: BrowserContext) => {
     await context.close()
     contexts.delete(context)
@@ -578,6 +588,9 @@ export async function runBrowserAcceptance(input: {
       try { rmSync(browserTemp, { recursive: true, force: true }) }
       catch { result.cleanup.errors.push('BROWSER_TEMP_REMOVAL_FAILED') }
     }
+    // Waits rejected by the context/browser close above settle on the next turns; let them land while the listener is attached.
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    process.off('unhandledRejection', strayRejection)
     result.status = browserProofPassed(result) ? 'PASS' : 'FAIL'
   }
   return result
