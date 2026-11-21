@@ -658,10 +658,18 @@ export async function runBrowserAcceptance(input: {
           assert.equal((await member.context.request.post(origin + '/api/auth/logout', {
             headers: await sessionHeaders(member.context, origin, { origin }),
           })).status(), 200, 'REAL_LOGOUT_FAILED')
-          assert.equal((await member.context.request.get(origin + '/api/auth/me', { headers: await sessionHeaders(member.context, origin) })).status(), 401,
-            'BROWSER_SESSION_SURVIVED_LOGOUT')
-          assert.equal((await member.context.request.get(origin + '/api/auth/me', { headers: { cookie: memberCookie } })).status(), 401,
-            'REVOKED_REAL_SESSION_WAS_STILL_ACCEPTED')
+          // /api/auth/me intentionally returns HTTP 200 with { user: null } for an anonymous session.
+          // A status-only 401 assertion falsely rejects a correctly revoked session.
+          const afterLogout = await member.context.request.get(origin + '/api/auth/me', {
+            headers: await sessionHeaders(member.context, origin),
+          })
+          assert.equal(afterLogout.status(), 200, 'AUTH_ME_ANONYMOUS_CONTRACT_CHANGED')
+          assert.deepEqual(await afterLogout.json(), { user: null }, 'BROWSER_SESSION_SURVIVED_LOGOUT')
+          const replay = await member.context.request.get(origin + '/api/auth/me', {
+            headers: { cookie: memberCookie },
+          })
+          assert.equal(replay.status(), 200, 'AUTH_ME_REPLAY_CONTRACT_CHANGED')
+          assert.deepEqual(await replay.json(), { user: null }, 'REVOKED_REAL_SESSION_WAS_STILL_ACCEPTED')
           memberCookie = ''
         })
         row.status = 'PASS'
