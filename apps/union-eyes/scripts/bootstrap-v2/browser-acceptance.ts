@@ -1,7 +1,8 @@
 /** Actual Chromium journeys against the owned production Next/V2 fixture. No QA cookies or response stubs. */
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 // The optional production-service shim for 'playwright' is deliberately small.
@@ -200,6 +201,7 @@ export async function runBrowserAcceptance(input: {
     ],
   }
   let browser: Browser | undefined
+  let browserTemp: string | undefined
   const contexts = new Set<BrowserContext>()
   let fixture: OwnedLoadFixture
   const origin = assertOwnedLocalOrigin(input.origin)
@@ -267,11 +269,15 @@ export async function runBrowserAcceptance(input: {
     result.setupPhase = 'LAUNCH_INSTALLED_CHROMIUM'
     const playwright = createRequire(import.meta.url)('playwright') as Pick<typeof import('@playwright/test'), 'chromium'>
     mkdirSync(path.join(input.stateDirectory, 'browser-downloads'), { recursive: true })
+    // Chromium creates its singleton socket under TMPDIR, and a Unix socket path is limited to 107 bytes. The owned state
+    // directory sits deep in the workspace on CI, which pushed that path over the limit and Chromium aborted at launch. The
+    // browser therefore gets its own short, owned temporary directory, removed when this stage ends.
+    browserTemp = mkdtempSync(path.join(tmpdir(), 'uev2b-'))
     browser = await playwright.chromium.launch({
       channel: 'chromium', headless: true,
       downloadsPath: path.join(input.stateDirectory, 'browser-downloads'),
       env: {
-        HOME: input.stateDirectory, TMPDIR: input.stateDirectory, TMP: input.stateDirectory, TEMP: input.stateDirectory,
+        HOME: input.stateDirectory, TMPDIR: browserTemp, TMP: browserTemp, TEMP: browserTemp,
         ...(process.env.PATH ? { PATH: process.env.PATH } : {}),
         ...(process.env.SystemRoot ? { SystemRoot: process.env.SystemRoot } : {}),
         ...(process.env.WINDIR ? { WINDIR: process.env.WINDIR } : {}),
@@ -498,6 +504,10 @@ export async function runBrowserAcceptance(input: {
     result.cleanup.contextsClosed = contexts.size === 0
     try { await browser?.close(); result.cleanup.browserClosed = true }
     catch { result.cleanup.errors.push('BROWSER_CLOSE_FAILED') }
+    if (browserTemp) {
+      try { rmSync(browserTemp, { recursive: true, force: true }) }
+      catch { result.cleanup.errors.push('BROWSER_TEMP_REMOVAL_FAILED') }
+    }
     result.status = browserProofPassed(result) ? 'PASS' : 'FAIL'
   }
   return result
