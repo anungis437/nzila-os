@@ -281,6 +281,9 @@ describe('isolated actual Next acceptance boundary', () => {
       expect(env.NODE_OPTIONS).toContain('--max-old-space-size=4096')
       expect(env.CRON_SECRET).toMatch(/^[a-f0-9]{96}$/)
       expect(env.CRON_SECRET).not.toBe('ue-v2-cron-secret')
+      // Case intake seals a NAR decision proof; the owned runtime must carry its own production-strength signing secret.
+      expect(env.NAR_SIGNING_SECRET).toMatch(/^[a-f0-9]{96}$/)
+      expect(env.NAR_SIGNING_SECRET).not.toBe(env.AUTH_SECRET)
       expect(env.HOME).not.toContain(path.dirname(path.resolve('local-boundary.cjs')) + path.sep)
       expect(env.SKIP_DB_STARTUP_CHECK).toBeUndefined()
       expect(env.PLAYWRIGHT_TEST_AUTH).toBeUndefined()

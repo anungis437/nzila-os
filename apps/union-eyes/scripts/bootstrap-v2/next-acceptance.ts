@@ -123,6 +123,9 @@ export function syntheticNextEnvironment(
     AUTH_SECRET: randomBytes(48).toString('hex'),
     AUTH_MFA_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
     VOTING_SECRET: randomBytes(48).toString('hex'),
+    // Production provisions this from Key Vault (bicep nar-signing-secret); the owned runtime generates its own, so case
+    // intake can seal its NAR decision proof. Without it every intake answers 500 "Missing NAR signing secret".
+    NAR_SIGNING_SECRET: randomBytes(48).toString('hex'),
     NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${port}`,
     AUTH_URL: `http://127.0.0.1:${port}`,
     AUTH_TRUST_HOST: 'true',
@@ -617,6 +620,7 @@ export async function runNextAcceptance() {
       env.AUTH_SECRET,
       env.AUTH_MFA_ENCRYPTION_KEY,
       env.VOTING_SECRET,
+      env.NAR_SIGNING_SECRET,
       env.CRON_SECRET,
       httpFixture.password,
       httpFixture.mfaSecret,

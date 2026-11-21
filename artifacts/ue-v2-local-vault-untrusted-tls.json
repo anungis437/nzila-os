@@ -1,7 +1,7 @@
 {
   "mode": "untrusted-tls",
   "nodeEnvironment": "production",
-  "sourceDigest": "0e7d048a2c0ccbe801210531a126e0913a5f368d93a8c23179f71715440c4847",
+  "sourceDigest": "50442237a2e45011ceaea61ece9172bf775da11cf60f1191fcdba220a5da8547",
   "exitCode": 0,
   "sdkMocked": false,
   "certificateValidationDisabled": false,
@@ -19,23 +19,23 @@
   },
   "networkObservations": [
     {
-      "pid": 43752,
+      "pid": 70514,
       "transport": "PIPE",
-      "targetDigest": "eb292fbe7b63546d93980f03d8183bb7e1752d3d5729e4435631f890e736ce1d",
+      "targetDigest": "db8b5f596008951ad9a4901f1a402b8af125915cad5dc68d660da2a8eb0286e3",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 43752,
+      "pid": 70514,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 60092,
+      "port": 60880,
       "allowed": true
     },
     {
-      "pid": 43752,
+      "pid": 70514,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
