@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:915b5524-6958-4fc8-a454-24df083d4b2c",
+  "serialNumber": "urn:uuid:c9a46c30-8afb-4a29-9ad4-887bd6cf81e4",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-19T09:50:28Z",
+    "timestamp": "2026-11-21T19:32:04Z",
     "tools": [
       {
         "vendor": "nzila",
@@ -20,11 +20,11 @@
     "properties": [
       {
         "name": "nzila:lockfile-sha256",
-        "value": "65d5b91a414ce67cc09966242b90b29c0bb1ee12d1ed0dca5f1b4df2b1da21bb"
+        "value": "b7e282a86af647c4722d1f67783341fc38dd10a64336250da10972d4bbf9d90d"
       },
       {
         "name": "nzila:registry-metadata-sha256",
-        "value": "79db91efe4fc5db9e10d4cb133bf89863a762d0fa0492e0bcd5b4a6f54cfbb5f"
+        "value": "49bf85254f2e39ff0d14a433077723eb635d1fc94767777c7685c7a83b19ed2f"
       }
     ]
   },

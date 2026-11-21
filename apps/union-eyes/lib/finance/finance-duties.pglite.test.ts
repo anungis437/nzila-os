@@ -5,10 +5,9 @@
  * best-effort refusal logger and the Canonical-V2 switch are doubles. Not a staging pass.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { drizzle } from 'drizzle-orm/pglite'
 import type { PGlite } from '@electric-sql/pglite'
 import { newUuid, ORG, ORG_B, seedMembership, U } from '../../db/__tests__/authority-kernel-harness'
-import { freshDb, kit } from '../../db/__tests__/authority-kernel-testkit'
+import { appDrizzle, freshDb, kit } from '../../db/__tests__/authority-kernel-testkit'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { ddl } from '@/lib/documents/test-support/pglite-document-database'
 import { ErrorCode } from '@/lib/api/errors'
@@ -40,7 +39,7 @@ async function as<T>(userId: string, fn: (tx: RLSTx) => Promise<T>, org = ORG): 
   await pg.exec('BEGIN')
   try {
     await pg.query(`SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`, [org, userId])
-    const out = await fn(drizzle(pg) as unknown as RLSTx)
+    const out = await fn(appDrizzle(pg) as unknown as RLSTx)
     await pg.exec('COMMIT')
     return out
   } catch (error) {
