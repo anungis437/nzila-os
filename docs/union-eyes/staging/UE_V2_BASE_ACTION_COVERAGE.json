@@ -11187,6 +11187,178 @@
         "stagingAndProductionPromoted": false,
         "executionRecoveryEvidence": "evidence/ue-v2-step1-qualification-20261117/interrupted-qualification-v1.json"
       }
-    ]
+    ],
+    "step1ClosureRegister": {
+      "purpose": "The one Step 1 closure register for Union Eyes V2. Each obligation maps to its existing open-verification row in UE_V2_BASE_PRODUCT_SCOPE_SEMANTIC_REVIEW_20261117.json; no parallel gate, status or workstream is created. A state here is engineering evidence, not a release, staging or Step 2 decision.",
+      "integrationBranch": "fix/ue-step1-integration-20261118",
+      "integrationPr": 1269,
+      "candidateSha": null,
+      "candidateShaRule": "Set only when every obligation below is qualified on the same committed bytes; until then each item names the commit its evidence was produced on.",
+      "stepClosed": false,
+      "step2Held": true,
+      "v2EngineeringQualification": {
+        "ciJob": "V2 production build, real login, four browser profiles and full casework load (.github/workflows/ue-http-runtime.yml)",
+        "componentsPassingBeforeBrowserFix": [
+          "production Next build",
+          "runtime start",
+          "authenticated HTTP smoke",
+          "authenticated casework load (3,593 of 3,600 scheduled requests, zero request errors)",
+          "Chromium start",
+          "fixture cleanup"
+        ],
+        "browserDefectsFoundAndCorrected": [
+          {
+            "commit": "d5e868e1a",
+            "kind": "HARNESS",
+            "defect": "Playwright context.cookies(url) and APIRequestContext drop Secure cookies for any http host but localhost; on http://127.0.0.1 the production Secure session cookie was invisible and API checks went out anonymous (denial checks could pass on a 401).",
+            "correction": "Read the whole jar matched by host/path; every request carries the browser's own cookies."
+          },
+          {
+            "commit": "18c63ae9a",
+            "kind": "HARNESS",
+            "defect": "Unobserved rejections from abandoned waits (Promise.race loser, pre-armed waitForResponse) killed the run before its receipt.",
+            "correction": "Abandoned waits are observed; any stray rejection is recorded as a cleanup error and fails the proof."
+          },
+          {
+            "commit": "434134f6a",
+            "kind": "APPLICATION",
+            "defect": "Sign-in accepted Enter before React hydration; the native form navigation reloaded the page empty.",
+            "correction": "Login controls disabled until hydrated (blocks implicit submission); data-hydrated exposed."
+          },
+          {
+            "commit": "4986e73e7",
+            "kind": "APPLICATION",
+            "defect": "Intake fields filled before hydration were not in form state; members also requested the steward-only voice notice (503 when unconfigured).",
+            "correction": "Intake submission disabled until hydrated; members never request the voice notice (unit test)."
+          },
+          {
+            "commit": "153ca299d",
+            "kind": "HARNESS",
+            "defect": "Root cause of INTAKE_SUBMIT timeout in all four profiles: the blocking privacy/cookie consent dialog (components/gdpr/cookie-consent-banner.tsx, modal, Escape and outside click disabled) covers the page after an organization is bound; fill/selectOption do not hit-test, click does and waited behind it.",
+            "correction": "The journey answers the dialog with the privacy-preserving Reject All after sign-in and requires it to appear; failed intake records fixed-value submission evidence; a passing intake must send exactly one intake POST."
+          }
+        ],
+        "fastDiagnostic": "From apps/union-eyes: UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=0 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts runs the real production build, real login and all four browser profiles against owned fixtures without the load profile. The CI component run keeps both flags at 1.",
+        "state": "ROOT_CAUSE_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
+        "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
+      },
+      "picomatchAdvisory1247710": {
+        "evidence": "evidence/ue-v2-step1-qualification-20261117/picomatch-advisory-1247710-verification-v8.json",
+        "state": "PATCHED_RUNTIME_AND_LOCKFILE_VERIFIED_EXACT_HEAD_CI_AUDIT_PENDING",
+        "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
+      },
+      "obligations": [
+        {
+          "id": "S1-A01",
+          "title": "Primary case-handler authority",
+          "openVerificationRow": "S1-A01",
+          "state": "ENFORCEMENT_PRESENT_QUALIFICATION_OPEN",
+          "evidence": [
+            "apps/union-eyes/lib/authority/common.ts (primary-only powers case:disclose_to_member, case:export_sealed_evidence, case:close; supervisory mandate carrying them invalid)",
+            "apps/union-eyes/lib/authority/policies/case.ts (supervisory/emergency and delegation refused; explicit owner/assignee with handler capacity only)",
+            "apps/union-eyes/lib/authority/issuance.ts, store/lifecycle.ts, store/mutations.ts (ceiling at rule and mandate issue/amend/write)",
+            "apps/union-eyes/db/auth/authority-physical-guards.ts and case-primary-domain-guards.ts (database CHECK ceilings)",
+            "lib/authority/__tests__/primary-handler-ceiling.test.ts; db/auth/*.pglite.test.ts; db/__tests__/grievances-routes.postgres.test.ts (native closure/cross-org refusal)"
+          ],
+          "gaps": [
+            "Ceiling guard tests run on PGlite, not native PostgreSQL; no native test names case:disclose_to_member or case:export_sealed_evidence.",
+            "Route-level export denial is proven for members only: secondary handler, supervisor, delegate, expired/revoked mandate, unassigned case and cross-tenant denials are not.",
+            "PR #1268 open items: owner/assignee uniqueness, direct caller paths, explicit emergency-grant denials."
+          ]
+        },
+        {
+          "id": "S1-A02",
+          "title": "Historical authorization reconciliation",
+          "openVerificationRow": "S1-HIST",
+          "state": "DISPOSITIONS_RECORDED_IMPLEMENTATION_TRACE_OPEN",
+          "evidence": [
+            "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json (111 historical capabilities, each with scope, source state and base actions; sourcePinAudit 57 files at 8147ae48)",
+            "apps/union-eyes/lib/reality/__tests__/step1-scope-reconciliation.test.ts (run in ue-full-regression)"
+          ],
+          "gaps": [
+            "No historical capability names its current implementation or registry identifier; links stop at base actions C01-C22.",
+            "No SUPERSEDED disposition exists; superseded functionality is not distinguishable from removed.",
+            "Runtime requalification against the current candidate is open."
+          ]
+        },
+        {
+          "id": "S1-A03",
+          "title": "Transitive authority",
+          "openVerificationRow": "S1-TRANSITIVE",
+          "state": "PARTIAL_COMPONENT_PROOF_CALLER_COVERAGE_NOT_PROVEN",
+          "evidence": [
+            "apps/union-eyes/lib/authority/subordinate-authority-register.ts (19 records incl. session bridges and revocation)",
+            "app/api/__tests__ cron, webhook and queue route tests",
+            "session-membership-revocation, kernel-revocation-sweep and external-resource-read.postgres tests (revocation, offboarding mid-read, session expiry)",
+            "audit-failure rollback in case-primary-domain-guards and grievances-routes.postgres tests"
+          ],
+          "gaps": [
+            "Historical callers NOT_PROVEN: 901 TypeScript candidate callers with 10 runtime-qualified, 19 Celery tasks, 12 beat schedules, 142 Python mutation callers.",
+            "No inventory proving every worker, queue and server-action path has an authority test."
+          ]
+        },
+        {
+          "id": "S1-A04",
+          "title": "Institutional representation",
+          "openVerificationRow": "S1-CONFIG",
+          "state": "MANDATE_MODEL_PROVEN_IN_PART_VARIANTS_OPEN",
+          "evidence": [
+            "apps/union-eyes/lib/authority/ontology.ts (mandate kinds)",
+            "lib/authority/__tests__/kernel-governance.test.ts (executive without office mandate refused; expiry, self-grant, conflict, recusal, delegation, foreign tenant)",
+            "db/__tests__/election-certificate-succession.native.test.ts (single successor under concurrency)",
+            "lib/external-resource-read with db/__tests__/external-resource-read.postgres.test.ts (external representative chain, native)"
+          ],
+          "gaps": [
+            "No native test for suspension, conflicting appointments or senior-representative supervision mandates.",
+            "Base actions C10 (senior supervision) and C11 (successor handoff) unqualified.",
+            "External counsel verifier not established; external representative issuance is synthetic-QA only (no HTTP surface)."
+          ]
+        },
+        {
+          "id": "S1-A05",
+          "title": "Product and stakeholder completeness",
+          "openVerificationRow": "S1-CAP",
+          "state": "SCOPE_DISPOSITIONS_RECORDED_PER_ITEM_EVIDENCE_OPEN",
+          "counts": {
+            "historicalCapabilities": 111,
+            "registryCapabilities": 143,
+            "historicalPersonaIdentifiers": 182,
+            "reconstructedPersonaContracts": 177,
+            "rowsNeedingScopeResolution": 0,
+            "requiredRowsWithoutBaseAction": 0,
+            "unresolvedCurrentScopeClassifications": 0
+          },
+          "countNote": "The registry holds 143 capabilities (141 at the historical baseline; 2 added in lib/reality/capability-registry.ts). The figure 140 does not appear in the reconciliation sources.",
+          "evidence": [
+            "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json (.currentReleaseResolution)"
+          ],
+          "gaps": [
+            "REQUIRED rows carry no evidence link of their own; evidence is reached only through base actions C01-C22, all CURRENT_STEP_1_CANDIDATE_UNQUALIFIED with negativeMatrix and step1Evidence null.",
+            "REQUIRED registry rows by source state: 25 NOT_IMPLEMENTED, 29 LIMITED, 3 REAL; REQUIRED historical rows: 44 PARTIAL, 11 NOT_IMPLEMENTED."
+          ]
+        },
+        {
+          "id": "S1-A06",
+          "title": "Adversarial qualification",
+          "openVerificationRow": "S1-FINAL",
+          "state": "HELD_PENDING_REMAINING_EVIDENCE",
+          "evidence": [
+            "SHA-bound CI: ue-full-regression.yml, ue-security-regression.yml, ue-native-postgres.yml (PG15/PG16, expected-skip contract), ue-bootstrap-v2-provenance.yml (zero-skip native runtime security matrix)",
+            "Concurrency/duplicate: auth-invite-concurrency.native, election-certificate-succession.native, grievances-routes.postgres",
+            "Bilingual/mobile and negative E2E: e2e/liuna-bilingual-mobile-transition.spec.ts; tests/e2e negative-workflow-transitions, org-isolation-negative, cross-org-block, evidence-misuse",
+            "V2 browser journeys in four EN/FR desktop/mobile profiles (see v2EngineeringQualification)"
+          ],
+          "gaps": [
+            "No action x authority matrix: negativeMatrix is null for all 22 base actions.",
+            "Earlier local receipts are bound to an uncommitted working tree, not a committed SHA.",
+            "Full contract reported 10,139 passed and 7 failed; the fresh PG16 runtime run was interrupted after 8 failures without a final report."
+          ]
+        }
+      ],
+      "residualBlockers": [
+        "Every obligation above remains open on its stated gaps; Step 1 is not closed and no candidate SHA is qualified.",
+        "V2 browser acceptance and the picomatch audit await exact-head CI on the pushed correction."
+      ]
+    }
   }
 }
