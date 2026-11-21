@@ -16,9 +16,14 @@ import {
 import { auditAuthorityMutation } from '@/lib/authority/store/audit'
 import { ACTIVE_RECUSAL_SQL } from '@/lib/authority/common'
 import type { PhysicalGuardContract } from './physical-guard-catalog'
+import { openCaseDomainDb } from '../__tests__/case-primary-domain-testkit'
+
+// UE_AUTHORITY_GUARDS_NATIVE=1 runs every case below on an owned disposable PostgreSQL 16 container (the native CI job does);
+// otherwise PGlite. The assertions are identical in both modes.
+const native = process.env.UE_AUTHORITY_GUARDS_NATIVE === '1'
 
 async function fixture(guardContract: PhysicalGuardContract = contract) {
-  const pg = new PGlite()
+  const pg = native ? await openCaseDomainDb(true) : new PGlite()
   await pg.exec(`CREATE ROLE ue_v2_owner;CREATE ROLE union_eyes_runtime;CREATE ROLE union_eyes_system;
  GRANT CREATE ON SCHEMA public TO ue_v2_owner;SET ROLE ue_v2_owner;`)
   const ddl = await generateMigration(generateDrizzleJson({}), generateDrizzleJson(schema))
