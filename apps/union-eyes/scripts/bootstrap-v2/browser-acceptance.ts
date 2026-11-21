@@ -35,7 +35,7 @@ interface ProfileResult {
   id: string
   locale: string
   viewport: { width: number; height: number }
-  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string; failureStage?: string }[]
+  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string; failureStage?: string; failurePath?: string }[]
   status: CheckStatus
 }
 interface BrowserResult {
@@ -51,6 +51,8 @@ interface BrowserResult {
   serverErrors: number
   /** 429 responses the browser received from the owned server (evidence only; a 429 that breaks a journey fails its check). */
   rateLimitedResponses: number
+  /** Owned-origin paths that answered 5xx, with identifiers masked; no query, body or header is kept. */
+  serverErrorPaths: string[]
   cleanup: { browserClosed: boolean; contextsClosed: boolean; errors: string[] }
   limitations: string[]
 }
@@ -155,6 +157,15 @@ async function sessionHeaders(context: BrowserContext, origin: string, extra: Re
   const cookie = (await ownedCookies(context, origin)).map((item) => `${item.name}=${item.value}`).join('; ')
   return cookie ? { ...extra, cookie } : extra
 }
+/** A URL's pathname with UUIDs and digit runs masked, or null when unparsable; queries and fragments are never kept. */
+export function maskedPath(url: string): string | null {
+  try {
+    return new URL(url).pathname
+      .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id')
+      .replace(/\d+/g, ':n')
+      .slice(0, 160)
+  } catch { return null }
+}
 function actualResponse(page: Page, endpoint: string, method: string) {
   const pending = page.waitForResponse((response) => new URL(response.url()).pathname === endpoint &&
     response.request().method() === method, { timeout: 45000 })
@@ -165,6 +176,8 @@ function actualResponse(page: Page, endpoint: string, method: string) {
 }
 /** The last fixed stage a journey reached; persisted with a failure so a timeout says what it was waiting for. */
 let browserStage = 'START'
+/** The masked path of the last top-level document a journey page navigated to; persisted with a failure. */
+let lastPagePath: string | null = null
 const stage = (name: string) => { browserStage = name }
 async function uiLogin(input: {
   context: BrowserContext; page: Page; origin: string; locale: string; organizationId: string
@@ -176,6 +189,8 @@ async function uiLogin(input: {
   await navigate(page, origin, `/${input.locale}/sign-in`)
   await page.waitForFunction((locale) => document.documentElement.lang.toLowerCase() === locale.toLowerCase(), input.locale)
   await visible(page, copy.loginForm.welcome)
+  stage('SIGN_IN_HYDRATION')
+  await page.locator('form[data-hydrated="true"]').first().waitFor({ state: 'attached', timeout: 30000 })
   const email = page.getByLabel(copy.auth.email, { exact: true })
   const passwordField = page.getByLabel(copy.auth.password, { exact: true })
   await email.fill(person.email)
@@ -251,7 +266,7 @@ export async function runBrowserAcceptance(input: {
 }): Promise<BrowserResult> {
   const result: BrowserResult = {
     status: 'FAIL', engine: null, engineVersion: null, profiles: [], setup: 'UNEXECUTED',
-    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0,
+    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0, serverErrorPaths: [],
     cleanup: { browserClosed: false, contextsClosed: false, errors: [] },
     limitations: [
       'Owned disposable production Next/native V2 proof only; no staging, production, real inbox or live customer acceptance.',
@@ -293,8 +308,13 @@ export async function runBrowserAcceptance(input: {
     })
     context.on('page', (page) => {
       page.on('pageerror', () => { result.unhandledBrowserErrors++ })
+      page.on('framenavigated', (frame) => { if (frame === page.mainFrame()) lastPagePath = maskedPath(frame.url()) })
       page.on('response', (response) => {
-        if (response.status() >= 500) result.serverErrors++
+        if (response.status() >= 500) {
+          result.serverErrors++
+          const masked = maskedPath(response.url())
+          if (masked && result.serverErrorPaths.length < 20 && !result.serverErrorPaths.includes(masked)) result.serverErrorPaths.push(masked)
+        }
         if (response.status() === 429) result.rateLimitedResponses++
       })
     })
@@ -386,6 +406,7 @@ export async function runBrowserAcceptance(input: {
         try { await operation(); activeCheck.status = 'PASS' }
         catch (error) {
           activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error); activeCheck.failureStage = browserStage
+          if (lastPagePath) activeCheck.failurePath = lastPagePath
           throw error
         }
       }
@@ -397,7 +418,9 @@ export async function runBrowserAcceptance(input: {
           person: fixture.people.member, password: input.fixture.password, mfaSecret: input.fixture.mfaSecret }
         await step('member-password-totp-ui', async () => { memberCookie = await uiLogin(memberLogin) })
         await step('member-intake-labels-and-create', async () => {
+          stage('INTAKE_PAGE')
           await navigate(member.page, origin, `/${profile.locale}/dashboard/claims/new`)
+          stage('INTAKE_LABELS')
           for (const name of [copy.forms.caseTitle, copy.forms.category, copy.priority.label, copy.forms.detailedDescription,
             copy.forms.whenOccurred, copy.forms.location, copy.forms.witnesses]) {
             await member.page.getByLabel(name, { exact: false }).waitFor({ state: 'visible' })
@@ -407,6 +430,7 @@ export async function runBrowserAcceptance(input: {
           await member.page.getByLabel(copy.forms.category, { exact: false }).selectOption('Safety')
           await member.page.getByLabel(copy.forms.detailedDescription, { exact: false }).fill('Synthetic browser acceptance case. No customer data.')
           await member.page.getByLabel(copy.forms.whenOccurred, { exact: false }).fill(new Date(Date.now() - 86400000).toISOString().slice(0, 10))
+          stage('INTAKE_SUBMIT')
           const responsePromise = actualResponse(member.page, '/api/cases/intake', 'POST')
           await member.page.getByRole('button', { name: copy.forms.submitCase, exact: true }).click()
           const body = await json(await responsePromise)
@@ -419,6 +443,7 @@ export async function runBrowserAcceptance(input: {
           assert.equal(persisted.rows[0].organization_id, fixture.organizationId)
           assert.equal(persisted.rows[0].member_id, fixture.people.member.id)
           createdNumber = persisted.rows[0].claim_number
+          stage('INTAKE_LANDING')
           await member.page.waitForURL(`**/${profile.locale}/dashboard/claims/${createdId}`, { timeout: 30000 })
           await visible(member.page, createdNumber)
           await noOverflow(member.page)
@@ -565,6 +590,7 @@ export async function runBrowserAcceptance(input: {
       } catch (error) {
         if (activeCheck.status !== 'FAIL') {
           activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error); activeCheck.failureStage = browserStage
+          if (lastPagePath) activeCheck.failurePath = lastPagePath
         }
         row.status = 'FAIL'
       } finally {

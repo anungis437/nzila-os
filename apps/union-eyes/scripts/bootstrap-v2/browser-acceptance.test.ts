@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, expect, it } from 'vitest'
 import {
-  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
+  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, maskedPath, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
 } from './browser-acceptance'
 
 const origin = 'http://127.0.0.1:43219'
@@ -79,6 +79,13 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
       { name: 'scoped', domain: '127.0.0.1', path: '/admin', secure: false, httpOnly: false },
     ]
     expect(cookiesForOwnedOrigin(jar, 'http://127.0.0.1:41449').map((cookie) => cookie.name)).toEqual(['nzila_session'])
+  })
+
+  it('keeps only a masked path from a failing response or page', () => {
+    expect(maskedPath('http://127.0.0.1:41449/fr-CA/dashboard/claims/0b7c5a3e-1f2d-4c3b-9a8e-123456789abc?token=secret#x'))
+      .toBe('/fr-CA/dashboard/claims/:id')
+    expect(maskedPath('http://127.0.0.1:41449/api/cases/CLM-2026-00042')).toBe('/api/cases/CLM-:n-:n')
+    expect(maskedPath('not a url')).toBeNull()
   })
 
   it('names the failed proof by its fixed code and never by a generated or typed message', () => {

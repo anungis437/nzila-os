@@ -75,6 +75,10 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
   const pathname = usePathname();
   const postLoginPath = configuredPostLoginPath ?? `/${localeOfPath(pathname, locales, defaultLocale)}/dashboard`;
   const [mode, setMode] = useState<Mode>('password');
+  // Until React has hydrated, a submit would be a native form navigation that reloads the page and drops what was typed;
+  // keep the controls off until the handlers are attached, and expose the state for automated journeys.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -342,7 +346,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
                 {organization.name} — {organization.slug}
               </option>)}
             </select>
-            <button type="submit" disabled={loading || !organizationId}
+            <button type="submit" disabled={loading || !organizationId || !hydrated}
               className="min-h-11 w-full whitespace-normal rounded-lg bg-blue-700 px-4 py-2 text-white disabled:opacity-50">
               {t('continueOrganization')}
             </button>
@@ -365,14 +369,14 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           <button
             type="button"
             onClick={continueWithSso}
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition-all"
           >
             {t('continueMicrosoft')}
           </button>
         </div>
       ) : mfaChallengeToken ? (
-        <form onSubmit={submitMfaChallenge} className="space-y-4">
+        <form onSubmit={submitMfaChallenge} className="space-y-4" data-hydrated={hydrated ? 'true' : 'false'}>
           <div>
             <label htmlFor="mfa-code" className="block text-sm font-medium text-gray-700 mb-1">
               {mfaUseRecovery ? t('recoveryCode') : t('authenticatorCode')}
@@ -392,7 +396,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? t('verifying') : t('verify')}
@@ -425,7 +429,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
         </form>
       ) : mode === 'password' ? (
-        <form onSubmit={submitPassword} className="space-y-4">
+        <form onSubmit={submitPassword} className="space-y-4" data-hydrated={hydrated ? 'true' : 'false'}>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">{auth('email')}</label>
             <input
@@ -459,14 +463,14 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? t('signingIn') : t('signIn')}
           </button>
         </form>
       ) : (
-        <form onSubmit={submitMagicLink} className="space-y-4">
+        <form onSubmit={submitMagicLink} className="space-y-4" data-hydrated={hydrated ? 'true' : 'false'}>
           <div>
             <label htmlFor="ml-email" className="block text-sm font-medium text-gray-700 mb-1">{auth('email')}</label>
             <input
@@ -483,7 +487,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? t('sending') : t('sendLink')}
@@ -504,7 +508,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           <button
             type="button"
             onClick={continueWithSso}
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full border border-gray-200 hover:bg-gray-50 text-gray-900 font-medium py-2.5 px-4 rounded-xl transition-colors"
           >
             {t('continueMicrosoft')}
