@@ -7,6 +7,9 @@ const root = `/subscriptions/${subscription}/resourceGroups/`
 export const workspace = `${root}${resourceGroup}/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law`
 export const previousWorkspace = `${root}nzila-canada-prod-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-canada-prod-law`
 export const names = ['unexpected-5xx', 'redis-unavailable', 'stripe-webhook-failure', 'resend-failure', 'database-errors', 'audit-persistence-failure', 'cron-job-failed'].map(name => `nzila-ue-v2-staging-${name}`)
+// Source-declared staging rules added after the workspace migration. They were never bound to the legacy workspace, so
+// they are never migration candidates: only Create, NoChange or an in-place Modify that keeps the dedicated workspace.
+export const nativeNames = ['base-operations-unhealthy-or-stale'].map(name => `nzila-ue-v2-staging-${name}`)
 export const ruleId = name => `${root}${resourceGroup}/providers/Microsoft.Insights/scheduledQueryRules/${name}`
 export const legacyCronFailureQuery = 'ContainerAppSystemLogs_CL | where ContainerAppName_s has "cron-deadlines" or JobName_s has "cron-deadlines" | where Reason_s in ("ContainerTerminated", "JobExecutionFailed") | where Log_s has_any ("exit code", "ExitCode", "Failed")'
 export const cronFailureQuery = 'ContainerAppSystemLogs_CL | where ContainerAppName_s has "cron-deadlines" or JobName_s has "cron-deadlines" | extend exitCode = toint(extract("exit code \'(-?[0-9]+)\'", 1, Log_s)) | where Reason_s == "JobExecutionFailed" or (Reason_s == "ContainerTerminated" and isnotnull(exitCode) and exitCode != 0)'
@@ -21,8 +24,19 @@ export function migrationPlan(whatIf, sourceSha) {
   const replacements = []
   for (const change of whatIf.changes) {
     if (!/\/providers\/microsoft\.insights\/scheduledqueryrules\//i.test(change.resourceId)) continue
+    const native = nativeNames.find(value => equalId(change.resourceId, ruleId(value)))
+    if (native) {
+      assert(['Modify', 'NoChange', 'Create'].includes(change.changeType), 'Unexpected log alert lifecycle operation')
+      assert.deepEqual(change.after.properties.scopes, [workspace], 'Only the dedicated staging workspace is permitted')
+      if (change.changeType === 'Modify') assert.deepEqual(change.before.properties.scopes, [workspace], 'A post-migration rule is never rebound between workspaces')
+      assert.equal(change.after.location, 'canadacentral')
+      assert.equal(change.after.tags.env, 'staging'); assert.equal(change.after.tags.managedBy, 'bicep')
+      assert.deepEqual(change.after.properties.actions.actionGroups, [`${root}${resourceGroup}/providers/Microsoft.Insights/actionGroups/nzila-ue-v2-staging-ops`])
+      assert.equal(change.after.properties.enabled, true)
+      continue
+    }
     const name = names.find(value => equalId(change.resourceId, ruleId(value)))
-    assert(name, 'Unexpected log alert outside the seven owned staging rules')
+    assert(name, 'Unexpected log alert outside the owned staging rules')
     assert(['Modify', 'NoChange', 'Create'].includes(change.changeType), 'Unexpected log alert lifecycle operation')
     assert.deepEqual(change.after.properties.scopes, [workspace], 'Only the dedicated staging workspace is permitted')
     if (change.changeType !== 'Modify') continue
