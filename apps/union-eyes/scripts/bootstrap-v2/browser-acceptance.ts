@@ -420,6 +420,8 @@ export async function runBrowserAcceptance(input: {
         await step('member-intake-labels-and-create', async () => {
           stage('INTAKE_PAGE')
           await navigate(member.page, origin, `/${profile.locale}/dashboard/claims/new`)
+          stage('INTAKE_HYDRATION')
+          await member.page.locator('[data-testid="new-claim-form"][data-hydrated="true"]').waitFor({ state: 'attached', timeout: 30000 })
           stage('INTAKE_LABELS')
           for (const name of [copy.forms.caseTitle, copy.forms.category, copy.priority.label, copy.forms.detailedDescription,
             copy.forms.whenOccurred, copy.forms.location, copy.forms.witnesses]) {

@@ -92,7 +92,12 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const disclosure = useVoiceDisclosure();
+  // Members are not offered voice transcription, so they never request its notice.
+  const disclosure = useVoiceDisclosure(canUseVoice);
+  // Until React hydrates, typed values are not in form state and a submit would fail validation silently; keep submission
+  // off until then and expose the state for automated journeys.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
   const disclosureRef = useRef(disclosure);
   useEffect(() => { disclosureRef.current = disclosure; }, [disclosure]);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -427,7 +432,7 @@ setIsSubmitting(false);
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" data-testid="new-claim-form" data-hydrated={hydrated ? 'true' : 'false'}>
                 {/* Title */}
                 <div>
                   <label htmlFor="new-case-title" className="block text-sm font-semibold text-gray-900 mb-2">
@@ -652,7 +657,7 @@ setIsSubmitting(false);
                 <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:gap-4">
                   <motion.button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !hydrated}
                     whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                     whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                     className="min-w-0 flex-1 whitespace-normal px-6 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"

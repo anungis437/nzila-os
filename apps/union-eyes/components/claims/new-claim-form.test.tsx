@@ -55,6 +55,13 @@ afterEach(() => {
 })
 
 describe('NewClaimForm', () => {
+  it('never requests the voice notice for a member, who is not offered voice, and opens submission once hydrated', async () => {
+    intakeAnswers({ ok: true, status: 200, json: async () => ({}) })
+    const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    await waitFor(() => expect(container.querySelector('form[data-hydrated="true"]')).not.toBeNull())
+    expect(fetchMock.mock.calls.some(([url]) => url === '/api/voice/disclosure')).toBe(false)
+  })
+
   it('connects every editable intake control to its visible label', () => {
     intakeAnswers(filed({ success: true, claimId: 'claim-11' }))
     render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
