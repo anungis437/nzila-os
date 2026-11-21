@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-18T01:22:05.821526+00:00",
+  "state": "NATIVE_CLONE_CANONICAL_FIXTURE_SOURCE_AND_SQL_ENGINE_COMPONENTS_VERIFIED",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "dirtyIntegrationSource": true,
+  "sourceFiles": [
+    {
+      "file": "apps/union-eyes/scripts/runtime/native-canonical-fixture.ts",
+      "sha256": "5cc99d41bf7fbdaf874df6deff00c5d837e18fff5fd40c9f7bbdda1a3430f06a"
+    },
+    {
+      "file": "apps/union-eyes/scripts/runtime/native-canonical-fixture.test.ts",
+      "sha256": "07edd279bd6c5dce9c41412f5e9cda99d7a5107460f2e6e352bab28a2b2839ac"
+    },
+    {
+      "file": "apps/union-eyes/scripts/runtime/native-test-database-isolation.ts",
+      "sha256": "73be763c55de6f6c0a04a639f56e733164f2cc38fc84028f2d120bea115a0501"
+    },
+    {
+      "file": "apps/union-eyes/db/__tests__/native-route-harness.ts",
+      "sha256": "0acbeb2bff27539887af0433db47e0764b843b4632bf99ffa4678156b6ceff15"
+    },
+    {
+      "file": "apps/union-eyes/db/__tests__/native-savepoint-harness.ts",
+      "sha256": "735babbbe3b9035295a701bde563126ca94290406149508679696b91f9bb2054"
+    },
+    {
+      "file": "apps/union-eyes/db/__tests__/authority-kernel-testkit.ts",
+      "sha256": "bac02cf13e8c163cc07189cb333a5ffcf646c7845082c8dc806040a3212bb0a7"
+    },
+    {
+      "file": "apps/union-eyes/db/__tests__/authority-kernel-combined.postgres.test.ts",
+      "sha256": "5c7c007548477761285e350d6f3e40788285c970aa64f4ac2ac7fbadf3ca9eb4"
+    },
+    {
+      "file": "apps/union-eyes/db/__tests__/thread-assignment.postgres.test.ts",
+      "sha256": "48057708949644c8abac8e3ab1e4d9438ad4e2e3fbb2a34498d2c33787e981d4"
+    },
+    {
+      "file": "apps/union-eyes/db/__tests__/deadline-dashboard.postgres.test.ts",
+      "sha256": "72020eec96aa5f7806d50daf3d10b52fcfc5015378344297107b9ca2427e473f"
+    }
+  ],
+  "scope": "Existing native-clone setup, two shared transaction helpers, optional typed native actor injection into the existing authority testkit and the three specifically approved native consumers. No new release gate or production auth/kernel changes.",
+  "repairs": [
+    "Each test clone gets independent random runtime/SYSTEM/ordinary-auth/auth-system LOGIN credentials, NOINHERIT/NOSUPERUSER/NOBYPASSRLS/NOCREATEDB/NOCREATEROLE, with source-compiled PostgreSQL15/16 membership options. Both incoming and outgoing role edges plus actual attributes are validated before publishing URLs.",
+    "All action/auth URLs point at the exact clone. Explicit operator URL remains available only for seed/catalog setup. Canonical mode1 is installed centrally, pools close, owned clone/roles drop, and prior environment values restore. No template-auth or operator-action fallback exists.",
+    "The session factory calls production createSession under its scoped identity executor, holds the real opaque bearer only in closures and runs production withBearerOrgBinding. It never seeds a user/membership, invents a role/relationship, writes a derived grant, issues deterministic cookies or remints a revoked cached parent.",
+    "Native runtime/SYSTEM transactions use their own restricted connections with SET LOCAL ROLE. Positive runtime work carries a live request-scoped bridge through the production context SQL. Missing actor/org remains an explicit unauthenticated negative SQL probe.",
+    "Shared route authorization reads actual live canonical membership rather than an in-memory declared role. Existing transactional/savepoint and committed-versus-rolled-back audit behavior remains. Binding errors use the existing production sanitizer so failed driver parameters cannot expose bridge credentials.",
+    "The combined kernel fixture uses bounded activeMembershipSource, an injected bearer-bound ceremony runner, default-denied identity bindings, preserved case/document/forged-actor/audit checks, and denial-focused finance probes. Thread assignment and deadline dashboard fixtures now carry real canonical actor/session context. Operator seed data is committed before a separate auth connection reads it."
+  ],
+  "localTests": {
+    "passed": 168,
+    "failed": 0,
+    "skipped": 0,
+    "suites": 4,
+    "newFixtureTests": 17,
+    "existingLifecycleRevocationCaseSourceTests": 151,
+    "project": "union-eyes",
+    "maxWorkers": 1,
+    "nodeHeapMb": 2048,
+    "scope": "Clone lifecycle/socket operations doubled; actual source-compiled PGlite roles/RLS and real production auth context/session/bearer services execute via a socket transport adapter. This is not native server/login or clone execution."
+  },
+  "testedCounterexamples": [
+    "Unowned/malformed/template/foreign-clone URLs refuse before execution.",
+    "Provisional clone/role provisioning failure cleans owned resources; disposal errors propagate.",
+    "Actual role graph rejects unexpected incoming membership and extra outgoing auth-system access.",
+    "GUC-only actor/org has zero visible business rows, while a real source-issued parent/bridge returns only owned rows.",
+    "Revoked parent stays revoked in cache; inactive user or non-member cannot issue a bound parent.",
+    "Already issued sessions re-read user/membership revocation before callback execution.",
+    "Existing testkit runs through the injected real session boundary.",
+    "Raw bridge values are absent from both raw-driver and Drizzle binding-failure errors."
+  ],
+  "focusedESLint": {
+    "files": 9,
+    "exitCode": 0
+  },
+  "diffCheckExitCode": 0,
+  "logs": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-canonical-fixture-local-v1.txt",
+      "sha256": "17c13e7a9c5a40d684cffbbe6510232936181579c35f24ff95a9c7bcce2cddef"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-canonical-fixture-eslint-v1.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "financialBoundary": {
+    "readinessMeaning": "financeSourceReadiness is retained only as an engineering/schema fact; broad historical manifest DML is not accepted as proof that a member has financial authority.",
+    "positiveFinanceFeatureQualification": false,
+    "strictNativeProbeAdded": "Own-organization INSERT and UPDATE by live role=member; emits actual actor, runtime/login role, live-session validity boolean, current physical RLS policies, affected rows, persisted outcomes and exact test-source hash. Any successful mutation fails the test and is an adverse counterexample. No bearer/credential is emitted.",
+    "actualProbeExecution": "UNEXECUTED_PENDING_ROOT_NATIVE_LEASE",
+    "sourceGrantChanges": false
+  },
+  "nativeExecution": {
+    "cloneCreationAndCleanup": "UNEXECUTED_ON_NATIVE_SERVER",
+    "threeMigratedNativeConsumers": "UNEXECUTED",
+    "nativeRoleLoginHandshake": "UNEXECUTED",
+    "fullNativeSuite": "UNEXECUTED",
+    "finalIntegratedTypecheck": "PENDING_ROOT_FROZEN_SOURCE_CHECK"
+  },
+  "remainingLegacyFixtureReview": {
+    "state": "SOURCE_CANDIDATES_UNQUALIFIED_PENDING_REVIEW_OR_NATIVE_EXECUTION",
+    "count": 37,
+    "meaning": "Conservative source patterns only. Historical isolated migration tests may intentionally exercise their original context contract; this is not a claim that every listed file failed or should be changed. No new defect register is introduced.",
+    "files": [
+      {
+        "file": "apps/union-eyes/db/__tests__/atomic-audit-fault.postgres.test.ts",
+        "sourceSha256": "ec041c48f75d5c031f4ada467f657c674f809be21595a6fa989484b4a8d451ad",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics",
+          "Explicit legacy mode0 in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/audit-reader.postgres.test.ts",
+        "sourceSha256": "fe991b0843d1cdecbc7f00a49c9bbb093625af8e13fff67ad507734d009d1120",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics",
+          "Deletes canonical mode in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/authority-kernel-case-backfill.native.test.ts",
+        "sourceSha256": "442e29235742e41ee7b76282a9678b23e9977171ace57bf6f5d29f7b91f6d917",
+        "reviewReasons": [
+          "Authority transaction has no explicit sessionToken in this file; may be a historical/mirror boundary"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/authority-kernel-django-audit.postgres.test.ts",
+        "sourceSha256": "7f84ea24105b457301ddab181607080685a97153bad00c0b514f56141fff8baa",
+        "reviewReasons": [
+          "Authority transaction has no explicit sessionToken in this file; may be a historical/mirror boundary"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/authority-kernel-identity-path.native.test.ts",
+        "sourceSha256": "20c8a1e25d816ed5640373da7947448534659ebae1ac6d93e1d30f87d5e1b9f6",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/authority-kernel-storage.postgres.test.ts",
+        "sourceSha256": "88a1816290fe552dbed9a957f023aeefe77042f2e6aa0f0188f72d35913b074c",
+        "reviewReasons": [
+          "Authority transaction has no explicit sessionToken in this file; may be a historical/mirror boundary"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/batch-ingest.postgres.test.ts",
+        "sourceSha256": "18a39f5f6dfffd862c6f3bbbc019d33689ac9d90ec426714c279f4d074b9fa78",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/canonical-schema-census.postgres.test.ts",
+        "sourceSha256": "a9c20acbdcb0a966049036778d13162e67a66cce5d79c9080269866b546daa60",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/clause-library-visibility.postgres.test.ts",
+        "sourceSha256": "f9310a136c59f3a651758c600b94c7d4d1300ca015af3f6803c32ad5e2ab904a",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/clause-suggestions.postgres.test.ts",
+        "sourceSha256": "a5169b810e9226a598c3bb94bed75d3e7df211cc9fa03f21015f89893946840d",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/declared-absent-relations.postgres.test.ts",
+        "sourceSha256": "7ec91ce8cb188f89bbe452bfab477afe73a798dd017f5f9c7cc8818261452659",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/document-intake.postgres.test.ts",
+        "sourceSha256": "21b82ab3623d8c51a26bf7e5bea80c72ff72ba98385341f18b5ed1738f4e1abb",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics",
+          "Deletes canonical mode in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/enhanced-rbac.postgres.test.ts",
+        "sourceSha256": "383cfe7a3b1e4fabac3bc9961fa2f8cec552a3b04ff2dd16bf283e67c68eec2c",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/federation-discovery.postgres.test.ts",
+        "sourceSha256": "48cddeff792231ea4440090c867a4e353ede14cb31c97db873d4dd5ff22ec0d1",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/finance-duties.postgres.test.ts",
+        "sourceSha256": "255ebdeb613ed394b81bb0e5b087f55324f95048018a3a7ff179bd3685c5e2e0",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics",
+          "Deletes canonical mode in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/icra-claim-capability-revocation.postgres.test.ts",
+        "sourceSha256": "3d46e2413a058a0389334132d262a5e52b2d7c7f4c6708c59957ce011ac7e76a",
+        "reviewReasons": [
+          "Explicit legacy mode0 in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/location-retention.postgres.test.ts",
+        "sourceSha256": "c2cc6a5a9cc7fd6c4ca16067de06cab8a910b8370c4ff382401f9925e05091ee",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/message-lifecycle.postgres.test.ts",
+        "sourceSha256": "e12b0b2a6ca4700adced796af3fa1591ea5d85b20b2aa3863ec3c4a685a91735",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/migration-0030-precedent-explicit-share-select.postgres.test.ts",
+        "sourceSha256": "999106f8d08b776a69be9b491b506a69103d18b680c2628489a095a74430e334",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/migration-0033-external-authority-principals.postgres.test.ts",
+        "sourceSha256": "c87d60163211118d90520b7601e54d022fee68422d54b43f2e8ac9de0097a31a",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/migration-0052-shared-clause-versions.postgres.test.ts",
+        "sourceSha256": "61b49cdd9c0400ee6e37630ee804b0caa2d5210cda84f7617c7eec83c607ed46",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/migration-0055-0079-census-closures.postgres.test.ts",
+        "sourceSha256": "9a7e6d5ebe7dbaf275e3d848ca18ea08ba1a68a35bd3a4188d09e3c48f0be11a",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/migrations-0048-0051-gate0.postgres.test.ts",
+        "sourceSha256": "dd9e11d206896b8ee2351ce495b718033ce388fbef5a9ec5acc21598a1262c38",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts",
+        "sourceSha256": "31f55656c7e84a0553e33ec73d32f48e1f82ecf74edd182006e67e20f4948c45",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/pilot-acceptance-denial.postgres.test.ts",
+        "sourceSha256": "9371d1f0336d0ca5cf8e1d67dc907394151cb2ce62d00ae86f7ba1a6937b2450",
+        "reviewReasons": [
+          "Deletes canonical mode in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/pilot-fixture-bootstrap.postgres.test.ts",
+        "sourceSha256": "e93998d15ca582685ecaec83609aed8766569f9f17f990be2befcf36220be46d",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics",
+          "Deletes canonical mode in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+        "sourceSha256": "05f7a15844c55961c5e66bd5f7572f82d6a5d8394a8ac7f51e9ea77977391c57",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics",
+          "Deletes canonical mode in test body"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
+        "sourceSha256": "13cfcabfebbfa69581dbfbbe914ce3931b59220c1a49b42b198acdeba2ab2c96",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/queued-case-mail.native.test.ts",
+        "sourceSha256": "271db59456dca5d4a42090710b7c44f47f9d323fa56ed6c033e15bd3bc6549c5",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/reachable-stub-shape-2.postgres.test.ts",
+        "sourceSha256": "701c59007b09fe1600cb9bb0bb05432895217f4c752e7f3b05d3934d525cb64c",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts",
+        "sourceSha256": "5c7ceaaa6912a509d4ae4ebb8ed65e66e909946d5b67356c53277e95467f8003",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts",
+        "sourceSha256": "126645e3baf41cd526096c2831ba8b359df4c7c69efa179746f4127aba4ec833",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/semantic-search.postgres.test.ts",
+        "sourceSha256": "b0a5a6a99646343a0a381a9b3d9070e7d24d87168e5697ee83d5927f7c1eb588",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/signature-audit-trail-append-only.postgres.test.ts",
+        "sourceSha256": "ad7339ed50c98a76f9eed9819b9657d90534fc29894cf26d538d0bbc6b53d7c2",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/signature-expiry.postgres.test.ts",
+        "sourceSha256": "6ca3f1c2bb042e1f88e70db60799cc72619f169f63582585f00a478a536fd975",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/signature-reads.postgres.test.ts",
+        "sourceSha256": "0571697c8adfd57d4e14690836c2e4bc73ed4df3c9da9f71c8b199519480cff2",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      },
+      {
+        "file": "apps/union-eyes/db/__tests__/tenant-isolation-remediation.postgres.test.ts",
+        "sourceSha256": "9b4ae2fe7f043f837cb3c0385c095fa3f0db069f208e618fd3fdfe3217b3b800",
+        "reviewReasons": [
+          "Contains hand-written legacy context settings; review actual bearer/nonce semantics"
+        ]
+      }
+    ]
+  },
+  "remaining": [
+    "Root-owned integrated typecheck/fast checks and exact-candidate commit/CI.",
+    "Actual native PostgreSQL15/16 execution of the central clone lifecycle and migrated positive/negative/rollback families.",
+    "Run the strict own-org finance probe and review any actual allowed mutation against the approved base sensitive-boundary contract before source containment changes.",
+    "Review remaining legacy context candidates in bounded families; no broad family completion is claimed.",
+    "No staging GO, overall Step1 completion, production deployment or Step2 execution is established."
+  ],
+  "dockerExecutedByThisBatch": false,
+  "stagingPromoted": false,
+  "productionPromoted": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "a2f555bab4f60b317049f4b973a67f3bd01fd738297b9324457d69b739690e28",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/native-canonical-fixture-migration-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

@@ -1,21 +1,19 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * GET  /api/finance/allocation — List allocation rules
  * POST /api/finance/allocation — Create an allocation rule
  */
 
-import { z } from 'zod';
-import { withApi } from '@/lib/api/framework';
+import { z } from 'zod'
+import { withApi } from '@/lib/api/framework'
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
-} from '@/lib/api/standardized-responses';
-import {
-  getAllocationRules,
-  createAllocationRule,
-} from '@/services/platform-economics';
+} from '@/lib/api/standardized-responses'
+import { getAllocationRules, createAllocationRule } from '@/services/platform-economics'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const createRuleSchema = z.object({
   name: z.string().min(1).max(255),
@@ -31,48 +29,66 @@ const createRuleSchema = z.object({
   ]),
   parameters: z.record(z.string(), z.unknown()).optional(),
   effectiveFrom: z.string().datetime().optional(),
-});
+})
 
 // The rules are the caller organization's own rows: the handler runs in that organization's tenant transaction, so the
 // ambient handle the engine reads and writes through carries the organization row-level security applies to.
 export const GET = withApi(
   {
     auth: { minRole: 'secretary_treasurer' },
-    entitlement: 'allocation_engine',
-    rlsOrgContext: true,
-    registry: { audience: 'officer', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+
+    rlsOrgContext: false,
+    registry: {
+      audience: 'officer',
+      productionStatus: 'active',
+      evidenceRequired: true,
+      orgScoping: 'caller-org',
+    },
     openapi: { tags: ['Finance'], summary: 'List allocation rules' },
   },
   async ({ organizationId }) => {
+    requireBaseFinancialAuthority()
+
     try {
-      const rules = await getAllocationRules(organizationId!);
-      return standardSuccessResponse(rules);
+      const rules = await getAllocationRules(organizationId!)
+      return standardSuccessResponse(rules)
     } catch (error) {
-      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to fetch allocation rules', error);
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Failed to fetch allocation rules',
+        error,
+      )
     }
   },
-);
+)
 
 export const POST = withApi(
   {
     auth: { minRole: 'admin' },
-    entitlement: 'allocation_engine',
-    rlsOrgContext: true,
-    registry: { audience: 'admin', productionStatus: 'active', evidenceRequired: true, orgScoping: 'caller-org' },
+
+    rlsOrgContext: false,
+    registry: {
+      audience: 'admin',
+      productionStatus: 'active',
+      evidenceRequired: true,
+      orgScoping: 'caller-org',
+    },
     openapi: { tags: ['Finance'], summary: 'Create an allocation rule' },
   },
   async ({ request, organizationId, userId }) => {
-    let rawBody: any;
+    let rawBody: unknown
     try {
-      rawBody = await request.json();
+      rawBody = await request.json()
     } catch {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON')
     }
 
-    const parsed = createRuleSchema.safeParse(rawBody);
+    const parsed = createRuleSchema.safeParse(rawBody)
     if (!parsed.success) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error)
     }
+
+    requireBaseFinancialAuthority()
 
     try {
       const rule = await createAllocationRule({
@@ -80,14 +96,16 @@ export const POST = withApi(
         name: parsed.data.name,
         method: parsed.data.method,
         weights: parsed.data.parameters as Record<string, number> | undefined,
-        effectiveFrom: parsed.data.effectiveFrom
-          ? new Date(parsed.data.effectiveFrom)
-          : new Date(),
+        effectiveFrom: parsed.data.effectiveFrom ? new Date(parsed.data.effectiveFrom) : new Date(),
         createdBy: userId!,
-      });
-      return standardSuccessResponse(rule);
+      })
+      return standardSuccessResponse(rule)
     } catch (error) {
-      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to create allocation rule', error);
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Failed to create allocation rule',
+        error,
+      )
     }
   },
-);
+)

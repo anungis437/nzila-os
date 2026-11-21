@@ -188,7 +188,7 @@
       "requiresDnsOrInfra": false,
       "blocksUnionEyesPilot": false,
       "notes": [
-        "Inventory: releaseStatus=frozen; not instrumented for runtime health."
+        "Inventory: releaseStatus=staging-only; no live failures recorded but no positive runtime evidence either."
       ]
     },
     {

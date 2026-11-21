@@ -1,210 +1,30 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { NextRequest } from 'next/server';
-
-const m = vi.hoisted(() => ({
-  processAnniversaryAwards: vi.fn(),
-  processScheduledAwards: vi.fn(),
-  sendBatchExpirationWarnings: vi.fn(),
-  db: { query: { organizations: { findMany: vi.fn() } } },
-  persistAtomicAudit: vi.fn(),
-  systemContexts: [] as Array<{ marker: string }>,
-}));
-
-vi.mock('@/lib/services/rewards/automation-service', () => ({
-  processAnniversaryAwards: m.processAnniversaryAwards,
-  processScheduledAwards: m.processScheduledAwards,
-}));
-vi.mock('@/lib/services/rewards/notification-service', () => ({
-  sendBatchExpirationWarnings: m.sendBatchExpirationWarnings,
-}));
-// The job has no tenant session: every step runs in a system transaction of its own (the ordinary tenant context is not offered at all).
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => {
-    const tx = { query: m.db.query, marker: `system-${m.systemContexts.length + 1}` };
-    m.systemContexts.push(tx);
-    return fn(tx);
-  },
-}));
-vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
-vi.mock('crypto', () => ({ timingSafeEqual: (a: Buffer, b: Buffer) => a.length === b.length && a.compare(b) === 0 }));
-
-async function loadRoute() {
-  return import('../rewards/cron/route');
-}
-
-describe('rewards/cron route', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.systemContexts = [];
-    m.persistAtomicAudit.mockResolvedValue(undefined);
-    process.env.CRON_SECRET = 'test-secret';
-    m.db.query.organizations.findMany.mockResolvedValue([
-      { id: 'org_1', status: 'active' },
-      { id: 'org_2', status: 'active' },
-    ]);
-    m.processAnniversaryAwards.mockResolvedValue({ success: true, processed: 5, failed: 0 });
-    m.processScheduledAwards.mockResolvedValue({ success: true, processed: 0, skipped: 3 });
-    m.sendBatchExpirationWarnings.mockResolvedValue({ success: true, sent: 10, byOrganization: { org_1: { sent: 6, failed: 0 }, org_2: { sent: 4, failed: 0 } } });
-  });
-
-  it('returns 401 when cron secret missing', async () => {
-    const { POST } = await loadRoute();
-    delete process.env.CRON_SECRET;
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron', {
-      method: 'POST', headers: { authorization: 'Bearer wrong-secret' },
-    }));
-    expect(response.status).toBe(401);
-  });
-
-  it('returns 401 when cron secret is invalid', async () => {
-    const { POST } = await loadRoute();
-
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron', {
-      method: 'POST',
-      headers: { authorization: 'Bearer wrong-secret' },
-    }));
-
-    expect(response.status).toBe(401);
-  });
-
-  it('runs anniversary awards task', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=anniversaries', {
-      method: 'POST', headers: { authorization: 'Bearer test-secret' },
-    }));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload.data.task).toBe('anniversaries');
-    expect(m.processAnniversaryAwards).toHaveBeenCalledTimes(2);
-    expect(m.processScheduledAwards).not.toHaveBeenCalled();
-  });
-
-  it('runs expiration warnings task', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=expirations', {
-      method: 'POST', headers: { authorization: 'Bearer test-secret' },
-    }));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload.data.executed).toEqual([{ task: 'expirations', result: expect.objectContaining({ sent: 10 }) }]);
-    expect(m.sendBatchExpirationWarnings).toHaveBeenCalledTimes(1);
-    // DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES: the scan is routed per active organization, not one cross-organization read.
-    expect(m.sendBatchExpirationWarnings).toHaveBeenCalledWith(['org_1', 'org_2']);
-  });
-
-  it('scans no organization for expiring credits when no organization is active', async () => {
-    m.db.query.organizations.findMany.mockResolvedValue([]);
-    const { POST } = await loadRoute();
-    await POST(new NextRequest('http://localhost/api/rewards/cron?task=expirations', {
-      method: 'POST', headers: { authorization: 'Bearer test-secret' },
-    }));
-    // An empty list is a scan of nothing; it is never the unscoped cross-organization scan (called with no list).
-    expect(m.sendBatchExpirationWarnings).toHaveBeenCalledWith([]);
-  });
-
-  it('runs all tasks when task=all', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=all', {
-      method: 'POST', headers: { authorization: 'Bearer test-secret' },
-    }));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload.data.executed.map((item: any) => item.task)).toEqual(['anniversaries', 'expirations', 'scheduled']);
-    expect(m.processAnniversaryAwards).toHaveBeenCalledTimes(2);
-    expect(m.sendBatchExpirationWarnings).toHaveBeenCalledTimes(1);
-    expect(m.processScheduledAwards).toHaveBeenCalledTimes(2);
-  });
-
-  // Gate 0 F01a: the GET reachability probe is removed; a scheduler posts, and a GET cannot reach the route's behaviour.
-  it('exports no GET handler', async () => {
-    const route = await loadRoute() as { GET?: unknown };
-    expect(route.GET).toBeUndefined();
-  });
-
-  it('accepts the secret in x-cron-secret (the header the scheduler sends) as well as a bearer token, and rejects a wrong or missing one', async () => {
-    const { POST } = await loadRoute();
-    const url = 'http://localhost/api/rewards/cron?task=scheduled';
-    expect((await POST(new NextRequest(url, { method: 'POST' }))).status).toBe(401);
-    expect((await POST(new NextRequest(url, { method: 'POST', headers: { 'x-cron-secret': 'wrong' } }))).status).toBe(401);
-    const viaHeader = await POST(new NextRequest(url, { method: 'POST', headers: { 'x-cron-secret': process.env.CRON_SECRET! } }));
-    const viaBearer = await POST(new NextRequest(url, { method: 'POST', headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
-    expect(viaHeader.status).not.toBe(401);
-    expect(viaBearer.status).not.toBe(401);
-  });
-
-  // Gate 0 F01 (DEF-0B11-PRP-REWARDS-CRON-REPORTS-SUCCESS-FOR-UNKNOWN-TASKS-AND-FAILED-ORGANIZATIONS)
-  it('refuses an unknown task with 400 and runs nothing', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=bogus', { method: 'POST', headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
-    expect(response.status).toBe(400);
-    expect((await response.json()).error).toBe('UNKNOWN_TASK');
-    expect(m.processAnniversaryAwards).not.toHaveBeenCalled();
-    expect(m.db.query.organizations.findMany).not.toHaveBeenCalled();
-  });
-
-  it('answers 500, naming the failing organizations and keeping the counts, when any organization task is rejected', async () => {
-    const orgs = await m.db.query.organizations.findMany();
-    m.processAnniversaryAwards.mockImplementation(async (id: string) => { if (id === orgs[0].id) throw new Error('boom'); return { processed: 1 }; });
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=anniversaries', { method: 'POST', headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
-    expect(response.status).toBe(500);
-    const body = await response.json();
-    expect(body).toMatchObject({ success: false, failed: 1, succeeded: orgs.length - 1, failures: [{ scope: `anniversaries:${orgs[0].id}` }] });
-  });
-
-  const post = async (query: string) => {
-    const { POST } = await loadRoute();
-    return POST(new NextRequest(`http://localhost/api/rewards/cron${query}`, { method: 'POST', headers: { 'x-cron-secret': 'test-secret' } }));
-  };
-
-  it('runs each organization\'s task and its audit entry on one system transaction of its own, with no tenant context at all', async () => {
-    const response = await post('?task=anniversaries');
-    expect(response.status).toBe(200);
-    // One system transaction lists the organizations; each organization then gets its own.
-    expect(m.systemContexts.map((tx) => tx.marker)).toEqual(['system-1', 'system-2', 'system-3']);
-    const [, org1Tx, org2Tx] = m.systemContexts;
-    expect(m.processAnniversaryAwards.mock.calls.map((call) => [call[0], call[1]])).toEqual([['org_1', org1Tx], ['org_2', org2Tx]]);
-    expect(m.persistAtomicAudit.mock.calls.map((call) => [call[0], call[1].organizationId, call[1].userId, call[1].action, call[1].details.processed])).toEqual([
-      [org1Tx, 'org_1', 'system:rewards', 'rewards.cron.anniversaries', 5],
-      [org2Tx, 'org_2', 'system:rewards', 'rewards.cron.anniversaries', 5],
-    ]);
-  });
-
-  it('checks the cron secret before it opens any transaction', async () => {
-    const { POST } = await loadRoute();
-    const response = await POST(new NextRequest('http://localhost/api/rewards/cron?task=all', { method: 'POST' }));
-    expect(response.status).toBe(401);
-    expect(m.systemContexts).toEqual([]);
-  });
-
-  it('answers 500 naming the organization when members could not be awarded, even though the task returned', async () => {
-    m.processAnniversaryAwards.mockImplementation(async (id: string) => (id === 'org_1' ? { success: false, processed: 1, failed: 2 } : { success: true, processed: 1, failed: 0 }));
-    const response = await post('?task=anniversaries');
-    expect(response.status).toBe(500);
-    expect(await response.json()).toMatchObject({ success: false, failures: [{ scope: 'anniversaries:org_1' }] });
-  });
-
-  it('audits the expiration e-mails under each organization whose members were mailed', async () => {
-    await post('?task=expirations');
-    expect(m.persistAtomicAudit.mock.calls.map((call) => [call[1].organizationId, call[1].action, call[1].details])).toEqual([
-      ['org_1', 'rewards.cron.expiration_warnings', { sent: 6, failed: 0 }],
-      ['org_2', 'rewards.cron.expiration_warnings', { sent: 4, failed: 0 }],
-    ]);
-  });
-
-  it('fails the run, naming the organization, when a run audit cannot be written', async () => {
-    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
-    const response = await post('?task=expirations');
-    expect(response.status).toBe(500);
-    expect(await response.json()).toMatchObject({ failures: [{ scope: 'expirations:org_1' }] });
-  });
-
-  it('never reports skipped scheduled rules as processed', async () => {
-    const body = await (await post('?task=scheduled')).json();
-    expect(JSON.stringify(body)).toContain('"skipped":3');
-    expect(JSON.stringify(body)).not.toContain('"processed":3');
-  });
-});
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { NextRequest } from 'next/server'
+import { POST } from '../rewards/cron/route'
+import scheduled from '@/lib/operations/scheduled-jobs.json'
+beforeEach(() => {
+  process.env.CRON_SECRET_KEY = 'synthetic-rewards-cron-key'
+})
+afterEach(() => {
+  delete process.env.CRON_SECRET_KEY
+})
+const request = (key?: string, task = 'all') =>
+  new NextRequest(`http://localhost/api/rewards/cron?task=${task}`, {
+    method: 'POST',
+    headers: key ? { 'x-cron-secret': key } : {},
+  })
+describe('deferred rewards automation callback', () => {
+  it('authenticates before reporting unavailable', async () => {
+    expect((await POST(request())).status).toBe(401)
+    expect((await POST(request('wrong'))).status).toBe(401)
+    const response = await POST(request('synthetic-rewards-cron-key'))
+    expect(response.status).toBe(501)
+    expect(JSON.stringify(await response.json())).toContain('NOT_IMPLEMENTED')
+  })
+  it('retains input validation after authentication', async () => {
+    expect((await POST(request('synthetic-rewards-cron-key', 'invented'))).status).toBe(400)
+  })
+  it('has no active job while credit automation is deferred', () => {
+    expect(scheduled.jobs.some((job) => job.path.startsWith('/api/rewards/cron'))).toBe(false)
+  })
+})

@@ -4,7 +4,7 @@
  * of the body. A refused intake is reported with the sentence, never with the code, and a success is followed by the case it created.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
 const h = vi.hoisted(() => ({ push: vi.fn(), toast: vi.fn(), trackCaseCreated: vi.fn(), incrementPilotCaseCount: vi.fn() }))
@@ -33,10 +33,11 @@ const intakeAnswers = (answer: unknown) => fetchMock.mockImplementation(async (u
 const intakeCall = () => fetchMock.mock.calls.find(([url]) => url === '/api/cases/intake') as [string, { method: string; body: string }]
 
 function fillAndSubmit(container: HTMLElement) {
-  fireEvent.change(screen.getByPlaceholderText('forms.caseTitlePlaceholder'), { target: { value: 'Schedule changed without notice' } })
-  fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'Safety' } })
-  fireEvent.change(screen.getByPlaceholderText('forms.descriptionPlaceholder'), { target: { value: 'The schedule changed the night before.' } })
-  fireEvent.change(container.querySelector('input[type="date"]') as HTMLElement, { target: { value: '2026-01-15' } })
+  const form = within(container)
+  fireEvent.change(form.getByLabelText('forms.caseTitle *'), { target: { value: 'Schedule changed without notice' } })
+  fireEvent.change(form.getByLabelText('forms.category *'), { target: { value: 'Safety' } })
+  fireEvent.change(form.getByLabelText('forms.detailedDescription *'), { target: { value: 'The schedule changed the night before.' } })
+  fireEvent.change(form.getByLabelText('forms.whenOccurred *'), { target: { value: '2026-01-15' } })
   fireEvent.click(screen.getByRole('button', { name: /forms\.submitCase/ }))
 }
 
@@ -54,6 +55,20 @@ afterEach(() => {
 })
 
 describe('NewClaimForm', () => {
+  it('never requests the voice notice for a member, who is not offered voice, and opens submission once hydrated', async () => {
+    intakeAnswers({ ok: true, status: 200, json: async () => ({}) })
+    const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    await waitFor(() => expect(container.querySelector('form[data-hydrated="true"]')).not.toBeNull())
+    expect(fetchMock.mock.calls.some(([url]) => url === '/api/voice/disclosure')).toBe(false)
+  })
+
+  it('connects every editable intake control to its visible label', () => {
+    intakeAnswers(filed({ success: true, claimId: 'claim-11' }))
+    render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    for (const label of ['forms.caseTitle *', 'forms.category *', 'priority.label *', 'forms.detailedDescription *', 'forms.whenOccurred *', 'forms.location', 'forms.witnesses']) {
+      expect(screen.getByLabelText(label)).toHaveAccessibleName(label)
+    }
+  })
   it('reports a refused intake with the sentence the route gives, not its code', async () => {
     intakeAnswers(refused(400, { error: 'VALIDATION_ERROR', message: 'Intake validation failed.' }))
     const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)

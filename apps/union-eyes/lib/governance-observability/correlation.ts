@@ -24,14 +24,21 @@ import type { GovernanceCorrelationContext } from './types';
  * Uses `crypto.randomUUID()` when available (Node 14.17+, edge runtime).
  * Falls back to a timestamp-based ID in constrained environments.
  */
+let fallbackCounter = 0;
+
 function generateId(prefix: string): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return `${prefix}_${crypto.randomUUID().replace(/-/g, '')}`;
   }
-  // Fallback: timestamp + Math.random (not cryptographically unique but good enough for correlation)
+  // Fallback: CSPRNG bytes when available, otherwise timestamp + monotonic counter (never Math.random).
   const ts = Date.now().toString(36);
-  const rand = Math.random().toString(36).slice(2, 10);
-  return `${prefix}_${ts}${rand}`;
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = crypto.getRandomValues(new Uint8Array(8));
+    const rand = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `${prefix}_${ts}${rand}`;
+  }
+  fallbackCounter = (fallbackCounter + 1) % Number.MAX_SAFE_INTEGER;
+  return `${prefix}_${ts}${fallbackCounter.toString(36)}`;
 }
 
 // ── Context creation ──────────────────────────────────────────────────────────

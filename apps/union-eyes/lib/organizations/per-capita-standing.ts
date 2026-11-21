@@ -15,6 +15,7 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
 import { perCapitaRemittances } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 
 export interface RemittanceFact {
   fromOrganizationId: string;
@@ -85,8 +86,14 @@ export function standingOf(facts: readonly RemittanceFact[]): AffiliateStanding 
   };
 }
 
-/** The remittances addressed to the organization from this calendar year and the one before, as facts. */
-export function loadRemittanceFacts(organizationId: string): Promise<RemittanceFact[]> {
+/**
+ * The remittances addressed to the organization from this calendar year and the one before, as facts.
+ *
+ * Refused (501, ContainedStorageUnavailable) before any statement: the current source contains per_capita_remittances (no runtime or
+ * system grant). The dashboards that read it show the refusal as a failed read, never as zero remittances or a compliant position.
+ */
+export async function loadRemittanceFacts(organizationId: string): Promise<RemittanceFact[]> {
+  requireContainedStorageAuthority('per_capita_remittances')
   return withRLSContext({ organizationId }, (tx) =>
     tx
       .select({

@@ -114,26 +114,15 @@ describe('WorkAidJourney', () => {
     expect(calls.some((call) => call.startsWith('POST /api/workaid/referrals'))).toBe(true)
   })
 
-  it('starts with an empty wording form and adopts only a proposal the server stored', async () => {
-    const proposal = { id: '66666666-6666-4666-8666-666666666666', version: 'fixture-1', body: 'TEST FIXTURE WORDING ONLY', bodySha256: 'ab', ownProposal: false, proposedAt: '2026-10-26T00:00:00.000Z' }
-    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
-      if ((init?.method ?? 'GET') === 'POST' && String(url).endsWith('/proposals')) {
-        const sent = JSON.parse(String(init?.body))
-        expect(sent).toEqual({ version: 'fixture-2', body: 'caller supplied text' })
-        return Response.json({ success: true, proposalId: proposal.id, adopted: false }, { status: 201 })
-      }
-      if (String(url).endsWith('/adopt')) return Response.json({ success: true, current: true })
-      return Response.json({ success: true, proposals: [proposal], referable: [] })
-    }))
-    renderJourney('staff', 'fr')
-    expect(await screen.findByTestId('wording-adoption')).toBeInTheDocument()
-    expect(screen.getByLabelText('Texte')).toHaveValue('')
-    fireEvent.change(screen.getByLabelText('Version'), { target: { value: 'fixture-2' } })
-    fireEvent.change(screen.getByLabelText('Texte'), { target: { value: 'caller supplied text' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Proposer le texte' }))
-    expect(await screen.findByRole('status')).toHaveTextContent("n'est pas un texte de consentement")
-    fireEvent.click(await screen.findByRole('button', { name: 'Adopter ce texte' }))
-    expect(await screen.findByRole('status')).toHaveTextContent('texte de consentement en vigueur')
+  it.each(['en', 'fr'] as const)('keeps wording proposal/adoption unavailable in %s without fetching or offering mutations', async (locale) => {
+    const fetcher = vi.fn()
+    vi.stubGlobal('fetch', fetcher)
+    renderJourney('staff', locale)
+    const messages = locale === 'fr' ? fr : en
+    expect(await screen.findByTestId('wording-store-unapplied')).toHaveTextContent(messages.workAidPage.wordingUnavailable)
+    expect(screen.queryByRole('textbox', { name: locale === 'fr' ? 'Texte' : 'Text' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: messages.workAidPage.wordingPropose })).not.toBeInTheDocument()
+    expect(fetcher).not.toHaveBeenCalled()
   })
 
   it('sends only the categories a representative leaves selected', async () => {

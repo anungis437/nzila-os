@@ -492,10 +492,10 @@ export function createRouteMatcher(patterns: string[]) {
   const regexes = patterns.map((pattern) => {
     // Convert :param to a named group pattern
     let regex = pattern.replace(/:[a-zA-Z_]+/g, '[^/]+')
-    // Escape forward slashes and dots for regex
-    regex = regex.replace(/\//g, '\\/').replace(/\./g, '\\.')
+    // Escape backslashes first (so literal backslashes cannot form escape sequences), then
+    // forward slashes and dots for regex
+    regex = regex.replace(/\\/g, '\\\\').replace(/\//g, '\\/').replace(/\./g, '\\.')
     // Convert escaped `.*` back to regex wildcard; parentheses in patterns (e.g. `(.*)`) are preserved as groups
-    // codeql[js/incomplete-sanitization] - patterns are developer-defined route strings, not user input
     regex = regex.replace(/\\\.\*/g, '.*')
     return new RegExp(`^${regex}$`)
   })

@@ -1,3 +1,4 @@
+import { buildAuditInsightsCsv } from '@/lib/services/audit-inspection-service'
 /**
  * Nzila OS — Audit Insights CSV Export
  *
@@ -6,16 +7,17 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateUser, getOrgMembership } from '@/lib/api-guards'
-import { platformDb } from '@nzila/db/platform'
-import { auditEvents, orgs } from '@nzila/db/schema'
-import { eq, count, desc, sql } from 'drizzle-orm'
-import { createLogger } from '@nzila/os-core'
-
-const logger = createLogger('audit-insights-export')
+import { withSpan } from '@nzila/os-core/telemetry'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+  // The export query and its structured log moved to audit-inspection-service;
+  // the route keeps its own request span so the export path stays traced.
+  return withSpan('api.audit-insights.export', {}, () => exportAuditInsights(req))
+}
+
+async function exportAuditInsights(req: NextRequest) {
   const authResult = await authenticateUser()
   if (!authResult.ok) return authResult.response
 
@@ -34,33 +36,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const baseQuery = platformDb
-    .select({
-      targetType: auditEvents.targetType,
-      action: auditEvents.action,
-      orgId: auditEvents.orgId,
-      entityName: orgs.legalName,
-      total: count().as('total'),
-    })
-    .from(auditEvents)
-    .leftJoin(orgs, eq(auditEvents.orgId, orgs.id))
-
-  const query = orgId
-    ? baseQuery.where(eq(auditEvents.orgId, orgId))
-    : baseQuery
-
-  const rows = await query
-    .groupBy(auditEvents.targetType, auditEvents.action, auditEvents.orgId, orgs.legalName)
-    .orderBy(desc(sql`count(*)`))
-    .limit(10000)
-
-  const header = 'target_type,action,org_id,entity_name,total'
-  const lines = rows.map(
-    (r) =>
-      `${r.targetType},${r.action},${r.orgId},"${(r.entityName ?? '').replace(/"/g, '""')}",${r.total}`,
-  )
-  const csv = [header, ...lines].join('\n')
-  logger.info('Audit insights export', { orgId, rowCount: rows.length })
+  const csv = await buildAuditInsightsCsv(orgId)
 
   return new NextResponse(csv, {
     headers: {

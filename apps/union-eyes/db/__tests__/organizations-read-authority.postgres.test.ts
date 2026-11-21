@@ -15,8 +15,12 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { sql } from 'drizzle-orm'
 import { NextRequest } from 'next/server'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
@@ -31,7 +35,7 @@ const state = vi.hoisted(() => ({
 
 type Tx = ReturnType<typeof drizzle>
 
-async function inRole<T>(role: string, organizationId: string | null, fn: (tx: Tx) => Promise<T>): Promise<T> {
+async function inRole<T>(role: string, organizationId: string | null, fn: (tx: Tx) => Promise<T>, binding?: AuthenticatedOrgBinding): Promise<T> {
   const pool = state.pool as pg.Pool
   const als = state.als as AsyncLocalStorage<Tx>
   const client = await pool.connect()
@@ -39,6 +43,7 @@ async function inRole<T>(role: string, organizationId: string | null, fn: (tx: T
     await client.query('BEGIN')
     await client.query(`SET LOCAL ROLE ${role}`)
     if (organizationId) await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId])
+    if (binding) await setNativeBusinessContext(client, binding)
     const db = drizzle(client)
     const execute = db.execute.bind(db)
     ;(db as unknown as { execute: unknown }).execute = async (q: never) => (await execute(q)).rows
@@ -69,7 +74,15 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (...args: unknown[]) => {
     const fn = args[args.length - 1] as (tx: unknown) => Promise<unknown>
     const ctx = args.length > 1 ? (args[0] as { organizationId?: string }) : {}
-    return inRole('union_eyes_runtime', ctx?.organizationId ?? null, fn as never)
+    const organizationId = ctx?.organizationId ?? null
+    // Canonical V2 admits a runtime tenant transaction only in a verified business session (ue_v2_verified_business_session): a caller
+    // who is a live canonical member of the organization runs in their own real session; anyone else runs with none and is refused.
+    const live = organizationId && (await (state.admin as { execute: (q: unknown) => Promise<{ rows: unknown[] }> }).execute(
+      sql`SELECT 1 FROM user_management.users u JOIN user_management.organization_users m ON m.user_id = u.user_id
+        WHERE u.user_id = ${state.userId} AND u.is_active AND m.organization_id = ${organizationId}::uuid AND m.is_active`)).rows.length
+    if (organizationId && live)
+      return withNativeCanonicalActor(state.userId, organizationId, (binding) => inRole('union_eyes_runtime', organizationId, fn as never, binding))
+    return inRole('union_eyes_runtime', organizationId, fn as never)
   },
 }))
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: async () => ({ userId: state.userId }) }))
@@ -126,7 +139,10 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
       `INSERT INTO organization_members (user_id, organization_id, role, status, is_primary, created_at, updated_at, name, email) VALUES ($1,$2,$3,$4,false,now(),now(),$1,$1 || '@example.test')`,
       [user, organizationId, role, status],
     )
-    if (status === 'active') state.roles[`${user}:${organizationId}`] = role
+    if (status === 'active') {
+      state.roles[`${user}:${organizationId}`] = role
+      await seedDeclaredCanonicalActor(admin, user, organizationId, role)
+    }
   }
 
   beforeAll(async () => {
@@ -148,6 +164,7 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     await member('suspended-a', LOCAL_A, 'member', 'suspended')
     await member('removed-a', LOCAL_A, 'admin')
     await admin.query('UPDATE organization_members SET deleted_at = now() WHERE user_id = $1 AND organization_id = $2', ['removed-a', LOCAL_A])
+    await admin.query('UPDATE user_management.organization_users SET is_active = false WHERE user_id = $1 AND organization_id = $2', ['removed-a', LOCAL_A])
   }, 120_000)
 
   afterAll(async () => {

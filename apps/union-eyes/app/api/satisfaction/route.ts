@@ -11,6 +11,7 @@ import {
   getPendingSurveys,
   createSatisfactionSurvey,
   SurveyAlreadyAnsweredError,
+  SurveyAttributionError,
 } from '@/lib/services/satisfaction-service';
 
 export const dynamic = 'force-dynamic';
@@ -54,7 +55,7 @@ export const POST = withApi(
     // The claim must be this organization's, and the survey must go to the claim's own member.
     const [claim] = await withRLSContext({ organizationId }, (tx) =>
       tx
-        .select({ memberId: claims.memberId, assignedTo: claims.assignedTo, status: claims.status })
+        .select({ memberId: claims.memberId, status: claims.status })
         .from(claims)
         .where(and(eq(claims.id, body.claimId), eq(claims.organizationId, organizationId)))
         .limit(1),
@@ -68,12 +69,6 @@ export const POST = withApi(
     if (claim.status !== 'resolved' && claim.status !== 'closed') {
       throw ApiError.conflict('A satisfaction survey can only be created for a resolved or closed claim');
     }
-    if (!claim.assignedTo) {
-      throw ApiError.badRequest('The claim has no assigned representative to rate');
-    }
-    if (claim.assignedTo !== body.lroId) {
-      throw ApiError.badRequest('The survey must rate the representative assigned to the claim');
-    }
 
     try {
       return await createSatisfactionSurvey(
@@ -86,6 +81,7 @@ export const POST = withApi(
         userId,
       );
     } catch (error) {
+      if (error instanceof SurveyAttributionError) throw ApiError.badRequest(error.message);
       if (error instanceof SurveyAlreadyAnsweredError) throw ApiError.conflict('The member has already answered this survey');
       throw error;
     }

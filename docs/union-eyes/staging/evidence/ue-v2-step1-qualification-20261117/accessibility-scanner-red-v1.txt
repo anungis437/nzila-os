@@ -1,0 +1,113 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > createAudit inserts and returns the audit 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > records a completed single-page scan only after the scanner actually returns no violations 2ms
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional playwright scanner dependency is missing 4ms
+   → promise resolved "undefined" instead of rejecting
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional @axe-core/playwright scanner dependency is missing 1ms
+   → promise resolved "undefined" instead of rejecting
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner launch fails and closes any launched browser 1ms
+   → promise resolved "undefined" instead of rejecting
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner newPage fails and closes any launched browser 1ms
+   → promise resolved "undefined" instead of rejecting
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner goto fails and closes any launched browser 1ms
+   → promise resolved "undefined" instead of rejecting
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner analyze fails and closes any launched browser 1ms
+   → promise resolved "undefined" instead of rejecting
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner close fails and closes any launched browser 1ms
+   → promise resolved "undefined" instead of rejecting
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit saves issues when violations exist 1ms
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit handles scan errors and rethrows 2ms
+   → expected { status: 'failed', …(1) } to match object { status: 'failed', …(2) }
+(1 matching property omitted from actual)
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit throws when audit not found 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getAudit returns audit and issues 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getAudit throws when not found 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getOpenIssues applies all optional filters 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getOpenIssues works without filters 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > resolveIssue updates the issue 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkColorContrast evaluates AA/AAA/fail 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkKeyboardAccessibility flags inaccessible interactive elements 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkAltText flags missing and short alt text 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkHeadingHierarchy detects missing headings and skips 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > generateComplianceReport summarizes issues and recommendations 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional playwright scanner dependency is missing
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional @axe-core/playwright scanner dependency is missing
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:118:73
+    116|     vi.doMock(dependency, () => { throw new Error(`Cannot find module …
+    117|     h.queue = [[], [auditRow], []];
+    118|     await expect(new AccessibilityAuditManager().runAutomatedAudit('a1…
+       |                                                                         ^
+    119|     expect(h.updates.at(-1)).toMatchObject({ status: 'failed', accessi…
+    120|     expect(h.updates.some((update) => update.status === 'completed')).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner launch fails and closes any launched browser
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner newPage fails and closes any launched browser
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner goto fails and closes any launched browser
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner analyze fails and closes any launched browser
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner close fails and closes any launched browser
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:129:73
+    127|     h[operation].mockRejectedValue(new Error(`${operation} failed`));
+    128|     h.queue = [[], [auditRow], []];
+    129|     await expect(new AccessibilityAuditManager().runAutomatedAudit('a1…
+       |                                                                         ^
+    130|     expect(h.updates.at(-1)).toMatchObject({ status: 'failed', accessi…
+    131|     expect(h.updates.some((update) => update.status === 'completed')).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit handles scan errors and rethrows
+AssertionError: expected { status: 'failed', …(1) } to match object { status: 'failed', …(2) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "accessibilityScore": null,
+-   "pagesScanned": 0,
+    "status": "failed",
+  }
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:164:30
+    162|       .mockRejectedValue(new Error('scan failed'));
+    163|     await expect(mgr.runAutomatedAudit('a1')).rejects.toThrow('scan fa…
+    164|     expect(h.updates.at(-1)).toMatchObject({ status: 'failed', accessi…
+       |                              ^
+    165|   });
+    166|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 14 passed (22)
+   Start at  19:00:50
+   Duration  216ms (transform 51%, tests 24%, import 18%, setup 4%, worker 3%)
+

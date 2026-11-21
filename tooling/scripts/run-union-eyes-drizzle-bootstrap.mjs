@@ -58,7 +58,6 @@ import {
   assertMigrationLedgerIntegrity,
   readLedgerExceptions,
 } from './lib/union-eyes-migration-ledger.mjs';
-import { activateCatalogPrivileges } from './lib/union-eyes-catalog-authority.mjs';
 import {
   grantRuntimeConnect,
   recordRestoredAuthority,
@@ -70,6 +69,8 @@ import {
   SCOPED_RLS_CLOSURE_TAGS,
   platformMigrationPrecedesScopedClosure,
   runtimeGrantsFollowSecurityClosure,
+  runCurrentSecurityBootstrapStage,
+  withCurrentSecurityInstaller,
   tagsThrough,
 } from './lib/union-eyes-bootstrap-stages.mjs';
 import { read0014RelationNames } from './lib/union-eyes-0014-producer-graph.mjs';
@@ -353,29 +354,12 @@ async function quarantineUnprotectedRuntimePrivileges(client) {
   return { applied: true, reason: 'closure_not_recorded' };
 }
 
-async function privilegeEnforcementEnabled(client) {
-  if (process.env.UE_PRIVILEGE_ENFORCEMENT === '1' || process.env.QA_TEST_ENV === 'true') return true;
-  const regclass = await client.query(`SELECT to_regclass('drizzle.bootstrap_attestations') AS regclass`);
-  if (!regclass.rows[0]?.regclass) return true;
-  const prior = await client.query('SELECT 1 FROM drizzle.bootstrap_attestations LIMIT 1');
-  return prior.rowCount === 0;
-}
-
 async function activateRuntimePrivileges(client) {
   if (!(await securityClosureRecorded(client))) {
     fail('Refusing runtime grant activation: the scoped RLS closure hashes are not all recorded.');
   }
-  const enforce = await privilegeEnforcementEnabled(client);
-  info(
-    enforce
-      ? 'Activating exact storage-authority grants after catalog verification.'
-      : 'Serving database: verifying catalog privileges without revoking live grants.',
-  );
-  try {
-    return await activateCatalogPrivileges(client, { repoRoot, enforce });
-  } catch (err) {
-    fail(`Runtime grant activation failed: ${err.message}`);
-  }
+  info('Converging current source auth, framework, case guards and exact grants in one verified transaction.');
+  return withCurrentSecurityInstaller(repoRoot, install => runCurrentSecurityBootstrapStage(client, install, { repoRoot }));
 }
 
 async function report0014PhysicalPresence(client) {
@@ -537,16 +521,18 @@ async function main() {
 
     info(`Applying scoped RLS closures after ${SCOPED_FOUNDATION_THROUGH_TAG} ...`);
     const closureSummary = await applyScopedMigrations(client, { afterTag: SCOPED_FOUNDATION_THROUGH_TAG });
+    const activationSummary = await activateRuntimePrivileges(client);
     const authorityReport = await verifyRestoredAuthority(client, {
       migrationsDir: SCOPED_MIGRATIONS_DIR,
       restored: restoreSummary.restored,
+      repoRoot,
+      currentContract: activationSummary.currentContract,
     });
     await recordRestoredAuthority(client, authorityReport);
     info(
       `Authority reconciliation ${authorityReport.mode}: ` +
         'HISTORICAL_MIGRATION_RECORDED PHYSICAL_SCHEMA_VERIFIED SECURITY_EFFECTS_VERIFIED RESTORE_RECONCILIATION_COMPLETE',
     );
-    const activationSummary = await activateRuntimePrivileges(client);
     if (restoreSummary.restored) {
       await grantRuntimeConnect(client);
       info('Runtime CONNECT restored after catalog admission.');
@@ -566,6 +552,7 @@ async function main() {
       platformMigrationsApplied: platformSummary.applied,
       runtimePrivilegeQuarantineApplied: quarantineSummary.applied,
       runtimeGrantActivationApplied: activationSummary.applied,
+      currentSecuritySourcePlanDigest: activationSummary.sourcePlanDigest,
       historicalMigrationRecorded: authorityReport.HISTORICAL_MIGRATION_RECORDED,
       physicalSchemaVerified: authorityReport.PHYSICAL_SCHEMA_VERIFIED,
       securityEffectsVerified: authorityReport.SECURITY_EFFECTS_VERIFIED,

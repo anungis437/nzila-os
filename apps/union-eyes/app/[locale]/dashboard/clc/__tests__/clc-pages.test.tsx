@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { createTranslator } from 'next-intl'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 
@@ -15,6 +18,7 @@ const m = vi.hoisted(() => ({
   loadRemittanceMetrics: vi.fn(),
   systemResults: [] as unknown[],
   systemFails: false,
+  systemCalls: vi.fn(),
 }))
 
 vi.mock('@/lib/api-auth-guard', () => ({ requireUser: vi.fn(async () => ({ userId: 'user-1', organizationId: 'clc-org' })) }))
@@ -32,10 +36,11 @@ vi.mock('@/lib/organizations/per-capita-standing', async (importActual) => ({
   loadAffiliateStandings: m.loadAffiliateStandings,
   loadRemittanceMetrics: m.loadRemittanceMetrics,
 }))
-// Each query of the staff page awaits one result, in order: failed syncs, last sync, pending approvals, overdue, recent activity.
+// A future reintroduction of the former staff metrics query must be observable.
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: vi.fn(),
   withSystemContext: async (run: (tx: unknown) => Promise<unknown>) => {
+    m.systemCalls()
     if (m.systemFails) throw new Error('system connection refused')
     const queue = [...m.systemResults]
     const chain = (): unknown => {
@@ -48,7 +53,6 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     return run({ select: chain })
   },
 }))
-vi.mock('@/components/admin/clc-approval-workflow', () => ({ CLCApprovalWorkflow: () => <div data-testid="approval-workflow" /> }))
 vi.mock('@/components/admin/clc-analytics-dashboard', () => ({ default: () => <div data-testid="clc-analytics-dashboard" /> }))
 vi.mock('@/components/admin/clc-remittances-dashboard', () => ({ ClcRemittancesDashboard: () => <div data-testid="clc-remittances-dashboard" /> }))
 
@@ -96,6 +100,7 @@ beforeEach(() => {
   m.role = 'clc_staff'
   m.systemFails = false
   m.systemResults = []
+  m.systemCalls.mockClear()
   m.redirect.mockClear()
   m.listAffiliates.mockReset()
   m.loadRemittanceFacts.mockReset()
@@ -105,59 +110,31 @@ beforeEach(() => {
 afterEach(() => cleanup())
 
 describe('CLC staff dashboard', () => {
-  it('shows the counts the system reads returned and the real sync history, with the row fields the table has', async () => {
-    m.systemResults = [
-      [{ count: 2 }],
-      [{ syncedAt: '2026-05-30T10:00:00.000Z' }],
-      [{ count: 5 }],
-      [{ count: 3 }],
-      [
-        { id: 's-1', affiliateCode: 'AFF-0001', action: 'failed', syncedAt: '2026-05-30T10:00:00.000Z', error: 'Upstream refused the request' },
-        { id: 's-2', affiliateCode: 'AFF-0002', action: 'updated', syncedAt: '2026-05-29T10:00:00.000Z', error: null },
-      ],
-    ]
-    const { container } = render(await CLCStaffDashboardPage())
-
-    const card = (title: string) => screen.getByText(title).closest('[class*="rounded"]') as HTMLElement
-    expect(within(card('Failed Syncs (24h)')).getByText('2')).toBeInTheDocument()
-    expect(within(card('Pending Approvals')).getByText('5')).toBeInTheDocument()
-    expect(within(card('Overdue Remittances')).getByText('3')).toBeInTheDocument()
-    expect(screen.getByText('AFF-0001')).toBeInTheDocument()
-    expect(screen.getByText('Upstream refused the request')).toBeInTheDocument()
-    expect(screen.getByText('failed')).toBeInTheDocument()
-    expect(screen.getByText('updated')).toBeInTheDocument()
-    // The count of syncs "pending" was a literal 0: no queue exists to count.
-    expect(screen.queryByText('Pending Syncs')).not.toBeInTheDocument()
-    expect(screen.getByTestId('approval-workflow')).toBeInTheDocument()
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    expect(adminLinksToMissingPages(container)).toEqual([])
+  it.each(['en', 'en-CA', 'fr', 'fr-CA'])('has actual release-scope translations for %s', locale => {
+    const messages = JSON.parse(readFileSync(path.resolve(import.meta.dirname, '../../../../../messages', `${locale}.json`), 'utf8'))
+    const translate = createTranslator({ locale, messages, namespace: 'clc.staff' })
+    expect(translate('releaseScope.title')).toBe(messages.clc.staff.releaseScope.title)
+    expect(translate('releaseScope.description')).toBe(messages.clc.staff.releaseScope.description)
+    expect(translate('releaseScope.description')).toMatch(locale.startsWith('fr') ? /ne sont pas inclus/ : /not included in this release/)
   })
-
-  it('offers no sync, import or settings control that does nothing or leads nowhere', async () => {
-    m.systemResults = [[{ count: 0 }], [], [{ count: 0 }], [{ count: 0 }], []]
-    const { container } = render(await CLCStaffDashboardPage())
-    expect(screen.queryByRole('button', { name: /Sync Now/ })).not.toBeInTheDocument()
-    expect(screen.queryByText(/Bulk Import/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Automated daily sync/)).not.toBeInTheDocument()
-    expect(adminLinksToMissingPages(container)).toEqual([])
-    expect(container.querySelector('a[href="/dashboard/admin/organizations"]')).not.toBeNull()
-  })
-
-  it('shows dashes and says so when the figures could not be read, instead of zero failures and nothing awaiting review', async () => {
+  it.each(['clc_staff', 'clc_executive', 'system_admin'])('shows the excluded scope without reading billing data for %s', async role => {
+    m.role = role
     m.systemFails = true
-    render(await CLCStaffDashboardPage())
-    expect(screen.getByRole('alert')).toHaveTextContent('could not be read')
-    const card = (title: string) => screen.getByText(title).closest('[class*="rounded"]') as HTMLElement
-    expect(within(card('Failed Syncs (24h)')).getByText('—')).toBeInTheDocument()
-    expect(within(card('Pending Approvals')).getByText('—')).toBeInTheDocument()
-    expect(within(card('Overdue Remittances')).getByText('—')).toBeInTheDocument()
+    const { container } = render(await CLCStaffDashboardPage())
+    expect(screen.getByRole('status')).toHaveTextContent('not included in this release')
+    expect(m.systemCalls).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('approval-workflow')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pending Approvals')).not.toBeInTheDocument()
+    expect(screen.queryByText('Overdue Remittances')).not.toBeInTheDocument()
     expect(screen.queryByText('0')).not.toBeInTheDocument()
     expect(screen.queryByText('All on track')).not.toBeInTheDocument()
+    expect(adminLinksToMissingPages(container)).toEqual([])
   })
 
   it('sends a caller without a CLC role away', async () => {
     m.role = 'member'
     await expect(CLCStaffDashboardPage()).rejects.toThrow('NEXT_REDIRECT /dashboard')
+    expect(m.systemCalls).not.toHaveBeenCalled()
   })
 })
 

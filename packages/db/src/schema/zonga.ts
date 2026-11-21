@@ -19,7 +19,9 @@ import {
   numeric,
   varchar,
   boolean,
+  check,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import { orgs } from './orgs'
 
 // ── Zonga Enums ─────────────────────────────────────────────────────────────
@@ -617,14 +619,24 @@ export const zongaNotifications = pgTable('zonga_notifications', {
   orgId: uuid('org_id')
     .notNull()
     .references(() => orgs.id),
-  userId: uuid('user_id').notNull(),
+  // Legacy UUID attribution is retained without treating a creator/listener ID
+  // as an authenticated principal. Current notifications use the opaque text ID.
+  userId: uuid('user_id'),
+  recipientUserId: text('recipient_user_id'),
   type: varchar('type', { length: 100 }).notNull(),
   title: varchar('title', { length: 500 }).notNull(),
   body: text('body'),
   link: text('link'),
   read: boolean('read').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-})
+}, (table) => ({
+  recipientNamespaceCheck: check('zonga_notification_recipient_namespace_ck', sql`
+    (${table.recipientUserId} IS NULL AND ${table.userId} IS NOT NULL)
+    OR (${table.recipientUserId} IS NOT NULL AND ${table.userId} IS NULL
+      AND length(btrim(${table.recipientUserId})) > 0
+      AND ${table.recipientUserId} = btrim(${table.recipientUserId}))
+  `),
+}))
 
 // ── Zonga Outbox ────────────────────────────────────────────────────────────
 

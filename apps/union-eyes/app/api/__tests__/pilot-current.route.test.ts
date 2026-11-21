@@ -29,7 +29,7 @@ vi.mock('@/db/schema/domains/pilot/pilot-milestones', () => ({ pilotMilestones: 
 vi.mock('@/lib/api/standardized-responses', () => ({ ErrorCode: { FORBIDDEN: 'FORBIDDEN' }, standardErrorResponse: vi.fn((code: string, message: string) => new Response(JSON.stringify({ message }), { status: 403 })) }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, eq: vi.fn(() => 'eq'), sql: vi.fn((s: any) => s) };
+  return { ...actual, eq: vi.fn(() => 'eq') };
 });
 
 async function loadRoute() {

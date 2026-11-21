@@ -1,0 +1,237 @@
+{
+  "scope": "DISPOSABLE_HASH_LOCKED_DRF_FINANCE_DENIAL_AND_ISOLATION_CONTROLS",
+  "recordedAt": "2026-11-18T05:43:13.944003+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "result": {
+    "pythonVersion": "3.11.17",
+    "platform": "linux",
+    "djangoVersion": "5.2.18",
+    "currentSettings": "config.settings",
+    "testModules": [
+      "billing.test_base_release_boundary",
+      "billing.tests_round33_restored_surfaces",
+      "billing.tests_round56_payments_containment",
+      "billing.tests_mixed_and_multiparty_isolation",
+      "billing.tests_isolation"
+    ],
+    "expectedTests": 41,
+    "expectedDispatches": 2410,
+    "testsRun": 41,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "endpointClasses": 81,
+    "endpointNames": [
+      "AccountBalanceReconciliationViewSet",
+      "AccountMappingsViewSet",
+      "AutopaySettingsViewSet",
+      "BankAccountsViewSet",
+      "BankOfCanadaRatesViewSet",
+      "BankReconciliationViewSet",
+      "BankReconciliationsViewSet",
+      "BankTransactionsViewSet",
+      "ChartOfAccountsViewSet",
+      "ClcApiConfigViewSet",
+      "ClcBargainingTrendsViewSet",
+      "ClcChartOfAccountsViewSet",
+      "ClcOauthTokensViewSet",
+      "ClcOrganizationSyncLogViewSet",
+      "ClcPerCapitaBenchmarksViewSet",
+      "ClcRemittanceMappingViewSet",
+      "ClcSyncLogViewSet",
+      "ClcUnionDensityViewSet",
+      "ClcWebhookLogViewSet",
+      "CostCentersViewSet",
+      "CpiAdjustedPricingViewSet",
+      "CpiDataViewSet",
+      "CrossBorderTransactionsViewSet",
+      "CurrencyEnforcementAuditViewSet",
+      "CurrencyEnforcementPolicyViewSet",
+      "CurrencyEnforcementViolationsViewSet",
+      "CurrencyExchangeRatesViewSet",
+      "DonationCampaignsViewSet",
+      "DonationReceiptsViewSet",
+      "DonationsViewSet",
+      "DuesRatesViewSet",
+      "DuesTransactionsViewSet",
+      "EmployerRemittancesViewSet",
+      "ErpConnectorsViewSet",
+      "ErpInvoicesViewSet",
+      "ExchangeRatesViewSet",
+      "FinancialAuditLogViewSet",
+      "FinancialPeriodsViewSet",
+      "FmvAuditLogViewSet",
+      "FmvBenchmarksViewSet",
+      "FmvPolicyViewSet",
+      "FmvViolationsViewSet",
+      "FxRateAuditLogViewSet",
+      "GlAccountMappingsViewSet",
+      "GlTransactionLogViewSet",
+      "GlTrialBalanceViewSet",
+      "IndependentAppraisalsViewSet",
+      "JournalEntriesViewSet",
+      "JournalEntryLinesViewSet",
+      "MemberArrearsViewSet",
+      "MemberDuesLedgerViewSet",
+      "OrganizationBillingConfigViewSet",
+      "OrganizationContactsViewSet",
+      "PaymentClassificationPolicyViewSet",
+      "PaymentCyclesViewSet",
+      "PaymentDisputesViewSet",
+      "PaymentMethodsViewSet",
+      "PaymentPlansViewSet",
+      "PaymentRoutingRulesViewSet",
+      "PaymentsViewSet",
+      "PerCapitaRemittancesViewSet",
+      "ProcurementBidsViewSet",
+      "ProcurementRequestsViewSet",
+      "RemittanceApprovalsViewSet",
+      "RemittanceExceptionsViewSet",
+      "RemittanceLineItemsViewSet",
+      "Rl1TaxSlipsViewSet",
+      "SeparatedPaymentTransactionsViewSet",
+      "StrikeFundDisbursementsViewSet",
+      "StrikeFundPaymentAuditViewSet",
+      "StripeConnectAccountsViewSet",
+      "StripeWebhookEventsViewSet",
+      "SyncJobsViewSet",
+      "T106FilingTrackingViewSet",
+      "T4aTaxSlipsViewSet",
+      "TaxYearEndProcessingViewSet",
+      "TransactionCurrencyConversionsViewSet",
+      "TransferPricingDocumentationViewSet",
+      "WeeklyThresholdTrackingViewSet",
+      "WhiplashPreventionAuditViewSet",
+      "WhiplashViolationsViewSet"
+    ],
+    "roles": [
+      "member",
+      "steward",
+      "officer",
+      "executive",
+      "admin"
+    ],
+    "actions": [
+      "list",
+      "create",
+      "retrieve",
+      "update",
+      "partial_update",
+      "destroy"
+    ],
+    "actualDispatches": 2410,
+    "allDispatchResponses403": true,
+    "databaseConnectionAttempts": 0,
+    "envFileReadAttempts": 0,
+    "lockedInstalledDistributions": 87,
+    "lockSha256": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979",
+    "verdict": "PASS"
+  },
+  "environment": {
+    "image": "python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce",
+    "platform": "linux/amd64",
+    "network": "none",
+    "containerCleanupConfirmed": true,
+    "actualPythonVersion": "3.11.17",
+    "declaredCollectorTargetVersion": "3.11.14",
+    "targetPatchVersionEqualityClaimed": false
+  },
+  "rawPrivateArtifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/v4-billing-result.json",
+      "sha256": "15ad5dd1fd5654b9703590f6e084a2b2bd67a452457d4deb390e5212f9144f97",
+      "bytes": 3616
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/v4-locked-install.json",
+      "sha256": "aed19cbb5e31717fccbd2d907a9d31d9298079e291e763e626c392dfebb4506b",
+      "bytes": 1444251
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/python-billing-container-v4.json",
+      "sha256": "eb500c24830be2422d2be5f844d5057734f8047e4114b6fb67a3906b9e771167",
+      "bytes": 402
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/python-billing-qualification-v4.log",
+      "sha256": "f19f19cf33bd4b2944f19acc6872cb069ef9e11f48d9e982f5a7c03286191e21",
+      "bytes": 1458580
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/billing-locked-wheel-inventory-v4.json",
+      "sha256": "a936b5c554082b5e567c54432a5247fd88a2a6ddf4583b1cbadc2c6d868ff80f",
+      "bytes": 14782
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/run-bounded-python-qualification-v2.py",
+      "sha256": "45f85189aa815ca3567788a1eb21fc9e4e5b63080a381d3ecd441296a4adc99d",
+      "bytes": 11243
+    }
+  ],
+  "sourceBindingsAtRecord": [
+    {
+      "path": "apps/union-eyes/backend/billing/views.py",
+      "sha256": "47a54379c1d89c3a36a94d7e07aba4ff5e1f1a8be4ea4a04b95b45f3f045d0aa",
+      "bytes": 52258
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/test_base_release_boundary.py",
+      "sha256": "26d677197606093478a776b5782f7e7a6fa04b96893b929e007021e7eeec97e0",
+      "bytes": 2721
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/tests_round33_restored_surfaces.py",
+      "sha256": "796be11c5b287260ee45e8924429868b929f39fa56a8a2657538f76323cfdd9d",
+      "bytes": 4766
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/tests_round56_payments_containment.py",
+      "sha256": "041f5db27306a11ecb4ceba2272bc678a8960a08e1da8373776a00c16046cfc8",
+      "bytes": 1845
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/tests_mixed_and_multiparty_isolation.py",
+      "sha256": "d21a7da998e29e179a0eb009d1512f742f74d15f128f333954be8af1d3eae0f4",
+      "bytes": 10072
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/tests_isolation.py",
+      "sha256": "a89ccc49dfeab6b61a73f5e03a1e73df6d0c0f95d1bf132fd5aa2c7eea90d338",
+      "bytes": 10154
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/isolation.py",
+      "sha256": "9a076cd51ac74ae6dab0a414b0bab9edcf48a42542309c2529b2763a72d71b6c",
+      "bytes": 19563
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/urls.py",
+      "sha256": "a7e0bb092b07e05519c8d239aa77e8674fba85383f37164b814658ceba50ab86",
+      "bytes": 6133
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock",
+      "sha256": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979",
+      "bytes": 8742
+    }
+  ],
+  "previousAttempt": {
+    "receipt": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/v3-billing-result.json",
+      "sha256": "8509f9de058144bdbb8802eee3c636a23665e5bb7d27dfe8c5a6df2d8e6f8ea3",
+      "bytes": 3616
+    },
+    "wholeCohortResult": "FAIL_40_PASS_1_FAIL",
+    "cause": "Stale static Payments permission class expectation. Actual local class is unconditional deny; actual assigned permission behavior assertions retained. All2410 handler responses already403, but whole v3 cohort was not a pass."
+  },
+  "limits": [
+    "Actual DRF dispatch refusal before SQL only. This does not prove raw PostgreSQL finance grants or successful financial operations.",
+    "Existing independent mixin query controls use test doubles; no production database, stakeholder, or provider acceptance is inferred.",
+    "Source bindings are interim working bytes, not the final integrated commit.",
+    "Positive finance and dues persistence remain excluded."
+  ],
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

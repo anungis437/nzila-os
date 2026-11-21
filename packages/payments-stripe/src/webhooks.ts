@@ -52,21 +52,23 @@ export class WebhookSignatureError extends Error {
  */
 export function extractEntityIdFromEvent(event: Stripe.Event): string | null {
   const obj = event.data.object as unknown as Record<string, unknown>
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null
 
-  // Check metadata on the object itself
-  if (obj.metadata && typeof obj.metadata === 'object') {
-    const meta = obj.metadata as Record<string, string>
-    if (meta.org_id) return meta.org_id
+  // Undefined means absent; null means a supplied scope is malformed. A valid
+  // second source cannot repair a contradictory or malformed signed object.
+  const scope = (metadata: unknown): string | null | undefined => {
+    if (metadata === null || metadata === undefined) return undefined
+    if (typeof metadata !== 'object' || Array.isArray(metadata)) return null
+    if (!Object.hasOwn(metadata, 'org_id')) return undefined
+    const id = (metadata as Record<string, unknown>).org_id
+    return typeof id === 'string' && id.length > 0 && id.trim() === id ? id : null
   }
-
-  // For charges, check the payment_intent metadata
-  if ('payment_intent' in obj && typeof obj.payment_intent === 'object' && obj.payment_intent) {
-    const pi = obj.payment_intent as Record<string, unknown>
-    if (pi.metadata && typeof pi.metadata === 'object') {
-      const meta = pi.metadata as Record<string, string>
-      if (meta.org_id) return meta.org_id
-    }
-  }
-
-  return null
+  const direct = scope(obj.metadata)
+  const parent = obj.payment_intent
+  if (Array.isArray(parent)) return null
+  const nested = parent && typeof parent === 'object'
+    ? scope((parent as Record<string, unknown>).metadata)
+    : undefined
+  if (direct === null || nested === null || (direct && nested && direct !== nested)) return null
+  return direct ?? nested ?? null
 }

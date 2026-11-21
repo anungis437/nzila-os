@@ -88,7 +88,7 @@ const SCENARIOS: Scenario[] = [
         facts(U.delegate, ['officer'], {
           memberships: [membership(U.delegate, ['officer'], { status: s }), membership(U.president, ['executive'])],
           delegations: [delegation({ actions: ['case:read'], resourceTypes: ['case'] })],
-          mandates: [office(U.president, ['read'])],
+          mandates: [{ ...office(U.president, ['read']), scope: { resourceIds: [CASE_ID] } }],
         }),
         caseFacts(),
         NOW,
@@ -175,7 +175,7 @@ describe('every kernel policy family: a live subordinate record never outlives t
         facts(U.delegate, ['officer'], {
           memberships: [membership(U.delegate, ['officer']), membership(U.president, ['executive'], { status })],
           delegations: [delegation({ actions: ['case:read'], resourceTypes: ['case'] })],
-          mandates: [office(U.president, ['read'])],
+          mandates: [{ ...office(U.president, ['read']), scope: { resourceIds: [CASE_ID] } }],
         }),
         caseFacts(),
         NOW,

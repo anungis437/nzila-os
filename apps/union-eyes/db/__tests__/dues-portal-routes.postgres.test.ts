@@ -3,15 +3,17 @@
  *
  * Platform 0061 and cache 0052 gave payroll_deductions and member_dues_issues a physical relation and a row-security floor (organization). Until then both
  * routes answered with an undefined-relation fault whatever the caller sent. This runs the unmodified routes against the combined Django + Drizzle schema,
- * with only the request boundary replaced (see native-route-harness.ts). It proves that
- *   - a member reads their own deductions, newest pay period first, and not another member's, and not their own in another organization;
- *   - the read carries nothing internal (the staff member who verified it, the remittance line, the employer, free-form metadata, other deductions);
- *   - the route asks the wrapper for a tenant transaction, and a handle with no organization sees no deduction row (why it must);
- *   - a member files a report as themselves, as open, whatever the body claims about identity, status, priority or assignment, and it is audited;
- *   - a report may name a deduction only if it is the caller's own: another member's, another organization's and a made-up one are all "not found";
- *   - what a client can get wrong (a body that is not an object, text that is too long, an amount that cannot be stored, an id that is not a uuid)
- *     is a client error, never a server fault, and writes nothing;
- *   - an organization cannot read another's reports, and a report whose audit fails is not stored.
+ * with only the request boundary replaced (see native-route-harness.ts).
+ *
+ * Finance and dues persistence is now excluded from the base release (lib/finance/base-release-boundary.ts requireBaseFinancialAuthority: an
+ * unconditional 501, no database, provider or audit side effect; consistent with the closed owner decision that dues are handled in an external
+ * system). So this proves the decided refusal, at the strength the positive proofs had:
+ *   - every member, in either organization, is answered NOT_IMPLEMENTED (501) for their deductions, and the refusal carries no row;
+ *   - the routes no longer ask for a tenant transaction, and a handle with no organization still sees no deduction row;
+ *   - a report is refused 501 whatever the body claims, whichever deduction it names (another member's, another organization's or a made-up one
+ *     answer identically, so the refusal is no existence oracle), and nothing is stored or audited;
+ *   - what a client can get wrong is still a client error, never a server fault, and writes nothing;
+ *   - below the route an organization still cannot read another's reports, and a caller with no organization is refused before any statement.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
@@ -69,6 +71,10 @@ describe.skipIf(!URL)('the dues portal routes on the combined schema, as the rea
 
   beforeAll(async () => {
     admin = await harness.start(URL!)
+    // The organizations the members belong to: a canonical membership references its organization.
+    for (const id of [ORG_A, ORG_B]) await admin.query(
+      `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+       VALUES ($1,$2,$2,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`, [id, `dues-portal-${id.slice(0, 8)}-${tag}`])
     for (const who of [asM, asN, asMInB]) harness.setRole(who.userId, who.organizationId, 'member')
     ids.jan = await seedDeduction(ORG_A, memberM, 1, '45.50')
     ids.feb = await seedDeduction(ORG_A, memberM, 2, '45.50')
@@ -82,73 +88,48 @@ describe.skipIf(!URL)('the dues portal routes on the combined schema, as the rea
     await harness.stop()
   })
 
+  const refusedAsUnavailable = (error: unknown) => {
+    expect(error).toBeInstanceOf(ApiError)
+    expect(error).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, status: 501, message: 'Finance and dues persistence are not available in this release.' })
+  }
+
   describe('GET /api/dues/deductions', () => {
-    it('lists the member\'s own deductions, newest pay period first, and nobody else\'s', async () => {
-      const { data } = await listDeductions({ ...asM, request: new Request('http://localhost/api/dues/deductions') })
-      expect(data.map((row) => row.id)).toEqual([ids.mar, ids.feb, ids.jan])
-      expect(data.map((row) => row.unionDuesAmount)).toEqual(['47.25', '45.50', '45.50'])
+    it('answers every member NOT_IMPLEMENTED for their deductions, in either organization, with no row in the refusal', async () => {
+      for (const who of [asM, asMInB, asN]) {
+        const error = await rejection(listDeductions({ ...who, request: new Request('http://localhost/api/dues/deductions') }))
+        refusedAsUnavailable(error)
+        expect(JSON.stringify(error)).not.toMatch(/45\.50|47\.25|60\.00|30\.00|staff-|internal reconciliation/)
+      }
     })
 
-    it('shows the same member only what they were deducted in the organization they are acting in', async () => {
-      const inB = await listDeductions({ ...asMInB, request: new Request('http://localhost/api/dues/deductions') })
-      expect(inB.data.map((row) => row.id)).toEqual([ids.b])
-      const other = await listDeductions({ ...asN, request: new Request('http://localhost/api/dues/deductions') })
-      expect(other.data.map((row) => row.id)).toEqual([ids.n])
-    })
-
-    it('carries nothing internal: not the verifier, the remittance line, the employer, the metadata or the other deductions', async () => {
-      const { data } = await listDeductions({ ...asM, request: new Request('http://localhost/api/dues/deductions') })
-      expect(Object.keys(data[0]).sort()).toEqual(
-        ['createdAt', 'grossPay', 'id', 'netPay', 'payPeriodEnd', 'payPeriodStart', 'source', 'unionDuesAmount', 'verified', 'verifiedAt'].sort(),
-      )
-      expect(JSON.stringify(data)).not.toMatch(/staff-|internal reconciliation|health|remittance_line|employer/)
-      expect(data[0]).toMatchObject({ grossPay: '2400.00', netPay: '1910.55', source: 'remittance', verified: true })
-    })
-
-    it('asks the wrapper for a tenant transaction, because a handle with no organization sees no deduction row', async () => {
+    it('no longer asks the wrapper for a tenant transaction, and a handle with no organization still sees no deduction row', async () => {
       const config = harness.configs.find((entry) => entry.openapi?.summary === 'List payroll deductions for the authenticated member')
-      expect(config?.rlsOrgContext).toBe(true)
+      expect(config?.rlsOrgContext).toBe(false)
       const schema = await import('@/db/schema')
       const withoutOrganization = await harness.tenant(RUNTIME_ROLE, null, memberM, (tx) => tx.select().from(schema.payrollDeductions))
       expect(withoutOrganization).toEqual([])
     })
 
-    it('answers a signed-in caller who has no organization with an empty list', async () => {
-      expect(await listDeductions({ organizationId: null, userId: memberM, role: 'member', request: new Request('http://localhost/api/dues/deductions') })).toEqual({ data: [] })
+    it('refuses a signed-in caller who has no organization before any statement: there is no canonical membership to bind', async () => {
+      const error = await rejection(listDeductions({ organizationId: null, userId: memberM, role: 'member', request: new Request('http://localhost/api/dues/deductions') }))
+      expect((error as InstanceType<typeof ApiError>).code).toBe(ErrorCode.FORBIDDEN)
     })
   })
 
   describe('POST /api/dues/issues', () => {
-    it('files a report as the caller, as open, and audits it by issue type', async () => {
+    it('refuses a report NOT_IMPLEMENTED, whatever the body claims about identity, status, priority, assignment and resolution, and stores and audits nothing', async () => {
       const before = harness.audits.length
-      const { success, issue } = await body(await fileIssue(request(asM, { ...valid, expectedAmount: 45.5 })))
-      expect(success).toBe(true)
-      const [stored] = await issueRows('id = $1', [issue.id])
-      expect(stored).toMatchObject({ organization_id: ORG_A, user_id: memberM, issue_type: 'incorrect_amount', subject: valid.subject, status: 'open', priority: 3, assigned_to: null, expected_amount: '45.50', payroll_deduction_id: null })
-      const entries = harness.audits.slice(before).filter((entry) => entry.resourceId === issue.id)
-      expect(entries).toEqual([expect.objectContaining({ action: 'dues.issue.report', resourceType: 'member_dues_issues', organizationId: ORG_A, userId: memberM, details: { issueType: 'incorrect_amount' } })])
-    })
-
-    it('ignores what a body claims about identity, status, priority, assignment and resolution', async () => {
-      const { issue } = await body(await fileIssue(request(asM, {
+      for (const payload of [{ ...valid, expectedAmount: 45.5 }, {
         ...valid, userId: memberN, organizationId: ORG_B, status: 'resolved', priority: 1, assignedTo: 'staff', resolvedBy: 'staff', resolutionType: 'corrected', actualAmount: 1,
-      })))
-      const [stored] = await issueRows('id = $1', [issue.id])
-      expect(stored).toMatchObject({ organization_id: ORG_A, user_id: memberM, status: 'open', priority: 3, assigned_to: null, resolved_by: null, resolution_type: null, actual_amount: null })
+      }]) refusedAsUnavailable(await rejection(fileIssue(request(asM, payload))))
+      expect(await issueRows('subject = $1', [valid.subject])).toHaveLength(0)
+      expect(harness.audits).toHaveLength(before)
     })
 
-    it('lets a report name one of the caller\'s own deductions', async () => {
-      const { issue } = await body(await fileIssue(request(asM, { ...valid, payrollDeductionId: ids.mar })))
-      expect((await issueRows('id = $1', [issue.id]))[0].payroll_deduction_id).toBe(ids.mar)
-    })
-
-    it('reports another member\'s deduction, another organization\'s and a made-up one identically as not found, and writes nothing', async () => {
-      const subject = `Foreign deduction ${tag}`
-      for (const payrollDeductionId of [ids.n, ids.b, randomUUID()]) {
-        const error = await rejection(fileIssue(request(asM, { ...valid, subject, payrollDeductionId })))
-        expect(error).toBeInstanceOf(ApiError)
-        expect((error as InstanceType<typeof ApiError>).code).toBe(ErrorCode.NOT_FOUND)
-        expect((error as Error).message).toBe('Payroll deduction not found')
+    it('refuses a report naming the caller\'s own, another member\'s, another organization\'s or a made-up deduction identically, and writes nothing', async () => {
+      const subject = `Named deduction ${tag}`
+      for (const payrollDeductionId of [ids.mar, ids.n, ids.b, randomUUID()]) {
+        refusedAsUnavailable(await rejection(fileIssue(request(asM, { ...valid, subject, payrollDeductionId }))))
       }
       expect(await issueRows('subject = $1', [subject])).toHaveLength(0)
     })
@@ -172,20 +153,21 @@ describe.skipIf(!URL)('the dues portal routes on the combined schema, as the rea
 
     it('keeps one organization\'s reports from another, below the route', async () => {
       const subject = `Isolated ${tag}`
-      const { issue } = await body(await fileIssue(request(asM, { ...valid, subject })))
+      const { rows } = await admin.query(`INSERT INTO public.member_dues_issues (organization_id, user_id, issue_type, subject, description)
+        VALUES ($1, $2, 'incorrect_amount', $3, 'Seeded by the operator: the route files nothing in this release') RETURNING id::text AS id`, [ORG_A, memberM, subject])
       const schema = await import('@/db/schema')
       const seenByA = await harness.tenant(RUNTIME_ROLE, ORG_A, memberM, (tx) => tx.select().from(schema.memberDuesIssues))
-      expect(seenByA.map((row) => row.id)).toContain(issue.id)
+      expect(seenByA.map((row) => row.id)).toContain(rows[0].id)
       const seenByB = await harness.tenant(RUNTIME_ROLE, ORG_B, memberM, (tx) => tx.select().from(schema.memberDuesIssues))
-      expect(seenByB.map((row) => row.id)).not.toContain(issue.id)
+      expect(seenByB.map((row) => row.id)).not.toContain(rows[0].id)
     })
 
-    it('stores nothing when its audit fails', async () => {
+    it('refuses before any audit is attempted, so nothing is stored whether or not the audit sink would work', async () => {
       const subject = `Unaudited ${tag}`
-      harness.failNextAudit()
-      const error = await rejection(fileIssue(request(asM, { ...valid, subject })))
-      expect((error as Error).message).toBe('audit sink unavailable')
+      const before = harness.audits.length
+      refusedAsUnavailable(await rejection(fileIssue(request(asM, { ...valid, subject }))))
       expect(await issueRows('subject = $1', [subject])).toHaveLength(0)
+      expect(harness.audits).toHaveLength(before)
     })
 
     it('refuses a caller below the role floor: no identity, no organization', async () => {

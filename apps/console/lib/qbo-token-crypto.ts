@@ -4,10 +4,10 @@
  * Envelope-encrypts QBO OAuth tokens before DB storage and decrypts on read.
  *
  * Strategy:
- *   - PRODUCTION:  Uses AZURE_KEYVAULT_URL → Azure Key Vault to wrap/unwrap
- *                  the local AES-256-GCM data encryption key (DEK).
+ *   - PRODUCTION:  Requires the configured local AES-256-GCM key.
+ *                  Azure Key Vault wrapping is not implemented here.
  *   - DEV/TEST:    Uses QBO_TOKEN_ENCRYPTION_KEY env var (32-byte hex) as a
- *                  static DEK. Falls back to plaintext with logged warning.
+ *                  static DEK. Missing keys retain nonproduction plaintext compatibility.
  *
  * Encrypted tokens are stored as:  `enc:v1:<iv-hex>:<ciphertext-hex>:<tag-hex>`
  *
@@ -32,43 +32,33 @@ const PREFIX = 'enc:v1:'
  *      unwrapKey of the DEK) is tracked separately and intentionally NOT
  *      implemented here so the surface fails closed if the key is missing.
  *   2. QBO_TOKEN_ENCRYPTION_KEY — hex-encoded 32-byte key for local dev
- *   3. null — plaintext fallback with warning
+ *   3. null — nonproduction plaintext compatibility only
  */
 function getDek(): Buffer | null {
-  // Production path: Azure Key Vault envelope encryption
-  if (process.env.AZURE_KEYVAULT_URL) {
-    const localKey = process.env.QBO_TOKEN_ENCRYPTION_KEY
-    if (localKey) {
-      return Buffer.from(localKey, 'hex')
-    }
-    logger.warn(
-      'AZURE_KEYVAULT_URL is set but QBO_TOKEN_ENCRYPTION_KEY is missing — tokens stored plaintext',
-    )
-    return null
-  }
-
-  // Dev/test path: static local key
   const localKey = process.env.QBO_TOKEN_ENCRYPTION_KEY
   if (localKey) {
-    const buf = Buffer.from(localKey, 'hex')
-    if (buf.length !== 32) {
-      logger.error('QBO_TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)')
-      return null
+    if (!/^[0-9a-fA-F]{64}$/.test(localKey)) {
+      throw new Error(
+        'QBO_TOKEN_ENCRYPTION_KEY must be exactly 64 hexadecimal characters (32 bytes)',
+      )
     }
-    return buf
+    return Buffer.from(localKey, 'hex')
   }
 
   if (process.env.NODE_ENV === 'production') {
-    // Fail-closed: storing OAuth bearer tokens (QuickBooks access to customer
-    // financial data) without encryption at rest is unacceptable in production.
-    logger.error(
-      'QBO tokens cannot be stored without encryption in production — set QBO_TOKEN_ENCRYPTION_KEY or AZURE_KEYVAULT_URL',
-    )
     throw new Error(
-      'QBO_TOKEN_ENCRYPTION_KEY (or AZURE_KEYVAULT_URL + key) is required in production to encrypt QBO OAuth tokens at rest',
+      'QBO_TOKEN_ENCRYPTION_KEY is required in production to encrypt QBO OAuth tokens at rest',
     )
   }
+  if (process.env.AZURE_KEYVAULT_URL) {
+    logger.warn('QBO local encryption key is unavailable in this nonproduction environment')
+  }
   return null
+}
+
+/** Validate storage configuration before exchanging provider credentials. */
+export function assertQboTokenStorageAvailable(): void {
+  getDek()
 }
 
 /**

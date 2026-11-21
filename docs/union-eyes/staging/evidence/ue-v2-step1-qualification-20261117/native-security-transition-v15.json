@@ -1,0 +1,69 @@
+{
+  "scope": "DISPOSABLE_NATIVE_POSTGRESQL_HISTORICAL_SECURITY_TRANSITION",
+  "recordedAt": "2026-11-18T03:44:15.320568+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "tests": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceChangedDuringRun": false,
+  "cases": [
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL refuses an altered legacy policy and preserves the entire security state and history",
+      "status": "passed"
+    },
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL rolls back roles, owners, ACLs and functions after a real database failure during the transition",
+      "status": "passed"
+    },
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL restores the exact old constraint and full state after a real failure following its current replacement",
+      "status": "passed"
+    },
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP",
+      "status": "passed"
+    }
+  ],
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v15.json",
+      "sha256": "327a4abf90334c6a62b13fcc26dd9ad6638c8947dcd9bae10ac15279056ddb71",
+      "bytes": 2736
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v15.txt",
+      "sha256": "abbd931a6c19a52f6bbead89d27186f289cad3dec49ebc1a6ad2d1a0756ffa0b",
+      "bytes": 1294
+    }
+  ],
+  "sourceBindingPublication": {
+    "rawPrivateOriginal": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v15-source.json",
+      "sha256": "f2888fa938d08d246f1d89f72db8a2cfd2bd482bc6254cf55472d115cdc4fb31",
+      "bytes": 112213
+    },
+    "publishedNormalForm": {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v15-source-public.json",
+      "sha256": "5d693807540f8908097b247785c8eaeb2101f7456b98adf124eda03282d8ee79",
+      "bytes": 144779
+    },
+    "formatter": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/publication-format-json-v1.py",
+      "sha256": "a861936c82981f7a70c71b4d535404e0138973c7616b34216a32b6f572a64c87",
+      "bytes": 2783
+    },
+    "transformation": "Path-to-SHA maps become explicit path/sha256 record arrays; source digest values and observed outcomes are preserved."
+  },
+  "limits": [
+    "Owned synthetic PostgreSQL15 historical fixture only; no staging or production operation.",
+    "Current security stage transaction, old-data preservation and second-install NOOP proved; the whole MJS pipeline and authenticated business/helper journeys are separate pending proofs.",
+    "Pre-existing live institutional authority/adoption and exact final commit qualification are not inferred."
+  ],
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

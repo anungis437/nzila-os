@@ -155,16 +155,16 @@ describe('platform services read path', () => {
     expect(overview).toMatchObject({ totalServices: 1, healthyServices: 1 });
   });
 
-  it('drops to the runtime role inside a transaction under the V2 context', async () => {
+  it('refuses under the V2 context without touching the database: platform_services has no current source authority there', async () => {
     h.v2.mockReturnValue(true);
-    const txExecute = vi.fn().mockResolvedValueOnce([]).mockResolvedValueOnce([{ service_name: 'a', status: 'down', updated_at: null }]);
+    const txExecute = vi.fn();
     h.transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn({ execute: txExecute }));
     const { loadPlatformServices } = await vi.importActual<typeof import('./platform-services')>('./platform-services');
-    const overview = await loadPlatformServices();
-    expect(txExecute).toHaveBeenCalledTimes(2);
-    expect(JSON.stringify(txExecute.mock.calls[0])).toContain('SET LOCAL ROLE union_eyes_runtime');
+    // catalog-v2-decisions.json classifies platform_services CONTAINED_NO_AUTHORITY: no runtime or system grant. The page shows a failed read.
+    await expect(loadPlatformServices()).rejects.toMatchObject({ code: 'PLATFORM_SERVICES_UNAVAILABLE' });
+    expect(h.transaction).not.toHaveBeenCalled();
+    expect(txExecute).not.toHaveBeenCalled();
     expect(h.execute).not.toHaveBeenCalled();
-    expect(overview.downServices).toBe(1);
   });
 
   it('propagates a database failure instead of returning an empty overview', async () => {

@@ -8,7 +8,7 @@ import { defineConfig, devices } from '@playwright/test'
  *
  * Projects run every acceptance spec at desktop, tablet and mobile sizes.
  */
-process.env.PLAYWRIGHT_TEST_AUTH ??= 'true'
+process.env.PLAYWRIGHT_TEST_AUTH ??= 'false'
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002'
 
 export default defineConfig({
@@ -22,7 +22,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   timeout: 120_000,
   expect: { timeout: 20_000 },
-  reporter: [['list'], ['json', { outputFile: process.env.UE_RUNTIME_REPORT ?? 'test-results/runtime-report.json' }]],
+  reporter: [
+    ['list'],
+    ['json', { outputFile: process.env.UE_RUNTIME_REPORT ?? 'test-results/runtime-report.json' }],
+  ],
   outputDir: process.env.UE_RUNTIME_ARTIFACTS ?? 'test-results/runtime',
   use: {
     baseURL,

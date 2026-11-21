@@ -12,6 +12,7 @@ import { db } from '@/db';
 import { commercialContracts } from '@/db/schema';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import {
@@ -41,7 +42,9 @@ export async function recordAcceptanceDenial(denial: AcceptanceDenial, userId: s
     await withSystemContext(async () =>
       db.transaction(async (tx) => {
         let claimRecorded = false;
-        if (denial.contractId && denial.claim) {
+        // Canonical V2 gives the system role no authority on commercial_contracts (catalog-v2-decisions: no commercial mutation), so the
+        // claim is not kept on the contract there; the refusal itself, with the channel claimed, is still recorded below.
+        if (denial.contractId && denial.claim && !currentStateContextEnabled()) {
           const [contract] = await tx
             .select({ metadata: commercialContracts.metadata })
             .from(commercialContracts)

@@ -53,6 +53,7 @@ export interface EffectiveCaseAccess {
   /** The kernel's own decision for case:process_ocr. Never inferred from viewing, uploading or modifying. */
   canProcessOcr: boolean
   canDiscloseToMember: boolean
+  canTransition: boolean
   canViewPrivateDocuments: boolean
   ownerOnly: {
     canReassignPrimary: boolean
@@ -112,6 +113,7 @@ const NO_ACCESS: EffectiveCaseAccess = {
   canModifyDocuments: false,
   canProcessOcr: false,
   canDiscloseToMember: false,
+  canTransition: false,
   canViewPrivateDocuments: false,
   ownerOnly: { canReassignPrimary: false, canCloseCase: false, canRemovePrimaryAccess: false, canExportSealedEvidence: false },
 }
@@ -164,6 +166,7 @@ export async function kernelCaseAccess(
     modify: await allowed('case:modify_document'),
     ocr: await allowed('case:process_ocr'),
     disclose: await allowed('case:disclose_to_member'),
+    transition: await allowed('case:transition'),
     close: await allowed('case:close'),
     sealed: await allowed('case:export_sealed_evidence'),
     restricted: await allowed('case:read_third_party_restricted'),
@@ -182,6 +185,7 @@ export async function kernelCaseAccess(
     canModifyDocuments: can.modify,
     canProcessOcr: can.ocr,
     canDiscloseToMember: can.disclose,
+    canTransition: can.transition,
     canViewPrivateDocuments: can.restricted,
   }
   if (isPrimaryOwner) {

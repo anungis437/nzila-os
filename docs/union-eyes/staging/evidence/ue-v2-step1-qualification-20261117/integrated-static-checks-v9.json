@@ -1,0 +1,67 @@
+{
+  "scope": "INTERIM_FULL_WORKSPACE_TYPECHECK",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "command": [
+    "pnpm",
+    "typecheck",
+    "--concurrency=1"
+  ],
+  "startedAt": "2026-11-18T03:00:23.835741+00:00",
+  "finishedAt": "2026-11-18T03:08:09.818799+00:00",
+  "processExitCode": 0,
+  "effectiveQualificationExitCode": 0,
+  "resourceStop": null,
+  "reportedTaskSummary": [
+    "238",
+    "238"
+  ],
+  "allReportedTasksCompleted": true,
+  "freeBytesBefore": 8718409728,
+  "freeBytesAfter": 7630786560,
+  "sourceBindingCount": 15964,
+  "sourceChangedDuringRun": [
+    "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+    "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+    "apps/union-eyes/db/auth/authority-physical-guards.ts",
+    "apps/union-eyes/db/auth/authority-rule-adoption.pglite.test.ts",
+    "tooling/scripts/lib/union-eyes-current-security-installer.ts"
+  ],
+  "finalCandidateQualified": false,
+  "actualUnionEyesPackageHeapLimitMiB": 8192,
+  "rawSourceBindingsPrivate": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/root-typecheck-v9.json",
+    "sha256": "12e7e6cd22512ad383d6d776b94e4b051b8e32cf61aac3c5e807f6b77812412c",
+    "bindingCount": 15964
+  },
+  "expandedManifestTypecheck": {
+    "exitCode": 0,
+    "scope": "Actual production tooling semantic checker after installer/preimage changes"
+  },
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-typecheck-v9.txt",
+      "sha256": "60a4379404a1d8ee6a7e7a7a8fff7917a952033de084b530f437c38519b7a2f8",
+      "bytes": 94204
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/expanded-manifest-typecheck-v5.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/source-plan-v11.log",
+      "sha256": "c92d7d99bb15405ded03cb41ff8309ca979fe2895158c5dac6ef80ddcd48e0fe",
+      "bytes": 119
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-catalog-v11.log",
+      "sha256": "ac926a2ee18668416692243e8fbc0081589f65a94f376af74fcba3efd7bb8a46",
+      "bytes": 63
+    }
+  ],
+  "limits": [
+    "Working source changed during workspace run; exact final candidate requalification remains mandatory.",
+    "Static checks do not prove runtime authorization, historical upgrade or deployment readiness."
+  ]
+}

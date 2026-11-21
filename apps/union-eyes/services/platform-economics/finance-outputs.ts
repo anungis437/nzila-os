@@ -1,6 +1,7 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Finance Outputs Service (Layer 5)
- * 
+ *
  * Generates reproducible, period-locked financial exports:
  * - Master invoices (PDF-ready data)
  * - Allocation statements
@@ -8,30 +9,30 @@
  * - Subsidy reports
  * - GL exports (CSV/JSON)
  * - Audit evidence packs
- * 
+ *
  * All outputs are traceable to ledger entries and tagged with a run hash.
- * 
+ *
  * @domain platform-economics
  * @layer 5 — Finance Outputs
  */
 
-import { db } from '@/db';
-import { sql } from 'drizzle-orm';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
-import { createHash } from 'crypto';
+import { db } from '@/db'
+import { sql } from 'drizzle-orm'
+import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
+import { createHash } from 'crypto'
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface ExportMeta {
-  exportId: string;
-  exportType: ExportType;
-  organizationId: string;
-  periodId: string;
-  generatedAt: string;
-  dataHash: string;
-  rowCount: number;
+  exportId: string
+  exportType: ExportType
+  organizationId: string
+  periodId: string
+  generatedAt: string
+  dataHash: string
+  rowCount: number
 }
 
 export type ExportType =
@@ -41,122 +42,120 @@ export type ExportType =
   | 'subsidy_report'
   | 'gl_journal_csv'
   | 'gl_trial_balance'
-  | 'evidence_pack';
+  | 'evidence_pack'
 
 export interface MasterInvoiceExport {
-  meta: ExportMeta;
+  meta: ExportMeta
   invoice: {
-    invoiceNumber: string;
-    orgName: string;
-    billingPeriod: string;
-    issueDate: string;
-    dueDate: string;
+    invoiceNumber: string
+    orgName: string
+    billingPeriod: string
+    issueDate: string
+    dueDate: string
     lineItems: Array<{
-      description: string;
-      quantity: string;
-      unitPrice: string;
-      amount: string;
-      costType: string;
-    }>;
+      description: string
+      quantity: string
+      unitPrice: string
+      amount: string
+      costType: string
+    }>
     /** The charges before any discount or subsidy: every line that is not an adjustment. */
-    subtotal: string;
+    subtotal: string
     /** The discount line the billing service writes (a negative `credit` line), as a positive amount. */
-    discount: string;
+    discount: string
     /** The subsidy line the billing service writes (a negative `subsidy` line), as a positive amount. */
-    subsidy: string;
-    tax: string;
-    total: string;
-    currency: string;
-    paymentStatus: string;
-    paidAmount: string;
-    balanceDue: string;
-  };
+    subsidy: string
+    tax: string
+    total: string
+    currency: string
+    paymentStatus: string
+    paidAmount: string
+    balanceDue: string
+  }
 }
 
 export interface AllocationStatementExport {
-  meta: ExportMeta;
-  allocationRunId: string;
+  meta: ExportMeta
+  allocationRunId: string
   /** The allocation method of the lines: one name when every line used it, `mixed` when they differ. */
-  method: string;
-  costPool: string;
+  method: string
+  costPool: string
   lines: Array<{
-    localId: string;
-    localName: string;
-    basisValue: string;
+    localId: string
+    localName: string
+    basisValue: string
     /** The allocation weight, as a percentage. */
-    sharePercent: string;
-    allocatedAmount: string;
-  }>;
-  total: string;
+    sharePercent: string
+    allocatedAmount: string
+  }>
+  total: string
 }
 
 export interface ChargebackReportExport {
-  meta: ExportMeta;
-  localId: string;
-  localName: string;
+  meta: ExportMeta
+  localId: string
+  localName: string
   chargebacks: Array<{
-    chargebackId: string;
-    periodLabel: string;
+    chargebackId: string
+    periodLabel: string
     /** What the allocation charged this local for the period. A statement records one amount: the subsidy is applied to the cost pool before it is allocated. */
-    amount: string;
-    currency: string;
-    status: string;
-  }>;
-  totalAmount: string;
+    amount: string
+    currency: string
+    status: string
+  }>
+  totalAmount: string
 }
 
 export interface GlJournalRow {
-  date: string;
-  accountNumber: string;
-  accountName: string;
-  description: string;
-  debit: string;
-  credit: string;
-  costCenter: string;
-  reference: string;
+  date: string
+  accountNumber: string
+  accountName: string
+  description: string
+  debit: string
+  credit: string
+  costCenter: string
+  reference: string
 }
 
 export interface GlJournalExport {
-  meta: ExportMeta;
-  rows: GlJournalRow[];
+  meta: ExportMeta
+  rows: GlJournalRow[]
 }
 
 export interface EvidencePack {
-  meta: ExportMeta;
+  meta: ExportMeta
   sections: {
-    invoices: MasterInvoiceExport[];
-    allocations: AllocationStatementExport[];
-    chargebacks: ChargebackReportExport[];
-    glJournal: GlJournalExport;
+    invoices: MasterInvoiceExport[]
+    allocations: AllocationStatementExport[]
+    chargebacks: ChargebackReportExport[]
+    glJournal: GlJournalExport
     ledgerSummary: {
-      totalEntries: number;
-      totalDebitsCad: string;
-      totalCreditsCad: string;
-      netBalanceCad: string;
-    };
-  };
+      totalEntries: number
+      totalDebitsCad: string
+      totalCreditsCad: string
+      netBalanceCad: string
+    }
+  }
 }
 
 // ============================================================================
 // Helpers
 // ============================================================================
 
-function computeHash(data: any): string {
-  return createHash('sha256')
-    .update(JSON.stringify(data))
-    .digest('hex');
+function computeHash(data: unknown): string {
+  return createHash('sha256').update(JSON.stringify(data)).digest('hex')
 }
 
 /** Money is numeric(14,2): whole cents, summed as integers so a total never carries a float's error. */
-const toCents = (value: unknown): number => Math.round(Number(String(value ?? '0')) * 100);
-const fromCents = (cents: number): string => (cents / 100).toFixed(2);
+const toCents = (value: unknown): number => Math.round(Number(String(value ?? '0')) * 100)
+const fromCents = (cents: number): string => (cents / 100).toFixed(2)
 
 function makeMeta(
   exportType: ExportType,
   organizationId: string,
   periodId: string,
   rowCount: number,
-  data: any,
+  data: unknown,
 ): ExportMeta {
   return {
     exportId: crypto.randomUUID(),
@@ -166,7 +165,7 @@ function makeMeta(
     generatedAt: new Date().toISOString(),
     dataHash: computeHash(data),
     rowCount,
-  };
+  }
 }
 
 // ============================================================================
@@ -177,6 +176,7 @@ export async function exportMasterInvoice(
   organizationId: string,
   invoiceId: string,
 ): Promise<MasterInvoiceExport> {
+  requireBaseFinancialAuthority()
   const [invoice] = await db.execute(sql`
     SELECT
       pi.id, pi.invoice_number, pi.billing_period_id,
@@ -190,10 +190,10 @@ export async function exportMasterInvoice(
     JOIN organizations o ON o.id = pi.organization_id
     WHERE pi.id = ${invoiceId}
       AND pi.organization_id = ${organizationId}
-  `);
+  `)
 
   if (!invoice) {
-    throw new Error(`Invoice ${invoiceId} not found for org ${organizationId}`);
+    throw new Error(`Invoice ${invoiceId} not found for org ${organizationId}`)
   }
 
   // Charges first, then adjustments; the invoice lines are written in one transaction, so no column orders them further.
@@ -202,19 +202,19 @@ export async function exportMasterInvoice(
     FROM platform_invoice_line_items
     WHERE invoice_id = ${invoiceId}
     ORDER BY (amount < 0), cost_type, description, id
-  `);
+  `)
 
-  const rows = lineItems as any as Array<Record<string, unknown>>;
+  const rows = lineItems as unknown as Array<Record<string, unknown>>
 
   // The billing service records a discount as a negative `credit` line and a subsidy as a negative `subsidy` line, and stores the invoice's subtotal net of both.
-  let chargesCents = 0;
-  let discountCents = 0;
-  let subsidyCents = 0;
+  let chargesCents = 0
+  let discountCents = 0
+  let subsidyCents = 0
   for (const r of rows) {
-    const cents = toCents(r.amount);
-    if (cents < 0 && r.cost_type === 'credit') discountCents -= cents;
-    else if (cents < 0 && r.cost_type === 'subsidy') subsidyCents -= cents;
-    else chargesCents += cents;
+    const cents = toCents(r.amount)
+    if (cents < 0 && r.cost_type === 'credit') discountCents -= cents
+    else if (cents < 0 && r.cost_type === 'subsidy') subsidyCents -= cents
+    else chargesCents += cents
   }
 
   const result: MasterInvoiceExport['invoice'] = {
@@ -239,7 +239,7 @@ export async function exportMasterInvoice(
     paymentStatus: String(invoice.status),
     paidAmount: String(invoice.amount_paid),
     balanceDue: String(invoice.balance_due),
-  };
+  }
 
   const meta = makeMeta(
     'master_invoice',
@@ -247,7 +247,7 @@ export async function exportMasterInvoice(
     String(invoice.billing_period_id),
     rows.length,
     result,
-  );
+  )
 
   await auditLog({
     eventType: AuditEventType.DATA_EXPORT,
@@ -257,9 +257,9 @@ export async function exportMasterInvoice(
     resourceId: invoiceId,
     action: 'master_invoice_exported',
     metadata: { exportId: meta.exportId, dataHash: meta.dataHash },
-  });
+  })
 
-  return { meta, invoice: result };
+  return { meta, invoice: result }
 }
 
 // ============================================================================
@@ -270,6 +270,7 @@ export async function exportAllocationStatement(
   organizationId: string,
   allocationRunId: string,
 ): Promise<AllocationStatementExport> {
+  requireBaseFinancialAuthority()
   const [run] = await db.execute(sql`
     SELECT
       ar.id, ar.billing_period_id, ar.total_amount,
@@ -278,10 +279,10 @@ export async function exportAllocationStatement(
     JOIN billing_periods bp ON bp.id = ar.billing_period_id
     WHERE ar.id = ${allocationRunId}
       AND ar.organization_id = ${organizationId}
-  `);
+  `)
 
   if (!run) {
-    throw new Error(`Allocation run ${allocationRunId} not found`);
+    throw new Error(`Allocation run ${allocationRunId} not found`)
   }
 
   // The method belongs to each line (a run may allocate different cost types differently); the lines also carry the name the run recorded.
@@ -297,10 +298,10 @@ export async function exportAllocationStatement(
     LEFT JOIN organizations o ON o.id = arl.local_id
     WHERE arl.run_id = ${allocationRunId}
     ORDER BY arl.allocated_amount DESC, arl.local_id, arl.cost_type
-  `);
+  `)
 
-  const rows = lines as any as Array<Record<string, unknown>>;
-  const methods = [...new Set(rows.map((r) => String(r.method)))];
+  const rows = lines as unknown as Array<Record<string, unknown>>
+  const methods = [...new Set(rows.map((r) => String(r.method)))]
 
   const meta = makeMeta(
     'allocation_statement',
@@ -308,7 +309,7 @@ export async function exportAllocationStatement(
     String(run.billing_period_id),
     rows.length,
     rows,
-  );
+  )
 
   await auditLog({
     eventType: AuditEventType.DATA_EXPORT,
@@ -318,7 +319,7 @@ export async function exportAllocationStatement(
     resourceId: allocationRunId,
     action: 'allocation_statement_exported',
     metadata: { exportId: meta.exportId, dataHash: meta.dataHash },
-  });
+  })
 
   return {
     meta,
@@ -333,7 +334,7 @@ export async function exportAllocationStatement(
       allocatedAmount: String(r.allocated_amount),
     })),
     total: String(run.total_amount),
-  };
+  }
 }
 
 // ============================================================================
@@ -345,9 +346,8 @@ export async function exportChargebackReport(
   localId: string,
   periodId?: string,
 ): Promise<ChargebackReportExport> {
-  const periodFilter = periodId
-    ? sql`AND cs.billing_period_id = ${periodId}`
-    : sql``;
+  requireBaseFinancialAuthority()
+  const periodFilter = periodId ? sql`AND cs.billing_period_id = ${periodId}` : sql``
 
   const rows = await db.execute(sql`
     SELECT
@@ -364,21 +364,15 @@ export async function exportChargebackReport(
       AND cs.local_id = ${localId}
       ${periodFilter}
     ORDER BY bp.period_start DESC, cs.created_at DESC, cs.id
-  `);
+  `)
 
-  const data = rows as any as Array<Record<string, unknown>>;
-  const localName = data.length > 0 ? String(data[0].local_name) : localId;
+  const data = rows as unknown as Array<Record<string, unknown>>
+  const localName = data.length > 0 ? String(data[0].local_name) : localId
 
-  let totalCents = 0;
-  for (const r of data) totalCents += toCents(r.total_amount);
+  let totalCents = 0
+  for (const r of data) totalCents += toCents(r.total_amount)
 
-  const meta = makeMeta(
-    'chargeback_report',
-    organizationId,
-    periodId ?? 'all',
-    data.length,
-    data,
-  );
+  const meta = makeMeta('chargeback_report', organizationId, periodId ?? 'all', data.length, data)
 
   await auditLog({
     eventType: AuditEventType.DATA_EXPORT,
@@ -388,7 +382,7 @@ export async function exportChargebackReport(
     resourceId: localId,
     action: 'chargeback_report_exported',
     metadata: { exportId: meta.exportId, localId },
-  });
+  })
 
   return {
     meta,
@@ -402,7 +396,7 @@ export async function exportChargebackReport(
       status: String(r.status),
     })),
     totalAmount: fromCents(totalCents),
-  };
+  }
 }
 
 // ============================================================================
@@ -413,6 +407,7 @@ export async function exportGlJournal(
   organizationId: string,
   periodId: string,
 ): Promise<GlJournalExport> {
+  requireBaseFinancialAuthority()
   const rows = await db.execute(sql`
     SELECT
       pl.created_at AS date,
@@ -431,11 +426,11 @@ export async function exportGlJournal(
     WHERE pl.organization_id = ${organizationId}
       AND pl.billing_period_id = ${periodId}
     ORDER BY pl.created_at ASC
-  `);
+  `)
 
-  const data = rows as any as Array<Record<string, unknown>>;
+  const data = rows as unknown as Array<Record<string, unknown>>
 
-  const meta = makeMeta('gl_journal_csv', organizationId, periodId, data.length, data);
+  const meta = makeMeta('gl_journal_csv', organizationId, periodId, data.length, data)
 
   await auditLog({
     eventType: AuditEventType.DATA_EXPORT,
@@ -445,7 +440,7 @@ export async function exportGlJournal(
     resourceId: periodId,
     action: 'gl_journal_exported',
     metadata: { exportId: meta.exportId, dataHash: meta.dataHash, rowCount: data.length },
-  });
+  })
 
   return {
     meta,
@@ -459,14 +454,15 @@ export async function exportGlJournal(
       costCenter: String(r.cost_center),
       reference: String(r.reference),
     })),
-  };
+  }
 }
 
 /**
  * Convert GL journal data to CSV string
  */
 export function glJournalToCsv(journal: GlJournalExport): string {
-  const header = 'Date,Account Number,Account Name,Description,Debit (CAD),Credit (CAD),Cost Center,Reference';
+  const header =
+    'Date,Account Number,Account Name,Description,Debit (CAD),Credit (CAD),Cost Center,Reference'
   const lines = journal.rows.map((r) =>
     [
       r.date,
@@ -478,8 +474,8 @@ export function glJournalToCsv(journal: GlJournalExport): string {
       r.costCenter,
       r.reference,
     ].join(','),
-  );
-  return [header, ...lines].join('\n');
+  )
+  return [header, ...lines].join('\n')
 }
 
 // ============================================================================
@@ -490,17 +486,18 @@ export async function generateEvidencePack(
   organizationId: string,
   periodId: string,
 ): Promise<EvidencePack> {
+  requireBaseFinancialAuthority()
   // Gather all invoices for the period
   const invoiceRows = await db.execute(sql`
     SELECT id FROM platform_invoices
     WHERE organization_id = ${organizationId}
       AND billing_period_id = ${periodId}
-  `);
-  const invoiceIds = (invoiceRows as any as Array<{ id: string }>).map((r) => r.id);
+  `)
+  const invoiceIds = (invoiceRows as unknown as Array<{ id: string }>).map((r) => r.id)
 
-  const invoices: MasterInvoiceExport[] = [];
+  const invoices: MasterInvoiceExport[] = []
   for (const id of invoiceIds) {
-    invoices.push(await exportMasterInvoice(organizationId, id));
+    invoices.push(await exportMasterInvoice(organizationId, id))
   }
 
   // Allocation runs
@@ -509,12 +506,12 @@ export async function generateEvidencePack(
     WHERE organization_id = ${organizationId}
       AND billing_period_id = ${periodId}
       AND is_simulation = false
-  `);
-  const allocationIds = (allocationRows as any as Array<{ id: string }>).map((r) => r.id);
+  `)
+  const allocationIds = (allocationRows as unknown as Array<{ id: string }>).map((r) => r.id)
 
-  const allocations: AllocationStatementExport[] = [];
+  const allocations: AllocationStatementExport[] = []
   for (const id of allocationIds) {
-    allocations.push(await exportAllocationStatement(organizationId, id));
+    allocations.push(await exportAllocationStatement(organizationId, id))
   }
 
   // Chargebacks (all locals)
@@ -522,16 +519,16 @@ export async function generateEvidencePack(
     SELECT DISTINCT local_id FROM chargeback_statements
     WHERE organization_id = ${organizationId}
       AND billing_period_id = ${periodId}
-  `);
-  const localIds = (localRows as any as Array<{ local_id: string }>).map((r) => r.local_id);
+  `)
+  const localIds = (localRows as unknown as Array<{ local_id: string }>).map((r) => r.local_id)
 
-  const chargebacks: ChargebackReportExport[] = [];
+  const chargebacks: ChargebackReportExport[] = []
   for (const lid of localIds) {
-    chargebacks.push(await exportChargebackReport(organizationId, lid, periodId));
+    chargebacks.push(await exportChargebackReport(organizationId, lid, periodId))
   }
 
   // GL journal
-  const glJournal = await exportGlJournal(organizationId, periodId);
+  const glJournal = await exportGlJournal(organizationId, periodId)
 
   // Ledger summary
   const [summary] = await db.execute(sql`
@@ -543,16 +540,17 @@ export async function generateEvidencePack(
     FROM platform_cost_ledger_entries
     WHERE organization_id = ${organizationId}
       AND billing_period_id = ${periodId}
-  `);
+  `)
 
-  const totalItems = invoices.length + allocations.length + chargebacks.length + glJournal.rows.length;
+  const totalItems =
+    invoices.length + allocations.length + chargebacks.length + glJournal.rows.length
 
   const meta = makeMeta('evidence_pack', organizationId, periodId, totalItems, {
     invoiceCount: invoices.length,
     allocationCount: allocations.length,
     chargebackCount: chargebacks.length,
     glRowCount: glJournal.rows.length,
-  });
+  })
 
   await auditLog({
     eventType: AuditEventType.DATA_EXPORT,
@@ -568,7 +566,7 @@ export async function generateEvidencePack(
       allocationCount: allocations.length,
       chargebackCount: chargebacks.length,
     },
-  });
+  })
 
   return {
     meta,
@@ -584,5 +582,5 @@ export async function generateEvidencePack(
         netBalanceCad: String(summary?.net_balance ?? '0'),
       },
     },
-  };
+  }
 }

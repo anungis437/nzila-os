@@ -21,7 +21,6 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
-import { createHash } from 'node:crypto'
 
 // ── CLI args ─────────────────────────────────────────────────────────────────
 const { values } = parseArgs({
@@ -67,35 +66,16 @@ mkdirSync(OUTPUT_DIR, { recursive: true })
 writeFileSync(PACK_PATH, JSON.stringify(pack, null, 2), 'utf-8')
 console.log(`📦 pack.json written: ${PACK_PATH}`)
 
-// ── Try os-core generateSeal; fall back to inline implementation ──────────────
+// ── Seal with the authoritative implementation; never downgrade on failure ──
 async function sealPack(/** @type {Record<string, unknown> & { artifacts: Array<{ sha256: string }> }} */ packData) {
-  try {
-    // Prefer @nzila/os-core implementation (authoritative)
-    const { generateSeal } = await import('@nzila/os-core/evidence/seal')
-    return generateSeal(packData, {
-      hmacKey: process.env.EVIDENCE_SEAL_KEY,
-    })
-  } catch {
-    // Inline fallback: deterministic SHA-256 seal (no HMAC)
-    const canonical = JSON.stringify(Object.fromEntries(
-      Object.entries(packData).sort(([/** @type {string} */ a], [/** @type {string} */ b]) => a.localeCompare(b))
-    ))
-    const packDigest = createHash('sha256').update(canonical).digest('hex')
-    const artifactHashes = packData.artifacts.map((a) => a.sha256)
-    const merkleRoot = artifactHashes.length === 0
-      ? createHash('sha256').update('').digest('hex')
-      : artifactHashes.reduce((/** @type {string} */ acc, /** @type {string} */ h) =>
-          createHash('sha256').update(acc + h).digest('hex')
-        )
-    return {
-      sealVersion: '1.0',
-      algorithm: 'sha256',
-      packDigest,
-      artifactsMerkleRoot: merkleRoot,
-      artifactCount: packData.artifacts.length,
-      sealedAt: new Date().toISOString(),
-    }
+  const key = process.env.EVIDENCE_SEAL_KEY
+  if (process.env.NODE_ENV === 'production' && (!key || key.length < 32)) {
+    throw new Error('EVIDENCE_SEAL_KEY of at least 32 characters is required in production')
   }
+  const { generateSeal } = await import('@nzila/os-core/evidence/seal')
+  const result = generateSeal(packData, { hmacKey: key })
+  if (key && !result.hmacSignature) throw new Error('Configured evidence signing key did not produce an HMAC signature')
+  return result
 }
 
 const seal = await sealPack(pack)

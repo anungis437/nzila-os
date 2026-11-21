@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-18T00:04:12.175Z",
+  "state": "LOCAL_ACCESSIBILITY_FAILURE_TRUTH_REGRESSIONS_VERIFIED",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "environment": "Local Vitest with deterministic database and optional scanner-module doubles; actual manager/private scanner/error path executed, no browser/network/live database.",
+  "scope": "Existing O11 accessibility / C19 audit truth; no new release gate, schema, API route, navigation or scanner product enabled.",
+  "rootCauses": [
+    "runAxeScan returned empty violations for missing optional dependencies or execution errors, causing completed single-page audit and score100.",
+    "Failed reruns retained stale score/page measurements.",
+    "The issue-only report converted absence of issue rows into a numeric WCAG compliance score without qualified automated/manual coverage."
+  ],
+  "repairs": [
+    "Scanner errors propagate to the existing failed audit status/rejection; score becomes null and pagesScanned0. In-progress reruns clear stale completion measurements.",
+    "Launched browser is closed in finally; cleanup failure also remains failed.",
+    "Issue summaries always return complianceScore:null, verificationStatus:UNVERIFIED and an explicit no-coverage reason. The preserved weighted issue count is separately named issueBurdenScore and documented as a heuristic."
+  ],
+  "callSites": "Name/import search found no production TypeScript caller or accessibility audit API route. Existing storage-authority references classify this module as latent. That containment remains unchanged.",
+  "red": [
+    {
+      "name": "Scanner fail-open",
+      "passed": 14,
+      "failed": 8,
+      "total": 22,
+      "sources": [
+        {
+          "sha256": "a9e00b4331a03849b21365752488e4252ef14c9da38a73436095875fec90405b",
+          "file": "apps/union-eyes/lib/accessibility/accessibility-service.ts"
+        },
+        {
+          "sha256": "8460ee1e2d7993a6bc0bbdbbeca5042698ed05e00f54344a82bb9acf58f69458",
+          "file": "apps/union-eyes/lib/accessibility/__tests__/accessibility-service.test.ts"
+        }
+      ]
+    },
+    {
+      "name": "Issue report false compliance",
+      "passed": 21,
+      "failed": 4,
+      "total": 25,
+      "sources": [
+        {
+          "sha256": "92507e32fb490aaf6a67256c3abe7419223bc831137649a5b0b98a5bd3810348",
+          "file": "apps/union-eyes/lib/accessibility/accessibility-service.ts"
+        },
+        {
+          "sha256": "6b2b0cc1b0326629f590f77e1dcc534479156733898e79c8d6482c1782dfc243",
+          "file": "apps/union-eyes/lib/accessibility/__tests__/accessibility-service.test.ts"
+        }
+      ]
+    }
+  ],
+  "finalFocusedTests": {
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "command": "pnpm exec vitest run apps/union-eyes/lib/accessibility/__tests__/accessibility-service.test.ts --project union-eyes --maxWorkers=1 --reporter=verbose",
+    "coverage": [
+      "Successful real scanner path with measured zero violations",
+      "Both missing optional scanner modules",
+      "Launch/newPage/navigation/analyze/browser cleanup failures",
+      "Persisted failed status with no completed result and cleared score/pages",
+      "Existing issue/write/query and WCAG utility tests",
+      "No-audit empty register, failed scanner and completed single-page scan all remain unverified for WCAG conformance"
+    ]
+  },
+  "focusedESLintExitCode": 0,
+  "diffCheckExitCode": 0,
+  "sourceFiles": [
+    {
+      "file": "apps/union-eyes/lib/accessibility/accessibility-service.ts",
+      "sha256": "1a327806e384a23c786060392b863a219131da680ff68f4ba416df40bdae5dff"
+    },
+    {
+      "file": "apps/union-eyes/lib/accessibility/__tests__/accessibility-service.test.ts",
+      "sha256": "a6465029ab5431302a56efe6dc65f456ee9acafdc3b607d32e69aaf8724242d6"
+    }
+  ],
+  "logs": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/accessibility-scanner-red-v1.txt",
+      "sha256": "d341b1bb70cc5654ff294ad5c427696dc62fed14741472b7c3e89bddf631c968"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/accessibility-report-truth-red-v1.txt",
+      "sha256": "e4f624bd9208871fb8cd4be7ad4f3d6dc6d65078324f5451b2f57b05c84632fd"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/accessibility-fail-closed-green-v1.txt",
+      "sha256": "3b27b0888a3004e9102c0a87e392c8d084c424c0ebd1b04877f473206aea62fd"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/accessibility-fail-closed-eslint-v1.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": [
+    "No actual Playwright executable, axe engine, authenticated browser journey, live database or scan of a deployed environment was run by these tests.",
+    "Automated single-page issue detection cannot certify the declared WCAG2.2AA journey coverage. Manual keyboard/screen-reader, focus/contrast and full acceptance evidence remain unexecuted under O11.",
+    "Zero pages on failed status records no accepted scan result, not evidence that the target had zero accessibility issues.",
+    "Final integrated typecheck and repository gates remain root-owned pending final source binding."
+  ],
+  "stagingPromoted": false,
+  "productionPromoted": false
+}

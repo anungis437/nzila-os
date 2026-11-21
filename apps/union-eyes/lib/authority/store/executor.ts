@@ -135,6 +135,7 @@ export async function runAuthorityTransaction<T>(
   }
   await connection.query('BEGIN')
   try {
+    await connection.query('SET LOCAL search_path = pg_catalog, public, pg_temp')
     await connection.query(
       `SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`,
       [ctx.organizationId, ctx.userId],

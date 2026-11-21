@@ -15,7 +15,7 @@ import {
   getDecisionsByCorrelationId,
   getDecisionsByWorkflowId,
   getDecisionsForOrg,
-} from '@/server/authority/decision'
+} from '@/lib/services/authority/decision'
 import { DecisionEventTypeSchema } from '@nzila/platform-contracts/control-system'
 import { z } from 'zod'
 import { createLogger } from '@nzila/os-core'

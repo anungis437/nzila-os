@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-17T23:35:15.793Z",
+  "candidateBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeDirty": true,
+  "state": "CONFIRMED_REVOKE_PURPOSE_VIOLATION",
+  "command": "pnpm exec vitest run --project union-eyes apps/union-eyes/db/auth/auth-system-purpose.pglite.test.ts --maxWorkers=1",
+  "observedExitCode": 1,
+  "testResults": {
+    "passed": 6,
+    "failed": 2,
+    "skipped": 0
+  },
+  "metadata": {
+    "proof": "AUTH_SYSTEM_PURPOSE_BOUNDARY",
+    "engine": "PGlite",
+    "nativeVerdict": "UNEXECUTED",
+    "compilerSourceSha256": "f6d0bdb51c27460a09b48841c2f0c563ec5eb819bb274c107ef7539c41480be6",
+    "compiledSqlSha256": "43fed89077d6d5bf9298a0d7c7bcee343733023cc37cb73491bf4c2098a0cd67"
+  },
+  "testSource": "apps/union-eyes/db/auth/auth-system-purpose.pglite.test.ts",
+  "testSourceSha256": "e86be38b4044375a16adc6052289635b35cfc9e03088bcb991ec0f928cf03fcd",
+  "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-system-purpose-red-v1.txt",
+  "logSha256": "bc8d1059a907cf9d890311d5c46736100684a8631d17bdeff4f9da89c505f043",
+  "observed": [
+    "Actual nzila_auth_system_mutation with revoke-sessions context persisted false->true on its inactive target session.",
+    "The same purpose persisted false->NULL.",
+    "Declared active->false revocation, foreign-user denial, distinct membership-state false/true transitions, wrong-purpose and cross-user/org denials, and no raw bearer reads passed."
+  ],
+  "productionCompilerChangedByThisAgent": false,
+  "engine": "PGlite",
+  "nativeVerdict": "UNEXECUTED",
+  "stagingPromoted": false,
+  "productionPromoted": false,
+  "remaining": "Root patches the source compiler; the unchanged regression must then pass."
+}

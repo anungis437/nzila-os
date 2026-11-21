@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -32,6 +33,10 @@ const INVOICE = '550e8400-e29b-41d4-a716-446655440030';
 const PERIOD = '550e8400-e29b-41d4-a716-446655440031';
 const RUN = '550e8400-e29b-41d4-a716-446655440032';
 const LOCAL = '550e8400-e29b-41d4-a716-446655440033';
+async function expectRefused(response: Response) {
+  expect(response.status).toBe(501);
+  expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' });
+}
 const ctx = { organizationId: 'org_1', userId: 'u1' };
 const get = (query: string) => new NextRequest(`http://localhost/api/finance/exports${query}`);
 
@@ -47,23 +52,14 @@ describe('finance/exports route', () => {
     m.generateEvidencePack.mockResolvedValue({ kind: 'evidence' });
   });
 
-  it('asks the wrapper for a secretary-treasurer, the entitlement and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for a secretary-treasurer; the base release declares no entitlement or tenant transaction because it refuses before any read', async () => {
     const { GET } = await loadRoute();
     expect(declaredOptions(GET)).toMatchObject({
       auth: { minRole: 'secretary_treasurer' },
-      entitlement: 'financial_intelligence_suite',
-      rlsOrgContext: true,
+      rlsOrgContext: false,
       registry: { audience: 'officer', evidenceRequired: true },
     });
-  });
-
-  it('is refused without the entitlement, and exports nothing', async () => {
-    const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('no module'));
-    const response = await GET(get(`?type=master_invoice&invoiceId=${INVOICE}`), ctx);
-
-    expect(response.status).toBe(403);
-    expect(m.exportMasterInvoice).not.toHaveBeenCalled();
+    expect(declaredOptions(GET)).not.toHaveProperty('entitlement');
   });
 
   it('returns validation error when type is missing', async () => {
@@ -72,36 +68,23 @@ describe('finance/exports route', () => {
     expect(response.status).toBe(400);
   });
 
-  it('exports the caller organization\'s master invoice', async () => {
+  it.each([
+    ['master_invoice', () => `?type=master_invoice&invoiceId=${INVOICE}`],
+    ['allocation_statement', () => `?type=allocation_statement&allocationRunId=${RUN}`],
+    ['chargeback_report', () => `?type=chargeback_report&localId=${LOCAL}&periodId=${PERIOD}`],
+    ['gl_journal json', () => `?type=gl_journal&periodId=${PERIOD}`],
+    ['gl_journal csv', () => `?type=gl_journal&periodId=${PERIOD}&format=csv`],
+    ['evidence_pack', () => `?type=evidence_pack&periodId=${PERIOD}`],
+  ])('refuses a valid %s export as not implemented, reading and exporting nothing', async (_name, query) => {
     const { GET } = await loadRoute();
-    const response = await GET(get(`?type=master_invoice&invoiceId=${INVOICE}`), ctx);
-    expect(response.status).toBe(200);
-    expect(m.exportMasterInvoice).toHaveBeenCalledWith('org_1', INVOICE);
-  });
+    const response = await GET(get(query()), ctx);
 
-  it('exports an allocation statement and a chargeback report for the caller organization', async () => {
-    const { GET } = await loadRoute();
-    expect((await GET(get(`?type=allocation_statement&allocationRunId=${RUN}`), ctx)).status).toBe(200);
-    expect(m.exportAllocationStatement).toHaveBeenCalledWith('org_1', RUN);
-    expect((await GET(get(`?type=chargeback_report&localId=${LOCAL}&periodId=${PERIOD}`), ctx)).status).toBe(200);
-    expect(m.exportChargebackReport).toHaveBeenCalledWith('org_1', LOCAL, PERIOD);
-  });
-
-  it('exports GL journal as CSV when format=csv', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(get(`?type=gl_journal&periodId=${PERIOD}&format=csv`), ctx);
-    const body = await response.text();
-
-    expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('text/csv');
-    expect(body).toContain('id');
-  });
-
-  it('exports evidence pack when periodId is provided', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(get(`?type=evidence_pack&periodId=${PERIOD}`), ctx);
-    expect(response.status).toBe(200);
-    expect(m.generateEvidencePack).toHaveBeenCalledWith('org_1', PERIOD);
+    await expectRefused(response);
+    expect(response.headers.get('content-type')).not.toContain('text/csv');
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    for (const exporter of [m.exportMasterInvoice, m.exportAllocationStatement, m.exportChargebackReport, m.exportGlJournal, m.glJournalToCsv, m.generateEvidencePack]) {
+      expect(exporter).not.toHaveBeenCalled();
+    }
   });
 
   it('names what an export still needs', async () => {
@@ -121,10 +104,10 @@ describe('finance/exports route', () => {
     expect(m.exportMasterInvoice).not.toHaveBeenCalled();
   });
 
-  it('reports an export that failed as a 500, never as an empty export', async () => {
+  it('a failing exporter is unreachable: the refusal is a 501, never a 500 from the export', async () => {
     const { GET } = await loadRoute();
     m.exportGlJournal.mockRejectedValueOnce(new Error('db down'));
-    const response = await GET(get(`?type=gl_journal&periodId=${PERIOD}`), ctx);
-    expect(response.status).toBe(500);
+    await expectRefused(await GET(get(`?type=gl_journal&periodId=${PERIOD}`), ctx));
+    expect(m.exportGlJournal).not.toHaveBeenCalled();
   });
 });

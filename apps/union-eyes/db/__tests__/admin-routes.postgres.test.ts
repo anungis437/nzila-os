@@ -60,7 +60,7 @@ vi.mock('@/lib/services/billing-cycle-service', () => ({
   },
 }))
 
-const { harness, RUNTIME_ROLE } = await import('./native-route-harness')
+const { harness, RUNTIME_ROLE, SYSTEM_ROLE } = await import('./native-route-harness')
 const annualReport = URL ? await import('@/app/api/admin/clc/analytics/annual-report/route') : null
 const forecast = URL ? await import('@/app/api/admin/clc/analytics/forecast/route') : null
 const trends = URL ? await import('@/app/api/admin/clc/analytics/multi-year-trends/route') : null
@@ -137,7 +137,9 @@ describe.skipIf(!URL)('the admin routes on the combined schema, as the real role
   beforeAll(async () => {
     admin = await harness.start(URL!)
     for (const [id, name] of [[ORG_A, 'Admin A'], [ORG_B, 'Admin B'], [ORG_C, 'Admin Congress']] as const) await newOrganization(id, `${name} ${tag}`)
-    for (const who of [adminA, secondAdminA, adminB, officerA, leadA, stewardA]) harness.setRole(who.userId, who.organizationId, who.role)
+    for (const who of [adminA, secondAdminA, adminB, officerA, stewardA]) harness.setRole(who.userId, who.organizationId, who.role)
+    // Platform staff: canonical V2 admits the platform_lead role only for a user whose canonical record is a system administrator.
+    harness.setRole(leadA.userId, leadA.organizationId, leadA.role, { systemAdmin: true })
 
     await newRemittance(ORG_A, 1, '100.00', 'paid')
     await newRemittance(ORG_A, 2, '200.00', 'paid')
@@ -175,49 +177,49 @@ describe.skipIf(!URL)('the admin routes on the combined schema, as the real role
       }
     })
 
-    it('sees no remittance on a handle with no organization, and only its own on a tenant handle', async () => {
+    it('refuses the remittance table to every runtime handle: canonical V2 contains per_capita_remittances (no runtime or system grant)', async () => {
       const schema = await import('@/db/schema')
-      expect(await harness.tenant(RUNTIME_ROLE, null, adminA.userId, (tx) => tx.select().from(schema.perCapitaRemittances))).toEqual([])
-      const own = await harness.tenant(RUNTIME_ROLE, ORG_B, adminB.userId, (tx) => tx.select().from(schema.perCapitaRemittances))
-      expect(own.map((row) => row.fromOrganizationId)).toEqual([ORG_B])
+      const refused = async (organizationId: string | null, userId: string) => {
+        const error = await rejection(harness.tenant(RUNTIME_ROLE, organizationId, userId, (tx) => tx.select().from(schema.perCapitaRemittances)))
+        return String((error as { cause?: { message?: string }; message?: string })?.cause?.message ?? error?.message)
+      }
+      expect(await refused(null, adminA.userId)).toMatch(/permission denied for table per_capita_remittances/)
+      expect(await refused(ORG_B, adminB.userId)).toMatch(/permission denied for table per_capita_remittances/)
+      expect(await refused(ORG_A, adminA.userId)).toMatch(/permission denied for table per_capita_remittances/)
     })
   })
 
   describe('the analytics', () => {
-    it("forecasts from the caller organization's own remittances and no other organization's", async () => {
-      const a = await answer(await run(forecast!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/forecast?months=3')))
-      expect(a.status).toBe(200)
-      expect(a.body).toHaveLength(3)
-      expect(a.body[0]).toMatchObject({ forecastAmount: 200, method: 'moving_average' })
-      const b = await answer(await run(forecast!.GET, as(adminB, 'http://localhost/api/admin/clc/analytics/forecast?months=3')))
-      expect(b.body[0]).toMatchObject({ forecastAmount: 999, method: 'insufficient_data' })
+    // per_capita_remittances has no runtime or system grant in the canonical source: every remittance analytic answers 501 NOT_IMPLEMENTED
+    // with the reason (lib/reality/contained-storage.ts) before any statement, for every organization, whatever its parameters.
+    const unavailable = async (handler: unknown, ctx: unknown) => {
+      const error = await rejection(run(handler, ctx))
+      expect(error).toMatchObject({ code: 'NOT_IMPLEMENTED', status: 501 })
+      expect(String((error as { message?: string }).message)).toContain('Per-capita remittance records are not available')
+    }
+
+    it('refuses the forecast to every organization: no figure is computed from remittances it may not read', async () => {
+      await unavailable(forecast!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/forecast?months=3'))
+      await unavailable(forecast!.GET, as(adminB, 'http://localhost/api/admin/clc/analytics/forecast?months=3'))
     })
 
-    it('reports the annual figures of the organization, not of the whole federation', async () => {
+    it('refuses the annual figures to every organization', async () => {
       const { year } = monthsAgo(1)
-      const a = await answer(await run(annualReport!.GET, as(adminA, `http://localhost/api/admin/clc/analytics/annual-report?year=${year}`)))
-      expect(a.status).toBe(200)
-      expect(a.body.summary.totalOrganizations).toBe(1)
-      expect(a.body.summary.totalAmount).toBeLessThanOrEqual(600)
-      expect(a.body.organizationPerformance.map((row: Row) => row.organizationId)).toEqual([ORG_A])
-      const b = await answer(await run(annualReport!.GET, as(adminB, `http://localhost/api/admin/clc/analytics/annual-report?year=${year}`)))
-      expect(b.body.organizationPerformance.map((row: Row) => row.organizationId)).toEqual([ORG_B])
-      expect(b.body.summary.totalAmount).toBe(999)
+      await unavailable(annualReport!.GET, as(adminA, `http://localhost/api/admin/clc/analytics/annual-report?year=${year}`))
+      await unavailable(annualReport!.GET, as(adminB, `http://localhost/api/admin/clc/analytics/annual-report?year=${year}`))
     })
 
-    it('charts the multi-year trend of the organization, from its own remittances', async () => {
-      const a = await answer(await run(trends!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/multi-year-trends?years=3')))
-      expect(a.status).toBe(200)
-      const totals = (body: Row) => body.totalAmountTrend.reduce((sum: number, entry: Row) => sum + entry.value, 0)
-      expect(totals(a.body)).toBe(600)
-      const b = await answer(await run(trends!.GET, as(adminB, 'http://localhost/api/admin/clc/analytics/multi-year-trends?years=3')))
-      expect(totals(b.body)).toBe(999)
+    it('refuses the multi-year trend to every organization', async () => {
+      await unavailable(trends!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/multi-year-trends?years=3'))
+      await unavailable(trends!.GET, as(adminB, 'http://localhost/api/admin/clc/analytics/multi-year-trends?years=3'))
     })
 
-    it('answers a malformed parameter as a client error', async () => {
-      expect((await run(forecast!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/forecast?months=99'))).status).toBe(400)
-      expect((await run(trends!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/multi-year-trends?years=4'))).status).toBe(400)
-      expect((await run(annualReport!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/annual-report?year=1900'))).status).toBe(400)
+    it('answers a malformed parameter with the same 501: the capability is unavailable before its input is read, and nothing is written', async () => {
+      const before = await query(`SELECT count(*)::int AS n FROM per_capita_remittances`)
+      await unavailable(forecast!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/forecast?months=99'))
+      await unavailable(trends!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/multi-year-trends?years=4'))
+      await unavailable(annualReport!.GET, as(adminA, 'http://localhost/api/admin/clc/analytics/annual-report?year=1900'))
+      expect(await query(`SELECT count(*)::int AS n FROM per_capita_remittances`)).toEqual(before)
     })
   })
 
@@ -308,11 +310,14 @@ describe.skipIf(!URL)('the admin routes on the combined schema, as the real role
       }
     })
 
-    it('shows a tenant handle only its own organization, and a handle with no organization nothing, which is why the jobs run as the system role', async () => {
+    it('refuses the dues table to every runtime handle, tenant or not: canonical V2 contains dues_transactions (no runtime or system grant)', async () => {
       const schema = await import('@/db/schema')
-      const owned = await harness.tenant(RUNTIME_ROLE, ORG_A, leadA.userId, (tx) => tx.select({ id: schema.duesTransactions.id }).from(schema.duesTransactions))
-      expect(new Set(owned.map((row) => row.id))).toEqual(new Set([DUES_A, DUES_LEGACY, FAILED_A]))
-      expect(await harness.tenant(RUNTIME_ROLE, null, leadA.userId, (tx) => tx.select().from(schema.duesTransactions))).toEqual([])
+      for (const organizationId of [ORG_A, null]) {
+        const dues = await rejection(harness.tenant(RUNTIME_ROLE, organizationId, leadA.userId, (tx) => tx.select({ id: schema.duesTransactions.id }).from(schema.duesTransactions)))
+        expect(String((dues as { cause?: { message?: string }; message?: string })?.cause?.message ?? dues?.message)).toMatch(/permission denied for table dues_transactions/)
+      }
+      const system = await rejection(harness.tenant(SYSTEM_ROLE, null, null, (tx) => tx.select({ id: schema.duesTransactions.id }).from(schema.duesTransactions)))
+      expect(String((system as { cause?: { message?: string }; message?: string })?.cause?.message ?? system?.message)).toMatch(/permission denied for table dues_transactions/)
       const configuration = await rejection(harness.tenant(RUNTIME_ROLE, ORG_A, leadA.userId, (tx) => tx.select().from(schema.organizationBillingConfig)))
       expect(String((configuration as { cause?: { message?: string }; message?: string })?.cause?.message ?? configuration?.message)).toMatch(/permission denied/i)
     })

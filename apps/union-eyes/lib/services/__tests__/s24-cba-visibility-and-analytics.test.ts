@@ -64,10 +64,11 @@ describe('Gate 0 batch B80: CBA review visibility, analytics honesty and organiz
 
   it('refuses a metrics action whose organization differs from the one the route authorized', () => {
     const actions = src('actions/analytics-actions.ts')
-    // A user-facing error, so the refusal reaches the caller as its own message instead of the generic action failure.
-    expect(actions).toContain("if (expected && expected !== resolved) throw new UserFacingError('Organization context changed during the request')")
-    expect(actions).toContain('getActor(params.expectedOrganizationId)')
-    expect(actions).toContain('getCurrentUserOrgId(params.expectedOrganizationId)')
+    // Each metrics action is bound by the canonical organization resolver to exactly the organization the route authorized
+    // (a live membership of the caller there, or a refusal), and acts only in the resolved context: never an ambient organization.
+    expect(actions.match(/resolveOrgContext\(\s*\{ organizationId: params\.expectedOrganizationId \},/g)).toHaveLength(2)
+    expect(actions).toContain('const { userId, organizationId: orgId } = context')
+    expect(actions).not.toMatch(/getCurrentUserOrgId|getActor\(/)
     const route = src('app/api/analytics/metrics/route.ts')
     expect(route.match(/expectedOrganizationId: context\.organizationId/g)).toHaveLength(2)
   })

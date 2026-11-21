@@ -1,0 +1,96 @@
+{
+  "scope": "INTERIM_EXISTING_MODULE_ADMISSION_METADATA_LEAST_PRIVILEGE",
+  "recordedAt": "2026-11-18T09:11:21.347399+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "sourceBindings": [
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/module-admission-storage-contract.ts",
+      "sha256": "3cd7541cc55b2717fb032a4a69d59de3973c45ba64e7864ba1c13171693fe38a"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/module-admission-storage-contract.test.ts",
+      "sha256": "09314d68864309cde8abd81db228cbaff03f48ae6a9cfc16294a8e665708e126"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current-authority.ts",
+      "sha256": "8c4d31ab5e776e157be081dd17e6ac2b4ee9751e94b164d1c994d22cfd53f212"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/service-column-contracts.ts",
+      "sha256": "da296e52b3d96655ea381e458f42aa37ac940c274bdea5324a6481f4f4a81112"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/security.ts",
+      "sha256": "4d454bd5d0642ad41342fcfe8a077bf1003e1ddab4248add9fd7b139241bd007"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "sha256": "c240509f9755ff6f843510ba297dc929886562f35f39b6c48a12995bbfcd6d01"
+    },
+    {
+      "path": "apps/union-eyes/services/platform-economics/entitlement-guard.ts",
+      "sha256": "8e980f81050f74f934329167c54257a40d6ade6370f8af26ff2e6b99fa2432fc"
+    }
+  ],
+  "classificationCorrection": "The four exact Drizzle-owned operational tables are not among81Django billing models or8financial declarations. Plan17 allowed their metadata already. Earlier suspected blanket81containment outage was an unverified inference and is refuted by actual plan/catalog. It is not used as a defect or pass claim.",
+  "actualAdverseCatalogEvidence": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/module-admission-native-column-counterexample-v1.json",
+    "sha256": "cdf4af3e974dcdaae5a763127e7a96c71e5aeb1a27bef6d4a6862b5abab39c17",
+    "bytes": 2287
+  },
+  "repair": "Replace broad17+commercial table access with exactly17operational SELECTcolumns across4source-owned tables, zero broad table/system/mutation powers. Preserve all records and original organization/parent RLS; actual module guard keeps active/expiry/usage/backing-contract checks. No newforeigncoverage, licensing issuance or positivefinancialfeature.",
+  "verification": [
+    {
+      "scope": "ActualPGlite canonical-session SQL and exact physical ACL census; synthetic fixture identities, no nativeTCPLOGIN claim",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "raw": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/module-admission-heavy-v2.json",
+        "sha256": "05373dac126820d33820aa9598421b6c1babcc054e3362cfdb3b39f2566ac00e",
+        "bytes": 4845
+      },
+      "log": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/module-admission-heavy-v2.log",
+        "sha256": "d68c2905e2558f81a46ff9a14db19dc76b097b5057b346fa93a00cdb0391abc2",
+        "bytes": 467
+      }
+    },
+    {
+      "scope": "Existing unchanged module-guard unit logic with test adapters",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "raw": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/module-admission-v1.json",
+        "sha256": "5021686aaa958d9f63794da60def75efc9d76c4af952c86c37583917b42f1971",
+        "bytes": 7623
+      },
+      "log": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/module-admission-v1.log",
+        "sha256": "70c32252c10306977492393321793f926ff25f66adf042ecbb5f60e2dff7fa73",
+        "bytes": 475
+      }
+    }
+  ],
+  "preservedFailures": [
+    {
+      "artifact": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/module-admission-heavy-v1.json",
+        "sha256": "95ef28e5fd33f534c3c81dc35f6bfc7f0276cb7daff58360b2cc9768aef408e7",
+        "bytes": 43373
+      },
+      "result": "Fixture unique-token setup failure plus stale pre-generation source-plan compiler mismatch; tenSQLcases skipped in that failedattempt, notpassed."
+    }
+  ],
+  "remaining": [
+    "Regenerate source plan/overlay and rerun full coupled billing/schema/compiler checks.",
+    "Semantic and source lint checking.",
+    "ActualPG15/16/native runtime column matrix and real application checks.",
+    "Audit complete exact candidate after source freeze."
+  ],
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

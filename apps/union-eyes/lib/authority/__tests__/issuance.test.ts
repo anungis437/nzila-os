@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_ISSUANCE_TEMPLATES,
   decideIssuance,
+  issuanceDomainApplies,
   NON_DELEGABLE_ACTIONS,
   PLACEHOLDER_INSTRUMENT,
   type IssuanceRequest,
   type IssuanceRule,
 } from '../issuance'
 import type { Capacity } from '../ontology'
+import { PLATFORM_ORGANIZATION_ID } from '../platform-organization'
 import { ahead, ago, CASE_ID, DAY, facts, HOUR, membership, mandate, NOW, ORG, ORG_B, ref, recusal, U } from './fixtures'
 
 const rule = (over: Partial<IssuanceRule> = {}): IssuanceRule => ({
@@ -229,16 +231,59 @@ describe('issuance policy: conflicts and domain protections', () => {
     expect(codes(run({ ...r, holderUserId: U.president }, issuerFacts(), null, lift))).toContain('SELF_APPROVAL')
   })
 
-  it('platform_staff has no eligible holder capacity: it denies even with a fully-formed, otherwise-valid active rule', () => {
-    // No capacity in ./capacity.ts's ROLE_CAPACITIES is eligible to hold this domain (structural support only,
-    // per DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ / DEF-0B10-OPL-14's decision record); exercise every real
-    // capacity as both issuer and holder to prove none can make this domain grant anything.
-    const platformRule = rule({ domain: 'platform_staff', issuerCapacities: ['executive'], allowedPowers: ['read'], maxTermDays: 365, requiresAcceptance: false, requiredIndependentApprovals: 0 })
+  describe('platform_staff: conferred only inside the platform organization', () => {
+    const P = PLATFORM_ORGANIZATION_ID
     const ALL_CAPACITIES: Capacity[] = ['member', 'steward', 'chief_steward', 'officer', 'executive', 'financial_officer', 'trustee', 'auditor', 'governance_reviewer', 'privacy_officer']
-    for (const cap of ALL_CAPACITIES) {
-      const d = run(req({ domain: 'platform_staff', powers: ['read'] }), issuerFacts(['executive']), holder([cap]), platformRule)
-      expect(codes(d), cap).toContain('CAPACITY_NOT_ELIGIBLE')
-    }
+    const platformRule = (org = P, over: Partial<IssuanceRule> = {}) => rule({ organizationId: org, domain: 'platform_staff', issuerCapacities: ['executive'], allowedPowers: ['platform.organization.manage', 'platform.stats.read'], maxTermDays: 90, requiresAcceptance: true, requiredIndependentApprovals: 1, ...over })
+    const platformReq = (org = P, over: Partial<IssuanceRequest> = {}) => req({ organizationId: org, domain: 'platform_staff', powers: ['platform.organization.manage'], scope: {}, expiresAt: ahead(30 * DAY), approval: { status: 'satisfied', approvingLines: [U.treasurer] } as IssuanceRequest['approval'], ...over })
+    const inOrg = (org: string, caps: Capacity[], user: string) => membership(user, caps, { organizationId: org })
+    const platformIssuer = (caps: Capacity[] = ['executive']) => facts(U.president, caps, { memberships: [inOrg(P, caps, U.president)] })
+
+    it('a platform executive confers named platform actions on a platform officer under an adopted rule and an independent approval', () => {
+      const d = run(platformReq(), platformIssuer(), inOrg(P, ['member', 'officer'], U.chief), platformRule())
+      expect(d.effect, codes(d).join()).toBe('allow')
+      expect(d.requiresAcceptance).toBe(true)
+    })
+
+    it('no customer-organization capacity, as issuer or holder, can confer it in a customer organization, even with a fully-formed active rule', () => {
+      for (const cap of ALL_CAPACITIES) {
+        const d = run(platformReq(ORG), issuerFacts(['executive']), holder([cap]), platformRule(ORG))
+        expect(d.effect, cap).toBe('deny')
+        expect(codes(d), cap).toContain('FOREIGN_TENANT')
+      }
+    })
+
+    it('the platform organization confers no customer domain', () => {
+      for (const domain of ['supervisory', 'financial', 'executive_office', 'emergency_access', 'governance_review'] as const) {
+        const d = run(req({ organizationId: P, domain }), platformIssuer(), inOrg(P, ['member', 'executive'], U.chief), rule({ organizationId: P, domain }))
+        expect(codes(d), domain).toContain('FOREIGN_TENANT')
+      }
+    })
+
+    it('denies a non-executive issuer, a holder without officer or executive capacity, a foreign holder, excess powers, an over-long term and a missing approval', () => {
+      expect(codes(run(platformReq(), platformIssuer(['officer']), inOrg(P, ['member', 'officer'], U.chief), platformRule()))).toContain('CAPACITY_NOT_ELIGIBLE')
+      for (const cap of ALL_CAPACITIES.filter((c) => c !== 'officer' && c !== 'executive'))
+        expect(codes(run(platformReq(), platformIssuer(), inOrg(P, [cap], U.chief), platformRule())), cap).toContain('CAPACITY_NOT_ELIGIBLE')
+      expect(codes(run(platformReq(), platformIssuer(), inOrg(ORG, ['member', 'officer'], U.chief), platformRule()))).toContain('NOT_AN_ACTIVE_MEMBER')
+      expect(codes(run(platformReq(P, { powers: ['platform.database.maintain'] }), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule()))).toContain('EXCEEDS_RULE_CEILING')
+      expect(codes(run(platformReq(P, { expiresAt: ahead(120 * DAY) }), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule()))).toContain('EXCEEDS_RULE_CEILING')
+      expect(codes(run(platformReq(P, { approval: undefined }), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule()))).toContain('APPROVAL_NOT_SATISFIED')
+      expect(codes(run(platformReq(P, { holderUserId: U.president }), platformIssuer(), inOrg(P, ['executive'], U.president), platformRule()))).toContain('SELF_APPROVAL')
+      expect(codes(run(platformReq(), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule(ORG)))).toContain('FOREIGN_TENANT')
+    })
+
+    it('a rule without a real instrument or two independent adopters grants nothing', () => {
+      expect(codes(run(platformReq(), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule(P, { sourceInstrument: PLACEHOLDER_INSTRUMENT })))).toContain('NO_ACTIVE_ISSUANCE_RULE')
+      expect(codes(run(platformReq(), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule(P, { approvedBy: [U.treasurer] })))).toContain('NO_ACTIVE_ISSUANCE_RULE')
+      expect(codes(run(platformReq(), platformIssuer(), inOrg(P, ['officer'], U.chief), platformRule(P, { approvedBy: [U.other, U.treasurer] })))).toContain('NO_ACTIVE_ISSUANCE_RULE')
+    })
+
+    it('domain applicability is one rule: platform_staff only in the platform organization, nothing else there', () => {
+      expect(issuanceDomainApplies('platform_staff', P)).toBe(true)
+      expect(issuanceDomainApplies('platform_staff', ORG)).toBe(false)
+      expect(issuanceDomainApplies('supervisory', P)).toBe(false)
+      expect(issuanceDomainApplies('supervisory', ORG)).toBe(true)
+    })
   })
 })
 

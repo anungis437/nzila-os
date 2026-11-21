@@ -1,0 +1,13 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| lib/authority/__tests__/primary-handler-ceiling.test.ts (25 tests) 7ms
+ ✓ |union-eyes| lib/authority/__tests__/kernel-revocation-sweep.test.ts (62 tests) 8ms
+ ✓ |union-eyes| lib/authority/__tests__/kernel-case.test.ts (89 tests) 10ms
+
+ Test Files  3 passed (3)
+      Tests  176 passed (176)
+   Start at  18:04:12
+   Duration  469ms (transform 50%, import 27%, tests 15%, setup 4%, worker 4%)
+
+JSON report written to /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/artifacts/ue-step1-upstream-green-v1.json

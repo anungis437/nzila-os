@@ -8,6 +8,7 @@
  */
 import type { EnforcementDeps } from '@/lib/authority/store/enforce'
 import { enforceAuthority } from '@/lib/authority/store/enforce'
+import { ACTIVE_RECUSAL_SQL } from '@/lib/authority/common'
 import { isUuid, type SqlExecutor } from '@/lib/authority/store/executor'
 import { kernelDeps } from '@/lib/authority/store/route-adapter'
 import { certificateProvenanceFromRow, type SuccessionGrant } from '@/lib/voting/election-succession'
@@ -88,7 +89,7 @@ export async function loadCertifiedSupersessionGrant(
       await exec.query<{ principal_user_id: string }>(
         `SELECT principal_user_id
            FROM ue_authority_recusals
-          WHERE organization_id = $1::uuid AND resource_type = 'council_election' AND resource_id = $2::uuid AND lifted_at IS NULL`,
+          WHERE organization_id = $1::uuid AND resource_type = 'council_election' AND resource_id = $2::uuid AND ${ACTIVE_RECUSAL_SQL}`,
         [input.organizationId, input.electionId],
       )
     ).rows.map((item) => item.principal_user_id)

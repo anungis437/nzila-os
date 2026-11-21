@@ -31,7 +31,7 @@ FRAMEWORK_APPS = frozenset(
     }
 )
 PLATFORM_METADATA_TABLES = frozenset(
-    {"failed_login_attempts", "rate_limit_events", "clc_chart_of_accounts"}
+    {"failed_login_attempts", "rate_limit_events"}
 )
 AUTH_SETTINGS = (
     "nzila.auth_phase",

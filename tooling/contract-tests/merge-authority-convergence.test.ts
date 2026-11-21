@@ -20,6 +20,7 @@ import {
   RequiredContextsTimeoutError,
   AUTHORITATIVE_JOB_LIMIT_MS,
   convergeRequiredChecks,
+  githubFetch,
   maxReconciliationAttempts,
   republishFrozenHead,
   requiredContextNames,
@@ -154,6 +155,43 @@ function expectSixteenTerminal(
   ).toBe(true)
   expect(checks.some((check) => check.head_sha === OLD)).toBe(false)
 }
+
+describe('GitHub read retries', () => {
+  const withEnv = async (run: () => Promise<void>) => {
+    const saved = { ...process.env }
+    Object.assign(process.env, { GITHUB_REPOSITORY: 'o/r', GITHUB_TOKEN: 't', MA_CHECK_RETRY_BASE_MS: '0', MA_CHECK_ATTEMPTS: '4' })
+    try { await run() } finally { process.env = saved }
+  }
+  const answers = (statuses: number[]) => {
+    const calls: string[] = []
+    const impl = async (url: string) => {
+      calls.push(url)
+      const status = statuses[Math.min(calls.length - 1, statuses.length - 1)]
+      return new Response(status === 200 ? '{"jobs":[]}' : 'x', { status })
+    }
+    return { calls, impl }
+  }
+
+  it('retries a transient 500 while listing jobs and returns the successful read', async () => {
+    await withEnv(async () => {
+      const { calls, impl } = answers([500, 502, 200])
+      const response = await githubFetch('https://api.github.com/x', impl as typeof fetch)
+      expect(response.status).toBe(200)
+      expect(calls).toHaveLength(3)
+    })
+  })
+
+  it('returns a non-retryable status at once and bounds a persistent 5xx', async () => {
+    await withEnv(async () => {
+      const missing = answers([404])
+      expect((await githubFetch('https://api.github.com/x', missing.impl as typeof fetch)).status).toBe(404)
+      expect(missing.calls).toHaveLength(1)
+      const down = answers([500])
+      expect((await githubFetch('https://api.github.com/x', down.impl as typeof fetch)).status).toBe(500)
+      expect(down.calls).toHaveLength(4)
+    })
+  })
+})
 
 describe('phase 2 required-context convergence', () => {
   it('defines a bounded retry interval and attempt budget', () => {

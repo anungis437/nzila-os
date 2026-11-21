@@ -1,0 +1,441 @@
+{
+  "collectedAt": "2026-11-18T02:15:01.951782+00:00",
+  "proof": "PERMANENT_CONSOLE_GOVERNANCE_REMEDIATION",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "environment": "Local Node/Vitest and jsdom component execution. No native browser, deployed environment or telemetry-provider delivery proof.",
+  "rootCause": [
+    "Expired console exceptions covered 36 raw browser emissions and 6 raw UE startup emissions.",
+    "The UE global console wrapper used Reflect to evade literal detection, serialized arbitrary values into log messages and replaced framework logging; in the browser its server logger path could also produce no output.",
+    "Several error screens claimed remote notification or logging without a delivery receipt."
+  ],
+  "sourceFiles": [
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/error.tsx",
+      "sha256": "20039867655606282a0f1470937eb096ef622e840543613b1d2f51a63ba4b66f",
+      "bytes": 2461,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/advisory-ai/error.tsx",
+      "sha256": "96c31a0024dafda05216a4353dabadf1695d65092168252f0dd598941fcf7640",
+      "bytes": 1753,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/ai-insights/error.tsx",
+      "sha256": "71e1bb82a0e65be9c26c1af6e6a09128ce30f8f1d8f7cacbdfdf755b40b82bff",
+      "bytes": 1753,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/alerts/error.tsx",
+      "sha256": "3e7cb66023bd9b25e01ae2130256f13a98e48b2d9984de71636a1b386ec83e52",
+      "bytes": 1748,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/audit/error.tsx",
+      "sha256": "557f27a40a19e69711c9ebaf2b2231233ff9de1049fb723579de911610657587",
+      "bytes": 1751,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/client-portal/error.tsx",
+      "sha256": "75ae95490232b16c0216485323cc74dd697d07f04d270934b9ae66ee8fc37616",
+      "bytes": 1761,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/clients/error.tsx",
+      "sha256": "569aa0126cddf8817fdf9b62224c0d60d5359834d5b5ed72714f329969a1445f",
+      "bytes": 1749,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/documents/error.tsx",
+      "sha256": "2af1544976f24fd6b5cff7c25de3776c53f40063f737e948663a438ae43e94c1",
+      "bytes": 1751,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/integrations/error.tsx",
+      "sha256": "2260611012ac4d37802c4975fe7150a4e8c04a59cbb7438a192d22c295c688a7",
+      "bytes": 1754,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/ledger/error.tsx",
+      "sha256": "ecd848c6e86ca49b8a3c07430e9c3ea0d1088f4a4de66eee536f0c22f57d577f",
+      "bytes": 1748,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/messages/error.tsx",
+      "sha256": "abd7ca9e310533e4dea8cf83387ab257f69888175bdf648f568c83e21d2347d3",
+      "bytes": 1750,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/notifications/error.tsx",
+      "sha256": "16858dc645d28f322cc0748b42f8f726f6cf12f4df20d716784ac1038f7817e2",
+      "bytes": 1761,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/platform-admin/error.tsx",
+      "sha256": "a28e5a396a8f8cb6cc05561c262640f8cbcdf897f401b2368adc370276151284",
+      "bytes": 1763,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/reports/error.tsx",
+      "sha256": "1745eb79c1292fc64de91ad24c599e2a9a74c9dd235bf21c18fd1acf0a5633c6",
+      "bytes": 1749,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/security/error.tsx",
+      "sha256": "ce7ef7b63b95af187b3f721756317c95a1f0adcfd8dcde68d2dedb7031c01240",
+      "bytes": 1751,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/settings/error.tsx",
+      "sha256": "274ddd7cec997138f5e6e7de904da7dd88fe73fb1d9aba3b6e9c8fa013b822aa",
+      "bytes": 1750,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/tasks/error.tsx",
+      "sha256": "4406819ec5b37ce3d5e588892688336bf3ef4931f40f64fa1729135230355318",
+      "bytes": 1747,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/tax-tools/error.tsx",
+      "sha256": "d64be6fc99d272b027092b3ca362e3782cc21b2000771385450a7d905b2fb00c",
+      "bytes": 1751,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/workflows/error.tsx",
+      "sha256": "7ddb15c58831c9976b2f9620cb93782367f70c9988f17928236626bcf0156666",
+      "bytes": 1751,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/documents/upload/error.tsx",
+      "sha256": "dd5f84d8ba77699ed3c47e0e7270ed005f39eb0541707f6b3f9afc06bf0e6739",
+      "bytes": 1766,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/workflows/[id]/error.tsx",
+      "sha256": "c6a147581a82a50e981c2e350b279cbf70a0511bc66bd7012ff1dea4d0740112",
+      "bytes": 1768,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/app/[locale]/dashboard/workflows/new/error.tsx",
+      "sha256": "4d01c24d3dc5a8c09a6ec2b3cfc29a33818a75706ed6942b1b6bf87f60b73f37",
+      "bytes": 1764,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/error.tsx",
+      "sha256": "2a89cc616a496e6303d4a174b341a9f7920a0e4c2d38befc5fbac892ce6946d0",
+      "bytes": 1610,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/artists/error.tsx",
+      "sha256": "9c6b66237713aef9c40bfaa4e5e00c77a1a62ef40d96463a0a61ae7dede5008b",
+      "bytes": 1330,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/browse/error.tsx",
+      "sha256": "049cece19e998e6449da11aea1a92db0497412b2e743545a9875ce8c963ca8bc",
+      "bytes": 1333,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/events/error.tsx",
+      "sha256": "5b3e577e17de908754b860089d7dabfecfca0ac76617645d12603ab59de3a031",
+      "bytes": 1332,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/notifications/error.tsx",
+      "sha256": "49a91ea7231a04dfe05207cc2f1e8f67fbfbf6e629ddd2c8a6406256015b5056",
+      "bytes": 1349,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/playlists/error.tsx",
+      "sha256": "d2ac4c23e0c5c12cbc0df53547071465f18ff60841513677a490aaddc17d6bba",
+      "bytes": 1346,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/zonga/app/[locale]/dashboard/tracks/error.tsx",
+      "sha256": "5c68c339d62374d0816eac36fae81acfefc0b43c7f9b215b74ccf69451aa62f9",
+      "bytes": 1317,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/partners/app/[locale]/admin/error.tsx",
+      "sha256": "66279157dcb0ba24c521119e22e00cfd9ee6ec37e657d6393efd32963b42748d",
+      "bytes": 1336,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/partners/app/admin/error.tsx",
+      "sha256": "66279157dcb0ba24c521119e22e00cfd9ee6ec37e657d6393efd32963b42748d",
+      "bytes": 1336,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/partners/app/[locale]/portal/error.tsx",
+      "sha256": "4c7cd3fcd524b13d3f462b3862f5d0bead491910b247b0468eda718f89f926b4",
+      "bytes": 1341,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/partners/app/portal/error.tsx",
+      "sha256": "4c7cd3fcd524b13d3f462b3862f5d0bead491910b247b0468eda718f89f926b4",
+      "bytes": 1341,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/nacp-exams/app/[locale]/dashboard/error.tsx",
+      "sha256": "c5ff148fd80a9d901dfd27165f42d10457af1a04c9cfb57c553d49ddc28ca8b0",
+      "bytes": 1462,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/console/components/ui/ErrorPanel.tsx",
+      "sha256": "a8d384649449f2544965396c2ffbd5a8ca4980df1694f3663401cf1a2dfc8984",
+      "bytes": 5607,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+      "sha256": "4595401a074f22b4e385870d9e3794cf03c74c4779dfd89f7037cec6a5754bc6",
+      "bytes": 3900,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/os-core/src/telemetry/browser.ts",
+      "sha256": "7435a265e1143236222c65d48aa2bd9d9937c4d77cecea0e8a4b40ec8f681d56",
+      "bytes": 3422,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/os-core/src/telemetry/browser.test.ts",
+      "sha256": "32c4ae1a72ad59ed1127ccf4c495ab28beae1a552a7e6f19c8db7ffed2e0f5a3",
+      "bytes": 4462,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/os-core/package.json",
+      "sha256": "5fcbd5d2457ff20619e593ac1b257d86210c3214b39e8bdcd8cfa5a98beef9f0",
+      "bytes": 3592,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/cfo/vitest.config.ts",
+      "sha256": "4a50de33646ef8b6bdc610cf37796bc6daf34c8da20e684d76b6a178e6d66be2",
+      "bytes": 1966,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/console/vitest.config.ts",
+      "sha256": "161935e2f0bc0ae6691a2b9c505b82cebfa954142701090dca9cae7a68e2ba87",
+      "bytes": 2413,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/instrumentation.ts",
+      "sha256": "20f0f6a451ee017a5a0f95635e542a682db8982a593f9068dcd51b5bf2eedb01",
+      "bytes": 13952,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/instrumentation-client.ts",
+      "sha256": "cb3a4621171070f61cee1d76b5f03535f1ab751560fc275ed55ff4d82f47fa6f",
+      "bytes": 1908,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/lib/console-wrapper.ts",
+      "deleted": true,
+      "baseBlobSha256": "d9be7c3c55ed9e08daf1f84405a664b05daa0aff67736a9552df31e183914857",
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/lib/__tests__/console-wrapper.test.ts",
+      "deleted": true,
+      "baseBlobSha256": "b998c5d1e9aff8024ba40ca6378025d96e5e78f9b8523b8880c267fc2e4de135",
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/lib/__tests__/bootstrap-diagnostics.test.ts",
+      "sha256": "5f43f3a443181356afb03864a952df299963ecf63d24662cd7664da262eb828b",
+      "bytes": 4704,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/lib/__tests__/browser-error-boundaries.test.tsx",
+      "sha256": "9d9497e18e04a7e318aa8f52f5d54c73b584faf01aabf1d7bed8874beac28999",
+      "bytes": 11349,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "governance/exceptions/no-console.json",
+      "sha256": "3a44a6d8f875b52593ca6af225a0f267bbe526fc24e0e8ec1a78d0cd49ac0f15",
+      "bytes": 165,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/error.tsx",
+      "sha256": "9d85564006ba86120f04e2c2a2df025410fa1cd3b913e9980d9fa4f96f776a8b",
+      "bytes": 3636,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/messages/en-CA.json",
+      "sha256": "58b257e8565e2af11055894e05102825535e6cb6ff1c66b42dfc9c251d953d27",
+      "bytes": 541986,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/messages/fr-CA.json",
+      "sha256": "679651126666d887a5e9755bc4dd8ba23b9ce2ead6f4a6eb393b09b8df8741a8",
+      "bytes": 608357,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "tooling/contract-tests/no-console.test.ts",
+      "sha256": "79a86b7f8ea6be1803e6441fcc991d4bad03bcecc20c4e83d173a15b2686aaba",
+      "bytes": 4394,
+      "changedByThisBatch": false
+    },
+    {
+      "file": "tooling/contract-tests/governance-helpers.ts",
+      "sha256": "5be70cb3b7c50476daffb56928745da81f3160497fd53c283312c5a5e88dcfa6",
+      "bytes": 6741,
+      "changedByThisBatch": false
+    },
+    {
+      "file": "apps/union-eyes/app/[locale]/dashboard/help/page.tsx",
+      "sha256": "c188d29e501e7c70d0ad087dcb67911f0281306e2790d443deb10774b539cb9a",
+      "bytes": 730,
+      "changedByThisBatch": false
+    },
+    {
+      "file": "apps/union-eyes/components/ui/button.tsx",
+      "sha256": "6b2055cf192c0e9e9a6b317f6202c7174bcbf4d45ba4f35bed1a32c921ba62df",
+      "bytes": 1871,
+      "changedByThisBatch": false
+    }
+  ],
+  "ownedPaths": 51,
+  "intentionalDeletions": [
+    "apps/union-eyes/lib/console-wrapper.ts",
+    "apps/union-eyes/lib/__tests__/console-wrapper.test.ts"
+  ],
+  "changes": [
+    "Pure shared browser subpath accepts only fixed app/surface/code and validated opaque digest/reference metadata. It stores at most 50 frozen entries in current-browser memory; it has no Node, Sentry, network or durable storage dependency.",
+    "Local receipt explicitly distinguishes RECORDED_LOCALLY, UNAVAILABLE and REJECTED, with remoteDelivery NOT_ATTEMPTED for this reporter only.",
+    "Migrate 36 real error boundaries to local sanitized diagnostics; preserve retry and copy controls, stable hydration-safe local reference, and truthful UI wording.",
+    "Remove UE global interception and both startup callers; Node startup refusal emits fixed-code structured stderr without inspecting caught values, retaining all fail-closed exits and noncritical OTel continuation.",
+    "UE dashboard recovery now uses existing EN/FR errors namespace, member-safe real help route, retry and accessible home navigation; retains existing Sentry capture without asserting provider delivery and tolerates synchronous SDK failure.",
+    "Retire all 12 console exception entries after actual source and regression proof. Existing console gate and expiry helper are unchanged by this batch."
+  ],
+  "validation": {
+    "focusedExitCode": 0,
+    "filesPassed": 4,
+    "testsPassed": 67,
+    "testsFailed": 0,
+    "testsSkipped": 0,
+    "maxWorkers": 1,
+    "nodeHeapLimitMiB": 2048,
+    "actualJsdomRecoveryCases": 41,
+    "localReporterCases": 17,
+    "startupCases": 7,
+    "unchangedConsoleGateCases": 2,
+    "formerBrowserBoundaryScopes": 10,
+    "formerBrowserEmissions": 36,
+    "formerUeStartupEmissions": 6,
+    "remainingConsoleExceptionEntries": 0,
+    "eslint": {
+      "exitCode": 0,
+      "files": 45,
+      "maxWarnings": 0,
+      "advisory": "Existing Next ESLint config emits a repository-root Pages directory advisory, with no lint diagnostics."
+    },
+    "gitDiffCheckExitCode": 0
+  },
+  "redEvidence": {
+    "unchangedPreRepairGateExitCode": 1,
+    "expiredEntries": 12,
+    "testsFailed": 1,
+    "testsPassed": 1,
+    "interpretation": "The runtime scan still applied expired exceptions; its pre-repair PASS was not an unwaived source proof. All 12 entries were retired only after source correction."
+  },
+  "remoteTelemetry": {
+    "localReporter": "NOT_ATTEMPTED",
+    "existingUeSentryCapture": "PRESERVED; unit SDK mock only; provider delivery UNVERIFIED",
+    "uiNotificationClaims": "REMOVED; references identify local or opaque error-digest origins without claiming a durable incident"
+  },
+  "limitations": [
+    "Existing no-console rule is a literal apps runtime scan; no universal AST or dynamic-alias enforcement claim.",
+    "Local store is ephemeral browser memory; references do not prove a durable incident or remote delivery.",
+    "Other existing UE client logger consumers were not rewritten or qualified for provider delivery.",
+    "jsdom is component evidence, not real Chromium/mobile-device acceptance.",
+    "Final integrated typecheck, required repository checks, production Next build and staging acceptance remain independent requirements."
+  ],
+  "artifacts": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-expiry-red-v1.txt",
+      "sha256": "283e484b1604c3f9e6b27866e86b95c4e8dc0b8e476371d2a66a439573ce861c",
+      "bytes": 2266
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-expiry-red-v1.json",
+      "sha256": "728f34741daad0334287a11e481bb3ee6bc30275ac73d8af767ec18ecec662a0",
+      "bytes": 3934
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-focused-v1.txt",
+      "sha256": "f7cc285f6a515c2fa73fd2e631cfdcb547b86a2e6181dd8ce3b624da50011fa6",
+      "bytes": 966
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-focused-v1.json",
+      "sha256": "793f679cde6b9d044e3b8a79c58554729b861167d72f5c41d9128cdf6d55b069",
+      "bytes": 29541
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-eslint-v1.txt",
+      "sha256": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45",
+      "bytes": 317
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-prior-exception-inventory-v1.json",
+      "sha256": "b6a86331b40545f80d54df8d49cca6cae8ebc625e5723ec435a680b36a2d08ae",
+      "bytes": 7411
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/console-governance-prior-runtime-inventory-v1.json",
+      "sha256": "c5fb30ae4d2e80ba000e7060a198b65bd9f1712b944c2f7268a4ef6cc97e7977",
+      "bytes": 14537
+    }
+  ],
+  "productionOrStagingChanges": false,
+  "financeFeatureImplementation": false,
+  "emailsSent": false,
+  "step2": "HELD"
+}

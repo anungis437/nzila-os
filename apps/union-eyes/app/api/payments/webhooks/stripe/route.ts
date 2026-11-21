@@ -29,15 +29,8 @@ import { syncIcraPurchase } from '@/lib/hubspot/syncIcraPurchase'
 import { syncWorkbookPurchase } from '@/lib/hubspot/syncWorkbookPurchase'
 import type { ExecutivePersonaId, ReportTierId } from '@/lib/icra/types'
 import { verifyStripeSignature } from '@/lib/payments/stripe-signature'
-import type { RLSTx } from '@/lib/db/with-rls-context'
-import {
-  DuesSettlementError,
-  isDuesPaymentIntent,
-  recordDuesPaymentProviderOutcome,
-  recordDuesSettlementDenial,
-  settleDuesPaymentIntent,
-  type StripePaymentIntentLike,
-} from '@/lib/dues/dues-settlement'
+import { isDuesPaymentIntent, type StripePaymentIntentLike } from '@/lib/dues/dues-settlement'
+import { MEMBER_DUES_SETTLEMENT_REFUSAL } from '@/lib/dues/member-dues-flag'
 import {
   hashWorkbookCheckoutReference,
   workbookCheckoutReferenceIsPlausible,
@@ -141,30 +134,14 @@ async function resolveBillingAccountId(organizationId: string): Promise<string |
  * Member dues events are settled exclusively here, after signature verification. Tampered or
  * foreign metadata fails closed (422) and is recorded as a denied settlement; it never credits.
  */
-async function processDuesEvent(
-  eventId: string,
-  run: (tx: RLSTx) => Promise<string>,
-): Promise<NextResponse> {
-  try {
-    const outcome = await withSystemContext((tx) => run(tx))
-    return NextResponse.json({ received: true, status: outcome })
-  } catch (error) {
-    if (error instanceof DuesSettlementError) {
-      logger.warn('[stripe-webhook] dues event rejected', { eventId, code: error.code })
-      await withSystemContext((tx) => recordDuesSettlementDenial(tx, error, eventId)).catch(
-        (auditError) =>
-          logger.error('[stripe-webhook] dues denial audit failed', {
-            eventId,
-            error: String(auditError),
-          }),
-      )
-      return NextResponse.json(
-        { received: false, error: 'dues_payment_rejected', code: error.code },
-        { status: 422 },
-      )
-    }
-    throw error
-  }
+/** A verified member dues event is authenticated, not authorized: no settlement authority exists (see
+ * MEMBER_DUES_SETTLEMENT_REFUSAL). Answer 501 with no database effect rather than a success or a 500. */
+function duesSettlementUnavailable(eventId: string, eventType: string): NextResponse {
+  logger.warn('[stripe-webhook] member dues event refused: no settlement authority', { eventId, eventType })
+  return NextResponse.json(
+    { received: false, error: 'NOT_IMPLEMENTED', message: MEMBER_DUES_SETTLEMENT_REFUSAL },
+    { status: 501 },
+  )
 }
 
 export async function POST(request: NextRequest) {
@@ -191,11 +168,8 @@ export async function POST(request: NextRequest) {
     switch (eventType) {
       case 'payment_intent.succeeded': {
         const pi = event.data?.object
-        if (isDuesPaymentIntent(pi as StripePaymentIntentLike)) {
-          return processDuesEvent(eventId, (tx) =>
-            settleDuesPaymentIntent(tx, pi as StripePaymentIntentLike, eventId),
-          )
-        }
+        if (isDuesPaymentIntent(pi as StripePaymentIntentLike))
+          return duesSettlementUnavailable(eventId, eventType)
         if (pi) {
           const orgId = (pi.metadata?.organization_id as string) ?? null
           const platformInvoiceId = (pi.metadata?.platform_invoice_id as string) ?? null
@@ -277,12 +251,7 @@ export async function POST(request: NextRequest) {
       case 'payment_intent.payment_failed':
       case 'payment_intent.canceled': {
         const pi = event.data?.object as StripePaymentIntentLike | undefined
-        if (isDuesPaymentIntent(pi)) {
-          const outcome = eventType === 'payment_intent.canceled' ? 'cancelled' : 'failed'
-          return processDuesEvent(eventId, (tx) =>
-            recordDuesPaymentProviderOutcome(tx, pi as StripePaymentIntentLike, eventId, outcome),
-          )
-        }
+        if (isDuesPaymentIntent(pi)) return duesSettlementUnavailable(eventId, eventType)
         break
       }
 

@@ -1,0 +1,34 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+ ❯ |union-eyes-native| db/__tests__/current-security-installer.native.test.ts (3 tests | 1 failed) 8452ms
+   ❯ actual released-to-current security transaction on owned native PostgreSQL (3)
+     ✓ refuses an altered legacy policy and preserves the entire security state and history 3352ms
+     ✓ rolls back roles, owners, ACLs and functions after a real database failure during the transition 2665ms
+     × qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP 2431ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes-native| db/__tests__/current-security-installer.native.test.ts > actual released-to-current security transaction on owned native PostgreSQL > qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP
+error: permission denied for function ue_framework_actor_authorized
+ ❯ ../../node_modules/pg/lib/client.js:631:17
+ ❯ execute ../../tooling/scripts/lib/union-eyes-current-security-installer.ts:380:59
+    378|   await client.query('SAVEPOINT ue_current_security_transaction_requir…
+    379|   await client.query('RELEASE SAVEPOINT ue_current_security_transactio…
+    380|   const execute = async (sql: string): Promise<Row[]> => (await client…
+       |                                                           ^
+    381|   const version = await execute(CURRENT_SECURITY_QUERIES.version), maj…
+    382|   const plan = loadCurrentSecurityPlan(options.repoRoot), projection =…
+ ❯ installUnionEyesCurrentSecurity ../../tooling/scripts/lib/union-eyes-current-security-installer.ts:503:106
+ ❯ runCurrentSecurityBootstrapStage ../../tooling/scripts/lib/union-eyes-bootstrap-stages.mjs:62:20
+ ❯ db/__tests__/current-security-installer.native.test.ts:183:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  20:53:26
+   Duration  10.56s (tests 81%, transform 14%, setup 4%, import 2%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v5.json

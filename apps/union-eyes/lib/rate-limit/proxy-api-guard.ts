@@ -31,8 +31,9 @@ export const API_GROUP_LIMITS: Readonly<Record<RouteGroup, GroupLimit>> = {
   mutations: { max: 60, windowMs: 60_000 },
   exports: { max: 10, windowMs: 60_000 },
   integrations: { max: 100, windowMs: 60_000 },
-  // Reads carry a generous ceiling: pages fan out many reads, and the control here is against floods, not browsing.
-  general: { max: 600, windowMs: 60_000 },
+  // Reads carry a generous ceiling: pages fan out many reads, and the control here is against floods, not browsing. 20 reads/s
+  // per session admits the qualified authenticated casework load (10 reads/s per session) with headroom.
+  general: { max: 1200, windowMs: 60_000 },
 }
 
 /** The address bucket is a ceiling over every credential a caller could present from one place. */

@@ -7,7 +7,7 @@ vi.mock('@/lib/api/crud-factory', () => ({
     POST: vi.fn(async () => ({ data: { id: 'ev1' } })),
   })),
 }));
-vi.mock('@/db/schema', () => ({ calendarEvents: {} }));
+vi.mock('@/db/schema', async () => ({ ...(await vi.importActual<Record<string, unknown>>('@/db/schema')), calendarEvents: {} }));
 
 describe('calendar/events route', () => {
   it('exports GET and POST handlers', async () => {

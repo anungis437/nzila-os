@@ -13,7 +13,7 @@ const fixtureSource = readFileSync(new URL('../external-admin.ts', import.meta.u
 
 describe('external-counsel QA grievance fixture', () => {
   it('inserts an explicit, valid grievance type without inventing an authority or grant through HTTP', () => {
-    const match = fixtureSource.match(/INSERT INTO grievances\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*`/)
+    const match = fixtureSource.match(/INSERT INTO (?:public\.)?grievances\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*`/)
     expect(match, 'grievance fixture INSERT must exist').not.toBeNull()
     const columns = match![1].split(',').map((value) => value.trim())
     const values = match![2].split(',').map((value) => value.trim())
@@ -23,7 +23,12 @@ describe('external-counsel QA grievance fixture', () => {
     const type = values[typeIndex].replace(/^'|'$/g, '')
     expect(grievanceTypeEnum.enumValues).toContain(type)
     expect(type).toBe('individual')
-    expect(fixtureSource).toContain("QA_TEST_ENV !== 'true'")
-    expect(fixtureSource).toContain('synthetic runtime acceptance')
+    // The environment guard lives in the owned-operator resolver the fixture calls first: QA_TEST_ENV=true, canonical mode,
+    // and only the owned loopback runtime operator with an initialized private fixture namespace.
+    expect(fixtureSource).toMatch(/async function main\(\): Promise<void> \{\s*const url = ownedRuntimeOperatorUrl\(\)/)
+    const guard = readFileSync(new URL('../fixture-auth.ts', import.meta.url), 'utf8')
+    expect(guard).toContain("process.env.QA_TEST_ENV !== 'true'")
+    expect(guard).toContain("throw new Error('Explicit owned canonical fixture operator required')")
+    expect(fixtureSource).toContain('owned synthetic external representative READ only; issuance is not qualified')
   })
 })

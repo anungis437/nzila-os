@@ -1,3 +1,8 @@
+import {
+  resolveTaxYearOrganization,
+  listTaxNotices,
+  createTaxNotice,
+} from '@/lib/services/finance-tax-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Tax Notices (CRA / RQ)
@@ -7,15 +12,9 @@
  * PR5 — Org-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { taxNotices, taxYears } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
-import { requireOrgAccess } from '@/lib/api-guards'
+
+import { requireOrgAccess, authenticateUser } from '@/lib/api-guards'
 import { CreateTaxNoticeInput } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const taxYearId = req.nextUrl.searchParams.get('taxYearId')
@@ -25,11 +24,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'taxYearId or orgId required' }, { status: 400 })
   }
 
-  let resolvedEntityId = orgId
-  if (!resolvedEntityId && taxYearId) {
-    const [ty] = await platformDb.select().from(taxYears).where(eq(taxYears.id, taxYearId))
-    resolvedEntityId = ty?.orgId ?? null
-  }
+  const identity = await authenticateUser()
+  if (!identity.ok) return identity.response
+  const resolved = await resolveTaxYearOrganization(taxYearId, orgId)
+  if (resolved.mismatch)
+    return NextResponse.json({ error: 'Tax year does not belong to organization' }, { status: 403 })
+  const resolvedEntityId = resolved.orgId
   if (!resolvedEntityId) {
     return NextResponse.json({ error: 'Could not resolve entity' }, { status: 400 })
   }
@@ -37,12 +37,8 @@ export async function GET(req: NextRequest) {
   const access = await requireOrgAccess(resolvedEntityId)
   if (!access.ok) return access.response
 
-  const filter = taxYearId
-    ? eq(taxNotices.taxYearId, taxYearId)
-    : eq(taxNotices.orgId, resolvedEntityId)
-
-  const rows = await platformDb.select().from(taxNotices).where(filter)
-  return NextResponse.json(rows)
+  const result = await listTaxNotices(taxYearId, resolvedEntityId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -57,21 +53,6 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await platformDb.insert(taxNotices).values(parsed.data).returning()
-
-  await recordFinanceAuditEvent({
-    orgId: parsed.data.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.TAX_NOTICE_UPLOAD,
-    targetType: 'tax_notice',
-    targetId: row.id,
-    afterJson: {
-      noticeType: parsed.data.noticeType,
-      authority: parsed.data.authority,
-      taxYearId: parsed.data.taxYearId,
-    },
-  })
-
-  return NextResponse.json(row, { status: 201 })
+  const result = await createTaxNotice(parsed.data, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

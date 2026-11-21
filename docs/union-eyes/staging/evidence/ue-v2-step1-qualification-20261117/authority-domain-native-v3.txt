@@ -1,0 +1,14 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| db/auth/case-primary-domain-guards.pglite.test.ts (15 tests) 7934ms
+   ✓ case persistence boundary on canonical auth and forced RLS (15)
+     ✓ has the same action ceiling as canonical policy for primary, collaborator, subject, supervisor and explicit delegation 367ms
+     ✓ captures permission expiry after waiting behind an actual case-source writer 2153ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  18:07:36
+   Duration  8.84s (tests 91%, import 8%, transform 1%)
+
+JSON report written to /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/artifacts/ue-step1-domain-native-v3.json

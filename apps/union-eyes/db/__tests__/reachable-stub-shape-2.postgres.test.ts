@@ -26,6 +26,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
 import * as declarations from '../schema'
 
+import catalogDecisions from '../../lib/operations/catalog-v2-decisions.json'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const TAG = 'platform-migration:0060_reachable_stub_shape_2'
 const MIGRATIONS = path.resolve(__dirname, '../migrations-platform')
@@ -71,6 +72,17 @@ for (const value of new Set(Object.values(declarations as Record<string, unknown
 interface ColumnRow { table_name: string; column_name: string; data_type: string; udt_name: string; column_default: string | null }
 interface TypeRow { typname: string; labels: string; tag: string }
 const columnKey = (row: { table_name: string; column_name: string }) => `${row.table_name}.${row.column_name}`
+const approvedColumnGrants = (catalogDecisions as { currentSecurity: { approvedColumnGrants: Array<{ schema: string; table: string; role: string; privilege: string; columns: string[] }> } })
+  .currentSecurity.approvedColumnGrants
+/** The authority snapshot with the column grants of the given columns left out. */
+const withoutColumnAcls = (authority: Array<Record<string, unknown>>, keys: ReadonlySet<string>) =>
+  authority.map((row) => ({
+    ...row,
+    column_acls: String(row.column_acls ?? '')
+      .split('|')
+      .filter((entry) => entry && !keys.has(`${row.table_name}.${entry.slice(0, entry.indexOf(':'))}`))
+      .join('|'),
+  }))
 
 describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined schema', () => {
   let admin: pg.Client
@@ -228,9 +240,19 @@ describe.skipIf(!URL)('platform 0060 reachable stub shape on the real combined s
         // Enum types it created are gone; every enum that existed before it is untouched.
         expect(rolledBack.types).toEqual(applied.types.filter((row) => row.tag !== TAG))
         expect(applied.types.some((row) => row.tag === TAG)).toBe(true)
-        expect(rolledBack.authority).toEqual(applied.authority)
+        // Grants, policies, constraints, indexes and row security are untouched. The canonical V2 catalog grants the system role SELECT on
+        // some of the columns 0060 adds (currentSecurity.approvedColumnGrants); a dropped column takes its column grant with it, and
+        // nothing else's.
+        expect(withoutColumnAcls(rolledBack.authority, taggedKeys)).toEqual(withoutColumnAcls(applied.authority, taggedKeys))
 
         await run(FORWARD)
+        const reapplied = await snapshot()
+        expect({ ...reapplied, authority: withoutColumnAcls(reapplied.authority, taggedKeys) }).toEqual({ ...applied, authority: withoutColumnAcls(applied.authority, taggedKeys) })
+        // A migration grants nothing: the column grants come back only from the catalog's declared grants, exactly as they were.
+        for (const grant of approvedColumnGrants.filter((g) => g.schema === 'public' && TABLES.includes(g.table))) {
+          const columns = grant.columns.filter((column) => taggedKeys.has(`${grant.table}.${column}`))
+          if (columns.length) await admin.query(`GRANT ${grant.privilege} (${columns.map((c) => `"${c}"`).join(', ')}) ON public."${grant.table}" TO ${grant.role}`)
+        }
         expect(await snapshot()).toEqual(applied)
       })
     })

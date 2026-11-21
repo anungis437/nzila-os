@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Dues Exceptions Queue
  *
@@ -6,23 +7,25 @@
  * Returns remittance line items in an exception or manual review state.
  * Used by the dues/exceptions page.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
-import { remittanceLineItems, employerRemittances } from '@/db/schema/dues-finance-schema';
-import { eq, inArray } from 'drizzle-orm';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { db } from '@/db'
+import { remittanceLineItems, employerRemittances } from '@/db/schema/dues-finance-schema'
+import { eq, inArray } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'List remittance exceptions' },
   },
   async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId) throw ApiError.badRequest('Organization context required')
+
+    requireBaseFinancialAuthority()
 
     const rows = await db
       .select({
@@ -41,18 +44,13 @@ export const GET = withApi(
         remittanceDate: employerRemittances.remittanceDate,
       })
       .from(remittanceLineItems)
-      .innerJoin(
-        employerRemittances,
-        eq(remittanceLineItems.remittanceId, employerRemittances.id),
-      )
-      .where(
-        inArray(remittanceLineItems.lineStatus, ['exception', 'manual_review', 'pending']),
-      );
+      .innerJoin(employerRemittances, eq(remittanceLineItems.remittanceId, employerRemittances.id))
+      .where(inArray(remittanceLineItems.lineStatus, ['exception', 'manual_review', 'pending']))
 
     // Filter by org via the joined remittance (remittanceLineItems doesn't have direct orgId in all schemas)
     // RLS enforces org isolation at DB level; return all rows
-    const orgRows = rows;
+    const orgRows = rows
 
-    return { data: orgRows };
+    return { data: orgRows }
   },
-);
+)

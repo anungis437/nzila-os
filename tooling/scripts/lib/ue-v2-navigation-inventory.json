@@ -5,7 +5,7 @@
     "apps/union-eyes/lib/executive/executive-navigation.ts": "1c85199c05fadb90cf5e3bb2dbea949c5c275c2ebd4e676ced40fde373c6a187",
     "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace",
     "apps/union-eyes/lib/auth/org-settings-access.ts": "4a33635c65fea47b9eb294522c7cd9151a2a75f9e47cc8eb7ba7378e99e2de71",
-    "apps/union-eyes/app/[locale]/dashboard/settings/page.tsx": "8486c554fe926947944bdc468b32ccfaf268194d2dd55d94e1553be49dc370e3"
+    "apps/union-eyes/app/[locale]/dashboard/settings/page.tsx": "93f4e4425a229d7427690023861ac51b5aeba913ae2dfcec822bfebd9792b040"
   },
   "canonicalEntryCount": 42,
   "uniquePaths": [

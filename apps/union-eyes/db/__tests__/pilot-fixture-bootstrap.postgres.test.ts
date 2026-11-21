@@ -24,6 +24,9 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
+
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const state = vi.hoisted(() => ({
   pool: null as unknown,
@@ -37,12 +40,14 @@ type Ctx = { organizationId?: string | null; userId?: string | null }
 
 // One drizzle transaction as the real role. A drizzle transaction object, so that nested transactions become savepoints, and execute() returns
 // rows the way the application's postgres-js driver does.
-async function inRole<T>(role: Role, ctx: Ctx, work: (tx: unknown) => Promise<T>): Promise<T> {
+async function inRole<T>(role: Role, ctx: Ctx, work: (tx: unknown) => Promise<T>, binding?: Parameters<typeof installNativeBusinessContext>[1]): Promise<T> {
   const client = await (state.pool as pg.Pool).connect()
   try {
     return await drizzle(client).transaction(async (tx) => {
       await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${ctx.organizationId ?? ''}, true), set_config('app.current_user_id', ${ctx.userId ?? ''}, true)`)
+      // Canonical V2: the tenant phase runs in the operator's own verified business session in the organization (ue_v2_verified_business_session).
+      if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
       const execute = tx.execute.bind(tx)
       ;(tx as unknown as { execute: unknown }).execute = async (query: never) => (await execute(query)).rows
       return work(tx)
@@ -59,7 +64,7 @@ vi.mock('@/lib/db/with-rls-context', async () => {
     // The canonical binding refuses an actor without an active membership in the organization.
     withRLSContext: async (ctx: Ctx, work: (tx: unknown) => Promise<unknown>) => {
       if (!state.members.has(`${ctx.userId}:${ctx.organizationId}`)) throw new AuthOrgBindingError('MEMBERSHIP_REQUIRED')
-      return inRole('union_eyes_runtime', ctx, work)
+      return withNativeCanonicalActor(ctx.userId!, ctx.organizationId!, (binding) => inRole('union_eyes_runtime', ctx, work, binding))
     },
   }
 })
@@ -157,8 +162,15 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
     }
   }
 
+  /** A statement as the runtime role in the operator's own verified business session in the organization (they are a live member). */
+  const asOperator = <T,>(organizationId: string, work: (tx: unknown) => Promise<T>) =>
+    withNativeCanonicalActor(STAFF, organizationId, (binding) => inRole('union_eyes_runtime', { organizationId, userId: STAFF }, work, binding))
   const orgOf = async (slug: string) => (await one('SELECT id FROM organizations WHERE slug = $1', [slug]))?.id as string | undefined
-  const join = (organizationId: string, userId = STAFF) => state.members.add(`${userId}:${organizationId}`)
+  // The operator becomes a live canonical member of the organization (as an administrator), which is what lets the binder open their session.
+  const join = async (organizationId: string, userId = STAFF) => {
+    await seedDeclaredCanonicalActor(admin, userId, organizationId, 'admin')
+    state.members.add(`${userId}:${organizationId}`)
+  }
 
   // The organization exists and the operator is a member: the state in which the tenant rows can be seeded.
   async function seededOrganization() {
@@ -166,7 +178,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
     const first = await call()
     const organizationId = (await orgOf(s.slug))!
     orgs.push(organizationId)
-    join(organizationId)
+    await join(organizationId)
     const second = await call()
     return { ...s, first, second, organizationId }
   }
@@ -273,9 +285,13 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
         'fixture_source', 'id', 'organization_id', 'resource_id', 'resource_type', 'seeded_at', 'seeded_by',
       ])
       expect((await one(`SELECT relforcerowsecurity AS forced FROM pg_class WHERE oid = 'public.pilot_fixture_rows'::regclass`)).forced).toBe(true)
-      const policies = await q(`SELECT policyname, cmd, roles::text AS roles FROM pg_policies WHERE tablename = 'pilot_fixture_rows' ORDER BY policyname`)
-      expect(policies.map((p) => `${p.policyname}:${p.cmd}`)).toEqual([
+      const policies = await q(`SELECT policyname, cmd, permissive, roles::text AS roles FROM pg_policies WHERE tablename = 'pilot_fixture_rows' ORDER BY policyname`)
+      // The migration's own policies, and no UPDATE policy; canonical V2 adds only its RESTRICTIVE verified-business-session policy.
+      expect(policies.filter((p) => !String(p.policyname).startsWith('ue_v2_')).map((p) => `${p.policyname}:${p.cmd}`)).toEqual([
         'ue_org_isolation_delete:DELETE', 'ue_org_isolation_insert:INSERT', 'ue_org_isolation_select:SELECT', 'ue_system_full_access:ALL',
+      ])
+      expect(policies.filter((p) => String(p.policyname).startsWith('ue_v2_')).map((p) => `${p.policyname}:${p.cmd}:${p.permissive}`)).toEqual([
+        'ue_v2_verified_business_session:ALL:RESTRICTIVE',
       ])
     })
 
@@ -353,7 +369,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       expect(await count('SELECT count(*) AS n FROM organizations WHERE slug = $1', [s.slug])).toBe(1)
       expect(await count(`SELECT count(*) AS n FROM pilot_fixture_rows WHERE organization_id = $1 AND resource_type = 'organization'`, [organizationId])).toBe(1)
 
-      join(organizationId)
+      await join(organizationId)
       const replies = await Promise.all([call(), call()])
 
       expect(replies.map((r) => r.status)).toEqual([200, 200])
@@ -382,7 +398,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       await call()
       const organizationId = (await orgOf(s.slug))!
       orgs.push(organizationId)
-      join(organizationId)
+      await join(organizationId)
 
       const reply = await call()
 
@@ -458,7 +474,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       const organizationId = (await orgOf(s.slug))!
       orgs.push(organizationId)
       await realMember(organizationId, s.fixture.members[0].id)
-      join(organizationId)
+      await join(organizationId)
 
       const seeded = await call()
       const reset = await call({ reset: true, confirmReset: s.slug })
@@ -509,7 +525,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       orgs.push(organizationId)
       await realMember(organizationId, s.fixture.members[0].id)
       await admin.query(`INSERT INTO pilot_events (organization_id, user_id, session_id, event_type, metadata) VALUES ($1,'u',$2,'org_created','{"source":"api/pilot/bootstrap/cupe"}')`, [organizationId, `pilot-bootstrap:${organizationId}`])
-      join(organizationId)
+      await join(organizationId)
 
       const seed = await call()
       const reset = await call({ reset: true, confirmReset: s.slug })
@@ -584,11 +600,11 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       const y = await seededOrganization()
       const [theirs] = await memberIds(x.organizationId)
 
-      const forged = await inRole('union_eyes_runtime', { organizationId: y.organizationId, userId: STAFF }, (tx) =>
+      const forged = await asOperator(y.organizationId, (tx) =>
         (tx as ReturnType<typeof drizzle>).execute(sql`INSERT INTO pilot_fixture_rows (organization_id, fixture_source, resource_type, resource_id, seeded_by)
           VALUES (${x.organizationId}, 'api/pilot/bootstrap/cupe', 'organization_member', ${randomUUID()}, 'attacker')`),
       ).then(() => 'inserted', (error: Error) => (/row-level security/i.test(error.message) || /row-level security/i.test(String((error as { cause?: Error }).cause?.message)) ? 'denied' : error.message))
-      await inRole('union_eyes_runtime', { organizationId: y.organizationId, userId: STAFF }, (tx) =>
+      await asOperator(y.organizationId, (tx) =>
         (tx as ReturnType<typeof drizzle>).execute(sql`INSERT INTO pilot_fixture_rows (organization_id, fixture_source, resource_type, resource_id, seeded_by)
           VALUES (${y.organizationId}, 'api/pilot/bootstrap/cupe', 'organization_member', ${theirs}, 'attacker')`),
       )
@@ -607,7 +623,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       const x = await seededOrganization()
       const y = await seededOrganization()
 
-      const visible = await inRole('union_eyes_runtime', { organizationId: y.organizationId, userId: STAFF }, async (tx) =>
+      const visible = await asOperator(y.organizationId, async (tx) =>
         (await (tx as ReturnType<typeof drizzle>).execute(sql`SELECT DISTINCT organization_id FROM pilot_fixture_rows`)) as unknown as Array<{ organization_id: string }>,
       )
 
@@ -622,7 +638,7 @@ describe.skipIf(!URL)('the CUPE pilot bootstrap on the combined schema, as the r
       await call()
       const organizationId = (await orgOf(s.slug))!
       orgs.push(organizationId)
-      join(organizationId)
+      await join(organizationId)
       await admin.query(`CREATE TRIGGER ue_f03a_bootstrap_fault_events BEFORE INSERT ON public.pilot_events FOR EACH ROW WHEN (NEW.organization_id = '${organizationId}') EXECUTE FUNCTION public.ue_f03a_bootstrap_fault()`)
 
       const failed = await call()

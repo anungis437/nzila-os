@@ -1,7 +1,7 @@
 /**
  * The post-apply verifier against REAL PostgreSQL catalogs.
  *
- * 1. The combined Django + Drizzle database must satisfy its own storage-authority manifest: row-level security,
+ * 1. The combined Django + Drizzle database must satisfy its canonical V2 catalog decisions: row-level security,
  *    policy coverage and the exact privileges of union_eyes_runtime and union_eyes_system, in both directions.
  * 2. The verifier must be able to fail. A scratch database proves it detects, and then clears, each kind of gap with
  *    the real catalog queries (a unit test with a fake database could not prove those).
@@ -14,11 +14,15 @@ import pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { storageAuthorityManifest } from '../rls-storage-authority/index'
 import {
+  OPERATIONS,
   RUNTIME_ROLE,
   SYSTEM_ROLE,
+  isInScope,
+  observeTable,
   verifyEntries,
   type ManifestEntryLike,
 } from '../../scripts/rls-enforcement/post-apply-verifier-core'
+import catalogDecisions from '../../lib/operations/catalog-v2-decisions.json'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
@@ -33,14 +37,46 @@ describe.skipIf(!URL)('post-apply verifier on real PostgreSQL catalogs', () => {
     await admin?.end().catch(() => undefined)
   })
 
-  it('finds the combined database consistent with every in-scope manifest entry', async () => {
-    const report = await verifyEntries(admin, storageAuthorityManifest)
+  // The canonical V2 runtime is built from its own catalog decisions (lib/operations/catalog-v2-decisions.json), which deliberately
+  // contain what the legacy manifest granted (217 legacy runtime/system privileges are CONTAINED_NO_AUTHORITY or LATENT_UNREACHABLE there,
+  // and evidence_packs gains the runtime UPDATE its Django view needs). The database must satisfy exactly those decisions, in both
+  // directions, with the same verifier.
+  const canonicalEntries = (catalogDecisions as { entries: Array<{ table: string; classification: string; runtime: string[]; system: string[] }> }).entries.map(
+    (entry): ManifestEntryLike => ({
+      table: entry.table,
+      classification: entry.classification as ManifestEntryLike['classification'],
+      requiredRuntimePrivileges: entry.runtime as ManifestEntryLike['requiredRuntimePrivileges'],
+      requiredSystemPrivileges: entry.system as ManifestEntryLike['requiredSystemPrivileges'],
+    }),
+  )
+
+  it('finds the combined database consistent with every in-scope canonical catalog decision', async () => {
+    const report = await verifyEntries(admin, canonicalEntries)
     expect(report.diffs.map((d) => `${d.kind}: ${d.text}`)).toEqual([])
     expect(report.missing).toBe(0)
     expect(report.extra).toBe(0)
     // A verifier that checked nothing would also report no gaps.
     expect(report.checked.length).toBeGreaterThan(300)
     expect(report.checked).toEqual(expect.arrayContaining(['grievances', 'documents', 'ue_authority_mandates']))
+  })
+
+  it('holds exactly the decided table privileges on the entries the verifier leaves out of scope: contained, latent and global tables', async () => {
+    const outOfScope = canonicalEntries.filter((entry) => !isInScope(entry))
+    expect(outOfScope.length).toBeGreaterThan(400)
+    const drift: string[] = []
+    for (const entry of outOfScope) {
+      const observed = await observeTable(admin, entry.table)
+      if (!observed) continue
+      for (const [role, wanted, held] of [
+        [RUNTIME_ROLE, new Set(entry.requiredRuntimePrivileges as string[]), observed.runtimePrivileges],
+        [SYSTEM_ROLE, new Set(entry.requiredSystemPrivileges as string[]), observed.systemPrivileges],
+      ] as const) {
+        for (const op of OPERATIONS) {
+          if (wanted.has(op) !== held.has(op)) drift.push(`${wanted.has(op) ? 'MISSING' : 'EXTRA'}: ${role} ${op} on ${entry.table}`)
+        }
+      }
+    }
+    expect(drift).toEqual([])
   })
 
   it('finds a physical table for every in-scope manifest entry', async () => {

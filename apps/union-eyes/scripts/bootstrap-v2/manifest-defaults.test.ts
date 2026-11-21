@@ -4,6 +4,8 @@ import { storageAuthorityManifest } from '../../db/rls-storage-authority'
 import type { SourceTable } from './source'
 import {
   callerDefaultDeclarationSelected,
+  defaultExpressionComparator,
+  selectedDefaultDeclarationSources,
   compareDeclaredDefaults,
   normalizeDefaultExpression,
   renderDeclaredDefault,
@@ -157,7 +159,8 @@ describe('independent server-default qualification', () => {
       sourceDigest: 'source',
       authority: storageAuthorityManifest.find((entry) => entry.table === 'claims') ?? null,
     }
-    expect(callerDefaultDeclarationSelected(base, 'current-caller')).toBe(true)
+    expect(callerDefaultDeclarationSelected(base, 'current-caller')).toBe(false)
+    expect(callerDefaultDeclarationSelected(base, 'current-caller', undefined, 'current-caller')).toBe(true)
     for (const classification of ['LATENT_UNREACHABLE', 'CONTAINED_NO_AUTHORITY'] as const) {
       const authority = storageAuthorityManifest.find(
         (entry) => entry.classification === classification,
@@ -173,8 +176,41 @@ describe('independent server-default qualification', () => {
         { ...base, name: 'cms_pages', authority: null },
         'current-caller',
       ),
-    ).toBe(true)
+    ).toBe(false)
     expect(callerDefaultDeclarationSelected(base, 'duplicate-auth', 'user_management')).toBe(false)
     expect(callerDefaultDeclarationSelected(base, 'current-model', 'user_management')).toBe(true)
   })
+})
+
+describe('exact default source and PostgreSQL expression identity',()=>{
+ it('selects only the plan-admitted caller, not a different table declaration from a barrel',()=>{
+  const table: SourceTable = {
+    name: 'example', source: 'canonical.py', sourceDigest: 'synthetic-source',
+    columns: [], foreignKeys: [], authority: null,
+  }
+  const plan: Parameters<typeof selectedDefaultDeclarationSources>[0] = {
+    tables: [table],
+    decisions: [{ relation: 'example', disposition: 'PROSPECTIVE_CANONICAL', source: 'apps/union-eyes/db/schema/domains/example.ts' }],
+  }
+  expect([...selectedDefaultDeclarationSources(plan)]).toEqual([['example','apps/union-eyes/db/schema/domains/example.ts']])
+  expect([...selectedDefaultDeclarationSources({ tables: [{ ...table, name: 'synthetic', source: 'scripts/example.test.ts' }], decisions: [] })]).toEqual([])
+ })
+ it('recognizes deparsed interval casts but preserves changed duration, operator, literals and extra statements',async()=>{
+  const equivalent=await defaultExpressionComparator()
+  expect(equivalent("now() + interval '2 years'","(now() + '2 years'::interval)")).toBe(true)
+  for(const changed of ["now() + interval '20 years'","now() - interval '2 years'","now() + interval '2 days'","now(); SELECT 1"])
+    expect(equivalent("now() + interval '2 years'",changed)).toBe(false)
+  expect(equivalent("'two  words'","'two words'")).toBe(false)
+ })
+})
+
+describe('catalog text-array literal casts',()=>{
+ it('retains ordered strings and accepts only lossless scalar text casts in a text-array context',async()=>{
+  const equivalent=await defaultExpressionComparator(),source="ARRAY['openid','profile','email']"
+  expect(equivalent(source,"ARRAY['openid'::text,'profile'::text,'email'::text]",'text[]')).toBe(true)
+  expect(equivalent(source,"ARRAY['email'::text,'profile'::text,'openid'::text]",'text[]')).toBe(false)
+  expect(equivalent(source,"ARRAY['openid'::varchar(2),'profile'::text,'email'::text]",'text[]')).toBe(false)
+  expect(equivalent("ARRAY['two  words']","ARRAY['two words'::text]",'text[]')).toBe(false)
+  expect(equivalent(source,"ARRAY['openid'::text,'profile'::text,'email'::text]")).toBe(false)
+ })
 })

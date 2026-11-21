@@ -8,6 +8,7 @@ import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { listClients, createClient } from '@/lib/actions/client-actions'
 import { ClientSchema } from '@/domain'
+import { CfoScopeError } from '@/lib/resolve-org'
 
 export async function GET(request: Request) {
   return withRequestContext(request, () =>
@@ -21,8 +22,17 @@ export async function GET(request: Request) {
       const search = url.searchParams.get('search') ?? undefined
       const status = url.searchParams.get('status') ?? undefined
 
-      const data = await listClients({ page, pageSize, search, status })
-      return NextResponse.json({ ok: true, data })
+      try {
+        const data = await listClients({ page, pageSize, search, status })
+        return NextResponse.json({ ok: true, data })
+      } catch (error) {
+        if (error instanceof CfoScopeError)
+          return NextResponse.json(
+            { ok: false, error: error.message },
+            { status: error.message === 'Unauthorized' ? 401 : 403 },
+          )
+        return NextResponse.json({ ok: false, error: 'Failed to load clients' }, { status: 500 })
+      }
     }),
   )
 }
@@ -35,14 +45,21 @@ export async function POST(request: Request) {
 
       try {
         const body = await request.json()
-        const parsed = ClientSchema.omit({ id: true }).safeParse(body)
+        const parsed = ClientSchema.omit({ id: true }).strict().safeParse(body)
         if (!parsed.success) {
           return NextResponse.json(
             { ok: false, error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
             { status: 400 },
           )
         }
-        const result = await createClient(parsed.data)
+        const result = await createClient({
+          name: parsed.data.name,
+          contactEmail: parsed.data.email,
+          phone: parsed.data.phone,
+          incorporationNumber: parsed.data.businessNumber,
+          industry: parsed.data.industry,
+          notes: parsed.data.notes,
+        })
 
         if (!result.ok) {
           return NextResponse.json(
@@ -53,10 +70,12 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ ok: true, data: result }, { status: 201 })
       } catch (err) {
-        return NextResponse.json(
-          { ok: false, error: err instanceof Error ? err.message : 'Unknown error' },
-          { status: 500 },
-        )
+        if (err instanceof CfoScopeError)
+          return NextResponse.json(
+            { ok: false, error: err.message },
+            { status: err.message === 'Unauthorized' ? 401 : 403 },
+          )
+        return NextResponse.json({ ok: false, error: 'Failed to create client' }, { status: 500 })
       }
     }),
   )

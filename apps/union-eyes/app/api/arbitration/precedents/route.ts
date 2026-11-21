@@ -2,6 +2,7 @@
  * CRUD collection route for arbitrationDecisions
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
+import { containedStorageHandlers } from '@/lib/reality/contained-storage';
 import { arbitrationDecisions } from '@/db/schema';
 import { PUBLIC_DETAIL_COLUMNS, WITHHELD_DECISION_COLUMNS } from '@/lib/precedents/public-decision-view';
 import { PRECEDENT_WRITABLE_FIELDS } from '@/lib/precedents/precedent-writable-fields';
@@ -9,7 +10,7 @@ import { eq, isNull, or, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
+const factory = crudRoutes({
   table: arbitrationDecisions,
   pk: 'id',
   tags: ["Bargaining"],
@@ -31,4 +32,7 @@ const { GET, POST } = crudRoutes({
   // The decision's own content; counters, embedding, import provenance and the supplying organization are server-owned.
   writableFields: PRECEDENT_WRITABLE_FIELDS,
 });
+// Canonical V2 contains arbitration_decisions (CONTAINED_NO_AUTHORITY: no application role may read or write it), so a canonical
+// deployment answers 501 NOT_IMPLEMENTED before the factory handler, or any statement, runs (lib/reality/contained-storage.ts).
+const { GET, POST } = containedStorageHandlers('arbitration_decisions', { GET: factory.GET, POST: factory.POST });
 export { GET, POST };

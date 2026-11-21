@@ -12,7 +12,8 @@ Nzila HQ is an **internal-only** dashboard surface for founders and executive st
 
 ## Architecture
 
-- `server/` — Server-side data layer (DB client, repository, integrations, snapshots)
+- `lib/db/` — Optional lazy HQ connection wrapper; shared `@nzila/db/postgres-factory` constructs the typed client with an explicit URL
+- `server/` — Server-side repository, integrations, schema and snapshots
 - `app/` — Next.js App Router pages + API routes
 - `components/` — UI components (primitives + dashboard widgets)
 - `packages/hq-domain/` — Domain intelligence engines (capital, dependency, finance, portfolio, venture)

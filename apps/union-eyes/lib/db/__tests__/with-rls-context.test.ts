@@ -153,7 +153,7 @@ describe('with-rls-context', () => {
       )
       expect(mocks.mockAuth).not.toHaveBeenCalled()
       expect(mocks.mockOrgBindingSql).toHaveBeenCalledWith(binding)
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
       expect(tenantContextStorage.getStore()).toBeUndefined()
     })
 
@@ -174,7 +174,7 @@ describe('with-rls-context', () => {
       )
       expect(value).toBe('nested')
       expect(mocks.mockOrgBinding).toHaveBeenCalledTimes(1)
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(4)
       expect(savepoint).toHaveBeenCalledTimes(1)
       expect(tenantContextStorage.getStore()).toBeUndefined()
     })
@@ -244,9 +244,10 @@ describe('with-rls-context', () => {
       })
       expect(mocks.mockTxExecute).toHaveBeenCalledWith(setting)
       expect(mocks.mockTxExecute.mock.calls[0][0].strings).toEqual([
-        'SET LOCAL ROLE union_eyes_runtime',
+        'SET LOCAL search_path = pg_catalog, public, pg_temp',
       ])
-      expect(mocks.mockTxExecute.mock.calls[1][0]).toBe(setting)
+      expect(mocks.mockTxExecute.mock.calls[1][0].strings).toEqual(['SET LOCAL ROLE union_eyes_runtime'])
+      expect(mocks.mockTxExecute.mock.calls[2][0]).toBe(setting)
       expect(scoped).toEqual({ execute: mocks.mockTxExecute })
       expect(tenantContextStorage.getStore()).toBeUndefined()
     })
@@ -278,9 +279,12 @@ describe('with-rls-context', () => {
       vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
       await withSystemContext(async () => 'system')
       await withPlatformAdminRLSContext('admin-1', 'synthetic-proof', async () => 'platform')
-      expect(mocks.mockSystemTxExecute.mock.calls).toHaveLength(6)
-      for (const index of [0, 3]) {
+      expect(mocks.mockSystemTxExecute.mock.calls).toHaveLength(8)
+      for (const index of [0, 4]) {
         expect(mocks.mockSystemTxExecute.mock.calls[index][0].strings).toEqual([
+          'SET LOCAL search_path = pg_catalog, public, pg_temp',
+        ])
+        expect(mocks.mockSystemTxExecute.mock.calls[index + 1][0].strings).toEqual([
           'SET LOCAL ROLE union_eyes_system',
         ])
       }
@@ -313,8 +317,8 @@ describe('with-rls-context', () => {
     it('sets user and org context then executes operation', async () => {
       const result = await withRLSContext(async () => 'ok')
       expect(result).toBe('ok')
-      // 2 execute calls: set user_id + set org_id
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      // Pin canonical resolution before setting user_id and org_id.
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
     })
 
     it('scopes the module-level db import to the tenant transaction for the duration of a no-arg callback (PR #752 round 16)', async () => {
@@ -348,8 +352,8 @@ describe('with-rls-context', () => {
       })
       const result = await withRLSContext(async () => 'ok')
       expect(result).toBe('ok')
-      // 2 calls: set user_id + set org_id (from publicMetadata)
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      // Pin canonical resolution, then set user_id and the resolved org_id.
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
       // The org resolved from session metadata is the one actually applied.
       expect(appliedSetting('app.current_org_id')).toBe('org-pub')
     })
@@ -361,7 +365,7 @@ describe('with-rls-context', () => {
         privateMetadata: {},
       })
       await withRLSContext(async () => 'ok')
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
     })
 
     it('accepts context map + operation overload', async () => {
@@ -452,7 +456,7 @@ describe('with-rls-context', () => {
       })
       const result = await withRLSContext(async () => 'ok')
       expect(result).toBe('ok')
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
     })
 
     it('falls back to privateMetadata.tenantId', async () => {
@@ -463,7 +467,7 @@ describe('with-rls-context', () => {
       })
       const result = await withRLSContext(async () => 'ok')
       expect(result).toBe('ok')
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
     })
 
     it('throws when currentUser() returns null and no orgId — fails closed', async () => {
@@ -484,12 +488,12 @@ describe('with-rls-context', () => {
     it('sets user context and executes', async () => {
       const result = await withExplicitUserContext('u-2', async () => 'done')
       expect(result).toBe('done')
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(1)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
     })
 
     it('sets org context when provided', async () => {
       await withExplicitUserContext('u-2', async () => 'done', 'org-2')
-      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(3)
     })
 
     it('scopes the module-level db import to the tenant transaction for the duration of the callback (PR #752 round 16)', async () => {
@@ -511,7 +515,7 @@ describe('with-rls-context', () => {
     it('clears user and org context on the separate system connection', async () => {
       const result = await withSystemContext(async () => 'sys')
       expect(result).toBe('sys')
-      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(3)
       expect(mocks.mockTxExecute).not.toHaveBeenCalled()
     })
 
@@ -643,7 +647,7 @@ describe('with-rls-context', () => {
       const result = await withSystemRLSContext('test: seed user creation', async () => 'done')
       expect(result).toBe('done')
       // withSystemContext sets '' for both user_id and org_id → 2 execute calls
-      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(3)
     })
 
     it('requires a reason string', async () => {
@@ -670,7 +674,7 @@ describe('with-rls-context', () => {
       )
       expect(result).toBe('exported')
       // sets app.current_user_id (audit) + clears app.current_org_id → 2 execute calls
-      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2)
+      expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(3)
       expect(mocks.mockTxExecute).not.toHaveBeenCalled()
     })
   })

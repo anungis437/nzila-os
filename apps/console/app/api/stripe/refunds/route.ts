@@ -1,3 +1,4 @@
+import { requestOrganizationRefund } from '@/lib/services/stripe-billing-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * POST /api/stripe/refunds — Request or execute a refund
@@ -11,15 +12,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { platformDb } from '@nzila/db/platform'
-import { stripeRefunds, stripePayments } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
-import { requiresApproval, executeRefund } from '@nzila/payments-stripe/primitives'
-import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
-import { recordAuditEvent } from '@/lib/audit-db'
-import { createLogger } from '@nzila/os-core'
 
-const logger = createLogger('stripe:refunds')
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 
 const RequestRefundSchema = z.object({
   orgId: z.guid(),
@@ -35,10 +29,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const body = await req.json()
   const parsed = RequestRefundSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Validation failed', details: parsed.error.issues }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Validation failed', details: parsed.error.issues },
+      { status: 400 },
+    )
   }
 
-  const { orgId, paymentId, amountCents, reason } = parsed.data
+  const { orgId } = parsed.data
 
   const orgAccess = await requireOrgAccess(orgId, {
     minRole: 'org_secretary',
@@ -46,104 +43,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   })
   if (!orgAccess.ok) return orgAccess.response
 
-  // Look up the payment to get the Stripe object ID
-  const [payment] = await platformDb
-    .select()
-    .from(stripePayments)
-    .where(eq(stripePayments.id, paymentId))
-    .limit(1)
-
-  if (!payment) {
-    return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
-  }
-  if (payment.orgId !== orgId) {
-    return NextResponse.json({ error: 'Forbidden: payment does not belong to organization' }, { status: 403 })
-  }
-
-  // Audit: refund requested
-  await recordAuditEvent({
-    orgId,
-    actorClerkUserId: auth.userId,
-    actorRole: auth.platformRole,
-    action: 'stripe.refund_requested',
-    targetType: 'stripe_payment',
-    targetId: paymentId,
-    afterJson: { amountCents, reason },
-  })
-
-  // Check if approval is required
-  if (requiresApproval(amountCents)) {
-    // Create pending refund — do NOT call Stripe yet
-    const [refundRow] = await platformDb
-      .insert(stripeRefunds)
-      .values({
-        orgId,
-        paymentId,
-        amountCents: BigInt(amountCents),
-        status: 'pending_approval',
-        requestedBy: auth.userId,
-        occurredAt: new Date(),
-      })
-      .returning({ id: stripeRefunds.id })
-
-    return NextResponse.json(
-      {
-        refundId: refundRow!.id,
-        status: 'pending_approval',
-        message: `Refund of ${amountCents} cents requires finance_approver approval`,
-      },
-      { status: 202 },
-    )
-  }
-
-  // Below threshold — execute immediately
-  try {
-    const stripeRefund = await executeRefund({
-      paymentIntentId: payment.stripeObjectId,
-      amountCents,
-      reason,
-    })
-
-    const [refundRow] = await platformDb
-      .insert(stripeRefunds)
-      .values({
-        orgId,
-        refundId: stripeRefund.id,
-        paymentId,
-        amountCents: BigInt(amountCents),
-        status: 'executed',
-        requestedBy: auth.userId,
-        occurredAt: new Date(),
-      })
-      .returning({ id: stripeRefunds.id })
-
-    await recordAuditEvent({
-      orgId,
-      actorClerkUserId: auth.userId,
-      actorRole: auth.platformRole,
-      action: 'stripe.refund_executed',
-      targetType: 'stripe_refund',
-      targetId: refundRow!.id,
-      afterJson: {
-        stripeRefundId: stripeRefund.id,
-        amountCents,
-        status: stripeRefund.status,
-      },
-    })
-
-    return NextResponse.json(
-      {
-        refundId: refundRow!.id,
-        stripeRefundId: stripeRefund.id,
-        status: 'executed',
-      },
-      { status: 201 },
-    )
-  } catch (err) {
-    logger.error('[stripe/refunds] Error executing refund:', err instanceof Error ? err : { detail: err })
-    return NextResponse.json(
-      { error: 'Failed to execute refund' },
-      { status: 500 },
-    )
-  }
+  const result = await requestOrganizationRefund(parsed.data, auth)
+  return NextResponse.json(result.body, { status: result.status })
 }

@@ -68,6 +68,12 @@ export interface ResendSendContext {
   templateId?: string;
   maxRetries?: number;
   disableRetry?: boolean;
+  /** Stable provider key for a durable outbox item; never generated per attempt. */
+  idempotencyKey?: string;
+  /** Formal correspondence errors must not echo recipient/content values. */
+  sensitiveContent?: boolean;
+  /** Absolute boundary of a durable outbox's provider idempotency window. */
+  notAfter?: number;
 }
 
 interface ResendParsedError {
@@ -232,7 +238,13 @@ export async function sendResendEmail(
   const finalPayload = attachObservability(screened.payload, context);
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    const { data, error } = await client.emails.send(finalPayload);
+    // Suppression/connection waits must not allow a stale task to start a new
+    // provider request after its safe replay window has elapsed.
+    if (context.notAfter !== undefined && (!Number.isFinite(context.notAfter) || Date.now() >= context.notAfter))
+      return {success:false,error:'Email replay window elapsed',code:'OUTBOX_WINDOW_ELAPSED'};
+    const { data, error } = context.idempotencyKey
+      ? await client.emails.send(finalPayload, { idempotencyKey: context.idempotencyKey })
+      : await client.emails.send(finalPayload);
 
     if (!error) {
       return {
@@ -252,11 +264,11 @@ export async function sendResendEmail(
       logger.error('Error sending email', {
         feature: context.feature,
         statusCode: parsed.statusCode,
-        error: parsed.message,
+        error: context.sensitiveContent ? 'Provider rejected correspondence submission' : parsed.message,
       });
       return {
         success: false,
-        error: parsed.message,
+        error: context.sensitiveContent ? 'Provider rejected correspondence submission' : parsed.message,
         statusCode: parsed.statusCode,
         code: parsed.code,
       };
@@ -309,12 +321,28 @@ export async function sendEmail({
 /**
  * Simple HTML tag stripper for plain text fallback
  */
-function stripHtml(html: string): string {
-  return html
-    .replace(/<style[^>]*>.*<\/style>/gm, '') // codeql[js/incomplete-multi-character-sanitization] - plain-text conversion, not security sanitization
-    .replace(/<[^>]+>/gm, '') // codeql[js/bad-tag-filter]
-    .replace(/\s+/g, ' ')
-    .trim();
+export function stripHtml(html: string): string {
+  // One linear pass, no backtracking: every '<' opens markup that is dropped, so the result never contains a tag or a
+  // partial one. <style> and <script> blocks are dropped with their content; an unterminated tag or block drops the rest.
+  const lower = html.toLowerCase();
+  let text = '';
+  let index = 0;
+  while (index < html.length) {
+    const open = html.indexOf('<', index);
+    if (open === -1) {
+      text += html.slice(index);
+      break;
+    }
+    text += html.slice(index, open) + ' ';
+    const block = ['style', 'script'].find(
+      (name) => lower.startsWith(`<${name}`, open) && /[\s/>]/.test(lower.charAt(open + name.length + 1)),
+    );
+    const close = block ? lower.indexOf(`</${block}`, open) : open;
+    const end = close === -1 ? -1 : html.indexOf('>', close);
+    if (end === -1) break;
+    index = end + 1;
+  }
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 /**

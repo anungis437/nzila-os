@@ -407,6 +407,20 @@
       "when": 1790520011000,
       "tag": "0060_graph_node_alias_rls_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1794873600000,
+      "tag": "0061_case_scope_persistence_boundary",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1794873601000,
+      "tag": "0062_case_scope_model_defaults",
+      "breakpoints": true
     }
   ]
 }

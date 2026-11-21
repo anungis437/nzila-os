@@ -1,107 +1,42 @@
 #!/usr/bin/env node
-/**
- * generate-attestation.mjs — Emit a runtime attestation envelope.
- *
- * Usage:
- *   node tooling/runtime-governance/generate-attestation.mjs --class=deployment
- *
- * Reads release identity from environment variables and writes the
- * attestation to proof-artifacts/attestations/<releaseId>/<class>.json.
- *
- * The envelope is hand-validated against the structural shape required
- * by `@nzila/runtime-attestation` to avoid pulling the workspace
- * package into a lightweight CI step.
- */
+/** Emit the canonical runtime attestation schema, bound to actual artifact bytes. */
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
+import {
+  citedEvidence, releaseIdentity, requireEnv, validateAttestation,
+} from './contracts.mjs'
 
-const ATTESTATION_SCHEMA_VERSION = '1.0.0'
-const ALLOWED_CLASSES = new Set([
-  'deployment',
-  'environment-legitimacy',
-  'pilot-safety',
-  'doctrine-compliance',
-  'ai-governance',
-  'continuity-governance',
-])
-
-function arg(name, fallback) {
-  const prefix = `--${name}=`
-  const found = process.argv.find((a) => a.startsWith(prefix))
-  return found ? found.slice(prefix.length) : fallback
-}
-
-function requireEnv(name) {
-  const v = process.env[name]
-  if (!v) {
-    process.stderr.write(
-      `runtime-governance/generate-attestation: missing env var ${name}\n`,
-    )
-    process.exit(2)
+try {
+  const className = process.argv.find((arg) => arg.startsWith('--class='))?.slice('--class='.length)
+  const release = releaseIdentity()
+  const environment = requireEnv('NZILA_ENVIRONMENT_CLASS')
+  const product = requireEnv('NZILA_PRODUCT')
+  const issuer = requireEnv('NZILA_ATTESTATION_ISSUER')
+  const rationale = requireEnv('NZILA_ATTESTATION_RATIONALE')
+  const issuedAt = new Date().toISOString()
+  const envelope = validateAttestation({
+    id: `att.${className}.${release.releaseId}.${Date.now()}`,
+    schemaVersion: '1.0.0',
+    class: className,
+    releaseId: release.releaseId,
+    environment,
+    subject: { kind: 'release', id: `${product}:${release.commitSha}` },
+    verdict: process.env.NZILA_ATTESTATION_VERDICT || 'unverified',
+    rationale: `${rationale} Manifest: ${release.manifestHash}; builtAt: ${release.builtAt}.`,
+    citedEvidence: citedEvidence(),
+    issuedBy: issuer,
+    issuedAt,
+    window: { start: release.builtAt, end: issuedAt },
+  })
+  if (Date.parse(envelope.window.start) > Date.parse(envelope.window.end)) {
+    throw new Error('attestation window starts in the future')
   }
-  return v
+  const directory = resolve(process.cwd(), 'proof-artifacts', 'attestations', release.releaseId)
+  mkdirSync(directory, { recursive: true })
+  const path = resolve(directory, `${envelope.class}.json`)
+  writeFileSync(path, `${JSON.stringify(envelope, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' })
+  process.stdout.write(`runtime-governance/generate-attestation: wrote ${path} verdict=${envelope.verdict}\n`)
+} catch (error) {
+  process.stderr.write(`runtime-governance/generate-attestation: ${error.message}\n`)
+  process.exitCode = 2
 }
-
-const className = arg('class')
-if (!className || !ALLOWED_CLASSES.has(className)) {
-  process.stderr.write(
-    `runtime-governance/generate-attestation: --class is required and must be one of ${[...ALLOWED_CLASSES].join(', ')}\n`,
-  )
-  process.exit(2)
-}
-
-const releaseId = requireEnv('NZILA_RELEASE_ID')
-const commitSha = requireEnv('NZILA_COMMIT_SHA')
-const manifestHash = requireEnv('NZILA_MANIFEST_HASH')
-const builtAt = requireEnv('NZILA_BUILT_AT')
-const envClass = requireEnv('NZILA_ENVIRONMENT_CLASS')
-const product = process.env.NZILA_PRODUCT ?? 'platform'
-const issuer = process.env.NZILA_ATTESTATION_ISSUER ?? 'release-governance-pipeline'
-
-const evidence = (process.env.NZILA_ATTESTATION_EVIDENCE ?? '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean)
-  .map((uri) => ({
-    uri,
-    contentHash: 'sha256:' + createHash('sha256').update(uri).digest('hex'),
-    description: 'CI artifact reference',
-  }))
-
-const envelope = {
-  schemaVersion: ATTESTATION_SCHEMA_VERSION,
-  attestationClass: className,
-  attestationId: `att.${className}.${releaseId}.${Date.now()}`,
-  issuer: { kind: 'pipeline', id: issuer },
-  release: {
-    releaseId,
-    commitSha,
-    manifestHash,
-    builtAt,
-  },
-  environment: {
-    environmentClass: envClass,
-    product,
-  },
-  verdict: process.env.NZILA_ATTESTATION_VERDICT ?? 'verified',
-  doctrineCitations: [
-    { document: 'docs/nzila-runtime-integration/live-runtime-attestation-generation.md' },
-  ],
-  evidence,
-  emittedAt: new Date().toISOString(),
-}
-
-const outDir = resolve(
-  process.cwd(),
-  'proof-artifacts',
-  'attestations',
-  releaseId,
-)
-mkdirSync(outDir, { recursive: true })
-const outPath = resolve(outDir, `${className}.json`)
-writeFileSync(outPath, JSON.stringify(envelope, null, 2) + '\n', 'utf8')
-
-process.stdout.write(
-  `runtime-governance/generate-attestation: wrote ${outPath} verdict=${envelope.verdict}\n`,
-)

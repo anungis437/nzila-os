@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
+const refused = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL };
 
 const m = vi.hoisted(() => ({
   execute: vi.fn(),
@@ -67,67 +71,51 @@ describe('finance/summary route', () => {
     await expect(GET({ organizationId: '' } as any)).rejects.toMatchObject({ status: 400 });
   });
 
-  it('returns normalized finance summary payload', async () => {
-    const { GET } = await loadRoute();
-    const payload = await GET({ organizationId: 'org_1', userId: 'u1' } as any);
+  const nothingRan = () => {
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
+    expect(m.execute).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  };
 
-    expect(payload).toMatchObject({
-      collectionRate: 50,
-      totalPaid: 200,
-      totalCharged: 400,
-      memberStanding: { total: 20 },
-      strikeFund: { totalDisbursements: 1 },
-      grievanceCosts: { totalClaims: 7 },
-      pensionHealth: { totalMembers: 10 },
-    });
-    expect(payload.budgets).toHaveLength(1);
-    expect(payload.perCapitaInbound.childCount).toBe(1);
+  it('refuses the summary with 501 NOT_IMPLEMENTED before any transaction, mandate check, financial read or audit', async () => {
+    const { GET } = await loadRoute();
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toMatchObject(refused);
+    nothingRan();
   });
 
-  it('runs mandate verification, all 17 financial reads and the access audit in one explicit tenant transaction', async () => {
+  it('refuses with 501 even when a live mandate would verify and every read would succeed', async () => {
+    m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'live', ledgerWide: true, resourceIds: [], accountIds: [] });
     const { GET } = await loadRoute();
-    await GET({ organizationId: 'org_1', userId: 'u1' } as any);
-    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
-    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: 'org_1', userId: 'u1' });
-    expect(m.requireLiveFinancialMandate).toHaveBeenCalledWith(
-      expect.objectContaining({ execute: m.execute }),
-      { organizationId: 'org_1', userId: 'u1', action: 'finance:view', requiresLedger: true },
-    );
-    expect(m.execute).toHaveBeenCalledTimes(17);
-    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
-      expect.objectContaining({ execute: m.execute }),
-      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'finance.summary.read' }),
-    );
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toMatchObject(refused);
+    nothingRan();
+  });
+
+  it('refuses with 501, not a mandate error, when the live mandate cannot be verified: the mandate is never consulted', async () => {
+    m.requireLiveFinancialMandate.mockRejectedValue(new Error('MANDATE_NOT_ISSUED'));
+    const { GET } = await loadRoute();
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toMatchObject(refused);
+    nothingRan();
+  });
+
+  it('refuses with 501 when the audit store is unavailable: no audit is attempted', async () => {
+    m.persistAtomicAudit.mockRejectedValue(new Error('AUDIT_UNAVAILABLE'));
+    const { GET } = await loadRoute();
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toMatchObject(refused);
+    nothingRan();
+  });
+
+  it('refuses with 501 for an organization with no dues charges, instead of reporting an empty summary', async () => {
+    m.execute.mockReset().mockResolvedValue([]);
+    const { GET } = await loadRoute();
+    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toMatchObject(refused);
+    nothingRan();
+  });
+
+  it('keeps the summary source on the explicit tenant transaction and the UI from showing a manufactured 100% collection rate', async () => {
     const source = readFileSync(resolve(__dirname, '../finance/summary/route.ts'), 'utf8');
     expect(source).not.toContain('db.execute(');
     expect(source).not.toContain('withRLSContext(async');
-  });
-
-  it('refuses every financial query when the live mandate cannot be verified', async () => {
-    m.requireLiveFinancialMandate.mockRejectedValueOnce(new Error('MANDATE_NOT_ISSUED'));
-    const { GET } = await loadRoute();
-    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toThrow('MANDATE_NOT_ISSUED');
-    expect(m.execute).not.toHaveBeenCalled();
-    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
-  });
-
-  it('refuses the response if the mandatory financial read audit fails', async () => {
-    m.persistAtomicAudit.mockRejectedValueOnce(new Error('AUDIT_UNAVAILABLE'));
-    const { GET } = await loadRoute();
-    await expect(GET({ organizationId: 'org_1', userId: 'u1' } as any)).rejects.toThrow('AUDIT_UNAVAILABLE');
-    expect(m.execute).toHaveBeenCalledTimes(17);
-  });
-
-  it('does not manufacture a 100% collection rate when no dues charges exist', async () => {
-    m.execute.mockReset().mockResolvedValue([]);
-    m.execute
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ totalPaid: '0', totalCharged: '0', uniqueMembers: 0 }]);
-    const { GET } = await loadRoute();
-    const payload = await GET({ organizationId: 'org_1', userId: 'u1' } as any);
-    expect(payload.collectionRate).toBeNull();
-    expect(payload.totalCharged).toBe(0);
-    expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
     const uiSource = readFileSync(resolve(__dirname, '../../../components/financial/FinancialOverview.tsx'), 'utf8');
     expect(uiSource).toContain("value={executive?.collectionRate == null ? '—'");
     expect(uiSource).toContain("No dues charges recorded");

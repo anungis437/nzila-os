@@ -1,3 +1,4 @@
+import { listStripeDailyScores } from '@/lib/services/ml-read-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/scores/stripe/daily
@@ -16,9 +17,7 @@
  *   includeFeatures optional boolean (default false)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { mlScoresStripeDaily, mlModels } from '@nzila/db/schema'
-import { eq, and, gte, lte } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { createLogger } from '@nzila/os-core'
 
@@ -54,59 +53,14 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // If modelKey is passed, resolve modelId(s) for that key
-    let modelIds: string[] | null = null
-    if (modelKey) {
-      const models = await platformDb
-        .select({ id: mlModels.id })
-        .from(mlModels)
-        .where(and(eq(mlModels.orgId, orgId), eq(mlModels.modelKey, modelKey)))
-      modelIds = models.map((m) => m.id)
-      if (modelIds.length === 0) {
-        return NextResponse.json([], { status: 200 })
-      }
-    }
-
-    const rows = await platformDb
-      .select({
-        id: mlScoresStripeDaily.id,
-        date: mlScoresStripeDaily.date,
-        score: mlScoresStripeDaily.score,
-        isAnomaly: mlScoresStripeDaily.isAnomaly,
-        threshold: mlScoresStripeDaily.threshold,
-        modelId: mlScoresStripeDaily.modelId,
-        modelKey: mlModels.modelKey,
-        inferenceRunId: mlScoresStripeDaily.inferenceRunId,
-        featuresJson: mlScoresStripeDaily.featuresJson,
-      })
-      .from(mlScoresStripeDaily)
-      .innerJoin(mlModels, eq(mlScoresStripeDaily.modelId, mlModels.id))
-      .where(
-        and(
-          eq(mlScoresStripeDaily.orgId, orgId),
-          gte(mlScoresStripeDaily.date, startDate),
-          lte(mlScoresStripeDaily.date, endDate),
-        ),
-      )
-      .orderBy(mlScoresStripeDaily.date)
-
-    const filtered = modelIds
-      ? rows.filter((r) => modelIds!.includes(r.modelId))
-      : rows
-
-    return NextResponse.json(
-      filtered.map((r) => ({
-        id: r.id,
-        date: r.date,
-        score: r.score,
-        isAnomaly: r.isAnomaly,
-        threshold: r.threshold,
-        modelId: r.modelId,
-        modelKey: r.modelKey,
-        inferenceRunId: r.inferenceRunId,
-        ...(includeFeatures ? { features: r.featuresJson } : {}),
-      })),
-    )
+    const result = await listStripeDailyScores({
+      orgId,
+      startDate,
+      endDate,
+      modelKey,
+      includeFeatures,
+    })
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     logger.error('[ML /scores/stripe/daily]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

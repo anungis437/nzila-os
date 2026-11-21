@@ -79,7 +79,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
   };
 });
 
-vi.mock('@/db/schema', () => ({
+vi.mock('@/db/schema', async () => ({
+  ...(await vi.importActual<Record<string, unknown>>('@/db/schema')),
   userConsents: {
     // The generic CRUD gate classifies a table by its SQL name.
     [Symbol.for('drizzle:Name')]: 'user_consents',

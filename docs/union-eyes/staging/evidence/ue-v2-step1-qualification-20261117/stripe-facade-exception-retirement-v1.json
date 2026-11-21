@@ -1,0 +1,60 @@
+{
+  "schema": "ue-step1-component-qualification-v1",
+  "component": "retire-obsolete-direct-stripe-type-wrapper-exception",
+  "recordedAt": "2026-11-18T02:00:02.959633+00:00",
+  "finalCandidateSha": null,
+  "source": [
+    {
+      "path": "apps/union-eyes/lib/stripe.ts",
+      "sha256": "7a0b0d60ff1f94357c393f6baf0f9810694b7e20f1cf36f5f9725d52fa8c9f41"
+    },
+    {
+      "path": "governance/exceptions/no-direct-provider.json",
+      "sha256": "5572bf9d8051c796881846052148aec1af3cb4c962ad731bdcee6d46d94988bf"
+    }
+  ],
+  "changes": [
+    "Type import/re-export uses the existing @nzila/payments-stripe Stripe type facade; runtime delegation remains the existing platform client.",
+    "Reflect.get preserves lazy property access without the arbitrary any/Record cast.",
+    "Removed only the now unnecessary exception for lib/stripe.ts. No exception expiry, detector, rule or assertion changed; the two other provider entries remain unchanged."
+  ],
+  "checks": {
+    "existingFacadeTests": {
+      "passed": 2,
+      "failed": 0,
+      "log": "stripe-facade-unit-v1.log"
+    },
+    "unchangedStripeAndEslintGovernanceContracts": {
+      "passed": 21,
+      "failed": 0,
+      "log": "stripe-governance-contracts-v1.log"
+    },
+    "facadeLint": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 0,
+      "suppressedMessages": 0,
+      "log": "stripe-facade-lint-v1.json"
+    },
+    "unchangedGaDirectProviderPredicateOnFacade": {
+      "violations": []
+    }
+  },
+  "artifacts": {
+    "stripe-facade-unit-v1.log": "859950955db705df00e3e21ccebb20236e7f6f20291c46aa259e883f05cf6062",
+    "stripe-governance-contracts-v1.log": "8480e95480c61ab0294f4e087072de0786e9d160bd236e66df6efa18044b0fde",
+    "stripe-facade-lint-v1.json": "0e7370f3ecae86b098ad4f123dd0237a3955416f46d46893d51c300cf56032fc",
+    "stripe-facade-lint-stderr-v1.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+  },
+  "scope": "Types, facade access and obsolete exception retirement only; no finance feature implementation or payment-provider operation performed.",
+  "semanticTypecheck": "Final integrated check remains parent-owned; no full typecheck was run for this bounded cleanup.",
+  "releaseReadiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "b11caafed84b3d47f38a091e63ca5b39b2d22bb9fea9b3a40129f1d026fc9396",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/stripe-facade-exception-retirement-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

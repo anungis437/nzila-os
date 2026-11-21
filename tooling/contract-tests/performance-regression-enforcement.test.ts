@@ -46,7 +46,8 @@ describe('Performance regression enforcement', () => {
     const workflow = parse(e2e) as { jobs: Record<string, { steps: Array<{ name?: string; if?: string; run?: string; env?: Record<string, string> }> }> }
     const smoke = workflow.jobs.e2e.steps.find((step) => step.name?.startsWith('Application performance smoke'))
     expect(smoke?.run).toContain('tests/load/smoke.js')
-    expect(smoke?.run).toContain('BASE_URL="http://localhost:${{ matrix.port }}"')
+    // The owned canonical Union Eyes runtime listens on 127.0.0.1 only.
+    expect(smoke?.run).toContain('BASE_URL="http://127.0.0.1:${{ matrix.port }}"')
     expect(smoke?.run).not.toContain('AUTH_TOKEN')
     expect(smoke?.env).toBeUndefined()
     expect(JSON.stringify(workflow.jobs.e2e)).not.toContain('secrets.')

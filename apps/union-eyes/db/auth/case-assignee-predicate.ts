@@ -1,7 +1,8 @@
 import { CASE_ASSIGNEE_MEMBERSHIP_ROLES } from '@/lib/cases/case-permissions'
+import { CASE_AUTHORITY_READER_ROLE, CASE_AUTHORITY_READER_SCHEMA_QUERY_FIELDS, compileCaseAuthorityReaderSchemaSql, hasBoundedCaseAuthorityReaderSchema } from './case-authority-reader-schema'
 
 export const CASE_ASSIGNEE_PREDICATE = 'public.ue_case_assignee_authorized'
-export const CASE_ASSIGNEE_PREDICATE_OWNER = 'nzila_auth_org_authority_reader'
+export const CASE_ASSIGNEE_PREDICATE_OWNER = CASE_AUTHORITY_READER_ROLE
 
 // The existing reader already has these narrowly granted canonical columns and
 // live-session-bound RLS. This companion grants no direct auth-table access.
@@ -33,6 +34,7 @@ export function compileCaseAssigneePredicateSql(): string {
       RAISE EXCEPTION 'Canonical raw-session organization authority is required';
     END IF;
   END $ue_case$;
+  ${compileCaseAuthorityReaderSchemaSql()}
   GRANT CREATE ON SCHEMA public TO ${CASE_ASSIGNEE_PREDICATE_OWNER};
   CREATE FUNCTION ${CASE_ASSIGNEE_PREDICATE}(target_user_id text,row_org uuid)
   RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog
@@ -52,7 +54,7 @@ export function caseAssigneePredicateViolations(rows: CatalogRow[]): string[] {
   const violations:string[]=[]
   for(const role of expectedRoles){
     const row=rows.find(item=>item.role===role)
-    if(!row||row.owner!==CASE_ASSIGNEE_PREDICATE_OWNER||row.prosecdef!==true||row.provolatile!=='s'
+    if(!row||!hasBoundedCaseAuthorityReaderSchema(row)||row.owner!==CASE_ASSIGNEE_PREDICATE_OWNER||row.prosecdef!==true||row.provolatile!=='s'
       ||row.proleakproof!==false||row.proretset!==false||row.proisstrict!==false||row.exact_execute_acl!==true
       ||row.argument_types!=='25 2950'||row.return_type!=='boolean'||row.language!=='sql'
       ||JSON.stringify(row.proconfig)!==JSON.stringify(['search_path=pg_catalog'])
@@ -64,6 +66,7 @@ export function caseAssigneePredicateViolations(rows: CatalogRow[]): string[] {
 }
 
 export const CASE_ASSIGNEE_CATALOG_QUERY = `SELECT p.oid::text AS oid,p.prosecdef,p.provolatile,p.proconfig,p.prosrc,
+  ${CASE_AUTHORITY_READER_SCHEMA_QUERY_FIELDS},
   p.proleakproof,p.proretset,p.proisstrict,
   p.proargtypes::text AS argument_types,p.prorettype::regtype::text AS return_type,l.lanname AS language,
   owner.rolname AS owner,r.rolname AS role,has_function_privilege(r.oid,p.oid,'EXECUTE') AS allowed,

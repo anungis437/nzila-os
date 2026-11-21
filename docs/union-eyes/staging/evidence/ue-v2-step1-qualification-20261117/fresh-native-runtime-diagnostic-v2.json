@@ -1,0 +1,105 @@
+{
+  "recordedAt": "2026-11-18T13:20:24.706542+00:00",
+  "scope": "OWNED_FRESH_PG16_DIAGNOSTIC_RUNTIME_MATRIX",
+  "status": "INTERRUPTED_WITH_CONFIRMED_FAILURES",
+  "sourcePlanSha256": "c101de562180c26e1b4afc5bc415f47c062f1106daa8f9592acfdd4be88d925e",
+  "sourceBindingCount": 1189,
+  "sourceChangedDuringRun": [],
+  "completeRun": false,
+  "finalJsonReportProduced": false,
+  "fullCoverageClaimed": false,
+  "observedPassingLinesOnly": 45,
+  "observedFailingLinesOnly": 8,
+  "failures": [
+    {
+      "case": "current tenant positive writes with genuine restricted execution > maps the actual Next application context to the canonical non-owner role and isolated rows",
+      "failure": "\u2192 promise resolved \"undefined\" instead of rejecting"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > qualifies the source-owned system sync selector without broad content reads",
+      "failure": "\u2192 promise resolved \"Result{ command: 'SELECT', \u2026(9) }\" instead of rejecting"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_authority_scopes: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 ACTOR_NOT_SESSION: proposed_by on ue_authority_approval_requests must be the authenticated principal of this transaction: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_respondents: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 UE_V2_SYNTHETIC_PARENT_FAILED:ue_authority_approval_requests:ACTOR_NOT_SESSION: proposed_by on ue_authority_approval_requests must be the authenticated principal of this transaction: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_scope_proposals: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 UE_V2_SYNTHETIC_PARENT_FAILED:ue_authority_approval_requests:ACTOR_NOT_SESSION: proposed_by on ue_authority_approval_requests must be the authenticated principal of this transaction: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > claim_status_transitions: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 CASE_TRANSITION_JOURNAL_IMMUTABLE: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > claim_updates: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 CASE_HISTORY_ORIGIN_REQUIRED: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > claims: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 CASE_TRANSITION_AUDIT_REQUIRED: expected 'FAIL' to be 'PASS' // Object.is equality"
+    }
+  ],
+  "reasonForInterruption": "Confirmed source-contract and guarded-fixture failures; rerun complete matrix on pinned native ARM64 after repairs instead of continuing emulated diagnostic execution",
+  "result": {
+    "command": [
+      "pnpm",
+      "--dir",
+      "apps/union-eyes",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.heavy.config.ts",
+      "scripts/bootstrap-v2/runtime-security-native.test.ts",
+      "--maxWorkers=1",
+      "--reporter=verbose",
+      "--reporter=json",
+      "--outputFile=/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v2.json"
+    ],
+    "startedAt": "2026-11-18T13:11:24.499627+00:00",
+    "finishedAt": "2026-11-18T13:16:27.010227+00:00",
+    "exitCode": -2,
+    "resourceStop": false,
+    "logSha256": "420a3833fceb5b059d27a888ac6ab5b7a6973f408a9b03232d3e46d7172da5ba"
+  },
+  "artifacts": [
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v2-source.json",
+      "sha256": "12d714a6b049e1cf4828cfe6a049fc752d4c13764ae59b85029a722341d42e8f"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v2-intentional-stop.json",
+      "sha256": "7cfe41e57e2539d5681e67834cc8ae070b30e19b5d61d5239c7139684cea28fd"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v2-owned-cleanup.json",
+      "sha256": "4bc6db1d283e58b41b2bbdd2dac2972d71a4cc4c62a0687ec49520d6cbf4fe22"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/pgvector-081-pg16-registry-manifest-v1.json",
+      "sha256": "22a04f7c379aaf625c26e41332ffcb762039b7173505679361b3e8d02045e7d9"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/pgvector-native-arm64-runtime-version-v1.log",
+      "sha256": "158c2e4bc5a42412adb82c72531476fab01596e1cbda9e66d65715ff17db0506"
+    }
+  ],
+  "cleanup": {
+    "ownedDiagnosticContainerRemoved": true,
+    "originalContainerInventoryRestored": true
+  },
+  "limits": [
+    "Observed passing lines are not a completed suite result",
+    "No whole-candidate/native runtime qualification",
+    "No live Azure or production data was used",
+    "Full native ARM64 rerun remains required"
+  ],
+  "candidateSha": null,
+  "step2Started": false,
+  "stagingOrProductionPromoted": false
+}

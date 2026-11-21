@@ -134,6 +134,8 @@ describe('grievances/[id] route', () => {
       canViewPrivateDocuments: false,
     });
     m.selectQueue = [[{ id: G, createdBy: 'other_user', unionRepId: 'u2', organizationId: 'org_1' }]];
+    const {ApiError}=await import('@/lib/api/errors');
+    m.requireKernelCaseAction.mockRejectedValueOnce(ApiError.forbidden());
 
     const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
 

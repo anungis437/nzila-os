@@ -29,16 +29,16 @@ jobs:
   runtime-governance-attestation:
     name: Runtime governance attestation
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     env:
       NZILA_RELEASE_ID: ${{ github.sha }}
       NZILA_COMMIT_SHA: ${{ github.sha }}
-      NZILA_MANIFEST_HASH: sha256-pending
-      NZILA_BUILT_AT: ${{ github.event.head_commit.timestamp || github.event.pull_request.updated_at }}
       NZILA_ENVIRONMENT_CLASS: ci
       NZILA_PRODUCT: platform
       NZILA_ATTESTATION_ISSUER: github-actions
-      NZILA_ATTESTATION_VERDICT: verified
-      NZILA_ATTESTATION_EVIDENCE: github://${{ github.repository }}/runs/${{ github.run_id }}
+      NZILA_ATTESTATION_EVIDENCE: proof-artifacts/runtime-governance/manifest.json,reports/runtime/runtime-health-status-latest.json,proof-artifacts/runtime-governance/doctrine.log,proof-artifacts/runtime-governance/telemetry.log,proof-artifacts/runtime-governance/attestation-schema.log,proof-artifacts/runtime-governance/otel.log,proof-artifacts/runtime-governance/middleware.log,proof-artifacts/runtime-governance/integrity.log
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,13 +46,39 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Bind verification inputs to the checked-out candidate
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+          import { createHash } from 'node:crypto'
+          import { execFileSync } from 'node:child_process'
+          const sha256 = bytes => `sha256-${createHash('sha256').update(bytes).digest('hex')}`
+          const commitSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+          if (commitSha !== process.env.NZILA_COMMIT_SHA) throw new Error('checkout does not match candidate SHA')
+          const builtAt = new Date().toISOString()
+          const manifest = {
+            schemaVersion: 1,
+            releaseId: process.env.NZILA_RELEASE_ID,
+            commitSha,
+            environmentClass: 'ci',
+            builtAt,
+            lockfile: { path: 'pnpm-lock.yaml', contentHash: sha256(readFileSync('pnpm-lock.yaml')) },
+            workflowRun: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+            scope: 'Offline governance and package contracts; no application deployment or live environment verification.',
+          }
+          const bytes = `${JSON.stringify(manifest, null, 2)}\n`
+          mkdirSync('proof-artifacts/runtime-governance', { recursive: true })
+          writeFileSync('proof-artifacts/runtime-governance/manifest.json', bytes, { flag: 'wx' })
+          appendFileSync(process.env.GITHUB_ENV, `NZILA_MANIFEST_HASH=${sha256(bytes)}\nNZILA_BUILT_AT=${builtAt}\n`)
+          NODE
 
       - name: Generate runtime health status (deterministic, offline)
         run: node tooling/scripts/generate-runtime-health-status.mjs
@@ -61,19 +87,22 @@ jobs:
         run: node tooling/scripts/validate-runtime-health-status.mjs
 
       - name: Validate doctrine enforcement contracts
-        run: pnpm --filter @nzila/doctrine-enforcement test
+        run: pnpm --filter @nzila/doctrine-enforcement test 2>&1 | tee proof-artifacts/runtime-governance/doctrine.log
 
       - name: Validate governance telemetry contracts
-        run: pnpm --filter @nzila/governance-telemetry test
+        run: pnpm --filter @nzila/governance-telemetry test 2>&1 | tee proof-artifacts/runtime-governance/telemetry.log
 
       - name: Validate runtime attestation schema
-        run: pnpm --filter @nzila/runtime-attestation test
+        run: pnpm --filter @nzila/runtime-attestation test 2>&1 | tee proof-artifacts/runtime-governance/attestation-schema.log
 
       - name: Validate governance OTel adapter
-        run: pnpm --filter @nzila/governance-otel test
+        run: pnpm --filter @nzila/governance-otel test 2>&1 | tee proof-artifacts/runtime-governance/otel.log
 
       - name: Validate governance middleware
-        run: pnpm --filter @nzila/governance-middleware test
+        run: pnpm --filter @nzila/governance-middleware test 2>&1 | tee proof-artifacts/runtime-governance/middleware.log
+
+      - name: Validate artifact integrity contracts
+        run: pnpm exec vitest run --project contract-tests tooling/contract-tests/runtime-governance-integrity.test.ts --maxWorkers=1 2>&1 | tee proof-artifacts/runtime-governance/integrity.log
 
       - name: Validate environment legitimacy inputs
         run: node tooling/runtime-governance/check-env.mjs
@@ -81,10 +110,16 @@ jobs:
       - name: Validate pilot boundaries
         run: node tooling/runtime-governance/check-pilot-boundaries.mjs
 
-      - name: Generate deployment attestation
+      - name: Record the unexecuted deployment boundary
+        env:
+          NZILA_ATTESTATION_VERDICT: partial
+          NZILA_ATTESTATION_RATIONALE: Offline CI contracts passed. Application deployment and live environment qualification were not executed by this workflow.
         run: node tooling/runtime-governance/generate-attestation.mjs --class=deployment
 
       - name: Generate doctrine compliance attestation
+        env:
+          NZILA_ATTESTATION_VERDICT: verified
+          NZILA_ATTESTATION_RATIONALE: The cited offline health, doctrine, telemetry, schema, OTel, middleware and artifact integrity contracts passed for this candidate. This verifies those contracts only.
         run: node tooling/runtime-governance/generate-attestation.mjs --class=doctrine-compliance
 
       - name: Write attestation evidence
@@ -101,6 +136,7 @@ jobs:
           path: |
             proof-artifacts/attestations/**
             proof-artifacts/evidence/**
+            proof-artifacts/runtime-governance/**
             reports/runtime/runtime-health-status-latest.json
           if-no-files-found: error
           retention-days: 90

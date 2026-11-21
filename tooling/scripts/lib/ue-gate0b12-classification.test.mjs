@@ -111,7 +111,7 @@ const defectOf = (args, id) => args.classification.defectRegister.find((item) =>
 const hasProblem = (result, pattern) => (Array.isArray(result) ? result : result.problems).some((problem) => pattern.test(problem))
 const newDefects = (args) => args.classification.defectRegister.filter((defect) => defect.tranche === '0B.12')
 const highNew = (args) => newDefects(args).filter((defect) => defect.severity === 'HIGH')
-const escape = (id) => id.replace(/[[\]|.]/g, '\\$&')
+const escape = (id) => id.replace(/[\\[\]|.]/g, '\\$&')
 const ctx = { exists, readText }
 
 const CARBON_DASHBOARD = 'carbon/dashboard/route.ts|GET'

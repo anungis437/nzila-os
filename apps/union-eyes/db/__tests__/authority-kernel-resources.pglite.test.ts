@@ -14,6 +14,7 @@ import { auditAuthorityMutation } from '../../lib/authority/store/audit'
 import { declareOwnRecusal, liftRecusal } from '../../lib/authority/store/lifecycle'
 import type { Action, ResourceType } from '../../lib/authority/ontology'
 import type { PGlite } from '@electric-sql/pglite'
+import type { SqlExecutor } from '../../lib/authority/store/executor'
 
 let db: PGlite
 let k: ReturnType<typeof kit>
@@ -31,6 +32,12 @@ const decide = (user: string, action: Action, type: ResourceType, id: string, or
   k.as(user, org)((t) => enforceAuthority(t, k.deps, { principalUserId: user, organizationId: org, action, resource: { type, id, organizationId: org }, ...extra }, { authenticated: true }))
 const readCase = (user: string, id = CASE, action: Action = 'case:read') => decide(user, action, 'case', id)
 const codes = (d: { reasons: readonly { code: string }[] }) => d.reasons.map((r) => r.code)
+// Primary facts come from an independent issuance under the fixture's adopted rule.
+const grantPrimary = async (holder:string,caseId:string,relation:'owner'|'assignee') => {
+  const rule=(await k.asAdmin(()=>db.query<{id:string}>("SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id=$1 AND domain='case_assignment' AND operation='issue' AND status='active'",[ORG]))).rows[0].id
+  return k.as(U.president)(tx=>insertRelationship(tx,{organizationId:ORG,principalUserId:holder,resourceType:'case',resourceId:caseId,relation,origin:'explicit',grantedBy:U.president,issuanceRuleId:rule,effectiveAt:minutesAgo()}))
+}
+
 
 beforeAll(async () => {
   db = await freshDb()
@@ -207,8 +214,8 @@ describe('classified document access: the case file, the member\'s own submissio
       await collab(READONLY, 'read_only', true)
       await collab(U.steward2, 'secondary_lro', false) // label only
     })
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: OWNER, resourceType: 'case', resourceId: CASE, relation: 'owner', origin: 'derived', effectiveAt: minutesAgo() }))
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: OWNER, resourceType: 'case', resourceId: CASE_PRIV, relation: 'owner', origin: 'derived', effectiveAt: minutesAgo() }))
+    await grantPrimary(OWNER,CASE,'owner')
+    await grantPrimary(OWNER,CASE_PRIV,'owner')
     const ruleId = (await k.asAdmin(() => db.query<{ id: string }>(`SELECT id::text id FROM ue_authority_issuance_rules WHERE organization_id = $1 AND domain = 'case_assignment' AND operation = 'issue' AND status = 'active'`, [ORG]))).rows[0].id
     const grant = (user: string, caseId: string, extra: { privilegedAccess?: boolean; expiresAt?: Date; effectiveAt?: Date } = {}) =>
       k.as(U.chief)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: user, resourceType: 'case', resourceId: caseId, relation: 'collaborator', permissions: ['read', 'read_internal'], origin: 'explicit', grantedBy: U.chief, issuanceRuleId: ruleId, effectiveAt: extra.effectiveAt ?? minutesAgo(), ...extra }))
@@ -317,11 +324,23 @@ describe('classified document access: the case file, the member\'s own submissio
     expect((await read(U.member, DOC_OWN)).effect).toBe('allow')
   })
 })
-describe('financial workflow: amounts, states and segregation of duties', () => {
+describe('excluded financial workflow and retained historical ledger protections', () => {
   const PAY = newUuid()
   const money = (over: Record<string, unknown> = {}) => ({ scope: { accountIds: [ACCT] }, monetaryLimitMinor: 500_000, currency: 'CAD', ...over })
   const step = (who: string, step: 'registered' | 'prepared' | 'approved' | 'executed' | 'reconciled', pay = PAY, extra: Record<string, unknown> = {}) =>
-    k.as(who)((t) => recordFinancialStep(t, k.deps, { organizationId: ORG, actorUserId: who, paymentId: pay, step, ...extra }))
+    k.as(who)(async () => {
+      let attemptedQueries = 0
+      const financialExecutor: SqlExecutor = { query: () => {
+        attemptedQueries++
+        throw new Error('Excluded financial workflow query reached')
+      } }
+      try {
+        return await recordFinancialStep(financialExecutor, k.deps, { organizationId: ORG, actorUserId: who, paymentId: pay, step, ...extra })
+      } finally {
+        expect(attemptedQueries).toBe(0)
+      }
+    })
+  const unavailable = { name: 'BaseFinancialCapabilityUnavailable', code: 'NOT_IMPLEMENTED', status: 501 }
   const state = async (pay = PAY) => {
     const d = await decide(U.treasurer, 'finance:view', 'financial_transaction', pay)
     return d
@@ -347,34 +366,36 @@ describe('financial workflow: amounts, states and segregation of duties', () => 
     expect((await state()).effect).toBe('deny')
   })
 
-  it('registration needs the same authority as preparing: a mandate on that account', async () => {
-    await expect(step(U.vp, 'registered', PAY, { accountId: ACCT, requiredApprovals: 1 })).rejects.toThrow(/denied/)
-    await expect(step(U.treasurer, 'registered', PAY, { accountId: newUuid(), requiredApprovals: 1 })).rejects.toThrow(/OUT_OF_SCOPE|NO_SOURCE_OF_AUTHORITY/)
-    await expect(step(U.treasurer, 'registered', PAY, { accountId: ACCT, requiredApprovals: 0 })).rejects.toThrow(/at least one required approval/)
-    await step(U.treasurer, 'registered', PAY, { accountId: ACCT, requiredApprovals: 1 })
-    await expect(step(U.treasurer, 'registered', PAY, { accountId: ACCT, requiredApprovals: 1 })).rejects.toThrow(/fin_step_uq/)
+  it('registration remains unavailable regardless of mandate, account or approval metadata', async () => {
+    await expect(step(U.vp, 'registered', PAY, { accountId: ACCT, requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'registered', PAY, { accountId: newUuid(), requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'registered', PAY, { accountId: ACCT, requiredApprovals: 0 })).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'registered', PAY, { accountId: ACCT, requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'registered', PAY, { accountId: ACCT, requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
   })
 
-  it('steps must follow the order; each needs its own mandate duty; the preparer cannot approve', async () => {
-    await expect(step(U.vp, 'approved')).rejects.toThrow(/STATE_NOT_ELIGIBLE/) // not prepared yet
-    await expect(step(U.president, 'executed')).rejects.toThrow(/STATE_NOT_ELIGIBLE/)
-    await step(U.treasurer, 'prepared')
-    await expect(step(U.treasurer, 'approved')).rejects.toThrow(/denied/) // lacks the approve duty, and is the preparer
-    await expect(step(U.president, 'approved')).rejects.toThrow(/NO_SOURCE_OF_AUTHORITY|ACTION_NOT_COVERED/) // executor duty only
-    await step(U.vp, 'approved')
-    await expect(step(U.vp, 'approved')).rejects.toThrow(/denied|SEGREGATION|approver_uq/)
+  it('preparation, approval and execution all refuse before workflow SQL', async () => {
+    await expect(step(U.vp, 'approved')).rejects.toMatchObject(unavailable)
+    await expect(step(U.president, 'executed')).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'prepared')).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'approved')).rejects.toMatchObject(unavailable)
+    await expect(step(U.president, 'approved')).rejects.toMatchObject(unavailable)
+    await expect(step(U.vp, 'approved')).rejects.toMatchObject(unavailable)
+    await expect(step(U.vp, 'approved')).rejects.toMatchObject(unavailable)
   })
 
-  it('the executor is independent of preparer and approver; the reconciler of everyone', async () => {
-    await expect(step(U.vp, 'executed')).rejects.toThrow(/denied/) // approver, and no execute duty
-    await step(U.president, 'executed')
-    await expect(step(U.treasurer, 'reconciled')).rejects.toThrow(/denied/)
-    await step(T2, 'reconciled')
+  it('all stored executive duties leave the financial journal untouched', async () => {
+    await expect(step(U.vp, 'executed')).rejects.toMatchObject(unavailable)
+    await expect(step(U.president, 'executed')).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'reconciled')).rejects.toMatchObject(unavailable)
+    await expect(step(T2, 'reconciled')).rejects.toMatchObject(unavailable)
     const events = await k.asAdmin(() => db.query<{ n: string }>(`SELECT count(*)::text n FROM ue_authority_financial_steps WHERE subject_id = $1`, [PAY]))
-    expect(Number(events.rows[0].n)).toBe(5)
+    expect(Number(events.rows[0].n)).toBe(0)
   })
 
-  it('the database refuses a broken order or a conflicted actor even if the kernel is bypassed', async () => {
+  it('retained released-schema guards still refuse a broken order or conflicted actor independently', async () => {
+    // This fixture installs released guard history. It does not represent the
+    // current zero-ACL financial boundary; the native census proves that denial.
     const P2 = newUuid()
     await k.asAdmin(() => db.query(`INSERT INTO public.payments (id, organization_id, member_id, amount, currency) VALUES ($1,$2,$3,'10.00','CAD')`, [P2, ORG, U.member]))
     const raw = (who: string, s: string, reg = false) => k.as(who)(async (t) => {
@@ -396,29 +417,29 @@ describe('financial workflow: amounts, states and segregation of duties', () => 
     await expect(k.as(U.treasurer)((t) => t.query(`UPDATE ue_authority_financial_steps SET actor = 'x' WHERE subject_id = $1`, [P2]))).rejects.toThrow(/append-only|permission denied/)
   })
 
-  it('a changed source amount after registration makes the record contradictory and denies everything', async () => {
+  it('changing retained amounts or currency cannot reopen excluded financial actions', async () => {
     const P3 = newUuid()
     await k.asAdmin(() => db.query(`INSERT INTO public.payments (id, organization_id, member_id, amount, currency) VALUES ($1,$2,$3,'50.00','CAD')`, [P3, ORG, U.member]))
-    await step(U.treasurer, 'registered', P3, { accountId: ACCT, requiredApprovals: 1 })
-    await step(U.treasurer, 'prepared', P3)
+    await expect(step(U.treasurer, 'registered', P3, { accountId: ACCT, requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
+    await expect(step(U.treasurer, 'prepared', P3)).rejects.toMatchObject(unavailable)
     await k.asAdmin(() => db.query(`UPDATE public.payments SET amount = '5000.00' WHERE id = $1`, [P3]))
     const d = await decide(U.vp, 'finance:approve', 'financial_transaction', P3)
     expect(d.effect).toBe('deny')
-    expect(d.reasons.map((r) => r.detail).join(' ')).toMatch(/changed after registration/)
+    expect(d.reasons).toContainEqual({ code: 'FACTS_CONTRADICTORY', detail: 'authority facts could not be loaded: Finance and dues persistence are not available in this release.' })
     await k.asAdmin(() => db.query(`UPDATE public.payments SET amount = '50.00', currency = 'USD' WHERE id = $1`, [P3]))
     expect((await decide(U.vp, 'finance:approve', 'financial_transaction', P3)).effect).toBe('deny')
   })
 
-  it('the mandate limit applies to the amount on record', async () => {
+  it('retained amount-limit metadata grants no execution authority', async () => {
     const P4 = newUuid()
     await k.asAdmin(() => db.query(`INSERT INTO public.payments (id, organization_id, member_id, amount, currency) VALUES ($1,$2,$3,'5000.01','CAD')`, [P4, ORG, U.member]))
-    await expect(step(U.treasurer, 'registered', P4, { accountId: ACCT, requiredApprovals: 1 })).rejects.toThrow(/AMOUNT_EXCEEDS_LIMIT/)
+    await expect(step(U.treasurer, 'registered', P4, { accountId: ACCT, requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
   })
 
   it('a payee who holds financial duties cannot act on their own payment', async () => {
     const P5 = newUuid()
     await k.asAdmin(() => db.query(`INSERT INTO public.payments (id, organization_id, member_id, amount, currency) VALUES ($1,$2,$3,'20.00','CAD')`, [P5, ORG, U.treasurer]))
-    await expect(step(U.treasurer, 'registered', P5, { accountId: ACCT, requiredApprovals: 1 })).rejects.toThrow(/ADVERSE_PARTY/)
+    await expect(step(U.treasurer, 'registered', P5, { accountId: ACCT, requiredApprovals: 1 })).rejects.toMatchObject(unavailable)
   })
 
   it('a payment of another organization is not found', async () => {
@@ -449,7 +470,7 @@ describe('governance review register and WorkAid referral', () => {
   it('referral needs a live owner/assignee relationship AND live member consent naming the categories', async () => {
     const matter = newUuid()
     await k.asAdmin(() => seedMembership(db, 'user_assignee', ORG, 'steward'))
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: 'user_assignee', resourceType: 'case', resourceId: CASE, relation: 'assignee', origin: 'derived', effectiveAt: minutesAgo() }))
+    await grantPrimary('user_assignee',CASE,'assignee')
     const refer = (cats: string[]) => k.as('user_assignee')((t) => referToWorkAid(t, k.deps, { organizationId: ORG, referrerUserId: 'user_assignee', caseId: CASE, memberUserId: U.member, categories: cats, matterId: matter }))
     await expect(refer(['status'])).rejects.toThrow(/CONSENT_REQUIRED/)
     await k.as(U.member)((t) => insertConsent(t, { organizationId: ORG, memberUserId: U.member, matterId: matter, direction: 'union_to_workaid', issuer: 'member', issuedBy: U.member, categories: ['status'], purpose: 'legal referral', grantedAt: minutesAgo(), expiresAt: daysAhead(30) }))
@@ -484,8 +505,11 @@ describe('governance review register and WorkAid referral', () => {
     await expect(session(engagement({ informationBarrier: false }))).rejects.toThrow(/COUNSEL_NO_INFORMATION_BARRIER/)
     expect(await session(engagement())).toBe(lawyer)
     // A relationship to the underlying case is a conflict even under a good engagement.
-    await k.as(U.president)((t) => insertRelationship(t, { organizationId: ORG, principalUserId: lawyer, resourceType: 'case', resourceId: CASE, relation: 'creator', origin: 'derived', effectiveAt: minutesAgo() }))
-    await expect(session(engagement())).rejects.toThrow(/COUNSEL_CASE_RELATIONSHIP/)
+    // Stored subject grants are refused; a real source creator remains a conflict.
+    await expect(k.as(U.president)(t => insertRelationship(t, {organizationId:ORG,principalUserId:lawyer,resourceType:'case',resourceId:CASE,relation:'creator',origin:'derived',effectiveAt:minutesAgo()}))).rejects.toThrow(/derived subject relationships/)
+    await k.asAdmin(() => db.query('UPDATE public.grievances SET created_by=$1 WHERE id=$2',[lawyer,CASE]))
+    try { await expect(session(engagement())).rejects.toThrow(/COUNSEL_CASE_RELATIONSHIP/) }
+    finally { await k.asAdmin(() => db.query('UPDATE public.grievances SET created_by=$1 WHERE id=$2',[U.member,CASE])) }
   })
 
   it('after counsel accepts, privileged reads are refused for everyone and counsel material is unreachable', async () => {

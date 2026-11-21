@@ -1,4 +1,5 @@
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import {
   complianceAlerts,
   employerRemittances,
@@ -227,6 +228,9 @@ export async function getExecutiveMetrics(args: {
   now?: Date;
 }): Promise<ExecutiveMetricsPayload> {
   const { organizationId, timeframe } = args;
+  // The executive figures include the month's employer remittances, and employer_remittances has no runtime or system grant in the
+  // current source: refused (501) before the cache or any statement, so no figure is served without the remittances it claims to count.
+  requireContainedStorageAuthority('employer_remittances');
   const now = args.now ?? new Date();
   const cacheKey = `executive:${organizationId}:${timeframe}:${CACHE_VERSION}`;
 

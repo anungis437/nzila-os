@@ -22,7 +22,9 @@ export function resolvePlatformOrgRole(raw: string | null | undefined): UserRole
   if (directMap[key]) return directMap[key]
   if (key === 'executive' || key === 'ceo') return UserRole.PRESIDENT
   if (key === 'compliance_manager') return UserRole.COMPLIANCE_MANAGER
-  if (key === 'auditor' || key === 'auditor_readonly') return UserRole.COMPLIANCE_MANAGER
+  // A customer organization's auditor is a member of that organization; audit access comes from an appointment, never from a
+  // Nzila platform tier (compliance_manager outranks system_admin and is refused in a customer organization).
+  if (key === 'auditor' || key === 'auditor_readonly') return UserRole.MEMBER
   if (key === 'governance') return UserRole.OFFICER
   if (key === 'support_agent') return UserRole.SUPPORT_AGENT
   if (key === 'staff' || key === 'support_staff') return UserRole.SUPPORT_AGENT

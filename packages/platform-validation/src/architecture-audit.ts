@@ -148,19 +148,25 @@ function line(lines: string[], i: number): string {
   return lines[i]
 }
 
+/** True for `.../api/.../route.ts` paths. Plain string checks: linear, no regex backtracking. */
+export function isApiRouteFile(rel: string): boolean {
+  const idx = rel.indexOf('/api/')
+  return idx !== -1 && rel.endsWith('route.ts') && rel.length - 'route.ts'.length >= idx + '/api/'.length
+}
+
 // Check that org_id comes from session/context, never from request body
 function checkOrgIsolation(filePath: string, lines: string[], repoRoot: string): ArchFinding[] {
   const findings: ArchFinding[] = []
   const rel = relative(repoRoot, filePath).replace(/\\/g, '/')
 
   // Only check API route handlers (route.ts files with HTTP verbs)
-  if (!rel.match(/\/api\/.*route\.ts$/)) return findings
+  if (!isApiRouteFile(rel)) return findings
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
     // Only flag when extracting org_id from request body destructuring
     // e.g. req.body.orgId, body.org_id, { orgId } = await req.json()
-    if (/(?:req\.body|request\.body)\.\s*org[_]?[iI]d/i.test(line)) {
+    if (/(?:req\.body|request\.body)\.\s{0,16}org[_]?[iI]d/i.test(line)) {
       findings.push({
         rule: 'org-isolation',
         severity: 'error',
@@ -179,10 +185,10 @@ function checkCorrelationIds(filePath: string, lines: string[], repoRoot: string
   const rel = relative(repoRoot, filePath).replace(/\\/g, '/')
 
   // Only API routes
-  if (!rel.match(/\/api\/.*route\.ts$/)) return findings // codeql[js/polynomial-redos] - rel is a workspace-relative path, bounded in length
+  if (!isApiRouteFile(rel)) return findings
 
   // Skip health/status endpoints — they don't need correlation IDs
-  if (/\/(health|status|ping|ready|live|favicon|robots)/.test(rel)) return findings // codeql[js/polynomial-redos] - rel is a workspace-relative path, bounded in length
+  if (/\/(health|status|ping|ready|live|favicon|robots)/.test(rel))  return findings
 
   const content = lines.join('\n')
   const hasCorrelation = /requestId|traceId|correlationId|x-request-id|getCorrelation|withRequestId/i.test(content)

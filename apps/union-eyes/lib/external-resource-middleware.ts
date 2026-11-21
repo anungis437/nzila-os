@@ -9,6 +9,9 @@ import {
   type ExternalMatterPermission,
 } from '@/lib/services/external-resource-authorization-service';
 import { representationAuthorityScopeEnum, type RepresentationAuthority } from '@/db/schema/representation-authority-schema';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { auth } from '@nzila/platform-auth/entra/server';
+import { readCanonicalExternalResource, type ExternalReadOperation } from '@/lib/external-resource-read/reader';
 
 const IDENTIFIER_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -66,6 +69,8 @@ export interface ExternalResourceTxContext extends ExternalResourceContext {
 
 interface ExternalMatterResourceOptions<TParams extends object> {
   requiredPermission: ExternalMatterPermission;
+  /** Fixed production reader operation; never selected by request input. */
+  protectedRead?: ExternalReadOperation;
   resolve: (request: Request, params?: TParams) => ExternalResourceParams;
   /**
    * Who records a successful read. 'middleware' (default): one record written here, in the same transaction as the read, carrying the
@@ -104,6 +109,20 @@ export function withExternalMatterResourceAuth<TParams extends object = External
   }
   return async (request: Request, params?: ExternalRouteContext<TParams>) => {
     try {
+      if (currentStateContextEnabled()) {
+        // External authority does not confer target-organization membership.
+        // Canonical reads use the representative's own session and the private
+        // exact-resource reader, never the legacy raw-table handler/context.
+        if (!options.protectedRead || !['GET', 'HEAD'].includes(request.method.toUpperCase()))
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        // No signed-in principal at all is 401, as every other route answers it, before any database work is attempted.
+        if (!(await auth()).userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const routeParams = await resolveRouteParams(params);
+        const resource = options.resolve(request, routeParams);
+        const documentId = ['document', 'download'].includes(options.protectedRead)
+          ? (routeParams as { id?: string } | undefined)?.id : undefined;
+        return readCanonicalExternalResource(options.protectedRead, { ...resource, documentId });
+      }
       const user = await requireUser();
       const routeParams = await resolveRouteParams(params);
       const resource = options.resolve(request, routeParams);
@@ -128,8 +147,10 @@ export function withExternalMatterResourceAuth<TParams extends object = External
       // The organization in the request is the caller's word. Before that organization's tenant transaction is opened (and before anything is
       // written to its audit trail), the caller must hold a live representation authority there for this matter, asked with no organization
       // context, where the only rows visible are the caller's own. Someone who holds none is refused here and no tenant transaction is opened.
-      // An external representative is never an organization member by definition, so canonical V2's organization-membership binder is a
-      // separate, non-overlapping concern and cannot stand in for this check: it runs in both legacy and V2 mode (DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT).
+      // This principal-only precheck belongs to the legacy path. Canonical V2
+      // above uses the fixed protected reader under the representative's OWN
+      // session; it never opens the query-named tenant transaction or calls
+      // this helper (which explicitly refuses canonical V2).
       {
         const held = await withPrincipalOnlyContext((tx) => holdsExternalAuthority(tx, {
           actorUserId: actor.userId,

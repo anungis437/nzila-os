@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -24,6 +25,10 @@ async function loadRoute() {
 
 const INVOICE = '550e8400-e29b-41d4-a716-446655440050';
 const url = `http://localhost/api/finance/invoices/${INVOICE}/payments`;
+async function expectRefused(response: Response) {
+  expect(response.status).toBe(501);
+  expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' });
+}
 const as = (id = INVOICE) => ({ organizationId: 'org_1', userId: 'u1', params: { id } });
 const post = (body: unknown) => new NextRequest(url, {
   method: 'POST',
@@ -40,38 +45,25 @@ describe('finance/invoices/[id]/payments route', () => {
     m.recordPayment.mockResolvedValue({ id: 'pay_new' });
   });
 
-  it('asks the wrapper for the role each handler had, the entitlement, and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for the role each handler had; no entitlement or tenant transaction is declared because the base release refuses first', async () => {
     const { GET, POST } = await loadRoute();
-    expect(declaredOptions(GET)).toMatchObject({ auth: { minRole: 'secretary_treasurer' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'officer' } });
-    expect(declaredOptions(POST)).toMatchObject({ auth: { minRole: 'admin' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'admin' } });
+    expect(declaredOptions(GET)).toMatchObject({ auth: { minRole: 'secretary_treasurer' }, rlsOrgContext: false, registry: { audience: 'officer' } });
+    expect(declaredOptions(POST)).toMatchObject({ auth: { minRole: 'admin' }, rlsOrgContext: false, registry: { audience: 'admin' } });
+    expect(declaredOptions(GET)).not.toHaveProperty('entitlement');
+    expect(declaredOptions(POST)).not.toHaveProperty('entitlement');
   });
 
-  it('GET is refused without the entitlement, and reads nothing', async () => {
+  it('GET for a valid invoice id is refused as not implemented, consulting no entitlement and reading no payments', async () => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('no module'));
-    const response = await GET(new NextRequest(url), as());
-    expect(response.status).toBe(403);
+    await expectRefused(await GET(new NextRequest(url), as()));
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
     expect(m.getPayments).not.toHaveBeenCalled();
-  });
-
-  it('GET returns the payments of the invoice for the caller organization', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new NextRequest(url), as());
-    expect(response.status).toBe(200);
-    expect(m.getPayments).toHaveBeenCalledWith('org_1', INVOICE);
   });
 
   it('GET answers an invoice id that is not a uuid as a client error, never as a database fault', async () => {
     const { GET } = await loadRoute();
     expect((await GET(new NextRequest(url), as('inv_1'))).status).toBe(400);
     expect(m.getPayments).not.toHaveBeenCalled();
-  });
-
-  it('GET returns 500 when payments fetch fails', async () => {
-    const { GET } = await loadRoute();
-    m.getPayments.mockRejectedValueOnce(new Error('db error'));
-    const response = await GET(new NextRequest(url), as());
-    expect(response.status).toBe(500);
   });
 
   it('POST returns validation error for invalid JSON', async () => {
@@ -95,33 +87,12 @@ describe('finance/invoices/[id]/payments route', () => {
     expect(m.recordPayment).not.toHaveBeenCalled();
   });
 
-  it('POST answers an invoice the organization does not have as not found, and records nothing', async () => {
-    const { POST } = await loadRoute();
-    m.getInvoiceWithLineItems.mockResolvedValueOnce(null);
-    const response = await POST(post({ amount: '10.00', method: 'eft' }), as());
-    expect(response.status).toBe(404);
-    expect(m.getInvoiceWithLineItems).toHaveBeenCalledWith(INVOICE, 'org_1');
-    expect(m.recordPayment).not.toHaveBeenCalled();
-  });
-
-  it('POST records the payment for the caller organization and user, whatever the body says', async () => {
+  it('POST with a valid body is refused as not implemented: no invoice is looked up and no payment is recorded', async () => {
     const { POST } = await loadRoute();
     const response = await POST(post({ amount: '100.50', method: 'eft', externalReference: 'bank-ref-1', organizationId: 'org_other', createdBy: 'someone' }), as());
-    expect(response.status).toBe(200);
-    expect(m.recordPayment).toHaveBeenCalledWith({
-      organizationId: 'org_1',
-      invoiceId: INVOICE,
-      amount: '100.50',
-      method: 'eft',
-      externalReference: 'bank-ref-1',
-      createdBy: 'u1',
-    });
-  });
-
-  it('POST reports a payment that failed as a 500, never as recorded', async () => {
-    const { POST } = await loadRoute();
-    m.recordPayment.mockRejectedValueOnce(new Error('db error'));
-    const response = await POST(post({ amount: '10.00', method: 'eft' }), as());
-    expect(response.status).toBe(500);
+    await expectRefused(response);
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    expect(m.getInvoiceWithLineItems).not.toHaveBeenCalled();
+    expect(m.recordPayment).not.toHaveBeenCalled();
   });
 });

@@ -33,7 +33,7 @@ export function decideCertifiedSupersession(
   if (election.namedUserIds.includes(me)) {
     return deny(req, now, { code: 'ADVERSE_PARTY', detail: 'a person named on the certified result cannot supersede it' })
   }
-  const recusal = activeRecusal(facts.recusals, me, req.resource, req.organizationId)
+  const recusal = activeRecusal(facts.recusals, me, req.resource, req.organizationId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
   if (!hasCapacity(membership, ELIGIBLE)) {
     return deny(req, now, { code: 'CAPACITY_NOT_ELIGIBLE', detail: 'a governance capacity is eligibility only and does not issue this power' })

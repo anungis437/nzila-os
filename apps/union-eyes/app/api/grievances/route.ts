@@ -12,6 +12,9 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances, GrievanceStatus } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
+import { liveDesignationExists } from '@/lib/triage/designations';
+import { memberGrievanceView } from '@/lib/cases/member-grievance-view';
 import { hasCaseFilingCapacity } from "@/lib/cases/case-authorization";
 import { auditLog, AuditEventType } from "@/lib/audit-logger";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
@@ -26,7 +29,6 @@ import { grievanceRelationshipScope, unassignedIntakeTriageScope } from '@/lib/s
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
-import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { randomBytes } from 'crypto';
 
@@ -153,7 +155,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
           // Member details
           // The authenticated intake submitter is the represented member; never infer this identity from supplied contact details.
-          grievantId: !isOfficialCase && z.guid().safeParse(userId).success ? userId : null,
+          representedMemberUserId: !isOfficialCase ? userId : null,
           grievantName: data.grievantName ?? null,
           grievantEmail: data.grievantEmail ?? null,
 
@@ -294,7 +296,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
     // or holds an active unexpired case-access grant for.
     const relationship = grievanceRelationshipScope(userId);
 
-    const { owned, triage } = await withRLSContext({ organizationId }, async () => {
+    const { owned, triage } = await withRLSContext({ organizationId }, async (tx) => {
       const ownedRows = await db
         .select()
         .from(grievances)
@@ -314,16 +316,23 @@ export const GET = withOrganizationAuth(async (request, context) => {
           createdAt: grievances.createdAt,
         })
         .from(grievances)
-        .where(scoped(unassignedIntakeTriageScope()))
+        .where(scoped(unassignedIntakeTriageScope(),liveDesignationExists({userId,organizationId},'cases')))
         .orderBy(desc(grievances.createdAt))
         .limit(200);
 
-      return { owned: ownedRows, triage: triageRows };
+      const decisions = await decideCaseCapabilitiesBatch(tx, { userId, organizationId, caseIds: ownedRows.map(row => row.id) });
+      const owned = ownedRows.flatMap<Record<string,unknown> & {id:string;accessScope:'case'|'member_visible'}>(row => {
+        const read = decisions.get(row.id)?.['case:read'];
+        if(read?.effect !== 'allow')return [];
+        return read.scope.visibility === 'internal' ? [{...row,accessScope:'case' as const}] :
+          [{...memberGrievanceView(row),id:row.id,accessScope:'member_visible' as const}];
+      });
+      return { owned, triage: triageRows };
     });
 
     const ownedIds = new Set(owned.map((row) => row.id));
     const visible = [
-      ...owned.map((row) => ({ ...row, accessScope: 'case' as const })),
+      ...owned,
       ...triage
         .filter((row) => !ownedIds.has(row.id))
         .map((row) => ({ ...row, accessScope: 'intake_triage' as const })),

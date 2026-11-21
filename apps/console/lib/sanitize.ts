@@ -39,7 +39,14 @@ export function validateRedirectUrl(url: string): string | null {
  */
 export function sanitizeHtml(dirty: string): string {
   if (typeof window === 'undefined') {
-    return dirty.replace(/<[^>]*>/g, ''); // codeql[js/incomplete-multi-character-sanitization] - server-side fallback; not rendered on server
+    // Strip tags until stable so nested fragments (e.g. "<<b>script>") cannot reassemble
+    let out = dirty;
+    let prev: string;
+    do {
+      prev = out;
+      out = out.replace(/<[^>]*>/g, '');
+    } while (out !== prev);
+    return out.replace(/[<>]/g, '');
   }
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const DOMPurify = (require('dompurify') as typeof import('dompurify')).default;

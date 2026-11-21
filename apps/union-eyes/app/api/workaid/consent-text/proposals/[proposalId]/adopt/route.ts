@@ -1,14 +1,12 @@
 /**
- * POST /api/workaid/consent-text/proposals/[proposalId]/adopt
- * A different executive adopts the stored proposal. The request body is not the wording.
+ * POST /api/workaid/consent-text/proposals/[proposalId]/adopt — retained WorkAid wording workflow, deferred from the base
+ * release. Validates the proposal id (400 when malformed), authenticates the caller's organization membership, then
+ * answers 501 WORKAID_WORDING_DEFERRED. It never reaches SQL or the authority store.
  */
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { withRLSContext } from '@/lib/db/with-rls-context'
 import { getCaseActor } from '@/lib/cases/case-authorization'
-import { drizzleExecutor, kernelDeps } from '@/lib/authority/store/route-adapter'
-import { adoptConsentWording } from '@/lib/authority/store/workaid-disclosure'
-import { workAidErrorResponse } from '@/lib/workaid/route-support'
+import { workAidErrorResponse, workAidWordingDeferredResponse } from '@/lib/workaid/route-support'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,11 +14,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ pr
   try {
     const { proposalId } = await params
     if (!z.guid().safeParse(proposalId).success) return NextResponse.json({ error: 'VALIDATION_ERROR', message: 'Invalid proposal id.' }, { status: 400 })
-    const actor = await getCaseActor()
-    const result = await withRLSContext(async (tx) =>
-      adoptConsentWording(drizzleExecutor(tx), kernelDeps, { organizationId: actor.organizationId, adopterUserId: actor.userId, proposalId }),
-    )
-    return NextResponse.json({ success: true, ...result, current: true })
+    await getCaseActor()
+    return workAidWordingDeferredResponse()
   } catch (error) {
     return workAidErrorResponse(error)
   }

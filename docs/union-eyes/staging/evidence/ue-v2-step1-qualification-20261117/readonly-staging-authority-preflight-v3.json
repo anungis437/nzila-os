@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "status": "READ_ONLY_STAGING_AUTHORITY_PREFLIGHT",
+  "identity": {
+    "database": "ue_v2_staging",
+    "address": "10.40.4.4",
+    "principal": "uev2admin",
+    "readonly": "on",
+    "row_security": "off",
+    "snapshot_at": "2026-11-17T21:14:33.016Z"
+  },
+  "tlsAuthorized": true,
+  "rowSecurityOffPreventsFilteredZeroClaims": true,
+  "tables": [
+    {
+      "name": "ue_authority_resource_relationships",
+      "owner": "ue_v2_owner",
+      "rls": true,
+      "force": true,
+      "state": "UNFILTERED_COUNT_READ",
+      "count": 26
+    },
+    {
+      "name": "ue_authority_mandates",
+      "owner": "ue_v2_owner",
+      "rls": true,
+      "force": true,
+      "state": "UNFILTERED_COUNT_READ",
+      "count": 27
+    },
+    {
+      "name": "ue_authority_delegations",
+      "owner": "ue_v2_owner",
+      "rls": true,
+      "force": true,
+      "state": "UNFILTERED_COUNT_READ",
+      "count": 0
+    },
+    {
+      "name": "ue_authority_recusals",
+      "owner": "ue_v2_owner",
+      "rls": true,
+      "force": true,
+      "state": "UNFILTERED_COUNT_READ",
+      "count": 0
+    },
+    {
+      "name": "case_authority_scopes",
+      "state": "NOT_PRESENT"
+    },
+    {
+      "name": "case_respondents",
+      "state": "NOT_PRESENT"
+    }
+  ],
+  "primaryPreflight": {
+    "state": "UNFILTERED_SOURCE_COUNTS",
+    "active_primary": 0,
+    "conflicting_primary_provenance": 0,
+    "invalid_validity": 0
+  },
+  "mandatePreflight": {
+    "state": "UNFILTERED_SOURCE_COUNTS",
+    "active_mandates": 0,
+    "conflicting_supervisory_powers": 0,
+    "invalid_validity": 0
+  },
+  "businessDml": false,
+  "ddl": false,
+  "privilegeChanges": false,
+  "stagingPromotion": false,
+  "productionDeployment": false,
+  "step2Acceptance": false,
+  "transport": {
+    "programSha256": "b32faa994064633799bfb9cc8f8a12057df833bec2bce08d09a858244de5c3ac",
+    "bundleSha256": "8942156e94440ad0ec1c9ef3a60131675072ca67472686f004d07a40d5245241",
+    "azureWrites": false,
+    "credentialPersistedInReceipt": false
+  },
+  "servingRevisionEvidence": "readonly-staging-resource-v1.json",
+  "candidateQualification": false
+}

@@ -22,7 +22,9 @@ import {
   userNotificationPreferences,
 } from "@/db/schema/domains/communications";
 import { organizationMembers } from "@/db/schema";
-import { eq, and, or, lt, isNull } from "drizzle-orm";
+import { eq, and, or, lt, isNull, sql } from "drizzle-orm";
+import { CASE_STATUS_EMAIL_PURPOSE } from '@/lib/workflow/case-status-intent';
+import { CORRESPONDENCE_EMAIL_PURPOSE } from '@/lib/correspondence/email-intent';
 import {
   decideDeliveryRetry,
   isDeliveryClaimConflict,
@@ -1085,7 +1087,7 @@ export class NotificationService {
           ];
       
       const failedNotifications = await db.select().from(notificationQueue).where(
-        and(...whereConditions)
+        and(...whereConditions, sql`${notificationQueue.payload}->>'purpose' IS DISTINCT FROM ${CORRESPONDENCE_EMAIL_PURPOSE} AND ${notificationQueue.payload}->>'purpose' IS DISTINCT FROM ${CASE_STATUS_EMAIL_PURPOSE}`)
       ).limit(50);
 
       let retried = 0;
@@ -1322,7 +1324,7 @@ export async function processPendingNotifications(batchSize: number = 50): Promi
     
     // Query pending notifications
     const pendingNotifications = await db.select().from(notificationQueue).where(
-      eq(notificationQueue.status, 'pending')
+      and(eq(notificationQueue.status, 'pending'), sql`${notificationQueue.payload}->>'purpose' IS DISTINCT FROM ${CORRESPONDENCE_EMAIL_PURPOSE} AND ${notificationQueue.payload}->>'purpose' IS DISTINCT FROM ${CASE_STATUS_EMAIL_PURPOSE}`)
     ).limit(batchSize);
 
     let processed = 0;

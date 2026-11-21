@@ -118,7 +118,9 @@ describe('the real tree', () => {
   // F03 deliberately removed the only HTTP reachability of the legacy TypeScript cross-organization dues/payment jobs.
   // Their Django/Celery replacements remain scheduled, while these two modules stay as migration-comparison evidence until the
   // finance owners remove them in a dedicated retirement. They are unreachable by design; this temporary increase must fall again.
-  const CEILING_DEAD_LIB = 376
+  // Lowered from 376: lib/rewards/analytics-reads.ts and lib/utils/safe-csv.ts lost their only callers when rewards analytics and
+  // export became unavailable in the base release, and were deleted rather than kept as unreachable code.
+  const CEILING_DEAD_LIB = 375
 
   it('holds the lib modules nothing reaches at or below the ceiling', () => {
     expect(report.deadLib.length).toBeLessThanOrEqual(CEILING_DEAD_LIB)

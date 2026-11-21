@@ -1,0 +1,89 @@
+{
+  "scope": "INTERIM_EXTERNAL_CATALOG_NATIVE_TRANSPORT_REMEDIATION",
+  "recordedAt": "2026-11-18T07:05:08.831817+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "nativeTransitionBeforeRepair": {
+    "passed": 3,
+    "failed": 1,
+    "skipped": 0,
+    "sourceChangedDuringRun": false,
+    "qualified": false,
+    "failure": "Positive released-to-current final catalog rejected all19 function caller sets and all19 private policy role sets. Three rollback/preservation fault controls passed."
+  },
+  "actualPG15DriverCounterexample": {
+    "scope": "ACTUAL_OWNED_PG15_NODE_PG_CATALOG_ARRAY_TRANSPORT_COUNTEREXAMPLE",
+    "serverVersion": "15.19 (Debian 15.19-1.pgdg13+2)",
+    "fields": [
+      {
+        "name": "names",
+        "dataTypeID": 1003
+      },
+      {
+        "name": "texts",
+        "dataTypeID": 1009
+      },
+      {
+        "name": "version",
+        "dataTypeID": 25
+      }
+    ],
+    "nameArrayTransportIsArray": false,
+    "textArrayTransportIsArray": true,
+    "nameArrayTransportType": "string",
+    "textArrayTransportType": "object"
+  },
+  "repair": "Cast actual catalog role-array elements to text in both SQL projections. Preserve strict array/equality checks, ownership, function bodies, roles, RLS and all mutation refusal assertions.",
+  "regression": {
+    "redFailed": 1,
+    "redFilteredNotExecuted": 52,
+    "greenPassed": 53,
+    "greenFailed": 0,
+    "greenSkipped": 0,
+    "checks": "Actual SQL field metadata must be text[] OID1009; native node-pg name[] OID1003 is an unparsed wire string."
+  },
+  "sourceBindingsAtRecord": [
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/lib/external-resource-read/catalog.ts",
+      "sha256": "bb8b52f65febd7800a401712bd84fe7d66ae6c07e065a643842428f5f4cfb362",
+      "bytes": 11737
+    },
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/lib/external-resource-read/__tests__/source.pglite.test.ts",
+      "sha256": "47d1b39c35466fa4071fab8177d35f085151b125e6ea5120b0d078d1184569ca",
+      "bytes": 39235
+    }
+  ],
+  "rawPrivateProof": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v17.json",
+      "sha256": "9cfc56c636090be77cdd2551aa7d8bd0ed8e99cfbb4900d201728ffcaa30fd0a",
+      "bytes": 6115
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v17-source.json",
+      "sha256": "253c3aee9b908b08c14a2269f4b245018e049e9c6be5b91715708010cf8605b5",
+      "bytes": 162176
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-catalog-native-array-red-v1.json",
+      "sha256": "7fa86e13f744ee229833d7e5017a68b1df6ad4ff9766018eea68e25a1440353d",
+      "bytes": 488
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-catalog-array-red-v1.json",
+      "sha256": "76772cf7b3acbb86274d509caee0437249e577c41dc0beac7c76a065ca383bbd",
+      "bytes": 25065
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-catalog-array-green-v1.json",
+      "sha256": "abd3052e03ed711b5582dee8fec54f9f8e9d65c602645cb92d45c94d5a6d0523",
+      "bytes": 26162
+    }
+  ],
+  "limits": [
+    "Repaired full native transition has not yet been rerun; source plan must regenerate with concurrent reward-boundary work.",
+    "PGlite SQL regression is not native PostgreSQL15/16 or application startup qualification."
+  ],
+  "finalCandidateQualified": false
+}

@@ -1,3 +1,4 @@
+import { persistAndNormalizeStripeEvent } from '@/lib/services/stripe-webhook-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * Stripe webhook endpoint — /api/webhooks/stripe
@@ -9,18 +10,13 @@
  * signature verification to work.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { stripeWebhookEvents, stripeConnections } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { createLogger } from '@nzila/os-core'
 import {
   verifyWebhookSignature,
   WebhookSignatureError,
   extractEntityIdFromEvent,
-  normalizeAndPersist,
-  markEventFailed,
 } from '@nzila/payments-stripe'
-import { recordAuditEvent } from '@/lib/audit-db'
 
 const logger = createLogger('webhooks:stripe')
 
@@ -58,82 +54,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ received: true, warning: 'no_entity_id' })
   }
 
-  // 4. Idempotent: check if stripeEventId already exists
-  const [existing] = await platformDb
-    .select({ id: stripeWebhookEvents.id })
-    .from(stripeWebhookEvents)
-    .where(eq(stripeWebhookEvents.stripeEventId, event.id))
-    .limit(1)
-
-  if (existing) {
-    // Already processed — return 200 (idempotent)
-    return NextResponse.json({ received: true, duplicate: true })
-  }
-
-  // 5. Persist event to stripeWebhookEvents
-  const [inserted] = await platformDb
-    .insert(stripeWebhookEvents)
-    .values({
-      orgId,
-      stripeEventId: event.id,
-      type: event.type,
-      apiVersion: event.api_version,
-      livemode: event.livemode,
-      created: new Date(event.created * 1000),
-      payloadJson: event as unknown as Record<string, unknown>,
-      signatureValid: true,
-      processingStatus: 'received',
-    })
-    .returning({ id: stripeWebhookEvents.id })
-
-  const webhookEventId = inserted!.id
-
-  // 6. Append audit_event: stripe.webhook_received
-  await recordAuditEvent({
-    orgId,
-    actorClerkUserId: 'system',
-    actorRole: 'system',
-    action: 'stripe.webhook_received',
-    targetType: 'stripe_webhook_event',
-    targetId: webhookEventId,
-    afterJson: {
-      stripeEventId: event.id,
-      type: event.type,
-      livemode: event.livemode,
-    },
-  })
-
-  // 7. Update lastEventAt on the stripe connection
-  await platformDb
-    .update(stripeConnections)
-    .set({ lastEventAt: new Date() })
-    .where(eq(stripeConnections.orgId, orgId))
-
-  // 8. Normalize inline (v1)
-  try {
-    const result = await normalizeAndPersist(event, webhookEventId, orgId)
-
-    // 9. Append audit_event: stripe.webhook_processed
-    await recordAuditEvent({
-      orgId,
-      actorClerkUserId: 'system',
-      actorRole: 'system',
-      action: 'stripe.webhook_processed',
-      targetType: 'stripe_webhook_event',
-      targetId: webhookEventId,
-      afterJson: {
-        stripeEventId: event.id,
-        type: event.type,
-        result: result.kind,
-      },
-    })
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown processing error'
-    await markEventFailed(webhookEventId, errorMessage)
-
-    logger.error(`[stripe-webhook] Processing failed for ${event.id}:`, { detail: errorMessage })
-    // Still return 200 — event is persisted, can be retried
-  }
-
-  return NextResponse.json({ received: true })
+  const result = await persistAndNormalizeStripeEvent(event, orgId)
+  return NextResponse.json(result.body, { status: result.status })
 }

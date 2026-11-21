@@ -1,0 +1,13 @@
+{
+  "status": "INTERRUPTED_HOST_RESTART_DURING_BUILD",
+  "sourcePlanAtLaunch": "UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json, interim v6; no final candidate claim",
+  "ownedSnapshotName": "ue-v2-next-48f2a807-041b-4817-85dc-757a78d20b31",
+  "phaseLog": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/next-build-interrupted-v1.txt",
+  "phaseLogSha256": "9bdb618dbc6aad875e59bf7ff2b41776dcf9be09998d23f9a5e76c66277df9f2",
+  "buildCompleted": false,
+  "httpExecuted": false,
+  "browserExecuted": false,
+  "loadExecuted": false,
+  "snapshotRemoved": true,
+  "productionOrStagingPromotion": false
+}

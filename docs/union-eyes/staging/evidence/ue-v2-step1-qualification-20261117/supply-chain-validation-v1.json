@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-17T19:06:46.962Z",
+  "repository": "anungis437/nzila-os",
+  "integrationBranch": "fix/ue-step1-integrated-20261117",
+  "repositoryHead": "3d19abdaea5c81f6d4a74f928b1f16648d9621ba",
+  "dirtyTree": true,
+  "status": "INTERIM_SOURCE_TESTED_NOT_FINAL_STEP_1_QUALIFICATION",
+  "authority": "Owner Step 1 execution mandate 2026-11-17; no staging or production promotion; Step 2 held",
+  "inputs": {
+    "package.json": "70ff115bedfe230bf2540e22f6d3a1858825802f09460723bb0a76cc18449a9f",
+    "pnpm-lock.yaml": "f579a7890e85fda87565edea8770deb22a274e92b0354c5bddad4661afb8f0a8",
+    "patches/picomatch@4.0.7.patch": "8c068c0459a58cd99412343b9e31d8a0f894f467a52d0dd56aa58cba7aa1df1a",
+    "scripts/generate-sbom.ts": "7d88d1a31f6d73f2e07880a0c56a9a666abeae88168f22808030ad5616baefe3",
+    "tooling/security/picomatch-repeated-extglob.test.mjs": "7ae788a73d38f34b1fe82295727097dc86a914e214a6b794fd9aeaafb77d3091",
+    "tooling/security/sbom.test.ts": "61952f7590317b927ed08347cd188179b503733b19e80531b4e3b4328f4f5ac6",
+    "tooling/security/vitest.audit.config.ts": "0932aa7ed760fdfd880e8501cd7081e9a72bed60361c5ea1aebd40cf21762889",
+    "ops/security/sbom.json": "b881e1e9ba6fecdc531d324a0117b4bb186a60c686730b0b813ace32427a8268",
+    "ops/security/npm-package-metadata.json": "f2e81c88ef20834bddaf429bd5db50e5f27de5bc341bc3f674e6f053da079459"
+  },
+  "artifacts": {
+    "dependency-audit-initial-v1.json": {
+      "sha256": "ff346a4c3e265893172e06928fea51df1d880472f22f5b65b7aa34543f04d181",
+      "bytes": 66035
+    },
+    "dependency-audit-installed-v1.json": {
+      "sha256": "bde125643bebe9269f0209a7dfd54c3d5b4ee5fc79d3b78233e9400a4fac4033",
+      "bytes": 2157
+    },
+    "dependency-bulk-audit-installed-v1.json": {
+      "sha256": "a5a12118ec7daf7316b5cc7c32b44c792ce6eb52fb8d3f9abd221965b6e52b8c",
+      "bytes": 770
+    },
+    "picomatch-advisory-v1.json": {
+      "sha256": "cc99706e61047047b6690db94abb98b5940d007196775c12902c0f79d8aedbd5",
+      "bytes": 4025
+    },
+    "security-node-tests-v1.txt": {
+      "sha256": "8cd99960c907b7b5fb1f10644324454e2e0261cfeb29e0cd30b3c774651c3997",
+      "bytes": 2342
+    },
+    "security-unit-tests-v1.txt": {
+      "sha256": "1fc3cea87a5e59a3391506490ffc41553eeee5a3e7d8aa330105701f3dc16788",
+      "bytes": 239
+    },
+    "picomatch-unpatched-control-v1.txt": {
+      "sha256": "fe6887872e1f5a32c317c502a520fd838f1e3e16cf189bb01b738caab8ef1160",
+      "bytes": 30723
+    },
+    "sbom-license-policy-v1.txt": {
+      "sha256": "e9e905ba2f3e7d4ba32e89a6f3e5223a1592668039af5145db647abce004845f",
+      "bytes": 4580
+    }
+  },
+  "dependencyPRsReused": [
+    {
+      "number": 1146,
+      "scope": "Next16.4.6 manifest updates only; lockfile regenerated against integrated source"
+    },
+    {
+      "number": 1213,
+      "scope": "OTelHTTP ^0.223.0 manifest update only; compatible bounded overrides; lockfile regenerated"
+    }
+  ],
+  "dependencyAudit": {
+    "initialAdvisories": 17,
+    "initialVulnerableInstances": 23,
+    "current": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 1,
+        "critical": 0
+      },
+      "dependencies": 2807,
+      "devDependencies": 0,
+      "optionalDependencies": 0,
+      "totalDependencies": 2807
+    },
+    "unresolvedAdvisoryIds": [
+      "1247710"
+    ],
+    "verdict": "FAIL_HIGH_ADVISORY_RETAINED_NO_WAIVER",
+    "picomatch": {
+      "version": "4.0.7",
+      "advisory": "1247710",
+      "upstreamPatchedVersion": null,
+      "source": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+      "localPatch": "patches/picomatch@4.0.7.patch",
+      "patchSha256": "8c068c0459a58cd99412343b9e31d8a0f894f467a52d0dd56aa58cba7aa1df1a",
+      "patchLockHash": "8c068c0459a58cd99412343b9e31d8a0f894f467a52d0dd56aa58cba7aa1df1a",
+      "claim": "Known repeated wildcard and overlapping literal prefix patterns are guarded by existing literalization; safe flat repetition is retained. No upstream patched release or audit pass claimed."
+    }
+  },
+  "tests": {
+    "nodeSecurity": {
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0
+    },
+    "securityUnit": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0
+    },
+    "unpatchedUpstreamControl": {
+      "expectedFailure": true,
+      "tarballIntegrityVerified": true,
+      "passed": 1,
+      "failed": 10,
+      "skipped": 0
+    },
+    "finalIntegratedRegression": "NOT_YET_RUN"
+  },
+  "sbom": {
+    "components": 2493,
+    "metadata": "ops/security/npm-package-metadata.json",
+    "artifact": "ops/security/sbom.json",
+    "licensePolicy": "FAILED_FOR_WORKSPACE_DECLARATIONS; NOT_A_CANDIDATE_RUNTIME_LICENSE_ACCEPTANCE",
+    "containerRuntimeScope": "NOT_YET_ASSESSED"
+  },
+  "pending": [
+    "Commit-bound final integrated checks",
+    "Qualified container build and scan",
+    "Runtime/build compatibility and native proofs",
+    "Resolve mandatory raw Picomatch advisory gate without waiver or concealment",
+    "Assess candidate runtime license policy separately from whole-workspace inventory"
+  ],
+  "stagingPromoted": false,
+  "productionPromoted": false,
+  "step2Started": false
+}

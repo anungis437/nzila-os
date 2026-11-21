@@ -6,12 +6,14 @@
  */
 'use server'
 
-import { auth } from '@nzila/platform-auth/entra/server'
+import { resolveOrgContext } from '../resolve-org'
+import { actionRows } from '../../queries/partner-action-facts'
+import { dealResourceId, dealRootScope, requireDealOrigin, scopedDeals } from '../partner-action-scope'
+import { z } from 'zod'
 import { platformDb } from '@nzila/db/platform'
-import { sql, desc as _desc } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
-import { buildPartnerEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -47,126 +49,65 @@ export interface DealStats {
   totalArr: number
 }
 
-/* ─── Queries ─── */
+const stageSchema = z.enum(['registered', 'submitted', 'approved', 'won', 'lost'])
+const createSchema = z.object({
+  accountName: z.string().min(1), contactName: z.string().min(1), contactEmail: z.string().email(),
+  vertical: z.string().min(1), estimatedArr: z.number().finite().positive(),
+  expectedCloseDate: z.string().min(1), notes: z.string().optional(),
+  partnerId: z.string().uuid().optional(),
+}).strict()
 
-export async function listDeals(opts?: {
-  page?: number
-  stage?: string
-  search?: string
-}): Promise<DealListResult> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-
-  const page = opts?.page ?? 1
-  const offset = (page - 1) * 25
-
+export async function listDeals(opts?: { page?: number; stage?: string; search?: string; partnerId?: string }): Promise<DealListResult> {
+  const ctx = await resolveOrgContext({ scope: 'partner', partnerId: opts?.partnerId, allowPlatform: true })
+  const page = z.number().int().positive().parse(opts?.page ?? 1)
+  const stage = opts?.stage ? stageSchema.parse(opts.stage) : null
+  const search = opts?.search ?? ''
   try {
-    const rows = (await platformDb.execute(
-      sql`SELECT
-        org_id as id,
-        metadata->>'accountName' as "accountName",
-        metadata->>'contactName' as "contactName",
-        metadata->>'contactEmail' as "contactEmail",
-        metadata->>'vertical' as vertical,
-        CAST(COALESCE(metadata->>'estimatedArr', '0') AS NUMERIC) as "estimatedArr",
-        metadata->>'expectedCloseDate' as "expectedCloseDate",
-        metadata->>'notes' as notes,
-        metadata->>'stage' as stage,
-        metadata->>'partnerId' as "partnerId",
-        metadata->>'partnerName' as "partnerName",
-        actor_id as "registeredBy",
-        created_at as "createdAt",
-        metadata->>'updatedAt' as "updatedAt"
-      FROM audit_log
-      WHERE action = 'deal.registered' OR action = 'deal.updated'
-      ORDER BY created_at DESC
-      LIMIT 25 OFFSET ${offset}`,
-    )) as unknown as { rows: Deal[] }
-
-    const [totals] = (await platformDb.execute(
-      sql`SELECT
-        COUNT(*) as total,
-        COALESCE(SUM(CAST(COALESCE(metadata->>'estimatedArr', '0') AS NUMERIC)), 0) as total_arr
-      FROM audit_log WHERE action = 'deal.registered'`,
-    )) as unknown as [{ total: number; total_arr: number }]
-
-    return {
-      deals: rows.rows ?? [],
-      total: Number(totals?.total ?? 0),
-      totalArr: Number(totals?.total_arr ?? 0),
-    }
+    const from = sql`FROM (${scopedDeals(ctx)}) deals WHERE ${stage ? sql`stage=${stage}` : sql`true`}
+      AND ${search ? sql`"accountName" ILIKE ${`%${search}%`}` : sql`true`}
+      AND ${ctx.scope === 'platform' && opts?.partnerId ? sql`"partnerId"=${opts.partnerId}` : sql`true`}`
+    const deals = actionRows<Deal>(await platformDb.execute(sql`SELECT * ${from} ORDER BY "createdAt" DESC,id LIMIT 25 OFFSET ${(page - 1) * 25}`))
+    const [total] = actionRows<{ total: number; totalArr: number }>(await platformDb.execute(sql`SELECT count(*) AS total,COALESCE(sum("estimatedArr"),0) AS "totalArr" ${from}`))
+    return { deals, total: Number(total?.total ?? 0), totalArr: Number(total?.totalArr ?? 0) }
   } catch (error) {
     logger.error('listDeals failed', { error })
     return { deals: [], total: 0, totalArr: 0 }
   }
 }
 
-export async function getDealStats(): Promise<DealStats> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-
+export async function getDealStats(partnerId?: string): Promise<DealStats> {
+  const ctx = await resolveOrgContext({ scope: 'partner', partnerId, allowPlatform: true })
   try {
-    const [stats] = (await platformDb.execute(
-      sql`SELECT
-        COUNT(*) FILTER (WHERE metadata->>'stage' = 'registered') as registered,
-        COUNT(*) FILTER (WHERE metadata->>'stage' = 'submitted') as submitted,
-        COUNT(*) FILTER (WHERE metadata->>'stage' = 'approved') as approved,
-        COUNT(*) FILTER (WHERE metadata->>'stage' = 'won') as won,
-        COUNT(*) FILTER (WHERE metadata->>'stage' = 'lost') as lost,
-        COALESCE(SUM(CAST(COALESCE(metadata->>'estimatedArr', '0') AS NUMERIC)), 0) as total_arr
-      FROM audit_log WHERE action = 'deal.registered' OR action = 'deal.updated'`,
-    )) as unknown as [DealStats & { total_arr: number }]
-
-    return {
-      registered: Number(stats?.registered ?? 0),
-      submitted: Number(stats?.submitted ?? 0),
-      approved: Number(stats?.approved ?? 0),
-      won: Number(stats?.won ?? 0),
-      lost: Number(stats?.lost ?? 0),
-      totalArr: Number(stats?.total_arr ?? 0),
-    }
+    const [stats] = actionRows<DealStats>(await platformDb.execute(sql`SELECT
+      count(*) FILTER (WHERE stage='registered') AS registered,count(*) FILTER (WHERE stage='submitted') AS submitted,
+      count(*) FILTER (WHERE stage='approved') AS approved,count(*) FILTER (WHERE stage='won') AS won,
+      count(*) FILTER (WHERE stage='lost') AS lost,COALESCE(sum("estimatedArr"),0) AS "totalArr"
+      FROM (${scopedDeals(ctx)}) deals WHERE ${ctx.scope === 'platform' && partnerId ? sql`"partnerId"=${partnerId}` : sql`true`}`))
+    return { registered: Number(stats?.registered ?? 0), submitted: Number(stats?.submitted ?? 0),
+      approved: Number(stats?.approved ?? 0), won: Number(stats?.won ?? 0), lost: Number(stats?.lost ?? 0), totalArr: Number(stats?.totalArr ?? 0) }
   } catch (error) {
     logger.error('getDealStats failed', { error })
     return { registered: 0, submitted: 0, approved: 0, won: 0, lost: 0, totalArr: 0 }
   }
 }
 
-/* ─── Mutations ─── */
-
 export async function createDeal(data: {
-  accountName: string
-  contactName: string
-  contactEmail: string
-  vertical: string
-  estimatedArr: number
-  expectedCloseDate: string
-  notes?: string
+  accountName: string; contactName: string; contactEmail: string; vertical: string;
+  estimatedArr: number; expectedCloseDate: string; notes?: string; partnerId?: string;
 }): Promise<{ success: boolean; dealId?: string }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-
+  const ctx = await resolveOrgContext({ scope: 'partner', partnerId: data?.partnerId })
+  const validated = createSchema.parse(data)
   try {
     const dealId = crypto.randomUUID()
-
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('deal.registered', ${userId}, 'deal', ${dealId},
-        ${JSON.stringify({
-          ...data,
-          stage: 'submitted',
-          partnerId: userId,
-          registeredAt: new Date().toISOString(),
-        })}::jsonb)`,
-    )
-
-    await buildPartnerEvidencePack({
-      actionId: crypto.randomUUID(),
-      actionType: 'DEAL_REGISTERED',
-      orgId: dealId,
-      executedBy: userId,
-    })
-
-    logger.info('Deal registered', { dealId, actorId: userId, accountName: data.accountName })
+    // A partner relationship is not an organization. The actual audit event ID
+    // identifies this root; the partner and actor are recorded separately.
+    const inserted = actionRows<{ id: string }>(await platformDb.execute(sql`INSERT INTO public.audit_log (id,action,actor_id,entity_type,org_id,metadata)
+      SELECT ${dealId},'deal.registered',${ctx.actorId},'deal',NULL,${JSON.stringify({
+        ...validated, dealId, partnerId: ctx.partner.id, partnerName: ctx.partner.companyName,
+        stage: 'submitted', registeredAt: new Date().toISOString(),
+      })}::jsonb WHERE EXISTS(SELECT 1 FROM public.partners p JOIN public.partner_users u ON u.partner_id=p.id
+        WHERE p.id::text=${ctx.partner.id} AND p.status='active' AND u.user_id=${ctx.actorId}) RETURNING id`))
+    if (inserted.length !== 1) throw new Error('Current partner authority changed')
     revalidatePath('/portal/deals')
     return { success: true, dealId }
   } catch (error) {
@@ -175,28 +116,18 @@ export async function createDeal(data: {
   }
 }
 
-export async function updateDealStage(
-  dealId: string,
-  stage: Deal['stage'],
-): Promise<{ success: boolean }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-
+export async function updateDealStage(dealId: string, stage: Deal['stage'], partnerId?: string): Promise<{ success: boolean }> {
+  const validated = stageSchema.parse(stage)
+  const ctx = validated === 'approved'
+    ? await resolveOrgContext({ scope: 'platform' })
+    : await resolveOrgContext({ scope: 'partner', partnerId, allowPlatform: true })
+  const origin = await requireDealOrigin(ctx, dealId)
   try {
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('deal.updated', ${userId}, 'deal', ${dealId},
-        ${JSON.stringify({ stage, updatedAt: new Date().toISOString() })}::jsonb)`,
-    )
-
-    await buildPartnerEvidencePack({
-      actionId: crypto.randomUUID(),
-      actionType: 'DEAL_STAGE_UPDATED',
-      orgId: dealId,
-      executedBy: userId,
-    })
-
-    logger.info('Deal stage updated', { dealId, stage, actorId: userId })
+    const inserted = actionRows<{ id: string }>(await platformDb.execute(sql`INSERT INTO public.audit_log (action,actor_id,entity_type,org_id,metadata)
+      SELECT 'deal.updated',${ctx.actorId},'deal',NULL,${JSON.stringify({
+        resourceId: origin.id, partnerId: origin.partner.id, stage: validated, updatedAt: new Date().toISOString(),
+      })}::jsonb WHERE EXISTS(SELECT 1 FROM public.audit_log origin WHERE ${dealRootScope(ctx)} AND ${dealResourceId}=${origin.id}) RETURNING id`))
+    if (inserted.length !== 1) throw new Error('Current deal authority changed')
     revalidatePath('/portal/deals')
     revalidatePath('/admin/partners')
     return { success: true }

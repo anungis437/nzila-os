@@ -4,7 +4,7 @@
 # pdfjs-dist 6 needs Promise.withResolvers (Node >=22.13) and sanitize-html 2.18 needs
 # Node >=22.12; CI already builds and tests on Node 22.
 # ============================================
-FROM node:22-slim AS base
+FROM node:22-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS base
 
 # Install wget for healthchecks (not included in slim by default).
 # apt-get upgrade -y patches OS-level CVEs in the base image (e.g. libgnutls30 CVE-2026-33845,
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g pnpm@10.11.0 --ignore-scripts
+RUN npm install -g pnpm@10.33.0 --ignore-scripts
 
 # Runtime image identity. Every final app stage inherits from base, so these
 # values remain available to dynamic /api/version handlers after the builder
@@ -35,6 +35,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY patches ./patches
 
 # Copy all workspace package.json files preserving directory structure.
 # Uses bind mount to extract only package.json files (cache-friendly, no

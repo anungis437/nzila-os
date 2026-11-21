@@ -62,6 +62,9 @@ describe.skipIf(!ENABLED)('Django models equal the physical schema', () => {
       ...process.env,
       DJANGO_SETTINGS_MODULE: 'config.settings',
       DJANGO_SECRET_KEY: 'parity-test-only',
+      // Django runs here as an offline measurement tool over the operator connection, not as a canonical web or worker process: its
+      // canonical settings refuse that (non-debug web/worker with dedicated credentials only), so this child process is not canonical.
+      UE_CANONICAL_BOOTSTRAP_V2: '0',
       DJANGO_DEBUG: 'True',
       PGDATABASE: u.pathname.replace(/^\//, ''),
       PGUSER: decodeURIComponent(u.username),

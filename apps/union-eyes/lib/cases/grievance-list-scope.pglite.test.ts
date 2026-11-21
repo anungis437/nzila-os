@@ -27,7 +27,7 @@ beforeAll(async () => {
     );
     CREATE TABLE ue_authority_recusals (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, principal_user_id text NOT NULL,
-      resource_type text NOT NULL, resource_id uuid NOT NULL, lifted_at timestamptz
+      resource_type text NOT NULL, resource_id uuid NOT NULL, declared_at timestamptz NOT NULL DEFAULT now(), lifted_by text, lifted_at timestamptz
     );
   `)
   const rows: [number, string, string, string | null, string | null][] = [

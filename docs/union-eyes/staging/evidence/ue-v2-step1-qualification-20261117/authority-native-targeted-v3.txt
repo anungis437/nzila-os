@@ -1,0 +1,10 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  15:21:49
+   Duration  11.60s (tests 92%, import 6%, transform 2%)
+

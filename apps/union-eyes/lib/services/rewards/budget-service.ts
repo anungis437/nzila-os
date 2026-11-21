@@ -1,7 +1,8 @@
+import { requireRewardsInstitutionalAuthority } from '@/lib/rewards/credit-authority'
 /**
  * Budget Service
  * Handles budget envelope management, usage tracking, and reservations
- * 
+ *
  * Features:
  * - Budget envelope creation and management
  * - Real-time usage tracking with limit enforcement
@@ -9,20 +10,20 @@
  * - Automatic expiration and cleanup of reservations
  */
 
-import { db } from '@/db';
+import { db } from '@/db'
 import {
   rewardBudgetEnvelopes,
   budgetReservations,
   recognitionPrograms,
   type NewRewardBudgetEnvelope,
   type RewardBudgetEnvelope,
-} from '@/db/schema';
-import { eq, and, sql, lte, gte, desc, asc, ne, type SQL } from 'drizzle-orm';
-import { type PgTransaction } from 'drizzle-orm/pg-core';
-import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
-import { v4 as uuidv4 } from 'uuid';
-import { logger } from '@/lib/logger';
-import { UserFacingError } from '@/lib/errors/user-facing-error';
+} from '@/db/schema'
+import { eq, and, sql, lte, gte, desc, asc, ne, type SQL } from 'drizzle-orm'
+import { type PgTransaction } from 'drizzle-orm/pg-core'
+import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
+import { v4 as uuidv4 } from 'uuid'
+import { logger } from '@/lib/logger'
+import { UserFacingError } from '@/lib/errors/user-facing-error'
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -30,14 +31,14 @@ type DbTransaction = PgTransaction<
   any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any
->;
+>
 
 export interface BudgetCheckResult {
-  hasEnoughBudget: boolean;
-  availableBudget: number;
-  reservedBudget: number;
-  totalBudget: number;
-  envelopeId?: string;
+  hasEnoughBudget: boolean
+  availableBudget: number
+  reservedBudget: number
+  totalBudget: number
+  envelopeId?: string
 }
 
 /**
@@ -48,14 +49,15 @@ export interface BudgetCheckResult {
  * its owner equals the envelope's org_id (round 36).
  */
 export async function createBudgetEnvelope(
-  data: NewRewardBudgetEnvelope
+  data: NewRewardBudgetEnvelope,
 ): Promise<RewardBudgetEnvelope> {
+  requireRewardsInstitutionalAuthority()
   const program = await db.query.recognitionPrograms.findFirst({
     where: eq(recognitionPrograms.id, data.programId),
-  });
+  })
 
   if (!program || program.orgId !== data.orgId) {
-    throw new UserFacingError('Recognition program not found for this organization');
+    throw new UserFacingError('Recognition program not found for this organization')
   }
 
   const [envelope] = await db
@@ -64,9 +66,9 @@ export async function createBudgetEnvelope(
       ...data,
       updatedAt: new Date(),
     })
-    .returning();
+    .returning()
 
-  return envelope;
+  return envelope
 }
 
 /**
@@ -74,16 +76,14 @@ export async function createBudgetEnvelope(
  */
 export async function getBudgetEnvelopeById(
   envelopeId: string,
-  orgId: string
+  orgId: string,
 ): Promise<RewardBudgetEnvelope | null> {
+  requireRewardsInstitutionalAuthority()
   const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
-    where: and(
-      eq(rewardBudgetEnvelopes.id, envelopeId),
-      eq(rewardBudgetEnvelopes.orgId, orgId)
-    ),
-  });
+    where: and(eq(rewardBudgetEnvelopes.id, envelopeId), eq(rewardBudgetEnvelopes.orgId, orgId)),
+  })
 
-  return envelope || null;
+  return envelope || null
 }
 
 /**
@@ -92,31 +92,32 @@ export async function getBudgetEnvelopeById(
 export async function listBudgetEnvelopes(
   programId: string,
   orgId: string,
-  activeOnly = false
+  activeOnly = false,
 ): Promise<RewardBudgetEnvelope[]> {
-  const now = new Date();
-  
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
+
   const conditions: SQL[] = [
     eq(rewardBudgetEnvelopes.programId, programId),
     eq(rewardBudgetEnvelopes.orgId, orgId),
-  ];
+  ]
 
   if (activeOnly) {
-    conditions.push(lte(rewardBudgetEnvelopes.startsAt, now));
-    conditions.push(gte(rewardBudgetEnvelopes.endsAt, now));
+    conditions.push(lte(rewardBudgetEnvelopes.startsAt, now))
+    conditions.push(gte(rewardBudgetEnvelopes.endsAt, now))
   }
 
-  const whereClause = and(...conditions);
+  const whereClause = and(...conditions)
   if (!whereClause) {
-    return [];
+    return []
   }
 
   const envelopes = await db.query.rewardBudgetEnvelopes.findMany({
     where: whereClause,
     orderBy: [desc(rewardBudgetEnvelopes.startsAt)],
-  });
+  })
 
-  return envelopes;
+  return envelopes
 }
 
 /**
@@ -125,23 +126,19 @@ export async function listBudgetEnvelopes(
 export async function updateBudgetEnvelope(
   envelopeId: string,
   orgId: string,
-  data: Partial<NewRewardBudgetEnvelope>
+  data: Partial<NewRewardBudgetEnvelope>,
 ): Promise<RewardBudgetEnvelope> {
+  requireRewardsInstitutionalAuthority()
   const [updated] = await db
     .update(rewardBudgetEnvelopes)
     .set({
       ...data,
       updatedAt: new Date(),
     })
-    .where(
-      and(
-        eq(rewardBudgetEnvelopes.id, envelopeId),
-        eq(rewardBudgetEnvelopes.orgId, orgId)
-      )
-    )
-    .returning();
+    .where(and(eq(rewardBudgetEnvelopes.id, envelopeId), eq(rewardBudgetEnvelopes.orgId, orgId)))
+    .returning()
 
-  return updated;
+  return updated
 }
 
 /**
@@ -151,9 +148,10 @@ export async function updateBudgetEnvelope(
 export async function checkBudgetAvailability(
   programId: string,
   orgId: string,
-  creditsNeeded: number
+  creditsNeeded: number,
 ): Promise<boolean> {
-  const now = new Date();
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
 
   const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
     where: and(
@@ -161,17 +159,17 @@ export async function checkBudgetAvailability(
       eq(rewardBudgetEnvelopes.orgId, orgId),
       eq(rewardBudgetEnvelopes.scopeType, 'org'),
       lte(rewardBudgetEnvelopes.startsAt, now),
-      gte(rewardBudgetEnvelopes.endsAt, now)
+      gte(rewardBudgetEnvelopes.endsAt, now),
     ),
     orderBy: [desc(rewardBudgetEnvelopes.createdAt)],
-  });
+  })
 
   if (!envelope) {
-    return true;
+    return true
   }
 
-  const available = envelope.amountLimit - envelope.amountUsed;
-  return available >= creditsNeeded;
+  const available = envelope.amountLimit - envelope.amountUsed
+  return available >= creditsNeeded
 }
 
 /**
@@ -185,9 +183,10 @@ export async function applyBudgetUsage(
   tx: DbTransaction | typeof db,
   programId: string,
   orgId: string,
-  amount: number
+  amount: number,
 ): Promise<void> {
-  const now = new Date();
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
 
   const [envelope] = await tx
     .select()
@@ -198,14 +197,14 @@ export async function applyBudgetUsage(
         eq(rewardBudgetEnvelopes.orgId, orgId),
         eq(rewardBudgetEnvelopes.scopeType, 'org'),
         lte(rewardBudgetEnvelopes.startsAt, now),
-        gte(rewardBudgetEnvelopes.endsAt, now)
-      )
+        gte(rewardBudgetEnvelopes.endsAt, now),
+      ),
     )
     .orderBy(desc(rewardBudgetEnvelopes.createdAt))
-    .limit(1);
+    .limit(1)
 
   if (!envelope) {
-    return;
+    return
   }
 
   await tx
@@ -214,12 +213,7 @@ export async function applyBudgetUsage(
       amountUsed: sql`${rewardBudgetEnvelopes.amountUsed} + ${amount}`,
       updatedAt: new Date(),
     })
-    .where(
-      and(
-        eq(rewardBudgetEnvelopes.id, envelope.id),
-        eq(rewardBudgetEnvelopes.orgId, orgId)
-      )
-    );
+    .where(and(eq(rewardBudgetEnvelopes.id, envelope.id), eq(rewardBudgetEnvelopes.orgId, orgId)))
 }
 
 /**
@@ -230,14 +224,15 @@ export async function applyBudgetUsageChecked(
   tx: DbTransaction | typeof db,
   programId: string,
   orgId: string,
-  amount: number
+  amount: number,
 ): Promise<boolean> {
+  requireRewardsInstitutionalAuthority()
   if (amount <= 0) {
-    await applyBudgetUsage(tx, programId, orgId, amount);
-    return true;
+    await applyBudgetUsage(tx, programId, orgId, amount)
+    return true
   }
 
-  const now = new Date();
+  const now = new Date()
 
   const [envelope] = await tx
     .select()
@@ -248,14 +243,14 @@ export async function applyBudgetUsageChecked(
         eq(rewardBudgetEnvelopes.orgId, orgId),
         eq(rewardBudgetEnvelopes.scopeType, 'org'),
         lte(rewardBudgetEnvelopes.startsAt, now),
-        gte(rewardBudgetEnvelopes.endsAt, now)
-      )
+        gte(rewardBudgetEnvelopes.endsAt, now),
+      ),
     )
     .orderBy(desc(rewardBudgetEnvelopes.createdAt))
-    .limit(1);
+    .limit(1)
 
   if (!envelope) {
-    return true;
+    return true
   }
 
   const [updated] = await tx
@@ -268,12 +263,12 @@ export async function applyBudgetUsageChecked(
       and(
         eq(rewardBudgetEnvelopes.id, envelope.id),
         eq(rewardBudgetEnvelopes.orgId, orgId),
-        sql`${rewardBudgetEnvelopes.amountUsed} + ${amount} <= ${rewardBudgetEnvelopes.amountLimit}`
-      )
+        sql`${rewardBudgetEnvelopes.amountUsed} + ${amount} <= ${rewardBudgetEnvelopes.amountLimit}`,
+      ),
     )
-    .returning();
+    .returning()
 
-  return !!updated;
+  return !!updated
 }
 
 /**
@@ -281,31 +276,34 @@ export async function applyBudgetUsageChecked(
  */
 export async function getBudgetUsageSummary(
   orgId: string,
-  programId?: string
-): Promise<Array<{
-  envelopeId: string;
-  envelopeName: string;
-  used: number;
-  limit: number;
-  percentage: number;
-  isActive: boolean;
-}>> {
-  const now = new Date();
+  programId?: string,
+): Promise<
+  Array<{
+    envelopeId: string
+    envelopeName: string
+    used: number
+    limit: number
+    percentage: number
+    isActive: boolean
+  }>
+> {
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
 
-  const conditions: SQL[] = [eq(rewardBudgetEnvelopes.orgId, orgId)];
+  const conditions: SQL[] = [eq(rewardBudgetEnvelopes.orgId, orgId)]
   if (programId) {
-    conditions.push(eq(rewardBudgetEnvelopes.programId, programId));
+    conditions.push(eq(rewardBudgetEnvelopes.programId, programId))
   }
 
-  const whereClause = and(...conditions);
+  const whereClause = and(...conditions)
   if (!whereClause) {
-    return [];
+    return []
   }
 
   const envelopes = await db.query.rewardBudgetEnvelopes.findMany({
     where: whereClause,
     orderBy: [desc(rewardBudgetEnvelopes.startsAt)],
-  });
+  })
 
   return envelopes.map((envelope) => ({
     envelopeId: envelope.id,
@@ -314,7 +312,7 @@ export async function getBudgetUsageSummary(
     limit: envelope.amountLimit,
     percentage: Math.round((envelope.amountUsed / envelope.amountLimit) * 100),
     isActive: now >= envelope.startsAt && now <= envelope.endsAt,
-  }));
+  }))
 }
 
 // ============== BUDGET RESERVATION IMPLEMENTATION ==============
@@ -328,11 +326,12 @@ export async function reserveBudget(
   amount: number,
   referenceType: string,
   referenceId: string,
-  expiresInMinutes = 60 * 24
+  expiresInMinutes = 60 * 24,
 ): Promise<{ success: boolean; reservationId?: string; error?: string }> {
+  requireRewardsInstitutionalAuthority()
   try {
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + expiresInMinutes * 60 * 1000);
+    const now = new Date()
+    const expiresAt = new Date(now.getTime() + expiresInMinutes * 60 * 1000)
 
     const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
       where: and(
@@ -340,34 +339,34 @@ export async function reserveBudget(
         eq(rewardBudgetEnvelopes.orgId, orgId),
         eq(rewardBudgetEnvelopes.scopeType, 'org'),
         lte(rewardBudgetEnvelopes.startsAt, now),
-        gte(rewardBudgetEnvelopes.endsAt, now)
+        gte(rewardBudgetEnvelopes.endsAt, now),
       ),
       orderBy: [desc(rewardBudgetEnvelopes.createdAt)],
-    });
+    })
 
     if (!envelope) {
-      return { success: true };
+      return { success: true }
     }
 
     const reservations = await db.query.budgetReservations.findMany({
       where: and(
         eq(budgetReservations.poolId, envelope.id),
         ne(budgetReservations.status, 'released'),
-        ne(budgetReservations.status, 'expired')
+        ne(budgetReservations.status, 'expired'),
       ),
-    });
+    })
 
-    const totalReserved = reservations.reduce((sum, r) => sum + (r.reservedAmount || 0), 0);
-    const available = envelope.amountLimit - envelope.amountUsed - totalReserved;
+    const totalReserved = reservations.reduce((sum, r) => sum + (r.reservedAmount || 0), 0)
+    const available = envelope.amountLimit - envelope.amountUsed - totalReserved
 
     if (available < amount) {
-      return { 
-        success: false, 
-        error: `Insufficient budget. Available: ${available}, Requested: ${amount}` 
-      };
+      return {
+        success: false,
+        error: `Insufficient budget. Available: ${available}, Requested: ${amount}`,
+      }
     }
 
-    const reservationId = uuidv4();
+    const reservationId = uuidv4()
     await db.insert(budgetReservations).values({
       id: reservationId,
       poolId: envelope.id,
@@ -376,26 +375,26 @@ export async function reserveBudget(
       referenceType,
       referenceId,
       expiresAt,
-    });
+    })
 
     logger.info('[Budget] Reserved credits', {
       amount,
       referenceType,
       referenceId,
       programId,
-    });
-    return { success: true, reservationId };
+    })
+    return { success: true, reservationId }
   } catch (error) {
     logger.error('[Budget] Error reserving budget', {
       error,
       programId,
       referenceType,
       referenceId,
-    });
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
+    })
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
 }
 
@@ -403,32 +402,34 @@ export async function reserveBudget(
  * Confirm a budget reservation (called when award is issued)
  */
 export async function confirmBudgetReservation(
-  reservationId: string
+  reservationId: string,
 ): Promise<{ success: boolean; error?: string }> {
+  requireRewardsInstitutionalAuthority()
   try {
     const reservation = await db.query.budgetReservations.findFirst({
       where: eq(budgetReservations.id, reservationId),
-    });
+    })
 
     if (!reservation) {
-      return { success: false, error: 'Reservation not found' };
+      return { success: false, error: 'Reservation not found' }
     }
 
     if (reservation.status !== 'pending') {
-      return { success: false, error: `Reservation already ${reservation.status}` };
+      return { success: false, error: `Reservation already ${reservation.status}` }
     }
 
-    await db.update(budgetReservations)
+    await db
+      .update(budgetReservations)
       .set({ status: 'confirmed', updatedAt: new Date() })
-      .where(eq(budgetReservations.id, reservationId));
+      .where(eq(budgetReservations.id, reservationId))
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
-    logger.error('[Budget] Error confirming reservation', { error, reservationId });
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
+    logger.error('[Budget] Error confirming reservation', { error, reservationId })
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
 }
 
@@ -436,32 +437,34 @@ export async function confirmBudgetReservation(
  * Release reserved budget
  */
 export async function releaseReservedBudget(
-  reservationId: string
+  reservationId: string,
 ): Promise<{ success: boolean; error?: string }> {
+  requireRewardsInstitutionalAuthority()
   try {
     const reservation = await db.query.budgetReservations.findFirst({
       where: eq(budgetReservations.id, reservationId),
-    });
+    })
 
     if (!reservation) {
-      return { success: false, error: 'Reservation not found' };
+      return { success: false, error: 'Reservation not found' }
     }
 
     if (reservation.status === 'released') {
-      return { success: true };
+      return { success: true }
     }
 
-    await db.update(budgetReservations)
+    await db
+      .update(budgetReservations)
       .set({ status: 'released', updatedAt: new Date() })
-      .where(eq(budgetReservations.id, reservationId));
+      .where(eq(budgetReservations.id, reservationId))
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
-    logger.error('[Budget] Error releasing reservation', { error, reservationId });
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
+    logger.error('[Budget] Error releasing reservation', { error, reservationId })
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
 }
 
@@ -470,34 +473,36 @@ export async function releaseReservedBudget(
  */
 export async function releaseReservationsByReference(
   referenceType: string,
-  referenceId: string
+  referenceId: string,
 ): Promise<{ released: number; error?: string }> {
+  requireRewardsInstitutionalAuthority()
   try {
     const reservations = await db.query.budgetReservations.findMany({
       where: and(
         eq(budgetReservations.referenceType, referenceType),
         eq(budgetReservations.referenceId, referenceId),
-        ne(budgetReservations.status, 'released')
+        ne(budgetReservations.status, 'released'),
       ),
-    });
+    })
 
     for (const reservation of reservations) {
-      await db.update(budgetReservations)
+      await db
+        .update(budgetReservations)
         .set({ status: 'released', updatedAt: new Date() })
-        .where(eq(budgetReservations.id, reservation.id));
+        .where(eq(budgetReservations.id, reservation.id))
     }
 
-    return { released: reservations.length };
+    return { released: reservations.length }
   } catch (error) {
     logger.error('[Budget] Error releasing reservations', {
       error,
       referenceType,
       referenceId,
-    });
-    return { 
+    })
+    return {
       released: 0,
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
 }
 
@@ -506,25 +511,26 @@ export async function releaseReservationsByReference(
  */
 export async function getBudgetStatus(
   programId: string,
-  orgId: string
+  orgId: string,
 ): Promise<{
-  envelope: RewardBudgetEnvelope | null;
-  totalBudget: number;
-  used: number;
-  reserved: number;
-  available: number;
-  reservationCount: number;
+  envelope: RewardBudgetEnvelope | null
+  totalBudget: number
+  used: number
+  reserved: number
+  available: number
+  reservationCount: number
 }> {
-  const now = new Date();
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
 
   const envelope = await db.query.rewardBudgetEnvelopes.findFirst({
     where: and(
       eq(rewardBudgetEnvelopes.programId, programId),
       eq(rewardBudgetEnvelopes.orgId, orgId),
       lte(rewardBudgetEnvelopes.startsAt, now),
-      gte(rewardBudgetEnvelopes.endsAt, now)
+      gte(rewardBudgetEnvelopes.endsAt, now),
     ),
-  });
+  })
 
   if (!envelope) {
     return {
@@ -534,18 +540,18 @@ export async function getBudgetStatus(
       reserved: 0,
       available: 0,
       reservationCount: 0,
-    };
+    }
   }
 
   const reservations = await db.query.budgetReservations.findMany({
     where: and(
       eq(budgetReservations.poolId, envelope.id),
       ne(budgetReservations.status, 'released'),
-      ne(budgetReservations.status, 'expired')
+      ne(budgetReservations.status, 'expired'),
     ),
-  });
+  })
 
-  const totalReserved = reservations.reduce((sum, r) => sum + (r.reservedAmount || 0), 0);
+  const totalReserved = reservations.reduce((sum, r) => sum + (r.reservedAmount || 0), 0)
 
   return {
     envelope,
@@ -554,45 +560,47 @@ export async function getBudgetStatus(
     reserved: totalReserved,
     available: envelope.amountLimit - envelope.amountUsed - totalReserved,
     reservationCount: reservations.length,
-  };
+  }
 }
 
 /**
  * Clean up expired reservations
  */
 export async function cleanupExpiredReservations(): Promise<{
-  cleaned: number;
-  released: number;
+  cleaned: number
+  released: number
 }> {
-  const now = new Date();
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
 
   const expiredReservationConditions: SQL[] = [
     ne(budgetReservations.status, 'released'),
     ne(budgetReservations.status, 'expired'),
     lte(budgetReservations.expiresAt, now),
-  ];
+  ]
 
-  const expiredReservationWhere = and(...expiredReservationConditions);
+  const expiredReservationWhere = and(...expiredReservationConditions)
   if (!expiredReservationWhere) {
-    return { cleaned: 0, released: 0 };
+    return { cleaned: 0, released: 0 }
   }
 
   const expiredReservations = await db.query.budgetReservations.findMany({
     where: expiredReservationWhere,
-  });
+  })
 
-  let released = 0;
+  let released = 0
   for (const reservation of expiredReservations) {
-    await db.update(budgetReservations)
+    await db
+      .update(budgetReservations)
       .set({ status: 'expired', updatedAt: new Date() })
-      .where(eq(budgetReservations.id, reservation.id));
-    released += reservation.reservedAmount || 0;
+      .where(eq(budgetReservations.id, reservation.id))
+    released += reservation.reservedAmount || 0
   }
 
   return {
     cleaned: expiredReservations.length,
     released,
-  };
+  }
 }
 
 /**
@@ -601,9 +609,10 @@ export async function cleanupExpiredReservations(): Promise<{
 export async function checkBudgetWithReservations(
   programId: string,
   orgId: string,
-  requestedAmount: number
+  requestedAmount: number,
 ): Promise<BudgetCheckResult> {
-  const status = await getBudgetStatus(programId, orgId);
+  requireRewardsInstitutionalAuthority()
+  const status = await getBudgetStatus(programId, orgId)
 
   if (!status.envelope) {
     return {
@@ -611,7 +620,7 @@ export async function checkBudgetWithReservations(
       availableBudget: requestedAmount,
       reservedBudget: 0,
       totalBudget: requestedAmount,
-    };
+    }
   }
 
   return {
@@ -620,32 +629,32 @@ export async function checkBudgetWithReservations(
     reservedBudget: status.reserved,
     totalBudget: status.totalBudget,
     envelopeId: status.envelope.id,
-  };
+  }
 }
 
 /**
  * Get all active reservations
  */
 export async function getActiveReservations(poolId?: string) {
-  const _now = new Date();
-  
+  requireRewardsInstitutionalAuthority()
+  const _now = new Date()
+
   const conditions: SQL[] = [
     ne(budgetReservations.status, 'released'),
     ne(budgetReservations.status, 'expired'),
-  ];
+  ]
 
   if (poolId) {
-    conditions.push(eq(budgetReservations.poolId, poolId));
+    conditions.push(eq(budgetReservations.poolId, poolId))
   }
 
-  const whereClause = and(...conditions);
+  const whereClause = and(...conditions)
   if (!whereClause) {
-    return [];
+    return []
   }
 
   return await db.query.budgetReservations.findMany({
     where: whereClause,
     orderBy: [asc(budgetReservations.expiresAt)],
-  });
+  })
 }
-

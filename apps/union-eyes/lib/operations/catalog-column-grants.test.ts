@@ -49,6 +49,7 @@ function approvedRows() {
         column_name: column,
         role_name: grant.role,
         privilege_type: grant.privilege,
+        is_grantable: false,
       })
     }
   }

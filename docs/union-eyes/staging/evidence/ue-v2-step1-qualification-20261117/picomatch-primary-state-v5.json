@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-11-18T00:21:42.712821+00:00",
+  "sources": [
+    {
+      "url": "https://registry.npmjs.org/picomatch/latest",
+      "httpStatus": 200,
+      "responseDate": "Wed, 18 Nov 2026 00:21:42 GMT",
+      "rawPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/picomatch-registry-raw-v5.json",
+      "rawSha256": "f5b19326b62bc9009139f82d9b3400421edf9fc0ade0212d49d1bac349659d77",
+      "state": {
+        "name": "picomatch",
+        "version": "4.0.7",
+        "dist": {
+          "shasum": "6313360034ccb36b3dc61ecbdff78121f90fe21f",
+          "tarball": "https://registry.npmjs.org/picomatch/-/picomatch-4.0.7.tgz",
+          "fileCount": 10,
+          "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+          "signatures": [
+            {
+              "sig": "MEQCIDeMRsq78AZoXJyPEawvv8JPPk7eIeoZRHU3VVnx4FUFAiAtcTcxKUlp2um5SNhGRRFGN8v1oGVjwBoiQBVBFbkk3A==",
+              "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+            },
+            {
+              "sig": "MEUCIFTk5VYWLeXAIebu2UWpaOQ5z72vxnbIe1t8ICKz/cuAAiEAp9RKfBDmwsNgt/m6Rs5cwKMCDQPoDAQTy408DJpDhVs=",
+              "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+            }
+          ],
+          "unpackedSize": 93759
+        }
+      }
+    },
+    {
+      "url": "https://api.github.com/advisories/GHSA-fc5q-39xc-vjpf",
+      "httpStatus": 200,
+      "responseDate": "Wed, 18 Nov 2026 00:21:42 GMT",
+      "rawPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/picomatch-ghsa-raw-v5.json",
+      "rawSha256": "cc99706e61047047b6690db94abb98b5940d007196775c12902c0f79d8aedbd5",
+      "state": {
+        "ghsa_id": "GHSA-fc5q-39xc-vjpf",
+        "cve_id": "CVE-2026-112366",
+        "severity": "high",
+        "updated_at": "2026-11-17T15:56:44Z",
+        "withdrawn_at": null,
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "npm",
+              "name": "picomatch"
+            },
+            "vulnerable_version_range": "<= 4.0.7",
+            "first_patched_version": null,
+            "vulnerable_functions": []
+          }
+        ]
+      }
+    }
+  ],
+  "conclusion": "No waiver or package-version substitution; current raw audit remains authoritative."
+}

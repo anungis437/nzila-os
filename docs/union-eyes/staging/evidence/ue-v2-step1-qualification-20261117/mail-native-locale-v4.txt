@@ -1,0 +1,9 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  15:47:15
+   Duration  10.28s (tests 92%, import 6%, transform 2%)
+

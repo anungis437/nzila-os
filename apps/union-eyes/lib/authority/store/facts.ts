@@ -10,7 +10,7 @@
  * Loading is fail-closed: a row that cannot be mapped faithfully throws, and the
  * enforcement wrapper turns that into a deny.
  */
-import { assessMandate } from '../common'
+import { withAppointmentCapacities } from '../common'
 import type { IssuanceApproval, IssuanceRule } from '../issuance'
 import type {
   ApprovalRequestFacts,
@@ -134,31 +134,6 @@ export interface LoadFactsInput {
 }
 
 /**
- * Appointment-only capacities are earned by a LIVE mandate, never by a role
- * label. They remain eligibility only: the mandate is still what grants access.
- */
-function withAppointmentCapacities(
-  memberships: readonly Membership[],
-  mandates: readonly Mandate[],
-  me: string,
-  org: string,
-  now: Date,
-): Membership[] {
-  const earned = new Set<Capacity>()
-  for (const m of mandates) {
-    if (m.principalUserId !== me || !assessMandate(m, org, now).effective) continue
-    if (m.kind === 'financial' && m.powers.includes('audit')) earned.add('auditor')
-    if (m.kind === 'governance_review') earned.add('governance_reviewer')
-  }
-  if (earned.size === 0) return [...memberships]
-  return memberships.map((mem) =>
-    mem.userId === me && mem.organizationId === org
-      ? { ...mem, capacities: [...new Set<Capacity>([...mem.capacities, ...earned])] }
-      : mem,
-  )
-}
-
-/**
  * Loads every fact the kernel needs to decide for one principal. Delegators of
  * the principal's live delegations are loaded too (membership, mandates,
  * recusals), because a delegate's authority is only as good as the delegator's.
@@ -173,9 +148,9 @@ export async function loadAuthorityFacts(
 
   const delegations = (
     await exec.query<Row>(
-      `SELECT d.*, (SELECT a.accepted_at FROM ue_authority_acceptances a
+      `SELECT d.*, (SELECT a.accepted_at FROM public.ue_authority_acceptances a
                      WHERE a.organization_id = d.organization_id AND a.instrument_type = 'delegation' AND a.instrument_id = d.id) AS accepted_at
-         FROM ue_authority_delegations d
+         FROM public.ue_authority_delegations d
         WHERE d.organization_id = $1 AND d.delegate_user_id = $2 AND d.status = 'active' AND d.revoked_at IS NULL`,
       [org, me],
     )
@@ -185,9 +160,9 @@ export async function loadAuthorityFacts(
 
   const mandates = (
     await exec.query<Row>(
-      `SELECT m.*, (SELECT a.accepted_at FROM ue_authority_acceptances a
+      `SELECT m.*, (SELECT a.accepted_at FROM public.ue_authority_acceptances a
                      WHERE a.organization_id = m.organization_id AND a.instrument_type = 'mandate' AND a.instrument_id = m.id) AS accepted_at
-         FROM ue_authority_mandates m
+         FROM public.ue_authority_mandates m
         WHERE m.organization_id = $1 AND m.principal_user_id = ANY($2::text[]) AND m.status = 'active' AND m.revoked_at IS NULL`,
       [org, people],
     )
@@ -196,9 +171,9 @@ export async function loadAuthorityFacts(
   const relationships = (
     input.resource
       ? await exec.query<Row>(
-          `SELECT * FROM ue_authority_resource_relationships
+          `SELECT * FROM public.ue_authority_resource_relationships
            WHERE organization_id = $1 AND principal_user_id = $2 AND resource_type = $3 AND resource_id = $4
-             AND status = 'active' AND revoked_at IS NULL`,
+             AND status = 'active' AND revoked_at IS NULL AND origin='explicit' AND relation IN ('owner','assignee','collaborator')`,
           [org, me, input.resource.type, input.resource.id],
         )
       : { rows: [] as Row[] }
@@ -206,8 +181,8 @@ export async function loadAuthorityFacts(
 
   const recusals = (
     await exec.query<Row>(
-      `SELECT * FROM ue_authority_recusals
-       WHERE organization_id = $1 AND principal_user_id = ANY($2::text[]) AND lifted_at IS NULL`,
+      `SELECT * FROM public.ue_authority_recusals
+       WHERE organization_id = $1 AND principal_user_id = ANY($2::text[])`,
       [org, people],
     )
   ).rows.map(mapRecusal)
@@ -215,15 +190,16 @@ export async function loadAuthorityFacts(
   const consents = (
     input.resource?.type === 'workaid_matter'
       ? await exec.query<Row>(
-          `SELECT * FROM ue_authority_disclosure_consents
+          `SELECT * FROM public.ue_authority_disclosure_consents
            WHERE organization_id = $1 AND matter_id = $2 AND revoked_at IS NULL`,
           [org, input.resource.id],
         )
       : { rows: [] as Row[] }
   ).rows.map(mapConsent)
 
+  const sourceMemberships = await membershipSource(exec, org, people)
   const memberships = withAppointmentCapacities(
-    await membershipSource(exec, org, people),
+    sourceMemberships,
     mandates,
     me,
     org,
@@ -232,6 +208,7 @@ export async function loadAuthorityFacts(
 
   return {
     principal: { userId: me, authenticated: input.authenticated },
+    sourceMemberships,
     memberships,
     mandates,
     relationships,
@@ -248,12 +225,12 @@ export async function loadApprovalRequestFacts(
 ): Promise<ApprovalRequestFacts | null> {
   if (!isUuid(organizationId) || !isUuid(requestId)) return null
   const req = (
-    await exec.query<Row>(`SELECT * FROM ue_authority_approval_requests WHERE organization_id = $1 AND id = $2`, [organizationId, requestId])
+    await exec.query<Row>(`SELECT * FROM public.ue_authority_approval_requests WHERE organization_id = $1 AND id = $2`, [organizationId, requestId])
   ).rows[0]
   if (!req) return null
   const decisions = (
     await exec.query<Row>(
-      `SELECT approver_user_id, authority_line_user_id, decision FROM ue_authority_approval_decisions
+      `SELECT approver_user_id, authority_line_user_id, decision FROM public.ue_authority_approval_decisions
        WHERE organization_id = $1 AND approval_request_id = $2 ORDER BY decided_at, id`,
       [organizationId, requestId],
     )
@@ -290,9 +267,9 @@ export async function loadRelationships(
 ): Promise<ResourceRelationship[]> {
   return (
     await exec.query<Row>(
-      `SELECT * FROM ue_authority_resource_relationships
+      `SELECT * FROM public.ue_authority_resource_relationships
         WHERE organization_id = $1 AND principal_user_id = $2 AND resource_type = $3 AND resource_id = $4
-          AND status = 'active' AND revoked_at IS NULL`,
+          AND status = 'active' AND revoked_at IS NULL AND origin='explicit' AND relation IN ('owner','assignee','collaborator')`,
       [organizationId, principalUserId, resourceType, resourceId],
     )
   ).rows.map(mapRelationship)
@@ -327,7 +304,7 @@ export async function loadActiveIssuanceRule(
   if (!isUuid(organizationId)) return null
   const rows = (
     await exec.query<Row>(
-      `SELECT * FROM ue_authority_issuance_rules
+      `SELECT * FROM public.ue_authority_issuance_rules
         WHERE organization_id = $1 AND domain = $2 AND operation = $3 AND status = 'active'`,
       [organizationId, domain, operation],
     )
@@ -344,12 +321,12 @@ export async function loadIssuanceApproval(
 ): Promise<{ status: IssuanceApproval['status']; approvingLines: string[]; subjectType: string; subjectId: string } | null> {
   if (!isUuid(organizationId) || !isUuid(requestId)) return null
   const req = (
-    await exec.query<Row>(`SELECT status, subject_type, subject_id FROM ue_authority_approval_requests WHERE organization_id = $1 AND id = $2`, [organizationId, requestId])
+    await exec.query<Row>(`SELECT status, subject_type, subject_id FROM public.ue_authority_approval_requests WHERE organization_id = $1 AND id = $2`, [organizationId, requestId])
   ).rows[0]
   if (!req) return null
   const lines = (
     await exec.query<Row>(
-      `SELECT DISTINCT authority_line_user_id FROM ue_authority_approval_decisions
+      `SELECT DISTINCT authority_line_user_id FROM public.ue_authority_approval_decisions
         WHERE organization_id = $1 AND approval_request_id = $2 AND decision = 'approved'`,
       [organizationId, requestId],
     )
@@ -366,9 +343,9 @@ export async function loadIssuanceApproval(
 export async function loadHolderMandates(exec: SqlExecutor, organizationId: string, holderUserId: string): Promise<Mandate[]> {
   return (
     await exec.query<Row>(
-      `SELECT m.*, (SELECT a.accepted_at FROM ue_authority_acceptances a
+      `SELECT m.*, (SELECT a.accepted_at FROM public.ue_authority_acceptances a
                      WHERE a.organization_id = m.organization_id AND a.instrument_type = 'mandate' AND a.instrument_id = m.id) AS accepted_at
-         FROM ue_authority_mandates m
+         FROM public.ue_authority_mandates m
         WHERE m.organization_id = $1 AND m.principal_user_id = $2 AND m.status = 'active' AND m.revoked_at IS NULL`,
       [organizationId, holderUserId],
     )

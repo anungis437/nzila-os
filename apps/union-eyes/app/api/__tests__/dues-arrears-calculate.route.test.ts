@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -23,6 +24,8 @@ async function loadRoute() {
   return import('../dues/arrears/calculate/route');
 }
 
+const REFUSAL = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
+
 describe('dues/arrears/calculate route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,17 +42,11 @@ describe('dues/arrears/calculate route', () => {
     await expect(GET({ organizationId: null })).rejects.toMatchObject({ status: 400 });
   });
 
-  it('GET returns arrears rows', async () => {
-    const rows = [{ id: 'a1', totalOwed: '150.00' }];
-    const where = vi.fn().mockResolvedValue(rows);
-    const from = vi.fn().mockReturnValue({ where });
-    m.db.select.mockReturnValue({ from });
-
+  it('GET is refused with 501 and reads nothing, even for a valid organization', async () => {
     const { GET } = await loadRoute();
-    const result = await GET({ organizationId: 'org_1' });
 
-    expect(result).toEqual({ data: rows });
-    expect(where).toHaveBeenCalledTimes(1);
+    await expect(GET({ organizationId: 'org_1' })).rejects.toMatchObject(REFUSAL);
+    expect(m.db.select).not.toHaveBeenCalled();
   });
 
   it('POST throws 400 when organizationId is missing', async () => {
@@ -58,26 +55,11 @@ describe('dues/arrears/calculate route', () => {
     await expect(POST({ organizationId: null, userId: 'u1' })).rejects.toMatchObject({ status: 400 });
   });
 
-  it('POST returns arrears summary and logs completion', async () => {
-    const summary = {
-      totalMembers: 10,
-      currentCount: 7,
-      warningCount: 1,
-      suspendedCount: 1,
-      badDebtCount: 1,
-      totalOwed: '1200.00',
-      totalOver30: '800.00',
-      totalOver60: '500.00',
-      totalOver90: '250.00',
-    };
-    const where = vi.fn().mockResolvedValue([summary]);
-    const from = vi.fn().mockReturnValue({ where });
-    m.db.select.mockReturnValue({ from });
-
+  it('POST is refused with 501, reads nothing and logs no completion', async () => {
     const { POST } = await loadRoute();
-    const result = await POST({ organizationId: 'org_1', userId: 'u1' });
 
-    expect(result).toEqual({ data: summary });
-    expect(m.logger.info).toHaveBeenCalledWith('Arrears summary calculated', { organizationId: 'org_1' });
+    await expect(POST({ organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject(REFUSAL);
+    expect(m.db.select).not.toHaveBeenCalled();
+    expect(m.logger.info).not.toHaveBeenCalled();
   });
 });

@@ -201,6 +201,8 @@ export interface DisclosureConsent {
 export interface AuthorityFacts {
   principal: Principal
   memberships: readonly Membership[]
+  /** Canonical membership rows before appointment-derived eligibility; loaders retain these for final-time evaluation. */
+  sourceMemberships?: readonly Membership[]
   mandates: readonly Mandate[]
   relationships: readonly ResourceRelationship[]
   delegations: readonly Delegation[]

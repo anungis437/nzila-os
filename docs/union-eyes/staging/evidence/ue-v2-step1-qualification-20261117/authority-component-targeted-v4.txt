@@ -1,0 +1,12 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+
+ Test Files  26 passed (26)
+      Tests  491 passed (491)
+   Start at  15:22:38
+   Duration  9.63s (tests 68%, import 22%, transform 9%)
+
+    Isolate  26 workers spawned · ~239ms startup each (spawn + environment, per file)
+             at least ~648ms faster with isolate: false — reuses workers across files instead of one per file
+

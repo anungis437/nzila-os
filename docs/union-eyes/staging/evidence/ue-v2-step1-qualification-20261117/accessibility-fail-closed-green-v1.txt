@@ -1,0 +1,34 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > createAudit inserts and returns the audit 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > records a completed single-page scan only after the scanner actually returns no violations 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional playwright scanner dependency is missing 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional @axe-core/playwright scanner dependency is missing 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner launch fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner newPage fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner goto fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner analyze fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner close fails and closes any launched browser 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit saves issues when violations exist 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit handles scan errors and rethrows 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit throws when audit not found 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getAudit returns audit and issues 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getAudit throws when not found 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getOpenIssues applies all optional filters 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getOpenIssues works without filters 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > resolveIssue updates the issue 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkColorContrast evaluates AA/AAA/fail 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkKeyboardAccessibility flags inaccessible interactive elements 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkAltText flags missing and short alt text 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkHeadingHierarchy detects missing headings and skips 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > cannot infer WCAG compliance from an empty issue register with no audit evidence 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > keeps an empty issue report unverified after an actual scanner failure 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > does not turn a completed single-page automated scan into full WCAG coverage 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > generateComplianceReport summarizes issues and recommendations 0ms
+
+ Test Files  1 passed (1)
+      Tests  25 passed (25)
+   Start at  19:03:15
+   Duration  226ms (transform 53%, import 21%, tests 19%, setup 4%, worker 3%)
+

@@ -1,0 +1,25 @@
+error: permission denied for schema pg_catalog
+    at /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/node_modules/pg/lib/client.js:631:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async hook (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/manifest-trace.ts:193:5)
+    at async execute (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/installer.ts:153:15)
+    at async createCurrentState (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/installer.ts:181:10)
+    at async runCleanRoom (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/clean-room.ts:206:5) {
+  length: 103,
+  severity: 'ERROR',
+  code: '42501',
+  detail: undefined,
+  hint: undefined,
+  position: '14',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'aclchk.c',
+  line: '2812',
+  routine: 'aclcheck_error'
+}

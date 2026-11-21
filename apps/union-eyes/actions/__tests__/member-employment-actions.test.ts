@@ -1,124 +1,118 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-const ORG = '11111111-1111-4111-8111-111111111111'
-const grant = {
-  ok: true as const,
-  userId: 'user-admin-a',
-  organizationId: ORG,
-  capability: 'administer' as const,
-  discloseCompensation: false,
-}
-
-const mocks = vi.hoisted(() => ({
-  authorize: vi.fn(),
-  revalidatePath: vi.fn(),
-  loggerError: vi.fn(),
-  q: {
-    createJobClassification: vi.fn(),
-    getJobClassificationsByOrganization: vi.fn(),
-    updateJobClassification: vi.fn(),
-  },
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { canonicalActionScope, ACTION_ORG, ACTION_ACTOR } from './fixtures/canonical-action-scope'
+import { UserRole } from '@/lib/auth/roles'
+import { assertRegisteredEmploymentGrant } from '@/lib/member-employment/authorize-employment-access'
+vi.mock('server-only', () => ({}))
+const port = vi.hoisted(() => ({ create: vi.fn(), list: vi.fn(), update: vi.fn() }))
+vi.mock('@/db/queries/member-employment-queries', async (original) => ({
+  ...(await original<typeof import('@/db/queries/member-employment-queries')>()),
+  createJobClassification: port.create,
+  getJobClassificationsByOrganization: port.list,
+  updateJobClassification: port.update,
 }))
-
-vi.mock('@/lib/member-employment/authorize-employment-access', () => ({
-  authorizeEmploymentAccess: mocks.authorize,
+// Audit sink only; membership, role and sealed grant decisions remain real.
+vi.mock('@/lib/audit-logger', async (original) => ({
+  ...(await original<typeof import('@/lib/audit-logger')>()),
+  auditLog: vi.fn(),
 }))
-vi.mock('@/db/queries/member-employment-queries', () => ({
-  ...mocks.q,
-  EmploymentBoundaryError: class EmploymentBoundaryError extends Error {
-    constructor(message: string) {
-      super(message)
-      this.name = 'EmploymentBoundaryError'
-    }
-  },
-}))
-vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }))
-vi.mock('@/lib/logger', () => ({
-  logger: { error: mocks.loggerError, warn: vi.fn(), info: vi.fn() },
-}))
-
 import * as actions from '../member-employment-actions'
-
-const CLASSIFICATION = { jobTitle: 'Electrician', jobCode: 'ELEC-J01' }
-
+const input = { organizationId: ACTION_ORG, jobTitle: 'Electrician', jobCode: 'ELEC-J01' }
 beforeEach(() => {
+  process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
   vi.clearAllMocks()
-  mocks.authorize.mockResolvedValue(grant)
-  for (const fn of Object.values(mocks.q)) fn.mockResolvedValue({ id: 'row' })
-  mocks.q.getJobClassificationsByOrganization.mockResolvedValue([{ id: 'row' }])
+  port.create.mockImplementation(async (grant) => {
+    assertRegisteredEmploymentGrant(grant)
+    return { id: 'classification' }
+  })
+  port.list.mockImplementation(async (grant) => {
+    assertRegisteredEmploymentGrant(grant)
+    return [{ id: 'classification' }]
+  })
+  port.update.mockImplementation(async (grant) => {
+    assertRegisteredEmploymentGrant(grant)
+    return { id: 'classification' }
+  })
 })
-
-describe('job classification actions', () => {
-  it('exports exactly the actions the mounted screen calls', () => {
+afterEach(() => {
+  delete process.env.UE_CANONICAL_BOOTSTRAP_V2
+})
+describe('classification actions consume actual canonical organizational authority', () => {
+  it('preserves the three mounted actions', () => {
     expect(Object.keys(actions).sort()).toEqual([
       'createJobClassificationAction',
       'getJobClassificationsByOrganizationAction',
       'updateJobClassificationAction',
     ])
   })
-
-  it('denies unauthenticated and unauthorized calls before a query', async () => {
-    mocks.authorize.mockResolvedValue({ ok: false, message: 'Unauthorized' })
-    const unauthenticated = await actions.createJobClassificationAction({ organizationId: ORG, ...CLASSIFICATION } as never)
-    expect(unauthenticated).toEqual({ isSuccess: false, message: 'Unauthorized' })
-
-    mocks.authorize.mockResolvedValue({ ok: false, message: 'Forbidden' })
-    expect(await actions.getJobClassificationsByOrganizationAction(ORG)).toEqual({ isSuccess: false, message: 'Forbidden' })
-    expect(await actions.updateJobClassificationAction('c1', { organizationId: ORG } as never)).toEqual({
-      isSuccess: false,
-      message: 'Forbidden',
+  it('passes a real sealed principal/org grant to the supported classification writer', async () => {
+    const result = await canonicalActionScope(() => actions.createJobClassificationAction(input), {
+      role: UserRole.ADMIN,
     })
-    expect(mocks.q.createJobClassification).not.toHaveBeenCalled()
-    expect(mocks.q.getJobClassificationsByOrganization).not.toHaveBeenCalled()
-    expect(mocks.q.updateJobClassification).not.toHaveBeenCalled()
+    expect(result).toMatchObject({ isSuccess: true, data: { id: 'classification' } })
+    expect(port.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: ACTION_ACTOR,
+        organizationId: ACTION_ORG,
+        capability: 'administer',
+        discloseCompensation: false,
+      }),
+      input,
+    )
   })
-
-  it('passes the authorized principal and organization into a permitted write', async () => {
-    const result = await actions.createJobClassificationAction({ organizationId: ORG, ...CLASSIFICATION } as never)
-
-    expect(result).toMatchObject({ isSuccess: true, data: { id: 'row' } })
-    expect(mocks.authorize).toHaveBeenCalledWith(ORG, 'administer')
-    expect(mocks.q.createJobClassification).toHaveBeenCalledWith(grant, expect.objectContaining({ organizationId: ORG }))
-
-    await actions.updateJobClassificationAction('c1', { organizationId: ORG, jobTitle: 'Lead' } as never)
-    expect(mocks.q.updateJobClassification).toHaveBeenCalledWith(grant, 'c1', expect.objectContaining({ jobTitle: 'Lead' }))
+  it('retains the list filter and supported update semantics', async () => {
+    await canonicalActionScope(
+      () => actions.getJobClassificationsByOrganizationAction(ACTION_ORG, false),
+      { role: UserRole.ADMIN },
+    )
+    expect(port.list).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: ACTION_ORG }),
+      false,
+    )
+    const update = { organizationId: ACTION_ORG, jobTitle: 'Lead electrician' }
+    await canonicalActionScope(
+      () => actions.updateJobClassificationAction('classification', update),
+      { role: UserRole.ADMIN },
+    )
+    expect(port.update).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: ACTION_ACTOR }),
+      'classification',
+      update,
+    )
   })
-
-  it('lists the classifications of the authorized organization, active ones by default', async () => {
-    expect(await actions.getJobClassificationsByOrganizationAction(ORG)).toMatchObject({ isSuccess: true, data: [{ id: 'row' }] })
-    expect(mocks.q.getJobClassificationsByOrganization).toHaveBeenCalledWith(grant, true)
-
-    await actions.getJobClassificationsByOrganizationAction(ORG, false)
-    expect(mocks.q.getJobClassificationsByOrganization).toHaveBeenLastCalledWith(grant, false)
+  it('refuses foreign organization substitution before any query', async () => {
+    const foreign = '22222222-2222-4222-8222-222222222222'
+    expect(
+      await canonicalActionScope(
+        () => actions.createJobClassificationAction({ ...input, organizationId: foreign }),
+        { role: UserRole.ADMIN },
+      ),
+    ).toMatchObject({ isSuccess: false, message: 'Forbidden' })
+    expect(port.create).not.toHaveBeenCalled()
   })
-
-  it('reports a failed read as a failure, never as an empty list', async () => {
-    mocks.q.getJobClassificationsByOrganization.mockRejectedValue(new Error('permission denied for table job_classifications'))
-
-    const result = await actions.getJobClassificationsByOrganizationAction(ORG)
-
-    expect(result).toEqual({ isSuccess: false, message: 'Failed to retrieve job classifications' })
-    expect(result).not.toHaveProperty('data')
+  it('does not turn an ordinary member into an employment administrator', async () => {
+    expect(
+      await canonicalActionScope(() =>
+        actions.getJobClassificationsByOrganizationAction(ACTION_ORG),
+      ),
+    ).toMatchObject({ isSuccess: false, message: 'Forbidden' })
+    expect(port.list).not.toHaveBeenCalled()
   })
-
-  it('shows the boundary error of the query layer and nothing a driver said', async () => {
-    const { EmploymentBoundaryError } = await import('@/db/queries/member-employment-queries')
-    mocks.q.updateJobClassification.mockRejectedValueOnce(new EmploymentBoundaryError('Job classification not found'))
-    expect(await actions.updateJobClassificationAction('c1', { organizationId: ORG } as never)).toEqual({
-      isSuccess: false,
-      message: 'Job classification not found',
-    })
-
-    mocks.q.createJobClassification.mockRejectedValueOnce(new Error('Failed query: insert into "job_classifications" params: ELEC-J01'))
-    const created = await actions.createJobClassificationAction({ organizationId: ORG, ...CLASSIFICATION } as never)
-    expect(created).toEqual({ isSuccess: false, message: 'Failed to create job classification' })
-    expect(JSON.stringify(mocks.loggerError.mock.calls)).not.toContain('ELEC-J01')
+  it('refuses expired canonical authority before effects', async () => {
+    expect(
+      await canonicalActionScope(() => actions.createJobClassificationAction(input), {
+        role: UserRole.ADMIN,
+        expiresAt: new Date(0),
+      }),
+    ).toMatchObject({ isSuccess: false })
+    expect(port.create).not.toHaveBeenCalled()
   })
-
-  it('does not revalidate a path: the screen fetches its list on demand', async () => {
-    await actions.createJobClassificationAction({ organizationId: ORG, ...CLASSIFICATION } as never)
-    await actions.updateJobClassificationAction('c1', { organizationId: ORG } as never)
-
-    expect(mocks.revalidatePath).not.toHaveBeenCalled()
+  it('reports a read outage truthfully and never returns an empty success', async () => {
+    port.list.mockRejectedValueOnce(new Error('private database diagnosis'))
+    expect(
+      await canonicalActionScope(
+        () => actions.getJobClassificationsByOrganizationAction(ACTION_ORG),
+        { role: UserRole.ADMIN },
+      ),
+    ).toEqual({ isSuccess: false, message: 'Failed to retrieve job classifications' })
   })
 })

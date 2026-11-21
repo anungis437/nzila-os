@@ -8,11 +8,12 @@
  */
 import { withApi } from '@/lib/api/framework';
 import { ApiError } from '@/lib/api/errors';
-import { db } from '@/db/db';
 import { claims } from '@/db/schema';
 import { organizationMembers } from '@/db/schema-organizations';
 import { and, eq, or, desc, isNull } from 'drizzle-orm';
 import { caseReadScope, getCaseActor } from '@/lib/cases/case-authorization';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,8 @@ export const GET = withApi(
     if (!UUID.test(params.id)) throw ApiError.notFound('Member');
     const actor = await getCaseActor();
 
-    const [member] = await db
+    return withRLSContext({ organizationId: actor.organizationId }, async tx => {
+    const [member] = await tx
       .select({ userId: organizationMembers.userId })
       .from(organizationMembers)
       .where(
@@ -46,7 +48,7 @@ export const GET = withApi(
       .limit(1);
     if (!member) throw ApiError.notFound('Member');
 
-    return db
+    const candidates = await tx
       .select({
         id: claims.id,
         claimId: claims.claimId,
@@ -60,5 +62,8 @@ export const GET = withApi(
       .from(claims)
       .where(and(caseReadScope(actor), or(eq(claims.memberId, member.userId), eq(claims.assignedTo, member.userId))))
       .orderBy(desc(claims.createdAt), desc(claims.id));
+    const decisions = await decideCaseCapabilitiesBatch(tx, { ...actor, caseIds: candidates.map(row => row.claimId) });
+    return candidates.filter(row => decisions.get(row.claimId)?.['case:read'].effect === 'allow');
+    });
   }
 );

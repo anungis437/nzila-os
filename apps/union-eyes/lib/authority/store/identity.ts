@@ -13,7 +13,7 @@
  * What remains here is the membership FACT source: a role maps to eligibility-only capacities, and
  * every row found (including duplicates) is returned so the kernel can fail closed on ambiguity.
  */
-import { capacitiesForRole } from '../capacity'
+import { capacitiesForMembership } from '../capacity'
 import type { Membership, MembershipStatus } from '../ontology'
 import { isPrincipalId, isUuid, type SqlExecutor } from './executor'
 import type { MembershipSource } from './facts'
@@ -56,7 +56,7 @@ export function mapMembershipRows(rows: readonly Row[]): Membership[] {
       userId: String(r.user_id),
       organizationId: String(r.organization_id),
       status: membershipStatus(r),
-      capacities: capacitiesForRole(r.role as string | null),
+      capacities: capacitiesForMembership(r.role as string | null, String(r.organization_id)),
       verifiedAt: null,
     }),
   )

@@ -5,12 +5,12 @@
  */
 'use server'
 
-import { auth } from '@nzila/platform-auth/entra/server'
+import { resolveOrgContext } from '../resolve-org'
+import { actionRows } from '../../queries/partner-action-facts'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { revalidatePath } from 'next/cache'
-import { buildPartnerEvidencePack } from '@/lib/evidence'
 
 /* ─── Types ─── */
 
@@ -74,26 +74,23 @@ const CERT_TRACKS: Omit<CertTrack, 'completedModules' | 'status' | 'completedAt'
 /* ─── Queries ─── */
 
 export async function getCertProgress(): Promise<CertProgress> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const { actorId: userId } = await resolveOrgContext({ scope: 'personal' })
 
   try {
     // Fetch completion records
-    const completions = (await platformDb.execute(
+    const completions = actionRows<{ trackId: string; completedModules: string; status: string; completedAt: string | null }>(await platformDb.execute(
       sql`SELECT
         metadata->>'trackId' as "trackId",
         metadata->>'completedModules' as "completedModules",
         metadata->>'status' as status,
         metadata->>'completedAt' as "completedAt"
-      FROM audit_log
+      FROM public.audit_log
       WHERE action = 'cert.progress' AND actor_id = ${userId}
       ORDER BY created_at DESC`,
-    )) as unknown as {
-      rows: Array<{ trackId: string; completedModules: string; status: string; completedAt: string | null }>
-    }
+    ))
 
     const progressMap = new Map<string, { completedModules: number; status: string; completedAt: string | null }>()
-    for (const row of completions.rows ?? []) {
+    for (const row of completions) {
       if (!progressMap.has(row.trackId)) {
         progressMap.set(row.trackId, {
           completedModules: Number(row.completedModules ?? 0),
@@ -137,11 +134,10 @@ export async function completeModule(
   trackId: string,
   moduleIndex: number,
 ): Promise<{ success: boolean }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
+  const { actorId: userId } = await resolveOrgContext({ scope: 'personal' })
 
   const track = CERT_TRACKS.find((t) => t.id === trackId)
-  if (!track) return { success: false }
+  if (!track || !Number.isInteger(moduleIndex) || moduleIndex < 0 || moduleIndex >= track.modules) return { success: false }
 
   try {
     const completedModules = Math.min(moduleIndex + 1, track.modules)
@@ -149,9 +145,10 @@ export async function completeModule(
     const status = isCompleted ? 'completed' : 'in-progress'
 
     await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('cert.progress', ${userId}, 'certification', ${trackId},
+      sql`INSERT INTO public.audit_log (action, actor_id, entity_type, org_id, metadata)
+      VALUES ('cert.progress', ${userId}, 'certification', NULL,
         ${JSON.stringify({
+          recordType: 'personal_course_progress',
           trackId,
           completedModules,
           status,
@@ -160,14 +157,8 @@ export async function completeModule(
         })}::jsonb)`,
     )
 
-    if (isCompleted) {
-      await buildPartnerEvidencePack({
-        actionId: crypto.randomUUID(),
-        actionType: 'CERTIFICATION_COMPLETED',
-        orgId: trackId,
-        executedBy: userId,
-      })
-    }
+    // This is actor-owned learning progress, without an institutional
+    // certification, organization evidence pack or automatic tier change.
 
     logger.info('Cert module completed', { trackId, moduleIndex, completedModules, actorId: userId })
     revalidatePath('/portal/certifications')

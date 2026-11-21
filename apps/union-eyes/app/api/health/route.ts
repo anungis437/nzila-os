@@ -18,10 +18,29 @@ import { probeCache } from '@/lib/operations/service-probes'
 const APP = 'union-eyes'
 const logger = createLogger('union-eyes.health')
 
+/**
+ * Catalog admission inspects the live catalog (hundreds of relations and grants), roughly 0.7 s in a production build. Probes call
+ * health constantly, so a passing evaluation is shared for 30 s and concurrent probes wait on one evaluation. A failing result is
+ * never reused: every probe re-evaluates it, and a newly non-compliant catalog surfaces within 30 s.
+ */
+const CATALOG_ADMISSION_REUSE_MS = 30_000
+let catalogAdmission: { at: number; report: Promise<Awaited<ReturnType<typeof evaluateCatalogAdmission>>> } | null = null
+function currentCatalogAdmission() {
+  const now = Date.now()
+  if (catalogAdmission && now - catalogAdmission.at < CATALOG_ADMISSION_REUSE_MS) return catalogAdmission.report
+  const report = evaluateCatalogAdmission()
+  catalogAdmission = { at: now, report }
+  report.then(
+    (result) => { if (!result.ok && catalogAdmission?.report === report) catalogAdmission = null },
+    () => { if (catalogAdmission?.report === report) catalogAdmission = null },
+  )
+  return report
+}
+
 async function checkCatalogAuthority(): Promise<{ state: HealthCheckState; ms: number; error?: string; note?: string }> {
   const start = Date.now()
   try {
-    const report = await evaluateCatalogAdmission()
+    const report = await currentCatalogAdmission()
     if (!report.ok) {
       logger.error('catalog authority admission failed', {
         event: 'catalog_authority_admission_failed',

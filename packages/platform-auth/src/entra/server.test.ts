@@ -59,7 +59,7 @@ vi.mock('drizzle-orm', () => ({
   and: (...conditions: unknown[]) => conditions,
 }))
 
-import { auth, currentUser } from './server'
+import { auth, createRouteMatcher, currentUser } from './server'
 
 const user = {
   id: 'ue-qa-member-primary',
@@ -213,4 +213,21 @@ it('keeps ordinary opaque password sessions on the existing credential resolver'
   expect((await auth()).userId).toBe(user.id)
   expect(mocks.password).toHaveBeenCalledOnce()
   expect(mocks.select).not.toHaveBeenCalled()
+})
+
+describe('createRouteMatcher escaping', () => {
+  it('keeps existing pattern semantics', () => {
+    const m = createRouteMatcher(['/dashboard(.*)', '/:locale/page', '/api/health', '/a.b'])
+    expect(m('/dashboard/x')).toBe(true)
+    expect(m('/en-CA/page')).toBe(true)
+    expect(m('/api/health')).toBe(true)
+    expect(m('/a.b')).toBe(true)
+    expect(m('/aXb')).toBe(false)
+  })
+
+  it('treats a literal backslash in a pattern as a literal', () => {
+    const m = createRouteMatcher(['/a\\d'])
+    expect(m('/a\\d')).toBe(true)
+    expect(m('/a5')).toBe(false)
+  })
 })

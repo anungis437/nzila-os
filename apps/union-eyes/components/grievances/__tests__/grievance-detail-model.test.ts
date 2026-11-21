@@ -67,9 +67,9 @@ describe('maySetStatus: the authority the status route requires', () => {
   });
   const grievance = (status: string, primaryLroId: string | null, effectiveAccess: ReturnType<typeof access>) => ({ status, primaryLroId, effectiveAccess });
 
-  it('is held by the primary owner and by an active secondary LRO', () => {
-    expect(maySetStatus(grievance('filed', 'rep-1', access({ isPrimaryOwner: true, accessRole: 'primary_owner' })))).toBe(true);
-    expect(maySetStatus(grievance('filed', 'rep-1', access({ isSecondaryCollaborator: true, accessRole: 'secondary_lro' })))).toBe(true);
+  it('is held only by an explicit kernel transition projection', () => {
+    expect(maySetStatus(grievance('filed', 'rep-1', access({ isPrimaryOwner: true, accessRole: 'primary_owner', canTransition: true })))).toBe(true);
+    expect(maySetStatus(grievance('filed', 'rep-1', access({ isSecondaryCollaborator: true, accessRole: 'secondary_lro', canTransition: true })))).toBe(true);
   });
 
   it('is not held by a reviewer, a read-only collaborator or a representative with no relationship to the matter', () => {
@@ -78,8 +78,8 @@ describe('maySetStatus: the authority the status route requires', () => {
     expect(maySetStatus(grievance('filed', 'rep-1', access()))).toBe(false);
   });
 
-  it('is held by any representative for an intake nobody is assigned to, and not once one is', () => {
-    expect(maySetStatus(grievance('draft', null, access()))).toBe(true);
+  it('is not inferred from an unassigned intake', () => {
+    expect(maySetStatus(grievance('draft', null, access()))).toBe(false);
     expect(maySetStatus(grievance('draft', 'rep-1', access()))).toBe(false);
   });
 });

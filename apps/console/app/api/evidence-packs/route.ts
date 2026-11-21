@@ -1,3 +1,4 @@
+import { listPlatformEvidencePacks } from '@/lib/services/platform-assurance-service'
 /**
  * API — Evidence Packs
  * GET /api/evidence-packs — list evidence packs from DB
@@ -7,9 +8,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requirePlatformRole, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
-import { platformDb } from '@nzila/db/platform'
-import { evidencePacks } from '@nzila/db/schema'
-import { desc } from 'drizzle-orm'
 
 export async function GET(req: NextRequest) {
   return withRequestContext(req, () =>
@@ -17,10 +15,7 @@ export async function GET(req: NextRequest) {
       const auth = await requirePlatformRole('platform_admin', 'studio_admin')
       if (!auth.ok) return auth.response
 
-      const packs = await platformDb
-        .select()
-        .from(evidencePacks)
-        .orderBy(desc(evidencePacks.createdAt))
+      const packs = await listPlatformEvidencePacks()
 
       if (req.nextUrl.searchParams.get('download') === 'true') {
         return new NextResponse(JSON.stringify(packs, null, 2), {

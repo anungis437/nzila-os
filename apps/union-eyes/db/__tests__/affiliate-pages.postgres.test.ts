@@ -27,7 +27,10 @@ const URL = process.env.UE_AUTHORITY_COMBINED_URL
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
 vi.mock('@/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
 vi.mock('@/lib/db/with-rls-context', async () => (await import('./native-route-harness')).rlsContextModule)
-vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }))
+// The affiliate directory is read as it is in the legacy lineage (its own native proof); the remittance reflection is proved in canonical
+// mode, the mode of every current deployment, where the canonical source contains per_capita_remittances.
+const mode = vi.hoisted(() => ({ canonical: false }))
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => mode.canonical }))
 vi.mock('@/lib/api-auth-guard', () => ({
   ROLE_HIERARCHY: { member: 20, admin: 140, fed_staff: 160, fed_executive: 170, clc_staff: 180, clc_executive: 190, system_admin: 200 },
   isPlatformAdminUser: async () => false,
@@ -88,6 +91,8 @@ describe.skipIf(!URL)('the affiliate and remittance reads on the combined schema
     await remittance(UNION, CLC, 1, 'approved', -30, 3, 50, 500)
     await remittance(UNION, CLC, 2, 'pending', 20, null, 55, 550)
     await remittance(LOCAL_1, FED, 1, 'paid', -10, -10, 30, 300)
+    // The congress staff member is a real canonical member: their tenant session is a verified business session.
+    await harness.setRole(clcStaff, CLC, 'admin')
   }, 120_000)
 
   afterAll(async () => {
@@ -143,36 +148,46 @@ describe.skipIf(!URL)('the affiliate and remittance reads on the combined schema
   })
 
   describe('the remittances', () => {
-    it('summarizes what is addressed to the congress: latest-period members, pending and overdue, a compliance rate, this year\'s revenue', async () => {
-      expect(await standing!.loadRemittanceMetrics(CLC)).toEqual({
-        totalMembers: 120 + 55,
-        pendingRemittances: 2,
-        overdueRemittances: 1,
-        complianceRate: 33,
-        totalRevenue: 1500,
-      })
+    // Canonical mode: per_capita_remittances has no runtime or system grant in the current source (CONTAINED_NO_AUTHORITY), so the
+    // reflection is refused 501 NOT_IMPLEMENTED with the reason before any statement (lib/reality/contained-storage.ts), for every organization;
+    // the dashboards show it as a failed read, never as zero remittances or a compliant position.
+    const snapshot = async () => (await admin.query(`SELECT id::text, status, total_amount::text FROM per_capita_remittances ORDER BY id`)).rows
+    const unavailable = async (work: Promise<unknown>) =>
+      expect(await work.then(() => null, (error: unknown) => error)).toMatchObject({
+        name: 'ContainedStorageUnavailable', code: 'NOT_IMPLEMENTED', status: 501, storage: 'per_capita_remittances' })
+    beforeAll(() => { mode.canonical = true })
+    afterAll(() => { mode.canonical = false })
+
+    it('refuses the congress\'s summary 501: no member count, pending, overdue, compliance rate or revenue is computed', async () => {
+      const before = await snapshot()
+      await unavailable(standing!.loadRemittanceMetrics(CLC))
+      expect(await snapshot()).toEqual(before)
     })
 
-    it('summarizes what is addressed to the federation, and none of the congress\'s', async () => {
-      expect(await standing!.loadRemittanceMetrics(FED)).toEqual({ totalMembers: 30, pendingRemittances: 0, overdueRemittances: 0, complianceRate: 100, totalRevenue: 300 })
+    it('refuses the federation\'s summary the same way', async () => {
+      await unavailable(standing!.loadRemittanceMetrics(FED))
     })
 
-    it('reports no compliance rate, not zero, for an organization nothing fell due to', async () => {
-      expect(await standing!.loadRemittanceMetrics(randomUUID())).toEqual({ totalMembers: 0, pendingRemittances: 0, overdueRemittances: 0, complianceRate: null, totalRevenue: 0 })
+    it('refuses an organization nothing fell due to the same way: no rate, not zero, and not a compliant position', async () => {
+      await unavailable(standing!.loadRemittanceMetrics(randomUUID()))
     })
 
-    it('gives each affiliate its own standing; one with nothing on file is pending and at risk', async () => {
-      const standings = await standing!.loadAffiliateStandings(CLC)
-      const submittedOn = (offset: number) => (v: string | null) => expect(String(v).slice(0, 10)).toBe(new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10))
-      expect(standings.get(FED)).toMatchObject({ remittanceStatus: 'overdue', complianceStatus: 'non-compliant' })
-      submittedOn(-42)(standings.get(FED)!.lastRemittanceDate)
-      expect(standings.get(UNION)).toMatchObject({ remittanceStatus: 'pending', complianceStatus: 'at-risk' })
-      expect(standings.has(LOCAL_1)).toBe(false)
+    it('refuses the affiliates\' standings, and the facts they come from', async () => {
+      await unavailable(standing!.loadAffiliateStandings(CLC))
+      await unavailable(standing!.loadRemittanceFacts(CLC))
+      // The pure standing rule is unchanged: with nothing on file, pending and at risk.
       expect(standing!.standingOf([])).toEqual({ remittanceStatus: 'pending', complianceStatus: 'at-risk', lastRemittanceDate: null })
     })
 
-    it('control: with no organization set the runtime role sees no remittance at all', async () => {
-      expect(await harness.tenant(RUNTIME_ROLE, null, null, (tx) => tx.select().from(schema!.perCapitaRemittances))).toEqual([])
+    it('control: the database refuses the table to the runtime role, in a member\'s session or with no organization, and to the system role', async () => {
+      const refusal = async (work: Promise<unknown>) => {
+        const error = await work.then(() => null, (failure: { message?: string; cause?: { message?: string } }) => `${failure.message} ${failure.cause?.message ?? ''}`)
+        expect(error).toMatch(/permission denied for table per_capita_remittances/)
+      }
+      await refusal(harness.tenant(RUNTIME_ROLE, CLC, clcStaff, (tx) => tx.select().from(schema!.perCapitaRemittances)))
+      await refusal(harness.tenant(RUNTIME_ROLE, null, null, (tx) => tx.select().from(schema!.perCapitaRemittances)))
+      const { SYSTEM_ROLE } = await import('./native-route-harness')
+      await refusal(harness.tenant(SYSTEM_ROLE, null, null, (tx) => tx.select().from(schema!.perCapitaRemittances)))
     })
   })
 })

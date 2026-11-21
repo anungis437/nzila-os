@@ -22,7 +22,8 @@ describe('owned real-SDK production vault bootstrap', () => {
       const url = 'postgresql://synthetic:synthetic@127.0.0.1:54321/synthetic'
       const env: NodeJS.ProcessEnv = {
         ...syntheticNextEnvironment(
-          { runtimeUrl: url, systemUrl: url, authUrl: url },
+          { runtimeUrl: url, systemUrl: url, authUrl: url,
+            authSystemUrl: url.replace('synthetic:', 'synthetic_auth_system:') },
           43210,
           boundary,
           state,

@@ -45,7 +45,8 @@ function scanDir(dir: string): string[] {
   for (const entry of entries) {
     const full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === '.next') continue
+      // Test directories (fixtures, harnesses) are not business logic; *.test.ts files are already excluded below.
+      if (entry.name === 'node_modules' || entry.name === '.next' || entry.name === '__tests__') continue
       results.push(...scanDir(full))
     } else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts')) {
       results.push(full)

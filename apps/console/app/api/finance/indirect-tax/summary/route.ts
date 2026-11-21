@@ -1,3 +1,8 @@
+import {
+  loadIndirectTaxPeriod,
+  readIndirectTaxSummary,
+  upsertIndirectTaxSummary,
+} from '@/lib/services/finance-tax-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Indirect Tax Summary
@@ -7,15 +12,9 @@
  * PR5 — Org-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { indirectTaxSummary, indirectTaxPeriods } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { requireOrgAccess, authenticateUser } from '@/lib/api-guards'
 import { UpdateIndirectTaxSummaryInput } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const authResult = await authenticateUser()
@@ -26,12 +25,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'periodId required' }, { status: 400 })
   }
 
-  const rows = await platformDb
-    .select()
-    .from(indirectTaxSummary)
-    .where(eq(indirectTaxSummary.periodId, periodId))
-
-  return NextResponse.json(rows[0] ?? null)
+  const period = await loadIndirectTaxPeriod(periodId)
+  if (!period) return NextResponse.json({ error: 'Period not found' }, { status: 404 })
+  const access = await requireOrgAccess(period.orgId)
+  if (!access.ok) return access.response
+  const result = await readIndirectTaxSummary(periodId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -42,10 +41,9 @@ export async function POST(req: NextRequest) {
   }
 
   // Resolve orgId from the period
-  const [period] = await platformDb
-    .select()
-    .from(indirectTaxPeriods)
-    .where(eq(indirectTaxPeriods.id, parsed.data.periodId))
+  const identity = await authenticateUser()
+  if (!identity.ok) return identity.response
+  const period = await loadIndirectTaxPeriod(parsed.data.periodId)
 
   if (!period) {
     return NextResponse.json({ error: 'Period not found' }, { status: 404 })
@@ -56,37 +54,6 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  // Upsert: check if summary already exists for this period
-  const existing = await platformDb
-    .select()
-    .from(indirectTaxSummary)
-    .where(eq(indirectTaxSummary.periodId, parsed.data.periodId))
-
-  let row
-  if (existing.length > 0) {
-    const { periodId, ...updates } = parsed.data
-    ;[row] = await platformDb
-      .update(indirectTaxSummary)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(indirectTaxSummary.periodId, periodId))
-      .returning()
-  } else {
-    ;[row] = await platformDb
-      .insert(indirectTaxSummary)
-      .values(parsed.data)
-      .returning()
-  }
-
-  await recordFinanceAuditEvent({
-    orgId: period.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.INDIRECT_TAX_SUMMARY_UPDATE,
-    targetType: 'indirect_tax_summary',
-    targetId: row.id,
-    beforeJson: existing[0] ? (existing[0] as unknown as Record<string, unknown>) : undefined,
-    afterJson: parsed.data as unknown as Record<string, unknown>,
-  })
-
-  return NextResponse.json(row, { status: existing.length > 0 ? 200 : 201 })
+  const result = await upsertIndirectTaxSummary(parsed.data, period, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

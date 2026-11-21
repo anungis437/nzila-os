@@ -11,7 +11,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { getListenerPlan } from '@/lib/guards/plan-queries'
-import { maxAudioQuality } from '@/lib/guards/subscription-guards'
+import { maxAudioQuality, isListenerPremium } from '@/lib/guards/subscription-guards'
 import { type AudioQuality } from '@/lib/plans'
 import { createPlaybackSession } from '@nzila/zonga-streaming'
 import { createPlayEvent } from '@nzila/zonga-analytics'
@@ -32,21 +32,45 @@ export async function GET(request: Request, { params }: RouteParams) {
       const _requestedQuality = url.searchParams.get('quality') as AudioQuality | null
 
       const [asset] = (await platformDb.execute(
-        sql`SELECT id, title, storage_url, duration_ms, creator_id
+        sql`SELECT id, title, storage_url, (duration_seconds::bigint*1000) AS duration_ms, creator_id
             FROM zonga_content_assets
             WHERE id = ${assetId} AND status = 'published'`,
-      )) as unknown as [{ id: string; title: string; storage_url: string | null; duration_ms: number | null; creator_id: string } | undefined]
+      )) as unknown as [
+        | {
+            id: string
+            title: string
+            storage_url: string | null
+            duration_ms: number | string | bigint | null
+            creator_id: string
+          }
+        | undefined,
+      ]
 
       if (!asset?.storage_url) {
-        return NextResponse.json({ ok: false, error: 'Asset not found or not published' }, { status: 404 })
+        return NextResponse.json(
+          { ok: false, error: 'Asset not found or not published' },
+          { status: 404 },
+        )
       }
 
-      const planInfo = await getListenerPlan(ctx.userId, ctx.orgId)
-      const bestQuality = maxAudioQuality(planInfo.plan)
+      // PostgreSQL bigint drivers may return text. The public/player boundary
+      // requires milliseconds as a safe number, never a mislabeled seconds value.
+      const durationMs = Number(asset.duration_ms ?? 0)
+      if (!Number.isSafeInteger(durationMs) || durationMs < 0)
+        return NextResponse.json(
+          { ok: false, error: 'Source audio duration is invalid' },
+          { status: 503 },
+        )
+
+      const planInfo = await getListenerPlan(ctx.userId, null)
+      const bestQuality = maxAudioQuality(
+        isListenerPremium(planInfo.plan, planInfo.subscriptionStatus) ? 'premium' : 'free',
+      )
 
       const qualityMap: Record<string, QualityTier> = {
         low: 'preview',
         standard: 'standard',
+        hifi: 'hifi',
         high: 'high',
         lossless: 'hifi',
       }
@@ -72,17 +96,22 @@ export async function GET(request: Request, { params }: RouteParams) {
         )
       }
 
-      const session = createPlaybackSession(
-        assetId,
-        asset.duration_ms ?? 0,
-        ctx.userId,
-        bestQuality,
+      const freshPlan = await getListenerPlan(ctx.userId, null)
+      const freshQuality = maxAudioQuality(
+        isListenerPremium(freshPlan.plan, freshPlan.subscriptionStatus) ? 'premium' : 'free',
       )
+      if (bestQuality === 'hifi' && freshQuality !== 'hifi')
+        return NextResponse.json(
+          { ok: false, error: 'Subscription changed; request playback again' },
+          { status: 403 },
+        )
+
+      const session = createPlaybackSession(assetId, durationMs, ctx.userId, bestQuality)
 
       const playEvent = createPlayEvent(ctx.orgId, ctx.userId, {
         assetId,
         creatorId: asset.creator_id,
-        durationMs: asset.duration_ms ?? 0,
+        durationMs,
         positionMs: 0,
         completionPercent: 0,
         quality: bestQuality,
@@ -90,10 +119,14 @@ export async function GET(request: Request, { params }: RouteParams) {
         source: 'direct',
       })
 
-      platformDb.execute(sql`
+      platformDb
+        .execute(
+          sql`
         INSERT INTO zonga_analytics_events (event_type, user_id, payload, created_at)
         VALUES (${playEvent.type}, ${ctx.userId}, ${JSON.stringify(playEvent)}::jsonb, ${playEvent.timestamp}::timestamptz)
-      `).catch((err) => logger.error('Failed to persist play event', { err }))
+      `,
+        )
+        .catch((err) => logger.error('Failed to persist play event', { err }))
 
       logger.info('Stream granted', {
         assetId,
@@ -104,13 +137,20 @@ export async function GET(request: Request, { params }: RouteParams) {
       })
 
       recordZongaStreamStart(ctx.orgId, assetId, ctx.userId, playEvent.id).catch((metricErr) =>
-        logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'stream_starts' }),
+        logger.warn('Pilot metric emit failed', {
+          error: String(metricErr),
+          metric: 'stream_starts',
+        }),
       )
 
-      const isReplay = url.searchParams.get('mode') === 'replay' || url.searchParams.get('replay') === '1'
+      const isReplay =
+        url.searchParams.get('mode') === 'replay' || url.searchParams.get('replay') === '1'
       if (isReplay) {
         recordZongaReplayView(ctx.orgId, assetId, ctx.userId, playEvent.id).catch((metricErr) =>
-          logger.warn('Pilot metric emit failed', { error: String(metricErr), metric: 'replay_views' }),
+          logger.warn('Pilot metric emit failed', {
+            error: String(metricErr),
+            metric: 'replay_views',
+          }),
         )
       }
 
@@ -121,7 +161,7 @@ export async function GET(request: Request, { params }: RouteParams) {
           quality: playback.bitrate,
           codec: playback.codec,
           sessionId: session.id,
-          durationMs: asset.duration_ms,
+          durationMs,
           provider: playback.provider,
           expiresAt: new Date(Date.now() + 4 * 3600 * 1000).toISOString(),
         },

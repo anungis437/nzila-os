@@ -1,9 +1,10 @@
+import { runtimeRequestAs, runtimeRequestAfterSignIn } from '../helpers/runtime-auth'
 /**
  * Runtime acceptance 01: the real Union Eyes application over HTTP, backed by native PostgreSQL.
  *
  * Nothing here is mocked: the Next.js server, the proxy, the API handlers, the authority kernel, the audit chain and the
- * databases are the real ones. Identities are the deterministic QA fixtures (apps/union-eyes/tests/fixtures), whose session
- * cookie is honoured only in a local QA environment (see packages/platform-auth/src/entra/server.ts).
+ * databases are the real ones. Known synthetic identities sign in through the actual password and MFA endpoints, then
+ * select their organization through the current private-membership binder. No predictable QA cookie is accepted.
  *
  * Each test records what the application actually does. Where a required capability is not yet reachable, the test asserts
  * the CURRENT behaviour and is named "KNOWN GAP" so the gap cannot pass as a feature.
@@ -11,7 +12,13 @@
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { ageQaCase, countGrievances, inspectCase, inspectFiling, resetQaCase } from '../../scripts/runtime/db-inspect'
+import {
+  ageQaCase,
+  countGrievances,
+  inspectCase,
+  inspectFiling,
+  resetQaCase,
+} from '../../scripts/runtime/db-inspect'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 import { gotoDashboardAsRole } from '../helpers/auth'
@@ -24,14 +31,13 @@ const STATE_DIR = process.env.UE_RUNTIME_STATE_DIR ?? join(process.cwd(), '..', 
 const SECONDARY = UE_TEST_ORGS.secondary.id
 
 async function as(userId: string, orgId: string): Promise<APIRequestContext> {
-  return pwRequest.newContext({
-    baseURL: BASE,
-    extraHTTPHeaders: { cookie: `nzila_session=ue-seed-session-${userId}; selected_org_id=${orgId}` },
-  })
+  return runtimeRequestAs(userId, orgId)
 }
 
 const ids = (body: unknown): string[] => {
-  const rows = ((body as { data?: unknown }).data ?? (body as { cases?: unknown }).cases ?? body) as unknown
+  const rows = ((body as { data?: unknown }).data ??
+    (body as { cases?: unknown }).cases ??
+    body) as unknown
   const list = Array.isArray(rows) ? rows : ((rows as { data?: unknown[] })?.data ?? [])
   return (list as Array<{ claimId?: string; id?: string }>).map((r) => r.claimId ?? r.id ?? '')
 }
@@ -52,10 +58,13 @@ test.describe('foundation: health, authentication, entitlement', () => {
     expect(body.checks.catalogAuthority.status).toBe('ok')
   })
 
-  test('an anonymous caller is refused by the API and sent to sign in by the app', async ({ page }, testInfo) => {
+  test('an anonymous caller is refused by the API and sent to sign in by the app', async ({
+    page,
+  }, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const anon = await pwRequest.newContext({ baseURL: BASE })
-    for (const path of ['/api/claims', '/api/cases']) expect((await anon.get(path)).status(), path).toBe(401)
+    for (const path of ['/api/claims', '/api/cases'])
+      expect((await anon.get(path)).status(), path).toBe(401)
     await page.goto('/en-CA/dashboard')
     await expect(page).toHaveURL(/sign-in|login|auth/i)
   })
@@ -72,7 +81,15 @@ test.describe('foundation: health, authentication, entitlement', () => {
     const tester = UE_TEST_USERS.restrictedUxTester
     const ctx = await as(tester.userId, tester.orgId)
     const response = await ctx.post('/api/cases/intake', {
-      data: { memberId: tester.userId, caseType: 'other', priority: 'low', title: 'No module here', description: 'Entitlement refusal check.', incidentDate: '2026-10-01', location: 'Anywhere' },
+      data: {
+        memberId: tester.userId,
+        caseType: 'other',
+        priority: 'low',
+        title: 'No module here',
+        description: 'Entitlement refusal check.',
+        incidentDate: '2026-10-01',
+        location: 'Anywhere',
+      },
     })
     expect(response.status()).toBe(403)
     expect((await response.json()).error).toBe('ENTITLEMENT_REQUIRED')
@@ -88,7 +105,15 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const member = await as(UE_TEST_USERS.memberPrimary.userId, PRIMARY)
     const response = await member.post('/api/cases/intake', {
-      data: { memberId: UE_TEST_USERS.memberPrimary.userId, caseType: 'discipline', priority: 'medium', title, description: 'Filed by the runtime acceptance journey.', incidentDate: '2026-10-01', location: 'Plant 2' },
+      data: {
+        memberId: UE_TEST_USERS.memberPrimary.userId,
+        caseType: 'discipline',
+        priority: 'medium',
+        title,
+        description: 'Filed by the runtime acceptance journey.',
+        incidentDate: '2026-10-01',
+        location: 'Plant 2',
+      },
     })
     expect(response.status(), await response.text()).toBe(201)
     const body = await response.json()
@@ -99,18 +124,40 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     expect(caseId).toMatch(/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i)
     expect(claimNumber).toMatch(/\S/)
     await mkdir(STATE_DIR, { recursive: true })
-    await writeFile(join(STATE_DIR, 'journey-a-state.json'), JSON.stringify({ caseId, claimNumber, title }), { mode: 0o600 })
+    await writeFile(
+      join(STATE_DIR, 'journey-a-state.json'),
+      JSON.stringify({ caseId, claimNumber, title }),
+      { mode: 0o600 },
+    )
     expect(body.status).toBe('submitted')
     expect(body.decision.proof, 'the intake decision carries a sealed proof').toBeTruthy()
   })
 
   test('the filing is in the database and in the platform audit chain (the sandbox store is honest about not being immutable)', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
-    test.skip(!process.env.DATABASE_URL || !process.env.PLATFORM_DATABASE_URL, 'needs DATABASE_URL and PLATFORM_DATABASE_URL to inspect persistence')
-    const { claim, audit } = await inspectFiling(caseId, PRIMARY)
-    expect(claim).toMatchObject({ status: 'submitted', member_id: UE_TEST_USERS.memberPrimary.userId, organization_id: PRIMARY })
-    expect(audit.length).toBeGreaterThan(0)
-    for (const record of audit) expect(record).toMatchObject({ storage_type: 'local_sandbox', immutable: false })
+    test.skip(
+      !process.env.DATABASE_URL || !process.env.PLATFORM_DATABASE_URL,
+      'needs DATABASE_URL and PLATFORM_DATABASE_URL to inspect persistence',
+    )
+    const { claim, audit, canonicalProofs } = await inspectFiling(caseId, PRIMARY)
+    expect(claim).toMatchObject({
+      status: 'submitted',
+      member_id: UE_TEST_USERS.memberPrimary.userId,
+      organization_id: PRIMARY,
+    })
+    if (process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1') {
+      // V2 seals the decision proof in the canonical tenant audit chain, in the filing's own transaction; no WORM claim is made.
+      expect(canonicalProofs.length).toBeGreaterThan(0)
+      for (const proof of canonicalProofs) {
+        expect(proof.proof_storage).toBe('canonical_append_only_audit_log')
+        expect(proof.seal_hash).toMatch(/^[a-f0-9]{64}$/)
+        expect(proof.signature).toBeTruthy()
+      }
+    } else {
+      expect(audit.length).toBeGreaterThan(0)
+      for (const record of audit)
+        expect(record).toMatchObject({ storage_type: 'local_sandbox', immutable: false })
+    }
   })
 
   test('the member sees the case in the queue and can open it; a member of another organization cannot', async ({}, testInfo) => {
@@ -148,23 +195,29 @@ test.describe('journey A: member files, authority decides who can see it', () =>
   test('an organization administrator cannot assign the case: the title confers no case authority (default deny)', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const admin = await as(UE_TEST_USERS.adminPrimary.userId, PRIMARY)
-    const response = await admin.post(`/api/cases/${caseId}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })
+    const response = await admin.post(`/api/cases/${caseId}/assign`, {
+      data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' },
+    })
     expect([403, 404], await response.text()).toContain(response.status())
   })
 
-  test('the case coordinator holding a unit-scoped supervisory mandate hands a case to the steward; the steward works it; the member never sees internal notes', async ({}, testInfo) => {
+  test('the case coordinator holding an exact-case supervisory mandate hands a case to the steward; the steward works it; the member never sees internal notes', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
     if (process.env.DATABASE_URL) await resetQaCase(seeded)
     const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
-    const assigned = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })
+    const assigned = await coordinator.post(`/api/cases/${seeded}/assign`, {
+      data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' },
+    })
     expect(assigned.status(), await assigned.text()).toBe(200)
     expect((await assigned.json()).assignedTo).toBe(UE_TEST_USERS.stewardPrimary.userId)
 
     const steward = await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)
     expect(ids(await (await steward.get('/api/cases')).json())).toContain(seeded)
     const secret = `internal steward note ${Date.now()}`
-    const note = await steward.post(`/api/cases/${seeded}/notes`, { data: { text: secret, isInternal: true } })
+    const note = await steward.post(`/api/cases/${seeded}/notes`, {
+      data: { text: secret, isInternal: true },
+    })
     expect(note.status(), await note.text()).toBeLessThan(300)
 
     const member = await as(UE_TEST_USERS.memberPrimary.userId, PRIMARY)
@@ -182,25 +235,48 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     const second = UE_TEST_USERS.stewardPrimaryTwo.userId
     const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
     // Start from the seeded holder so the test is repeatable.
-    expect((await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: first, reason: 'runtime acceptance baseline' } })).status()).toBe(200)
+    expect(
+      (
+        await coordinator.post(`/api/cases/${seeded}/assign`, {
+          data: { assigneeId: first, reason: 'runtime acceptance baseline' },
+        })
+      ).status(),
+    ).toBe(200)
     // Self-assignment by the coordinator is refused by the kernel: a person cannot route a matter to themselves.
-    const self = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.chiefStewardPrimary.userId, reason: 'runtime acceptance' } })
+    const self = await coordinator.post(`/api/cases/${seeded}/assign`, {
+      data: { assigneeId: UE_TEST_USERS.chiefStewardPrimary.userId, reason: 'runtime acceptance' },
+    })
     expect([403, 404]).toContain(self.status())
 
-    const moved = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: second, reason: 'runtime acceptance reassignment' } })
+    const moved = await coordinator.post(`/api/cases/${seeded}/assign`, {
+      data: { assigneeId: second, reason: 'runtime acceptance reassignment' },
+    })
     expect(moved.status(), await moved.text()).toBe(200)
     expect((await moved.json()).previousAssignee).toBe(first)
 
     try {
-      expect((await (await as(first, PRIMARY)).get(`/api/cases/${seeded}`)).status(), 'revoked steward').toBe(404)
-      expect((await (await as(first, PRIMARY)).get(`/api/cases/${seeded}/notes`)).status(), 'revoked steward notes').toBe(404)
-      expect(ids(await (await (await as(first, PRIMARY)).get('/api/cases')).json())).not.toContain(seeded)
-      // A brand-new request context is a fresh sign-in: nothing is held in the client, so this is the persisted state.
-      const fresh = await as(second, PRIMARY)
-      expect((await fresh.get(`/api/cases/${seeded}`)).status()).toBe(200)
-      expect(ids(await (await fresh.get('/api/cases')).json())).toContain(seeded)
+      expect(
+        (await (await as(first, PRIMARY)).get(`/api/cases/${seeded}`)).status(),
+        'revoked steward',
+      ).toBe(404)
+      expect(
+        (await (await as(first, PRIMARY)).get(`/api/cases/${seeded}/notes`)).status(),
+        'revoked steward notes',
+      ).toBe(404)
+      expect(ids(await (await (await as(first, PRIMARY)).get('/api/cases')).json())).not.toContain(
+        seeded,
+      )
+      const fresh = await runtimeRequestAfterSignIn(second, PRIMARY)
+      try {
+        expect((await fresh.get(`/api/cases/${seeded}`)).status()).toBe(200)
+        expect(ids(await (await fresh.get('/api/cases')).json())).toContain(seeded)
+      } finally {
+        await fresh.dispose()
+      }
     } finally {
-      const restored = await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: first, reason: 'runtime acceptance restore' } })
+      const restored = await coordinator.post(`/api/cases/${seeded}/assign`, {
+        data: { assigneeId: first, reason: 'runtime acceptance restore' },
+      })
       expect(restored.status(), await restored.text()).toBe(200)
     }
     expect((await (await as(first, PRIMARY)).get(`/api/cases/${seeded}`)).status()).toBe(200)
@@ -218,9 +294,18 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     const coordinator = await as(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
     const steward = await as(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)
     const member = await as(UE_TEST_USERS.memberPrimary.userId, PRIMARY)
-    const move = (status: string) => steward.patch(`/api/cases/${seeded}/transition`, { data: { targetStatus: status, reason: 'runtime acceptance' } })
+    const move = (status: string) =>
+      steward.patch(`/api/cases/${seeded}/transition`, {
+        data: { targetStatus: status, reason: 'runtime acceptance' },
+      })
 
-    expect((await coordinator.post(`/api/cases/${seeded}/assign`, { data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' } })).status()).toBe(200)
+    expect(
+      (
+        await coordinator.post(`/api/cases/${seeded}/assign`, {
+          data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason: 'runtime acceptance' },
+        })
+      ).status(),
+    ).toBe(200)
     expect((await inspectCase(seeded)).assignedTo).toBe(UE_TEST_USERS.stewardPrimary.userId)
 
     // The workbench sends claim-status names; the route must accept them and still refuse an unknown status.
@@ -229,7 +314,9 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     expect(nextActions.allowedTransitions.length, JSON.stringify(nextActions)).toBeGreaterThan(0)
 
     // A business rule (minimum time in a status) refuses the escalation and the refusal leaves no grievance behind.
-    const early = await steward.post(`/api/cases/${seeded}/escalate`, { data: { priority: 'high', notes: 'too early' } })
+    const early = await steward.post(`/api/cases/${seeded}/escalate`, {
+      data: { priority: 'high', notes: 'too early' },
+    })
     expect(early.status(), await early.text()).toBe(422)
     expect(await countGrievances(PRIMARY)).toBe(before)
 
@@ -242,10 +329,17 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     }
 
     await ageQaCase(seeded, 72)
-    const escalated = await steward.post(`/api/cases/${seeded}/escalate`, { data: { priority: 'high', notes: 'runtime acceptance escalation' } })
+    const escalated = await steward.post(`/api/cases/${seeded}/escalate`, {
+      data: { priority: 'high', notes: 'runtime acceptance escalation' },
+    })
     expect(escalated.status(), await escalated.text()).toBeLessThan(300)
     const persisted = await inspectCase(seeded)
-    expect(persisted).toMatchObject({ status: 'resolved', resolutionOutcome: 'escalated_to_grievance', grievances: 1, grievanceEvents: 1 })
+    expect(persisted).toMatchObject({
+      status: 'resolved',
+      resolutionOutcome: 'escalated_to_grievance',
+      grievances: 1,
+      grievanceEvents: 1,
+    })
 
     const timeline = await (await steward.get(`/api/cases/${seeded}/timeline`)).text()
     expect(timeline).toContain('under_review')
@@ -255,7 +349,9 @@ test.describe('journey A: member files, authority decides who can see it', () =>
 
 test.describe('landing and navigation by stakeholder, at desktop, tablet and mobile', () => {
   for (const role of STAKEHOLDER_ORDER) {
-    test(`${role}: reaches the correct landing, sees its navigation, and the page does not overflow`, async ({ page }, testInfo) => {
+    test(`${role}: reaches the correct landing, sees its navigation, and the page does not overflow`, async ({
+      page,
+    }, testInfo) => {
       const landing = await gotoDashboardAsRole(page, role)
       expect(page.url()).toContain(landing)
       // Below the desktop breakpoint the navigation lives behind a trigger; opening it is part of the journey.
@@ -272,14 +368,28 @@ test.describe('landing and navigation by stakeholder, at desktop, tablet and mob
         await expect(nav).toBeVisible()
       }
       // The organization selector and the page body must finish loading: a permanent "Loading…" is a defect, not a state.
-      await expect(page.getByText(/^Loading(\.\.\.|…)$/).first(), `${role}: a loading placeholder never resolved`).toHaveCount(0, { timeout: 30_000 })
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
-      expect(overflow, `${role} on ${testInfo.project.name}: horizontal overflow`).toBeLessThanOrEqual(1)
-      await page.screenshot({ path: testInfo.outputPath(`${role}-${testInfo.project.name}.png`), fullPage: false })
+      await expect(
+        page.getByText(/^Loading(\.\.\.|…)$/).first(),
+        `${role}: a loading placeholder never resolved`,
+      ).toHaveCount(0, { timeout: 30_000 })
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      )
+      expect(
+        overflow,
+        `${role} on ${testInfo.project.name}: horizontal overflow`,
+      ).toBeLessThanOrEqual(1)
+      await page.screenshot({
+        path: testInfo.outputPath(`${role}-${testInfo.project.name}.png`),
+        fullPage: false,
+      })
       // Navigation labels the information-architecture contract requires are present somewhere on the page.
       if (testInfo.project.name === 'desktop') {
         for (const label of REQUIRED_VISIBLE_LABELS[role].slice(0, 3)) {
-          await expect(page.getByText(label, { exact: false }).first(), `${role}: "${label}"`).toBeVisible()
+          await expect(
+            page.getByText(label, { exact: false }).first(),
+            `${role}: "${label}"`,
+          ).toBeVisible()
         }
       }
     })

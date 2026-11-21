@@ -35,13 +35,27 @@ describe('Gate 0 batch B94: KPI target bounds and external refusal audit scope',
   })
 
   // DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT (canonical V2 gap)
-  it('runs the external-authority precheck in every bootstrap mode: an external representative is never an organization member, so the canonical V2 membership binder cannot replace it', () => {
+  it('requires authority before target-tenant effects in both modes, using the own-session protected reader for canonical V2', () => {
     const middleware = src('lib/external-resource-middleware.ts')
-    expect(middleware).not.toContain('currentStateContextEnabled')
-    expect(middleware).not.toContain("from '@/lib/auth/canonical-bootstrap'")
+    const canonicalStart = middleware.indexOf('if (currentStateContextEnabled())')
+    const legacyStart = middleware.indexOf('const user = await requireUser()', canonicalStart)
+    expect(canonicalStart).toBeGreaterThan(-1)
+    expect(legacyStart).toBeGreaterThan(canonicalStart)
+    const canonical = middleware.slice(canonicalStart, legacyStart)
+    expect(canonical).toContain('if (!options.protectedRead')
+    expect(canonical).toContain('return readCanonicalExternalResource(options.protectedRead')
+    expect(canonical).not.toContain('withPrincipalOnlyContext(')
+    expect(canonical).not.toContain('withRLSContext(')
+    expect(canonical).not.toContain('handler(')
     const precheck = middleware.indexOf('withPrincipalOnlyContext((tx) => holdsExternalAuthority(')
-    const guardedBlock = middleware.slice(0, precheck)
-    // No unclosed `if (` between the actor declaration and the precheck would gate it behind a flag again.
-    expect(guardedBlock.lastIndexOf('if (!')).toBeLessThan(guardedBlock.lastIndexOf('const actor ='))
+    expect(precheck).toBeGreaterThan(legacyStart)
+    expect(precheck).toBeLessThan(middleware.indexOf('withRLSContext({ organizationId: resource.organizationId }'))
+    const reader = src('lib/external-resource-read/reader.ts')
+    expect(reader).toContain('return withRLSContext(async tx =>')
+    expect(reader).toContain('public.ue_external_resource_read_v1(')
+    expect(reader).not.toContain('withRLSContext({ organizationId:')
+    // Actual qualified/unqualified SQL and route wiring are exercised by
+    // external-resource-read source.pglite/routes suites; this source oracle
+    // prevents a return to query-derived target tenant or legacy membership.
   })
 })

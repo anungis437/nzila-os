@@ -9,12 +9,30 @@
 import { useState, useTransition, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, CheckCircle2, Upload, X, FileText } from 'lucide-react'
-import { uploadDocument, type Document } from '@/lib/actions/misc-actions'
+import { type Document } from '@/lib/actions/misc-actions'
 
-const documentTypes: Document['type'][] = ['invoice', 'receipt', 'contract', 'report', 'statement', 'other']
+const documentTypes: Document['type'][] = [
+  'invoice',
+  'receipt',
+  'contract',
+  'report',
+  'statement',
+  'other',
+]
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25 MB
-const ALLOWED_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.webp', '.csv', '.xlsx', '.xls', '.docx', '.txt']
+const ALLOWED_EXTENSIONS = [
+  '.pdf',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.csv',
+  '.xlsx',
+  '.xls',
+  '.docx',
+  '.txt',
+]
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -98,6 +116,8 @@ export function DocumentUploadForm() {
         // 1. Upload file to blob storage via API route
         const uploadFormData = new FormData()
         uploadFormData.append('file', selectedFile)
+        uploadFormData.append('name', name.trim())
+        uploadFormData.append('type', type || 'other')
 
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
@@ -111,26 +131,19 @@ export function DocumentUploadForm() {
         }
 
         const blob = (await uploadRes.json()) as {
+          uploadId: string
           blobPath: string
           sha256: string
           sizeBytes: number
           url: string
         }
 
-        // 2. Record document metadata in audit log
-        const result = await uploadDocument({
-          name: name.trim(),
-          type: type || 'other',
-          size: blob.sizeBytes,
-          url: blob.url,
-        })
-
-        if (result.success) {
-          setSuccess(true)
-          setTimeout(() => router.push('../documents'), 1200)
-        } else {
-          setError('Failed to save document record.')
+        if (!blob.uploadId) {
+          setError('Upload was not recorded.')
+          return
         }
+        setSuccess(true)
+        setTimeout(() => router.push('../documents'), 1200)
       } catch {
         setError('Upload failed. Please try again.')
       }
@@ -148,13 +161,20 @@ export function DocumentUploadForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-sm"
+    >
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
       )}
 
       <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">Document Name *</label>
+        <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
+          Document Name *
+        </label>
         <input
           id="name"
           name="name"
@@ -166,14 +186,18 @@ export function DocumentUploadForm() {
       </div>
 
       <div>
-        <label htmlFor="type" className="mb-1.5 block text-sm font-medium text-foreground">Document Type</label>
+        <label htmlFor="type" className="mb-1.5 block text-sm font-medium text-foreground">
+          Document Type
+        </label>
         <select
           id="type"
           name="type"
           className="rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-electric/40"
         >
           {documentTypes.map((t) => (
-            <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+            <option key={t} value={t}>
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </option>
           ))}
         </select>
       </div>
@@ -225,7 +249,9 @@ export function DocumentUploadForm() {
         ) : (
           <>
             <Upload className="mb-3 h-8 w-8 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">Drag & drop files here, or click to browse</p>
+            <p className="text-sm text-muted-foreground">
+              Drag & drop files here, or click to browse
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
               PDF, images, CSV, Excel, Word — up to 25 MB
             </p>

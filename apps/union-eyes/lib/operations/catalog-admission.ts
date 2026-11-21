@@ -2,8 +2,9 @@ import { createHash } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import contract from './catalog-authority-contract.json'
 import { admissionQueries, assessCatalogAdmission, catalogContractDigest } from './catalog-admission-core.mjs'
-import { canonicalAdmissionQueries, canonicalCatalogContract, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
+import { canonicalAdmissionQueriesForMajor, canonicalCatalogContract, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
 import { catalogSnapshotExecutor, compileCatalogSnapshot } from './catalog-admission-batch'
+import { canonicalPostgresMajor, type CanonicalPostgresMajor } from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 
 export const CATALOG_ADMISSION_PUBLIC_ERROR = 'catalog authority admission failed'
 
@@ -18,7 +19,7 @@ export type CatalogAdmissionReport = {
   violations: string[]
 }
 
-type AdmissionContext = { canonical: boolean; environment: string }
+type AdmissionContext = { canonical: boolean; environment: string; postgresMajor?: CanonicalPostgresMajor }
 type InFlightInspections = Map<string, Promise<CatalogAdmissionReport>>
 
 // Next can bundle health and readiness separately. Share their running inspection
@@ -27,6 +28,14 @@ type InFlightInspections = Map<string, Promise<CatalogAdmissionReport>>
 const inFlightKey = Symbol.for('nzila.union-eyes.catalog-admission.in-flight.v1')
 const inspectionGlobal = globalThis as typeof globalThis & { [inFlightKey]?: InFlightInspections }
 const contractFingerprint = catalogContractDigest({ legacy: contract, canonical: canonicalCatalogContract() })
+export const CATALOG_POSTGRES_VERSION_QUERY = "SELECT pg_catalog.current_setting('server_version_num') AS server_version_num"
+
+async function withPostgresMajor(execute: Execute, context: AdmissionContext): Promise<AdmissionContext> {
+  if (!context.canonical || context.postgresMajor) return context
+  const rows = await execute(CATALOG_POSTGRES_VERSION_QUERY)
+  if (rows.length !== 1) throw new Error('Canonical PostgreSQL version inspection is incomplete')
+  return { ...context, postgresMajor: canonicalPostgresMajor(rows[0].server_version_num) }
+}
 
 async function appDatabaseExecutor(): Promise<Execute> {
   const { db } = await import('@nzila/db')
@@ -46,6 +55,7 @@ async function inspectCatalogAdmission(
   execute: Execute,
   context: AdmissionContext,
 ): Promise<CatalogAdmissionReport> {
+  context = await withPostgresMajor(execute, context)
   const snapshots: Record<string, QueryRow[]> = {}
   for (const query of admissionQueries) {
     snapshots[query.name] = await execute(query.sql)
@@ -56,7 +66,7 @@ async function inspectCatalogAdmission(
     context.environment,
   )
   if (context.canonical) {
-    report.violations.push(...await inspectCanonicalAuthCatalog(execute))
+    report.violations.push(...await inspectCanonicalAuthCatalog(execute, { postgresMajor: context.postgresMajor }))
     report.ok = report.violations.length === 0
   }
   return report
@@ -74,19 +84,20 @@ export async function evaluateCatalogAdmission(execute?: Execute): Promise<Catal
   }
   if (execute) return inspectCatalogAdmission(execute, context)
 
-  const statements = [
-    ...admissionQueries.map(query => query.sql),
-    ...(context.canonical ? canonicalAdmissionQueries : []),
-  ]
   const database = createHash('sha256').update(process.env.DATABASE_URL ?? '').digest('hex')
-  const key = JSON.stringify([contractFingerprint, catalogContractDigest(statements), context, database, process.env.GITHUB_SHA ?? ''])
+  const key = JSON.stringify([contractFingerprint, context, database, process.env.GITHUB_SHA ?? ''])
   const inspections = inspectionGlobal[inFlightKey] ??= new Map()
   let pending = inspections.get(key)
   if (!pending) {
     pending = appDatabaseExecutor()
       .then(async executeDefault => {
+        const inspectedContext = await withPostgresMajor(executeDefault, context)
+        const statements = [
+          ...admissionQueries.map(query => query.sql),
+          ...(inspectedContext.canonical ? canonicalAdmissionQueriesForMajor(inspectedContext.postgresMajor) : []),
+        ]
         const envelope = await executeDefault(compileCatalogSnapshot(statements))
-        return inspectCatalogAdmission(catalogSnapshotExecutor(statements, envelope), context)
+        return inspectCatalogAdmission(catalogSnapshotExecutor(statements, envelope), inspectedContext)
       })
       .finally(() => {
         if (inspections.get(key) === pending) inspections.delete(key)

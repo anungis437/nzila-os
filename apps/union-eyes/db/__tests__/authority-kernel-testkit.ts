@@ -1,4 +1,8 @@
 import { PGlite } from '@electric-sql/pglite'
+import { afterAll } from 'vitest'
+import { drizzle as drizzlePglite } from 'drizzle-orm/pglite'
+import { drizzle as drizzleNodePostgres } from 'drizzle-orm/node-postgres'
+import { openCaseDomainDb, type CaseDomainDb } from './case-primary-domain-testkit'
 import { ORG, U, installAuthoritySchema, newUuid, seedCast, type Db } from './authority-kernel-harness'
 import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
 import { canonicalMembershipSource } from '../../lib/authority/store/identity'
@@ -19,18 +23,38 @@ export const DAY = 86_400_000
 export const minutesAgo = (m = 1) => new Date(Date.now() - m * 60_000)
 export const daysAhead = (d: number) => new Date(Date.now() + d * DAY)
 
+// UE_AUTHORITY_KERNEL_NATIVE=1 runs the kernel storage suites on an owned disposable PostgreSQL 16 container (the native CI job
+// does, through *.native.test.ts entry points); otherwise PGlite. Every native database is removed after its file.
+const nativeKernel = process.env.UE_AUTHORITY_KERNEL_NATIVE === '1'
+const nativeOpened: CaseDomainDb[] = []
+if (nativeKernel) afterAll(async () => { await Promise.allSettled(nativeOpened.splice(0).map((db) => db.close())) })
+
+/**
+ * The application's Drizzle handle over a test database: the PGlite driver for PGlite, the node-postgres driver for an owned
+ * native container (UE_AUTHORITY_KERNEL_NATIVE). Suites use this instead of drizzle(pg) so the same assertions run on both.
+ */
+export function appDrizzle(db: PGlite): ReturnType<typeof drizzlePglite> {
+  const native = (db as unknown as Partial<CaseDomainDb>).client
+  return (native ? drizzleNodePostgres(native) : drizzlePglite(db)) as unknown as ReturnType<typeof drizzlePglite>
+}
+
 export async function freshDb(): Promise<PGlite> {
-  const db = new PGlite()
+  const db = nativeKernel
+    ? await openCaseDomainDb(true).then((opened) => { nativeOpened.push(opened); return opened as unknown as PGlite })
+    : new PGlite()
   await installAuthoritySchema(db)
   await seedCast(db)
   await db.exec('SET ROLE union_eyes_runtime')
   return db
 }
 
-export function kit(db: Db, memberships: MembershipSource = canonicalMembershipSource) {
+export type AuthorityActorRunner = <T>(userId: string, organizationId: string,
+  operation: (executor: SqlExecutor) => Promise<T>) => Promise<T>
+
+export function kit(db: Db, memberships: MembershipSource = canonicalMembershipSource, actorRunner?: AuthorityActorRunner) {
   const deps: EnforcementDeps = { memberships }
   const as = (user: string, org = ORG) => <T>(fn: (t: SqlExecutor) => Promise<T>): Promise<T> =>
-    runAuthorityTransaction(db as unknown as SqlExecutor, { organizationId: org, userId: user }, fn)
+    actorRunner ? actorRunner(user, org, fn) : runAuthorityTransaction(db as unknown as SqlExecutor, { organizationId: org, userId: user }, fn)
 
   /** The real adoption ceremony: the drafter requests, two other executives vote in their own sessions, then a third activates. */
   async function adoptRule(ruleId: string, instrument: string, org = ORG, drafter = U.president): Promise<void> {

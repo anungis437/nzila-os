@@ -1,0 +1,10 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+{"proof":"AUTH_SYSTEM_PURPOSE_BOUNDARY","engine":"PGlite","nativeVerdict":"UNEXECUTED","compilerSourceSha256":"181dd2428baea5607eee417017a88d4632be54ceb3d8f6cb866c7f7ebd2448e1","compiledSqlSha256":"fb1b5970ba8d0db5fa4dde151366ea479126271b8a1ab662b0f8fc3e34faf03a"}
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  18:36:38
+   Duration  1.46s (tests 76%, import 19%, transform 5%)
+

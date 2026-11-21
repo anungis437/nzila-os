@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
       if (view === 'summary') {
         const tier = url.searchParams.get('tier') ?? undefined
-        const data = await getCommissionSummary(tier)
+        const data = await getCommissionSummary(tier, url.searchParams.get('partnerId') ?? undefined)
         return NextResponse.json({ ok: true, data })
       }
 

@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
+import { browserErrorReference, recordBrowserError } from '@nzila/os-core/browser-diagnostics'
 
 export default function AdminError({
   error,
@@ -9,15 +10,22 @@ export default function AdminError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const localReference = useId()
+  const diagnosticReference = browserErrorReference(error.digest, localReference)
+
   useEffect(() => {
-    console.error('[partners/admin]', error)
-  }, [error])
+    recordBrowserError({ app: 'partners', surface: 'admin', code: 'CLIENT_BOUNDARY_ERROR',
+      reference: diagnosticReference.value, referenceOrigin: diagnosticReference.origin })
+  }, [error, diagnosticReference.value, diagnosticReference.origin])
 
   return (
     <div className="max-w-md mx-auto mt-24 text-center">
       <h2 className="text-xl font-bold text-slate-900">Something went wrong</h2>
       <p className="mt-2 text-sm text-slate-500">
         {error.message || 'An unexpected error occurred in the admin panel.'}
+      </p>
+      <p className="mt-2 text-xs text-gray-500">
+        {diagnosticReference.origin === 'local' ? 'Local reference' : 'Reference'}: {diagnosticReference.value}
       </p>
       <button
         onClick={reset}

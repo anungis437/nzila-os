@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   rows: [] as unknown[],
+  batch:vi.fn(),
   where: vi.fn(),
   eq: vi.fn(),
   scope: vi.fn(),
@@ -17,9 +18,9 @@ vi.mock('@/lib/api/framework', () => ({
   withApi: (_cfg: unknown, handler: (ctx: unknown) => unknown) => (ctx: unknown) => handler(ctx),
   ApiError: TestApiError,
 }));
-vi.mock('@/db', () => ({
-  db: { select: () => ({ from: () => ({ where: async (condition: unknown) => { m.where(condition); return m.rows; } }) }) },
-}));
+const fakeDb={select:()=>({from:()=>({where:async(condition:unknown)=>{m.where(condition);return m.rows;}})})};
+vi.mock('@/lib/db/with-rls-context',()=>({withRLSContext:async(_ctx:unknown,fn:any)=>fn(fakeDb)}));
+vi.mock('@/lib/authority/store/route-adapter',()=>({decideCaseCapabilitiesBatch:m.batch}));
 vi.mock('@/db/schema/domains/claims/grievances', () => ({ grievances: { organizationId: 'organizationId', demoSeedId: 'demoSeedId' } }));
 vi.mock('drizzle-orm', () => ({
   eq: (a: unknown, b: unknown) => { m.eq(a, b); return { eq: [a, b] }; },
@@ -36,10 +37,11 @@ const iso = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toI
 describe('GET /api/grievances/workload', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.batch.mockImplementation(async(_tx,input)=>new Map(input.caseIds.map((id:string)=>[id,{'case:read':{effect:id==='denied'?'deny':'allow'}}])));
     m.rows = [
-      { status: 'filed', createdAt: iso(40) },
-      { status: 'filed', createdAt: iso(2) },
-      { status: 'closed', createdAt: iso(1) },
+      { id:'old',status: 'filed', createdAt: iso(40) },
+      { id:'recent',status: 'filed', createdAt: iso(2) },
+      { id:'closed',status: 'closed', createdAt: iso(1) },
     ];
   });
 
@@ -63,5 +65,12 @@ describe('GET /api/grievances/workload', () => {
     expect(m.scope).toHaveBeenCalledWith('org-1', 'chief-1');
     expect(m.where).toHaveBeenCalledWith(['ACTOR_SCOPE', 'PRODUCTION']);
     expect(m.eq).not.toHaveBeenCalled();
+  });  it('does not count a prefilter match that the kernel denies and never manufactures zeroes on outage',async()=>{
+    m.rows.push({id:'denied',status:'filed',createdAt:iso(80)});
+    const {GET}=await import('../grievances/workload/route');
+    expect(await GET({organizationId:'org-1',userId:'steward-1'})).toMatchObject({data:{activeCases:2,overdueCases:1,casesThisWeek:2}});
+    m.batch.mockRejectedValue(new Error('authority unavailable'));
+    await expect(GET({organizationId:'org-1',userId:'steward-1'})).rejects.toThrow('unavailable');
   });
+
 });

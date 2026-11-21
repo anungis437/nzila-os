@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-11-18T13:24:07.234318+00:00",
+  "scope": "SOURCE_PATCH_COMPLETENESS_AND_ACTUAL_INSTALLED_PACKAGE_REGRESSION",
+  "status": "BOUNDED_REMEDIATION_VERIFIED_AUDIT_REMAINS_FAILED",
+  "defect": "Repeated negated/wrapped extglobs emitted nested unbounded repetition despite the prior source wildcard scan",
+  "retainedOriginalControls": 40,
+  "newControlCount": 31,
+  "installedChecks": {
+    "passed": 71,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "approvedPnpm": "10.33.0",
+  "lockSha256": "66487ed6f7133ed9c6247b0f8970359a91924486e36c1a3b13f5192e381dbe68",
+  "patch": {
+    "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/patches/picomatch@4.0.7.patch",
+    "sha256": "6a36b929622ce4b86f275680e96d31001b63ce209414fb2b02194a7ec1f7d10d"
+  },
+  "regressions": {
+    "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs",
+    "sha256": "642a43022df0647bc2956b9d2a5cf74453087ae7ded6e774e488140eb8baf977"
+  },
+  "installedParserSha256": "a434fa61c1a1a1edc3fbb807c014eb9a1105615b5d4f37d858f0bd008d2631bc",
+  "actualFrozenInstallExitCode": 0,
+  "lockChange": "33generated patch hash references only; all unrelated prior lock bytes preserved",
+  "rawDependencyAudit": {
+    "exitCode": 1,
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 1,
+      "critical": 0
+    },
+    "advisoryId": "1247710",
+    "module": "picomatch",
+    "resolvedVersion": "4.0.7",
+    "officialPatchedRelease": null,
+    "waiverAdded": false
+  },
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/picomatch-targeted-lock-reconciliation-v7.json",
+      "sha256": "61398880959a6826a6f00808638ae2de5d293cf9dbdb4223bc8d9abf8b4c4833"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/picomatch-frozen-install-v7.log",
+      "sha256": "89e5f9bcb0e831887c8b455d36e02e0fe4e36d7cd1b6926352dd6db1c737615a"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/picomatch-installed-green-v7.log",
+      "sha256": "9d030056abf100d335775ec7f1418f156f12f4e7731cb05db57b83e83795ff87"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/pnpm-audit-v7.json",
+      "sha256": "b69fa899db855c89fc14e8c9537fd41fb868b59c207004b780d39795c8ffba21"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/supply-chain-followup-freeze-v6.json",
+      "sha256": "4468030f8500b2a24096047bcafa0e55c3aea2c0939dd9e22a8f63d37a870b8c"
+    }
+  ],
+  "limits": [
+    "Raw dependency HIGH finding remains unresolved",
+    "Final application/container reachability and SBOM/image qualification remain outstanding",
+    "No whole-candidate or release-readiness claim"
+  ],
+  "candidateSha": null,
+  "step2Started": false,
+  "stagingOrProductionPromoted": false
+}

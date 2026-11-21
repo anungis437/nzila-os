@@ -1,0 +1,115 @@
+{
+  "recordedAt": "2026-11-18T12:10:57.495906+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "ACTUAL_PRODUCTION_STARTUP_ON_OWNED_FROZEN_PG15_SOURCE_WITH_UUID_REPAIR",
+  "result": "TWO_CLI_RUNS_AND_SEVEN_AUTHENTICATED_COMPANION_PROBES_PASS",
+  "nativePrerequisite": {
+    "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/native-security-transition-v21.json",
+    "sha256": "ea08ff2def5aa6d6ff5e9cb7a1b957daa24c18daab8b37b9b87fd1d8d794a70a",
+    "bytes": 1761
+  },
+  "image": {
+    "id": "sha256:1aac5b49cefd627f02816141ca4ad012d6cc19460dfe02a9b5168a105be3fc53",
+    "reference": "postgres:15",
+    "postgresMajor": 15
+  },
+  "serverVersionNum": "150019",
+  "sourceBindings": 12980,
+  "sourceUnchanged": true,
+  "rawPrivateReceipt": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_14061_4ea9e373337a/receipt.json",
+    "sha256": "c93cf56b0ac12d1e3ea1ea966482c1cd9d7a144dbb0681df57ce01ae5181e274",
+    "bytes": 2500184
+  },
+  "launch": {
+    "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-production-launch-v6.json",
+    "sha256": "8432836b611a1d45f27ffa4bec2bf896714ecee95c067d045c0e4edf68789593",
+    "bytes": 653
+  },
+  "runs": [
+    {
+      "iteration": 1,
+      "exitCode": 0,
+      "applicationReady": false,
+      "runtimeGrantActivationApplied": true,
+      "migrationLedger": {
+        "digest": "b88b3987842049a02ce50e91b66131fc83ce2907b9e7bda240c9e7b97bba4ace",
+        "rowCount": 149
+      },
+      "rawLog": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_14061_4ea9e373337a/runner-1.log",
+        "sha256": "14c948914b5c9c58f9680e07f7d509d5675194d56d2d19efdca5e179d3d99d45",
+        "bytes": 13868
+      }
+    },
+    {
+      "iteration": 2,
+      "exitCode": 0,
+      "applicationReady": false,
+      "runtimeGrantActivationApplied": false,
+      "migrationLedger": {
+        "digest": "b88b3987842049a02ce50e91b66131fc83ce2907b9e7bda240c9e7b97bba4ace",
+        "rowCount": 149
+      },
+      "rawLog": {
+        "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/ue_native_cli_14061_4ea9e373337a/runner-2.log",
+        "sha256": "14c948914b5c9c58f9680e07f7d509d5675194d56d2d19efdca5e179d3d99d45",
+        "bytes": 13868
+      }
+    }
+  ],
+  "restrictedSessionProbes": {
+    "scope": "restricted canonical-session companion execution only",
+    "finalCandidateQualified": false,
+    "probes": [
+      {
+        "name": "runtime-live-org-and-membership-reader",
+        "passed": true
+      },
+      {
+        "name": "runtime-assignee-positive-and-member-denial",
+        "passed": true
+      },
+      {
+        "name": "runtime-unissued-domain-transition-denial-with-public-fact-load",
+        "passed": true
+      },
+      {
+        "name": "runtime-cannot-call-system-verifier",
+        "passed": true
+      },
+      {
+        "name": "system-missing-queue-verifier-reads-public-and-returns-null",
+        "passed": true
+      },
+      {
+        "name": "system-cannot-mint-or-decide-case",
+        "passed": true
+      },
+      {
+        "name": "revoked-real-session-refuses-before-companion-use",
+        "passed": true
+      }
+    ],
+    "cleanup": {},
+    "passed": true,
+    "limits": [
+      "No governed primary grant, valid queued intent, email delivery or institutional adoption is claimed",
+      "Source-native caller execution only; identities are synthetic setup and actions use real canonical sessions"
+    ]
+  },
+  "cleanup": {
+    "originalTemplatePreserved": true,
+    "cloneRemoved": true,
+    "loginsRemoved": true
+  },
+  "limits": [
+    "No whole-bootstrap read-only claim: each invocation still appends its attestation.",
+    "applicationReady remains false. No Next browser, email delivery, customer adoption or final release qualification.",
+    "The following template was built from this frozen snapshot; later candidate changes require reconciliation."
+  ]
+}

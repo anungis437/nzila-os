@@ -1,16 +1,8 @@
+import { createHealthcareSurvey } from '@/lib/services/healthcare-survey-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 import { NextResponse } from 'next/server'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { requireRole } from '@/lib/rbac'
-import { db } from '@/lib/db'
-import { healthcareSurveys } from '@nzila/db/schema'
-import {
-  HEALTHCARE_AUDIT_ACTIONS,
-  UNIT_SCHEDULING_TEMPLATE,
-  generateShareToken,
-  assertDistributionMessageSafe,
-} from '@nzila/healthcare-surveys'
-import { recordHealthcareAuditEvent } from '@/lib/healthcare-discovery'
 
 export async function POST(request: Request) {
   await requireRole('platform_admin', 'studio_admin', 'ops')
@@ -38,54 +30,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
   }
 
-  const distributionMessage = body.distributionMessage?.trim()
-  if (distributionMessage) {
-    assertDistributionMessageSafe(distributionMessage)
-  }
-
-  const shareToken = generateShareToken()
-
-  const inserted = await db
-    .insert(healthcareSurveys)
-    .values({
-      orgId: body.targetOrgId ?? undefined,
-      campaignName: body.campaignName ?? null,
-      unitName: body.unitName,
-      siteName: body.siteName ?? null,
-      localName: body.localName,
-      championLabel: body.championLabel,
-      title: body.title,
-      description: body.purposeStatement,
-      audience: body.audience ?? null,
-      status: 'draft',
-      anonymous: true,
-      allowFreeText: true,
-      purposeStatement: body.purposeStatement,
-      privacyNotice:
-        'This discovery survey is for workflow discovery only. Do not include patient information, employee names, manager names, grievance details, or identifying details.',
-      internalNotes: body.internalNotes ?? null,
-      distributionMessage: distributionMessage ?? null,
-      questions: UNIT_SCHEDULING_TEMPLATE.questions,
-      templateKey: UNIT_SCHEDULING_TEMPLATE.key,
-      shareToken,
-      closeDate: body.closeDate ? new Date(body.closeDate) : null,
-      createdBy: userId,
-    })
-    .returning({ id: healthcareSurveys.id })
-
-  const surveyId = inserted[0].id
-
-  await recordHealthcareAuditEvent({
-    action: HEALTHCARE_AUDIT_ACTIONS.HEALTHCARE_SURVEY_CREATED,
-    actorId: userId,
-    orgId: body.targetOrgId,
-    surveyId,
-    localName: body.localName,
-    unitName: body.unitName,
-    championLabel: body.championLabel,
-    summary: 'Created healthcare discovery survey.',
-    metadata: { anonymous: true },
-  })
-
-  return NextResponse.json({ ok: true, surveyId })
+  const result = await createHealthcareSurvey(body, userId)
+  return NextResponse.json(result.body, { status: result.status })
 }

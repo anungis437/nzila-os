@@ -96,6 +96,7 @@ const toTime = (value: Date | string | null): number | null => {
 
 /** Canonical membership as the platform resolver would judge it at `now`. Unknown states throw (fail closed). */
 export function canonicalMembershipStatus(row: CanonicalMembershipRow, now: Date): MembershipStatus {
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error('invalid membership evaluation clock')
   if (row.revokedAt !== null && row.revokedAt !== undefined) return 'revoked'
   switch (row.state) {
     case 'revoked':

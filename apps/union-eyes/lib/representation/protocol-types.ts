@@ -103,6 +103,19 @@ function nonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+/** Provenance is server-written UTC ISO time. Reject malformed, date-only, or normalized-invalid calendar values. */
+function protocolInstant(value: unknown): number | null {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return null;
+  const instant = Date.parse(value);
+  if (!Number.isFinite(instant)) return null;
+  return new Date(instant).toISOString() === (value.includes(".") ? value : value.replace(/Z$/, ".000Z")) ? instant : null;
+}
+
+function protocolPrincipal(value: unknown): value is string {
+  return typeof value === "string" && value.length >= 1 && value.length <= 255
+    && value === value.trim() && !/[\u0000-\u001f\u007f]/.test(value);
+}
+
 /** Structural validation of a stored protocol value. Never trusts shape from storage. */
 export function parseStoredProtocol(value: unknown): { ok: true; protocol: RepresentationProtocol } | { ok: false; reason: string } {
   if (!value || typeof value !== "object" || Array.isArray(value)) return { ok: false, reason: "not_an_object" };
@@ -124,7 +137,7 @@ export function parseStoredProtocol(value: unknown): { ok: true; protocol: Repre
  * Resolve a stored value into display-safe protocol plus an explicit execution status.
  * Missing, malformed, unapproved or self-approved configuration is never executable.
  */
-export function resolveStoredProtocol(value: unknown | null | undefined): ProtocolResolution {
+export function resolveStoredProtocol(value: unknown | null | undefined, now: Date = new Date()): ProtocolResolution {
   if (value === null || value === undefined) {
     return { status: "missing", executable: false, protocol: PROTOCOL_STEWARD_LED, reason: "no_configuration" };
   }
@@ -138,14 +151,28 @@ export function resolveStoredProtocol(value: unknown | null | undefined): Protoc
     // Well-formed settings saved before provenance existed. Preserved as-is but never executable.
     return { status: "legacy_unapproved", executable: false, protocol, reason: "historical_configuration_without_provenance" };
   }
-  if (!approval || !nonEmptyString(approval.configuredBy) || !nonEmptyString(approval.configuredAt)) {
+  if (!approval || typeof approval !== "object" || Array.isArray(approval) || !protocolPrincipal(approval.configuredBy)) {
     return { status: "invalid", executable: false, protocol, reason: "malformed_provenance" };
   }
-  if (!nonEmptyString(approval.approvedBy) || !nonEmptyString(approval.approvedAt)) {
+  const configuredAt = protocolInstant(approval.configuredAt);
+  const evaluatedAt = now.getTime();
+  if (configuredAt === null || !Number.isFinite(evaluatedAt) || configuredAt > evaluatedAt) {
+    return { status: "invalid", executable: false, protocol, reason: "invalid_configuration_time" };
+  }
+  // A pending configuration has neither approval field. A partial, null, or malformed
+  // purported approval is invalid, not a pending approval that can be silently repaired.
+  if (approval.approvedBy === undefined && approval.approvedAt === undefined) {
     return { status: "pending_approval", executable: false, protocol, reason: "approval_pending" };
   }
-  if (approval.approvedBy === approval.configuredBy || Number.isNaN(Date.parse(approval.approvedAt))) {
+  if (!protocolPrincipal(approval.approvedBy) || typeof approval.approvedAt !== "string") {
+    return { status: "invalid", executable: false, protocol, reason: "malformed_provenance" };
+  }
+  if (approval.approvedBy === approval.configuredBy) {
     return { status: "invalid", executable: false, protocol, reason: "approval_not_independent" };
+  }
+  const approvedAt = protocolInstant(approval.approvedAt);
+  if (approvedAt === null || approvedAt < configuredAt || approvedAt > evaluatedAt) {
+    return { status: "invalid", executable: false, protocol, reason: "invalid_approval_time" };
   }
   return {
     status: "approved",

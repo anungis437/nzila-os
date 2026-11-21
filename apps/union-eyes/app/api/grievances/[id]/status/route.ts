@@ -5,15 +5,12 @@
  */
 
 import { z } from "zod";
-import { db } from "@/db/db";
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { canTransitionGrievance } from "@/lib/cases/grievance-transition-authority";
-import { getEffectiveCaseAccess } from "@/lib/services/case-access-service";
-import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
@@ -49,7 +46,7 @@ const statusSchema = z.object({
 
 export const PATCH = withApi(
   {
-    // No role floor: what the caller may do is the authority they hold over this matter (canTransitionGrievance below); the role only picks the FSM actor.
+    // No role floor: explicit live kernel actions authorize the matter; role only narrows the FSM.
     auth: { required: true },
     entitlement: 'grievance_case_suite',
     // The grievance is read through the ambient handle, so the handler runs in the caller's organization transaction.
@@ -71,114 +68,50 @@ export const PATCH = withApi(
 
     const { status: newStatus, notes } = parsed.data;
 
-    // Fetch current grievance
-    const [grievance] = await db
-      .select()
-      .from(grievances)
-      .where(
-        and(
-          eq(grievances.id, grievanceId),
-          eq(grievances.organizationId, organizationId),
-        ),
-      );
+    // Lock, authorize and mutate on the same tenant transaction. Relationship labels,
+    // legacy primary columns and an unassigned draft never confer transition authority.
+    const outcome = await withRLSContext({ organizationId }, async (tx) => {
+      const [grievance] = await tx.select().from(grievances).where(and(
+        eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId),
+      )).for('update');
+      if (!grievance) return { response: standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found") };
 
-    if (!grievance) {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, "Grievance not found");
-    }
+      await requireKernelCaseAction(tx, { userId, organizationId }, grievanceId, 'case:transition');
+      const currentStatus = grievance.status as string;
+      const unifiedCurrent = toLifecycleState('grievance', currentStatus) ?? toLifecycleState('cupe', currentStatus);
+      const unifiedTarget = toLifecycleState('grievance', newStatus) ?? toLifecycleState('cupe', newStatus);
+      if (!unifiedCurrent || !unifiedTarget) return { response: standardErrorResponse(
+        ErrorCode.VALIDATION_ERROR, `Unrecognized status: ${!unifiedCurrent ? currentStatus : newStatus}`,
+      ) };
+      // Denied/withdrawn/closed_no_case are legacy spellings of closure; reopening is
+      // equally consequential. None may bypass the primary-handler-only action.
+      if (unifiedTarget === 'closed' || unifiedCurrent === 'closed') {
+        await requireKernelCaseAction(tx, { userId, organizationId }, grievanceId, 'case:close');
+      }
+      const actorRole = mapToActorRole(await hasMinRole("admin"), await hasMinRole("steward"));
+      const result = validateTransition({ actorRole, caseId: grievanceId,
+        currentState: unifiedCurrent, targetState: unifiedTarget, assignedTo: grievance.unionRepId });
+      if (!result.allowed) return { response: standardErrorResponse(ErrorCode.VALIDATION_ERROR, result.reason ?? "Invalid transition") };
 
-    // Role level is necessary but not sufficient: the actor needs authority over this matter.
-    const caseAccess = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
-    const mayTransition = canTransitionGrievance({
-      isPrimaryOwner: caseAccess.isPrimaryOwner,
-      accessRole: caseAccess.isSecondaryCollaborator ? caseAccess.accessRole : null,
-      grievanceStatus: grievance.status as string,
-      primaryRepresentativeId: grievance.unionRepId,
-    });
-    if (!mayTransition) {
-      await auditLog({
-        eventType: AuditEventType.AUTHORITY_VIOLATION,
-        severity: AuditSeverity.HIGH,
-        userId,
-        organizationId,
-        resource: "grievances",
-        action: "status_transition",
-        resourceId: grievanceId,
-        details: { reason: "Representative has no authority over this matter", requestedStatus: newStatus },
-        outcome: "failure",
-      });
-      return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have authority to change the status of this matter");
-    }
-    // Map existing status to unified FSM status via state bridge
-    const currentStatus = grievance.status as string;
-    const isAdmin = await hasMinRole("admin");
-    const isStaff = await hasMinRole("steward");
-    const actorRole = mapToActorRole(isAdmin, isStaff);
-
-    // Translate both statuses through the state bridge
-    const unifiedCurrent = toLifecycleState('grievance', currentStatus)
-      ?? toLifecycleState('cupe', currentStatus);
-    const unifiedTarget = toLifecycleState('grievance', newStatus)
-      ?? toLifecycleState('cupe', newStatus);
-
-    if (!unifiedCurrent || !unifiedTarget) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        `Unrecognized status: ${!unifiedCurrent ? currentStatus : newStatus}`,
-      );
-    }
-
-    // Validate FSM transition via unified case-lifecycle
-    const result = validateTransition({
-      actorRole,
-      caseId: grievanceId,
-      currentState: unifiedCurrent,
-      targetState: unifiedTarget,
-      assignedTo: grievance.unionRepId,
-    });
-
-    if (!result.allowed) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, result.reason ?? "Invalid transition");
-    }
-
-    const previousState = { status: grievance.status };
-
-    // Apply update, only from the status that was validated: a transition that raced this one finds the matter already moved.
-    const [updated] = await withRLSContext({ organizationId }, async (tx) => {
-      const rows = await tx
-        .update(grievances)
-        .set({
-          status: newStatus,
-          updatedAt: new Date(),
-          ...(newStatus === "settled" ? { resolvedAt: new Date() } : {}),
-          ...(newStatus === "closed" ? { closedAt: new Date() } : {}),
-        })
-        .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId), eq(grievances.status, grievance.status)))
-        .returning();
-      if (rows.length === 0) throw ApiError.conflict('The grievance changed while its status was being updated');
-
-      // Emit event
-      await tx.insert(grievanceEvents).values({
-        grievanceId,
-        eventType: "status_changed",
-        actorUserId: userId,
-        notes: notes ?? `Status changed: ${currentStatus} → ${newStatus}`,
-      });
-
-      // The status change, its event and its audit record commit together.
-      const intakeAction = newStatus === 'closed_no_case'
-        ? 'close_intake_no_case'
+      const rows = await tx.update(grievances).set({ status: newStatus, updatedAt: new Date(),
+        ...(unifiedTarget === 'resolved' ? { resolvedAt: new Date() } : {}),
+        ...(unifiedTarget === 'closed' ? { closedAt: new Date() } : {}),
+      }).where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId),
+        eq(grievances.status, grievance.status))).returning();
+      if (!rows.length) throw ApiError.conflict('The grievance changed while its status was being updated');
+      await tx.insert(grievanceEvents).values({ grievanceId, eventType: "status_changed", actorUserId: userId,
+        // The member-readable event contains the state only; confidential reasons stay in the restricted audit.
+        notes: `Status changed: ${currentStatus} → ${newStatus}` });
+      const intakeAction = newStatus === 'closed_no_case' ? 'close_intake_no_case'
         : currentStatus === 'draft' && newStatus !== 'draft' ? 'review_intake' : null;
-      await persistAtomicAudit(tx, {
-        organizationId,
-        userId,
-        action: 'grievance.status_change',
-        resourceType: 'grievances',
-        resourceId: grievanceId,
-        details: { previousState, newState: { status: newStatus }, ...(intakeAction ? { intakeAction } : {}) },
-      });
-
-      return rows;
+      await persistAtomicAudit(tx, { organizationId, userId, action: 'grievance.status_change',
+        resourceType: 'grievances', resourceId: grievanceId,
+        details: { previousState: { status: currentStatus }, newState: { status: newStatus },
+          reason: notes ?? null, ...(intakeAction ? { intakeAction } : {}) } });
+      return { updated: rows[0], currentStatus };
     });
+    if ('response' in outcome) return outcome.response;
+    const { updated, currentStatus } = outcome;
 
     await settleUnionEvidencePack(buildUnionEvidencePack({
       actionType: 'GRIEVANCE_STATUS_CHANGED',

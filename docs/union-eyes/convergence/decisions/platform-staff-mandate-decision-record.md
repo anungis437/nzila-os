@@ -1,6 +1,6 @@
 # Union Eyes - platform-staff mandate decision record
 
-Decision: `UE-INST-PLATFORM-STAFF-MANDATE-AUTHORITY`. State: OUTSTANDING. Status: DECISION_READY_NOT_DECIDED.
+Decision: `UE-INST-PLATFORM-STAFF-MANDATE-AUTHORITY`. State: DECIDED (by the platform owner, 2026-11-20; see "Owner decision" below). Status: DECIDED_BY_OWNER.
 
 ## Status of this record
 
@@ -34,8 +34,40 @@ This is the full extent of what engineering can complete unilaterally: the kerne
 1. A named instrument (Nzila bylaw, board resolution, or operating policy) establishing who holds `executive` capacity for `UE_SYSTEM_ORG_ID`.
 2. A real membership row (or equivalent identity-fact source) for each named platform officer, carrying that capacity - this repository has no seeding mechanism for it today and none is added by this record.
 3. A drafted, adopted (two independent named approvers, neither the drafter), and activated `ue_authority_issuance_rules` row for `platform_staff`/`issue`, following the exact same `draftIssuanceRule` -> `requestRuleAdoption` -> `activateIssuanceRule` path every other domain already uses.
-4. Until all three exist, the routes continue operating exactly as they do today: authorized by the `isPlatformAdminUser` identity fact, not by an issued mandate.
+4. Until all three exist, every platform-wide operation is refused (HTTP 403, audited under the caller's own organization, nothing written). Since 2026-11-09 (`a6ed0264e`) `requirePlatformStaffAuthority` requires `isPlatformAdminUser` eligibility AND a live, accepted, action-specific `platform_staff` mandate; eligibility alone authorizes nothing. (This point previously said the routes ran on the identity fact alone; that has not been true since that commit and is corrected here.)
 
 ## Non-decisions
 
 This record does not: name who the platform officers are; decide whether Nzila's own governance should use the Authority Kernel at all for this purpose (a parallel, non-kernel mechanism is also a legitimate option the deciding authority may choose instead); or change `isPlatformAdminUser`, the routes, their projection, or their audit behavior.
+
+## Owner decision, 2026-11-20
+
+Nzila is operated by a single owner, who decided that platform-wide authority must not depend on several officeholders. The model is:
+
+- **The platform executive.** This is an active `executive` membership in the platform organization (`PLATFORM_ORGANIZATION_ID`, the existing `UE_SYSTEM_ORG_ID` sentinel), held by a user with platform eligibility (`is_system_admin`). The owner creates it once. It confers every platform capability from any organization the executive is acting in. It needs no mandate, ceremony or second approver.
+- **Every use is on record.** Each exercise writes a `<capability>.authorized` audit row (`basis: platform_executive`) before the action runs. If that row cannot be written, the action is refused. Every refusal writes `<capability>.denied` with its reason.
+- **Removal is immediate.** Changing the membership's role, or deactivating it, ends the authority on the next request.
+- **Platform staff below the executive.** They still need a live, accepted, action-specific `platform_staff` mandate, exercised from the platform organization. The kernel (`lib/authority/platform-organization.ts`, `issuanceDomainApplies`) refuses that domain in customer organizations, and the platform organization issues no other domain. Issuing staff mandates still uses the multi-approver ceremony; simplify it when there is staff to delegate to.
+- **No other platform organization.** `POST /api/organizations` refuses `type: platform`.
+
+Point 4 above is superseded.
+
+**Proof.** The V2 production-build acceptance (`scripts/bootstrap-v2/next-http-smoke.ts`) proves the following, each refusal audited with zero writes:
+- an ordinary member is refused;
+- an eligible but unappointed administrator is refused from a customer organization and from the platform organization;
+- after appointment, the executive creates an organization (201, reloaded, audited twice);
+- after the appointment is removed, the executive is refused again.
+
+**One-time production setup**, run by the owner against the production database as its operator. Replace `<owner-user-id>` with your own user id:
+
+```sql
+INSERT INTO public.organizations (id,name,slug,organization_type,hierarchy_path,hierarchy_level,sectors,clc_affiliated,
+  member_count,active_member_count,settings,features_enabled,status,remittance_day,created_at,updated_at)
+VALUES ('00000000-0000-0000-0000-000000000000','Nzila platform','nzila-platform','platform',ARRAY[]::text[],0,ARRAY[]::varchar[],
+  false,0,0,'{}',ARRAY[]::text[],'active',15,now(),now())
+ON CONFLICT (id) DO NOTHING;
+INSERT INTO user_management.organization_users (user_id,organization_id,role,is_primary,is_active,joined_at)
+VALUES ('<owner-user-id>','00000000-0000-0000-0000-000000000000','executive',false,true,now());
+-- the owner's user row must also carry user_management.users.is_system_admin = true
+```
+

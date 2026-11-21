@@ -17,6 +17,8 @@ export async function withSystemContext<T>(
     // also lets a refused inner query roll back before the caller records
     // a retry, without aborting the outer worker transaction.
     return active.transaction(async (tx) => {
+    // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+    await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
       const [previous] = await tx.execute<{
         database_role: string; user_id: string | null; org_id: string | null
       }>(sql`SELECT current_setting('role') AS database_role,
@@ -43,6 +45,8 @@ export async function withSystemContext<T>(
   // variables on the tenant runtime connection. See
   // db/migrations/0108_rls_tenant_isolation_foundation.sql.
   return await systemDb.transaction(async (tx) => {
+    // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+    await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
     if (currentStateContextEnabled()) await tx.execute(sql`SET LOCAL ROLE union_eyes_system`)
     // Context vars are still cleared for audit/logging consistency, but no
     // policy on this connection depends on them being empty.

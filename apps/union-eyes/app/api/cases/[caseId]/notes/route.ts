@@ -113,12 +113,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
     const wanted = parsed.data.isInternal
 
     const written = await withRLSContext(async (tx) => {
-      // Anyone the kernel lets comment may add a member-visible note; an internal note is a separate decision.
+      // Commenting, internal note writing and releasing staff material to the member are separate kernel decisions.
       const claim = await findReadableCase(tx, actor, caseId, true, 'case:comment')
 
       if (!claim) return null
       const isInternal = wanted ?? claim.visibility === 'internal'
       if (isInternal && !(await findReadableCase(tx, actor, caseId, true, 'case:write_notes'))) return null
+      // A member may contribute their own submission. An internal reader publishing a note
+      // to the member is disclosing staff material and needs the live primary-handler power.
+      if (!isInternal && claim.visibility === 'internal' &&
+        !(await findReadableCase(tx, actor, caseId, true, 'case:disclose_to_member'))) return null
 
       const [newNote] = await tx
         .insert(claimUpdates)

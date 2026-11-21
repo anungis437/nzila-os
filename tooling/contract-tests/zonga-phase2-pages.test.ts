@@ -27,11 +27,7 @@ const ZONGA_COMPONENTS = join(ROOT, 'apps', 'zonga', 'components', 'dashboard')
 
 /* ─── SERVER PAGES: must exist, call auth(), import Card ─── */
 
-const SERVER_PAGES = [
-  'browse',
-  'playlists',
-  'notifications',
-]
+const SERVER_PAGES = ['browse', 'playlists', 'notifications']
 
 const SERVER_DETAIL_PAGES: Array<{ dir: string; sub: string }> = [
   { dir: 'playlists', sub: '[id]' },
@@ -137,14 +133,7 @@ describe('ZNG-PAGE2 — Pages use text-navy for design consistency', () => {
 
 /* ─── ERROR / LOADING BOUNDARIES ─── */
 
-const BOUNDARY_SECTIONS = [
-  'playlists',
-  'events',
-  'notifications',
-  'browse',
-  'tracks',
-  'artists',
-]
+const BOUNDARY_SECTIONS = ['playlists', 'events', 'notifications', 'browse', 'tracks', 'artists']
 
 describe('ZNG-PAGE2-04 — Error boundaries exist for new sections', () => {
   for (const section of BOUNDARY_SECTIONS) {
@@ -225,7 +214,6 @@ describe('ZNG-PAGE2-05 — Interactive client components import server actions',
     'notification-buttons.tsx': 'notification-actions',
     'like-button.tsx': 'social-actions',
     'comment-form.tsx': 'social-actions',
-    'tip-button.tsx': 'social-actions',
     'follow-button.tsx': 'social-actions',
   }
 
@@ -237,6 +225,21 @@ describe('ZNG-PAGE2-05 — Interactive client components import server actions',
       expect(content).toContain(expectedImport)
     })
   }
+})
+
+describe('ZNG-PAGE2-05 — Tip button does not advertise an unverified tip', () => {
+  // The old button called tipCreator, which wrote a fabricated revenue event with
+  // no payment, then showed "Tip sent". That theatre was removed: tipCreator now
+  // throws 501 (VERIFIED_TIP_PAYMENT_SOURCE_UNAVAILABLE) and the button is an
+  // honest disabled control until a verified payment source exists.
+  it('tip-button.tsx is disabled, never calls tipCreator, never claims success', () => {
+    const content = readFileSync(join(ZONGA_COMPONENTS, 'tip-button.tsx'), 'utf-8')
+    expect(content).not.toContain('tipCreator')
+    expect(content).not.toMatch(/onClick/)
+    expect(content).toMatch(/<button[\s\S]*?\bdisabled\b/)
+    expect(content).toContain('Tipping unavailable')
+    expect(content).not.toMatch(/Tip sent/i)
+  })
 })
 
 /* ─── SIDEBAR UPDATE ─── */
@@ -290,9 +293,11 @@ describe('ZNG-PAGE2-06 — Sidebar layout updated with new navigation', () => {
 
 describe('ZNG-PAGE2 — Pages import from server actions, not direct DB', () => {
   const PAGE_ACTION_MAP: Record<string, string[]> = {
-    'browse': ['catalog-actions', 'event-actions', 'playlist-actions', 'search-actions'],
-    'playlists': ['playlist-actions'],
-    'notifications': ['notification-actions'],
+    // Browse now reads fixed published projections (assets, events, playlists,
+    // trending) through browse-actions -> lib/services/published-catalog.
+    browse: ['browse-actions'],
+    playlists: ['playlist-actions'],
+    notifications: ['notification-actions'],
   }
 
   for (const [page, actionFiles] of Object.entries(PAGE_ACTION_MAP)) {
@@ -306,4 +311,32 @@ describe('ZNG-PAGE2 — Pages import from server actions, not direct DB', () => 
       expect(content).not.toContain("from '@nzila/db")
     })
   }
+
+  it('browse-actions covers catalog, events, playlists and trending via scoped published projections', () => {
+    const page = readFileSync(join(ZONGA_DASHBOARD, 'browse', 'page.tsx'), 'utf-8')
+    for (const fn of [
+      'browsePublishedAssets',
+      'browsePublishedEvents',
+      'browsePublicPlaylists',
+      'browseTrending',
+    ])
+      expect(page).toContain(`${fn}()`)
+    const actions = readFileSync(
+      join(ROOT, 'apps', 'zonga', 'lib', 'actions', 'browse-actions.ts'),
+      'utf-8',
+    )
+    expect(actions).toContain("'use server'")
+    expect(actions).not.toContain('@nzila/db')
+    for (const [fn, svc] of [
+      ['browsePublishedAssets', 'publishedAssets'],
+      ['browsePublishedEvents', 'publishedEvents'],
+      ['browsePublicPlaylists', 'publicPlaylists'],
+      ['browseTrending', 'trending'],
+    ])
+      expect(actions).toMatch(
+        new RegExp(
+          `export async function ${fn}[\\s\\S]*?resolveOrgContext\\('published', [^\\n]*${svc}`,
+        ),
+      )
+  })
 })

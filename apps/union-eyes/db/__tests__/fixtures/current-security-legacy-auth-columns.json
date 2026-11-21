@@ -1,0 +1,1240 @@
+{
+  "kind": "OBSERVED_METADATA_INPUT_NOT_EXPECTED_SCHEMA_OR_DDL_AUTHORITY",
+  "provenance": "Owned disposable native PG15 template from released 0327 source; metadata only, no row values. Expected definitions come independently from the shared current auth producer and immutable legacy source.",
+  "legacyReferenceSha256": "6c9e7ce3d5c77f11e06ab90006255f1a06fbd7db4ae2d26784bcbf12c5b2fac7",
+  "columns": [
+    {
+      "table": "auth_audit_log",
+      "name": "id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "auth_audit_log",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "auth_audit_log",
+      "name": "event_type",
+      "type": "character varying(50)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "auth_audit_log",
+      "name": "ip_address",
+      "type": "character varying(45)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "auth_audit_log",
+      "name": "user_agent",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "auth_audit_log",
+      "name": "metadata",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'{}'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "auth_audit_log",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "email",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "organization_id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "role",
+      "type": "character varying(50)",
+      "not_null": true,
+      "default_expression": "'member'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "token_hash",
+      "type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "invited_by",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "accepted_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "accepted_user_id",
+      "type": "character varying(255)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "revoked_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "invites",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "email",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "organization_id",
+      "type": "uuid",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "purpose",
+      "type": "character varying(32)",
+      "not_null": true,
+      "default_expression": "'login'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "token_hash",
+      "type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "used_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "attempts",
+      "type": "integer",
+      "not_null": false,
+      "default_expression": "0",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "magic_links",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "token_hash",
+      "type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "method",
+      "type": "character varying(20)",
+      "not_null": true,
+      "default_expression": "'totp'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "consumed_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "attempts",
+      "type": "integer",
+      "not_null": false,
+      "default_expression": "0",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "ip_address",
+      "type": "character varying(45)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "user_agent",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "pending_ip",
+      "type": "character varying(45)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "pending_user_agent",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_challenges",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "secret_encrypted",
+      "type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "recovery_codes_hashed",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'[]'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "enabled_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "disabled_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "last_used_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "mfa_totp",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "provider_id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "provider_name",
+      "type": "character varying(50)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "provider_user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "provider_data",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'{}'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "access_token",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "refresh_token",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "token_expires_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "oauth_providers",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "organization_id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "allow_local_auth",
+      "type": "boolean",
+      "not_null": true,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "allow_magic_link",
+      "type": "boolean",
+      "not_null": true,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "allow_sso",
+      "type": "boolean",
+      "not_null": true,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "require_sso",
+      "type": "boolean",
+      "not_null": true,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "require_invite",
+      "type": "boolean",
+      "not_null": true,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "password_reset_allowed",
+      "type": "boolean",
+      "not_null": true,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "allowed_email_domains",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'[]'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "mfa_required_for_roles",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'[]'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "sso_provider_id",
+      "type": "uuid",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "updated_by",
+      "type": "character varying(255)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "org_auth_policies",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "organization_user_id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "organization_id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "role",
+      "type": "character varying(50)",
+      "not_null": true,
+      "default_expression": "'member'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "permissions",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'[]'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "is_active",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "is_primary",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "invited_by",
+      "type": "character varying(255)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "invited_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "joined_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "last_access_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "organization_users",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "password_reset_tokens",
+      "name": "id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "password_reset_tokens",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "password_reset_tokens",
+      "name": "token_hash",
+      "type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "password_reset_tokens",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "password_reset_tokens",
+      "name": "used_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "password_reset_tokens",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "session_id",
+      "type": "uuid",
+      "not_null": true,
+      "default_expression": "gen_random_uuid()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "organization_id",
+      "type": "uuid",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "session_token",
+      "type": "text",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "refresh_token",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "device_info",
+      "type": "jsonb",
+      "not_null": false,
+      "default_expression": "'{}'::jsonb",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "ip_address",
+      "type": "character varying(45)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "user_agent",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "is_active",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "session_token_hash",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "user_sessions",
+      "name": "last_used_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "user_id",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "email",
+      "type": "character varying(255)",
+      "not_null": true,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "email_verified",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "email_verified_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "password_hash",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "first_name",
+      "type": "character varying(100)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "last_name",
+      "type": "character varying(100)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "display_name",
+      "type": "character varying(200)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "avatar_url",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "phone",
+      "type": "character varying(20)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "phone_verified",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "phone_verified_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "timezone",
+      "type": "character varying(50)",
+      "not_null": false,
+      "default_expression": "'UTC'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "locale",
+      "type": "character varying(10)",
+      "not_null": false,
+      "default_expression": "'en-US'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "is_active",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "true",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "is_system_admin",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "last_login_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "last_login_ip",
+      "type": "character varying(45)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "password_changed_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "failed_login_attempts",
+      "type": "integer",
+      "not_null": false,
+      "default_expression": "0",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "account_locked_until",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "two_factor_enabled",
+      "type": "boolean",
+      "not_null": false,
+      "default_expression": "false",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "two_factor_secret",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "two_factor_backup_codes",
+      "type": "text[]",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "encrypted_sin",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "encrypted_ssn",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "encrypted_bank_account",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "account_source",
+      "type": "character varying(20)",
+      "not_null": true,
+      "default_expression": "'local'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "lifecycle_state",
+      "type": "character varying(20)",
+      "not_null": true,
+      "default_expression": "'active'::character varying",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "lifecycle_reason",
+      "type": "text",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "lifecycle_changed_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "lifecycle_changed_by",
+      "type": "character varying(255)",
+      "not_null": false,
+      "default_expression": null,
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    },
+    {
+      "table": "users",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "not_null": false,
+      "default_expression": "now()",
+      "identity": "",
+      "generated": ""
+    }
+  ]
+}

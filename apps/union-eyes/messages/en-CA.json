@@ -1,4 +1,13 @@
 {
+  "organizationSelector": {
+    "label": "Organization: {name}",
+    "loading": "Loading...",
+    "errorRetry": "Error loading - Click to retry",
+    "none": "No organization",
+    "search": "Search organizations...",
+    "empty": "No organization found.",
+    "hierarchyUnavailable": "Hierarchy unavailable"
+  },
   "workAidPage": {
     "metaTitle": "WorkAid | UnionEyes",
     "metaDescription": "Union-side consent, documents and referral status. Nothing on this screen is sent to counsel.",
@@ -89,7 +98,7 @@
     "wordingProposed": "The proposal was recorded. It is not consent wording until another executive adopts it.",
     "wordingAdopted": "The wording is now the current consent text.",
     "wordingWithdrawn": "The proposal was withdrawn. It is not consent wording.",
-    "wordingUnavailable": "Wording adoption is not installed on this database.",
+    "wordingUnavailable": "Wording proposal and adoption are unavailable in this base release.",
     "openJourney": "WorkAid consent and referral"
   },
   "memberDocuments": {
@@ -290,6 +299,9 @@
     "federationRemittances": "Remittance Tracking"
   },
   "auth": {
+    "footerPartOf": "Part of",
+    "footerPrivacy": "Privacy",
+    "footerTerms": "Terms",
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
@@ -517,6 +529,7 @@
     "viewAll": "View All"
   },
   "claims": {
+    "removeAttachment": "Remove attachment {name}",
     "title": "Cases",
     "createClaim": "Submit Intake",
     "viewClaim": "View Case",
@@ -810,7 +823,18 @@
     "loadingError": "Failed to load data. Please refresh the page.",
     "network": "Network error. Check your connection.",
     "validation": "Please check your input and try again.",
-    "timeout": "Request timed out. Please try again."
+    "timeout": "Request timed out. Please try again.",
+    "dashboardBoundary": {
+      "title": "Something went wrong",
+      "description": "Your dashboard could not be loaded. Try again or get help using the reference below.",
+      "developmentDetails": "Error details (development only):",
+      "retry": "Try again",
+      "home": "Go to homepage",
+      "reference": "Reference: {reference}",
+      "localReference": "Local reference: {reference}",
+      "supportLead": "If this problem persists,",
+      "supportLink": "get help"
+    }
   },
   "financial": {
     "title": "Financial Analytics",
@@ -1844,7 +1868,104 @@
       "recipientEmail": "Email",
       "recipientHint": "Who the letter is addressed to. Leave empty to add no recipient.",
       "signMyself": "I will sign this letter",
-      "signMyselfHint": "You become the assigned signer. A different officer must still approve the letter."
+      "signMyselfHint": "You become the assigned signer. A different officer must still approve the letter.",
+      "chooseTitle": "Choose a Starting Point",
+      "chooseHint": "Select a template for your context, or start from a blank letter.",
+      "composeTitle": "Compose Letter",
+      "template": "Template:",
+      "back": "Back to templates",
+      "cancel": "Cancel",
+      "subject": "Subject *",
+      "subjectPlaceholder": "Enter subject line...",
+      "type": "Type",
+      "priority": "Priority",
+      "body": "Body *",
+      "bodyPlaceholder": "Write your letter content...",
+      "placeholderHint": "Replace bracketed placeholders (e.g. [Recipient Name]) with actual values before submitting.",
+      "draftHint": "The letter will be saved as a draft. You can edit and submit it for review later.",
+      "create": "Create Draft",
+      "creating": "Creating...",
+      "aiAssist": "AI Draft Assist",
+      "aiLoading": "Drafting...",
+      "aiSubjectRequired": "Enter a subject first so the AI knows what to draft.",
+      "aiUnavailable": "Draft assistance is unavailable right now. You can compose manually.",
+      "aiGenerated": "Draft generated — review and personalize before sending.",
+      "aiEmpty": "AI returned no content. Try adding more detail to your subject.",
+      "createFailed": "Failed to create letter",
+      "created": "Letter created as draft.",
+      "types": {
+        "letter": "Letter",
+        "notice": "Notice",
+        "memo": "Memo",
+        "demand": "Demand",
+        "response": "Response",
+        "proposal": "Proposal",
+        "agreement": "Agreement",
+        "report": "Report",
+        "other": "Other"
+      },
+      "priorities": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "templates": {
+        "grievance_notification": {
+          "label": "Grievance Notification",
+          "description": "Formal notice to the employer that a grievance has been filed under the collective agreement.",
+          "subject": "Formal Grievance Notice — [Grievance Number]",
+          "body": "Dear [Recipient Name],\n\nThis letter serves as formal notification that a grievance has been filed under the provisions of the collective agreement.\n\nGrievance Title: [Grievance Title]\nGrievant: [Grievant Name]\nEmployer: [Employer Name]\nDate Filed: [Date]\n\nWe request a meeting at the earliest mutually convenient time to discuss this matter in accordance with the grievance procedure outlined in our collective agreement.\n\nPlease acknowledge receipt of this notice within five (5) business days.\n\nRespectfully,\n[Your Name]\n[Union Local]"
+        },
+        "demand_letter": {
+          "label": "Demand Letter",
+          "description": "Formal demand for action, remedy, or compliance with the collective agreement.",
+          "subject": "Formal Demand — [Subject Matter]",
+          "body": "Dear [Recipient Name],\n\nThis letter constitutes a formal demand regarding [describe the issue] in relation to the obligations set forth in the collective agreement.\n\nSpecifically, we demand that the employer:\n\n1. [Action Required]\n2. [Action Required]\n3. [Timeline for Compliance]\n\nFailure to comply within [X] business days may result in further action under the grievance and arbitration procedure.\n\nThis demand is made without prejudice to any other rights or remedies available under the collective agreement or applicable legislation.\n\nRespectfully,\n[Your Name]\n[Union Local]"
+        },
+        "documentation_request": {
+          "label": "Documentation Request",
+          "description": "Request for employer records, documents, or information relevant to a case.",
+          "subject": "Request for Documentation — [Reference]",
+          "body": "Dear [Recipient Name],\n\nIn relation to [grievance/case reference], we are requesting the following documentation to support the review process:\n\n1. [Specify document type]\n2. [Specify document type]\n3. [Specify document type]\n\nUnder the collective agreement, the employer is obligated to provide relevant documentation within [X] business days of this request.\n\nPlease forward the requested documents to the undersigned at your earliest convenience.\n\nThank you for your cooperation.\n\nRespectfully,\n[Your Name]\n[Union Local]"
+        },
+        "meeting_request": {
+          "label": "Meeting Request",
+          "description": "Request to schedule a step meeting, mediation, or discussion with the employer.",
+          "subject": "Meeting Request — [Subject]",
+          "body": "Dear [Recipient Name],\n\nWe are writing to request a meeting regarding [subject matter / grievance number].\n\nWe propose the following options:\n- Date/Time Option 1: [Insert date and time]\n- Date/Time Option 2: [Insert date and time]\n- Date/Time Option 3: [Insert date and time]\n\nLocation: [Insert preferred location or virtual meeting link]\n\nAttendees from the union side will include:\n- [Grievant Name] (Grievant)\n- [Steward Name] (Steward/Representative)\n\nPlease confirm a suitable date and time within three (3) business days.\n\nRespectfully,\n[Your Name]\n[Union Local]"
+        },
+        "response_letter": {
+          "label": "Response to Employer",
+          "description": "Formal response to an employer communication, proposal, or decision.",
+          "subject": "Re: [Original Subject]",
+          "body": "Dear [Recipient Name],\n\nThank you for your communication dated [date] regarding [subject matter].\n\nAfter careful review, we wish to respond as follows:\n\n[Your response and position]\n\n[If applicable: We request further discussion / We accept the proposed terms / We reject the proposal for the following reasons:]\n\nWe remain committed to resolving this matter through the established grievance procedure and constructive dialogue.\n\nRespectfully,\n[Your Name]\n[Union Local]"
+        },
+        "resolution_proposal": {
+          "label": "Resolution Proposal",
+          "description": "Proposed settlement terms or resolution framework for an active grievance.",
+          "subject": "Proposed Resolution — [Reference]",
+          "body": "Dear [Recipient Name],\n\nFollowing our discussions regarding [grievance/case reference], we would like to propose the following resolution:\n\nProposed Terms:\n1. [Insert proposed action / remedy]\n2. [Insert timeline for implementation]\n3. [Insert conditions, if any]\n\nThis proposal is made on a without-prejudice basis and is subject to ratification by the grievant and the union.\n\nWe believe this resolution addresses the concerns raised and would welcome a meeting to discuss these terms further.\n\nPlease provide your response within [X] business days.\n\nRespectfully,\n[Your Name]\n[Union Local]"
+        },
+        "official_notice": {
+          "label": "Official Notice",
+          "description": "Statutory or contractual notice to members, the employer, or third parties.",
+          "subject": "Notice — [Subject]",
+          "body": "To Whom It May Concern,\n\nPlease be advised of the following:\n\n[Describe the subject of the notice]\n\nEffective Date: [Date]\n\nThis notice is issued pursuant to [cite the relevant article, bylaw, or regulation].\n\n[Additional details or required actions]\n\nFor questions or further information, please contact the undersigned.\n\nRespectfully,\n[Your Name]\n[Title / Union Local]"
+        },
+        "investigation_report": {
+          "label": "Investigation Report",
+          "description": "Formal report summarizing findings from a workplace investigation or review.",
+          "subject": "Investigation Report — [Subject]",
+          "body": "INVESTIGATION REPORT\n\nReference: [Case/File Number]\nDate: [Date]\nInvestigator: [Your Name]\n\n1. BACKGROUND\n[Describe the circumstances that led to this investigation]\n\n2. METHODOLOGY\n[Describe the investigation process: interviews conducted, documents reviewed, timelines]\n\n3. FINDINGS\n[Present factual findings organized by issue]\n\n4. ANALYSIS\n[Analysis of findings against the collective agreement, policies, or legislation]\n\n5. CONCLUSIONS\n[Summary of conclusions]\n\n6. RECOMMENDATIONS\n[List recommended actions or remedies]\n\nSubmitted by:\n[Your Name]\n[Title / Union Local]"
+        },
+        "blank": {
+          "label": "Blank Letter",
+          "description": "Start from scratch — compose freely without a template.",
+          "subject": "",
+          "body": ""
+        }
+      }
     },
     "detail": {
       "title": "Letter details",
@@ -1929,7 +2050,7 @@
       "chooseSignature": "Signature",
       "sign": "Sign letter",
       "dispatchMethod": "How it was sent",
-      "dispatch": "Mark as dispatched",
+      "dispatch": "Send email / record dispatch",
       "dispatchMethods": {
         "email": "Email",
         "mail": "Mail",
@@ -1947,8 +2068,17 @@
         "reopened": "Reopened as a draft.",
         "signed": "Signed.",
         "dispatched": "Marked as dispatched.",
-        "signatureSaved": "Signature saved."
+        "signatureSaved": "Signature saved.",
+        "emailQueued": "Email queued; provider acceptance is pending.",
+        "emailAccepted": "The provider accepted the email. Inbox receipt is separate."
       }
+    },
+    "email": {
+      "queued": "Email is queued. The letter is not marked dispatched until the provider accepts every recipient copy.",
+      "review_required": "Email needs review. Some copies may already have been accepted; do not send another copy outside this queue.",
+      "unavailable": "Email status could not be confirmed. Check again before sending or cancelling.",
+      "refresh": "Check email status",
+      "dispatchNote": "Email sends the approved letter text and signer name in a separate copy to each recipient. Attachments are not supported by this delivery path. Other methods record delivery performed outside Union Eyes."
     }
   },
   "contentPage": {
@@ -6826,6 +6956,10 @@
     },
     "staff": {
       "title": "CLC Staff Operations",
+      "releaseScope": {
+        "title": "Release scope",
+        "description": "CLC remittances and national sync reporting are not included in this release."
+      },
       "workflow": {
         "title": "Approval Workflow",
         "description": "Review and approve pending remittances"
@@ -12616,5 +12750,49 @@
     "accessChanged": "Your case access changed. Reload the case to check your access.",
     "savedRefreshFailed": "The change was saved, but the current deadline list could not be loaded. Retry to see the latest record.",
     "truncated": "The first 200 deadlines are shown."
+  },
+  "loginForm": {
+    "invalidCode": "Invalid code",
+    "signIn": "Sign in",
+    "welcome": "Welcome back",
+    "subtitle": "Sign in to your account to continue",
+    "method": "Sign-in method",
+    "emailLink": "Email me a link",
+    "methodsFailed": "Sign-in options could not be checked",
+    "methodsFallback": "We could not check which sign-in options apply to this address, so the standard ones are shown. {reason}",
+    "loginFailed": "Login failed",
+    "verificationFailed": "Verification failed",
+    "linkFailed": "Could not send sign-in link",
+    "mfaPrompt": "Enter the 6-digit code from your authenticator app.",
+    "authenticatorCode": "Authenticator code",
+    "recoveryCode": "Recovery code",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "useAuthenticator": "Use authenticator code",
+    "useRecovery": "Use recovery code",
+    "cancel": "Cancel",
+    "ssoRequired": "Your organization requires single sign-on.",
+    "continueMicrosoft": "Continue with Microsoft",
+    "ssoStartFailed": "Unable to start Microsoft sign-in. Please try again.",
+    "devLink": "Sign-in link sent. (Dev mode) Continue at: {url}",
+    "magicLinkNotice": "We'll email a one-time sign-in link. Valid for 15 minutes.",
+    "signingIn": "Signing in…",
+    "sending": "Sending…",
+    "sendLink": "Send sign-in link",
+    "or": "or",
+    "accessProvisioned": "Access is provisioned by your organization administrator.",
+    "networkError": "Could not reach the server. Check your connection and try again.",
+    "unexpectedError": "The server answered in a way this page does not understand. Please try again.",
+    "organizationLookupFailed": "Could not load your organizations",
+    "organizationSelectionFailed": "Could not select the organization",
+    "organizationAccessChanged": "Your organization access changed or your session expired. Refresh your organizations or sign in again.",
+    "noOrganizationAccess": "Your account has no active organization access. Contact your organization administrator.",
+    "chooseOrganizationTitle": "Choose your organization",
+    "loadingOrganizations": "Loading your organizations…",
+    "organization": "Organization",
+    "chooseOrganizationPlaceholder": "Choose an organization",
+    "continueOrganization": "Continue to your organization",
+    "refreshOrganizations": "Refresh organizations",
+    "restartSignIn": "Sign in again"
   }
 }

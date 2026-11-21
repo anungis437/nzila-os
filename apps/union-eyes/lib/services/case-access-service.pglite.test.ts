@@ -4,10 +4,9 @@
  * application's context does; everything else (decisions, governed assignment, audit chain) is the production code.
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-import { drizzle } from 'drizzle-orm/pglite'
 import type { PGlite } from '@electric-sql/pglite'
 import { newUuid, ORG, ORG_B, seedMembership, U } from '../../db/__tests__/authority-kernel-harness'
-import { freshDb, kit, minutesAgo, daysAhead } from '../../db/__tests__/authority-kernel-testkit'
+import { appDrizzle, freshDb, kit, minutesAgo, daysAhead } from '../../db/__tests__/authority-kernel-testkit'
 import { assignCase } from '../authority/store/lifecycle'
 import { insertRelationship } from '../authority/store/mutations'
 
@@ -19,7 +18,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     await pg.exec('BEGIN')
     try {
       await pg.query(`SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`, [context.organizationId, ctx.user])
-      const result = await fn(drizzle(pg))
+      const result = await fn(appDrizzle(pg))
       await pg.exec('COMMIT')
       return result
     } catch (error) {

@@ -142,10 +142,12 @@ describe('WorkAidJourney: when the server cannot be reached or answers badly', (
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('says a wording proposal list that is not a list is unexpected', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ success: true, proposals: 'none' })))
+  it('does not consume a malformed proposal response while wording workflow is deferred', async () => {
+    const fetcher = vi.fn(async () => Response.json({ success: true, proposals: 'none' }))
+    vi.stubGlobal('fetch', fetcher)
     renderJourney('staff')
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('UNEXPECTED_RESPONSE')
+    expect(await screen.findByTestId('wording-store-unapplied')).toHaveTextContent(enCA.workAidPage.wordingUnavailable)
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

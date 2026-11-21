@@ -25,7 +25,11 @@ export function ComposeMessageForm({ onClose }: Props) {
     if (!to.trim() || !subject.trim() || !body.trim()) return
 
     startTransition(async () => {
-      const result = await sendMessage({ to: to.trim(), subject: subject.trim(), body: body.trim() })
+      const result = await sendMessage({
+        to: to.trim(),
+        subject: subject.trim(),
+        body: body.trim(),
+      })
       if (result.success) {
         setSuccess(true)
         setTimeout(onClose, 1200)
@@ -37,13 +41,16 @@ export function ComposeMessageForm({ onClose }: Props) {
     return (
       <div className="flex flex-col items-center py-8 text-center">
         <CheckCircle2 className="mb-3 h-8 w-8 text-emerald-500" />
-        <p className="text-sm font-medium text-foreground">Message sent</p>
+        <p className="text-sm font-medium text-foreground">Message recorded</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-sm"
+    >
       <div className="flex items-center justify-between">
         <h3 className="font-poppins text-sm font-semibold text-foreground">Compose Message</h3>
         <button type="button" onClick={onClose} className="rounded p-1 hover:bg-secondary">
@@ -52,7 +59,7 @@ export function ComposeMessageForm({ onClose }: Props) {
       </div>
       <input
         name="to"
-        placeholder="To (email or ID)"
+        placeholder="To (active member user ID)"
         required
         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-electric/40"
       />

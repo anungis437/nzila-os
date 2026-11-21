@@ -48,7 +48,7 @@ describe('cases/[caseId]/notes route', () => {
     m.insertQueue = [];
     // One queued case per request; the follow-up internal-note decision re-decides the same case.
     m.findReadableCase.mockImplementation(async (_tx: unknown, _actor: unknown, _ref: string, _lock: boolean, action = 'case:read') => {
-      if (action === 'case:write_notes') return m.lastClaim;
+      if (action === 'case:write_notes' || action === 'case:disclose_to_member') return m.lastClaim;
       m.lastClaim = (m.claimQueue.shift() ?? [])[0] ?? null;
       return m.lastClaim;
     });
@@ -185,6 +185,22 @@ describe('cases/[caseId]/notes route', () => {
     expect(m.findReadableCase).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), 'c1', true, 'case:write_notes');
     expect(m.insertValues).not.toHaveBeenCalled();
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses staff disclosure without primary authority before writing', async () => {
+    const { POST } = await loadRoute();
+    const { ApiError } = await import('@/lib/api/errors');
+    m.findReadableCase.mockImplementation(async (_tx, _actor, _ref, _lock, action = 'case:read') => {
+      if (action === 'case:disclose_to_member') throw ApiError.forbidden('Primary handler required');
+      return { claimId: 'c1', visibility: 'internal' };
+    });
+    const response = await POST(new Request('http://localhost/api/cases/c1/notes', {
+      method: 'POST', body: JSON.stringify({ text: 'staff information', isInternal: false }),
+    }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(403);
+    expect(m.findReadableCase).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), 'c1', true, 'case:disclose_to_member');
+    expect(m.insertValues).not.toHaveBeenCalled(); expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
   });
 
 });

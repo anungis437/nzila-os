@@ -1,3 +1,4 @@
+import { listTaxProfiles, createTaxProfile } from '@/lib/services/finance-tax-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Tax Profiles
@@ -7,15 +8,9 @@
  * PR5 — Org-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { taxProfiles } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { CreateTaxProfileInput } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const orgId = req.nextUrl.searchParams.get('orgId')
@@ -26,12 +21,8 @@ export async function GET(req: NextRequest) {
   const access = await requireOrgAccess(orgId)
   if (!access.ok) return access.response
 
-  const rows = await platformDb
-    .select()
-    .from(taxProfiles)
-    .where(eq(taxProfiles.orgId, orgId))
-
-  return NextResponse.json(rows)
+  const result = await listTaxProfiles(orgId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -46,20 +37,6 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await platformDb
-    .insert(taxProfiles)
-    .values(parsed.data)
-    .returning()
-
-  await recordFinanceAuditEvent({
-    orgId: parsed.data.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.TAX_PROFILE_CREATE,
-    targetType: 'tax_profile',
-    targetId: row.id,
-    afterJson: parsed.data as unknown as Record<string, unknown>,
-  })
-
-  return NextResponse.json(row, { status: 201 })
+  const result = await createTaxProfile(parsed.data, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

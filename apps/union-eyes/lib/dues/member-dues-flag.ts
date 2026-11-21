@@ -15,11 +15,17 @@ import { ApiError } from '@/lib/api/errors'
  * unnamed merchant account. Enabling collection needs an owner decision naming the merchant of record, a
  * per-organization processor configuration and a recorded member disclosure consent; none exists.
  *
- * Configuring Stripe for client-commercial billing never switches member dues payment on. The verified-webhook
- * settlement path stays live so an already-pending dues payment can still be settled exactly once.
+ * Configuring Stripe for client-commercial billing never switches member dues payment on. Verified-webhook settlement
+ * is unavailable as well (MEMBER_DUES_SETTLEMENT_REFUSAL): SYSTEM holds no authority over the dues tables.
  */
 export const MEMBER_DUES_COLLECTION_REFUSAL =
   'Member dues payment is not offered: dues are handled in an external system, and no merchant account, per-organization processor configuration or member disclosure consent is recorded for collecting them here'
+
+/** The SYSTEM role holds zero authority over dues_transactions and member_dues_ledger (ZERO_SYSTEM_MUTATION_TABLES in
+ * scripts/bootstrap-v2/system-mutation-contracts.ts). A verified processor event for a member dues payment therefore has
+ * no settlement path here: the webhook answers 501 and writes nothing, and the database refuses the settlement writer. */
+export const MEMBER_DUES_SETTLEMENT_REFUSAL =
+  'Member dues settlement is not available: dues are handled in an external system, and Union Eyes holds no system authority over dues transactions or the member dues ledger'
 
 export function isMemberDuesPaymentEnabled(_env: NodeJS.ProcessEnv = process.env): boolean {
   return false

@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const {
-  mockAuthenticateUser,
-  mockWithRequestContext,
-  mockWithSpan,
-  mockDbSelect,
-} = vi.hoisted(() => ({
-  mockAuthenticateUser: vi.fn(),
-  mockWithRequestContext: vi.fn(async (_req: Request, fn: () => Promise<unknown>) => fn()),
-  mockWithSpan: vi.fn(async (_name: string, _attrs: Record<string, unknown>, fn: () => Promise<unknown>) => fn()),
-  mockDbSelect: vi.fn(),
-}))
+const { mockAuthenticateUser, mockWithRequestContext, mockWithSpan, mockDbSelect } = vi.hoisted(
+  () => ({
+    mockAuthenticateUser: vi.fn(),
+    mockWithRequestContext: vi.fn(async (_req: Request, fn: () => Promise<unknown>) => fn()),
+    mockWithSpan: vi.fn(
+      async (_name: string, _attrs: Record<string, unknown>, fn: () => Promise<unknown>) => fn(),
+    ),
+    mockDbSelect: vi.fn(),
+  }),
+)
 
 vi.mock('@/lib/api-guards', () => ({
-  authenticateUser: mockAuthenticateUser,
+  GLOBAL_OPERATOR_ROLES: ['platform_admin'],
+  requirePlatformRole: mockAuthenticateUser,
   withRequestContext: mockWithRequestContext,
 }))
 
@@ -23,7 +23,11 @@ vi.mock('@nzila/os-core/telemetry', () => ({
 
 vi.mock('@nzila/db', () => ({
   db: { select: mockDbSelect },
-  commerceOrders: { status: 'order_status', total: 'order_total', paymentStatus: 'order_payment_status' },
+  commerceOrders: {
+    status: 'order_status',
+    total: 'order_total',
+    paymentStatus: 'order_payment_status',
+  },
   commerceQuotes: { status: 'quote_status' },
   flowPayments: { status: 'payment_status' },
   commercePurchaseOrders: { expectedDeliveryDate: 'po_expected', status: 'po_status' },
@@ -58,7 +62,10 @@ describe('api metrics route slice', () => {
   })
 
   it('returns auth response when unauthenticated', async () => {
-    mockAuthenticateUser.mockResolvedValueOnce({ ok: false, response: new Response('unauthorized', { status: 401 }) })
+    mockAuthenticateUser.mockResolvedValueOnce({
+      ok: false,
+      response: new Response('unauthorized', { status: 401 }),
+    })
 
     const { GET } = await import('@/app/api/metrics/route')
     const response = await GET(new Request('http://localhost/api/metrics'))
@@ -84,7 +91,15 @@ describe('api metrics route slice', () => {
       [{ count: 13 }],
     ])
 
-    const { GET, recordRequest, recordOrder, recordQuote, recordPaymentBlock, recordVendorDelay, recordProductionCycle } = await import('@/app/api/metrics/route')
+    const { GET } = await import('@/app/api/metrics/route')
+    const {
+      recordRequest,
+      recordOrder,
+      recordQuote,
+      recordPaymentBlock,
+      recordVendorDelay,
+      recordProductionCycle,
+    } = await import('@/lib/services/operational-metrics-service')
 
     recordRequest(100)
     recordRequest(50, true)
@@ -127,7 +142,15 @@ describe('api metrics route slice', () => {
       throw new Error('db down')
     })
 
-    const { GET, recordRequest, recordOrder, recordQuote, recordPaymentBlock, recordVendorDelay, recordProductionCycle } = await import('@/app/api/metrics/route')
+    const { GET } = await import('@/app/api/metrics/route')
+    const {
+      recordRequest,
+      recordOrder,
+      recordQuote,
+      recordPaymentBlock,
+      recordVendorDelay,
+      recordProductionCycle,
+    } = await import('@/lib/services/operational-metrics-service')
 
     recordRequest(25)
     recordOrder(200)

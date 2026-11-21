@@ -1,3 +1,4 @@
+import { loadClosePeriod, readClosePeriodDetail } from '@/lib/services/finance-close-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Close Period Detail
@@ -6,10 +7,8 @@
  * PR5 — Org-scoped auth via requireOrgAccess
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { closePeriods, closeTasks, closeExceptions, closeApprovals } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
-import { authenticateUser } from '@/lib/api-guards'
+
+import { authenticateUser, requireOrgAccess } from '@/lib/api-guards'
 
 export async function GET(
   _req: NextRequest,
@@ -20,16 +19,14 @@ export async function GET(
 
   const { periodId } = await params
 
-  const [[period], tasks, exceptions, approvals] = await Promise.all([
-    platformDb.select().from(closePeriods).where(eq(closePeriods.id, periodId)),
-    platformDb.select().from(closeTasks).where(eq(closeTasks.periodId, periodId)),
-    platformDb.select().from(closeExceptions).where(eq(closeExceptions.periodId, periodId)),
-    platformDb.select().from(closeApprovals).where(eq(closeApprovals.periodId, periodId)),
-  ])
+  const period = await loadClosePeriod(periodId)
 
   if (!period) {
     return NextResponse.json({ error: 'Close period not found' }, { status: 404 })
   }
 
-  return NextResponse.json({ period, tasks, exceptions, approvals })
+  const access = await requireOrgAccess(period.orgId)
+  if (!access.ok) return access.response
+  const result = await readClosePeriodDetail(period)
+  return NextResponse.json(result.body, { status: result.status })
 }

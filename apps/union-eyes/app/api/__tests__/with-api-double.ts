@@ -114,7 +114,7 @@ export function withApiDouble(options: DoubleOptions, handler: Handler) {
         rest,
       })
     } catch (error) {
-      if (error instanceof ApiError) return refusal(error.code, ({ AUTH_REQUIRED: 401, FORBIDDEN: 403, INSUFFICIENT_PERMISSIONS: 403, NOT_FOUND: 404, CONFLICT: 409, VALIDATION_ERROR: 400, RATE_LIMIT_EXCEEDED: 429 } as Record<string, number>)[error.code] ?? 500, error.message)
+      if (error instanceof ApiError) return refusal(error.code, ({ AUTH_REQUIRED: 401, FORBIDDEN: 403, INSUFFICIENT_PERMISSIONS: 403, NOT_FOUND: 404, CONFLICT: 409, VALIDATION_ERROR: 400, RATE_LIMIT_EXCEEDED: 429, NOT_IMPLEMENTED: 501 } as Record<string, number>)[error.code] ?? 500, error.message)
       throw error
     } finally {
       active = outer

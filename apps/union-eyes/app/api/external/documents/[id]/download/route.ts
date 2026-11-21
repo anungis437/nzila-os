@@ -1,4 +1,5 @@
 import { and, eq, isNull } from 'drizzle-orm';
+import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { BlobTooLargeError, readBlobBounded } from '@/lib/blob-client';
@@ -33,9 +34,20 @@ function attachmentName(raw: string | null | undefined): string {
   return cleaned.length > 0 ? cleaned.slice(0, 200) : 'document';
 }
 
+/** Versions predating explicit byte-count metadata remain pinned by their
+ * stored checksum. An explicitly recorded size is never ignored if malformed. */
+function versionSize(metadata: unknown): number | null {
+  if (!metadata || typeof metadata !== 'object' || !('sizeBytes' in metadata)) return null;
+  const value = metadata.sizeBytes;
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0 || value > EXTERNAL_DOWNLOAD_MAX_BYTES)
+    throw new Error('EXTERNAL_VERSION_SIZE_INVALID');
+  return value;
+}
+
 export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'download_documents',
+    protectedRead: 'download',
     resolve: resolveExternalDocumentResource,
     // The download writes its own, more specific record naming the bytes delivered.
     readRecord: 'handler',
@@ -64,8 +76,9 @@ export const GET = withExternalMatterResourceAuth(
         matterId,
         documentId,
         requiredPermission: 'download',
-      });
-      if (!decision.allowed) {
+      }, { recordAllowed: false });
+      if (!decision.allowed || !decision.authorityId || !decision.matterGrantId || !decision.documentGrantId
+        || decision.authorityId !== context.authorityId || decision.matterGrantId !== context.matterGrantId) {
         return { kind: 'forbidden' as const };
       }
 
@@ -76,6 +89,10 @@ export const GET = withExternalMatterResourceAuth(
           name: documents.name,
           filename: documents.filename,
           mimeType: documents.mimeType,
+          privacyLabel: documents.privacyLabel,
+          containsLegalPrivilege: documents.containsLegalPrivilege,
+          containsMedicalSensitive: documents.containsMedicalSensitive,
+          medicalSensitive: documents.medicalSensitive,
         })
         .from(documents)
         .innerJoin(documentLinks, eq(documentLinks.documentId, documents.id))
@@ -94,13 +111,16 @@ export const GET = withExternalMatterResourceAuth(
       if (!row) {
         return { kind: 'not_found' as const };
       }
+      if (['privileged', 'highly_sensitive'].includes(row.privacyLabel) || row.containsLegalPrivilege
+        || row.containsMedicalSensitive || row.medicalSensitive) return { kind: 'forbidden' as const };
 
       // Every grant must name the reviewed version. A legacy null pin is ambiguous and therefore authorizes no download; it must be
       // reissued after a person reviews the intended artifact. It must never silently widen to the current/latest version.
       const pinned = decision.documentVersionNo ?? null;
       if (pinned === null) return { kind: 'forbidden' as const };
       const [pinnedVersion] = await tx
-        .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
+        .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey,
+          contentHash: documentVersions.contentHash, metadata: documentVersions.metadata })
         .from(documentVersions)
         .where(
           and(
@@ -111,7 +131,7 @@ export const GET = withExternalMatterResourceAuth(
         )
         .limit(1);
 
-      return { kind: 'located' as const, row, pinnedVersion };
+      return { kind: 'located' as const, row, pinnedVersion, decision };
     });
 
     if (located.kind === 'forbidden') {
@@ -120,11 +140,12 @@ export const GET = withExternalMatterResourceAuth(
     if (located.kind === 'not_found') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    const { row, pinnedVersion } = located;
+    const { row, pinnedVersion, decision: locatedDecision } = located;
 
     if (!pinnedVersion?.storageKey) {
       return NextResponse.json({ error: 'Download is not available' }, { status: 404 });
     }
+    if (!/^[a-f0-9]{64}$/.test(pinnedVersion.contentHash)) return externalForbidden();
 
     let bytes: Buffer;
     try {
@@ -137,10 +158,40 @@ export const GET = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Download is not available' }, { status: 503 });
     }
 
-    // The access is on the record before any byte leaves the server, and it names what is delivered.
+    const checksum = createHash('sha256').update(bytes).digest('hex');
+    let expectedSize: number | null;
+    try { expectedSize = versionSize(pinnedVersion.metadata); }
+    catch { return externalForbidden(); }
+    if (checksum !== pinnedVersion.contentHash || (expectedSize !== null && bytes.length !== expectedSize))
+      return NextResponse.json({ error: 'Download is unavailable' }, { status: 503 });
+
+    // Re-read and lock the live grant and exact artifact after storage. No
+    // connection is held across the blob fetch; the final locks last through
+    // the canonical audit commit, before any response bytes are released.
     try {
-      await withRLSContext({ organizationId }, (tx) =>
-        persistAtomicAudit(tx, {
+      const released = await withRLSContext({ organizationId }, async (tx) => {
+        const currentDecision = await authorizeExternalDocumentAccess(tx, {
+          actor: context.actor, organizationId, matterType, matterId, documentId, requiredPermission: 'download',
+        }, { lock: true, recordAllowed: false });
+        if (!currentDecision.allowed || currentDecision.authorityId !== locatedDecision.authorityId
+          || currentDecision.matterGrantId !== locatedDecision.matterGrantId || currentDecision.documentGrantId !== locatedDecision.documentGrantId
+          || currentDecision.documentVersionNo !== pinnedVersion.versionNo) return false;
+        const [currentDocument] = await tx.select({ id: documents.id, privacyLabel: documents.privacyLabel,
+          containsLegalPrivilege: documents.containsLegalPrivilege, containsMedicalSensitive: documents.containsMedicalSensitive,
+          medicalSensitive: documents.medicalSensitive })
+          .from(documents).innerJoin(documentLinks, eq(documentLinks.documentId, documents.id))
+          .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), eq(documents.status, 'active'),
+            isNull(documents.deletedAt), eq(documentLinks.organizationId, organizationId), eq(documentLinks.linkedEntityType, 'grievance'),
+            eq(documentLinks.linkedEntityId, matterId))).limit(1).for('share');
+        if (!currentDocument || currentDocument.privacyLabel !== row.privacyLabel || currentDocument.containsLegalPrivilege
+          || currentDocument.containsMedicalSensitive || currentDocument.medicalSensitive) return false;
+        const [currentVersion] = await tx.select({ id: documentVersions.id, versionNo: documentVersions.versionNo,
+          storageKey: documentVersions.storageKey, contentHash: documentVersions.contentHash, metadata: documentVersions.metadata })
+          .from(documentVersions).where(and(eq(documentVersions.organizationId, organizationId), eq(documentVersions.documentId, documentId),
+            eq(documentVersions.id, pinnedVersion.id), eq(documentVersions.versionNo, pinnedVersion.versionNo))).limit(1).for('share');
+        if (!currentVersion || currentVersion.storageKey !== pinnedVersion.storageKey || currentVersion.contentHash !== checksum
+          || versionSize(currentVersion.metadata) !== expectedSize) return false;
+        await persistAtomicAudit(tx, {
           organizationId,
           userId: context.actor.userId,
           action: 'document.external_download',
@@ -158,9 +209,12 @@ export const GET = withExternalMatterResourceAuth(
             versionNo: pinnedVersion.versionNo,
             delivery: 'served_by_route',
             sizeBytes: bytes.length,
+            checksumSha256: checksum,
           },
-        }),
-      );
+        });
+        return true;
+      });
+      if (!released) return externalForbidden();
     } catch (error) {
       logger.error('External document download could not be recorded', { documentId: row.id, error: error instanceof Error ? error.message : String(error) });
       return NextResponse.json({ error: 'Download is unavailable' }, { status: 503 });

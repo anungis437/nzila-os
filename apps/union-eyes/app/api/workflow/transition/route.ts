@@ -88,9 +88,6 @@ export async function POST(request: NextRequest) {
       // The kernel decides the actor may move this case (and close it, when the target closes it) before it is locked.
       const mayMove = await findReadableCase(tx, actor, claimNumber, true, 'case:transition');
       if (!mayMove) return NextResponse.json({ success: false, error: 'Claim not found' }, { status: 404 });
-      if (['closed', 'resolved'].includes(targetStatus) && !(await findReadableCase(tx, actor, claimNumber, true, 'case:close'))) {
-        return NextResponse.json({ success: false, error: 'Claim not found' }, { status: 404 });
-      }
       const claimConditions = [eq(claims.claimNumber, claimNumber), eq(claims.organizationId, actor.organizationId)];
 
       const [claim] = await wrapSchemaQuery(
@@ -110,13 +107,19 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      if (['closed','rejected'].includes(targetStatus) || ['closed','rejected'].includes(claim.status)) {
+        const mayClose=await findReadableCase(tx,actor,claimNumber,true,'case:close');
+        if(!mayClose)return NextResponse.json({success:false,error:'Claim not found'},{status:404});
+      }
+
       const currentStatus = claim.status as ClaimStatus
 
       // Pre-flight FSM guard via canonical lifecycle bridge
       const currentLifecycle = toLifecycleState('claim', currentStatus) ?? 'submitted'
       const allowedLifecycle = getAllowedTransitions(currentLifecycle, 'steward')
       const allowed = [...new Set(allowedLifecycle.map(toLegacyClaimStatus))]
-      if (!allowed.includes(targetStatus as ClaimStatus)) {
+      const targetLifecycle=toLifecycleState('claim',targetStatus);
+      if (!targetLifecycle || !allowedLifecycle.includes(targetLifecycle)) {
         recordUnionEyesWorkflowTransitionFailure(
           organizationId || claim.organizationId,
           claim.claimId,

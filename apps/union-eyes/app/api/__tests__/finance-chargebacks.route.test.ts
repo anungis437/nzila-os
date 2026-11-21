@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
 import { declaredOptions } from './with-api-double';
 
 const m = vi.hoisted(() => ({
@@ -6,7 +7,14 @@ const m = vi.hoisted(() => ({
   getChargebacks: vi.fn(),
 }));
 
-vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
+// The shared double reports every code it does not know as 500, so the handler is also exposed raw (`.handler`) to assert the thrown 501 refusal itself.
+vi.mock('@/lib/api/framework', async () => {
+  const double = await import('./with-api-double');
+  return {
+    ...double.frameworkDouble,
+    withApi: (options: any, handler: any) => Object.assign(double.withApiDouble(options, handler), { handler }),
+  };
+});
 vi.mock('@/lib/api/standardized-responses', async () => (await import('./standard-responses-double')).standardResponsesDouble());
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/services/platform-economics', () => ({ getChargebacks: m.getChargebacks }));
@@ -17,6 +25,7 @@ async function loadRoute() {
 
 const LOCAL = '550e8400-e29b-41d4-a716-446655440010';
 const PERIOD = '550e8400-e29b-41d4-a716-446655440011';
+const REFUSAL = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
 
 describe('finance/chargebacks route', () => {
   beforeEach(() => {
@@ -25,37 +34,36 @@ describe('finance/chargebacks route', () => {
     m.getChargebacks.mockResolvedValue([{ id: 'cb_1', amount: 123 }]);
   });
 
-  it('asks the wrapper for a secretary-treasurer, the entitlement and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for a secretary-treasurer and declares its registry entry', async () => {
     const { GET } = await loadRoute();
+    // The route no longer declares an entitlement or a tenant transaction: the base release refuses before either would matter.
     expect(declaredOptions(GET)).toMatchObject({
       auth: { minRole: 'secretary_treasurer' },
-      entitlement: 'financial_intelligence_suite',
-      rlsOrgContext: true,
+      rlsOrgContext: false,
       registry: { audience: 'officer', evidenceRequired: true },
     });
   });
 
-  it('is refused without the entitlement, and reads nothing', async () => {
+  it.each([
+    ['no filter', { query: {} }],
+    ['a local and a period', { query: { localId: LOCAL, periodId: PERIOD } }],
+  ])('is refused with 501 and reads no chargebacks, for %s', async (_label, extra) => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('no module'));
-    const response = await GET(new Request('http://localhost/api/finance/chargebacks'), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(403);
-    expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'financial_intelligence_suite', 'u1');
+    await expect(
+      (GET as any).handler({ organizationId: 'org_1', userId: 'u1', ...extra }),
+    ).rejects.toMatchObject(REFUSAL);
     expect(m.getChargebacks).not.toHaveBeenCalled();
   });
 
-  it('returns the chargebacks of the caller organization, for the local and period asked', async () => {
+  it('refuses with 501, not 500, even when the underlying read would fail', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(
-      new Request(`http://localhost/api/finance/chargebacks?localId=${LOCAL}&periodId=${PERIOD}`),
-      { organizationId: 'org_1', userId: 'u1' },
-    );
-    const json = await response.json();
+    m.getChargebacks.mockRejectedValueOnce(new Error('db down'));
 
-    expect(response.status).toBe(200);
-    expect(m.getChargebacks).toHaveBeenCalledWith({ organizationId: 'org_1', localId: LOCAL, billingPeriodId: PERIOD });
-    expect(json.data).toEqual([{ id: 'cb_1', amount: 123 }]);
+    await expect(
+      (GET as any).handler({ organizationId: 'org_1', userId: 'u1', query: {} }),
+    ).rejects.toMatchObject(REFUSAL);
+    expect(m.getChargebacks).not.toHaveBeenCalled();
   });
 
   it('answers an id that is not a uuid as a client error, never as a database fault', async () => {
@@ -65,13 +73,5 @@ describe('finance/chargebacks route', () => {
       expect(response.status, query).toBe(400);
     }
     expect(m.getChargebacks).not.toHaveBeenCalled();
-  });
-
-  it('reports a read that failed as a 500, never as an empty list', async () => {
-    const { GET } = await loadRoute();
-    m.getChargebacks.mockRejectedValueOnce(new Error('db down'));
-    const response = await GET(new Request('http://localhost/api/finance/chargebacks'), { organizationId: 'org_1', userId: 'u1' });
-
-    expect(response.status).toBe(500);
   });
 });

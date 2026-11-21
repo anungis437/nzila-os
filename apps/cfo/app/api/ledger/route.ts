@@ -7,6 +7,8 @@ import { NextResponse } from 'next/server'
 import { authenticateUser, withRequestContext } from '@/lib/api-guards'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { z } from 'zod'
+import { CfoScopeError } from '@/lib/resolve-org'
+import { CfoCapabilityUnavailableError } from '@/lib/services/capability-unavailable'
 import {
   getLedgerEntries,
   runReconciliation,
@@ -45,7 +47,11 @@ export async function GET(request: Request) {
 
       if (!parsed.success) {
         return NextResponse.json(
-          { ok: false, error: 'Invalid query parameters', details: parsed.error.flatten().fieldErrors },
+          {
+            ok: false,
+            error: 'Invalid query parameters',
+            details: parsed.error.flatten().fieldErrors,
+          },
           { status: 400 },
         )
       }
@@ -67,6 +73,7 @@ export async function POST(request: Request) {
         const result = await runReconciliation()
         return NextResponse.json({ ok: true, data: result })
       } catch (err) {
+        if (err instanceof CfoScopeError || err instanceof CfoCapabilityUnavailableError) throw err
         return NextResponse.json(
           { ok: false, error: err instanceof Error ? err.message : 'Unknown error' },
           { status: 500 },

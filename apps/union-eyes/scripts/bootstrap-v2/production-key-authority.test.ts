@@ -21,7 +21,8 @@ describe('actual production encryption authority requirement', () => {
       mkdirSync(state)
       const url = 'postgresql://synthetic:synthetic@127.0.0.1:54321/synthetic'
       const env = syntheticNextEnvironment(
-        { runtimeUrl: url, systemUrl: url, authUrl: url },
+        { runtimeUrl: url, systemUrl: url, authUrl: url,
+          authSystemUrl: url.replace('synthetic:', 'synthetic_auth_system:') },
         43210,
         boundary,
         state,

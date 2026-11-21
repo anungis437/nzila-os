@@ -24,6 +24,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import type { PermissionCheckEntry } from '@/db/queries/enhanced-rbac-queries'
 import { serializeRawDates } from '@/db/driver-dates'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 type Statement = ReturnType<typeof sql>
@@ -121,12 +124,19 @@ describe.skipIf(!URL)('the enhanced RBAC on the combined schema, as the real run
     const db = drizzle(client)
     // as every production client does (db/driver-dates.ts)
     serializeRawDates(client)
-    state.run = (role, organizationId, work) =>
-      db.transaction(async (tx) => {
+    // A tenant call runs in the verified business session of the organization's declared administrator (a real canonical member), as the
+    // canonical topology requires (ue_v2_verified_business_session); the system role and an organization-less handle run with none.
+    state.run = (role, organizationId, work) => {
+      const run = (binding?: AuthenticatedOrgBinding) => db.transaction(async (tx) => {
         await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
         await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId}, true), set_config('app.current_user_id', '', true)`)
+        if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
         return work(tx)
       })
+      return role === 'union_eyes_runtime' && organizationId
+        ? withNativeCanonicalActor(nativeTenantReaderId(organizationId, 'admin'), organizationId, run)
+        : run()
+    }
     for (const [org, slug] of [
       [ORG_A, `rb-a-${sfx}`],
       [ORG_B, `rb-b-${sfx}`],
@@ -137,6 +147,7 @@ describe.skipIf(!URL)('the enhanced RBAC on the combined schema, as the real run
         [org, slug, slug],
       )
     }
+    for (const org of [ORG_A, ORG_B]) await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(org, 'admin'), org, 'admin')
     memberB = await newMember(ORG_B, 'b1')
   }, 120_000)
 
@@ -177,7 +188,16 @@ describe.skipIf(!URL)('the enhanced RBAC on the combined schema, as the real run
         { relname: 'member_roles', relrowsecurity: true, relforcerowsecurity: true },
         { relname: 'permission_exceptions', relrowsecurity: true, relforcerowsecurity: true },
         { relname: 'rbac_audit_log', relrowsecurity: true, relforcerowsecurity: true },
-        { relname: 'role_definitions', relrowsecurity: false, relforcerowsecurity: false },
+        // The canonical source enables and forces row security on every source relation, the shared catalog included; its declared
+        // GLOBAL_REFERENCE_DATA policies (ue_v2_select for the runtime, ue_v2_system_* for the system role) are what admit it.
+        { relname: 'role_definitions', relrowsecurity: true, relforcerowsecurity: true },
+      ])
+      const admitting = (await admin.query(`SELECT polname, polcmd, polroles::regrole[]::text[] AS roles FROM pg_policy WHERE polrelid = 'public.role_definitions'::regclass AND polpermissive ORDER BY polname`)).rows
+      expect(admitting).toEqual([
+        { polname: 'ue_v2_select', polcmd: 'r', roles: ['union_eyes_runtime'] },
+        { polname: 'ue_v2_system_insert', polcmd: 'a', roles: ['union_eyes_system'] },
+        { polname: 'ue_v2_system_select', polcmd: 'r', roles: ['union_eyes_system'] },
+        { polname: 'ue_v2_system_update', polcmd: 'w', roles: ['union_eyes_system'] },
       ])
     })
 
@@ -442,6 +462,11 @@ describe.skipIf(!URL)('the enhanced RBAC on the combined schema, as the real run
     const chainIds: string[] = []
 
     it('links every entry of an organization to the one before it, and starts each organization afresh', async () => {
+      // The trail does not reference the organization, but reading it as a tenant needs a member of one, in a real session.
+      await admin.query(
+        `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+         VALUES ($1,$2,$2,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`, [CHAIN, `rb-chain-${sfx}`])
+      await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(CHAIN, 'admin'), CHAIN, 'admin')
       for (let i = 0; i < 4; i += 1) chainIds.push(await q!.recordPermissionCheck(entry(CHAIN, i)))
       const other = randomUUID()
       await q!.recordPermissionCheck(entry(other, 0))

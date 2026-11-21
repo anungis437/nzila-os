@@ -17,7 +17,8 @@ import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
 import { getCaseActor, caseReadScope, caseTriageQueueScope, requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
 import { claimIdentitySelect } from '@/lib/cases/claim-identity';
-import type { CaseListRow, CaseQueueRow } from '@/lib/cases/case-list';
+import { memberCaseListView, type CaseListRow, type CaseQueueRow } from '@/lib/cases/case-list';
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
 
 const caseCreateSchema = z.object({
   claimType: z.enum([
@@ -64,8 +65,8 @@ export const GET = withApi(
     const typeFilter   = type   ? sql`AND c.claim_type = ${type}` : sql``;
     const priorityFilter = priority ? sql`AND c.priority = ${priority}` : sql``;
 
-    const rows = await withRLSContext(async (tx) =>
-      tx.execute(sql`
+    const full = await withRLSContext({ organizationId: actor.organizationId }, async (tx) => {
+      const rows = await tx.execute(sql`
         SELECT c.claim_id        AS "claimId",
                c.claim_number    AS "claimNumber",
                c.organization_id AS "organizationId",
@@ -105,8 +106,14 @@ export const GET = withApi(
           ${priorityFilter}
         ORDER BY c.created_at DESC
         LIMIT 200
-      `),
-    );
+      `);
+      const candidates = Array.from(rows) as unknown as CaseListRow[];
+      const decisions = await decideCaseCapabilitiesBatch(tx, { ...actor, caseIds: candidates.map(row => row.claimId) });
+      return candidates.flatMap(row => {
+        const read = decisions.get(row.claimId)?.['case:read'];
+        return read?.effect === 'allow' ? [read.scope.visibility === 'internal' ? row : memberCaseListView(row)] : [];
+      });
+    });
 
     // A live `cases` triage designation adds the unassigned queue as metadata only (never the description, analysis,
     // evidence or amounts), and only for cases the caller cannot already read in full.
@@ -121,7 +128,6 @@ export const GET = withApi(
         LIMIT 200
       `),
     );
-    const full = Array.from(rows) as unknown as CaseListRow[];
     const seen = new Set(full.map((r) => r.claimId));
     const queued = Array.from(queue) as unknown as CaseQueueRow[];
     return { data: [...full, ...queued.filter((r) => !seen.has(r.claimId))] };

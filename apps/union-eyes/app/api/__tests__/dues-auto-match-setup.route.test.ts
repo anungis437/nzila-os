@@ -1,4 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = {
+  status: 501,
+  code: ErrorCode.NOT_IMPLEMENTED,
+  message: 'Finance and dues persistence are not available in this release.',
+};
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -61,53 +68,30 @@ describe('dues/reconciliation/auto-match', () => {
     return (POST as any)({ organizationId: 'org_1', userId: 'treasurer' });
   };
 
-  it('matches a unique employee number, sends the rest to manual review, and audits on the same transaction', async () => {
-    m.pending = [{ id: 'l1', employeeNumber: 'E1' }, { id: 'l2', employeeNumber: 'E404' }];
-    m.membersByNumber = { E1: [{ user_id: 'member-1' }] };
-    await expect(run()).resolves.toEqual({ matched: 1, unmatched: 1 });
-    expect(m.updates.map((u) => u.lineStatus)).toEqual(['matched', 'manual_review']);
-    expect(m.audit).toHaveBeenCalledWith(
-      m.tx,
-      expect.objectContaining({ action: 'dues.reconciliation.auto_match', userId: 'treasurer', details: { matched: 1, unmatched: 1, ambiguous: 0 } }),
-    );
-  });
-
-  it('never attributes a payroll line to a member when the number names more than one', async () => {
-    m.pending = [{ id: 'l1', employeeNumber: 'DUP' }];
-    m.membersByNumber = { DUP: [{ user_id: 'a' }, { user_id: 'b' }] };
-    await expect(run()).resolves.toEqual({ matched: 0, unmatched: 1 });
-    expect(m.updates.every((u) => u.lineStatus !== 'matched')).toBe(true);
-    expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ details: { matched: 0, unmatched: 1, ambiguous: 1 } }));
-  });
-
-  it('writes no audit when there is nothing to match', async () => {
-    m.pending = [];
-    await run();
-    expect(m.audit).not.toHaveBeenCalled();
-  });
-
-  it('requires a live reconcile mandate on the same transaction before reading or writing', async () => {
-    m.pending = [{ id: 'l1', employeeNumber: 'E1' }];
-    m.membersByNumber = { E1: [{ user_id: 'member-1' }] };
-    await run();
-    expect(m.mandate).toHaveBeenCalledWith(m.tx, { organizationId: 'org_1', userId: 'treasurer', action: 'finance:reconcile', requiresLedger: true });
-  });
-
-  it('matches nothing, writes nothing and audits nothing when the caller holds no reconcile mandate', async () => {
-    m.pending = [{ id: 'l1', employeeNumber: 'E1' }];
-    m.membersByNumber = { E1: [{ user_id: 'member-1' }] };
-    m.mandate.mockRejectedValue(new Error('DUTY_NOT_HELD'));
-    await expect(run()).rejects.toThrow('DUTY_NOT_HELD');
+  it.each([
+    ['a unique employee number', [{ id: 'l1', employeeNumber: 'E1' }], { E1: [{ user_id: 'member-1' }] }],
+    ['an ambiguous employee number', [{ id: 'l1', employeeNumber: 'DUP' }], { DUP: [{ user_id: 'a' }, { user_id: 'b' }] }],
+    ['no pending items', [], {}],
+  ])('refuses with 501 before the mandate, any read, write or audit (%s)', async (_label, pending, members) => {
+    m.pending = pending;
+    m.membersByNumber = members;
+    await expect(run()).rejects.toMatchObject(REFUSAL);
+    expect(m.mandate).not.toHaveBeenCalled();
     expect(m.tx.select).not.toHaveBeenCalled();
+    expect(m.tx.execute).not.toHaveBeenCalled();
+    expect(m.tx.update).not.toHaveBeenCalled();
     expect(m.updates).toEqual([]);
     expect(m.audit).not.toHaveBeenCalled();
   });
 
-  it('fails the whole run when the audit cannot be written', async () => {
+  it('is not unlocked by the caller holding a reconcile mandate: the refusal is the same 501', async () => {
     m.pending = [{ id: 'l1', employeeNumber: 'E1' }];
     m.membersByNumber = { E1: [{ user_id: 'member-1' }] };
-    m.audit.mockRejectedValue(new Error('audit down'));
-    await expect(run()).rejects.toThrow('audit down');
+    m.mandate.mockResolvedValue({ mandateId: 'live', ledgerWide: true });
+    await expect(run()).rejects.toMatchObject(REFUSAL);
+    expect(m.mandate).not.toHaveBeenCalled();
+    expect(m.updates).toEqual([]);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });
 
@@ -119,14 +103,14 @@ describe('dues/setup-intent', () => {
     m.stripeCreate.mockResolvedValue({ id: 'seti_1', client_secret: 'secret' });
   });
 
-  it('never attaches the intent to a customer the caller names, and records the operation', async () => {
+  it.each([
+    ['with no body', undefined],
+    ['naming a customer', { customerId: 'cus_victim' }],
+  ])('refuses %s with 501 and creates no provider intent or audited operation', async (_label, body) => {
     const { POST } = await import('../dues/setup-intent/route');
-    await (POST as any)({ organizationId: 'org_1', userId: 'treasurer', body: { customerId: 'cus_victim' } });
-    expect(m.stripeCreate).toHaveBeenCalledWith({ metadata: { organization_id: 'org_1', source: 'union-eyes-dues' } });
-    expect(m.op).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'dues.setup_intent.create', organizationId: 'org_1', userId: 'treasurer' }),
-      expect.any(Function),
-    );
+    await expect((POST as any)({ organizationId: 'org_1', userId: 'treasurer', body })).rejects.toMatchObject(REFUSAL);
+    expect(m.stripeCreate).not.toHaveBeenCalled();
+    expect(m.op).not.toHaveBeenCalled();
   });
 
   it('is restricted to the financial authority', async () => {

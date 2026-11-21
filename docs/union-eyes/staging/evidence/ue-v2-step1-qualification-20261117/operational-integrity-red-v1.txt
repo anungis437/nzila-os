@@ -1,0 +1,515 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ❯ |contract-tests| runtime-governance-integrity.test.ts (18 tests | 17 failed) 1799ms
+   ❯ runtime governance artifact integrity (18)
+     × emits the canonical package schema and hashes artifact bytes rather than its location 98ms
+     × changes the evidence digest when bytes at the same location change 88ms
+     × refuses absent or unresolvable evidence "" 82ms
+     × refuses absent or unresolvable evidence "github://owner/repo/runs/123" 80ms
+     × refuses absent or unresolvable evidence "https://example.invalid/proof.json" 84ms
+     × refuses absent or unresolvable evidence "missing.json" 89ms
+     × defaults an unspecified verdict to unverified 95ms
+     × rejects invalid release or claim metadata NZILA_RELEASE_ID 85ms
+     × rejects invalid release or claim metadata NZILA_COMMIT_SHA 79ms
+     × rejects invalid release or claim metadata NZILA_MANIFEST_HASH 83ms
+     × rejects invalid release or claim metadata NZILA_BUILT_AT 108ms
+     × rejects invalid release or claim metadata NZILA_ATTESTATION_VERDICT 86ms
+     × rejects invalid release or claim metadata NZILA_ATTESTATION_RATIONALE 78ms
+     × writes a canonical ledger record containing the full validated attestation and refuses replacement 172ms
+     × refuses evidence modified after attestation issuance 185ms
+     × rejects an arbitrary object presented as an attestation 80ms
+     × rejects placeholder identity values at the environment gate 72ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > emits the canonical package schema and hashes artifact bytes rather than its location
+ZodError: [
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "id"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "deployment",
+      "doctrine-compliance",
+      "continuity-governance",
+      "pilot-safety",
+      "ai-governance",
+      "environment-legitimacy"
+    ],
+    "path": [
+      "class"
+    ],
+    "message": "Invalid option: expected one of \"deployment\"|\"doctrine-compliance\"|\"continuity-governance\"|\"pilot-safety\"|\"ai-governance\"|\"environment-legitimacy\""
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "releaseId"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "environment"
+    ],
+    "message": "Invalid input: expected string, received object"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "subject"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "rationale"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "citedEvidence"
+    ],
+    "message": "Invalid input: expected array, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "issuedBy"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "issuedAt"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "window"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "attestationClass",
+      "attestationId",
+      "issuer",
+      "release",
+      "doctrineCitations",
+      "evidence",
+      "emittedAt"
+    ],
+    "path": [],
+    "message": "Unrecognized keys: \"attestationClass\", \"attestationId\", \"issuer\", \"release\", \"doctrineCitations\", \"evidence\", \"emittedAt\""
+  }
+]
+ ❯ validateAttestation ../../packages/runtime-attestation/src/attestation.ts:99:35
+     97|
+     98| export function validateAttestation(value: unknown): RuntimeAttestatio…
+     99|   return runtimeAttestationSchema.parse(value)
+       |                                   ^
+    100| }
+    101|
+ ❯ runtime-governance-integrity.test.ts:52:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > changes the evidence digest when bytes at the same location change
+ZodError: [
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "id"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "deployment",
+      "doctrine-compliance",
+      "continuity-governance",
+      "pilot-safety",
+      "ai-governance",
+      "environment-legitimacy"
+    ],
+    "path": [
+      "class"
+    ],
+    "message": "Invalid option: expected one of \"deployment\"|\"doctrine-compliance\"|\"continuity-governance\"|\"pilot-safety\"|\"ai-governance\"|\"environment-legitimacy\""
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "releaseId"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "environment"
+    ],
+    "message": "Invalid input: expected string, received object"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "subject"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "rationale"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "citedEvidence"
+    ],
+    "message": "Invalid input: expected array, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "issuedBy"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "issuedAt"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "window"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "attestationClass",
+      "attestationId",
+      "issuer",
+      "release",
+      "doctrineCitations",
+      "evidence",
+      "emittedAt"
+    ],
+    "path": [],
+    "message": "Unrecognized keys: \"attestationClass\", \"attestationId\", \"issuer\", \"release\", \"doctrineCitations\", \"evidence\", \"emittedAt\""
+  }
+]
+ ❯ validateAttestation ../../packages/runtime-attestation/src/attestation.ts:99:35
+     97|
+     98| export function validateAttestation(value: unknown): RuntimeAttestatio…
+     99|   return runtimeAttestationSchema.parse(value)
+       |                                   ^
+    100| }
+    101|
+ ❯ runtime-governance-integrity.test.ts:65:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > refuses absent or unresolvable evidence ""
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > refuses absent or unresolvable evidence "github://owner/repo/runs/123"
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > refuses absent or unresolvable evidence "https://example.invalid/proof.json"
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > refuses absent or unresolvable evidence "missing.json"
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ runtime-governance-integrity.test.ts:79:33
+     77|       const f = fixture()
+     78|       const result = f.run('generate-attestation.mjs', ['--class=deplo…
+     79|       expect(result.status).not.toBe(0)
+       |                                 ^
+     80|     },
+     81|   )
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > defaults an unspecified verdict to unverified
+ZodError: [
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "id"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "deployment",
+      "doctrine-compliance",
+      "continuity-governance",
+      "pilot-safety",
+      "ai-governance",
+      "environment-legitimacy"
+    ],
+    "path": [
+      "class"
+    ],
+    "message": "Invalid option: expected one of \"deployment\"|\"doctrine-compliance\"|\"continuity-governance\"|\"pilot-safety\"|\"ai-governance\"|\"environment-legitimacy\""
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "releaseId"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "environment"
+    ],
+    "message": "Invalid input: expected string, received object"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "subject"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "rationale"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "array",
+    "code": "invalid_type",
+    "path": [
+      "citedEvidence"
+    ],
+    "message": "Invalid input: expected array, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "issuedBy"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "issuedAt"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "window"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "attestationClass",
+      "attestationId",
+      "issuer",
+      "release",
+      "doctrineCitations",
+      "evidence",
+      "emittedAt"
+    ],
+    "path": [],
+    "message": "Unrecognized keys: \"attestationClass\", \"attestationId\", \"issuer\", \"release\", \"doctrineCitations\", \"evidence\", \"emittedAt\""
+  }
+]
+ ❯ validateAttestation ../../packages/runtime-attestation/src/attestation.ts:99:35
+     97|
+     98| export function validateAttestation(value: unknown): RuntimeAttestatio…
+     99|   return runtimeAttestationSchema.parse(value)
+       |                                   ^
+    100| }
+    101|
+ ❯ runtime-governance-integrity.test.ts:87:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects invalid release or claim metadata NZILA_RELEASE_ID
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects invalid release or claim metadata NZILA_COMMIT_SHA
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects invalid release or claim metadata NZILA_MANIFEST_HASH
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects invalid release or claim metadata NZILA_BUILT_AT
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects invalid release or claim metadata NZILA_ATTESTATION_VERDICT
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects invalid release or claim metadata NZILA_ATTESTATION_RATIONALE
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ runtime-governance-integrity.test.ts:99:100
+     97|   ])('rejects invalid release or claim metadata %s', (key, value) => {
+     98|     const f = fixture()
+     99|     expect(f.run('generate-attestation.mjs', ['--class=deployment'], {…
+       |                                                                                                    ^
+    100|   })
+    101|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > writes a canonical ledger record containing the full validated attestation and refuses replacement
+ZodError: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "environmentClass"
+    ],
+    "path": [
+      "scope"
+    ],
+    "message": "Unrecognized key: \"environmentClass\""
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "short",
+      "standard",
+      "extended",
+      "archival"
+    ],
+    "path": [
+      "retentionClass"
+    ],
+    "message": "Invalid option: expected one of \"short\"|\"standard\"|\"extended\"|\"archival\""
+  },
+  {
+    "code": "invalid_value",
+    "values": [
+      "platform-only",
+      "governance-forum",
+      "product-team",
+      "external-attestation"
+    ],
+    "path": [
+      "accessClass"
+    ],
+    "message": "Invalid option: expected one of \"platform-only\"|\"governance-forum\"|\"product-team\"|\"external-attestation\""
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "writtenAt"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "schemaVersion",
+      "severity",
+      "doctrineCitations",
+      "decision",
+      "emittedAt",
+      "recordedAt"
+    ],
+    "path": [],
+    "message": "Unrecognized keys: \"schemaVersion\", \"severity\", \"doctrineCitations\", \"decision\", \"emittedAt\", \"recordedAt\""
+  }
+]
+ ❯ GovernanceEvidenceLedger.append ../../packages/runtime-attestation/src/ledger.ts:81:42
+     79|    */
+     80|   append(record: LedgerRecord): LedgerRecord {
+     81|     const validated = ledgerRecordSchema.parse(record)
+       |                                          ^
+     82|     if (this.records.has(validated.id)) {
+     83|       throw new LedgerMutationRejectedError(validated.id)
+ ❯ runtime-governance-integrity.test.ts:111:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > refuses evidence modified after attestation issuance
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ runtime-governance-integrity.test.ts:121:97
+    119|     f.generate()
+    120|     writeFileSync(f.evidence, '{"status":"failed"}\n')
+    121|     expect(f.run('write-evidence.mjs', [`--from-attestation=${f.attest…
+       |                                                                                                 ^
+    122|   })
+    123|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects an arbitrary object presented as an attestation
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ runtime-governance-integrity.test.ts:127:106
+    125|     const f = fixture()
+    126|     writeFileSync(f.attestationPath.replace('/proof-artifacts/attestat…
+    127|     expect(f.run('write-evidence.mjs', [`--from-attestation=${join(f.c…
+       |                                                                                                          ^
+    128|   })
+    129|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+ FAIL  |contract-tests| runtime-governance-integrity.test.ts > runtime governance artifact integrity > rejects placeholder identity values at the environment gate
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ runtime-governance-integrity.test.ts:147:94
+    145|   it('rejects placeholder identity values at the environment gate', ()…
+    146|     const f = fixture()
+    147|     expect(f.run('check-env.mjs', [], { NZILA_MANIFEST_HASH: 'sha256-p…
+       |                                                                                              ^
+    148|   })
+    149| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  17 failed | 1 passed (18)
+   Start at  16:32:48
+   Duration  2.06s (tests 93%, transform 3%, import 3%)
+

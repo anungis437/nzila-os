@@ -1,29 +1,32 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-import { Metadata } from 'next';
-import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
-import { getTranslations } from 'next-intl/server';
-import { PeerNominationForm } from '@/components/rewards/peer-nomination-form';
-import { listAwardTypes } from '@/actions/rewards-actions';
-import { listRecognitionPrograms } from '@/actions/rewards-actions';
-import { listRecognitionCandidates } from '@/lib/rewards/page-reads';
+import { Metadata } from 'next'
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope'
+import { getTranslations } from 'next-intl/server'
+import { PeerNominationForm } from '@/components/rewards/peer-nomination-form'
+import { listPeerRecognitionAwardTypes } from '@/actions/rewards-actions'
+import { listPeerRecognitionPrograms } from '@/actions/rewards-actions'
+import { listRecognitionCandidates } from '@/lib/rewards/page-reads'
 
 export const metadata: Metadata = {
   title: 'Recognize a Peer | Recognition & Rewards',
   description: 'Nominate a colleague for recognition',
-};
+}
 
 export default async function PeerRecognitionPage() {
-  const { userId, organizationId } = await requireOrganizationScope();
+  const { userId, organizationId } = await requireOrganizationScope()
 
-  const t = await getTranslations('rewards.peer');
+  const t = await getTranslations('rewards.peer')
 
   // Fetch recognition programs. A failed read is an error, not "no programs".
-  const programsResult = await listRecognitionPrograms();
+  const programsResult = await listPeerRecognitionPrograms()
   if (!programsResult.success) {
-    throw new Error(('error' in programsResult && programsResult.error) || 'The recognition programs could not be loaded');
+    throw new Error(
+      ('error' in programsResult && programsResult.error) ||
+        'The recognition programs could not be loaded',
+    )
   }
-  
+
   if (!programsResult.data || !programsResult.data.length) {
     return (
       <div className="container mx-auto py-8">
@@ -32,12 +35,12 @@ export default async function PeerRecognitionPage() {
           <p className="text-muted-foreground">{t('noProgramsDescription')}</p>
         </div>
       </div>
-    );
+    )
   }
 
   // Get the first active program (or you can let user select)
-  const activeProgram = programsResult.data.find((p) => p.status === 'active');
-  
+  const activeProgram = programsResult.data.find((p) => p.status === 'active')
+
   if (!activeProgram) {
     return (
       <div className="container mx-auto py-8">
@@ -46,18 +49,21 @@ export default async function PeerRecognitionPage() {
           <p className="text-muted-foreground">{t('noActiveProgramsDescription')}</p>
         </div>
       </div>
-    );
+    )
   }
 
   // Fetch award types for peer recognition: a member nominates for the peer ones only (the server refuses any other).
-  const awardTypesResult = await listAwardTypes(activeProgram.id);
+  const awardTypesResult = await listPeerRecognitionAwardTypes(activeProgram.id)
   if (!awardTypesResult.success) {
-    throw new Error(('error' in awardTypesResult && awardTypesResult.error) || 'The award types could not be loaded');
+    throw new Error(
+      ('error' in awardTypesResult && awardTypesResult.error) ||
+        'The award types could not be loaded',
+    )
   }
 
   const peerAwardTypes = (awardTypesResult.data ?? [])
     .filter((awardType) => awardType.kind === 'peer')
-    .map((awardType) => ({ id: awardType.id, name: awardType.name, defaultCreditAmount: awardType.defaultCreditAmount }));
+    .map((awardType) => ({ id: awardType.id, name: awardType.name }))
 
   if (peerAwardTypes.length === 0) {
     return (
@@ -67,11 +73,11 @@ export default async function PeerRecognitionPage() {
           <p className="text-muted-foreground">{t('noPeerAwardsDescription')}</p>
         </div>
       </div>
-    );
+    )
   }
 
   // The colleagues a nomination can name, by name only: a member does not get everybody's e-mail address from a picker.
-  const candidates = await listRecognitionCandidates(organizationId);
+  const candidates = await listRecognitionCandidates(organizationId)
 
   return (
     <div className="container mx-auto py-8 max-w-3xl">
@@ -86,5 +92,5 @@ export default async function PeerRecognitionPage() {
         currentUserId={userId}
       />
     </div>
-  );
+  )
 }

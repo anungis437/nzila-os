@@ -6,6 +6,7 @@
  * is aggregate (UE-OFFICER-EXECUTIVE-CANONICAL-2.1 §IX): matter-level content
  * needs a separate effective grant, which a `minRole` check cannot express.
  */
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { strategicGoals } from '@/db/schema';
@@ -25,6 +26,8 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
+    // The executive figures count employer remittances, which have no runtime or system grant in the current source: 501 first.
+    requireContainedStorageAuthority('employer_remittances');
     const orgId = organizationId!;
     const timeframe: DashboardTimeframe = 'monthly';
 

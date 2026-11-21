@@ -1,17 +1,18 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * GET  /api/dues/payment-plans — List payment plans for the org
  * POST /api/dues/payment-plans — Create a payment plan
  */
 
-import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { paymentPlans } from '@/db/schema/dues-finance-schema';
-import { eq, desc } from 'drizzle-orm';
+import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { db } from '@/db'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { paymentPlans } from '@/db/schema/dues-finance-schema'
+import { eq, desc } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const createPlanSchema = z.object({
   userId: z.string(),
@@ -22,33 +23,36 @@ const createPlanSchema = z.object({
   frequency: z.enum(['weekly', 'bi_weekly', 'monthly']).default('monthly'),
   startDate: z.coerce.date(),
   nextPaymentDue: z.coerce.date(),
-});
+})
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: {
       tags: ['Dues'],
       summary: 'List payment plans for the organization',
     },
   },
   async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId) throw ApiError.badRequest('Organization context required')
+    requireBaseFinancialAuthority()
+
     const plans = await db
       .select()
       .from(paymentPlans)
       .where(eq(paymentPlans.organizationId, organizationId))
-      .orderBy(desc(paymentPlans.createdAt));
-    return { plans };
+      .orderBy(desc(paymentPlans.createdAt))
+    return { plans }
   },
-);
+)
 
 export const POST = withApi(
   {
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     body: createPlanSchema,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {
@@ -57,33 +61,39 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId) throw ApiError.badRequest('Organization context required')
+    requireBaseFinancialAuthority()
+
     return withRLSContext(async (tx) => {
-    const [plan] = await tx
-      .insert(paymentPlans)
-      .values({
+      const [plan] = await tx
+        .insert(paymentPlans)
+        .values({
+          organizationId,
+          userId: body.userId,
+          planName: body.planName,
+          totalOwed: body.totalOwed,
+          installmentAmount: body.installmentAmount,
+          installmentCount: body.installmentCount,
+          frequency: body.frequency,
+          startDate: body.startDate,
+          remainingBalance: body.totalOwed,
+          nextPaymentDue: body.nextPaymentDue,
+          status: 'active',
+        })
+        .returning()
+      await persistAtomicAudit(tx, {
         organizationId,
-        userId: body.userId,
-        planName: body.planName,
-        totalOwed: body.totalOwed,
-        installmentAmount: body.installmentAmount,
-        installmentCount: body.installmentCount,
-        frequency: body.frequency,
-        startDate: body.startDate,
-        remainingBalance: body.totalOwed,
-        nextPaymentDue: body.nextPaymentDue,
-        status: 'active',
+        userId: userId!,
+        action: 'dues.payment_plan.create',
+        resourceType: 'payment_plans',
+        resourceId: plan.id,
+        details: {
+          memberId: body.userId,
+          totalOwed: body.totalOwed,
+          installmentCount: body.installmentCount,
+        },
       })
-      .returning();
-    await persistAtomicAudit(tx, {
-      organizationId,
-      userId: userId!,
-      action: 'dues.payment_plan.create',
-      resourceType: 'payment_plans',
-      resourceId: plan.id,
-      details: { memberId: body.userId, totalOwed: body.totalOwed, installmentCount: body.installmentCount },
-    });
-    return plan;
-    });
+      return plan
+    })
   },
-);
+)

@@ -25,6 +25,19 @@ import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import { NextResponse } from 'next/server'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 
+// Module admission reads operational state only. Commercial amounts, signatures,
+// arbitrary metadata and entitlement administration stay outside this selector.
+const admissionColumns = {
+  id: orgEntitlements.id,
+  organizationId: orgEntitlements.organizationId,
+  contractLineItemId: orgEntitlements.contractLineItemId,
+  featureKey: orgEntitlements.featureKey,
+  status: orgEntitlements.status,
+  expiresAt: orgEntitlements.expiresAt,
+  usageLimit: orgEntitlements.usageLimit,
+  currentUsage: orgEntitlements.currentUsage,
+}
+
 // ============================================================================
 // Module Keys (canonical feature identifiers)
 // ============================================================================
@@ -321,7 +334,7 @@ export async function checkModuleEntitlement(
   return withRLSContext({ organizationId }, async () => {
     // 1. Look up active entitlement
     const [entitlement] = await db
-      .select()
+      .select(admissionColumns)
       .from(orgEntitlements)
       .where(
         and(
@@ -403,7 +416,7 @@ export async function checkCoveredOrg(
 ): Promise<boolean> {
   const [covered] = await withRLSContext({ organizationId }, (tx) =>
     tx
-      .select()
+      .select({ contractId: contractCoveredOrgs.contractId, organizationId: contractCoveredOrgs.organizationId, deactivatedAt: contractCoveredOrgs.deactivatedAt })
       .from(contractCoveredOrgs)
       .where(
         and(
@@ -425,7 +438,7 @@ export async function listOrgEntitlements(
 ): Promise<EntitlementCheckResult[]> {
   const entitlements = await withRLSContext({ organizationId }, (tx) =>
     tx
-      .select()
+      .select(admissionColumns)
       .from(orgEntitlements)
       .where(
         and(eq(orgEntitlements.organizationId, organizationId), eq(orgEntitlements.status, 'active')),

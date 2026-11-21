@@ -6,16 +6,20 @@
  * platform or congress, whoever the viewer is) and its API keys as the system role. The platform view is for the people who belong to
  * the platform organization, so it reads their own organization: when the organization is a platform one, its settings, its keys and the
  * services' health; when it is not, there are no platform settings to show and the answer is null (the caller shows the organization's own
- * settings). platform_services is reference data with no row-level security, readable in any context.
+ * settings). The services' health comes from platform_services only outside canonical mode: a canonical deployment classifies that table
+ * CONTAINED_NO_AUTHORITY (no runtime or system grant; see lib/operations/platform-services.ts), so there `services` is null - unavailable,
+ * not an empty list.
  */
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 export interface PlatformSettingsRows {
   settings: Record<string, unknown>;
   featuresEnabled: string[];
   apiKeys: Array<{ id: string; name: string; keyPrefix: string; status: string; scopes: string[]; requestCount: number }>;
-  services: Array<{ serviceName: string; status: string }>;
+  /** null when the deployment holds no authority to read the services' health (canonical mode). */
+  services: Array<{ serviceName: string; status: string }> | null;
 }
 
 type Row = Record<string, unknown>;
@@ -50,7 +54,7 @@ export function loadPlatformSettings(organizationId: string): Promise<PlatformSe
       `)) as Iterable<Row>,
     );
 
-    const services = Array.from(
+    const services = currentStateContextEnabled() ? null : Array.from(
       (await tx.execute(sql`
         SELECT service_name, status
         FROM platform_services
@@ -69,7 +73,7 @@ export function loadPlatformSettings(organizationId: string): Promise<PlatformSe
         scopes: Array.isArray(r.scopes) ? (r.scopes as string[]) : [],
         requestCount: Number(r.request_count),
       })),
-      services: services.map((r) => ({ serviceName: String(r.service_name), status: String(r.status) })),
+      services: services?.map((r) => ({ serviceName: String(r.service_name), status: String(r.status) })) ?? null,
     };
   });
 }

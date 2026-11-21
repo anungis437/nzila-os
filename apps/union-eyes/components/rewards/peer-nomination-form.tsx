@@ -1,91 +1,95 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { Award } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { nominatePeer } from '@/actions/rewards-actions';
-import { nominatePeerSchema } from '@/lib/validation/rewards-schemas';
+import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { Award } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { nominatePeer } from '@/actions/rewards-actions'
+import { nominatePeerSchema } from '@/lib/validation/rewards-schemas'
 
 export interface PeerAwardTypeOption {
-  id: string;
-  name: string;
-  defaultCreditAmount: number;
+  id: string
+  name: string
 }
 
 /** A colleague a nomination can name: a name and the id the server resolves, nothing else about them. */
 export interface PeerCandidate {
-  userId: string;
-  name: string;
+  userId: string
+  name: string
 }
 
 interface PeerNominationFormProps {
   /** The peer award types of the active program. The server accepts nothing else, whatever the form sends. */
-  awardTypes: PeerAwardTypeOption[];
-  candidates: PeerCandidate[];
-  currentUserId: string;
-  onSuccess?: () => void;
+  awardTypes: PeerAwardTypeOption[]
+  candidates: PeerCandidate[]
+  currentUserId: string
+  onSuccess?: () => void
 }
 
-const MAX_REASON_LENGTH = 500;
-const SELECT_CLASS = 'w-full rounded-md border bg-background p-2 text-sm';
+const MAX_REASON_LENGTH = 500
+const SELECT_CLASS = 'w-full rounded-md border bg-background p-2 text-sm'
 
-export function PeerNominationForm({ awardTypes, candidates, currentUserId, onSuccess }: PeerNominationFormProps) {
-  const t = useTranslations('rewards.peer');
-  const router = useRouter();
-  const [awardTypeId, setAwardTypeId] = useState('');
-  const [recipientUserId, setRecipientUserId] = useState('');
-  const [reason, setReason] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+export function PeerNominationForm({
+  awardTypes,
+  candidates,
+  currentUserId,
+  onSuccess,
+}: PeerNominationFormProps) {
+  const t = useTranslations('rewards.peer')
+  const router = useRouter()
+  const [awardTypeId, setAwardTypeId] = useState('')
+  const [recipientUserId, setRecipientUserId] = useState('')
+  const [reason, setReason] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
-  const colleagues = candidates.filter((candidate) => candidate.userId !== currentUserId);
+  const colleagues = candidates.filter((candidate) => candidate.userId !== currentUserId)
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError('');
-    setSubmitted(false);
+    event.preventDefault()
+    setError('')
+    setSubmitted(false)
 
     // The same schema the action validates with: what is sent is exactly what the action accepts.
-    const parsed = nominatePeerSchema.safeParse({ awardTypeId, recipientUserId, reason });
+    const parsed = nominatePeerSchema.safeParse({ awardTypeId, recipientUserId, reason })
     if (!parsed.success) {
-      setError(t('validation.allFieldsRequired'));
-      return;
+      setError(t('validation.allFieldsRequired'))
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
-      const result = await nominatePeer(parsed.data);
+      const result = await nominatePeer(parsed.data)
 
       // A success is a row written: the action returns the nomination it stored, and without one nothing is reported as submitted.
       if (result.success && 'data' in result && result.data?.id) {
-        setSubmitted(true);
-        setAwardTypeId('');
-        setRecipientUserId('');
-        setReason('');
-        onSuccess?.();
+        setSubmitted(true)
+        setAwardTypeId('')
+        setRecipientUserId('')
+        setReason('')
+        onSuccess?.()
       } else {
-        setError(('error' in result && result.error) || t('error.submit'));
+        setError(('error' in result && result.error) || t('error.submit'))
       }
     } catch {
-      setError(t('error.submit'));
+      setError(t('error.submit'))
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   if (awardTypes.length === 0) {
     return (
       <Alert>
         <AlertDescription>{t('noPeerAwards')}</AlertDescription>
       </Alert>
-    );
+    )
   }
 
   return (
@@ -108,7 +112,9 @@ export function PeerNominationForm({ awardTypes, candidates, currentUserId, onSu
               onChange={(event) => setRecipientUserId(event.target.value)}
               disabled={isSubmitting || colleagues.length === 0}
             >
-              <option value="">{colleagues.length === 0 ? t('noMembers') : t('selectRecipient')}</option>
+              <option value="">
+                {colleagues.length === 0 ? t('noMembers') : t('selectRecipient')}
+              </option>
               {colleagues.map((colleague) => (
                 <option key={colleague.userId} value={colleague.userId}>
                   {colleague.name}
@@ -129,7 +135,7 @@ export function PeerNominationForm({ awardTypes, candidates, currentUserId, onSu
               <option value="">{t('selectAwardType')}</option>
               {awardTypes.map((awardType) => (
                 <option key={awardType.id} value={awardType.id}>
-                  {awardType.name} ({awardType.defaultCreditAmount})
+                  {awardType.name}
                 </option>
               ))}
             </select>
@@ -174,5 +180,5 @@ export function PeerNominationForm({ awardTypes, candidates, currentUserId, onSu
         </form>
       </CardContent>
     </Card>
-  );
+  )
 }

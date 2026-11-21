@@ -13,7 +13,7 @@ import { Badge } from '@/components/primitives/Badge'
 import { resolveOrgContext } from '@/lib/resolve-org'
 import { assertCapability } from '@/lib/rbac'
 import { listRecentAudit } from '@/server/db/audit'
-import { isDbAvailable } from '@/server/db/client'
+import { isDbAvailable } from '@/lib/db/client'
 
 export const dynamic = 'force-dynamic'
 

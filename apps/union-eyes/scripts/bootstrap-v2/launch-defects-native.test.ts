@@ -146,7 +146,7 @@ native('staging defect closure (native)', () => {
     expect(rows.rows[1].previous_hash).toBe(rows.rows[0].content_hash)
   }, 120000)
 
-  describe('dues settlement under the real SYSTEM role', () => {
+  describe('dues settlement is refused to the real SYSTEM role', () => {
     const MEMBER = 'native-member-text-id'
     const ids = ['d1111111-1111-4111-8111-111111111111', 'd2222222-2222-4222-8222-222222222222']
     const intentFor = (id: string, piId: string, overrides: Record<string, unknown> = {}) => ({
@@ -183,49 +183,40 @@ native('staging defect closure (native)', () => {
         )
     }, 120000)
 
-    it('credits once, audits, and treats a redelivery as a duplicate', async () => {
-      expect(await settle(ids[0], 'pi_native_0', 'evt_native_1')).toBe('settled')
-      expect(await settle(ids[0], 'pi_native_0', 'evt_native_1_retry')).toBe('duplicate')
-      const ledger = await fixture.seed.query(
-        'SELECT user_id, amount::text, status, created_by FROM member_dues_ledger WHERE reference_id=$1',
-        [ids[0]],
-      )
-      expect(ledger.rows).toEqual([
-        { user_id: MEMBER, amount: '25.00', status: 'posted', created_by: 'system:stripe-webhook' },
-      ])
-      const audit = await fixture.seed.query(
-        "SELECT user_id FROM public.audit_logs WHERE organization_id=$1 AND action='dues.settle' AND resource_id=$2",
-        [ORG_A, ids[0]],
-      )
-      expect(audit.rows).toEqual([{ user_id: 'system:stripe-webhook' }])
-    }, 120000)
-
-    it('denies tampered metadata, amount and provider reference with no ledger or status change', async () => {
-      await expect(
-        settle(ids[1], 'pi_native_1', 'evt_t1', { amount_received: 1, amount: 1 }),
-      ).rejects.toMatchObject({ code: 'AMOUNT_MISMATCH' })
-      await expect(settle(ids[1], 'pi_attacker', 'evt_t2')).rejects.toMatchObject({
-        code: 'PROVIDER_REFERENCE_MISMATCH',
-      })
-      await expect(
-        settle(ids[1], 'pi_native_1', 'evt_t3', {
-          metadata: {
-            ue_payment_kind: 'member_dues',
-            ue_dues_payment_id: ids[1],
-            organization_id: ORG_B,
-            member_user_id: MEMBER,
-          },
-        }),
-      ).rejects.toMatchObject({ code: 'ORGANIZATION_MISMATCH' })
-      const state = await fixture.seed.query('SELECT status FROM dues_transactions WHERE id=$1', [
-        ids[1],
-      ])
-      expect(state.rows[0].status).toBe('pending')
-      const ledger = await fixture.seed.query(
-        'SELECT count(*)::int AS n FROM member_dues_ledger WHERE reference_id=$1',
-        [ids[1]],
-      )
-      expect(ledger.rows[0].n).toBe(0)
+    // SYSTEM holds zero authority over dues_transactions and member_dues_ledger
+    // (ZERO_SYSTEM_MUTATION_TABLES): the settlement writer itself, run as the real SYSTEM role, is refused by
+    // the database before reading the payment, for an untampered and a tampered event alike, and nothing changes.
+    const sqlState = (error: unknown): unknown =>
+      (error as { cause?: { code?: unknown }; code?: unknown })?.cause?.code ??
+      (error as { code?: unknown })?.code
+    it('refuses SYSTEM settlement of a verified dues payment at the database, with no ledger, status or audit change', async () => {
+      for (const [id, piId, event, overrides] of [
+        [ids[0], 'pi_native_0', 'evt_native_1', {}],
+        [ids[0], 'pi_native_0', 'evt_native_1_retry', {}],
+        [ids[1], 'pi_native_1', 'evt_t1', { amount_received: 1, amount: 1 }],
+        [ids[1], 'pi_attacker', 'evt_t2', {}],
+      ] as const) {
+        const error = await settle(id, piId, event, overrides).then(
+          () => null,
+          (refusal: unknown) => refusal,
+        )
+        expect(error, `${event}: settlement must be refused`).not.toBeNull()
+        expect(sqlState(error), event).toBe('42501')
+      }
+      for (const id of ids) {
+        const state = await fixture.seed.query('SELECT status FROM dues_transactions WHERE id=$1', [id])
+        expect(state.rows[0].status).toBe('pending')
+        const ledger = await fixture.seed.query(
+          'SELECT count(*)::int AS n FROM member_dues_ledger WHERE reference_id=$1',
+          [id],
+        )
+        expect(ledger.rows[0].n).toBe(0)
+        const audit = await fixture.seed.query(
+          "SELECT count(*)::int AS n FROM public.audit_logs WHERE organization_id=$1 AND action='dues.settle' AND resource_id=$2",
+          [ORG_A, id],
+        )
+        expect(audit.rows[0].n).toBe(0)
+      }
     }, 120000)
   })
 })

@@ -834,7 +834,7 @@ test('NEGATIVE 12: each of the eight risk categories raised by the source is ref
     const args = fixture()
     strip(args, category)
     if (args.classification.operations.find((item) => item.id === id).riskScreen[category]) delete args.classification.operations.find((item) => item.id === id).riskScreen[category]
-    assert.ok(hasProblem(run(args), new RegExp(`operation ${id.replace(/[[\]|.]/g, '\\$&')} raises ${category}`)), `${category} on ${id}`)
+    assert.ok(hasProblem(run(args), new RegExp(`operation ${id.replace(/[\\[\]|.]/g, '\\$&')} raises ${category}`)), `${category} on ${id}`)
   }
 
   const screenedAway = fixture()

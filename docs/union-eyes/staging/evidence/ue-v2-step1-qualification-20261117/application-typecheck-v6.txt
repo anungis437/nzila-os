@@ -1,0 +1,4 @@
+
+> @nzila/union-eyes@1.0.0 typecheck /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+> node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit
+

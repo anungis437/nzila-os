@@ -354,6 +354,7 @@ describe('CorrespondenceDetailDialog: a signed letter', () => {
     let status = 'signed';
     const fetchMock = router({
       [GET]: () => json(200, detailBody({ status, assignedSignerId: 'officer-1', dispatchedAt: status === 'dispatched' ? '2026-03-05T12:00:00.000Z' : null, dispatchMethod: status === 'dispatched' ? 'courier' : null })),
+      [`POST /api/correspondence/${ID}/email-status`]: () => json(200,{success:true,data:{state:'not_queued',accepted:0,total:0}}),
       [`POST /api/correspondence/${ID}/dispatch`]: () => {
         status = 'dispatched';
         return json(200, { success: true, data: { data: letter({ status }) } });
@@ -362,10 +363,30 @@ describe('CorrespondenceDetailDialog: a signed letter', () => {
     vi.stubGlobal('fetch', fetchMock);
     renderDialog(STEWARD);
     fireEvent.change(await screen.findByLabelText('How it was sent'), { target: { value: 'courier' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Mark as dispatched' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Send email / record dispatch' }));
     expect(await screen.findByText(/\(Courier\)/)).toBeInTheDocument();
     expect(sent(fetchMock, `POST /api/correspondence/${ID}/dispatch`)).toEqual({ dispatchMethod: 'courier' });
     const next = screen.getByRole('region', { name: 'Next step' });
     expect(within(next).getByText('No further action is available for this letter.')).toBeInTheDocument();
+  });
+
+  it.each(['en-CA','fr-CA'] as const)('keeps queued email separate from dispatch until receipt settlement in %s',async(locale)=>{
+    let queued=false,accepted=false,status='signed';
+    const fetchMock=router({
+      [GET]:()=>json(200,detailBody({status,assignedSignerId:'officer-1',dispatchedAt:status==='dispatched'?'2026-03-05T12:00:00.000Z':null,dispatchMethod:status==='dispatched'?'email':null})),
+      [`POST /api/correspondence/${ID}/dispatch`]:()=>{queued=true;return json(202,{success:true,data:{state:'queued'}})},
+      [`POST /api/correspondence/${ID}/email-status`]:()=>{if(accepted)status='dispatched';return json(200,{success:true,data:{state:accepted?'accepted':queued?'queued':'not_queued',accepted:accepted?1:0,total:queued?1:0}})},
+    });
+    vi.stubGlobal('fetch',fetchMock);renderDialog(STEWARD,locale);
+    const label=locale==='en-CA'?'Send email / record dispatch':'Envoyer le courriel / consigner l’expédition';
+    fireEvent.click(await screen.findByRole('button',{name:label}));
+    expect(await screen.findByText(locale==='en-CA'?'Email queued; provider acceptance is pending.':'Courriel en attente; l’acceptation du fournisseur est à confirmer.')).toBeInTheDocument();
+    expect(status).toBe('signed');
+    expect(screen.queryByRole('button',{name:label})).not.toBeInTheDocument();
+    accepted=true;
+    fireEvent.click(screen.getByRole('button',{name:locale==='en-CA'?'Check email status':'Vérifier le statut du courriel'}));
+    expect(await screen.findByText(locale==='en-CA'?'The provider accepted the email. Inbox receipt is separate.':'Le fournisseur a accepté le courriel. La réception dans la boîte de réception reste distincte.')).toBeInTheDocument();
+    expect(status).toBe('dispatched');
+    expect(fetchMock.mock.calls.filter(([url])=>String(url).endsWith('/dispatch'))).toHaveLength(1);
   });
 });

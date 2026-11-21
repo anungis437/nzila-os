@@ -1,0 +1,5 @@
+tooling/scripts/lib/union-eyes-current-security-installer.ts(117,70): error TS2339: Property 'arrayBounds' does not exist on type '{ names: any; }'.
+tooling/scripts/lib/union-eyes-current-security-installer.ts(117,96): error TS2339: Property 'arrayBounds' does not exist on type '{ names: any; }'.
+tooling/scripts/lib/union-eyes-current-security-installer.ts(118,17): error TS2339: Property 'typmods' does not exist on type '{ names: any; }'.
+tooling/scripts/lib/union-eyes-current-security-installer.ts(118,54): error TS2339: Property 'typmods' does not exist on type '{ names: any; }'.
+tooling/scripts/lib/union-eyes-current-security-installer.ts(118,70): error TS2339: Property 'typmods' does not exist on type '{ names: any; }'.

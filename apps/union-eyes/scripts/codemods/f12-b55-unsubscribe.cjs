@@ -15,10 +15,6 @@ if (start < 0 || end < 0) throw new Error('anchors')
 // One transaction: every write below uses tx, so a failure part-way leaves no recipient half-unsubscribed.
 let body = s.slice(start, end).replace('withSystemContext(async () => {', 'withSystemContext(async (tx) => {')
 body = body.split('await db\n').join('await tx\n').split('await db.').join('await tx.')
-body = body.replace(
-  "      await db.insert(consentRecords)",
-  "      await db.insert(consentRecords)",
-)
 s = s.slice(0, start) + body + s.slice(end)
 fs.writeFileSync(p, s)
 
