@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, expect, it } from 'vitest'
 import {
-  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
+  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
 } from './browser-acceptance'
 
 const origin = 'http://127.0.0.1:43219'
@@ -70,6 +70,15 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
     expect(result).toBe('BROWSER_OR_RUNTIME_CHECK_FAILED')
     expect(JSON.stringify(result)).not.toContain(secret)
     expect(browserFailureKind(new assert.AssertionError({ message: secret }))).toBe('ASSERTION_FAILED')
+  })
+
+  it('reads the owned origin\'s Secure session cookie over http://127.0.0.1 and nothing from another host', () => {
+    const jar = [
+      { name: 'nzila_session', domain: '127.0.0.1', path: '/', secure: true, httpOnly: true },
+      { name: 'other', domain: 'example.com', path: '/', secure: false, httpOnly: false },
+      { name: 'scoped', domain: '127.0.0.1', path: '/admin', secure: false, httpOnly: false },
+    ]
+    expect(cookiesForOwnedOrigin(jar, 'http://127.0.0.1:41449').map((cookie) => cookie.name)).toEqual(['nzila_session'])
   })
 
   it('names the failed proof by its fixed code and never by a generated or typed message', () => {

@@ -35,7 +35,7 @@ interface ProfileResult {
   id: string
   locale: string
   viewport: { width: number; height: number }
-  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string }[]
+  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string; failureStage?: string }[]
   status: CheckStatus
 }
 interface BrowserResult {
@@ -49,6 +49,8 @@ interface BrowserResult {
   externalRequestsBlocked: number
   unhandledBrowserErrors: number
   serverErrors: number
+  /** 429 responses the browser received from the owned server (evidence only; a 429 that breaks a journey fails its check). */
+  rateLimitedResponses: number
   cleanup: { browserClosed: boolean; contextsClosed: boolean; errors: string[] }
   limitations: string[]
 }
@@ -127,16 +129,35 @@ async function navigate(page: Page, origin: string, route: string) {
   assert.ok(response && response.status() === 200, 'ACTUAL_BROWSER_PAGE_NOT_200')
   assert.equal(new URL(page.url()).origin, origin, 'BROWSER_LEFT_OWNED_ORIGIN')
 }
+/**
+ * The cookies the browser holds for the owned origin, read from the whole jar and matched by host and path.
+ * `context.cookies(url)` is not used: Playwright treats only `localhost` as local and drops Secure cookies for any other
+ * http URL, so on http://127.0.0.1 it hid the production Secure session cookie that Chromium itself stored and sent.
+ */
+export function cookiesForOwnedOrigin<T extends { domain: string; path: string }>(cookies: readonly T[], origin: string): T[] {
+  const url = new URL(assertOwnedLocalOrigin(origin))
+  return cookies.filter((cookie) => {
+    const domain = cookie.domain.startsWith('.') ? cookie.domain.slice(1) : cookie.domain
+    return (url.hostname === domain || url.hostname.endsWith(`.${domain}`)) && url.pathname.startsWith(cookie.path)
+  })
+}
+async function ownedCookies(context: BrowserContext, origin: string) {
+  return cookiesForOwnedOrigin(await context.cookies(), origin)
+}
 function actualResponse(page: Page, endpoint: string, method: string) {
   return page.waitForResponse((response) => new URL(response.url()).pathname === endpoint &&
     response.request().method() === method, { timeout: 45000 })
 }
+/** The last fixed stage a journey reached; persisted with a failure so a timeout says what it was waiting for. */
+let browserStage = 'START'
+const stage = (name: string) => { browserStage = name }
 async function uiLogin(input: {
   context: BrowserContext; page: Page; origin: string; locale: string; organizationId: string
   person: { id: string; email: string }; password: string; mfaSecret: string
 }) {
   const copy = input.locale === 'fr-CA' ? fr : en
   const { page, context, origin, person, password, mfaSecret } = input
+  stage('SIGN_IN_PAGE')
   await navigate(page, origin, `/${input.locale}/sign-in`)
   await page.waitForFunction((locale) => document.documentElement.lang.toLowerCase() === locale.toLowerCase(), input.locale)
   await visible(page, copy.loginForm.welcome)
@@ -144,29 +165,35 @@ async function uiLogin(input: {
   const passwordField = page.getByLabel(copy.auth.password, { exact: true })
   await email.fill(person.email)
   await passwordField.fill(password)
+  stage('PASSWORD_LOGIN')
   const loginPromise = actualResponse(page, '/api/auth/login', 'POST')
   await passwordField.press('Enter')
   const loginResponse = await loginPromise
   const login = await json(loginResponse)
   assert.equal(login.requiresMfa, true, 'PASSWORD_MUST_REQUIRE_REAL_MFA')
   assert.equal(record(login.user).id, person.id, 'LOGIN_IDENTITY_SUBSTITUTION')
-  assert.ok(!(await context.cookies(origin)).some((cookie) => cookie.name === 'nzila_session'), 'SESSION_ISSUED_BEFORE_MFA')
+  assert.ok(!(await ownedCookies(context, origin)).some((cookie) => cookie.name === 'nzila_session'), 'SESSION_ISSUED_BEFORE_MFA')
+  stage('MFA_FIELD')
   const code = page.getByLabel(copy.loginForm.authenticatorCode, { exact: true })
   await code.waitFor({ state: 'visible' })
   let invalidCode = '000000'
   while (verifyTotp(mfaSecret, invalidCode)) invalidCode = String(Number(invalidCode) + 1).padStart(6, '0')
+  stage('INVALID_MFA')
   await code.fill(invalidCode)
   const refusedPromise = actualResponse(page, '/api/auth/mfa/challenge', 'POST')
   await code.press('Enter')
   assert.equal((await refusedPromise).status(), 401, 'INVALID_UI_MFA_WAS_NOT_DENIED')
+  stage('INVALID_MFA_ALERT')
   await page.getByRole('alert').filter({ hasText: copy.loginForm.invalidCode }).waitFor({ state: 'visible' })
-  assert.ok(!(await context.cookies(origin)).some((cookie) => cookie.name === 'nzila_session'), 'SESSION_ISSUED_AFTER_INVALID_MFA')
+  assert.ok(!(await ownedCookies(context, origin)).some((cookie) => cookie.name === 'nzila_session'), 'SESSION_ISSUED_AFTER_INVALID_MFA')
+  stage('VALID_MFA')
   await code.fill(computeTotp(mfaSecret))
   const challengePromise = actualResponse(page, '/api/auth/mfa/challenge', 'POST')
   await code.press('Enter')
   const challenge = await json(await challengePromise)
   assert.equal(challenge.ok, true, 'MFA_DID_NOT_CONFIRM_SESSION')
   assert.equal(challenge.userId, person.id, 'MFA_IDENTITY_SUBSTITUTION')
+  stage('ORGANIZATION_OR_DASHBOARD')
   const organizationChoice = page.getByRole('combobox', { name: copy.loginForm.organization, exact: true })
   const next = await Promise.race([
     organizationChoice.waitFor({ state: 'visible', timeout: 45000 }).then(() => 'CHOICE'),
@@ -176,19 +203,23 @@ async function uiLogin(input: {
     const offered = await organizationChoice.locator('option:not([value=""])').count()
     assert.ok(offered > 0, 'NO_OFFERED_ORGANIZATION')
     if (offered > 1) {
+      stage('ORGANIZATION_SWITCH')
       await organizationChoice.selectOption(input.organizationId)
       const selected = actualResponse(page, '/api/organizations/switch', 'POST')
       await page.getByRole('button', { name: copy.loginForm.continueOrganization, exact: true }).click()
       assert.equal((await json(await selected)).activeOrganizationId, input.organizationId, 'UI_ORGANIZATION_SUBSTITUTION')
     }
   }
+  stage('DASHBOARD')
   await page.waitForURL((url) => url.pathname.startsWith(`/${input.locale}/dashboard`), { timeout: 45000 })
-  const session = (await context.cookies(origin)).find((cookie) => cookie.name === 'nzila_session')
+  stage('SESSION_COOKIE')
+  const session = (await ownedCookies(context, origin)).find((cookie) => cookie.name === 'nzila_session')
   assert.ok(session?.value && session.httpOnly, 'REAL_HTTP_ONLY_SESSION_REQUIRED')
+  stage('SESSION_ORGANIZATION')
   const selection = await context.request.get(origin + '/api/users/me/organizations', { timeout: 30000 })
   assert.equal(selection.status(), 200, 'CANONICAL_UI_ORGANIZATION_SELECTION_FAILED')
   assert.equal(record(await selection.json()).activeOrganizationId, input.organizationId, 'UI_SESSION_ORGANIZATION_SUBSTITUTION')
-  return (await context.cookies(origin)).map((cookie) => `${cookie.name}=${cookie.value}`).join('; ')
+  return (await ownedCookies(context, origin)).map((cookie) => `${cookie.name}=${cookie.value}`).join('; ')
 }
 
 export async function runBrowserAcceptance(input: {
@@ -201,7 +232,7 @@ export async function runBrowserAcceptance(input: {
 }): Promise<BrowserResult> {
   const result: BrowserResult = {
     status: 'FAIL', engine: null, engineVersion: null, profiles: [], setup: 'UNEXECUTED',
-    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0,
+    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0,
     cleanup: { browserClosed: false, contextsClosed: false, errors: [] },
     limitations: [
       'Owned disposable production Next/native V2 proof only; no staging, production, real inbox or live customer acceptance.',
@@ -239,7 +270,10 @@ export async function runBrowserAcceptance(input: {
     })
     context.on('page', (page) => {
       page.on('pageerror', () => { result.unhandledBrowserErrors++ })
-      page.on('response', (response) => { if (response.status() >= 500) result.serverErrors++ })
+      page.on('response', (response) => {
+        if (response.status() >= 500) result.serverErrors++
+        if (response.status() === 429) result.rateLimitedResponses++
+      })
     })
     const page = await context.newPage()
     page.setDefaultTimeout(30000)
@@ -325,9 +359,10 @@ export async function runBrowserAcceptance(input: {
       let activeCheck = row.checks[0]
       const step = async (name: (typeof REQUIRED_BROWSER_CHECKS)[number], operation: () => Promise<void>) => {
         activeCheck = row.checks.find((check) => check.name === name)!
+        stage('START')
         try { await operation(); activeCheck.status = 'PASS' }
         catch (error) {
-          activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error)
+          activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error); activeCheck.failureStage = browserStage
           throw error
         }
       }
@@ -501,7 +536,7 @@ export async function runBrowserAcceptance(input: {
         row.status = 'PASS'
       } catch (error) {
         if (activeCheck.status !== 'FAIL') {
-          activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error)
+          activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error); activeCheck.failureStage = browserStage
         }
         row.status = 'FAIL'
       } finally {

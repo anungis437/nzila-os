@@ -196,10 +196,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  // Never log the driver message: it can echo the role DDL, including password literals. The class and SQLSTATE suffice.
-  const name = err instanceof Error ? err.name : 'Error'
-  const code = typeof (err as { code?: unknown })?.code === 'string' ? (err as { code: string }).code : 'unknown'
-  console.error(`[provision-runtime-db-roles] Failed: ${name} (SQLSTATE ${code})`)
+main().catch(() => {
+  // Nothing from the driver error is logged: its message, and fields derived from it, can echo the role DDL with password
+  // literals. Re-run against the database directly (psql) to see the server-side error.
+  console.error('[provision-runtime-db-roles] Failed: role provisioning did not complete (driver error withheld; it can carry role DDL)')
   process.exit(1)
 })
