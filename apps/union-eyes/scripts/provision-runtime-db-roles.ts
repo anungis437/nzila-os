@@ -197,11 +197,9 @@ async function main() {
 }
 
 main().catch((err) => {
-  // Redact anything credential-shaped before logging: dollar-quoted password literals and URL userinfo.
-  const raw = err instanceof Error ? err.message : String(err)
-  const safe = raw
-    .replace(/\$pw\$[\s\S]*?\$pw\$/g, '$pw$[REDACTED]$pw$')
-    .replace(/(:\/\/)[^@\s/]*@/g, '$1[REDACTED]@')
-  console.error('[provision-runtime-db-roles] Failed:', safe)
+  // Never log the driver message: it can echo the role DDL, including password literals. The class and SQLSTATE suffice.
+  const name = err instanceof Error ? err.name : 'Error'
+  const code = typeof (err as { code?: unknown })?.code === 'string' ? (err as { code: string }).code : 'unknown'
+  console.error(`[provision-runtime-db-roles] Failed: ${name} (SQLSTATE ${code})`)
   process.exit(1)
 })

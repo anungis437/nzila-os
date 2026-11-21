@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, expect, it } from 'vitest'
 import {
-  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
+  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
 } from './browser-acceptance'
 
 const origin = 'http://127.0.0.1:43219'
@@ -70,6 +70,18 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
     expect(result).toBe('BROWSER_OR_RUNTIME_CHECK_FAILED')
     expect(JSON.stringify(result)).not.toContain(secret)
     expect(browserFailureKind(new assert.AssertionError({ message: secret }))).toBe('ASSERTION_FAILED')
+  })
+
+  it('names the failed proof by its fixed code and never by a generated or typed message', () => {
+    const secret = 'private-synthetic-password-and-session-value'
+    expect(browserFailureCode(new assert.AssertionError({ message: 'PASSWORD_MUST_REQUIRE_REAL_MFA' }))).toBe('PASSWORD_MUST_REQUIRE_REAL_MFA')
+    expect(browserFailureCode(new assert.AssertionError({ message: `Typed value: ${secret}` }))).toBe('UNNAMED_ASSERTION')
+    let generated: unknown
+    try { assert.equal(secret, 'other') } catch (error) { generated = error }
+    expect(browserFailureCode(generated)).toBe('UNNAMED_ASSERTION')
+    const timeout = new Error(`waiting for ${secret}`); timeout.name = 'TimeoutError'
+    expect(browserFailureCode(timeout)).toBe('PLAYWRIGHT_TIMEOUT')
+    expect(browserFailureCode(new Error(secret))).toBe('UNCLASSIFIED')
   })
 
   it('classifies a failed Chromium launch into a fixed code and never echoes the launcher message', () => {

@@ -43,9 +43,19 @@ test.describe('persistence after a restart', () => {
     expect(opened.status()).toBe(200)
     expect(JSON.stringify(await opened.json())).toContain(claimNumber)
 
-    const { claim, audit } = await inspectFiling(caseId, PRIMARY)
+    const { claim, audit, canonicalProofs } = await inspectFiling(caseId, PRIMARY)
     expect(claim).toMatchObject({ status: 'submitted', organization_id: PRIMARY })
-    expect(audit.length).toBeGreaterThan(0)
+    if (process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1') {
+      // V2 seals the filing's decision proof in the canonical tenant audit chain; it must still be there, sealed, after a restart.
+      expect(canonicalProofs.length).toBeGreaterThan(0)
+      for (const proof of canonicalProofs) {
+        expect(proof.proof_storage).toBe('canonical_append_only_audit_log')
+        expect(proof.seal_hash).toMatch(/^[a-f0-9]{64}$/)
+        expect(proof.signature).toBeTruthy()
+      }
+    } else {
+      expect(audit.length).toBeGreaterThan(0)
+    }
 
     const outsider = await as(UE_TEST_USERS.memberSecondary.userId, SECONDARY)
     expect((await outsider.get(`/api/cases/${caseId}`)).status()).toBe(404)

@@ -73,22 +73,33 @@ export interface ParsedData {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Remove HTML markup for plain-text extraction. Repeats until stable so nested/overlapping
- * fragments cannot reassemble into a tag after one pass.
- */
+/** Remove HTML markup for plain-text extraction. */
 function stripHtmlMarkup(input: string): string {
-  let text = input;
-  let previous: string;
-  do {
-    previous = text;
-    text = text
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, '')
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, '')
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .replace(/<[^>]*>/g, '');
-  } while (text !== previous);
-  return text.replace(/[<>]/g, '');
+  // Linear scan: every '<' opens markup that is skipped to its closing '>', so no tag can survive or be reassembled,
+  // and <script>/<style> bodies and comments are dropped with their content.
+  const lower = input.toLowerCase()
+  const out: string[] = []
+  let i = 0
+  while (i < input.length) {
+    const open = input.indexOf('<', i)
+    if (open === -1) { out.push(input.slice(i)); break }
+    out.push(input.slice(i, open))
+    if (lower.startsWith('<!--', open)) {
+      const close = lower.indexOf('-->', open + 4)
+      i = close === -1 ? input.length : close + 3
+      continue
+    }
+    const element = ['script', 'style'].find((name) => lower.startsWith(`<${name}`, open) && !/[a-z0-9]/.test(lower.charAt(open + name.length + 1)))
+    if (element) {
+      const closing = lower.indexOf(`</${element}`, open)
+      const end = closing === -1 ? -1 : lower.indexOf('>', closing)
+      i = end === -1 ? input.length : end + 1
+      continue
+    }
+    const end = input.indexOf('>', open)
+    i = end === -1 ? input.length : end + 1
+  }
+  return out.join('').replace(/>/g, '')
 }
 
 export interface TableData {

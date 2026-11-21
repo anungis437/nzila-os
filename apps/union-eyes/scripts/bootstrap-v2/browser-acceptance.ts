@@ -35,7 +35,7 @@ interface ProfileResult {
   id: string
   locale: string
   viewport: { width: number; height: number }
-  checks: { name: string; status: CheckStatus; failureKind?: string }[]
+  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string }[]
   status: CheckStatus
 }
 interface BrowserResult {
@@ -67,6 +67,18 @@ export function browserTargetAllowed(target: string, origin: string) {
 /** Error messages/DOM snapshots may contain passwords, tokens, or typed case content. Persist the check and class only. */
 export function browserFailureKind(error: unknown) {
   return error instanceof assert.AssertionError ? 'ASSERTION_FAILED' : 'BROWSER_OR_RUNTIME_CHECK_FAILED'
+}
+/**
+ * The fixed code an assertion in this file names (e.g. PASSWORD_MUST_REQUIRE_REAL_MFA), so a CI failure says which proof broke.
+ * Only an author-written UPPER_SNAKE constant is kept; a generated message (which can quote compared values) becomes
+ * UNNAMED_ASSERTION, and a Playwright wait that ran out becomes PLAYWRIGHT_TIMEOUT. Nothing typed, bound or rendered is persisted.
+ */
+export function browserFailureCode(error: unknown) {
+  if (error instanceof assert.AssertionError) {
+    return error.generatedMessage || !/^[A-Z][A-Z0-9_]{2,63}$/.test(error.message) ? 'UNNAMED_ASSERTION' : error.message
+  }
+  if (error instanceof Error && error.name === 'TimeoutError') return 'PLAYWRIGHT_TIMEOUT'
+  return 'UNCLASSIFIED'
 }
 /**
  * A failed Chromium launch, classified from the launcher's own error into a fixed code. The message itself is never persisted:
@@ -314,7 +326,10 @@ export async function runBrowserAcceptance(input: {
       const step = async (name: (typeof REQUIRED_BROWSER_CHECKS)[number], operation: () => Promise<void>) => {
         activeCheck = row.checks.find((check) => check.name === name)!
         try { await operation(); activeCheck.status = 'PASS' }
-        catch (error) { activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); throw error }
+        catch (error) {
+          activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error)
+          throw error
+        }
       }
       try {
         const member = await open(profile); scope.push(member.context)
@@ -485,7 +500,9 @@ export async function runBrowserAcceptance(input: {
         })
         row.status = 'PASS'
       } catch (error) {
-        if (activeCheck.status !== 'FAIL') { activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error) }
+        if (activeCheck.status !== 'FAIL') {
+          activeCheck.status = 'FAIL'; activeCheck.failureKind = browserFailureKind(error); activeCheck.failureCode = browserFailureCode(error)
+        }
         row.status = 'FAIL'
       } finally {
         for (const context of scope) {
