@@ -179,6 +179,9 @@ jobs:
             db/__tests__/workaid-union-side.pglite.test.ts lib/db/__tests__/case-read-batch.pglite.test.ts
             lib/finance/finance-duties.pglite.test.ts lib/services/case-access-service.pglite.test.ts
             db/auth/authority-physical-guards.pglite.test.ts db/auth/case-primary-domain-guards.pglite.test.ts
+            db/__tests__/message-authority-issuance.pglite.test.ts lib/auth/organization-admin.pglite.test.ts
+            lib/cases/assignment-profiles.pglite.test.ts lib/cases/automatic-assignment.pglite.test.ts
+            lib/cases/kernel-claims.pglite.test.ts
           )
           mkdir -p artifacts/ue-native-pg
           for suite in "${suites[@]}"; do
@@ -197,7 +200,7 @@ jobs:
               throw new Error(`${f}: failed=${r.numFailedTests} skipped=${r.numPendingTests} todo=${r.numTodoTests} total=${r.numTotalTests}`)
             total += r.numTotalTests
           }
-          if (files.length !== 20) throw new Error(`expected 20 native suites, found ${files.length}`)
+          if (files.length !== 25) throw new Error(`expected 25 native suites, found ${files.length}`)
           console.log(`authority kernel native: ${files.length} suites, ${total} tests, zero failures, zero skips`)
           NODE
 

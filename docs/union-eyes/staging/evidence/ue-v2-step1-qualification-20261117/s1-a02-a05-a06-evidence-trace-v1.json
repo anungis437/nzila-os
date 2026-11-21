@@ -18,25 +18,9 @@
       "TRACED_TO_LIVE_REGISTRY": 110,
       "TRACED_TO_UNIMPLEMENTED_REGISTRY": 1
     },
-    "requiredWithEvidence": 120,
-    "requiredWithEvidenceGap": 6,
-    "actionsWithGaps": [
-      "C04",
-      "C06",
-      "C07",
-      "C08",
-      "C10",
-      "C11",
-      "C12",
-      "C13",
-      "C14",
-      "C16",
-      "C17",
-      "C18",
-      "C19",
-      "C20",
-      "C22"
-    ]
+    "requiredWithEvidence": 126,
+    "requiredWithEvidenceGap": 0,
+    "actionsWithGaps": []
   },
   "historicalTrace": [
     {
@@ -17163,10 +17147,10 @@
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/auth-invite-manage.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C05",
@@ -17194,7 +17178,32 @@
     {
       "id": "C06",
       "action": "Membership and access lifecycle",
-      "routes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "route": "/api/organizations/[id]/members",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 3
+        },
+        {
+          "method": "PATCH",
+          "route": "/api/scim/v2/[organizationId]/Users/[id]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 2
+        },
+        {
+          "method": "DELETE",
+          "route": "/api/scim/v2/[organizationId]/Users/[id]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 2
+        },
+        {
+          "method": "GET",
+          "route": "/api/users/me/organizations",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        }
+      ],
       "v2BrowserChecks": [
         "member-password-totp-ui",
         "staff-password-totp-ui",
@@ -17204,26 +17213,56 @@
         "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
         "db/__tests__/authority-kernel-revocation.pglite.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     },
     {
       "id": "C07",
       "action": "Multiple capacity and active organization",
-      "routes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "route": "/api/users/me/organizations",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "POST",
+          "route": "/api/organizations/switch",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        }
+      ],
       "v2BrowserChecks": [
         "member-password-totp-ui"
       ],
-      "behaviouralTests": [],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C08",
       "action": "Connected intake to closure",
-      "routes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "route": "/api/cases/intake",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "GET",
+          "route": "/api/cases/[caseId]",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "PATCH",
+          "route": "/api/cases/[caseId]/transition",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        }
+      ],
       "v2BrowserChecks": [
         "member-intake-labels-and-create",
         "staff-case-read"
@@ -17233,9 +17272,7 @@
         "app/api/__tests__/workflow-transition.route.test.ts",
         "db/__tests__/grievances-routes.postgres.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     },
     {
       "id": "C09",
@@ -17277,34 +17314,75 @@
     {
       "id": "C10",
       "action": "Senior representative supervision",
-      "routes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "route": "/api/workbench/assigned",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "POST",
+          "route": "/api/workbench/assign",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "POST",
+          "route": "/api/cases/[caseId]/assign",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 2
+        }
+      ],
       "v2BrowserChecks": [],
       "behaviouralTests": [
         "lib/authority/__tests__/institutional-representation.test.ts",
         "lib/authority/__tests__/kernel-governance.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     },
     {
       "id": "C11",
       "action": "Successor handoff",
-      "routes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "route": "/api/cases/[caseId]/assign",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 2
+        }
+      ],
       "v2BrowserChecks": [],
       "behaviouralTests": [
         "db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
         "db/__tests__/authority-kernel-case-sources.pglite.test.ts",
         "db/__tests__/election-certificate-succession.native.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     },
     {
       "id": "C12",
       "action": "Member case follow-through",
-      "routes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "route": "/api/cases",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "GET",
+          "route": "/api/cases/[caseId]",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "GET",
+          "route": "/api/cases/[caseId]/deadlines",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        }
+      ],
       "v2BrowserChecks": [
         "member-case-list-reopen",
         "member-deadline-read-only",
@@ -17315,25 +17393,62 @@
         "lib/services/case-access-service.pglite.test.ts",
         "app/api/__tests__/cases-notes.route.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     },
     {
       "id": "C13",
       "action": "Role-specific document journey",
-      "routes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "route": "/api/documents",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 3
+        },
+        {
+          "method": "GET",
+          "route": "/api/documents/[id]",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "PATCH",
+          "route": "/api/documents/[id]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 2
+        },
+        {
+          "method": "DELETE",
+          "route": "/api/documents/[id]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 2
+        },
+        {
+          "method": "GET",
+          "route": "/api/documents/[id]/download",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        }
+      ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/documents.route.test.ts",
+        "app/api/__tests__/documents-id.route.test.ts",
+        "app/api/documents/[id]/download/route.pglite.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C14",
       "action": "User-facing sealed evidence export",
-      "routes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "route": "/api/cases/[caseId]/export",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        }
+      ],
       "v2BrowserChecks": [],
       "behaviouralTests": [
         "app/api/__tests__/cases-caseId-export.route.test.ts",
@@ -17342,9 +17457,7 @@
         "db/__tests__/authority-physical-guards.native.test.ts",
         "db/__tests__/case-primary-domain-guards.native.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     },
     {
       "id": "C15",
@@ -17385,24 +17498,82 @@
     {
       "id": "C16",
       "action": "Correspondence approval and dispatch",
-      "routes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "route": "/api/correspondence",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "POST",
+          "route": "/api/correspondence/[id]/submit",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "POST",
+          "route": "/api/correspondence/[id]/approve",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "POST",
+          "route": "/api/correspondence/[id]/dispatch",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "POST",
+          "route": "/api/correspondence/[id]/cancel",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        }
+      ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/correspondence-submit.route.test.ts",
+        "app/api/__tests__/correspondence-approve.route.test.ts",
+        "app/api/__tests__/correspondence-dispatch.route.test.ts",
+        "app/api/__tests__/correspondence-cancel.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C17",
       "action": "Staff messaging and preferences",
-      "routes": [],
+      "routes": [
+        {
+          "method": "GET",
+          "route": "/api/messages/threads",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "POST",
+          "route": "/api/messages/threads",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "GET",
+          "route": "/api/messages/threads/[threadId]",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "PUT",
+          "route": "/api/notifications/preferences",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        }
+      ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/messages-lifecycle.route.test.ts",
+        "app/api/__tests__/notifications-preferences-authority.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C18",
@@ -17416,32 +17587,72 @@
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/dashboard-leadership-authority.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C19",
       "action": "Organization administration and audit operations",
-      "routes": [],
+      "routes": [
+        {
+          "method": "PATCH",
+          "route": "/api/organizations/[id]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 4
+        },
+        {
+          "method": "GET",
+          "route": "/api/compliance/audit-logs",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        }
+      ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/organizations-id.route.test.ts",
+        "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+        "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C20",
       "action": "Privacy request handling",
-      "routes": [],
+      "routes": [
+        {
+          "method": "POST",
+          "route": "/api/privacy/dsar",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "GET",
+          "route": "/api/privacy/dsar/[requestId]",
+          "boundary": "READ_NOT_IN_MUTATION_CENSUS",
+          "routeTestFiles": null
+        },
+        {
+          "method": "POST",
+          "route": "/api/privacy/dsar/[requestId]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        },
+        {
+          "method": "POST",
+          "route": "/api/privacy/threads/[threadId]",
+          "boundary": "GUARDED_SESSION",
+          "routeTestFiles": 1
+        }
+      ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "lib/privacy/requests.pglite.test.ts",
+        "db/__tests__/privacy-requests.postgres.test.ts",
+        "app/api/__tests__/privacy-request-actions.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C21",
@@ -17484,9 +17695,7 @@
         "db/__tests__/authority-kernel-revocation.pglite.test.ts",
         "scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts"
       ],
-      "gaps": [
-        "No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived."
-      ]
+      "gaps": []
     }
   ],
   "requiredEvidence": [
@@ -17517,7 +17726,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17558,7 +17771,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17599,7 +17816,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17640,7 +17861,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17681,7 +17906,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17722,7 +17951,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17763,7 +17996,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17793,7 +18030,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C09",
@@ -17816,7 +18056,10 @@
             "lib/authority/__tests__/institutional-representation.test.ts",
             "lib/authority/__tests__/kernel-governance.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/workbench/assign",
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C11",
@@ -17826,7 +18069,9 @@
             "db/__tests__/authority-kernel-case-sources.pglite.test.ts",
             "db/__tests__/election-certificate-succession.native.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17856,7 +18101,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C09",
@@ -17879,7 +18127,10 @@
             "lib/authority/__tests__/institutional-representation.test.ts",
             "lib/authority/__tests__/kernel-governance.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/workbench/assign",
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C11",
@@ -17889,7 +18140,9 @@
             "db/__tests__/authority-kernel-case-sources.pglite.test.ts",
             "db/__tests__/election-certificate-succession.native.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17919,7 +18172,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -17943,8 +18199,26 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C14",
@@ -17980,8 +18254,26 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C14",
@@ -18017,8 +18309,26 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C14",
@@ -18049,6 +18359,20 @@
       "id": "UE-CAP-F-003",
       "state": "EXTERNAL_GATE",
       "evidence": [
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
+        },
         {
           "baseActionId": "C14",
           "v2BrowserChecks": [],
@@ -18106,7 +18430,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18204,7 +18531,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C10",
@@ -18213,7 +18543,10 @@
             "lib/authority/__tests__/institutional-representation.test.ts",
             "lib/authority/__tests__/kernel-governance.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/workbench/assign",
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C11",
@@ -18223,7 +18556,9 @@
             "db/__tests__/authority-kernel-case-sources.pglite.test.ts",
             "db/__tests__/election-certificate-succession.native.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18310,6 +18645,18 @@
       "id": "UE-CAP-I-002",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C17",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/messages-lifecycle.route.test.ts",
+            "app/api/__tests__/notifications-preferences-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/messages/threads",
+            "PUT /api/notifications/preferences"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -18406,7 +18753,24 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C15",
@@ -18449,7 +18813,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18500,6 +18867,20 @@
           "testedRoutes": []
         },
         {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -18529,6 +18910,20 @@
             "app/api/__tests__/cases-notes.route.test.ts"
           ],
           "testedRoutes": []
+        },
+        {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18579,6 +18974,20 @@
       "state": "PARTIAL",
       "evidence": [
         {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -18625,8 +19034,27 @@
       "inventory": "historicalCapabilities",
       "id": "UE-OMIT-A11Y-BILINGUAL",
       "state": "PARTIAL",
-      "evidence": [],
-      "evidenceGap": "No tested route, behavioural test or V2 browser journey is linked through its base actions."
+      "evidence": [
+        {
+          "operationalItem": "O10",
+          "tests": [],
+          "v2Qualification": "Chromium desktop and mobile emulation only",
+          "limitation": "Physical devices and other browser engines are not exercised."
+        },
+        {
+          "operationalItem": "O11",
+          "tests": [],
+          "v2Qualification": "V2 browser journeys: named controls, visible error feedback, keyboard sign-in and reopening, no horizontal overflow, four profiles",
+          "limitation": "Declared accessibility checks only; full WCAG certification is not established."
+        },
+        {
+          "operationalItem": "O12",
+          "tests": [],
+          "v2Qualification": "V2 browser journeys in en-CA and fr-CA on desktop and mobile",
+          "limitation": "The journeys exercised in both languages; every UI state in both languages is not established."
+        }
+      ],
+      "evidenceGap": null
     },
     {
       "inventory": "historicalCapabilities",
@@ -18644,7 +19072,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18672,6 +19103,23 @@
           "testedRoutes": [
             "POST /api/auth/invite/create",
             "POST /api/auth/invite/accept"
+          ]
+        },
+        {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
           ]
         },
         {
@@ -18716,7 +19164,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18735,6 +19186,23 @@
       "id": "UE-OMIT-REP-CORRESPONDENCE",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -18763,7 +19231,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C12",
@@ -18814,6 +19285,18 @@
       "state": "PARTIAL",
       "evidence": [
         {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -18831,6 +19314,18 @@
       "state": "PARTIAL",
       "evidence": [
         {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -18838,6 +19333,15 @@
             "scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts"
           ],
           "testedRoutes": []
+        },
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
         }
       ],
       "evidenceGap": null
@@ -18852,8 +19356,24 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18872,6 +19392,23 @@
       "id": "UE-OMIT-PKI-SIGNING-WORKFLOW",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -18894,8 +19431,12 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
         },
         {
           "baseActionId": "C08",
@@ -18908,7 +19449,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C09",
@@ -18922,6 +19466,18 @@
             "PUT /api/assignment-profiles",
             "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
           ]
         },
         {
@@ -18980,7 +19536,24 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18999,6 +19572,20 @@
       "id": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
+        },
         {
           "baseActionId": "C14",
           "v2BrowserChecks": [],
@@ -19029,6 +19616,14 @@
       "state": "PARTIAL",
       "evidence": [
         {
+          "baseActionId": "C18",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/dashboard-leadership-authority.route.test.ts"
+          ],
+          "testedRoutes": []
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19045,6 +19640,18 @@
       "id": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -19073,7 +19680,24 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19092,6 +19716,20 @@
       "id": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
+        },
         {
           "baseActionId": "C14",
           "v2BrowserChecks": [],
@@ -19142,7 +19780,16 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "operationalItem": "O12",
+          "tests": [],
+          "v2Qualification": "V2 browser journeys in en-CA and fr-CA on desktop and mobile",
+          "limitation": "The journeys exercised in both languages; every UI state in both languages is not established."
         }
       ],
       "evidenceGap": null
@@ -19152,6 +19799,23 @@
       "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -19170,6 +19834,18 @@
       "state": "PARTIAL",
       "evidence": [
         {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19186,6 +19862,18 @@
       "id": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C17",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/messages-lifecycle.route.test.ts",
+            "app/api/__tests__/notifications-preferences-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/messages/threads",
+            "PUT /api/notifications/preferences"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -19225,6 +19913,18 @@
           ]
         },
         {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19252,7 +19952,23 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19282,6 +19998,26 @@
           ]
         },
         {
+          "baseActionId": "C18",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/dashboard-leadership-authority.route.test.ts"
+          ],
+          "testedRoutes": []
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19298,6 +20034,23 @@
       "id": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
       "state": "PARTIAL",
       "evidence": [
+        {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -19326,7 +20079,23 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19356,7 +20125,24 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19403,7 +20189,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C09",
@@ -19533,6 +20322,14 @@
           ]
         },
         {
+          "baseActionId": "C04",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-manage.route.test.ts"
+          ],
+          "testedRoutes": []
+        },
+        {
           "baseActionId": "C06",
           "v2BrowserChecks": [
             "member-password-totp-ui",
@@ -19543,7 +20340,11 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19570,6 +20371,18 @@
           ],
           "testedRoutes": [
             "PATCH /api/pilot/onboarding"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
           ]
         },
         {
@@ -19638,6 +20451,18 @@
       "state": "NOT_IMPLEMENTED",
       "evidence": [
         {
+          "baseActionId": "C17",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/messages-lifecycle.route.test.ts",
+            "app/api/__tests__/notifications-preferences-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/messages/threads",
+            "PUT /api/notifications/preferences"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19686,6 +20511,14 @@
       "state": "NOT_IMPLEMENTED",
       "evidence": [
         {
+          "baseActionId": "C18",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/dashboard-leadership-authority.route.test.ts"
+          ],
+          "testedRoutes": []
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19701,15 +20534,47 @@
       "inventory": "registryCapabilities",
       "id": "UE-ADMIN-PILOT-STATUS",
       "state": "LIMITED",
-      "evidence": [],
-      "evidenceGap": "No tested route, behavioural test or V2 browser journey is linked through its base actions."
+      "evidence": [
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
+        },
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
+        }
+      ],
+      "evidenceGap": null
     },
     {
       "inventory": "registryCapabilities",
       "id": "UE-DB-POSTGRES-PING",
       "state": "LIMITED",
-      "evidence": [],
-      "evidenceGap": "No tested route, behavioural test or V2 browser journey is linked through its base actions."
+      "evidence": [
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
+        }
+      ],
+      "evidenceGap": null
     },
     {
       "inventory": "registryCapabilities",
@@ -19732,22 +20597,52 @@
       "inventory": "registryCapabilities",
       "id": "UE-SECRET-DATABASE-URL",
       "state": "LIMITED",
-      "evidence": [],
-      "evidenceGap": "No tested route, behavioural test or V2 browser journey is linked through its base actions."
+      "evidence": [
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
+        }
+      ],
+      "evidenceGap": null
     },
     {
       "inventory": "registryCapabilities",
       "id": "UE-SECRET-AUTH",
       "state": "LIMITED",
-      "evidence": [],
-      "evidenceGap": "No tested route, behavioural test or V2 browser journey is linked through its base actions."
+      "evidence": [
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
+        }
+      ],
+      "evidenceGap": null
     },
     {
       "inventory": "registryCapabilities",
       "id": "UE-SECRET-ENTRA-TENANT",
       "state": "LIMITED",
-      "evidence": [],
-      "evidenceGap": "No tested route, behavioural test or V2 browser journey is linked through its base actions."
+      "evidence": [
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
+        }
+      ],
+      "evidenceGap": null
     },
     {
       "inventory": "registryCapabilities",
@@ -19782,15 +20677,23 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
         },
         {
           "baseActionId": "C07",
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19887,6 +20790,23 @@
           ]
         },
         {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
+          ]
+        },
+        {
           "baseActionId": "C21",
           "v2BrowserChecks": [
             "staff-deadline-create-reschedule-complete-cancel",
@@ -19899,6 +20819,15 @@
             "POST /api/cases/[caseId]/deadlines",
             "PATCH /api/cases/[caseId]/deadlines"
           ]
+        },
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
         }
       ],
       "evidenceGap": null
@@ -19909,6 +20838,20 @@
       "state": "NOT_IMPLEMENTED",
       "evidence": [
         {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19916,6 +20859,15 @@
             "scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts"
           ],
           "testedRoutes": []
+        },
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
         }
       ],
       "evidenceGap": null
@@ -19926,6 +20878,20 @@
       "state": "NOT_IMPLEMENTED",
       "evidence": [
         {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -19933,6 +20899,15 @@
             "scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts"
           ],
           "testedRoutes": []
+        },
+        {
+          "operationalItem": "O07",
+          "tests": [
+            "lib/__tests__/pilot-admin-operational.test.ts",
+            "lib/config/__tests__/env-validation.test.ts"
+          ],
+          "v2Qualification": "V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)",
+          "limitation": "Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here."
         }
       ],
       "evidenceGap": null
@@ -20530,6 +21505,20 @@
       "state": "NOT_IMPLEMENTED",
       "evidence": [
         {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -20546,6 +21535,20 @@
       "id": "UE-PRIVACY-DSAR-WORKFLOW",
       "state": "LIMITED",
       "evidence": [
+        {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -20564,6 +21567,20 @@
       "state": "NOT_IMPLEMENTED",
       "evidence": [
         {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
+        },
+        {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
           "behaviouralTests": [
@@ -20580,6 +21597,20 @@
       "id": "UE-PRIVACY-BREACH-ASSESSMENT",
       "state": "NOT_IMPLEMENTED",
       "evidence": [
+        {
+          "baseActionId": "C20",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "lib/privacy/requests.pglite.test.ts",
+            "db/__tests__/privacy-requests.postgres.test.ts",
+            "app/api/__tests__/privacy-request-actions.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/privacy/dsar",
+            "POST /api/privacy/dsar/[requestId]",
+            "POST /api/privacy/threads/[threadId]"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],
@@ -20635,7 +21666,16 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "operationalItem": "O12",
+          "tests": [],
+          "v2Qualification": "V2 browser journeys in en-CA and fr-CA on desktop and mobile",
+          "limitation": "The journeys exercised in both languages; every UI state in both languages is not established."
         }
       ],
       "evidenceGap": null
@@ -20650,8 +21690,12 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
         },
         {
           "baseActionId": "C08",
@@ -20664,7 +21708,24 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
+        },
+        {
+          "baseActionId": "C13",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents.route.test.ts",
+            "app/api/__tests__/documents-id.route.test.ts",
+            "app/api/documents/[id]/download/route.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/documents",
+            "PATCH /api/documents/[id]",
+            "DELETE /api/documents/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20688,8 +21749,12 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
         },
         {
           "baseActionId": "C08",
@@ -20702,7 +21767,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C09",
@@ -20716,6 +21784,18 @@
             "PUT /api/assignment-profiles",
             "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
           ]
         },
         {
@@ -20740,8 +21820,12 @@
           "v2BrowserChecks": [
             "member-password-totp-ui"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-read-authority.pglite.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/organizations/switch"
+          ]
         },
         {
           "baseActionId": "C08",
@@ -20754,7 +21838,10 @@
             "app/api/__tests__/workflow-transition.route.test.ts",
             "db/__tests__/grievances-routes.postgres.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/intake",
+            "PATCH /api/cases/[caseId]/transition"
+          ]
         },
         {
           "baseActionId": "C09",
@@ -20777,7 +21864,10 @@
             "lib/authority/__tests__/institutional-representation.test.ts",
             "lib/authority/__tests__/kernel-governance.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/workbench/assign",
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C11",
@@ -20787,7 +21877,9 @@
             "db/__tests__/authority-kernel-case-sources.pglite.test.ts",
             "db/__tests__/election-certificate-succession.native.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/assign"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20817,7 +21909,23 @@
             "lib/auth/__tests__/session-membership-revocation.pglite.test.ts",
             "db/__tests__/authority-kernel-revocation.pglite.test.ts"
           ],
-          "testedRoutes": []
+          "testedRoutes": [
+            "POST /api/organizations/[id]/members",
+            "PATCH /api/scim/v2/[organizationId]/Users/[id]",
+            "DELETE /api/scim/v2/[organizationId]/Users/[id]"
+          ]
+        },
+        {
+          "baseActionId": "C19",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/organizations-id.route.test.ts",
+            "app/api/__tests__/organizations-id-delete-governance.route.test.ts",
+            "app/api/__tests__/audit-log-readers-direct-authority.route.test.ts"
+          ],
+          "testedRoutes": [
+            "PATCH /api/organizations/[id]"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20836,6 +21944,23 @@
       "id": "UE-APPROVED-LETTER-EMAIL",
       "state": "LIMITED",
       "evidence": [
+        {
+          "baseActionId": "C16",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/correspondence-submit.route.test.ts",
+            "app/api/__tests__/correspondence-approve.route.test.ts",
+            "app/api/__tests__/correspondence-dispatch.route.test.ts",
+            "app/api/__tests__/correspondence-cancel.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/correspondence",
+            "POST /api/correspondence/[id]/submit",
+            "POST /api/correspondence/[id]/approve",
+            "POST /api/correspondence/[id]/dispatch",
+            "POST /api/correspondence/[id]/cancel"
+          ]
+        },
         {
           "baseActionId": "C22",
           "v2BrowserChecks": [],

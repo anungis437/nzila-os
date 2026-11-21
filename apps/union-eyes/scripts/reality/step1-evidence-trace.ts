@@ -39,7 +39,15 @@ export const BEHAVIOURAL_TESTS: Readonly<Record<string, readonly string[]>> = {
   C01: ['app/api/__tests__/auth-invite-create.route.test.ts'],
   C02: ['app/api/__tests__/auth-invite-create.route.test.ts'],
   C03: ['app/api/__tests__/auth-invite-manage.route.test.ts'],
+  C04: ['app/api/__tests__/auth-invite-manage.route.test.ts'],
   C05: ['app/api/__tests__/pilot-onboarding.route.test.ts'],
+  C07: ['app/api/__tests__/organizations-read-authority.pglite.test.ts'],
+  C13: ['app/api/__tests__/documents.route.test.ts', 'app/api/__tests__/documents-id.route.test.ts', 'app/api/documents/[id]/download/route.pglite.test.ts'],
+  C16: ['app/api/__tests__/correspondence-submit.route.test.ts', 'app/api/__tests__/correspondence-approve.route.test.ts', 'app/api/__tests__/correspondence-dispatch.route.test.ts', 'app/api/__tests__/correspondence-cancel.route.test.ts'],
+  C17: ['app/api/__tests__/messages-lifecycle.route.test.ts', 'app/api/__tests__/notifications-preferences-authority.route.test.ts'],
+  C18: ['app/api/__tests__/dashboard-leadership-authority.route.test.ts'],
+  C19: ['app/api/__tests__/organizations-id.route.test.ts', 'app/api/__tests__/organizations-id-delete-governance.route.test.ts', 'app/api/__tests__/audit-log-readers-direct-authority.route.test.ts'],
+  C20: ['lib/privacy/requests.pglite.test.ts', 'db/__tests__/privacy-requests.postgres.test.ts', 'app/api/__tests__/privacy-request-actions.route.test.ts'],
   C15: ['app/api/__tests__/documents-transcript-authority.route.test.ts', 'app/api/documents/[id]/ocr/route.canonical.pglite.test.ts'],
   C21: ['app/api/__tests__/cases-caseId-deadlines.route.test.ts'],
   C06: ['lib/auth/__tests__/session-membership-revocation.pglite.test.ts', 'db/__tests__/authority-kernel-revocation.pglite.test.ts'],
@@ -52,6 +60,22 @@ export const BEHAVIOURAL_TESTS: Readonly<Record<string, readonly string[]>> = {
   C22: ['db/__tests__/authority-kernel-revocation.pglite.test.ts', 'scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts'],
 }
 
+/**
+ * Operational items (ledger .operations) that REQUIRED rows link to, with the tests or qualification that exercise them and
+ * what they do not establish.
+ */
+export const OPERATIONAL_EVIDENCE: Readonly<Record<string, { tests: readonly string[]; v2Qualification?: string; limitation: string }>> = {
+  O07: { tests: ['lib/__tests__/pilot-admin-operational.test.ts', 'lib/config/__tests__/env-validation.test.ts'],
+    v2Qualification: 'V2 HTTP smoke and runtime readiness on an owned PostgreSQL (component qualification)',
+    limitation: 'Probe semantics and fail-closed configuration are tested; continuous deployed dependency monitoring is not established here.' },
+  O11: { tests: [], v2Qualification: 'V2 browser journeys: named controls, visible error feedback, keyboard sign-in and reopening, no horizontal overflow, four profiles',
+    limitation: 'Declared accessibility checks only; full WCAG certification is not established.' },
+  O12: { tests: [], v2Qualification: 'V2 browser journeys in en-CA and fr-CA on desktop and mobile',
+    limitation: 'The journeys exercised in both languages; every UI state in both languages is not established.' },
+  O10: { tests: [], v2Qualification: 'Chromium desktop and mobile emulation only',
+    limitation: 'Physical devices and other browser engines are not exercised.' },
+}
+
 export function buildTrace() {
   const rec = read(path.join(STAGING, 'UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json'))
   const ledger = read(path.join(STAGING, 'UE_V2_BASE_ACTION_COVERAGE.json'))
@@ -60,6 +84,8 @@ export function buildTrace() {
   const registry: Row[] = rec.registryCapabilities
   const live = new Set(['REAL', 'LIMITED'])
 
+  const declared: Record<string, unknown[] | null> = Object.fromEntries((ledger.actions as { id: string; apiMethods: unknown[] | null }[]).map((a) => [a.id, a.apiMethods]))
+  const notes: Record<string, unknown> = Object.fromEntries((ledger.actions as { id: string; apiMethodsNote?: unknown }[]).map((a) => [a.id, a.apiMethodsNote]))
   const actionRoutes = new Map<string, { method: string; route: string }[]>()
   for (const a of ledger.actions as { id: string; apiMethods: string[] | null }[])
     // The ledger writes route parameters as {name}; the App Router (and the census) as [name].
@@ -96,7 +122,9 @@ export function buildTrace() {
     const behavioural = [...(BEHAVIOURAL_TESTS[a.id] ?? [])]
     const routeMutations = routes.filter((r) => r.boundary !== 'READ_NOT_IN_MUTATION_CENSUS')
     const gaps: string[] = []
-    if (!routes.length) gaps.push('No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.')
+    const declaredMethods = declared[a.id]
+    const crossCutting = Array.isArray(declaredMethods) && declaredMethods.length === 0 && typeof notes[a.id] === 'string'
+    if (!routes.length && !crossCutting) gaps.push('No API method is recorded for this action in the ledger; route-level authority evidence cannot be derived.')
     for (const r of routeMutations) if (!r.routeTestFiles) gaps.push(`${r.method} ${r.route} has no route test file importing it.`)
     if (!browser.length && !behavioural.length) gaps.push('Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action.')
     return { id: a.id, action: a.action, routes, v2BrowserChecks: browser, behaviouralTests: behavioural, gaps }
@@ -105,9 +133,14 @@ export function buildTrace() {
   const requiredEvidence = (inventory: string, rows: Row[], liveField: 'sourceState' | 'historicalSourceState') =>
     rows.filter((r) => r.scope === 'REQUIRED').map((r) => {
       const actions = [...(r.baseActionIds ?? [])].sort()
-      const evidence = actionEvidence.filter((a) => actions.includes(a.id) && (a.v2BrowserChecks.length || a.behaviouralTests.length || a.routes.some((x) => x.routeTestFiles)))
+      const evidence: Record<string, unknown>[] = actionEvidence.filter((a) => actions.includes(a.id) && (a.v2BrowserChecks.length || a.behaviouralTests.length || a.routes.some((x) => x.routeTestFiles)))
         .map((a) => ({ baseActionId: a.id, v2BrowserChecks: a.v2BrowserChecks, behaviouralTests: a.behaviouralTests,
           testedRoutes: a.routes.filter((x) => x.routeTestFiles).map((x) => `${x.method} ${x.route}`) }))
+      for (const id of actions) {
+        const op = OPERATIONAL_EVIDENCE[id]
+        if (op && (op.tests.length || op.v2Qualification))
+          evidence.push({ operationalItem: id, tests: [...op.tests], v2Qualification: op.v2Qualification ?? null, limitation: op.limitation })
+      }
       return { inventory, id: r.id, state: r[liveField] ?? null, evidence,
         evidenceGap: evidence.length ? null : 'No tested route, behavioural test or V2 browser journey is linked through its base actions.' }
     })

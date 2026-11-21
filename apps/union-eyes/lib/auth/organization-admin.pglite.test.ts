@@ -1,8 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-import { drizzle } from 'drizzle-orm/pglite'
 import { sql } from 'drizzle-orm'
 import type { PGlite } from '@electric-sql/pglite'
-import { freshDb, kit } from '@/db/__tests__/authority-kernel-testkit'
+import { appDrizzle, freshDb, kit } from '@/db/__tests__/authority-kernel-testkit'
 import { ORG, ORG_B, seedMembership, U } from '@/db/__tests__/authority-kernel-harness'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { isActiveOrganizationAdministrator } from './organization-admin'
@@ -10,7 +9,7 @@ import { isActiveOrganizationAdministrator } from './organization-admin'
 let pg: PGlite
 let k: ReturnType<typeof kit>
 const admin = 'synthetic-business-admin'
-const allowed = (signedIn = admin, requestedActor = signedIn, organizationId = ORG) => drizzle(pg).transaction(async tx => {
+const allowed = (signedIn = admin, requestedActor = signedIn, organizationId = ORG) => appDrizzle(pg).transaction(async tx => {
   await tx.execute(sql`SELECT set_config('app.current_user_id',${signedIn},true),set_config('app.current_org_id',${organizationId},true)`)
   return isActiveOrganizationAdministrator(tx as unknown as RLSTx, { userId: requestedActor, organizationId })
 })

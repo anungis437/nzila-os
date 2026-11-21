@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { BEHAVIOURAL_TESTS, buildTrace, renderTrace, TRACE_FILE } from '../../../scripts/reality/step1-evidence-trace'
+import { BEHAVIOURAL_TESTS, buildTrace, OPERATIONAL_EVIDENCE, renderTrace, TRACE_FILE } from '../../../scripts/reality/step1-evidence-trace'
 
 /** Step 1 S1-A02 / S1-A05 / S1-A06: every historical and required item has a reproducible disposition and evidence or an explicit gap. */
 const trace = buildTrace()
@@ -24,8 +24,9 @@ describe('Step 1 evidence trace', () => {
   it('every declared base-action route resolves to a census boundary and every behavioural test file exists (S1-A06)', () => {
     for (const action of trace.actionEvidence)
       for (const route of action.routes) expect(route.boundary, `${action.id} ${route.method} ${route.route}`).not.toBe('NOT_FOUND')
-    for (const files of Object.values(BEHAVIOURAL_TESTS))
+    for (const files of [...Object.values(BEHAVIOURAL_TESTS), ...Object.values(OPERATIONAL_EVIDENCE).map((o) => o.tests)])
       for (const file of files) expect(existsSync(path.resolve(__dirname, '../../..', file)), file).toBe(true)
+    expect(trace.summary.actionsWithGaps).toEqual([])
   })
   it('no base action mutation route is unguarded', () => {
     const boundaries = trace.actionEvidence.flatMap((a) => a.routes.map((r) => r.boundary))

@@ -14,8 +14,8 @@
       "SIGNED_OR_SECRET": 1,
       "UNCLASSIFIED": 2
     },
-    "guardedWithRouteTest": 494,
-    "guardedWithoutRouteTest": 109,
+    "guardedWithRouteTest": 499,
+    "guardedWithoutRouteTest": 104,
     "unclassified": [],
     "reviewedUnclassified": [
       "POST /api/icra/telemetry",
@@ -2183,7 +2183,7 @@
       "route": "/api/correspondence/[id]/submit",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/correspondence/[id]",
@@ -4217,7 +4217,7 @@
       "route": "/api/notifications/preferences",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/test",
@@ -4781,7 +4781,7 @@
       "route": "/api/privacy/dsar/[requestId]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/dsar",
@@ -4799,13 +4799,13 @@
       "route": "/api/privacy/threads/[threadId]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/threads/[threadId]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/profile/roles",

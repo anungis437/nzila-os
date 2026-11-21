@@ -1,5 +1,7 @@
 import { PGlite } from '@electric-sql/pglite'
 import { afterAll } from 'vitest'
+import { drizzle as drizzlePglite } from 'drizzle-orm/pglite'
+import { drizzle as drizzleNodePostgres } from 'drizzle-orm/node-postgres'
 import { openCaseDomainDb, type CaseDomainDb } from './case-primary-domain-testkit'
 import { ORG, U, installAuthoritySchema, newUuid, seedCast, type Db } from './authority-kernel-harness'
 import { runAuthorityTransaction, type SqlExecutor } from '../../lib/authority/store/executor'
@@ -26,6 +28,15 @@ export const daysAhead = (d: number) => new Date(Date.now() + d * DAY)
 const nativeKernel = process.env.UE_AUTHORITY_KERNEL_NATIVE === '1'
 const nativeOpened: CaseDomainDb[] = []
 if (nativeKernel) afterAll(async () => { await Promise.allSettled(nativeOpened.splice(0).map((db) => db.close())) })
+
+/**
+ * The application's Drizzle handle over a test database: the PGlite driver for PGlite, the node-postgres driver for an owned
+ * native container (UE_AUTHORITY_KERNEL_NATIVE). Suites use this instead of drizzle(pg) so the same assertions run on both.
+ */
+export function appDrizzle(db: PGlite): ReturnType<typeof drizzlePglite> {
+  const native = (db as unknown as Partial<CaseDomainDb>).client
+  return (native ? drizzleNodePostgres(native) : drizzlePglite(db)) as unknown as ReturnType<typeof drizzlePglite>
+}
 
 export async function freshDb(): Promise<PGlite> {
   const db = nativeKernel

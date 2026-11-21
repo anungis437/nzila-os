@@ -25,7 +25,7 @@ describe('transitive authority census (S1-A03)', () => {
 
   it('guarded mutation exports without a route test may only decrease (ratchet)', () => {
     const untested = rows.filter((r) => r.class === 'GUARDED_SESSION' && r.testFiles === 0).length
-    expect(untested).toBeLessThanOrEqual(109)
+    expect(untested).toBeLessThanOrEqual(104)
   })
 
   it('classifies every mutation export into exactly one boundary class', () => {

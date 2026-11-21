@@ -55,4 +55,21 @@ describe('POST /api/auth/invite/manage refusals', () => {
     expect((await post({ action: 'reissue', inviteId: INVITE })).status).toBe(409)
     expect(m.deliver).not.toHaveBeenCalled()
   })
+
+  it('GET (C04): an unauthenticated caller gets 401 and a non-manager 403, and neither sees any invitation', async () => {
+    const { GET } = await import('../auth/invite/manage/route')
+    const get = () => (GET as unknown as (r: Request) => Promise<Response>)(new Request('http://localhost/api/auth/invite/manage'))
+    m.authed = false
+    expect((await get()).status).toBe(401)
+    m.authed = true
+    m.canManage.mockResolvedValue(false)
+    const refused = await get()
+    expect(refused.status).toBe(403)
+    expect(JSON.stringify(await refused.json())).not.toContain('invitations')
+    expect(m.list).not.toHaveBeenCalled()
+    m.canManage.mockResolvedValue(true)
+    m.list.mockResolvedValue([])
+    expect((await get()).status).toBe(200)
+    expect(m.list).toHaveBeenCalledWith('actor-1', 'org-1')
+  })
 })

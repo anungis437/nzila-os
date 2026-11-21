@@ -7,7 +7,7 @@ import { installQueuedMailFixture,type MailFixtureDb } from '../auth/queued-case
 import { applyPhysicalGuards,inspectPhysicalGuards,planPhysicalGuards } from '../auth/physical-guard-catalog'
 import { CASE_PRIMARY_DOMAIN_GUARDS,compileCaseDomainSupportSql } from '../auth/case-primary-domain-guards'
 
-export interface CaseDomainDb extends MailFixtureDb {close():Promise<void>;connect?:()=>Promise<CaseDomainDb>}
+export interface CaseDomainDb extends MailFixtureDb {close():Promise<void>;connect?:()=>Promise<CaseDomainDb>;client?:pgDriver.Client}
 export async function openCaseDomainDb(native=false):Promise<CaseDomainDb>{
  if(!native)return new PGlite()
  const owner=randomUUID(),name=`ue-case-domain-${owner}`,password=randomUUID(),image='pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337'
@@ -17,7 +17,7 @@ export async function openCaseDomainDb(native=false):Promise<CaseDomainDb>{
   for(let attempt=0;;attempt++){try{execFileSync('docker',['exec',id,'pg_isready','-h','127.0.0.1','-U','postgres'],{stdio:'pipe'});break}catch(error){if(attempt>=80)throw error;await new Promise(resolve=>setTimeout(resolve,100))}}
   const port=Number(execFileSync('docker',['port',id,'5432/tcp'],{encoding:'utf8'}).trim().split(':').at(-1))
   const connect=async():Promise<CaseDomainDb>=>{const client=new pgDriver.Client({host:'127.0.0.1',port,user:'postgres',password,database:'postgres'});await client.connect();opened.push(client)
-   return {exec:async text=>client.query(text),query:async<T>(text:string,params?:unknown[])=>({rows:(await client.query(text,params)).rows as T[]}),close:async()=>{await client.end()},connect}}
+   return {exec:async text=>client.query(text),query:async<T>(text:string,params?:unknown[])=>({rows:(await client.query(text,params)).rows as T[]}),close:async()=>{await client.end()},connect,client}}
   const database=await connect()
   return {...database,close:async()=>{
    await Promise.allSettled(opened.map(client=>client.end()))

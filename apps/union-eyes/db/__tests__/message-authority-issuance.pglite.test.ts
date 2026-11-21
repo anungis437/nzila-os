@@ -13,14 +13,13 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { PGlite } from '@electric-sql/pglite'
-import { drizzle } from 'drizzle-orm/pglite'
 import { sql } from 'drizzle-orm'
 import { changeMandate } from '../../lib/authority/store/lifecycle'
 import { adoptRetentionPolicy, readRetentionPolicy, setLegalHold } from '../../lib/messaging/thread-lifecycle'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { ORG, U } from './authority-kernel-harness'
-import { freshDb, kit } from './authority-kernel-testkit'
+import { appDrizzle, freshDb, kit } from './authority-kernel-testkit'
 
 const migration = (name: string) => readFileSync(resolve(__dirname, '..', 'migrations-platform', name), 'utf8')
 
@@ -97,7 +96,7 @@ beforeAll(async () => {
       GRANT SELECT, INSERT ON audit_security.audit_logs TO union_eyes_runtime;
     `)
   })
-  app = drizzle(pg)
+  app = appDrizzle(pg)
   await k.adoptDefaultRules(ORG, (domain, operation) => domain === 'governance_review' && (operation === 'issue' || operation === 'revoke'))
   threadId = randomUUID()
   await k.asAdmin(() => pg.query(

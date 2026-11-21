@@ -1331,7 +1331,12 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "POST /api/organizations/{id}/members",
+        "PATCH /api/scim/v2/{organizationId}/Users/{id}",
+        "DELETE /api/scim/v2/{organizationId}/Users/{id}",
+        "GET /api/users/me/organizations"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -1671,7 +1676,8 @@
         "remaining": "Complete enabled membership lifecycle and same-session revocation matrix."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C07",
@@ -1685,7 +1691,10 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "GET /api/users/me/organizations",
+        "POST /api/organizations/switch"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -2174,7 +2183,8 @@
         "remaining": "List enabled pilot role/capacity combinations and exercise organization/resource switches."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C08",
@@ -2188,7 +2198,11 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "POST /api/cases/intake",
+        "GET /api/cases/{caseId}",
+        "PATCH /api/cases/{caseId}/transition"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -2648,7 +2662,8 @@
         "remaining": "One connected intake/triage/assignment/investigation/transition/close/handoff flow with persisted outcomes."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C09",
@@ -3059,7 +3074,11 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "GET /api/workbench/assigned",
+        "POST /api/workbench/assign",
+        "POST /api/cases/{caseId}/assign"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -3465,7 +3484,8 @@
         "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C11",
@@ -3479,7 +3499,9 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "POST /api/cases/{caseId}/assign"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -3794,7 +3816,9 @@
         "remaining": "Connected successor acceptance, unfinished obligations and outgoing resource revocation."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration).",
+      "apiMethodsNote": "Case successor handoff is a reassignment through the governed assign route; office succession (succeedOffice) has no HTTP surface and is proven by the native kernel lifecycle suites."
     },
     {
       "id": "C12",
@@ -3808,7 +3832,11 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "GET /api/cases",
+        "GET /api/cases/{caseId}",
+        "GET /api/cases/{caseId}/deadlines"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -4046,7 +4074,8 @@
         "remaining": "Enabled status/history/clarification/acknowledgement/review-request actions and negative disclosure boundaries."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C13",
@@ -4060,7 +4089,13 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "POST /api/documents",
+        "GET /api/documents/{id}",
+        "PATCH /api/documents/{id}",
+        "DELETE /api/documents/{id}",
+        "GET /api/documents/{id}/download"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -4484,7 +4519,8 @@
         "remaining": "Connected upload/download/search across member, representative and supervisory case contexts."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C14",
@@ -4498,7 +4534,9 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "GET /api/cases/{caseId}/export"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -4774,7 +4812,8 @@
         "remaining": "Rerun full local checks and exact-source CI after public invitation and request-scope repairs; qualify the immutable Linux image including PDFKit fonts; perform actual authorized EN/FR workbench PDF download, embedded-envelope verification, durable audit, cross-tenant/unauthorized refusal and recovery on the deployed source."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C15",
@@ -5063,7 +5102,13 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "POST /api/correspondence",
+        "POST /api/correspondence/{id}/submit",
+        "POST /api/correspondence/{id}/approve",
+        "POST /api/correspondence/{id}/dispatch",
+        "POST /api/correspondence/{id}/cancel"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -5382,7 +5427,8 @@
         "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C17",
@@ -5396,7 +5442,12 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "GET /api/messages/threads",
+        "POST /api/messages/threads",
+        "GET /api/messages/threads/{threadId}",
+        "PUT /api/notifications/preferences"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -5685,7 +5736,8 @@
         "remaining": "Staff initiation, participants, preference enforcement and persisted read state."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C18",
@@ -5887,7 +5939,10 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [
+        "PATCH /api/organizations/{id}",
+        "GET /api/compliance/audit-logs"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -6322,7 +6377,8 @@
         "remaining": "Positive enabled organization configuration, access removal and audit-operation workflows."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C20",
@@ -6336,7 +6392,12 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": "/dashboard/privacy",
-      "apiMethods": null,
+      "apiMethods": [
+        "POST /api/privacy/dsar",
+        "GET /api/privacy/dsar/{requestId}",
+        "POST /api/privacy/dsar/{requestId}",
+        "POST /api/privacy/threads/{threadId}"
+      ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -6595,7 +6656,8 @@
         "remaining": "Repeat the qualified account_profile journey on the final corrected candidate; other rights require an appropriate actual handler response, without an automatic statutory-fulfilment claim."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
     },
     {
       "id": "C21",
@@ -6930,7 +6992,7 @@
         "roleOrMandate": "Action-specific verification remains required"
       },
       "ui": null,
-      "apiMethods": null,
+      "apiMethods": [],
       "positiveDurableResult": null,
       "negativeMatrix": null,
       "persistenceAndAudit": null,
@@ -7579,7 +7641,9 @@
         "remaining": "Apply retry/stale/partial-failure/recovery/cleanup criteria to every enabled action."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration).",
+      "apiMethodsNote": "Cross-cutting failure, concurrency and recovery coverage across the other actions; it has no route of its own."
     }
   ],
   "operations": [
