@@ -85,6 +85,10 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
     const secret = 'private-synthetic-password-and-session-value'
     expect(browserFailureCode(new assert.AssertionError({ message: 'PASSWORD_MUST_REQUIRE_REAL_MFA' }))).toBe('PASSWORD_MUST_REQUIRE_REAL_MFA')
     expect(browserFailureCode(new assert.AssertionError({ message: `Typed value: ${secret}` }))).toBe('UNNAMED_ASSERTION')
+    let named: unknown
+    try { assert.equal(secret, 'other', 'UI_SESSION_ORGANIZATION_SUBSTITUTION') } catch (error) { named = error }
+    expect(browserFailureCode(named)).toBe('UI_SESSION_ORGANIZATION_SUBSTITUTION')
+    expect(JSON.stringify(browserFailureCode(named))).not.toContain(secret)
     let generated: unknown
     try { assert.equal(secret, 'other') } catch (error) { generated = error }
     expect(browserFailureCode(generated)).toBe('UNNAMED_ASSERTION')

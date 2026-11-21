@@ -77,7 +77,9 @@ export function browserFailureKind(error: unknown) {
  */
 export function browserFailureCode(error: unknown) {
   if (error instanceof assert.AssertionError) {
-    return error.generatedMessage || !/^[A-Z][A-Z0-9_]{2,63}$/.test(error.message) ? 'UNNAMED_ASSERTION' : error.message
+    // Node appends the compared values after a blank line; only the author's first line is ever kept.
+    const code = error.message.split('\n', 1)[0]
+    return error.generatedMessage || !/^[A-Z][A-Z0-9_]{2,63}$/.test(code) ? 'UNNAMED_ASSERTION' : code
   }
   if (error instanceof Error && error.name === 'TimeoutError') return 'PLAYWRIGHT_TIMEOUT'
   return 'UNCLASSIFIED'
@@ -143,6 +145,15 @@ export function cookiesForOwnedOrigin<T extends { domain: string; path: string }
 }
 async function ownedCookies(context: BrowserContext, origin: string) {
   return cookiesForOwnedOrigin(await context.cookies(), origin)
+}
+/**
+ * Request headers carrying the browser's real cookies for the owned origin. Playwright's APIRequestContext applies the same
+ * localhost-only rule as context.cookies(url) and would send a Secure session cookie to http://127.0.0.1 nowhere, so every
+ * authenticated or denial request would silently go out anonymous.
+ */
+async function sessionHeaders(context: BrowserContext, origin: string, extra: Record<string, string> = {}) {
+  const cookie = (await ownedCookies(context, origin)).map((item) => `${item.name}=${item.value}`).join('; ')
+  return cookie ? { ...extra, cookie } : extra
 }
 function actualResponse(page: Page, endpoint: string, method: string) {
   return page.waitForResponse((response) => new URL(response.url()).pathname === endpoint &&
@@ -216,7 +227,9 @@ async function uiLogin(input: {
   const session = (await ownedCookies(context, origin)).find((cookie) => cookie.name === 'nzila_session')
   assert.ok(session?.value && session.httpOnly, 'REAL_HTTP_ONLY_SESSION_REQUIRED')
   stage('SESSION_ORGANIZATION')
-  const selection = await context.request.get(origin + '/api/users/me/organizations', { timeout: 30000 })
+  const selection = await context.request.get(origin + '/api/users/me/organizations', {
+    headers: await sessionHeaders(context, origin), timeout: 30000,
+  })
   assert.equal(selection.status(), 200, 'CANONICAL_UI_ORGANIZATION_SELECTION_FAILED')
   assert.equal(record(await selection.json()).activeOrganizationId, input.organizationId, 'UI_SESSION_ORGANIZATION_SUBSTITUTION')
   return (await ownedCookies(context, origin)).map((cookie) => `${cookie.name}=${cookie.value}`).join('; ')
@@ -487,7 +500,7 @@ export async function runBrowserAcceptance(input: {
           assert.equal(await section.getByLabel(copy.caseDeadlines.name, { exact: true }).count(), 0)
           const deniedId = randomUUID()
           const denied = await member.context.request.post(origin + `/api/cases/${fixture.assignedCaseId}/deadlines`, {
-            headers: { origin }, data: { id: deniedId, title: 'Denied synthetic member deadline', dueDay }, timeout: 30000,
+            headers: await sessionHeaders(member.context, origin, { origin }), data: { id: deniedId, title: 'Denied synthetic member deadline', dueDay }, timeout: 30000,
           })
           assert.ok([403, 404].includes(denied.status()), 'MEMBER_DEADLINE_MUTATION_WAS_NOT_DENIED')
           assert.equal((await input.seed.query('SELECT 1 FROM public.claim_deadlines WHERE id=$1', [deniedId])).rowCount, 0,
@@ -499,7 +512,7 @@ export async function runBrowserAcceptance(input: {
           await uiLogin({ ...outsider, origin, locale: profile.locale, organizationId: fixture.organizationId,
             person: { id: input.fixture.actor, email: `${input.fixture.actor}@example.invalid` },
             password: input.fixture.password, mfaSecret: input.fixture.mfaSecret })
-          const response = await outsider.context.request.get(origin + `/api/cases/${createdId}`)
+          const response = await outsider.context.request.get(origin + `/api/cases/${createdId}`, { headers: await sessionHeaders(outsider.context, origin) })
           assert.ok([403, 404].includes(response.status()), 'OTHER_MEMBER_CASE_READ_ALLOWED')
           assert.ok(!(await response.text()).includes(createdNumber), 'DENIED_CASE_METADATA_DISCLOSED')
           await navigate(outsider.page, origin, `/${profile.locale}/dashboard/claims/${createdId}`)
@@ -509,7 +522,7 @@ export async function runBrowserAcceptance(input: {
         await step('foreign-tenant-case-denial', async () => {
           const foreignNumber = cases.rows.find((caseRow) => caseRow.claim_id === fixture.foreignCaseId).claim_number
           for (const person of [member, staff]) {
-            const response = await person.context.request.get(origin + `/api/cases/${fixture.foreignCaseId}`)
+            const response = await person.context.request.get(origin + `/api/cases/${fixture.foreignCaseId}`, { headers: await sessionHeaders(person.context, origin) })
             assert.ok([403, 404].includes(response.status()), 'FOREIGN_CASE_READ_ALLOWED')
             assert.ok(!(await response.text()).includes(foreignNumber), 'FOREIGN_CASE_METADATA_DISCLOSED')
           }
@@ -517,18 +530,23 @@ export async function runBrowserAcceptance(input: {
         await step('finance-read-and-write-denial', async () => {
           const before = await input.seed.query('SELECT count(*)::text AS count FROM public.platform_invoices WHERE organization_id=$1', [fixture.organizationId])
           for (const person of [member, staff]) {
-            assert.equal((await person.context.request.get(origin + '/api/finance/summary')).status(), 403)
+            assert.equal((await person.context.request.get(origin + '/api/finance/summary', { headers: await sessionHeaders(person.context, origin) })).status(), 403,
+              'FINANCE_SUMMARY_WAS_NOT_DENIED')
             assert.equal((await person.context.request.post(origin + '/api/finance/invoices', {
-              headers: { origin }, data: { billingPeriodId: randomUUID() },
-            })).status(), 403)
+              headers: await sessionHeaders(person.context, origin, { origin }), data: { billingPeriodId: randomUUID() },
+            })).status(), 403, 'FINANCE_INVOICE_WRITE_WAS_NOT_DENIED')
           }
           const after = await input.seed.query('SELECT count(*)::text AS count FROM public.platform_invoices WHERE organization_id=$1', [fixture.organizationId])
           assert.deepEqual(after.rows, before.rows, 'DENIED_FINANCE_WRITE_PERSISTED')
         })
         await step('logout-revocation', async () => {
           // The browser's real cookie jar supplies and consumes the session cookie; no raw cookie is persisted.
-          assert.equal((await member.context.request.post(origin + '/api/auth/logout', { headers: { origin } })).status(), 200)
-          assert.equal((await member.context.request.get(origin + '/api/auth/me')).status(), 401)
+          assert.ok(memberCookie.includes('nzila_session='), 'LOGOUT_NEEDS_A_REAL_SESSION')
+          assert.equal((await member.context.request.post(origin + '/api/auth/logout', {
+            headers: await sessionHeaders(member.context, origin, { origin }),
+          })).status(), 200, 'REAL_LOGOUT_FAILED')
+          assert.equal((await member.context.request.get(origin + '/api/auth/me', { headers: await sessionHeaders(member.context, origin) })).status(), 401,
+            'BROWSER_SESSION_SURVIVED_LOGOUT')
           assert.equal((await member.context.request.get(origin + '/api/auth/me', { headers: { cookie: memberCookie } })).status(), 401,
             'REVOKED_REAL_SESSION_WAS_STILL_ACCEPTED')
           memberCookie = ''
