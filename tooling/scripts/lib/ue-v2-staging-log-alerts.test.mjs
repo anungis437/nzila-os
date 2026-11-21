@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { migrationPlan, replaceReviewedAlerts, previousWorkspace, workspace, names, ruleId, legacyCronFailureQuery, cronFailureQuery } from './ue-v2-staging-log-alerts.mjs'
+import { migrationPlan, replaceReviewedAlerts, previousWorkspace, workspace, names, nativeNames, ruleId, legacyCronFailureQuery, cronFailureQuery } from './ue-v2-staging-log-alerts.mjs'
 
 const source = '9a7ee373e1205209f864e63f37877c8919bb6738'
 function fixture() {
@@ -98,4 +98,28 @@ test('scope replacement allows only the exact canonical non-zero-exit correction
   assert.throws(() => migrationPlan(x, source))
   const bicep = readFileSync(new URL('../../../infrastructure/bicep/ue-v2/modules/alerts.bicep', import.meta.url), 'utf8')
   assert(bicep.includes("query: '" + cronFailureQuery.replaceAll("'", "\\'") + "'"))
+})
+
+test('a post-migration source-declared rule is created in place and never migrated', () => {
+  const nativeChange = (changeType, beforeScopes = [workspace]) => {
+    const after = structuredClone(fixture().changes[0].after)
+    after.properties.scopes = [workspace]
+    return { resourceId: ruleId(nativeNames[0]), changeType, ...(changeType === 'Create' ? {} : { before: { ...structuredClone(after), properties: { ...structuredClone(after.properties), scopes: beforeScopes } } }), after }
+  }
+  for (const type of ['Create', 'NoChange', 'Modify']) {
+    const whatIf = fixture(); whatIf.changes.push(nativeChange(type))
+    const plan = migrationPlan(whatIf, source)
+    assert.equal(plan.operations, 7)
+    assert.ok(plan.replacements.every(row => row.name !== nativeNames[0]))
+  }
+  const refusals = [
+    x => { x.changes.push(nativeChange('Delete')) },
+    x => { x.changes.push(nativeChange('Modify', [previousWorkspace])) },
+    x => { const c = nativeChange('Create'); c.after.properties.scopes = [previousWorkspace]; x.changes.push(c) },
+    x => { const c = nativeChange('Create'); c.after.properties.actions.actionGroups = ['/other']; x.changes.push(c) },
+    x => { const c = nativeChange('Create'); c.after.tags = { ...c.after.tags, env: 'production' }; x.changes.push(c) },
+    x => { const c = nativeChange('Create'); c.after.properties.enabled = false; x.changes.push(c) },
+    x => { const c = nativeChange('Create'); c.resourceId = ruleId('nzila-ue-v2-staging-other-new-rule'); x.changes.push(c) },
+  ]
+  for (const corrupt of refusals) { const x = fixture(); corrupt(x); assert.throws(() => migrationPlan(x, source)) }
 })
