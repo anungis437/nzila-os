@@ -119,6 +119,20 @@ describe('existing V2 engineering component evidence verification (synthetic par
       expect(() => verifyNextEngineeringComponents(fixture, rawExit(), expectation)).toThrow()
     })
 
+  it('admits a 501 only from the declared not-implemented steps and refuses every other server error', () => {
+    const withObservation = (row: Record<string, unknown>) => {
+      const fixture = engineeringFixture() as Record<string, unknown>
+      return { ...fixture, httpObservations: [...(fixture.httpObservations as unknown[]), row] }
+    }
+    for (const name of ['legacy-documents-endpoint-not-implemented', 'dues-initiation-not-implemented'])
+      expect(() => verifyNextEngineeringComponents(withObservation({ name, path: '/x', method: 'POST', status: 501 }), rawExit(), expectation))
+        .not.toThrow()
+    expect(() => verifyNextEngineeringComponents(withObservation({ name: 'case-read', path: '/x', method: 'GET', status: 501 }), rawExit(), expectation))
+      .toThrow(/case-read answered 501/)
+    expect(() => verifyNextEngineeringComponents(
+      withObservation({ name: 'dues-initiation-not-implemented', path: '/x', method: 'POST', status: 500 }), rawExit(), expectation)).toThrow()
+  })
+
   it('rejects raw CLI success, cancellation, launch failure and an unknown exit', () => {
     for (const exit of [{ ...rawExit(), code: 0 }, { ...rawExit(), code: 2 }, { ...rawExit(), code: null },
       { ...rawExit(), signal: 'SIGTERM' }, { ...rawExit(), launchError: 'ETIMEDOUT' }])

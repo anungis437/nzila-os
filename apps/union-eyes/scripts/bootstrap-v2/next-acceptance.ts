@@ -82,6 +82,16 @@ export function nextOutputSanitizer(urls: OwnedNextDatabaseUrls, additionalSecre
   }
 }
 
+/**
+ * HTTP smoke steps that prove an honest 501 NOT_IMPLEMENTED for a capability the base release does not offer (never a 200).
+ * Only these exact steps may answer 501; any other 5xx fails component qualification.
+ */
+export const DECLARED_NOT_IMPLEMENTED_OBSERVATIONS: ReadonlySet<string> = new Set([
+  'legacy-documents-endpoint-not-implemented',
+  // Member dues payment is excluded from the base release (finance/dues); the route must refuse with 501, never credit a ledger.
+  'dues-initiation-not-implemented',
+])
+
 export function syntheticNextEnvironment(
   urls: OwnedNextDatabaseUrls,
   port: number,
@@ -295,7 +305,8 @@ export function verifyNextEngineeringComponents(raw: unknown, rawExit: unknown, 
   for (const value of observations) {
     const row = proofObject(value, 'HTTP observation')
     const status = proofNumber(row.status, 'HTTP status', true)
-    assert.ok(status >= 100 && (status < 500 || (status === 501 && row.name === 'legacy-documents-endpoint-not-implemented')))
+    assert.ok(status >= 100 && (status < 500 || (status === 501 && DECLARED_NOT_IMPLEMENTED_OBSERVATIONS.has(String(row.name)))),
+      `HTTP observation ${String(row.name)} answered ${status}`)
   }
   const browser = proofObject(result.browserAcceptance, 'browser acceptance')
   assert.equal(browser.status, 'PASS')

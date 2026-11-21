@@ -11259,21 +11259,45 @@
             "observed": "Exact-head CI: every required browser check passed in all four profiles except logout-revocation, with zero server errors; HTTP QA passed."
           },
           {
-            "commit": "PENDING_THIS_PUSH",
+            "commit": "57ff9b91e",
             "kind": "APPLICATION",
             "defect": "handleLogout answered {success:true} even when revocation or its audit threw, and in that case did not clear the cookie: a failed sign-out was reported as done while the session stayed valid.",
             "correction": "A failed revocation answers 500 Sign-out could not be confirmed and still clears the browser cookie; package tests cover success and failure."
           },
           {
-            "commit": "PENDING_THIS_PUSH",
+            "commit": "57ff9b91e",
             "kind": "HARNESS",
             "defect": "logout-revocation expected 401 from /api/auth/me, a public session probe that answers 200 with user:null when no valid session is presented (BROWSER_SESSION_SURVIVED_LOGOUT in all four profiles).",
             "correction": "Asserts the absent user through the jar and through the old cookie, and adds that a protected API (/api/users/me/organizations) refuses the revoked cookie with 401."
+          },
+          {
+            "commit": "PENDING_THIS_PUSH",
+            "kind": "HARNESS_VERIFIER",
+            "defect": "Component qualification refused the run because the HTTP smoke dues-initiation-not-implemented step answered its required 501 (added in 425d7120c) while the verifier admitted 501 only for legacy-documents-endpoint-not-implemented.",
+            "correction": "DECLARED_NOT_IMPLEMENTED_OBSERVATIONS names both honest-501 steps; any other 5xx, or a 500 from either step, still fails; tests pin both directions. The 57ff9b91e CI artifacts verify with the corrected verifier."
           }
         ],
         "fastDiagnostic": "From apps/union-eyes: UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=0 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts runs the real production build, real login and all four browser profiles against owned fixtures without the load profile. The CI component run keeps both flags at 1.",
-        "state": "LOGOUT_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
-        "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
+        "state": "BROWSER_ACCEPTANCE_PASSED_ON_57FF9B91E_COMPONENT_QUALIFICATION_PENDING_EXACT_HEAD_CI",
+        "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32",
+        "browserAcceptanceObserved": {
+          "commit": "57ff9b91e674c18d77fa5ad35d3b2a94f9ad2189",
+          "ciRun": 44920906244,
+          "result": "PASS",
+          "profiles": {
+            "desktop-en": "11/11",
+            "desktop-fr": "11/11",
+            "mobile-en": "11/11",
+            "mobile-fr": "11/11"
+          },
+          "serverErrors": 0,
+          "rateLimitedResponses": 0,
+          "unhandledBrowserErrors": 0,
+          "externalRequestsBlocked": 0,
+          "cleanup": "browser and contexts closed, no errors",
+          "buildHttpLoad": "nextBuild PASS, HTTP smoke PASS, authenticated casework load PASS",
+          "componentQualification": "REFUSED_BY_VERIFIER_ALLOWLIST_DRIFT_CORRECTED_IN_FOLLOWING_COMMIT"
+        }
       },
       "picomatchAdvisory1247710": {
         "evidence": "evidence/ue-v2-step1-qualification-20261117/picomatch-advisory-1247710-verification-v8.json",
