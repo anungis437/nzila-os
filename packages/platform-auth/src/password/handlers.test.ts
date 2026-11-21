@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NextRequest } from 'next/server'
-import { login } from './auth-service'
-import { handleLogin } from './handlers'
+import { login, logout } from './auth-service'
+import { handleLogin, handleLogout } from './handlers'
+import { clearSessionCookie } from './session'
+
+vi.mock('./session', () => ({ clearSessionCookie: vi.fn() }))
 
 vi.mock('./auth-service', () => ({
   signup: vi.fn(),
@@ -71,5 +74,24 @@ describe('password login HTTP response', () => {
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({ error: 'Invalid credentials' })
     expect(response.headers.has('set-cookie')).toBe(false)
+  })
+})
+
+describe('handleLogout', () => {
+  beforeEach(() => { vi.mocked(logout).mockReset(); vi.mocked(clearSessionCookie).mockReset() })
+
+  it('reports success only when the session was revoked', async () => {
+    vi.mocked(logout).mockResolvedValue(undefined)
+    const response = await handleLogout()
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ success: true })
+  })
+
+  it('never reports a sign-out that did not happen: a failed revocation answers 500 and still clears the cookie', async () => {
+    vi.mocked(logout).mockRejectedValue(new Error('revocation write failed'))
+    const response = await handleLogout()
+    expect(response.status).toBe(500)
+    expect(await response.json()).toEqual({ error: 'Sign-out could not be confirmed' })
+    expect(clearSessionCookie).toHaveBeenCalledTimes(1)
   })
 })

@@ -11252,14 +11252,27 @@
             "observed": "Exact-head CI: member sign-in, intake (one POST, persisted) and case-list reopen, and staff sign-in, passed in all four profiles with zero server errors."
           },
           {
-            "commit": "PENDING_THIS_PUSH",
+            "commit": "d2988310f",
             "kind": "HARNESS",
             "defect": "staff-case-read opened /dashboard/claims/<id>; the staff experience does not offer that member route and the role guard returned the steward to /dashboard/workbench (all four profiles).",
-            "correction": "Staff open the assigned case where the product presents it: the representation workbench queue, expanded by case number, whose panel holds the case deadlines used by the next step."
+            "correction": "Staff open the assigned case where the product presents it: the representation workbench queue, expanded by case number, whose panel holds the case deadlines used by the next step.",
+            "observed": "Exact-head CI: every required browser check passed in all four profiles except logout-revocation, with zero server errors; HTTP QA passed."
+          },
+          {
+            "commit": "PENDING_THIS_PUSH",
+            "kind": "APPLICATION",
+            "defect": "handleLogout answered {success:true} even when revocation or its audit threw, and in that case did not clear the cookie: a failed sign-out was reported as done while the session stayed valid.",
+            "correction": "A failed revocation answers 500 Sign-out could not be confirmed and still clears the browser cookie; package tests cover success and failure."
+          },
+          {
+            "commit": "PENDING_THIS_PUSH",
+            "kind": "HARNESS",
+            "defect": "logout-revocation expected 401 from /api/auth/me, a public session probe that answers 200 with user:null when no valid session is presented (BROWSER_SESSION_SURVIVED_LOGOUT in all four profiles).",
+            "correction": "Asserts the absent user through the jar and through the old cookie, and adds that a protected API (/api/users/me/organizations) refuses the revoked cookie with 401."
           }
         ],
         "fastDiagnostic": "From apps/union-eyes: UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=0 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts runs the real production build, real login and all four browser profiles against owned fixtures without the load profile. The CI component run keeps both flags at 1.",
-        "state": "STAFF_WORKBENCH_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
+        "state": "LOGOUT_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
         "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
       },
       "picomatchAdvisory1247710": {

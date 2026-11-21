@@ -658,10 +658,17 @@ export async function runBrowserAcceptance(input: {
           assert.equal((await member.context.request.post(origin + '/api/auth/logout', {
             headers: await sessionHeaders(member.context, origin, { origin }),
           })).status(), 200, 'REAL_LOGOUT_FAILED')
-          assert.equal((await member.context.request.get(origin + '/api/auth/me', { headers: await sessionHeaders(member.context, origin) })).status(), 401,
-            'BROWSER_SESSION_SURVIVED_LOGOUT')
-          assert.equal((await member.context.request.get(origin + '/api/auth/me', { headers: { cookie: memberCookie } })).status(), 401,
-            'REVOKED_REAL_SESSION_WAS_STILL_ACCEPTED')
+          // /api/auth/me is a public session probe: it answers 200 with user:null when no valid session is presented, so the
+          // proof is the absent user, not a status. A protected API must then refuse the revoked cookie outright.
+          const identity = async (headers: Record<string, string>) => {
+            const response = await member.context.request.get(origin + '/api/auth/me', { headers })
+            assert.equal(response.status(), 200, 'SESSION_PROBE_UNAVAILABLE')
+            return record(await response.json()).user ?? null
+          }
+          assert.equal(await identity(await sessionHeaders(member.context, origin)), null, 'BROWSER_SESSION_SURVIVED_LOGOUT')
+          assert.equal(await identity({ cookie: memberCookie }), null, 'REVOKED_REAL_SESSION_WAS_STILL_ACCEPTED')
+          assert.equal((await member.context.request.get(origin + '/api/users/me/organizations', { headers: { cookie: memberCookie } })).status(),
+            401, 'REVOKED_SESSION_STILL_AUTHORIZES_API')
           memberCookie = ''
         })
         row.status = 'PASS'
