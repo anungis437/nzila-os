@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "candidateSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+  "pullRequest": 1269,
+  "pullRequestHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
+  "mergeMethod": "merge commit through the main ruleset (16 Merge Authority required checks, no bypass)",
+  "headCheckRuns": {
+    "success": 131,
+    "skipped": 11,
+    "neutral": 1,
+    "failure": 0
+  },
+  "codeScanningOpenAlertsOnHead": 0,
+  "workflowRuns": {
+    "CI": 44946518604,
+    "Merge Authority": 44946518495,
+    "Union Eyes Bootstrap V2 Provenance (pull_request)": 44946518413,
+    "Union Eyes Bootstrap V2 Provenance (workflow_dispatch)": 44946520802,
+    "Union Eyes Native PostgreSQL Acceptance": 44946518327,
+    "Union Eyes Disposable HTTP and Browser Acceptance": 44946518155,
+    "Union Eyes Full Regression": 44946518417,
+    "Union Eyes Security Regression": 44946518541,
+    "Red-Team Adversarial Tests (pull_request)": 44946518566,
+    "Red-Team Adversarial Tests (workflow_dispatch)": 44946523411,
+    "E2E Tests": 44946518554,
+    "Dependency Audit": 44946518407,
+    "Container Security Scan (Trivy)": 44946518452,
+    "Secret Scan": 44946518472
+  },
+  "v2EngineeringResult": "PASS_REQUIRED_ENGINEERING_COMPONENTS: four browser profiles 11/11, 20 automated WCAG 2.1 A/AA scans with zero critical or serious violations",
+  "nativeAuthorityKernelStep": "25 suites, 470 tests, zero failures or skips on owned native PostgreSQL 16",
+  "redTeam": "re-enabled; 7 files, 106 tests passed",
+  "limits": [
+    "Automated accessibility scans are not a manual assistive-technology audit.",
+    "Translation quality is not machine-verified.",
+    "Physical devices are not exercised.",
+    "Counsel signing-key custody belongs to the external issuer."
+  ],
+  "stagingDeploymentAndDeployedQualification": "PENDING"
+}
