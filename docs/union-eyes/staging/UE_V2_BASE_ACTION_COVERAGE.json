@@ -11235,11 +11235,17 @@
             "commit": "153ca299d",
             "kind": "HARNESS",
             "defect": "Root cause of INTAKE_SUBMIT timeout in all four profiles: the blocking privacy/cookie consent dialog (components/gdpr/cookie-consent-banner.tsx, modal, Escape and outside click disabled) covers the page after an organization is bound; fill/selectOption do not hit-test, click does and waited behind it.",
-            "correction": "The journey answers the dialog with the privacy-preserving Reject All after sign-in and requires it to appear; failed intake records fixed-value submission evidence; a passing intake must send exactly one intake POST."
+            "correction": "Answered the dialog right after sign-in and required it there. Exact-head CI disproved the timing: all four profiles timed out waiting for it on the dashboard (PRIVACY_CHOICE), because the dialog renders only after the client resolves the organization, which can be later."
+          },
+          {
+            "commit": "PENDING_THIS_PUSH",
+            "kind": "HARNESS",
+            "defect": "The modal privacy dialog appears at an unpredictable point after sign-in and covers the page until answered.",
+            "correction": "page.addLocatorHandler answers it with Reject All whenever it is visible before an action; answers are counted in the receipt; a blocked submit records the covering element (tag, role, test id, modal) and the step no longer requires the dialog at a fixed point."
           }
         ],
         "fastDiagnostic": "From apps/union-eyes: UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=0 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts runs the real production build, real login and all four browser profiles against owned fixtures without the load profile. The CI component run keeps both flags at 1.",
-        "state": "ROOT_CAUSE_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
+        "state": "DIALOG_HANDLER_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
         "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
       },
       "picomatchAdvisory1247710": {
@@ -11357,7 +11363,8 @@
       ],
       "residualBlockers": [
         "Every obligation above remains open on its stated gaps; Step 1 is not closed and no candidate SHA is qualified.",
-        "V2 browser acceptance and the picomatch audit await exact-head CI on the pushed correction."
+        "V2 browser acceptance and the picomatch audit await exact-head CI on the pushed correction.",
+        "Publish required checks failed once on a transient GitHub API 500 listing jobs; GitHub reads in tooling/ci/merge-authority/publish.mjs now retry transient statuses with the existing bounded backoff (contract-tested)."
       ]
     }
   }

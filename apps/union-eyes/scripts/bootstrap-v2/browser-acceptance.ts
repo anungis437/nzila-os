@@ -37,6 +37,8 @@ export interface IntakeSubmissionEvidence {
   intakeRequests: number
   responseClass: 'NONE' | '2XX' | '3XX' | '4XX' | '5XX'
   persistedSinceStart: number | null
+  /** The element on top of the submit button's centre when it is not the button itself: tag, role and test id only. */
+  coveringElement: { tag: string; role: string | null; testId: string | null; modal: boolean } | null
 }
 export function responseClass(status: number | null): IntakeSubmissionEvidence['responseClass'] {
   if (status === null) return 'NONE'
@@ -68,6 +70,8 @@ interface BrowserResult {
   serverErrors: number
   /** 429 responses the browser received from the owned server (evidence only; a 429 that breaks a journey fails its check). */
   rateLimitedResponses: number
+  /** Times the modal privacy dialog was answered with the privacy-preserving choice (evidence only). */
+  privacyChoicesAnswered: number
   /** Owned-origin paths that answered 5xx, with identifiers masked; no query, body or header is kept. */
   serverErrorPaths: string[]
   cleanup: { browserClosed: boolean; contextsClosed: boolean; errors: string[] }
@@ -270,13 +274,6 @@ async function uiLogin(input: {
   })
   assert.equal(selection.status(), 200, 'CANONICAL_UI_ORGANIZATION_SELECTION_FAILED')
   assert.equal(record(await selection.json()).activeOrganizationId, input.organizationId, 'UI_SESSION_ORGANIZATION_SUBSTITUTION')
-  // A fresh browser meets the blocking privacy dialog once an organization is bound; answer it as a person would, with the
-  // privacy-preserving choice. Until it is answered it covers the page, so every later click would wait behind it.
-  stage('PRIVACY_CHOICE')
-  const privacy = page.getByRole('dialog', { name: copy.experiencePrivacy.text0, exact: true })
-  await privacy.waitFor({ state: 'visible', timeout: 30000 })
-  await privacy.getByRole('button', { name: copy.experiencePrivacy.text3, exact: true }).click()
-  await privacy.waitFor({ state: 'hidden', timeout: 30000 })
   return (await ownedCookies(context, origin)).map((cookie) => `${cookie.name}=${cookie.value}`).join('; ')
 }
 
@@ -290,7 +287,7 @@ export async function runBrowserAcceptance(input: {
 }): Promise<BrowserResult> {
   const result: BrowserResult = {
     status: 'FAIL', engine: null, engineVersion: null, profiles: [], setup: 'UNEXECUTED',
-    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0, serverErrorPaths: [],
+    externalRequestsBlocked: 0, unhandledBrowserErrors: 0, serverErrors: 0, rateLimitedResponses: 0, privacyChoicesAnswered: 0, serverErrorPaths: [],
     cleanup: { browserClosed: false, contextsClosed: false, errors: [] },
     limitations: [
       'Owned disposable production Next/native V2 proof only; no staging, production, real inbox or live customer acceptance.',
@@ -344,6 +341,14 @@ export async function runBrowserAcceptance(input: {
     })
     const page = await context.newPage()
     page.setDefaultTimeout(30000)
+    // The privacy/cookie consent dialog is modal and appears only once the client has resolved the organization, which can
+    // happen at any point after sign-in. Answer it whenever it appears, as a person would, with the privacy-preserving
+    // choice, before the next action; until answered it covers the page and every click would wait behind it.
+    const privacyCopy = (profile.locale === 'fr-CA' ? fr : en).experiencePrivacy
+    await page.addLocatorHandler(page.getByRole('dialog', { name: privacyCopy.text0, exact: true }), async (dialog) => {
+      await dialog.getByRole('button', { name: privacyCopy.text3, exact: true }).click()
+      result.privacyChoicesAnswered++
+    })
     return { context, page }
   }
   try {
@@ -490,6 +495,15 @@ export async function runBrowserAcceptance(input: {
               submitEnabled: await page.getByRole('button', { name: copy.forms.submitCase, exact: true }).isEnabled({ timeout: 1000 })
                 .catch(() => null),
               validationErrors: await page.locator('[data-testid="new-claim-form"] p.text-red-600').count().catch(() => -1),
+              coveringElement: await page.getByRole('button', { name: copy.forms.submitCase, exact: true }).evaluate((button) => {
+                const box = button.getBoundingClientRect()
+                const top = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+                if (!top || top === button || button.contains(top)) return null
+                const owner = top.closest('[role]')
+                return { tag: top.tagName.toLowerCase(), role: owner?.getAttribute('role') ?? null,
+                  testId: top.closest('[data-testid]')?.getAttribute('data-testid') ?? null,
+                  modal: Boolean(top.closest('[aria-modal="true"]')) }
+              }, undefined, { timeout: 1000 }).catch(() => null),
               intakeRequests,
               responseClass: responseClass(lastIntakeStatus),
               persistedSinceStart: await input.seed.query(
