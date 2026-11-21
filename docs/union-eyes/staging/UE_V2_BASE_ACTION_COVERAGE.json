@@ -11245,14 +11245,21 @@
             "observed": "Exact-head CI: dialog answered in all four profiles (privacyChoicesAnswered 4), submit enabled, no covering element, no validation errors, exactly one intake POST per profile."
           },
           {
-            "commit": "PENDING_THIS_PUSH",
+            "commit": "6921b3b23",
             "kind": "HARNESS_RUNTIME_PROVISIONING",
             "defect": "The intake POST answered 5XX in all four profiles with nothing persisted; the server logged Missing NAR signing secret from the NAR decision-proof seal. The owned V2 runtime generated AUTH, MFA, voting and cron secrets but not NAR_SIGNING_SECRET, which production provisions from Key Vault (bicep nar-signing-secret). The HTTP smoke and load never call intake, so only the browser journey reached it.",
-            "correction": "The owned runtime generates its own 48-byte NAR_SIGNING_SECRET and the output sanitizer withholds it; a unit test pins it."
+            "correction": "The owned runtime generates its own 48-byte NAR_SIGNING_SECRET and the output sanitizer withholds it; a unit test pins it.",
+            "observed": "Exact-head CI: member sign-in, intake (one POST, persisted) and case-list reopen, and staff sign-in, passed in all four profiles with zero server errors."
+          },
+          {
+            "commit": "PENDING_THIS_PUSH",
+            "kind": "HARNESS",
+            "defect": "staff-case-read opened /dashboard/claims/<id>; the staff experience does not offer that member route and the role guard returned the steward to /dashboard/workbench (all four profiles).",
+            "correction": "Staff open the assigned case where the product presents it: the representation workbench queue, expanded by case number, whose panel holds the case deadlines used by the next step."
           }
         ],
         "fastDiagnostic": "From apps/union-eyes: UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=0 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts runs the real production build, real login and all four browser profiles against owned fixtures without the load profile. The CI component run keeps both flags at 1.",
-        "state": "NAR_SECRET_PROVISIONING_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
+        "state": "STAFF_WORKBENCH_CORRECTION_PUSHED_EXACT_HEAD_CI_PENDING",
         "evidenceCommit": "153ca299d911ca254b452e6a8f0e2ece6489ff32"
       },
       "picomatchAdvisory1247710": {
@@ -11371,7 +11378,8 @@
       "residualBlockers": [
         "Every obligation above remains open on its stated gaps; Step 1 is not closed and no candidate SHA is qualified.",
         "V2 browser acceptance and the picomatch audit await exact-head CI on the pushed correction.",
-        "Publish required checks failed once on a transient GitHub API 500 listing jobs; GitHub reads in tooling/ci/merge-authority/publish.mjs now retry transient statuses with the existing bounded backoff (contract-tested)."
+        "Publish required checks failed once on a transient GitHub API 500 listing jobs; GitHub reads in tooling/ci/merge-authority/publish.mjs now retry transient statuses with the existing bounded backoff (contract-tested).",
+        "HTTP QA spec 09 failed once when the external-counsel fixture re-seeded: equal one-hour terms read from two Date.now() calls let the grant end 1 ms after its authority, which the qualification schema correctly refuses. The fixture now derives every term from one clock reading (reproduced against the real schema: old REFUSED, new ACCEPTED)."
       ]
     }
   }

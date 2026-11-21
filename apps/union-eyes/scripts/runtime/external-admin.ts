@@ -252,10 +252,13 @@ async function main(): Promise<void> {
       const authorityTtl = command === 'authority-lapse' ? SHORT_MS : HOUR_MS
       const grantTtl = command === 'expire' ? SHORT_MS : HOUR_MS
       const authorityId = randomUUID(), grantId = randomUUID()
-      const effectiveAt = new Date(Date.now() - 60_000).toISOString()
-      const authorityExpires = new Date(Date.now() + authorityTtl).toISOString()
-      const grantExpires = new Date(Date.now() + grantTtl).toISOString()
-      const expiresAt = authorityTtl < grantTtl ? authorityExpires : grantExpires
+      // One clock reading for every term: separate Date.now() calls let an equal-TTL grant end a millisecond after its
+      // authority, and the qualification (bounded by both) is then refused as exceeding its source term.
+      const now = Date.now()
+      const effectiveAt = new Date(now - 60_000).toISOString()
+      const authorityExpires = new Date(now + authorityTtl).toISOString()
+      const grantExpires = new Date(now + grantTtl).toISOString()
+      const expiresAt = new Date(now + Math.min(authorityTtl, grantTtl)).toISOString()
       await operator.query(
         `INSERT INTO public.representation_authorities (id,organization_id,matter_type,matter_id,represented_person_id,representative_user_id,
            representative_organization_id,scope,source,status,effective_at,expires_at,created_by,created_at,updated_at)

@@ -531,9 +531,19 @@ export async function runBrowserAcceptance(input: {
             person: fixture.people.steward, password: input.fixture.password, mfaSecret: input.fixture.mfaSecret })
         })
         await step('staff-case-read', async () => {
-          await navigate(staff.page, origin, `/${profile.locale}/dashboard/claims/${fixture.assignedCaseId}`)
-          await visible(staff.page, cases.rows.find((caseRow) => caseRow.claim_id === fixture.assignedCaseId).claim_number)
-          await staff.page.getByTestId('case-deadlines').getByLabel(copy.caseDeadlines.name, { exact: true }).waitFor({ state: 'visible' })
+          // Staff work cases in the representation workbench: /dashboard/claims is a member route the staff experience does not
+          // offer (the role guard returns staff to the workbench). The assigned case is opened from the queue by its number.
+          const assignedNumber = cases.rows.find((caseRow) => caseRow.claim_id === fixture.assignedCaseId).claim_number
+          stage('STAFF_WORKBENCH')
+          await navigate(staff.page, origin, `/${profile.locale}/dashboard/workbench`)
+          stage('STAFF_CASE_IN_QUEUE')
+          const expand = staff.page.getByRole('button', { name: `${copy.workbench.expand} ${assignedNumber}`, exact: true })
+          await expand.waitFor({ state: 'visible', timeout: 30000 })
+          stage('STAFF_CASE_OPEN')
+          await expand.click()
+          const details = staff.page.locator(`[id="case-details-${encodeURIComponent(fixture.assignedCaseId)}"]`)
+          await details.waitFor({ state: 'visible' })
+          await details.getByTestId('case-deadlines').getByLabel(copy.caseDeadlines.name, { exact: true }).waitFor({ state: 'visible' })
           await noOverflow(staff.page)
         })
         const deadlineName = `Owned browser deadline ${profile.id} ${fixture.ownership.slice(0, 8)}`
