@@ -151,7 +151,8 @@ test.describe('rate limiting contract', () => {
     // An active, signed-in person with an unspent bucket: a suspended account never obtains a session under real login, so its
     // burst would meet only the per-address ceiling and prove nothing about the session limit returning to the shared store.
     const result = await burst(
-      await as(UE_TEST_USERS.financeReconciler.userId, PRIMARY),
+      // Not a user the next spec (05, finance) mutates as: this burst spends the session's one-minute mutation allowance.
+      await as(UE_TEST_USERS.stewardPrimaryTwo.userId, PRIMARY),
       MUTATION_LIMIT + 5,
     )
     expect(result.allowed).toBeLessThanOrEqual(MUTATION_LIMIT)

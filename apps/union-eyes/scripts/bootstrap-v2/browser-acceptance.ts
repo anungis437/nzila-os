@@ -67,6 +67,19 @@ export function browserTargetAllowed(target: string, origin: string) {
 export function browserFailureKind(error: unknown) {
   return error instanceof assert.AssertionError ? 'ASSERTION_FAILED' : 'BROWSER_OR_RUNTIME_CHECK_FAILED'
 }
+/**
+ * A failed Chromium launch, classified from the launcher's own error into a fixed code. The message itself is never persisted:
+ * the code is the only output, so nothing typed or bound can leak, and a CI failure still says why the browser did not start.
+ */
+export function browserLaunchFailureKind(error: unknown) {
+  const message = error instanceof Error ? error.message : ''
+  if (/Executable doesn't exist|browserType\.launch: .*not found/i.test(message)) return 'CHROMIUM_EXECUTABLE_MISSING'
+  if (/Host system is missing dependencies|error while loading shared libraries/i.test(message)) return 'CHROMIUM_HOST_DEPENDENCIES_MISSING'
+  if (/Timeout \d+ms exceeded/i.test(message)) return 'CHROMIUM_LAUNCH_TIMEOUT'
+  if (/has been closed|exited|signal=SIG/i.test(message)) return 'CHROMIUM_EXITED_AT_LAUNCH'
+  if (/Cannot find module|ERR_MODULE_NOT_FOUND/i.test(message)) return 'PLAYWRIGHT_MODULE_UNRESOLVED'
+  return browserFailureKind(error)
+}
 export function browserProofPassed(result: Pick<BrowserResult,
   'setup' | 'profiles' | 'externalRequestsBlocked' | 'unhandledBrowserErrors' | 'serverErrors' | 'cleanup'>) {
   return result.setup === 'PASS' && result.externalRequestsBlocked === 0 &&
@@ -476,7 +489,8 @@ export async function runBrowserAcceptance(input: {
     }
   } catch (error) {
     result.setup = 'FAIL'
-    result.setupFailureKind = browserFailureKind(error)
+    result.setupFailureKind = result.setupPhase === 'LAUNCH_INSTALLED_CHROMIUM'
+      ? browserLaunchFailureKind(error) : browserFailureKind(error)
   } finally {
     for (const context of contexts) {
       try { await close(context) } catch { result.cleanup.errors.push('CONTEXT_CLOSE_FAILED') }

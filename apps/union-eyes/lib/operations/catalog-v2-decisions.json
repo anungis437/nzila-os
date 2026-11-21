@@ -8221,7 +8221,7 @@
   ],
   "currentSecurity": {
     "contractVersion": "1",
-    "sourcePlanDigest": "4c651f11e005025ccb478a8c14c23256b68c5353f990febbd6fd72e6e33cb528",
+    "sourcePlanDigest": "1c66dde785c581be0753ca69dacd4ac005f2156d31374848b484fc39132f3ab0",
     "currentFunctions": [
       {
         "schema": "public",
