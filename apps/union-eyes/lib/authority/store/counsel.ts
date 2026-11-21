@@ -16,6 +16,7 @@ import {
   type CounselEngagement,
   type CounselNonceStore,
 } from '../counsel-boundary'
+import { verifyCounselAssertionJws, type CounselIssuerRegistry } from '../counsel-assertion-jws'
 import { auditAuthorityMutation } from './audit'
 import type { CounselIdentityVerifier, EnforcementDeps } from './enforce'
 import { AuthorityStoreError, bindSessionActor, type SqlExecutor } from './executor'
@@ -180,4 +181,23 @@ export function createAssertionBackedCounselVerifier(i: {
     },
     engagement: (exec, input) => loadCounselEngagement(exec, input),
   }
+}
+
+/**
+ * The production counsel verifier: a per-request `CounselIdentityVerifier` built from the counsel-side issuer's signed
+ * token (compact JWS) and the allow-listed public key registry. The signature is verified first; a token that does not
+ * verify yields a verifier that refuses every counsel claim, so an unverified assertion can never reach the session.
+ * A verified one goes through the same envelope, single-use nonce and subject checks as any assertion.
+ */
+export function createJwsBackedCounselVerifier(i: { token: string; registry: CounselIssuerRegistry; now?: () => Date }): CounselIdentityVerifier {
+  const verified = verifyCounselAssertionJws(i.token, i.registry)
+  if (!verified.ok) {
+    return {
+      async isCounselFor() { return false },
+      engagement: (exec, input) => loadCounselEngagement(exec, input),
+    }
+  }
+  return createAssertionBackedCounselVerifier({
+    assertion: verified.assertion, allowedIssuers: i.registry.issuers, signatureVerifier: verified.verifier, now: i.now,
+  })
 }

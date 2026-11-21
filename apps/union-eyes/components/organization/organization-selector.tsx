@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Check, ChevronsUpDown, Building2, Users, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,7 @@ type Found =
 type Fallback = { attempt: number } & ({ status: 'failed'; message: string } | Found);
 
 export function OrganizationSelector() {
+  const t = useTranslations('organizationSelector');
   const { 
     organizationId, 
     organization, 
@@ -141,7 +143,7 @@ export function OrganizationSelector() {
     return (
       <div className="w-70 h-10 flex items-center border rounded-md px-3 bg-background">
         <Building2 className="h-4 w-4 text-muted-foreground mr-2" />
-        <span className="text-sm text-muted-foreground">Loading...</span>
+        <span className="text-sm text-muted-foreground">{t('loading')}</span>
       </div>
     );
   }
@@ -155,8 +157,8 @@ export function OrganizationSelector() {
         onClick={() => refreshOrganizations()}
       >
         <span className="flex items-center gap-2">
-          <Building2 className="h-4 w-4" />
-          Error loading - Click to retry
+          <Building2 className="h-4 w-4" aria-hidden="true" />
+          {t('errorRetry')}
         </span>
       </Button>
     );
@@ -165,8 +167,8 @@ export function OrganizationSelector() {
   if (!effectiveOrganization && (isLoading || (needsFallback && settledFallback === null))) {
     return (
       <div role="status" className="ue-organization-selector flex h-10 items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm text-muted-foreground">
-        <Building2 className="h-4 w-4" />
-        Loading...
+        <Building2 className="h-4 w-4" aria-hidden="true" />
+        {t('loading')}
       </div>
     );
   }
@@ -180,8 +182,8 @@ export function OrganizationSelector() {
         onClick={retry}
       >
         <span className="flex items-center gap-2">
-          <Building2 className="h-4 w-4" />
-          Error loading - Click to retry
+          <Building2 className="h-4 w-4" aria-hidden="true" />
+          {t('errorRetry')}
         </span>
       </Button>
     );
@@ -195,8 +197,8 @@ export function OrganizationSelector() {
         onClick={() => refreshOrganizations()}
       >
         <span className="flex items-center gap-2">
-          <Building2 className="h-4 w-4" />
-          No organization
+          <Building2 className="h-4 w-4" aria-hidden="true" />
+          {t('none')}
         </span>
       </Button>
     );
@@ -209,7 +211,7 @@ export function OrganizationSelector() {
     ? organizationPath
     : fallbackPath !== null && 'entries' in fallbackPath ? fallbackPath.entries : [];
   const hierarchyLabel = pathFailure !== null
-    ? 'Hierarchy unavailable'
+    ? t('hierarchyUnavailable')
     : resolvedPath.length > 1
       ? resolvedPath.slice(0, -1).map((org) => org.name).join(' > ')
       : null;
@@ -236,6 +238,8 @@ export function OrganizationSelector() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          // A combobox takes no name from its content, so it needs an explicit one (WCAG 4.1.2).
+          aria-label={t('label', { name: effectiveOrganization.name })}
           className="ue-organization-selector justify-between"
         >
           <span className="flex items-center gap-2 min-w-0">
@@ -252,9 +256,9 @@ export function OrganizationSelector() {
       </PopoverTrigger>
       <PopoverContent className="w-70 p-0">
         <Command>
-          <CommandInput placeholder="Search organizations..." />
+          <CommandInput placeholder={t('search')} aria-label={t('search')} />
           <CommandList>
-            <CommandEmpty>No organization found.</CommandEmpty>
+            <CommandEmpty>{t('empty')}</CommandEmpty>
             <CommandGroup>
               {userOrganizations.map((org) => {
                 const OrgIcon = organizationTypeIcons[org.type as keyof typeof organizationTypeIcons] || Building2;

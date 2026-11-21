@@ -1,4 +1,13 @@
 {
+  "organizationSelector": {
+    "label": "Organisation : {name}",
+    "loading": "Chargement de l’organisation…",
+    "errorRetry": "Erreur de chargement – sélectionner pour réessayer",
+    "none": "Aucune organisation",
+    "search": "Rechercher des organisations…",
+    "empty": "Aucune organisation trouvée.",
+    "hierarchyUnavailable": "Hiérarchie indisponible"
+  },
   "workAidPage": {
     "metaTitle": "WorkAid | UnionEyes",
     "metaDescription": "Consentement, documents et état du signalement du côté syndical. Rien sur cet écran n'est transmis au conseil.",

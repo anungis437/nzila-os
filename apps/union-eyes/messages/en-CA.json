@@ -1,4 +1,13 @@
 {
+  "organizationSelector": {
+    "label": "Organization: {name}",
+    "loading": "Loading...",
+    "errorRetry": "Error loading - Click to retry",
+    "none": "No organization",
+    "search": "Search organizations...",
+    "empty": "No organization found.",
+    "hierarchyUnavailable": "Hierarchy unavailable"
+  },
   "workAidPage": {
     "metaTitle": "WorkAid | UnionEyes",
     "metaDescription": "Union-side consent, documents and referral status. Nothing on this screen is sent to counsel.",

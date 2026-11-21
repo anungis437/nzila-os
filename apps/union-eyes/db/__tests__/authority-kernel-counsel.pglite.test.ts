@@ -9,6 +9,7 @@ import { auditAuthorityMutation } from '../../lib/authority/store/audit'
 import { requireCounselSession } from '../../lib/authority/store/enforce'
 import {
   createAssertionBackedCounselVerifier,
+  createJwsBackedCounselVerifier,
   createDurableNonceStore,
   loadCounselEngagement,
   recordCounselEngagement,
@@ -16,7 +17,7 @@ import {
 } from '../../lib/authority/store/counsel'
 import type { PGlite } from '@electric-sql/pglite'
 import { generateKeyPairSync, sign } from 'node:crypto'
-import { COUNSEL_ASSERTION_JWS_TYPE, createCounselIssuerRegistry, verifyCounselAssertionJws } from '../../lib/authority/counsel-assertion-jws'
+import { COUNSEL_ASSERTION_JWS_TYPE, createCounselIssuerRegistry } from '../../lib/authority/counsel-assertion-jws'
 
 let db: PGlite
 let k: ReturnType<typeof kit>
@@ -185,11 +186,7 @@ describe('signed counsel assertions (JWS verifier) through the real counsel sess
     const input = `${Buffer.from(JSON.stringify({ alg: 'ES256', typ: COUNSEL_ASSERTION_JWS_TYPE, kid: 'gw-1' })).toString('base64url')}.${Buffer.from(JSON.stringify(body)).toString('base64url')}`
     return `${input}.${sign('sha256', Buffer.from(input), { key, dsaEncoding: 'ieee-p1363' }).toString('base64url')}`
   }
-  const verifierFromToken = (token: string) => {
-    const out = verifyCounselAssertionJws(token, registry)
-    if (!out.ok) return { isCounselFor: async () => false }
-    return createAssertionBackedCounselVerifier({ assertion: out.assertion, allowedIssuers: registry.issuers, signatureVerifier: out.verifier })
-  }
+  const verifierFromToken = (token: string) => createJwsBackedCounselVerifier({ token, registry })
 
   it('a genuinely signed assertion for exactly this counsel authorizes once; its replay is refused by the durable nonce register', async () => {
     const token = signed()

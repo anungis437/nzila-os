@@ -31,7 +31,13 @@ const context = vi.hoisted(() => ({ value: {} as OrganizationContext }));
 vi.mock('@/lib/hooks/use-organization', () => ({ useOrganization: () => context.value }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
 
+import { NextIntlClientProvider } from 'next-intl';
+import enCA from '@/messages/en-CA.json';
+import frCA from '@/messages/fr-CA.json';
 import { OrganizationSelector } from '../organization-selector';
+
+const renderSelector = (locale: 'en-CA' | 'fr-CA' = 'en-CA') =>
+  render(<NextIntlClientProvider locale={locale} messages={locale === 'en-CA' ? enCA : frCA}><OrganizationSelector /></NextIntlClientProvider>);
 
 const local: Org = { id: 'org-9', name: 'Local 1000', type: 'local' };
 const union: Org = { id: 'org-2', name: 'CUPE', type: 'union' };
@@ -75,7 +81,7 @@ afterEach(() => {
 describe('OrganizationSelector: what the context has', () => {
   it('shows the one organization of a single-organization user as a label, under its parents, and asks nothing', async () => {
     context.value = { ...idle(), organizationId: 'org-9', organization: local, userOrganizations: [local], organizationPath: [{ id: 'clc', name: 'CLC' }, { id: 'cupe', name: 'CUPE' }, { id: 'org-9', name: 'Local 1000' }] };
-    render(<OrganizationSelector />);
+    renderSelector();
 
     expect(await screen.findByText('Local 1000')).toBeInTheDocument();
     expect(screen.getByText('CLC > CUPE')).toBeInTheDocument();
@@ -86,9 +92,11 @@ describe('OrganizationSelector: what the context has', () => {
   it('lets a user of several organizations pick one, and switches to it', async () => {
     context.value = { ...idle(), organizationId: 'org-9', organization: local, userOrganizations: [local, union] };
     const user = userEvent.setup();
-    render(<OrganizationSelector />);
+    renderSelector();
 
-    await user.click(await screen.findByRole('combobox'));
+    // A combobox takes no name from its content: it carries an explicit one naming the current organization (WCAG 4.1.2).
+    const combobox = await screen.findByRole('combobox', { name: `Organization: ${local.name}` });
+    await user.click(combobox);
     await user.click(await screen.findByText('CUPE'));
 
     expect(context.value.switchOrganization).toHaveBeenCalledWith('org-2');
@@ -98,7 +106,7 @@ describe('OrganizationSelector: what the context has', () => {
   it('says the organizations could not be loaded, with the reason, and a click asks the context again', async () => {
     context.value = { ...idle(), error: 'Failed to load organizations: 500' };
     const user = userEvent.setup();
-    render(<OrganizationSelector />);
+    renderSelector();
 
     const button = await screen.findByRole('button', { name: 'Error loading - Click to retry' });
     expect(button).toHaveAttribute('title', 'Failed to load organizations: 500');
@@ -109,7 +117,7 @@ describe('OrganizationSelector: what the context has', () => {
 
   it('says it is loading while the context loads, and asks the profile nothing', async () => {
     context.value = { ...idle(), isLoading: true };
-    render(<OrganizationSelector />);
+    renderSelector();
 
     // A loading indicator, not a button that does nothing.
     expect(await screen.findByRole('status')).toHaveTextContent('Loading...');
@@ -120,7 +128,7 @@ describe('OrganizationSelector: what the context has', () => {
 
 describe('OrganizationSelector: an organization the context lacks', () => {
   it('reads the profile and the path of the organization it names, and shows it under its parents', async () => {
-    render(<OrganizationSelector />);
+    renderSelector();
 
     expect(await screen.findByText('Local 1000')).toBeInTheDocument();
     expect(await screen.findByText('CLC > CUPE')).toBeInTheDocument();
@@ -130,7 +138,7 @@ describe('OrganizationSelector: an organization the context lacks', () => {
   it('says "No organization" only when the profile names none', async () => {
     profileAnswer = profile(null);
     const user = userEvent.setup();
-    render(<OrganizationSelector />);
+    renderSelector();
 
     const button = await screen.findByRole('button', { name: 'No organization' });
     await user.click(button);
@@ -142,7 +150,7 @@ describe('OrganizationSelector: an organization the context lacks', () => {
   it('says the organization could not be loaded, with the route\'s reason, when the profile could not be read, and Retry recovers', async () => {
     profileAnswer = { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Profile service is down' } };
     const user = userEvent.setup();
-    render(<OrganizationSelector />);
+    renderSelector();
 
     const button = await screen.findByRole('button', { name: 'Error loading - Click to retry' });
     expect(button).toHaveAttribute('title', 'Profile service is down');
@@ -157,7 +165,7 @@ describe('OrganizationSelector: an organization the context lacks', () => {
 
   it('shows the organization and says the hierarchy is unavailable when only the path could not be read', async () => {
     pathAnswer = { status: 404, body: { error: 'Not found' } };
-    render(<OrganizationSelector />);
+    renderSelector();
 
     expect(await screen.findByText('Local 1000')).toBeInTheDocument();
     expect(await screen.findByText('Hierarchy unavailable')).toBeInTheDocument();
@@ -171,10 +179,20 @@ describe('OrganizationSelector: an organization the context lacks', () => {
     ['an organization without a name', profile({ id: 'org-9' }), 'Unexpected API response: name is missing'],
   ])('reports %s as an error, not as no organization', async (_what, answer, message) => {
     profileAnswer = answer;
-    render(<OrganizationSelector />);
+    renderSelector();
 
     const button = await screen.findByRole('button', { name: 'Error loading - Click to retry' });
     expect(button).toHaveAttribute('title', message);
     await waitFor(() => expect(screen.queryByText('No organization')).toBeNull());
+  });
+
+  it('speaks French in fr-CA: loading, empty and combobox name', async () => {
+    context.value = { ...idle(), isLoading: true };
+    renderSelector('fr-CA');
+    expect(await screen.findByRole('status')).toHaveTextContent('Chargement de l’organisation…');
+    cleanup();
+    context.value = { ...idle(), organizationId: 'org-9', organization: local, userOrganizations: [local, union] };
+    renderSelector('fr-CA');
+    expect(await screen.findByRole('combobox', { name: `Organisation : ${local.name}` })).toBeInTheDocument();
   });
 });
