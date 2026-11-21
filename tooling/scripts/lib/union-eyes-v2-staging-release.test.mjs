@@ -321,3 +321,37 @@ test('CHG-2026-0114 founder direction accepts only the exact candidate and prese
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, technical_gates_required: false } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects(approved, { ...opts, nowMs: Date.parse('2028-01-01T00:00:00Z') }).includes('CHANGE_RECORD_OUTSIDE_WINDOW'))
 })
+
+test('registry attestation selects the single linux/amd64 image manifest from an OCI index and fails closed otherwise', () => {
+  const select = path.join(REPO, 'tooling/scripts/union-eyes-select-image-manifest.sh')
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-select-'))
+  const d = (c) => `sha256:${c.repeat(64)}`
+  const run = (doc) => {
+    const file = path.join(dir, 'doc.json')
+    fs.writeFileSync(file, JSON.stringify(doc))
+    return spawnSync('bash', [select, file], { encoding: 'utf8' })
+  }
+  const image = { schemaVersion: 2, mediaType: 'application/vnd.oci.image.manifest.v1+json', config: { digest: d('c') }, layers: [] }
+  const amd64 = { mediaType: 'application/vnd.oci.image.manifest.v1+json', digest: d('a'), platform: { os: 'linux', architecture: 'amd64' } }
+  const attestation = {
+    mediaType: 'application/vnd.oci.image.manifest.v1+json', digest: d('b'), platform: { os: 'unknown', architecture: 'unknown' },
+    annotations: { 'vnd.docker.reference.type': 'attestation-manifest', 'vnd.docker.reference.digest': d('a') },
+  }
+  const index = (manifests) => ({ schemaVersion: 2, mediaType: 'application/vnd.oci.image.index.v1+json', manifests })
+  // A single image manifest needs no selection.
+  assert.equal(run(image).status, 0)
+  assert.equal(run(image).stdout.trim(), '')
+  // BuildKit image + attestation index (current runner Docker push).
+  assert.equal(run(index([amd64, attestation])).stdout.trim(), d('a'))
+  // Multi-architecture upstream index (digest-pinned mirror) and a Docker manifest list.
+  const arm64 = { ...amd64, digest: d('e'), platform: { os: 'linux', architecture: 'arm64', variant: 'v8' } }
+  assert.equal(run(index([arm64, amd64, attestation])).stdout.trim(), d('a'))
+  assert.equal(run({ ...index([arm64, amd64]), mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json' }).stdout.trim(), d('a'))
+  // Fail closed: no amd64 image, an attestation dressed as amd64, two candidates, unknown documents.
+  assert.notEqual(run(index([arm64, attestation])).status, 0)
+  assert.notEqual(run(index([{ ...attestation, platform: { os: 'linux', architecture: 'amd64' } }])).status, 0)
+  assert.notEqual(run(index([amd64, { ...amd64, digest: d('f') }])).status, 0)
+  assert.notEqual(run(index([{ ...amd64, digest: 'sha256:short' }])).status, 0)
+  assert.notEqual(run({ schemaVersion: 2 }).status, 0)
+  fs.rmSync(dir, { recursive: true, force: true })
+})
