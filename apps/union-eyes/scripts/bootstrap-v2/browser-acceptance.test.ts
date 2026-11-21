@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, expect, it } from 'vitest'
 import {
-  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, maskedPath, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
+  BROWSER_PROFILES, REQUIRED_BROWSER_CHECKS, browserFailureCode, cookiesForOwnedOrigin, maskedPath, responseClass, browserFailureKind, browserLaunchFailureKind, browserProofPassed, browserTargetAllowed,
 } from './browser-acceptance'
 
 const origin = 'http://127.0.0.1:43219'
@@ -79,6 +79,10 @@ describe('owned V2 browser qualification contracts (no application-runtime claim
       { name: 'scoped', domain: '127.0.0.1', path: '/admin', secure: false, httpOnly: false },
     ]
     expect(cookiesForOwnedOrigin(jar, 'http://127.0.0.1:41449').map((cookie) => cookie.name)).toEqual(['nzila_session'])
+  })
+
+  it('classifies an intake response by class only', () => {
+    expect([null, 201, 302, 409, 503].map(responseClass)).toEqual(['NONE', '2XX', '3XX', '4XX', '5XX'])
   })
 
   it('keeps only a masked path from a failing response or page', () => {

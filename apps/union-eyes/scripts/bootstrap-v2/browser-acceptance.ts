@@ -29,13 +29,30 @@ export const REQUIRED_BROWSER_CHECKS = [
   'member-deadline-read-only', 'other-member-case-denial', 'foreign-tenant-case-denial',
   'finance-read-and-write-denial', 'logout-revocation',
 ] as const
+/** Fixed-value evidence of one browser intake attempt: no typed content, identifier, cookie or response body. */
+export interface IntakeSubmissionEvidence {
+  blockingDialogs: number
+  submitEnabled: boolean | null
+  validationErrors: number
+  intakeRequests: number
+  responseClass: 'NONE' | '2XX' | '3XX' | '4XX' | '5XX'
+  persistedSinceStart: number | null
+}
+export function responseClass(status: number | null): IntakeSubmissionEvidence['responseClass'] {
+  if (status === null) return 'NONE'
+  if (status >= 500) return '5XX'
+  if (status >= 400) return '4XX'
+  if (status >= 300) return '3XX'
+  return '2XX'
+}
 type Profile = (typeof BROWSER_PROFILES)[number]
 type CheckStatus = 'UNEXECUTED' | 'PASS' | 'FAIL'
 interface ProfileResult {
   id: string
   locale: string
   viewport: { width: number; height: number }
-  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string; failureStage?: string; failurePath?: string }[]
+  checks: { name: string; status: CheckStatus; failureKind?: string; failureCode?: string; failureStage?: string; failurePath?: string
+    submission?: IntakeSubmissionEvidence }[]
   status: CheckStatus
 }
 interface BrowserResult {
@@ -253,6 +270,13 @@ async function uiLogin(input: {
   })
   assert.equal(selection.status(), 200, 'CANONICAL_UI_ORGANIZATION_SELECTION_FAILED')
   assert.equal(record(await selection.json()).activeOrganizationId, input.organizationId, 'UI_SESSION_ORGANIZATION_SUBSTITUTION')
+  // A fresh browser meets the blocking privacy dialog once an organization is bound; answer it as a person would, with the
+  // privacy-preserving choice. Until it is answered it covers the page, so every later click would wait behind it.
+  stage('PRIVACY_CHOICE')
+  const privacy = page.getByRole('dialog', { name: copy.experiencePrivacy.text0, exact: true })
+  await privacy.waitFor({ state: 'visible', timeout: 30000 })
+  await privacy.getByRole('button', { name: copy.experiencePrivacy.text3, exact: true }).click()
+  await privacy.waitFor({ state: 'hidden', timeout: 30000 })
   return (await ownedCookies(context, origin)).map((cookie) => `${cookie.name}=${cookie.value}`).join('; ')
 }
 
@@ -418,6 +442,15 @@ export async function runBrowserAcceptance(input: {
           person: fixture.people.member, password: input.fixture.password, mfaSecret: input.fixture.mfaSecret }
         await step('member-password-totp-ui', async () => { memberCookie = await uiLogin(memberLogin) })
         await step('member-intake-labels-and-create', async () => {
+          const startedAt = new Date()
+          let intakeRequests = 0
+          let lastIntakeStatus: number | null = null
+          const isIntake = (url: string, method: string) => method === 'POST' && new URL(url).pathname === '/api/cases/intake'
+          member.page.on('request', (request) => { if (isIntake(request.url(), request.method())) intakeRequests++ })
+          member.page.on('response', (response) => {
+            if (isIntake(response.url(), response.request().method())) lastIntakeStatus = response.status()
+          })
+          try {
           stage('INTAKE_PAGE')
           await navigate(member.page, origin, `/${profile.locale}/dashboard/claims/new`)
           stage('INTAKE_HYDRATION')
@@ -449,6 +482,25 @@ export async function runBrowserAcceptance(input: {
           await member.page.waitForURL(`**/${profile.locale}/dashboard/claims/${createdId}`, { timeout: 30000 })
           await visible(member.page, createdNumber)
           await noOverflow(member.page)
+          assert.equal(intakeRequests, 1, 'UI_INTAKE_SUBMITTED_MORE_THAN_ONCE')
+          } catch (error) {
+            const page = member.page
+            const evidence: IntakeSubmissionEvidence = {
+              blockingDialogs: await page.locator('[role="dialog"]:visible, [role="alertdialog"]:visible').count().catch(() => -1),
+              submitEnabled: await page.getByRole('button', { name: copy.forms.submitCase, exact: true }).isEnabled({ timeout: 1000 })
+                .catch(() => null),
+              validationErrors: await page.locator('[data-testid="new-claim-form"] p.text-red-600').count().catch(() => -1),
+              intakeRequests,
+              responseClass: responseClass(lastIntakeStatus),
+              persistedSinceStart: await input.seed.query(
+                'SELECT count(*)::int AS count FROM public.claims WHERE organization_id=$1 AND member_id=$2 AND created_at >= $3',
+                [fixture.organizationId, fixture.people.member.id, startedAt],
+              ).then((rows) => Number(rows.rows[0].count)).catch(() => null),
+            }
+            const check = row.checks.find((item) => item.name === 'member-intake-labels-and-create')
+            if (check) check.submission = evidence
+            throw error
+          }
         })
         await step('member-case-list-reopen', async () => {
           await navigate(member.page, origin, `/${profile.locale}/dashboard/claims`)
