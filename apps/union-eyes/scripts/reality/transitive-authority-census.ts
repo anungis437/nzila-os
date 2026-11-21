@@ -108,7 +108,11 @@ export function buildCensus(): CensusRow[] {
     const content = resolveReExport(file, readFileSync(file, 'utf8'))
     const route = routePathOf(file)
     const routeDir = route.replace(/^\/api\//, 'api/')
-    const importers = tests.filter((t) => t.text.includes(`${routeDir}/route`)).length
+    // A route module is imported as '@/app/api/<path>/route', '<...>/app/api/<path>/route' or, from app/api/__tests__,
+    // '../<path>/route' (and deeper relatives). Anchor on the full path below /api so a sibling route never matches.
+    const below = routeDir.replace(/^api\//, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const importPattern = new RegExp(`['"\`](?:[^'"\`]*/api/|(?:\\.\\./)+)${below}/route['"\`]`)
+    const importers = tests.filter((t) => importPattern.test(t.text)).length
     for (const exp of scanRouteFileExports(content)) {
       if (!(MUTATIONS as readonly string[]).includes(exp.method)) continue
       const span = exp.span

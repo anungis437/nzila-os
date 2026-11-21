@@ -14,8 +14,8 @@
       "SIGNED_OR_SECRET": 1,
       "UNCLASSIFIED": 2
     },
-    "guardedWithRouteTest": 300,
-    "guardedWithoutRouteTest": 303,
+    "guardedWithRouteTest": 494,
+    "guardedWithoutRouteTest": 109,
     "unclassified": [],
     "reviewedUnclassified": [
       "POST /api/icra/telemetry",
@@ -35,145 +35,145 @@
       "route": "/api/admin/alerts/escalations/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/escalations/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/escalations",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/admin/alerts/executions/test",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/executions",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/recipients/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/recipients/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/recipients",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/rules/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/rules/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/alerts/rules",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/billing-cycles/preview",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/billing-cycles/trigger-scheduled",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/admin/billing-cycles",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/analytics/anomalies",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/analytics/organizations",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/analytics/patterns",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/remittances/[id]/export",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/remittances/[id]/submit",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/remittances/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/admin/clc/remittances/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/admin/clc/remittances/export",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/clc/remittances",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/admin/database/optimize",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/documents/legacy-backfill",
@@ -185,67 +185,67 @@
       "route": "/api/admin/dues/payments/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/dues/payments/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/dues/payments",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/dues/send-reminders",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/admin/duplicates",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/email-suppressions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/employment/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/employment/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/employment/member/[memberId]/history",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/employment/member/[memberId]",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/employment",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/feature-flags",
@@ -257,7 +257,7 @@
       "route": "/api/admin/fix-super-admin-roles",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/admin/ingest/retry",
@@ -269,235 +269,235 @@
       "route": "/api/admin/ingest",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/job-classifications/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/job-classifications/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/job-classifications",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/jobs/[action]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/jobs/retry",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/jobs",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/leaves/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/leaves/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/leaves",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/lro/metrics",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/members/bulk-import",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/members/export",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/organizations/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/organizations/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/organizations/bulk-import",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/payments/retry-failed",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/admin/pki/certificates/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/certificates/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/certificates",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/signatures/[id]/sign",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/signatures/[id]/verify",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/signatures",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/workflows/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/workflows/[id]",
       "method": "PUT",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/pki/workflows",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/representation-protocol",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/admin/representation-protocol",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/admin/roles/batch",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/seed-cupe-pilot",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/seed-test-data",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/segments/[id]/execute",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/segments/[id]/execute",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/segments/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/segments/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/segments",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/system/cache",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/admin/system/settings",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/update-role",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/admin/users/[userId]",
@@ -515,25 +515,25 @@
       "route": "/api/agreements",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/cache-stats",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/classify",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/ai/copilot/query",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/copilot/sessions/[id]",
@@ -545,7 +545,7 @@
       "route": "/api/ai/extract-clauses",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/feedback",
@@ -575,133 +575,133 @@
       "route": "/api/ai/ingest",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/ai/mamba",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/match-precedents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/pension/plans/[id]/trustee-summary",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/ai/search",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/semantic-search",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ai/summarize",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/claims/categories",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/claims/stewards",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/claims/trends",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/claims",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/clause-stats",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/comparative",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/dashboard",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/deadlines-metrics",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/executive",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/financial/categories",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/financial/costs",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/financial/outcomes",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/financial/trends",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/financial",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/heatmap",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/insights/weekly-summary",
@@ -713,43 +713,43 @@
       "route": "/api/analytics/insights",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/analytics/insights",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/analytics/kpis",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/members/churn-risk",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/members/cohorts",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/members/trends",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/members",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/metrics",
@@ -761,85 +761,85 @@
       "route": "/api/analytics/operational/bottlenecks",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/operational/queues",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/operational/sla",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/operational/workload",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/operational",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/org-activity",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/precedent-stats",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/predictions",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/refresh",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/analytics/trends",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arbitration/precedents/[id]/citations",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arbitration/precedents/[id]/citations",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arbitration/precedents/[id]/documents",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arbitration/precedents/[id]/documents",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arbitration/precedents/[id]",
@@ -857,7 +857,7 @@
       "route": "/api/arbitration/precedents/search",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arbitration/precedents",
@@ -887,55 +887,55 @@
       "route": "/api/arrears/case/[memberId]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arrears/cases",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arrears/create-payment-plan",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arrears/escalate/[caseId]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arrears/log-contact",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/arrears/resolve/[caseId]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/assignment-profiles",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/forgot-password",
       "method": "POST",
       "class": "PUBLIC_REGISTRY",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/invite/accept",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/invite/create",
@@ -947,31 +947,31 @@
       "route": "/api/auth/invite/manage",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/login",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/logout",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/magic-link/request",
       "method": "POST",
       "class": "PUBLIC_REGISTRY",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/magic-link/verify",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/mfa/challenge",
@@ -983,97 +983,97 @@
       "route": "/api/auth/mfa/disable",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/mfa/enroll",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/mfa/verify-enroll",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/policy",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/reset-password",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/role",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/auth/signup",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/bargaining-notes/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bargaining-notes/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bargaining-notes",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bargaining/negotiations/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/bargaining/negotiations/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/bargaining/negotiations",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/bargaining/proposals/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bargaining/proposals/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bargaining/proposals",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bargaining/tentative-agreements",
@@ -1103,13 +1103,13 @@
       "route": "/api/billing/credits/check-expired",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/billing/invoices",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/billing/replay-invoice",
@@ -1121,7 +1121,7 @@
       "route": "/api/billing/send-batch",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/billing/send-invoice",
@@ -1133,61 +1133,61 @@
       "route": "/api/billing/subscriptions/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/billing/subscriptions/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/billing/subscriptions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/billing/validate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/breaks/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/breaks/policies/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/breaks/policies/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/breaks/policies",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/breaks",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/bulk-import",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/calendar-sync/connections/[id]/sync",
@@ -1211,7 +1211,7 @@
       "route": "/api/calendar-sync/connections",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/calendar/events/[id]",
@@ -1229,91 +1229,91 @@
       "route": "/api/calendar/events",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/calendars/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/calendars/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/calendars",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/carbon/validate",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/case-studies/[slug]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/case-studies/[slug]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/case-studies",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/assign",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/cases/[caseId]/deadlines",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/deadlines",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/escalate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/evidence",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/evidence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/notes",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/[caseId]/transition",
@@ -1331,55 +1331,55 @@
       "route": "/api/cases/bulk-import",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/evidence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/cases/intake",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cases/meetings",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/cases/outcomes",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 3
     },
     {
       "route": "/api/cases/templates/generate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/cases/templates",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/cases/timeline",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/cases",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 3
     },
     {
       "route": "/api/cba-intelligence/benchmark/[id]",
@@ -1397,13 +1397,13 @@
       "route": "/api/cba-intelligence/ingestion/run",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/cba-intelligence/ingestion/seed",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/cba-intelligence/ingestion",
@@ -1415,7 +1415,7 @@
       "route": "/api/cba-intelligence/review",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cba-intelligence/sources/[id]",
@@ -1427,19 +1427,19 @@
       "route": "/api/cba-intelligence/sources",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/cbas/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/cbas/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/cbas",
@@ -1451,7 +1451,7 @@
       "route": "/api/chatbot/messages",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/chatbot/sessions/[sessionId]/archive",
@@ -1463,67 +1463,67 @@
       "route": "/api/chatbot/sessions",
       "method": "POST",
       "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/claims/[id]/defensibility-pack",
+      "method": "DELETE",
+      "class": "GUARDED_SESSION",
       "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/defensibility-pack",
-      "method": "DELETE",
-      "class": "GUARDED_SESSION",
-      "testFiles": 0
-    },
-    {
-      "route": "/api/claims/[id]/defensibility-pack",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/status",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/status",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/updates",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/updates",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/workflow",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]/workflow",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/claims/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/claims/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/claims/bulk",
@@ -1535,13 +1535,13 @@
       "route": "/api/claims",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 3
     },
     {
       "route": "/api/clause-library/[id]/share",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/clause-library/[id]/tags",
@@ -1559,19 +1559,19 @@
       "route": "/api/clause-library/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 5
+      "testFiles": 1
     },
     {
       "route": "/api/clause-library/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 5
+      "testFiles": 1
     },
     {
       "route": "/api/clause-library/compare",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/clause-library/search",
@@ -1583,7 +1583,7 @@
       "route": "/api/clause-library",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 2
     },
     {
       "route": "/api/clauses/[id]",
@@ -1601,49 +1601,49 @@
       "route": "/api/clauses/compare",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/clauses/search",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/clauses",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/clc/dashboard",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/clc/remittances",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/clc/sync",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cnesst/anti-scab/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/cnesst/anti-scab/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/cnesst/anti-scab",
@@ -1655,13 +1655,13 @@
       "route": "/api/cnesst/filings/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/cnesst/filings/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/cnesst/filings",
@@ -1685,7 +1685,7 @@
       "route": "/api/cnesst/hs-committees",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/cnesst/pay-equity/[id]/transition",
@@ -1697,31 +1697,31 @@
       "route": "/api/cnesst/pay-equity/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/cnesst/pay-equity/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/cnesst/pay-equity",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/cnesst/preventive-withdrawals/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/cnesst/preventive-withdrawals/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/cnesst/preventive-withdrawals",
@@ -1751,7 +1751,7 @@
       "route": "/api/cognition/precedents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/committees/[id]/action-items/[itemId]",
@@ -1763,37 +1763,37 @@
       "route": "/api/committees/[id]/action-items",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/committees/[id]/documents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/committees/[id]/intelligence",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/committees/[id]/meetings/[meetingId]/attendance",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/committees/[id]/meetings/[meetingId]/minutes",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/committees/[id]/meetings/[meetingId]/minutes",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/committees/[id]/meetings/[meetingId]",
@@ -1805,25 +1805,25 @@
       "route": "/api/committees/[id]/meetings",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/committees/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/committees/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/committees",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/campaigns/[id]/analytics/export",
@@ -1883,19 +1883,19 @@
       "route": "/api/communications/campaigns/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/campaigns/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/campaigns",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/distribution-lists/[id]/export",
@@ -1913,13 +1913,13 @@
       "route": "/api/communications/distribution-lists/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/communications/distribution-lists/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/communications/distribution-lists",
@@ -1937,19 +1937,19 @@
       "route": "/api/communications/polls/[pollId]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/polls/[pollId]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/polls",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/sms/campaigns",
@@ -1985,61 +1985,61 @@
       "route": "/api/communications/surveys/[surveyId]/responses/[responseId]/answers",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/communications/surveys/[surveyId]/responses/[responseId]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/communications/surveys/[surveyId]/responses",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/communications/surveys/[surveyId]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/surveys/[surveyId]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/surveys",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/templates/[id]/duplicate",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/templates/[id]/duplicate",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/communications/templates/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/communications/templates/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/communications/templates",
@@ -2057,13 +2057,13 @@
       "route": "/api/communications/webhooks/resend",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 3
     },
     {
       "route": "/api/compliance/audit-logs",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/compliance/data-classification-policy",
@@ -2075,7 +2075,7 @@
       "route": "/api/compliance/evaluate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/compliance/validate",
@@ -2087,7 +2087,7 @@
       "route": "/api/consent",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/contact",
@@ -2099,7 +2099,7 @@
       "route": "/api/content/templates/[id]/status",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/continuity/archives",
@@ -2129,19 +2129,19 @@
       "route": "/api/cope/campaigns",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cope/canvassing",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cope/officials",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/correspondence/[id]/approve",
@@ -2183,13 +2183,13 @@
       "route": "/api/correspondence/[id]/submit",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/correspondence/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/correspondence/signatures",
@@ -2201,7 +2201,7 @@
       "route": "/api/correspondence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cron/analytics/daily-metrics",
@@ -2237,7 +2237,7 @@
       "route": "/api/cron/deadline-overdue",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/cron/deadline-reminders",
@@ -2249,13 +2249,13 @@
       "route": "/api/cron/document-intake-reaper",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/cron/education-reminders",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/cron/equity-retention",
@@ -2267,7 +2267,7 @@
       "route": "/api/cron/external-data-sync",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cron/location-retention",
@@ -2285,13 +2285,13 @@
       "route": "/api/cron/monthly-per-capita",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/cron/observability-alerts",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/cron/overdue-notifications",
@@ -2327,115 +2327,115 @@
       "route": "/api/cron/sla-watchdog",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/currency/convert",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/deadlines/[id]/complete",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/deadlines/[id]/complete",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/deadlines/[id]/extend",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/deadlines/[id]/extend",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/deadlines/compliance",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/deadlines",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/debug/user-role",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/dispatch/assign",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/dispatch/requests",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/documents/[id]/ocr",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/documents/[id]/transcript/publish",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/documents/[id]/transcript",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/documents/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/documents/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/documents/bulk",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/documents/categories",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/documents/folders",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/documents/intakes/[id]/cancel",
@@ -2453,13 +2453,13 @@
       "route": "/api/documents/repository/[id]/versions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 4
     },
     {
       "route": "/api/documents/repository/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/documents/repository/downloads",
@@ -2483,31 +2483,31 @@
       "route": "/api/documents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 3
     },
     {
       "route": "/api/dues/arrears/[id]/payment",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/arrears/[id]/reminder",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/arrears/calculate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/calculate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/create-payment-intent",
@@ -2519,13 +2519,13 @@
       "route": "/api/dues/issues",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/dues/payment-plans",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/reconcile",
@@ -2537,145 +2537,145 @@
       "route": "/api/dues/reconciliation/auto-match",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/reconciliation/match",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/reconciliation/reject",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/remittances/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/remittances/upload",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/remittances",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/dues/setup-intent",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/education/certifications/generate",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/certifications/renewal-reminders",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/certifications",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/certifications",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/certifications",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/completions/certificates",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/completions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/education/courses",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/notification-preferences",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/programs/[id]/enrollments",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/programs/[id]/enrollments",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/programs",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/programs",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/programs",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/education/registrations",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/education/sessions/[id]/attendance",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/education/sessions/[id]/attendance",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/education/sessions",
@@ -2699,7 +2699,7 @@
       "route": "/api/elections/[id]/succession",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/elections/[id]/vote",
@@ -2711,13 +2711,13 @@
       "route": "/api/elections/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/elections",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/emergency/activate",
@@ -2729,7 +2729,7 @@
       "route": "/api/emergency/pipeda",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/emergency/recovery",
@@ -2741,19 +2741,19 @@
       "route": "/api/employer-execution/compliance",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/employer-execution/payroll-runs/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/employer-execution/payroll-runs",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/employer-execution/remittance-runs/[id]/submission",
@@ -2777,7 +2777,7 @@
       "route": "/api/employer-execution/replay/[runId]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/employer-execution/timesheets/[batchId]/mapping",
@@ -2807,7 +2807,7 @@
       "route": "/api/employers/communications/contacts",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 2
     },
     {
       "route": "/api/employers/communications",
@@ -2831,25 +2831,25 @@
       "route": "/api/enterprise/integrations",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/enterprise/sso/providers/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 1
     },
     {
       "route": "/api/enterprise/sso/providers/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 1
     },
     {
       "route": "/api/enterprise/sso/providers",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 5
+      "testFiles": 0
     },
     {
       "route": "/api/enterprise/sso/scim-token",
@@ -2879,31 +2879,31 @@
       "route": "/api/equity/disclosure-grants",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/equity/disclosure-grants",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/equity/self-identify",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/events/[id]/occurrences",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/events/[id]/occurrences",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/events/[id]",
@@ -2933,25 +2933,25 @@
       "route": "/api/exit-interviews/[id]/governance",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/exit-interviews/[id]/index",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exit-interviews/[id]/publish",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exit-interviews/[id]/review",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/exit-interviews/[id]/submit",
@@ -2963,19 +2963,19 @@
       "route": "/api/exit-interviews/[id]/summarize",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exit-interviews/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exit-interviews/cognition-memory",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/exit-interviews/copilot",
@@ -2987,7 +2987,7 @@
       "route": "/api/exit-interviews/graph-query",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/exit-interviews/mitigation-comparison",
@@ -3005,7 +3005,7 @@
       "route": "/api/exit-interviews/reasoning-sessions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/exit-interviews/scenarios",
@@ -3017,7 +3017,7 @@
       "route": "/api/exit-interviews/search",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exit-interviews/simulation",
@@ -3041,67 +3041,67 @@
       "route": "/api/exit-interviews",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/exports/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exports/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exports/csv",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exports/excel",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exports/pdf",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/exports",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/extensions/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/extensions/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/external-data/lrb",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/external-data",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/external/grievances/[id]/documents/intakes",
@@ -3113,169 +3113,169 @@
       "route": "/api/external/grievances/[id]/documents/upload",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/federations/[id]/affiliates",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/affiliates",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/dashboard",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/dashboard",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/meetings",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/meetings",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/remittances",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/[id]/remittances",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/federations/benchmark/grievances",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/finance/allocation/run",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/allocation",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/billing",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/billing",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/invoices/[id]/payments",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/invoices",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/pricing/compare",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/pricing/quote",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/finance/simulation",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/budgets/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/budgets/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/budgets",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/expenses/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/expenses/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/expenses",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/vendors/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/vendors/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/financial/vendors",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/gdpr/consents",
@@ -3287,7 +3287,7 @@
       "route": "/api/gdpr/cookie-consent",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/gdpr/data-erasure",
@@ -3335,7 +3335,7 @@
       "route": "/api/governance/council-elections",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/governance/elections/sessions/[id]/vote",
@@ -3347,25 +3347,25 @@
       "route": "/api/governance/elections/sessions/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/governance/elections/sessions/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/governance/elections/sessions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/governance/golden-share",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/governance/lifecycle/conflicts/[conflictId]",
@@ -3407,7 +3407,7 @@
       "route": "/api/governance/mission-audits",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/governance/policies/evaluate",
@@ -3419,13 +3419,13 @@
       "route": "/api/governance/policies/rules",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/governance/policy-templates",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/governance/reserved-matters/[id]/class-b-vote",
@@ -3461,13 +3461,13 @@
       "route": "/api/grievances/[id]/access",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/grievances/[id]/access",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/grievances/[id]/assign",
@@ -3485,19 +3485,19 @@
       "route": "/api/grievances/[id]/documents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/grievances/[id]/priority-override",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/grievances/[id]/recommend-steward",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/grievances/[id]/status",
@@ -3509,19 +3509,19 @@
       "route": "/api/grievances/[id]/suggest-clauses",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/grievances/import",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/grievances",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/health-safety/hazards/[id]/transition",
@@ -3533,19 +3533,19 @@
       "route": "/api/health-safety/hazards/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/health-safety/hazards/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/health-safety/hazards",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/health-safety/incidents/[id]/close",
@@ -3557,49 +3557,49 @@
       "route": "/api/health-safety/incidents/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/health-safety/incidents/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/health-safety/incidents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 3
     },
     {
       "route": "/api/health-safety/inspections/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/health-safety/inspections/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/health-safety/inspections",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/health-safety/ppe",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/healthwelfare/plans",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/icra/[assessmentId]/answer",
@@ -3617,7 +3617,7 @@
       "route": "/api/icra/[assessmentId]/claim",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 5
+      "testFiles": 2
     },
     {
       "route": "/api/icra/[assessmentId]/submit",
@@ -3635,97 +3635,97 @@
       "route": "/api/icra/email-results",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/icra/report/[assessmentId]/review",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/icra/start",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/icra/submit",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/icra/telemetry",
       "method": "POST",
       "class": "UNCLASSIFIED",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/integrations/api-keys",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/integrations/framework/[id]/activate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/integrations/framework/[id]/sync",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/integrations/framework",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/integrations/shopify/credentials",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/integrations/shopify/credentials",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/integrations/shopify/webhooks",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/intelligence",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/intelligence",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/investigations/evidence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/investigations/timeline",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/investigations",
@@ -3737,19 +3737,19 @@
       "route": "/api/jurisdiction/clc-compliance",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/jurisdiction/validate-deadline",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/labour-standards/[jurisdiction]/compliance-check",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/locals/[id]",
@@ -3785,25 +3785,25 @@
       "route": "/api/location/geofence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/location/track",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/meeting-rooms/[id]/bookings/[bookingId]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/meeting-rooms/[id]/bookings/[bookingId]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/meeting-rooms/[id]/bookings",
@@ -3815,97 +3815,97 @@
       "route": "/api/meeting-rooms",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/member/ai-feedback",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/consents",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/documents",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/documents",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/employment",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/employment",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/history",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/history",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/preferences",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/preferences",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/roles",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]/roles",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/appointments",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/bulk",
@@ -3917,7 +3917,7 @@
       "route": "/api/members/dues",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/export",
@@ -3929,7 +3929,7 @@
       "route": "/api/members/import",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/merge",
@@ -3941,19 +3941,19 @@
       "route": "/api/members/search",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/segments/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/segments/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/segments/preview",
@@ -3965,7 +3965,7 @@
       "route": "/api/members/segments",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/members/self/bootstrap",
@@ -3977,7 +3977,7 @@
       "route": "/api/messages/retention-policy",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messages/threads/[threadId]/assignment",
@@ -3989,55 +3989,55 @@
       "route": "/api/messages/threads/[threadId]/legal-hold",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messages/threads/[threadId]/lifecycle",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messages/threads/[threadId]/messages",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messages/threads/[threadId]/read",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messages/threads",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messaging/campaigns",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messaging/preferences",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/messaging/templates/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/messaging/templates/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/messaging/templates",
@@ -4049,61 +4049,61 @@
       "route": "/api/metrics",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/monitoring/alerts",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/monitoring/drift",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/monitoring/usage",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/predictions/churn-risk",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/ml/predictions/claim-outcome",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/predictions/sla-breach-risk/feedback",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/ml/predictions/sla-breach-risk",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/ml/predictions/timeline",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/predictions/workload-forecast",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ml/query",
@@ -4115,7 +4115,7 @@
       "route": "/api/ml/recommendations",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/mobile/devices/[id]/test-push",
@@ -4145,19 +4145,19 @@
       "route": "/api/mobile/notifications",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/mobile/push/subscribe",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/mobile/push/unsubscribe",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/mobile/sync/[deviceId]",
@@ -4175,43 +4175,43 @@
       "route": "/api/movement-insights/trends",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/negotiations",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/device",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/device",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/mark-all-read",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications/preferences",
@@ -4223,13 +4223,13 @@
       "route": "/api/notifications/test",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/notifications",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/oci/assessment",
@@ -4241,13 +4241,13 @@
       "route": "/api/oci/intake",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/ocra/[assessmentId]/answer",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ocra/[assessmentId]/claim",
@@ -4259,7 +4259,7 @@
       "route": "/api/ocra/[assessmentId]/submit",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ocra/checkout",
@@ -4271,37 +4271,37 @@
       "route": "/api/ocra/email-results",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ocra/start",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/ocra/submit",
       "method": "POST",
       "class": "CAPABILITY_TOKEN",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/ocra/telemetry",
       "method": "POST",
       "class": "UNCLASSIFIED",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/onboarding/discover-federation",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/onboarding/events",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/onboarding/readiness",
@@ -4313,7 +4313,7 @@
       "route": "/api/onboarding/suggest-clauses",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/onboarding/transfers",
@@ -4325,7 +4325,7 @@
       "route": "/api/onboarding",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/org/switch",
@@ -4337,31 +4337,31 @@
       "route": "/api/organizations/[id]/members",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 3
     },
     {
       "route": "/api/organizations/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 3
+      "testFiles": 4
     },
     {
       "route": "/api/organizations/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 4
     },
     {
       "route": "/api/organizations/switch",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/organizations",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/organizer/impact",
@@ -4373,43 +4373,43 @@
       "route": "/api/organizing/assignments/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/assignments/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/assignments",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/campaigns",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/card-check",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/committee",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/forms/generate",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/labour-board",
@@ -4427,169 +4427,169 @@
       "route": "/api/organizing/notes/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/notes/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/notes",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/sequences/[id]/enroll",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/sequences/[id]/enroll",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/sequences/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/sequences/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/sequences",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/support-percentage",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/organizing/workplace-mapping",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/payments/[id]/duties",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/payments/checkout/create",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/payments/webhooks/paypal",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/payments/webhooks/stripe",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/pension/benefits/[id]/transition",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/pension/benefits",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pension/contributions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/pension/members",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/pension/plans/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/pension/plans/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/pension/plans",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/pension/t4a",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/pension/trustee-meetings/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pension/trustee-meetings/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pension/trustee-meetings",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pension/trustees/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pension/trustees/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pension/trustees",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply/[id]/approve-commercial-terms",
@@ -4619,7 +4619,7 @@
       "route": "/api/pilot/apply/[id]/commercial-transition",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply/[id]/evidence-assessments",
@@ -4631,67 +4631,67 @@
       "route": "/api/pilot/apply/[id]/intelligence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply/[id]/rebind-organization",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply/[id]/reference-profile",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply/[id]/verify-organization",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/apply",
       "method": "POST",
       "class": "PUBLIC_REGISTRY",
-      "testFiles": 4
+      "testFiles": 2
     },
     {
       "route": "/api/pilot/bootstrap/cupe",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/pilot/demo-data",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/pilot/demo-data",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/pilot/events",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/pilot/feedback",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/pilot/onboarding",
@@ -4703,49 +4703,49 @@
       "route": "/api/portal/documents/upload",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/portal/documents",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/portal/dues/pay",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/precedents/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/precedents/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/precedents/drafts/[id]/review",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/precedents/jurisdiction-preferences",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/precedents/search",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/precedents",
@@ -4757,19 +4757,19 @@
       "route": "/api/privacy/breach",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/consent",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/consent",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/dsar/[requestId]/export",
@@ -4787,13 +4787,13 @@
       "route": "/api/privacy/dsar",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/provincial",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/privacy/threads/[threadId]",
@@ -4811,79 +4811,79 @@
       "route": "/api/profile/roles",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/reconciliation/process",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reconciliation/resolve",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/reconciliation/resolve",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/reconciliation/resolve",
       "method": "POST",
       "class": "GUARDED_SESSION",
+      "testFiles": 0
+    },
+    {
+      "route": "/api/reports/[id]/execute",
+      "method": "DELETE",
+      "class": "REFUSAL_STUB",
       "testFiles": 1
     },
     {
       "route": "/api/reports/[id]/execute",
-      "method": "DELETE",
-      "class": "REFUSAL_STUB",
-      "testFiles": 0
-    },
-    {
-      "route": "/api/reports/[id]/execute",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports/[id]/run",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports/[id]/run",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports/[id]/share",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports/[id]/share",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/reports/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/reports/builder",
@@ -4895,25 +4895,25 @@
       "route": "/api/reports/datasources/sample",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports/execute",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 1
     },
     {
       "route": "/api/reports/field-grants",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/reports/field-grants",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/reports/scheduled/[id]",
@@ -4937,43 +4937,43 @@
       "route": "/api/reports/templates",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/reports",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/reviews",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/rewards/cron",
       "method": "POST",
       "class": "SIGNED_OR_SECRET",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/rewards/redemptions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/satisfaction/[id]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/satisfaction",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/scim/v2/[organizationId]/Users/[id]",
@@ -4997,79 +4997,79 @@
       "route": "/api/scim/v2/[organizationId]/Users",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 2
     },
     {
       "route": "/api/security/events",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/settings/organization",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/signatures/documents/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/signatures/documents/[id]",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 0
     },
     {
       "route": "/api/signatures/documents",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/signatures/sign",
       "method": "POST",
       "class": "GUARDED_SESSION",
+      "testFiles": 0
+    },
+    {
+      "route": "/api/social-media/accounts",
+      "method": "DELETE",
+      "class": "GUARDED_SESSION",
+      "testFiles": 2
+    },
+    {
+      "route": "/api/social-media/accounts",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 2
+    },
+    {
+      "route": "/api/social-media/accounts",
+      "method": "PUT",
+      "class": "GUARDED_SESSION",
+      "testFiles": 2
+    },
+    {
+      "route": "/api/social-media/analytics",
+      "method": "DELETE",
+      "class": "GUARDED_SESSION",
       "testFiles": 1
     },
     {
-      "route": "/api/social-media/accounts",
-      "method": "DELETE",
-      "class": "GUARDED_SESSION",
-      "testFiles": 5
-    },
-    {
-      "route": "/api/social-media/accounts",
-      "method": "POST",
-      "class": "GUARDED_SESSION",
-      "testFiles": 5
-    },
-    {
-      "route": "/api/social-media/accounts",
-      "method": "PUT",
-      "class": "GUARDED_SESSION",
-      "testFiles": 5
-    },
-    {
-      "route": "/api/social-media/analytics",
-      "method": "DELETE",
-      "class": "GUARDED_SESSION",
-      "testFiles": 3
-    },
-    {
       "route": "/api/social-media/analytics",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/social-media/analytics",
       "method": "PUT",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 1
     },
     {
       "route": "/api/social-media/campaigns",
@@ -5093,73 +5093,73 @@
       "route": "/api/social-media/feed",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/social-media/posts/review",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 1
     },
     {
       "route": "/api/social-media/posts",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 6
+      "testFiles": 2
     },
     {
       "route": "/api/social-media/posts",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 6
+      "testFiles": 2
     },
     {
       "route": "/api/staging-proof/deadline-engine/scenario",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/storage/cleanup",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/storage/usage",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/strike/disbursements",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/strike/eligibility",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/strike/funds",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/strike/picket-lines",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/strike/stipends",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/support/metrics",
@@ -5177,61 +5177,61 @@
       "route": "/api/support/tickets/[id]/assign",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/support/tickets/[id]/assign",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/support/tickets/[id]/comments",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/support/tickets/[id]/comments",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/support/tickets/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/support/tickets/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/support/tickets",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/targets/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/targets",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/tax/cope/receipts",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/tax/cra/export",
@@ -5243,19 +5243,19 @@
       "route": "/api/tax/rl-1/generate",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/tax/slips",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/tax/t106",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/tax/t4a",
@@ -5273,13 +5273,13 @@
       "route": "/api/testimonials/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 3
     },
     {
       "route": "/api/testimonials/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 3
     },
     {
       "route": "/api/triage-designations",
@@ -5297,25 +5297,25 @@
       "route": "/api/units/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/units/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/units",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/upload",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/v2/[...path]",
@@ -5351,73 +5351,73 @@
       "route": "/api/voice/upload",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/voting/sessions/[id]/vote",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/voting/sessions/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/voting/sessions/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/voting/sessions",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/voting/verify",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/wcb/assessments/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/wcb/assessments/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/wcb/assessments",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/wcb/claims/[id]",
       "method": "DELETE",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/wcb/claims/[id]",
       "method": "PATCH",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/wcb/claims",
       "method": "POST",
       "class": "REFUSAL_STUB",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/workaid/consent-text/proposals/[proposalId]/adopt",
@@ -5477,13 +5477,13 @@
       "route": "/api/workbench/assign",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/workbook/[id]/claim",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 1
     },
     {
       "route": "/api/workbook/[id]/consent",
@@ -5495,19 +5495,19 @@
       "route": "/api/workbook/[id]/memory-holders/[holderId]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 2
     },
     {
       "route": "/api/workbook/[id]/memory-holders/[holderId]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 4
+      "testFiles": 2
     },
     {
       "route": "/api/workbook/[id]/memory-holders",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 3
+      "testFiles": 2
     },
     {
       "route": "/api/workbook/checkout/redeem",
@@ -5525,31 +5525,31 @@
       "route": "/api/workbook/start",
       "method": "POST",
       "class": "PUBLIC_INTAKE_GUARDED",
-      "testFiles": 1
+      "testFiles": 0
     },
     {
       "route": "/api/workflow/transition",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/worksites/[id]",
       "method": "DELETE",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/worksites/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/worksites",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 2
     },
     {
       "route": "/api/workspace/telemetry",

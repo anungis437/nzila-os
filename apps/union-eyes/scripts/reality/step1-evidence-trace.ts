@@ -36,9 +36,15 @@ const V2_BROWSER_CHECKS: Readonly<Record<string, readonly string[]>> = {
 
 /** Kernel, native PostgreSQL and route tests that exercise a base action's authority (paths relative to apps/union-eyes). */
 export const BEHAVIOURAL_TESTS: Readonly<Record<string, readonly string[]>> = {
+  C01: ['app/api/__tests__/auth-invite-create.route.test.ts'],
+  C02: ['app/api/__tests__/auth-invite-create.route.test.ts'],
+  C03: ['app/api/__tests__/auth-invite-manage.route.test.ts'],
+  C05: ['app/api/__tests__/pilot-onboarding.route.test.ts'],
+  C15: ['app/api/__tests__/documents-transcript-authority.route.test.ts', 'app/api/documents/[id]/ocr/route.canonical.pglite.test.ts'],
+  C21: ['app/api/__tests__/cases-caseId-deadlines.route.test.ts'],
   C06: ['lib/auth/__tests__/session-membership-revocation.pglite.test.ts', 'db/__tests__/authority-kernel-revocation.pglite.test.ts'],
   C08: ['lib/authority/__tests__/primary-handler-lifecycle.test.ts', 'app/api/__tests__/workflow-transition.route.test.ts', 'db/__tests__/grievances-routes.postgres.test.ts'],
-  C09: ['lib/cases/automatic-assignment.pglite.test.ts', 'lib/cases/assignment-profiles.pglite.test.ts'],
+  C09: ['lib/cases/automatic-assignment.pglite.test.ts', 'lib/cases/assignment-profiles.pglite.test.ts', 'app/api/__tests__/cases-caseId-assign.route.test.ts'],
   C10: ['lib/authority/__tests__/institutional-representation.test.ts', 'lib/authority/__tests__/kernel-governance.test.ts'],
   C11: ['db/__tests__/authority-kernel-lifecycle.pglite.test.ts', 'db/__tests__/authority-kernel-case-sources.pglite.test.ts', 'db/__tests__/election-certificate-succession.native.test.ts'],
   C12: ['lib/services/case-access-service.pglite.test.ts', 'app/api/__tests__/cases-notes.route.test.ts'],

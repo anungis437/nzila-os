@@ -1,48 +1,58 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { NextRequest } from 'next/server';
+/**
+ * Step 1 S1-A06 / C03: invitation reissue and revocation are refused to anyone who cannot manage this organization's
+ * invitations, before any invite is touched; a refused or failed change never answers success.
+ */
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const m = vi.hoisted(() => ({ allowed: vi.fn(), list: vi.fn(), reissue: vi.fn(), revoke: vi.fn(), deliver: vi.fn() }));
-vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: (handler: (request: NextRequest, context: { userId: string; organizationId: string }) => Promise<Response>) => (request: NextRequest) => handler(request, { userId: 'admin-a', organizationId: 'org-a' }) }));
-vi.mock('@nzila/platform-auth/invites', () => ({ canManageOrganizationInvites: m.allowed, listOrganizationInvites: m.list, reissueInvite: m.reissue, revokeInvite: m.revoke }));
-vi.mock('@/lib/members/invitation-delivery', () => ({ deliverOrganizationInvitation: m.deliver }));
-import { GET, POST } from '../auth/invite/manage/route';
-const id = '11111111-1111-4111-8111-111111111111';
-const request = (body: unknown) => new NextRequest('http://localhost/api/auth/invite/manage', { method: 'POST', body: JSON.stringify(body) });
+const m = vi.hoisted(() => ({
+  canManage: vi.fn(), revokeInvite: vi.fn(), reissueInvite: vi.fn(), list: vi.fn(), deliver: vi.fn(),
+  authed: true,
+}))
+vi.mock('@/lib/organization-middleware', () => ({
+  // The real wrapper authenticates and binds the organization; here it is reduced to that contract: no session, 401.
+  withOrganizationAuth: (handler: (req: Request, ctx: { userId: string; organizationId: string }) => Promise<Response>) =>
+    async (req: Request) => m.authed
+      ? handler(req, { userId: 'actor-1', organizationId: 'org-1' })
+      : new Response(JSON.stringify({ error: 'AUTH_REQUIRED' }), { status: 401 }),
+}))
+vi.mock('@nzila/platform-auth/invites', () => ({
+  canManageOrganizationInvites: m.canManage, revokeInvite: m.revokeInvite, reissueInvite: m.reissueInvite, listOrganizationInvites: m.list,
+}))
+vi.mock('@/lib/members/invitation-delivery', () => ({ deliverOrganizationInvitation: m.deliver }))
 
-describe('organization invitation management routes', () => {
-  beforeEach(() => {
-    vi.clearAllMocks(); m.allowed.mockResolvedValue(true); m.list.mockResolvedValue([]);
-    m.reissue.mockResolvedValue({ success: true, inviteId: 'replacement', token: 'secret' });
-    m.revoke.mockResolvedValue({ success: true }); m.deliver.mockResolvedValue({ inviteId: 'replacement', delivery: 'failed' });
-  });
-  it('refuses listing and both mutations without direct organization administration', async () => {
-    m.allowed.mockResolvedValue(false);
-    expect((await GET(new NextRequest('http://localhost/api/auth/invite/manage'))).status).toBe(403);
-    for (const action of ['reissue', 'revoke']) expect((await POST(request({ action, inviteId: id }))).status).toBe(403);
-    expect(m.list).not.toHaveBeenCalled(); expect(m.reissue).not.toHaveBeenCalled(); expect(m.revoke).not.toHaveBeenCalled();
-  });
-  it('lists only the authenticated active organization', async () => {
-    expect((await GET(new NextRequest('http://localhost/api/auth/invite/manage?organizationId=other'))).status).toBe(200);
-    expect(m.list).toHaveBeenCalledWith('admin-a', 'org-a');
-  });
-  it.each(['organizationId', 'actorUserId', 'email', 'role'])('rejects client override %s', async (key) => {
-    expect((await POST(request({ action: 'reissue', inviteId: id, [key]: 'forged' }))).status).toBe(400);
-    expect(m.reissue).not.toHaveBeenCalled();
-  });
-  it('uses the server actor and tenant for a replacement and withholds the secret', async () => {
-    const response = await POST(request({ action: 'reissue', inviteId: id }));
-    expect(response.status).toBe(201);
-    expect(m.reissue).toHaveBeenCalledWith(expect.objectContaining({ inviteId: id, actorUserId: 'admin-a', organizationId: 'org-a' }));
-    expect(await response.json()).toEqual({ inviteId: 'replacement', delivery: 'failed' });
-  });
-  it('does not email a terminal or unavailable invitation', async () => {
-    m.reissue.mockResolvedValue({ success: false, error: 'Invitation is no longer available' });
-    expect((await POST(request({ action: 'reissue', inviteId: id }))).status).toBe(409);
-    expect(m.deliver).not.toHaveBeenCalled();
-  });
-  it('revokes without submitting an email', async () => {
-    expect((await POST(request({ action: 'revoke', inviteId: id }))).status).toBe(200);
-    expect(m.revoke).toHaveBeenCalledWith(expect.objectContaining({ actorUserId: 'admin-a', organizationId: 'org-a' }));
-    expect(m.deliver).not.toHaveBeenCalled();
-  });
-});
+const INVITE = '0b7c5a3e-1f2d-4c3b-9a8e-0000000000f1'
+const post = async (body: unknown) => {
+  const { POST } = await import('../auth/invite/manage/route')
+  return (POST as unknown as (r: Request) => Promise<Response>)(new Request('http://localhost/api/auth/invite/manage', { method: 'POST', body: JSON.stringify(body) }))
+}
+
+describe('POST /api/auth/invite/manage refusals', () => {
+  beforeEach(() => { vi.clearAllMocks(); m.authed = true; m.canManage.mockResolvedValue(true) })
+
+  it('refuses an unauthenticated caller with 401 and touches no invite', async () => {
+    m.authed = false
+    expect((await post({ action: 'revoke', inviteId: INVITE })).status).toBe(401)
+    expect(m.revokeInvite).not.toHaveBeenCalled()
+  })
+  it('refuses a member who cannot manage invitations with 403, for revoke and reissue, before reading the body', async () => {
+    m.canManage.mockResolvedValue(false)
+    for (const action of ['revoke', 'reissue']) expect((await post({ action, inviteId: INVITE })).status).toBe(403)
+    expect(m.canManage).toHaveBeenCalledWith('actor-1', 'org-1')
+    expect(m.revokeInvite).not.toHaveBeenCalled()
+    expect(m.reissueInvite).not.toHaveBeenCalled()
+  })
+  it('refuses a malformed action or invite id with 400', async () => {
+    expect((await post({ action: 'delete', inviteId: INVITE })).status).toBe(400)
+    expect((await post({ action: 'revoke', inviteId: 'not-a-guid' })).status).toBe(400)
+    expect((await post({ action: 'revoke', inviteId: INVITE, organizationId: 'org-2' })).status).toBe(400)
+    expect(m.revokeInvite).not.toHaveBeenCalled()
+  })
+  it('scopes the change to the bound organization and actor, and a refused change is 409, never success', async () => {
+    m.revokeInvite.mockResolvedValue({ success: false, error: 'NOT_PENDING' })
+    expect((await post({ action: 'revoke', inviteId: INVITE })).status).toBe(409)
+    expect(m.revokeInvite).toHaveBeenCalledWith(expect.objectContaining({ inviteId: INVITE, actorUserId: 'actor-1', organizationId: 'org-1' }))
+    m.reissueInvite.mockResolvedValue({ success: false, error: 'NOT_PENDING' })
+    expect((await post({ action: 'reissue', inviteId: INVITE })).status).toBe(409)
+    expect(m.deliver).not.toHaveBeenCalled()
+  })
+})

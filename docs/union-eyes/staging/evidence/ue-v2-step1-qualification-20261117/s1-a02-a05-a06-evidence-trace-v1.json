@@ -21,27 +21,20 @@
     "requiredWithEvidence": 120,
     "requiredWithEvidenceGap": 6,
     "actionsWithGaps": [
-      "C01",
-      "C02",
-      "C03",
       "C04",
-      "C05",
       "C06",
       "C07",
       "C08",
-      "C09",
       "C10",
       "C11",
       "C12",
       "C13",
       "C14",
-      "C15",
       "C16",
       "C17",
       "C18",
       "C19",
       "C20",
-      "C21",
       "C22"
     ]
   },
@@ -17109,15 +17102,14 @@
           "method": "POST",
           "route": "/api/auth/invite/accept",
           "boundary": "CAPABILITY_TOKEN",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "POST /api/auth/invite/accept has no route test file importing it.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/auth-invite-create.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C02",
@@ -17131,10 +17123,10 @@
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/auth-invite-create.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C03",
@@ -17150,15 +17142,14 @@
           "method": "POST",
           "route": "/api/auth/invite/manage",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "POST /api/auth/invite/manage has no route test file importing it.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/auth-invite-manage.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C04",
@@ -17195,10 +17186,10 @@
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/pilot-onboarding.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C06",
@@ -17260,13 +17251,13 @@
           "method": "PUT",
           "route": "/api/assignment-profiles",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         },
         {
           "method": "POST",
           "route": "/api/cases/[caseId]/assign",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 2
         },
         {
           "method": "PATCH",
@@ -17278,12 +17269,10 @@
       "v2BrowserChecks": [],
       "behaviouralTests": [
         "lib/cases/automatic-assignment.pglite.test.ts",
-        "lib/cases/assignment-profiles.pglite.test.ts"
+        "lib/cases/assignment-profiles.pglite.test.ts",
+        "app/api/__tests__/cases-caseId-assign.route.test.ts"
       ],
-      "gaps": [
-        "PUT /api/assignment-profiles has no route test file importing it.",
-        "POST /api/cases/[caseId]/assign has no route test file importing it."
-      ]
+      "gaps": []
     },
     {
       "id": "C10",
@@ -17365,7 +17354,7 @@
           "method": "POST",
           "route": "/api/documents/[id]/ocr",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 3
+          "routeTestFiles": 2
         },
         {
           "method": "GET",
@@ -17377,22 +17366,21 @@
           "method": "PUT",
           "route": "/api/documents/[id]/transcript",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         },
         {
           "method": "POST",
           "route": "/api/documents/[id]/transcript/publish",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         }
       ],
       "v2BrowserChecks": [],
-      "behaviouralTests": [],
-      "gaps": [
-        "PUT /api/documents/[id]/transcript has no route test file importing it.",
-        "POST /api/documents/[id]/transcript/publish has no route test file importing it.",
-        "Neither a V2 browser journey nor a kernel/native/route behavioural test is linked to this action."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/documents-transcript-authority.route.test.ts",
+        "app/api/documents/[id]/ocr/route.canonical.pglite.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C16",
@@ -17469,24 +17457,23 @@
           "method": "POST",
           "route": "/api/cases/[caseId]/deadlines",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         },
         {
           "method": "PATCH",
           "route": "/api/cases/[caseId]/deadlines",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 0
+          "routeTestFiles": 1
         }
       ],
       "v2BrowserChecks": [
         "staff-deadline-create-reschedule-complete-cancel",
         "member-deadline-read-only"
       ],
-      "behaviouralTests": [],
-      "gaps": [
-        "POST /api/cases/[caseId]/deadlines has no route test file importing it.",
-        "PATCH /api/cases/[caseId]/deadlines has no route test file importing it."
-      ]
+      "behaviouralTests": [
+        "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+      ],
+      "gaps": []
     },
     {
       "id": "C22",
@@ -17511,9 +17498,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17549,9 +17539,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17587,9 +17580,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17625,9 +17621,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17663,9 +17662,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17701,9 +17703,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17739,9 +17744,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -17792,9 +17800,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
@@ -17852,9 +17863,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
@@ -18397,9 +18411,14 @@
         {
           "baseActionId": "C15",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/documents-transcript-authority.route.test.ts",
+            "app/api/documents/[id]/ocr/route.canonical.pglite.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/documents/[id]/ocr"
+            "POST /api/documents/[id]/ocr",
+            "PUT /api/documents/[id]/transcript",
+            "POST /api/documents/[id]/transcript/publish"
           ]
         },
         {
@@ -18534,8 +18553,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18577,8 +18601,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18637,9 +18666,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -18648,8 +18680,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -18878,9 +18915,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
@@ -18904,9 +18944,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -19081,7 +19124,9 @@
         {
           "baseActionId": "C05",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/pilot-onboarding.route.test.ts"
+          ],
           "testedRoutes": [
             "PATCH /api/pilot/onboarding"
           ]
@@ -19161,15 +19206,20 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
           "baseActionId": "C05",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/pilot-onboarding.route.test.ts"
+          ],
           "testedRoutes": [
             "PATCH /api/pilot/onboarding"
           ]
@@ -19224,7 +19274,9 @@
         {
           "baseActionId": "C05",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/pilot-onboarding.route.test.ts"
+          ],
           "testedRoutes": [
             "PATCH /api/pilot/onboarding"
           ]
@@ -19358,9 +19410,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
@@ -19370,8 +19425,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         }
       ],
       "evidenceGap": null
@@ -19415,9 +19475,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
@@ -19441,17 +19504,32 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
           "baseActionId": "C02",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
             "POST /api/auth/invite/create"
+          ]
+        },
+        {
+          "baseActionId": "C03",
+          "v2BrowserChecks": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-manage.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/auth/invite/manage"
           ]
         },
         {
@@ -19487,7 +19565,9 @@
         {
           "baseActionId": "C05",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/pilot-onboarding.route.test.ts"
+          ],
           "testedRoutes": [
             "PATCH /api/pilot/onboarding"
           ]
@@ -19532,8 +19612,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19575,8 +19660,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -19725,8 +19815,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         }
       ],
       "evidenceGap": null
@@ -19742,8 +19837,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         }
       ],
       "evidenceGap": null
@@ -19759,8 +19859,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         }
       ],
       "evidenceGap": null
@@ -19773,9 +19878,12 @@
         {
           "baseActionId": "C01",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/auth-invite-create.route.test.ts"
+          ],
           "testedRoutes": [
-            "POST /api/auth/invite/create"
+            "POST /api/auth/invite/create",
+            "POST /api/auth/invite/accept"
           ]
         },
         {
@@ -19784,8 +19892,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         }
       ],
       "evidenceGap": null
@@ -19988,8 +20101,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20014,8 +20132,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20040,8 +20163,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20066,8 +20194,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20092,8 +20225,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20118,8 +20256,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20144,8 +20287,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20170,8 +20318,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20196,8 +20349,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20222,8 +20380,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20279,8 +20442,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20305,8 +20473,13 @@
             "staff-deadline-create-reschedule-complete-cancel",
             "member-deadline-read-only"
           ],
-          "behaviouralTests": [],
-          "testedRoutes": []
+          "behaviouralTests": [
+            "app/api/__tests__/cases-caseId-deadlines.route.test.ts"
+          ],
+          "testedRoutes": [
+            "POST /api/cases/[caseId]/deadlines",
+            "PATCH /api/cases/[caseId]/deadlines"
+          ]
         },
         {
           "baseActionId": "C22",
@@ -20444,7 +20617,9 @@
         {
           "baseActionId": "C05",
           "v2BrowserChecks": [],
-          "behaviouralTests": [],
+          "behaviouralTests": [
+            "app/api/__tests__/pilot-onboarding.route.test.ts"
+          ],
           "testedRoutes": [
             "PATCH /api/pilot/onboarding"
           ]
@@ -20534,9 +20709,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
@@ -20583,9 +20761,12 @@
           "v2BrowserChecks": [],
           "behaviouralTests": [
             "lib/cases/automatic-assignment.pglite.test.ts",
-            "lib/cases/assignment-profiles.pglite.test.ts"
+            "lib/cases/assignment-profiles.pglite.test.ts",
+            "app/api/__tests__/cases-caseId-assign.route.test.ts"
           ],
           "testedRoutes": [
+            "PUT /api/assignment-profiles",
+            "POST /api/cases/[caseId]/assign",
             "PATCH /api/grievances/[id]/assign"
           ]
         },
