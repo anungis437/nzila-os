@@ -191,7 +191,7 @@ export function verifyRecovery(recovery, specs, options = {}) {
   }
   for (const [key, statements] of statementsById) {
     const distinct = new Set(statements.map((statement) => statement.status))
-    if (distinct.size > 1 && !declared.has(key)) problems.push(`sources disagree about ${key.replace('|', '/')} (${[...distinct].join(' vs ')}) and no unresolved conflict is recorded`)
+    if (distinct.size > 1 && !declared.has(key)) problems.push(`sources disagree about ${key.replaceAll('|', '/')} (${[...distinct].join(' vs ')}) and no unresolved conflict is recorded`)
   }
   for (const key of declared) {
     const [persona, id] = key.split('|')

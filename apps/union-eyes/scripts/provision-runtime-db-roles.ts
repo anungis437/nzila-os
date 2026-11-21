@@ -197,6 +197,11 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('[provision-runtime-db-roles] Failed:', err instanceof Error ? err.message : err)
+  // Redact anything credential-shaped before logging: dollar-quoted password literals and URL userinfo.
+  const raw = err instanceof Error ? err.message : String(err)
+  const safe = raw
+    .replace(/\$pw\$[\s\S]*?\$pw\$/g, '$pw$[REDACTED]$pw$')
+    .replace(/(:\/\/)[^@\s/]*@/g, '$1[REDACTED]@')
+  console.error('[provision-runtime-db-roles] Failed:', safe)
   process.exit(1)
 })

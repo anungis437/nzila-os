@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 260 |
 | GitHub Workflows | 72 |
 | Contract Test Files | 309 |
-| TS/JS Test Files | 3838 |
+| TS/JS Test Files | 3842 |
 | Python Test Files | 54 |
 
 ## Apps

@@ -125,11 +125,25 @@ export abstract class BaseAdapter implements IngestionAdapter {
    * Used by HTML-based adapters during normalization.
    */
   protected stripHtml(html: string): string {
-    return html
-      .replace(/<script[\s\S]*?<\/script>/gi, "") // codeql[js/bad-tag-filter] - plain-text extraction for AI, not security sanitization
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ") // codeql[js/bad-tag-filter] - used for text extraction only
-      .replace(/\s+/g, " ")
-      .trim();
+    return stripHtmlMarkup(html).replace(/\s+/g, " ").trim();
   }
+}
+
+/**
+ * Remove HTML markup for plain-text extraction. Repeats until the output is stable so that
+ * nested/overlapping fragments (e.g. "<<b>script>") cannot reassemble into a tag after one pass.
+ */
+function stripHtmlMarkup(input: string): string {
+  let text = input;
+  let previous: string;
+  do {
+    previous = text;
+    text = text
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/<[^>]*>/g, " ");
+  } while (text !== previous);
+  // Any stray angle bracket left (unterminated tag) is dropped so no tag fragment survives.
+  return text.replace(/[<>]/g, " ");
 }

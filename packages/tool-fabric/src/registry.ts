@@ -83,7 +83,11 @@ export const toolEvidenceRefSchema: z.ZodType<ToolEvidenceRef> = z
   .strict()
 
 const DIGEST_PATTERN = /^sha256:[0-9a-f]{64}$/
-const EXACT_VERSION = /^\d+(?:\.\d+)*(?:[-+.][0-9A-Za-z.-]+)?$/
+// Unambiguous (linear) form of /^\d+(?:\.\d+)*(?:[-+.][0-9A-Za-z.-]+)?$/
+const EXACT_VERSION = /^\d+(?:\.[0-9A-Za-z.-]+|(?:\.\d+)*[-+][0-9A-Za-z.-]+)?$/
+export function isExactVersion(version: string): boolean {
+  return EXACT_VERSION.test(version)
+}
 
 const TRANSITIONS: Readonly<Record<ToolTrustStatus, readonly ToolTrustStatus[]>> = {
   DISCOVERED: ['EVALUATING', 'REJECTED'],
@@ -331,7 +335,7 @@ export class ToolRegistry {
     } else if (g.subjectDigest !== identity.digest) {
       problems.push('governance decision is not bound to this artifact digest')
     }
-    if (!EXACT_VERSION.test(identity.version)) problems.push('approval requires an exact version')
+    if (!isExactVersion(identity.version)) problems.push('approval requires an exact version')
     if (!identity.license?.trim()) problems.push('approval requires a reviewed licence')
     if (provenance.mutableUpstream) problems.push('approval refused: upstream is a mutable ref')
     if (g.decidedByRole !== 'platform-governance-board' || !g.authorId || !g.reviewerId ||

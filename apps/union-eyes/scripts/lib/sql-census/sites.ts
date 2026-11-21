@@ -64,9 +64,9 @@ const HOLE = '__hole__'
 const QUERY_METHODS = new Set(['query', 'execute', 'unsafe', 'queryRaw', 'executeRaw', '$queryRaw', '$executeRaw', 'exec', 'queryArray', 'queryObject'])
 const TABLE_METHODS = new Set(['from', 'innerJoin', 'leftJoin', 'rightJoin', 'fullJoin', 'crossJoin', 'update', 'delete', 'insert', 'into'])
 const DECORATORS = new Set(['mapWith', 'as', 'append', 'inlineParams', 'getSQL', 'if'])
-const SQL_START = /^\s*(?:\/\*[\s\S]*?\*\/\s*|--[^\n]*\n\s*)*(?:WITH\b|SELECT\b|INSERT\s+INTO\b|UPDATE\s+[\w".]+\s+SET\b|DELETE\s+FROM\b|MERGE\s+INTO\b)/i
+const SQL_START = /^\s*(?:\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/\s*|--[^\n]*\n\s*)*(?:WITH\b|SELECT\b|INSERT\s+INTO\b|UPDATE\s+[\w".]+\s+SET\b|DELETE\s+FROM\b|MERGE\s+INTO\b)/i
 /** A bare string literal is SQL only when it has a statement's structure: English that begins with "Select" ("Select worksite (optional)") must not count. */
-const STRUCTURED_START = /^\s*(?:\/\*[\s\S]*?\*\/\s*|--[^\n]*\n\s*)*(?:WITH\s+[\w"]+\s+AS\s*\(|SELECT\b[\s\S]*\bFROM\b|INSERT\s+INTO\b|UPDATE\s+[\w".]+\s+SET\b|DELETE\s+FROM\b|MERGE\s+INTO\b)/i
+const STRUCTURED_START = /^\s*(?:\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/\s*|--[^\n]*\n\s*)*(?:WITH\s+[\w"]+\s+AS\s*\(|SELECT\b[\s\S]*\bFROM\b|INSERT\s+INTO\b|UPDATE\s+[\w".]+\s+SET\b|DELETE\s+FROM\b|MERGE\s+INTO\b)/i
 const FOREIGN_DIALECT = /\b(mssql|azure-sql|sqlserver|mysql|sqlite|oracle)\b/i
 const UTILITY_START = /^\s*(?:CREATE|ALTER|DROP|TRUNCATE|GRANT|REVOKE|COMMENT\s+ON|COPY|DO|CALL|SET|RESET|BEGIN|COMMIT|ROLLBACK|SAVEPOINT|ANALYZE|VACUUM|LOCK|LISTEN|NOTIFY)\b/i
 

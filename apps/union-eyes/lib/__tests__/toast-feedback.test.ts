@@ -45,7 +45,7 @@ function mountedRenderers(): Set<string> {
     .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
   const mounted = new Set<string>()
   const rendered = (component: string) => new RegExp(`<${component}\\b`).test(layout)
-  const imported = (component: string, from: string) => new RegExp(`import\\s*\\{[^}]*\\b${component}\\b[^}]*\\}\\s*from\\s*['"]${from.replace(/[/.]/g, '\\$&')}['"]`).test(layout)
+  const imported = (component: string, from: string) => new RegExp(`import\\s*\\{[^}]*\\b${component}\\b[^}]*\\}\\s*from\\s*['"]${from.replace(/[\\^$.*+?()[\]{}|/]/g, '\\$&')}['"]`).test(layout)
   // The radix toaster draws what `useToast` from components/ui/use-toast holds (components/ui/toaster.tsx reads it).
   if (imported('Toaster', '@/components/ui/toaster') && rendered('Toaster')) mounted.add('@/components/ui/use-toast')
   if (imported('Toaster as SonnerToaster', '@/components/ui/sonner') && rendered('SonnerToaster')) mounted.add('sonner')

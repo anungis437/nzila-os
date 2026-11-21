@@ -8,7 +8,7 @@
  * - Tamper detection
  */
 
-import { createHmac, randomBytes, pbkdf2Sync, createVerify, createPublicKey } from 'crypto';
+import { createHmac, randomBytes, randomInt, pbkdf2Sync, createVerify, createPublicKey } from 'crypto';
 import { logger } from '@/lib/logger';
 
 interface VoteReceipt {
@@ -178,7 +178,7 @@ export function generateVoteReceipt(
   previousAuditHash: string | null = null
 ): VoteReceipt {
   const receiptId = randomBytes(16).toString('hex');
-  const verificationCode = (randomBytes(3).readUIntBE(0, 3) % 1_000_000) // codeql[js/biased-cryptographic-random] - display-only receipt code, not a secret or ballot security token
+  const verificationCode = randomInt(0, 1_000_000) // unbiased CSPRNG draw
     .toString()
     .padStart(6, '0');
 

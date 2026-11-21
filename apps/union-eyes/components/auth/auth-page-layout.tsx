@@ -47,8 +47,10 @@ export default function AuthPageLayout({
   tagline,
   subtitle,
   stats = [],
-  heroImage = 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80',
-  heroAlt = 'Professional team meeting — representing organized labor collaboration',
+  // A sign-in page loads nothing from a third party: the hero is the app's own illustration, so the page works offline and in
+  // locked-down deployments, and no outside host sees who opens the login screen.
+  heroImage = '/images/hero/hero-teamwork.svg',
+  heroAlt = 'Illustration of a team working together — representing organized labor collaboration',
   isSignUp: _isSignUp = false,
 }: AuthPageLayoutProps) {
   return (
@@ -61,6 +63,7 @@ export default function AuthPageLayout({
           alt={heroAlt}
           fill
           priority
+          unoptimized={heroImage.endsWith('.svg')}
           className="object-cover"
           sizes="55vw"
         />

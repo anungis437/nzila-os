@@ -179,18 +179,34 @@ const CLAUSE_FAMILY_KEYWORDS: Record<string, string[]> = {
 // Text normalization
 // ---------------------------------------------------------------------------
 
+/**
+ * Remove HTML markup for plain-text extraction. Repeats until the output is stable so that
+ * nested/overlapping fragments (e.g. "<<b>script>") cannot reassemble into a tag after one pass.
+ */
+function stripHtmlMarkup(input: string): string {
+  let text = input;
+  let previous: string;
+  do {
+    previous = text;
+    text = text
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/<[^>]*>/g, " ");
+  } while (text !== previous);
+  // Any stray angle bracket left (unterminated tag) is dropped so no tag fragment survives.
+  return text.replace(/[<>]/g, " ");
+}
+
 function normalizeText(rawContent: string, contentType: string): string {
   if (contentType.includes("text/html")) {
-    return rawContent
-      .replace(/<script[\s\S]*?<\/script>/gi, "") // codeql[js/bad-tag-filter] - plain-text extraction for AI ingestion
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ") // codeql[js/bad-tag-filter]
+    return stripHtmlMarkup(rawContent)
       .replace(/&nbsp;/gi, " ")
-      .replace(/&amp;/gi, "&") // codeql[js/double-escaping] - decoding for plain-text AI ingestion, not re-rendered as HTML
       .replace(/&lt;/gi, "<")
       .replace(/&gt;/gi, ">")
       .replace(/&quot;/gi, '"')
       .replace(/&#39;/gi, "'")
+      .replace(/&amp;/gi, "&") // decoded last so "&amp;lt;" becomes "&lt;", not "<"
       .replace(/\s+/g, " ")
       .trim();
   }

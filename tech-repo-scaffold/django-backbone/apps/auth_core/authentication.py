@@ -68,7 +68,7 @@ class OIDCAuthentication(authentication.BaseAuthentication):
 
         except jwt.InvalidTokenError as e:
             logger.error(f"Invalid token: {e}")
-            raise exceptions.AuthenticationFailed(f"Invalid authentication token: {str(e)}")
+            raise exceptions.AuthenticationFailed("Invalid authentication token")
 
         except Exception as e:
             logger.exception(f"Unexpected auth error: {e}")

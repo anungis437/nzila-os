@@ -14,8 +14,13 @@ const leadCaptureSchema = z.object({
 })
 
 function sanitizeInput(text: string): string {
-  // codeql[js/incomplete-multi-character-sanitization] - test helper only, not production sanitization
-  return text.replace(/<script[\s>][\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, '').trim()
+  let out = text
+  let prev: string
+  do {
+    prev = out
+    out = out.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '').replace(/<[^>]*>/g, '')
+  } while (out !== prev)
+  return out.replace(/[<>]/g, '').trim()
 }
 
 describe('Lead Capture Validation', () => {

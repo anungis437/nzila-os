@@ -73,6 +73,24 @@ export interface ParsedData {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Remove HTML markup for plain-text extraction. Repeats until stable so nested/overlapping
+ * fragments cannot reassemble into a tag after one pass.
+ */
+function stripHtmlMarkup(input: string): string {
+  let text = input;
+  let previous: string;
+  do {
+    previous = text;
+    text = text
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, '')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<[^>]*>/g, '');
+  } while (text !== previous);
+  return text.replace(/[<>]/g, '');
+}
+
 export interface TableData {
   headers: string[];
   rows: Record<string, string>[];
@@ -343,12 +361,11 @@ class DOCXParser implements FileParser {
         const result = await mammoth.convertToHtml({ buffer: buffer });
         
         // Simple HTML tag stripping
-        const text = result.value
-          .replace(/<[^>]*>/g, '') // codeql[js/bad-tag-filter, js/incomplete-multi-character-sanitization] - plain-text extraction for AI ingestion
+        const text = stripHtmlMarkup(result.value)
           .replace(/&nbsp;/g, ' ')
-          .replace(/&amp;/g, '&') // codeql[js/double-escaping] - decoding for AI ingestion, not re-rendered as HTML
           .replace(/&lt;/g, '<')
           .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&') // decoded last so "&amp;lt;" becomes "&lt;", not "<"
           .trim();
         
         return {

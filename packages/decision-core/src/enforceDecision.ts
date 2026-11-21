@@ -45,8 +45,9 @@ function isBlocking(level: DecisionEnforcementLevel): boolean {
  * A blank, whitespace, or free-form string is rejected to prevent silent
  * acceptance of malformed policy references at the enforcement boundary.
  */
-const POLICY_VERSION_RE = /^(?:\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)*|\d{4}-\d{2}-\d{2}(?:\.\d+)?)$/
-function isValidPolicyVersion(version: string): boolean {
+const POLICY_VERSION_RE =
+  /^(?:\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+(?:\+[0-9A-Za-z.-]+)*)?|\d{4}-\d{2}-\d{2}(?:\.\d+)?)$/
+export function isValidPolicyVersion(version: string): boolean {
   return POLICY_VERSION_RE.test(version.trim())
 }
 

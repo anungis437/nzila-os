@@ -3,12 +3,16 @@ SignatureService API ViewSet
 Generated from service: signature-service
 """
 
+import logging
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from documents.models import *  # Import relevant models
+
+logger = logging.getLogger(__name__)
 # from documents.serializers import SignatureServiceSerializer
 
 
@@ -62,10 +66,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'hashDocument not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -84,10 +89,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'hashDocumentReference not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -106,10 +112,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'signDocument not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -128,10 +135,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'signDocumentWithKey not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -150,10 +158,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'getDocumentSignatures not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -172,10 +181,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'rejectSignature not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -194,10 +204,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'createSignatureRequest not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -216,10 +227,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'getUserSignatureRequests not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -238,10 +250,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'completeSignatureRequestStep not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -260,10 +273,11 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'cancelSignatureRequest not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
@@ -282,8 +296,9 @@ class SignatureServiceViewSet(viewsets.ModelViewSet):
                 'message': 'expireOverdueSignatureRequests not yet implemented'
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
+        except Exception:
+            logger.exception("Signature service request failed")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An internal error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
