@@ -67,9 +67,15 @@ function secrets() {
   const file = join(STATE_ROOT, 'secrets.json')
   if (!existsSync(file)) {
     const token = () => randomBytes(24).toString('hex')
-    writeFileSync(file, JSON.stringify({ db: token(), auth: token(), voting: token(), nar: token() }), { mode: 0o600 })
+    writeFileSync(file, JSON.stringify({ db: token(), auth: token(), voting: token(), nar: token(), seal: token() }), { mode: 0o600 })
   }
-  return JSON.parse(readFileSync(file, 'utf8'))
+  const stored = JSON.parse(readFileSync(file, 'utf8'))
+  // Older runtimes predate the correspondence seal key; add it once, keeping every other secret.
+  if (!stored.seal) {
+    stored.seal = randomBytes(24).toString('hex')
+    writeFileSync(file, JSON.stringify(stored), { mode: 0o600 })
+  }
+  return stored
 }
 
 /** Opaque per-worktree owner key. Only containers with this exact label may be reused or removed. */
@@ -136,6 +142,8 @@ export function runtimeEnv() {
     ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
     UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
     NAR_SIGNING_SECRET: secrets().nar,
+    // Seals queued correspondence (lib/correspondence/email-intent.ts); production provisions its own (bicep evidence-seal-key).
+    EVIDENCE_SEAL_KEY: secrets().seal,
     NAR_SIGNING_KEY_ID: 'local-acceptance',
     NAR_STORAGE_MODE: 'local_sandbox',
     NAR_LOCAL_SANDBOX_DIR: join(STATE, 'nar-sandbox'),

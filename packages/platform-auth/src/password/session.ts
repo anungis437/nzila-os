@@ -119,9 +119,10 @@ export async function validateSession(
 async function touchSessionLastUsed(dbExecutor: typeof db, sessionId: string): Promise<void> {
   try {
     await dbExecutor.transaction(async (savepoint) => {
-      const [previous] = (await savepoint.execute(
-        sql`SELECT current_setting('lock_timeout') AS value`,
-      )) as unknown as Array<{ value: string }>
+      // postgres.js returns the rows array; PGlite returns { rows }.
+      const read = (await savepoint.execute(sql`SELECT current_setting('lock_timeout') AS value`)) as unknown as
+        Array<{ value: string }> | { rows: Array<{ value: string }> }
+      const [previous] = Array.isArray(read) ? read : read.rows
       await savepoint.execute(sql`SELECT set_config('lock_timeout', '100ms', true)`)
       await savepoint
         .update(authUserSessions)

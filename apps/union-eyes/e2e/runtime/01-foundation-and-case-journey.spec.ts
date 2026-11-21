@@ -139,15 +139,25 @@ test.describe('journey A: member files, authority decides who can see it', () =>
       !process.env.DATABASE_URL || !process.env.PLATFORM_DATABASE_URL,
       'needs DATABASE_URL and PLATFORM_DATABASE_URL to inspect persistence',
     )
-    const { claim, audit } = await inspectFiling(caseId, PRIMARY)
+    const { claim, audit, canonicalProofs } = await inspectFiling(caseId, PRIMARY)
     expect(claim).toMatchObject({
       status: 'submitted',
       member_id: UE_TEST_USERS.memberPrimary.userId,
       organization_id: PRIMARY,
     })
-    expect(audit.length).toBeGreaterThan(0)
-    for (const record of audit)
-      expect(record).toMatchObject({ storage_type: 'local_sandbox', immutable: false })
+    if (process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1') {
+      // V2 seals the decision proof in the canonical tenant audit chain, in the filing's own transaction; no WORM claim is made.
+      expect(canonicalProofs.length).toBeGreaterThan(0)
+      for (const proof of canonicalProofs) {
+        expect(proof.proof_storage).toBe('canonical_append_only_audit_log')
+        expect(proof.seal_hash).toMatch(/^[a-f0-9]{64}$/)
+        expect(proof.signature).toBeTruthy()
+      }
+    } else {
+      expect(audit.length).toBeGreaterThan(0)
+      for (const record of audit)
+        expect(record).toMatchObject({ storage_type: 'local_sandbox', immutable: false })
+    }
   })
 
   test('the member sees the case in the queue and can open it; a member of another organization cannot', async ({}, testInfo) => {

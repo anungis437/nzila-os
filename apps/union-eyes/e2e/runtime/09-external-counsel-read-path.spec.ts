@@ -113,7 +113,9 @@ test.describe('external representative: default-deny, whitelist projection, per-
       '/api/assurance/finance/ledger',
     ]) {
       const status = (await c.get(path)).status()
-      expect([401, 403, 404], `${path} -> ${status}`).toContain(status)
+      // Financial assurance is not offered in the base release: it answers 501 to everyone and discloses nothing (as spec 08 asserts).
+      const refusals = path === '/api/assurance/finance/ledger' ? [401, 403, 404, 501] : [401, 403, 404]
+      expect(refusals, `${path} -> ${status}`).toContain(status)
     }
   })
 

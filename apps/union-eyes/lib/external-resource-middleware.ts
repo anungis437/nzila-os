@@ -10,6 +10,7 @@ import {
 } from '@/lib/services/external-resource-authorization-service';
 import { representationAuthorityScopeEnum, type RepresentationAuthority } from '@/db/schema/representation-authority-schema';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+import { auth } from '@nzila/platform-auth/entra/server';
 import { readCanonicalExternalResource, type ExternalReadOperation } from '@/lib/external-resource-read/reader';
 
 const IDENTIFIER_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -114,6 +115,8 @@ export function withExternalMatterResourceAuth<TParams extends object = External
         // exact-resource reader, never the legacy raw-table handler/context.
         if (!options.protectedRead || !['GET', 'HEAD'].includes(request.method.toUpperCase()))
           return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        // No signed-in principal at all is 401, as every other route answers it, before any database work is attempted.
+        if (!(await auth()).userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         const routeParams = await resolveRouteParams(params);
         const resource = options.resolve(request, routeParams);
         const documentId = ['document', 'download'].includes(options.protectedRead)

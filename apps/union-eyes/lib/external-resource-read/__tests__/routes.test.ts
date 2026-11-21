@@ -1,7 +1,8 @@
 /** Route/middleware wiring only; actual SQL authorization and byte orchestration
  * have their own component suites. No authenticated HTTP-runtime claim. */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-const state = vi.hoisted(() => ({ read: vi.fn(), legacy: vi.fn(), requireUser: vi.fn(), principal: vi.fn(), tenant: vi.fn() }))
+const state = vi.hoisted(() => ({ read: vi.fn(), legacy: vi.fn(), requireUser: vi.fn(), principal: vi.fn(), tenant: vi.fn(), auth: vi.fn() }))
+vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: state.auth }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => true }))
 vi.mock('@/lib/external-resource-read/reader', () => ({ readCanonicalExternalResource: state.read }))
 vi.mock('@/lib/api-auth-guard', () => ({ requireUser: state.requireUser }))
@@ -17,7 +18,11 @@ import { GET as document } from '@/app/api/external/documents/[id]/route'
 import { GET as download } from '@/app/api/external/documents/[id]/download/route'
 
 const org = '00000000-0000-4000-8000-000000000001', caseId = '00000000-0000-4000-8000-000000000002', doc = '00000000-0000-4000-8000-000000000003'
-beforeEach(() => { vi.clearAllMocks(); state.read.mockImplementation(async () => new Response('Synthetic protected reader result', { status: 200 })) })
+beforeEach(() => {
+  vi.clearAllMocks()
+  state.auth.mockResolvedValue({ userId: 'synthetic-representative' })
+  state.read.mockImplementation(async () => new Response('Synthetic protected reader result', { status: 200 }))
+})
 describe('canonical external GET routes use the protected reader without target membership or legacy raw handlers', () => {
   it.each([
     ['matter', matter, caseId, `https://fixture.invalid/api/external/grievances/${caseId}?organizationId=${org}`],
@@ -32,6 +37,13 @@ describe('canonical external GET routes use the protected reader without target 
     expect(state.requireUser).not.toHaveBeenCalled()
     expect(state.principal).not.toHaveBeenCalled()
     expect(state.tenant).not.toHaveBeenCalled()
+  })
+
+  it('answers an anonymous caller 401 before the protected reader or any database context', async () => {
+    state.auth.mockResolvedValueOnce({ userId: null })
+    const response = await matter(new Request(`https://fixture.invalid/api/external/grievances/${caseId}?organizationId=${org}`), { params: Promise.resolve({ id: caseId }) })
+    expect(response.status).toBe(401)
+    expect(state.read).not.toHaveBeenCalled(); expect(state.principal).not.toHaveBeenCalled(); expect(state.tenant).not.toHaveBeenCalled()
   })
 
   it('does not infer an external write from a read qualification', async () => {

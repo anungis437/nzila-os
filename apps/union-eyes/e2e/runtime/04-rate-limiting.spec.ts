@@ -148,8 +148,10 @@ test.describe('rate limiting contract', () => {
         'x-ratelimit-mode'
       ]
     await expect.poll(modeOf, { timeout: 90_000, intervals: [2_000] }).toBe('shared')
+    // An active, signed-in person with an unspent bucket: a suspended account never obtains a session under real login, so its
+    // burst would meet only the per-address ceiling and prove nothing about the session limit returning to the shared store.
     const result = await burst(
-      await as(UE_TEST_USERS.suspendedMember.userId, PRIMARY),
+      await as(UE_TEST_USERS.financeReconciler.userId, PRIMARY),
       MUTATION_LIMIT + 5,
     )
     expect(result.allowed).toBeLessThanOrEqual(MUTATION_LIMIT)

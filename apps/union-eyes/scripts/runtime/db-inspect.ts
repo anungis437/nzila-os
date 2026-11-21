@@ -15,6 +15,8 @@ export interface FilingEvidence {
     immutable: boolean | null
     previous_hash: string | null
   }>
+  /** V2: the signed decision proofs in the canonical tenant audit chain (canonical-nar-proof.ts). */
+  canonicalProofs: Array<{ proof_storage: string | null; seal_hash: string | null; signature: string | null }>
 }
 
 export async function inspectFiling(
@@ -41,7 +43,15 @@ export async function inspectFiling(
         [organizationId, `%${claimId}%`],
       )
     ).rows
-    return { claim, audit }
+    const canonicalProofs = (
+      await app.query(
+        `SELECT details->>'proofStorage' AS proof_storage, details->'narRecord'->'seal'->>'hash' AS seal_hash,
+                details->'narRecord'->'seal'->>'signature' AS signature
+           FROM public.audit_logs WHERE organization_id = $1 AND action = 'nar.decision.proof' AND details::text LIKE $2`,
+        [organizationId, `%${claimId}%`],
+      )
+    ).rows
+    return { claim, audit, canonicalProofs }
   } finally {
     await app.end()
     await platform.end()
