@@ -1,22 +1,31 @@
 # Executive Reliability Dashboard
 
-Generated: 2026-05-04T02:02:47.934Z
+Generated: 2026-11-17T21:42:29.513Z
 
-## Score Summary (0-10)
+Source and configuration checks do not establish live availability, alert delivery, SLO attainment, deployment success or recovery.
+
+## Source and Configuration Scores (0-10)
 
 - Reliability: 10
 - Observability: 10
-- Incident Readiness: 10
-- Cost Governance: 10
-- MTTR Readiness: 10
+- Incident procedures: 10
+- Cost governance: 10
+- Recovery procedures: 10
 
-## Portfolio Signals
+## Observed Inputs
 
-- Apps breaching SLO contract: 0
+- Apps missing endpoint source contracts: 0
 - Synthetic configured targets: 6
-- Alert routing ready: true
-- Unresolved app cost mapping: 17
+- Alert routing configuration valid: true
+- Live alert delivery: unverified
+- Runtime incident MTTR: unknown
+- Deployment success rate: unknown
+- Rollback count: unknown
+- Current-window distinct CI workflows: 0
 
-## Top Risk Apps
+## Remaining Evidence
 
-- none
+- Verify live synthetic probes; configured targets alone do not establish endpoint availability.
+- Verify live alert delivery; routing configuration alone does not establish delivery.
+- Backfill actual deployment outcomes and rollback events; CI workflow conclusions are not deployment or rollback receipts.
+- Integrate a current runtime incident feed; vulnerability remediation metrics do not establish incident MTTR or incident counts.

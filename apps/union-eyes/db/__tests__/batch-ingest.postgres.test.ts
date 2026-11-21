@@ -24,6 +24,8 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { serializeRawDates } from '@/db/driver-dates'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const state = vi.hoisted(() => ({ tx: null as unknown }))
@@ -89,17 +91,20 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     client = postgres(URL!, { max: 4, onnotice: () => undefined })
     const db = drizzle(client)
     serializeRawDates(client)
+    // The importer is a live administrator of each organization, and the import runs in the importer's own verified business session,
+    // as the route's tenant transaction does (canonical V2: ue_v2_verified_business_session).
     run = (organizationId, work) =>
-      db.transaction(async (tx) => {
+      withNativeCanonicalActor(IMPORTER, organizationId, (binding) => db.transaction(async (tx) => {
         await tx.execute(sql.raw('SET LOCAL ROLE union_eyes_runtime'))
         await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId}, true), set_config('app.current_user_id', ${IMPORTER}, true)`)
+        await installNativeBusinessContext((statement) => tx.execute(statement), binding)
         state.tx = tx
         try {
           return await work()
         } finally {
           state.tx = null
         }
-      })
+      }))
     for (const [id, name] of [
       [ORG, 'Ingest Fixture Local'],
       [OTHER, 'Another Local'],
@@ -109,6 +114,7 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
          VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
         [id, name, `ing-${sfx}-${id.slice(0, 6)}`],
       )
+      await seedDeclaredCanonicalActor(admin, IMPORTER, id, 'admin')
     }
   }, 120_000)
 
@@ -175,32 +181,41 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
   it('is idempotent: the same records again change the same rows and add no copy', async () => {
     const before = await rows(`SELECT id::text id, grievance_number FROM grievances WHERE organization_id = $1 ORDER BY external_case_id`, [ORG])
     const documentsBefore = await rows(`SELECT id::text id FROM documents WHERE organization_id = $1 ORDER BY id`, [ORG])
-    const second = await importAs(ORG, [
-      record(ORG, 'C-1', {
-        title: 'Case C-1, corrected',
-        status: 'investigating',
-        timeline: [{ date: '2026-01-11', action: 'acknowledged', actor: 'Steward', notes: 'Acknowledged by the steward' }],
-        documents: [
-          { external_id: 'D-1', name: 'Grievance form (signed).pdf', file_type: 'pdf', file_url: 'https://files.example.test/form.pdf' },
-          { name: 'Phone note', file_type: 'note' },
-        ],
-      }),
-      record(ORG, 'C-2'),
-    ])
+    const corrected = (status: string) => record(ORG, 'C-1', {
+      title: 'Case C-1, corrected',
+      status,
+      timeline: [{ date: '2026-01-11', action: 'acknowledged', actor: 'Steward', notes: 'Acknowledged by the steward' }],
+      documents: [
+        { external_id: 'D-1', name: 'Grievance form (signed).pdf', file_type: 'pdf', file_url: 'https://files.example.test/form.pdf' },
+        { name: 'Phone note', file_type: 'note' },
+      ],
+    })
+
+    // An import is not a case handler: canonical V2 lets only an actor with case:transition authority over the case change its status
+    // (ue_guard_case_closure_write, CASE_TRANSITION_AUTHORITY_REQUIRED). A re-import that would move an existing case's status fails that
+    // record and leaves nothing of it; the record after it still imports.
+    const moved = await importAs(ORG, [corrected('investigating'), record(ORG, 'C-2')])
+    expect(moved).toMatchObject({ status: 'partial', succeeded: 1, failed: 1 })
+    expect(moved.errors.map((e) => e.externalId)).toEqual(['C-1'])
+    const untouched = await rows(`SELECT id::text id, grievance_number, title, status, import_batch_id::text batch FROM grievances WHERE organization_id = $1 AND external_case_id = 'C-1'`, [ORG])
+    expect(untouched).toEqual([{ id: before[0].id, grievance_number: before[0].grievance_number, title: 'Case C-1', status: 'filed', batch: firstBatch }])
+    expect((await rows(`SELECT name FROM documents WHERE organization_id = $1 AND external_document_id = 'D-1'`, [ORG]))[0].name).toBe('Grievance form.pdf')
+
+    const second = await importAs(ORG, [corrected('filed'), record(ORG, 'C-2')])
     expect(second).toMatchObject({ status: 'completed', succeeded: 2, failed: 0 })
     expect(second.batchId).not.toBe(firstBatch)
 
     const after = await rows(`SELECT id::text id, grievance_number, title, status, import_batch_id::text batch FROM grievances WHERE organization_id = $1 ORDER BY external_case_id`, [ORG])
     expect(after.map((r) => ({ id: r.id, grievance_number: r.grievance_number }))).toEqual(before)
-    expect(after[0]).toMatchObject({ title: 'Case C-1, corrected', status: 'investigating', batch: second.batchId })
+    expect(after[0]).toMatchObject({ title: 'Case C-1, corrected', status: 'filed', batch: second.batchId })
     expect(await rows(`SELECT id::text id FROM documents WHERE organization_id = $1 ORDER BY id`, [ORG])).toEqual(documentsBefore)
     expect((await rows(`SELECT name FROM documents WHERE organization_id = $1 AND external_document_id = 'D-1'`, [ORG]))[0].name).toBe('Grievance form (signed).pdf')
     expect((await rows(`SELECT count(*)::int n FROM document_versions WHERE organization_id = $1`, [ORG]))[0].n).toBe(1)
     expect((await rows(`SELECT count(*)::int n FROM document_links WHERE organization_id = $1`, [ORG]))[0].n).toBe(2)
-    // The acknowledged event is unchanged; the imported event names the status the case now has, so it is a new event.
+    // The acknowledged event is unchanged, and the imported event names the same status as before, so neither is copied.
     expect(await rows(`SELECT event_type, count(*)::int n FROM grievance_timeline_events WHERE grievance_id = $1 GROUP BY event_type ORDER BY event_type`, [before[0].id])).toEqual([
       { event_type: 'acknowledged', n: 1 },
-      { event_type: 'imported', n: 2 },
+      { event_type: 'imported', n: 1 },
     ])
   })
 

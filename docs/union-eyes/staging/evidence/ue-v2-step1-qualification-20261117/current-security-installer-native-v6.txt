@@ -1,0 +1,66 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+ ❯ |union-eyes-native| db/__tests__/current-security-installer.native.test.ts (3 tests | 3 failed) 2101ms
+   ❯ actual released-to-current security transaction on owned native PostgreSQL (3)
+     × refuses an altered legacy policy and preserves the entire security state and history 932ms
+     × rolls back roles, owners, ACLs and functions after a real database failure during the transition 645ms
+     × qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP 522ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes-native| db/__tests__/current-security-installer.native.test.ts > actual released-to-current security transaction on owned native PostgreSQL > refuses an altered legacy policy and preserves the entire security state and history
+AssertionError: expected [Function] to throw error including 'Legacy auth policy preimage differs' but got 'UE_V2_SOURCE_COMMITMENT_DRIFT:apps/un…'
+
+Expected: "Legacy auth policy preimage differs"
+Received: "UE_V2_SOURCE_COMMITMENT_DRIFT:apps/union-eyes/lib/authority/policies/workaid.ts"
+
+ ❯ db/__tests__/current-security-installer.native.test.ts:166:114
+    164|     await operator!.query('ALTER POLICY ue_auth_users_self_select ON u…
+    165|     const before = await securityDigest(admin!), history = await histo…
+    166|     await expect(runCurrentSecurityBootstrapStage(operator!, installUn…
+       |                                                                                                                  ^
+    167|     expect(await securityDigest(admin!)).toBe(before)
+    168|     expect(await historyDigest(admin!, history)).toEqual(history)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |union-eyes-native| db/__tests__/current-security-installer.native.test.ts > actual released-to-current security transaction on owned native PostgreSQL > rolls back roles, owners, ACLs and functions after a real database failure during the transition
+AssertionError: expected [Function] to throw error including 'UE_NATIVE_FORCED_CURRENT_SECURITY_FAI…' but got 'UE_V2_SOURCE_COMMITMENT_DRIFT:apps/un…'
+
+Expected: "UE_NATIVE_FORCED_CURRENT_SECURITY_FAILURE"
+Received: "UE_V2_SOURCE_COMMITMENT_DRIFT:apps/union-eyes/lib/authority/policies/workaid.ts"
+
+ ❯ db/__tests__/current-security-installer.native.test.ts:176:114
+    174|     await admin!.query("CREATE EVENT TRIGGER ue_native_forced_security…
+    175|     const before = await securityDigest(admin!), history = await histo…
+    176|     await expect(runCurrentSecurityBootstrapStage(operator!, installUn…
+       |                                                                                                                  ^
+    177|     expect(await securityDigest(admin!)).toBe(before)
+    178|     expect(await historyDigest(admin!, history)).toEqual(history)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |union-eyes-native| db/__tests__/current-security-installer.native.test.ts > actual released-to-current security transaction on owned native PostgreSQL > qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP
+Error: UE_V2_SOURCE_COMMITMENT_DRIFT:apps/union-eyes/lib/authority/policies/workaid.ts
+ ❯ assertCurrentSourceCommitments scripts/bootstrap-v2/source.ts:33:35
+     31|     if (source.startsWith('python:')) continue
+     32|     const current = hash(readFileSync(path.join(root, ...source.split(…
+     33|     if (current !== digest) throw new Error(`UE_V2_SOURCE_COMMITMENT_D…
+       |                                   ^
+     34|   }
+     35| }
+ ❯ loadCurrentSecurityPlan ../../tooling/scripts/lib/union-eyes-current-security-programs.ts:29:3
+ ❯ installUnionEyesCurrentSecurity ../../tooling/scripts/lib/union-eyes-current-security-installer.ts:420:16
+ ❯ runCurrentSecurityBootstrapStage ../../tooling/scripts/lib/union-eyes-bootstrap-stages.mjs:62:20
+ ❯ db/__tests__/current-security-installer.native.test.ts:183:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  21:00:30
+   Duration  2.72s (tests 80%, setup 10%, transform 6%, import 4%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v6.json

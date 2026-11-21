@@ -26,7 +26,7 @@ vi.mock('@/lib/organizations/read-authority', async () => {
 vi.mock('@/db/schema', () => ({ organizationMembers: { organizationId: 'organizationId', deletedAt: 'deletedAt', status: 'status', role: 'role' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), isNull: vi.fn(() => 'isNull'), inArray: vi.fn(() => 'inArray'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
+  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), isNull: vi.fn(() => 'isNull'), inArray: vi.fn(() => 'inArray') };
 });
 
 async function loadRoute() {

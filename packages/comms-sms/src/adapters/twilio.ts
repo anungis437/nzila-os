@@ -24,12 +24,32 @@ function parseCredentials(creds: Record<string, unknown>): TwilioCredentials {
   return { accountSid, authToken, fromNumber }
 }
 
+/**
+ * Optional delivery-status webhook, passed as `request.metadata.statusCallback`.
+ * Absent means no callback. Present but not an absolute http(s) URL is refused
+ * rather than forwarded, so a misconfigured base URL never reaches the provider.
+ */
+function parseStatusCallback(request: SendRequest): { ok: true; url?: string } | { ok: false; error: string } {
+  const value = request.metadata?.['statusCallback']
+  if (value === undefined) return { ok: true }
+  if (typeof value !== 'string') return { ok: false, error: 'Invalid Twilio statusCallback' }
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return { ok: false, error: 'Invalid Twilio statusCallback' }
+    return { ok: true, url: url.toString() }
+  } catch {
+    return { ok: false, error: 'Invalid Twilio statusCallback' }
+  }
+}
+
 export const twilioAdapter: IntegrationAdapter = {
   provider: 'twilio',
   channel: 'sms',
 
   async send(request: SendRequest, credentials: Record<string, unknown>): Promise<SendResult> {
     const { accountSid, authToken, fromNumber } = parseCredentials(credentials)
+    const callback = parseStatusCallback(request)
+    if (!callback.ok) return { ok: false, error: callback.error }
     const twilio = await import('twilio')
     const client = twilio.default(accountSid, authToken)
 
@@ -38,6 +58,7 @@ export const twilioAdapter: IntegrationAdapter = {
         to: request.to,
         from: fromNumber,
         body: request.body ?? '',
+        ...(callback.url ? { statusCallback: callback.url } : {}),
       })
       return { ok: true, providerMessageId: message.sid }
     } catch (err) {

@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import ts from 'typescript'
 
 const ROOT = join(__dirname, '..', '..')
 
@@ -31,14 +32,44 @@ describe('UE-FSM-001: Union Eyes route-level FSM enforcement', () => {
     const src = read('apps/union-eyes/app/api/cases/[caseId]/escalate/route.ts')
     expect(src).toContain('updateClaimStatusById')
 
-    const claimsUpdateStart = src.indexOf('.update(claims)')
-    const claimsUpdateEnd = src.indexOf('.where(and(eq(claims.claimId, caseId), eq(claims.organizationId, orgId)));', claimsUpdateStart)
-    expect(claimsUpdateStart).toBeGreaterThanOrEqual(0)
-    expect(claimsUpdateEnd).toBeGreaterThan(claimsUpdateStart)
-
-    const claimsUpdateBlock = src.slice(claimsUpdateStart, claimsUpdateEnd)
-    expect(claimsUpdateBlock).not.toContain("status: 'resolved'")
-    expect(claimsUpdateBlock).toContain('resolutionOutcome')
+    // Inspect the actual update expression instead of assuming the resource ID
+    // variable's spelling. Escalation now binds writes to the locked canonical
+    // claim; a future direct status write must still fail this contract.
+    const tree = ts.createSourceFile('escalate.ts', src, ts.ScriptTarget.Latest, true)
+    const updates: ts.CallExpression[] = []
+    const visit = (node: ts.Node) => {
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) &&
+          node.expression.name.text === 'set') {
+        const receiver = node.expression.expression
+        if (ts.isCallExpression(receiver) && ts.isPropertyAccessExpression(receiver.expression) &&
+            receiver.expression.name.text === 'update' && receiver.arguments[0]?.getText(tree) === 'claims') {
+          updates.push(node)
+        }
+      }
+      ts.forEachChild(node, visit)
+    }
+    visit(tree)
+    expect(updates).toHaveLength(1)
+    const update = updates[0]!
+    const values = update.arguments[0]!
+    expect(ts.isObjectLiteralExpression(values)).toBe(true)
+    if (!ts.isObjectLiteralExpression(values)) throw new Error('Claim update must declare its fields')
+    expect(values.properties.every(ts.isPropertyAssignment)).toBe(true)
+    const fields = values.properties.map((property) => property.name?.getText(tree).replace(/^['"]|['"]$/g, ''))
+    expect(fields).not.toContain('status')
+    expect(fields).toContain('resolutionOutcome')
+    const transitionStart = src.indexOf('await updateClaimStatusById(')
+    const refusalStart = src.indexOf('if (!transitionResult.success)')
+    expect(transitionStart).toBeGreaterThanOrEqual(0)
+    expect(refusalStart).toBeGreaterThan(transitionStart)
+    expect(update.getStart(tree)).toBeGreaterThan(refusalStart)
+    const where = update.parent
+    expect(ts.isPropertyAccessExpression(where) && where.name.text === 'where').toBe(true)
+    const filtered = where.parent
+    expect(ts.isCallExpression(filtered)).toBe(true)
+    if (!ts.isCallExpression(filtered)) throw new Error('Claim update must be scoped')
+    expect(filtered.arguments[0]?.getText(tree)).toContain('eq(claims.claimId, lockedClaim.claimId)')
+    expect(filtered.arguments[0]?.getText(tree)).toContain('eq(claims.organizationId, orgId)')
   })
 
   it('grievance status route validates transitions via unified lifecycle FSM', () => {

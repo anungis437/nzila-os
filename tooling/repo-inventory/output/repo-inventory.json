@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-17T00:00:00.000Z",
+  "generatedAt": "2026-11-21T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
   "workflowCount": 72,
-  "contractTestCount": 307,
-  "tsTestFileCount": 3731,
-  "pythonTestFileCount": 52,
+  "contractTestCount": 309,
+  "tsTestFileCount": 3842,
+  "pythonTestFileCount": 54,
   "apps": [
     {
       "name": "abr",
@@ -109,7 +109,7 @@
         "ui"
       ],
       "purpose": "CFO finance dashboard — ledger management, tax tools, AI advisory, document intelligence, and integrations with Plaid, Dext, Xero, and QuickBooks.",
-      "codeFileCount": 238
+      "codeFileCount": 255
     },
     {
       "name": "civic",
@@ -186,7 +186,7 @@
         "ui"
       ],
       "purpose": "Internal operations console — platform governance, compliance, analytics, integrations management, and proof-center for multi-vertical oversight.",
-      "codeFileCount": 449
+      "codeFileCount": 472
     },
     {
       "name": "control-plane",
@@ -227,6 +227,7 @@
         "platform-auth",
         "platform-change-management",
         "platform-compliance-snapshots",
+        "platform-contracts",
         "platform-decision-engine",
         "platform-environment",
         "platform-event-fabric",
@@ -251,7 +252,7 @@
         "ui"
       ],
       "purpose": "Platform control plane — multi-tenant governance, workflow orchestration, anomaly detection, procurement proof, and infrastructure oversight.",
-      "codeFileCount": 335
+      "codeFileCount": 349
     },
     {
       "name": "cora",
@@ -328,7 +329,7 @@
         "ui"
       ],
       "purpose": "Commerce vertical — end-to-end order management, quoting, invoicing, inventory, supplier management, and Shopify/Zoho integrations.",
-      "codeFileCount": 438
+      "codeFileCount": 445
     },
     {
       "name": "maestria",
@@ -439,6 +440,7 @@
       "dependsOnPlatformAuth": true,
       "nzilaDeps": [
         "config",
+        "db",
         "hq-domain",
         "os-core",
         "payments-stripe",
@@ -447,7 +449,7 @@
         "ui"
       ],
       "purpose": "",
-      "codeFileCount": 106
+      "codeFileCount": 107
     },
     {
       "name": "orchestrator-api",
@@ -503,7 +505,7 @@
         "ui"
       ],
       "purpose": "Partner portal for managing deals, commissions, certifications, and go-to-market operations.",
-      "codeFileCount": 110
+      "codeFileCount": 114
     },
     {
       "name": "platform-admin",
@@ -658,6 +660,7 @@
         "ai-sdk",
         "attestation-visibility",
         "blob",
+        "comms-sms",
         "config",
         "continuity-review",
         "crm-hubspot",
@@ -689,7 +692,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 6554
+      "codeFileCount": 6691
     },
     {
       "name": "union-eyes-demo",
@@ -848,7 +851,7 @@
         "zonga-streaming-aws"
       ],
       "purpose": "Africa-first music distribution, streaming, and royalty management platform.",
-      "codeFileCount": 462
+      "codeFileCount": 475
     }
   ],
   "workflows": [

@@ -42,7 +42,7 @@ const detail = (overrides: Record<string, unknown> = {}) => ({
   documents: [],
   governedDocuments: [],
   collaborators: [],
-  effectiveAccess: { canViewInternal: true, isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
+  effectiveAccess: { canTransition: true, ownerOnly: {canCloseCase:true}, canViewInternal: true, isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
   ...overrides,
 });
 
@@ -471,7 +471,7 @@ describe('GrievanceDetailConsole: access for other representatives', () => {
   it('offers neither the grant form nor a revoke to someone who may not manage access', async () => {
     current = detail({
       collaborators: [withCollaborator()],
-      effectiveAccess: { canViewInternal: true, isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'secondary_lro', canManageAssignments: false, canUploadDocuments: true },
+      effectiveAccess: { canViewInternal: true, isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'secondary_lro', canTransition: true, canManageAssignments: false, canUploadDocuments: true },
     });
     renderConsole();
     await loaded();

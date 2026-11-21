@@ -82,6 +82,27 @@ describe('email-service', () => {
     expect(result.messageId).toBe('msg-1');
   });
 
+  it('passes a stable outbox key to Resend and refuses a replay after its absolute window',async()=>{
+    mocks.mockSend.mockResolvedValue({data:{id:'stable-provider-message'},error:null});
+    const {sendResendEmail}=await import('../email-service');
+    const payload={from:'sender@example.invalid',to:'controlled@example.invalid',subject:'Approved',text:'Synthetic text'};
+    await sendResendEmail(payload,{idempotencyKey:'ue-letter/stable-key',disableRetry:true,notAfter:Date.now()+60_000});
+    expect(mocks.mockSend).toHaveBeenCalledWith(expect.objectContaining(payload),{idempotencyKey:'ue-letter/stable-key'});
+    mocks.mockSend.mockClear();
+    expect(await sendResendEmail(payload,{idempotencyKey:'ue-letter/stable-key',notAfter:Date.now()-1})).toMatchObject({success:false,code:'OUTBOX_WINDOW_ELAPSED'});
+    expect(mocks.mockSend).not.toHaveBeenCalled();
+  });
+
+  it('keeps provider content out of formal-letter errors and logs',async()=>{
+    mocks.mockSend.mockResolvedValue({data:null,error:{message:'recipient secret@example.invalid body private-text',statusCode:422}});
+    const {sendResendEmail}=await import('../email-service');
+    const result=await sendResendEmail({from:'sender@example.invalid',to:'controlled@example.invalid',subject:'Approved',text:'Synthetic'},
+      {sensitiveContent:true,disableRetry:true,idempotencyKey:'ue-letter/test'});
+    expect(result).toMatchObject({success:false,statusCode:422,error:'Provider rejected correspondence submission'});
+    expect(JSON.stringify(mocks.mockError.mock.calls)).not.toContain('secret@example.invalid');
+    expect(JSON.stringify(mocks.mockError.mock.calls)).not.toContain('private-text');
+  });
+
   it('sendEmail returns error from Resend', async () => {
     mocks.mockSend.mockResolvedValue({
       data: null,
@@ -190,5 +211,28 @@ describe('email-service', () => {
     ]);
     expect(result).toHaveLength(1);
     expect(result[0].email).toBe('good@test.com');
+  });
+});
+
+describe('stripHtml plain-text fallback', () => {
+  it('drops every tag and every style or script block, and never emits a tag or a partial one', async () => {
+    const { stripHtml } = await import('../email-service');
+    expect(stripHtml('<p>Hello <b>there</b></p>')).toBe('Hello there');
+    expect(stripHtml('<style>p{color:red}</style>Body')).toBe('Body');
+    expect(stripHtml('<SCRIPT type="x">alert(1)</SCRIPT>ok')).toBe('ok');
+    expect(stripHtml('<stylesheet>x</stylesheet>')).toBe('x');
+    expect(stripHtml('a <unterminated')).toBe('a');
+    expect(stripHtml('<style>never closed')).toBe('');
+    for (const input of ['<scr<script>ipt>alert(1)</script>', '<<style>>x</style>', '<<<b>>>'])
+      expect(stripHtml(input)).not.toContain('<');
+  });
+
+  it('runs in linear time on adversarial markup', async () => {
+    const { stripHtml } = await import('../email-service');
+    const started = Date.now();
+    stripHtml('<style'.repeat(50_000));
+    stripHtml('<'.repeat(200_000));
+    stripHtml('<style>'.repeat(20_000));
+    expect(Date.now() - started).toBeLessThan(2_000);
   });
 });

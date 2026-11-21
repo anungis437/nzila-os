@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
 
 const m = vi.hoisted(() => {
   class AllocationRunError extends Error {
@@ -42,30 +45,38 @@ describe('finance/allocation/run route', () => {
     m.runAllocation.mockResolvedValue({ allocated: 100 });
   });
 
-  it('asks the wrapper for an administrator, the allocation entitlement and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for an administrator and declares no entitlement and no ambient tenant transaction', async () => {
     const { POST } = await loadRoute();
-    expect(declaredOptions(POST)).toMatchObject({
+    const options = declaredOptions(POST);
+    expect(options).toMatchObject({
       auth: { minRole: 'admin' },
-      entitlement: 'allocation_engine',
-      rlsOrgContext: true,
+      rlsOrgContext: false,
       registry: { audience: 'admin', evidenceRequired: true },
     });
+    expect(options.entitlement).toBeUndefined();
   });
 
-  it('runs the allocation for the caller organization and user, never a simulation', async () => {
+  it('refuses a valid run with 501 NOT_IMPLEMENTED, never a simulation or a result, and runs nothing', async () => {
     const { POST } = await loadRoute();
     const response = await POST(post({ ...valid, organizationId: 'org_other' }), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(200);
-    expect(m.runAllocation).toHaveBeenCalledWith(expect.objectContaining({ isSimulation: false, organizationId: 'org_1', createdBy: 'u1' }));
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
-  it('is refused without the entitlement, and runs nothing', async () => {
+  it('refuses with 501 whether or not the organization holds the module: no entitlement or allocation work runs', async () => {
     const { POST } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('no module'));
-    const response = await POST(post(valid), { organizationId: 'org_1', userId: 'u1' });
+    for (const entitled of [true, false]) {
+      m.requireEntitlement.mockReset();
+      if (entitled) m.requireEntitlement.mockResolvedValue(undefined);
+      else m.requireEntitlement.mockRejectedValue(new Error('no module'));
+      const response = await POST(post(valid), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(403);
+      expect(response.status).toBe(501);
+      expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    }
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
     expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
@@ -78,23 +89,18 @@ describe('finance/allocation/run route', () => {
     expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
-  it('reports a run that failed as a 500, never as a result', async () => {
+  it.each([
+    ['a run that fails', () => m.runAllocation.mockRejectedValue(new Error('period closed'))],
+    ['a period, rule or cost the caller cannot act on (not found)', () => m.runAllocation.mockRejectedValue(new m.AllocationRunError('not_found', 'Billing period x not found'))],
+    ['a period that is not open (conflict)', () => m.runAllocation.mockRejectedValue(new m.AllocationRunError('conflict', 'Billing period P1 is closed'))],
+  ])('never reaches the allocation engine, so %s cannot surface: 501 NOT_IMPLEMENTED', async (_label, arrange) => {
+    arrange();
     const { POST } = await loadRoute();
-    m.runAllocation.mockRejectedValueOnce(new Error('period closed'));
     const response = await POST(post(valid), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(500);
-  });
-
-  it('answers a period, rule or cost the caller cannot act on as 404 (not there) or 409 (not open), never as a fault', async () => {
-    const { POST } = await loadRoute();
-    m.runAllocation.mockRejectedValueOnce(new m.AllocationRunError('not_found', 'Billing period x not found'));
-    const notFound = await POST(post(valid), { organizationId: 'org_1', userId: 'u1' });
-    expect(notFound.status).toBe(404);
-
-    m.runAllocation.mockRejectedValueOnce(new m.AllocationRunError('conflict', 'Billing period P1 is closed'));
-    const conflict = await POST(post(valid), { organizationId: 'org_1', userId: 'u1' });
-    expect(conflict.status).toBe(409);
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
   it('bounds the locals a single run may allocate to', async () => {

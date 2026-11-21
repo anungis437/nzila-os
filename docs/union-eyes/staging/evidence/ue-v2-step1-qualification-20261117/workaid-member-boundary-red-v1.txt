@@ -1,0 +1,31 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+ ❯ |union-eyes| lib/authority/__tests__/workaid-disclosure-member-boundary.test.ts (2 tests | 1 failed) 5ms
+   ❯ WorkAid counsel disclosure member boundary (2)
+     × refuses a contradictory member identity even when matter and recipient match 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes| lib/authority/__tests__/workaid-disclosure-member-boundary.test.ts > WorkAid counsel disclosure member boundary > refuses a contradictory member identity even when matter and recipient match
+AssertionError: expected 'allow' to be 'deny' // Object.is equality
+
+Expected: "deny"
+Received: "allow"
+
+ ❯ lib/authority/__tests__/workaid-disclosure-member-boundary.test.ts:23:30
+     21|     expect(decide(req, facts(U.steward, ['steward'], {
+     22|       consents: [{ ...disclosure, memberUserId: U.other }],
+     23|     }), matter, NOW).effect).toBe('deny')
+       |                              ^
+     24|   })
+     25| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  20:57:34
+   Duration  276ms (transform 71%, import 21%, tests 4%, worker 2%, setup 2%)
+

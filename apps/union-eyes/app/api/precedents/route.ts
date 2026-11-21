@@ -4,6 +4,7 @@
  * POST /api/precedents - Create a new precedent (platform content managers only)
  */
 
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { NextResponse } from "next/server";
 import { 
   listPrecedents, 
@@ -48,6 +49,7 @@ export const GET = withApi(
     openapi: { tags: ['Precedents'], summary: 'List, filter and rank arbitration precedents' },
   },
   async ({ request, organizationId, userId }) => {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
       const { searchParams } = new URL(request.url);
       const requestJurisdiction = searchParams.get('jurisdiction');
@@ -220,6 +222,7 @@ export const POST = withApi(
     openapi: { tags: ['Precedents'], summary: 'Create a precedent draft awaiting review' },
   },
   async ({ request, userId, organizationId }) => {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
     let body: unknown;
     try {

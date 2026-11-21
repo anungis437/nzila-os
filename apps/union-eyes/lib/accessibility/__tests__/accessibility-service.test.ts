@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
   queue: [] as unknown[],
+  updates: [] as Record<string, unknown>[],
   warn: vi.fn(),
+  launch: vi.fn(),
+  newPage: vi.fn(),
+  goto: vi.fn(),
+  close: vi.fn(),
+  analyze: vi.fn(),
 }));
 
 function chain() {
@@ -13,6 +19,10 @@ function chain() {
   ]) {
     c[m] = vi.fn(() => c);
   }
+  c.set = vi.fn((value: Record<string, unknown>) => {
+    h.updates.push(value);
+    return c;
+  });
   (c as { then: (r: (v: unknown) => void) => void }).then = (resolve) => {
     resolve(h.queue.shift() ?? []);
   };
@@ -57,8 +67,22 @@ import {
 } from '../accessibility-service';
 
 beforeEach(() => {
+  vi.resetModules();
   h.queue = [];
+  h.updates = [];
   h.warn.mockReset();
+  h.launch.mockReset().mockImplementation(async () => ({ newPage: h.newPage, close: h.close }));
+  h.newPage.mockReset().mockImplementation(async () => ({ goto: h.goto }));
+  h.goto.mockReset().mockResolvedValue(undefined);
+  h.close.mockReset().mockResolvedValue(undefined);
+  h.analyze.mockReset().mockResolvedValue({ violations: [] });
+  vi.doMock('playwright', () => ({ chromium: { launch: h.launch } }));
+  vi.doMock('@axe-core/playwright', () => ({
+    AxeBuilder: class {
+      withTags() { return this; }
+      analyze = h.analyze;
+    },
+  }));
 });
 
 const auditRow = { id: 'a1', targetUrl: 'http://x', organizationId: 'o1' };
@@ -77,11 +101,36 @@ describe('AccessibilityAuditManager', () => {
     expect(audit).toEqual({ id: 'a1' });
   });
 
-  it('runAutomatedAudit completes with empty violations (real runAxeScan)', async () => {
+  it('records a completed single-page scan only after the scanner actually returns no violations', async () => {
     h.queue = [[], [auditRow], []]; // update, select, update
     const mgr = new AccessibilityAuditManager();
     await mgr.runAutomatedAudit('a1');
-    expect(h.warn).toHaveBeenCalled(); // axe scan unavailable
+    expect(h.goto).toHaveBeenCalledWith('http://x', { waitUntil: 'networkidle' });
+    expect(h.analyze).toHaveBeenCalledOnce();
+    expect(h.close).toHaveBeenCalledOnce();
+    expect(h.warn).not.toHaveBeenCalled();
+    expect(h.updates.at(-1)).toMatchObject({ status: 'completed', pagesScanned: 1, totalIssues: 0 });
+  });
+
+  it.each(['playwright', '@axe-core/playwright'])('fails explicitly when the optional %s scanner dependency is missing', async (dependency) => {
+    vi.doMock(dependency, () => { throw new Error(`Cannot find module '${dependency}'`); });
+    h.queue = [[], [auditRow], []];
+    await expect(new AccessibilityAuditManager().runAutomatedAudit('a1')).rejects.toThrow();
+    expect(h.updates.at(-1)).toMatchObject({ status: 'failed', accessibilityScore: null, pagesScanned: 0 });
+    expect(h.updates.some((update) => update.status === 'completed')).toBe(false);
+    expect(h.launch).not.toHaveBeenCalled();
+    expect(h.analyze).not.toHaveBeenCalled();
+    expect(h.warn).toHaveBeenCalledOnce();
+  });
+
+  it.each(['launch', 'newPage', 'goto', 'analyze', 'close'] as const)('fails explicitly when scanner %s fails and closes any launched browser', async (operation) => {
+    h[operation].mockRejectedValue(new Error(`${operation} failed`));
+    h.queue = [[], [auditRow], []];
+    await expect(new AccessibilityAuditManager().runAutomatedAudit('a1')).rejects.toThrow(`${operation} failed`);
+    expect(h.updates.at(-1)).toMatchObject({ status: 'failed', accessibilityScore: null, pagesScanned: 0 });
+    expect(h.updates.some((update) => update.status === 'completed')).toBe(false);
+    expect(h.close).toHaveBeenCalledTimes(operation === 'launch' ? 0 : 1);
+    expect(h.warn).toHaveBeenCalledOnce();
   });
 
   it('runAutomatedAudit saves issues when violations exist', async () => {
@@ -112,6 +161,7 @@ describe('AccessibilityAuditManager', () => {
       .fn()
       .mockRejectedValue(new Error('scan failed'));
     await expect(mgr.runAutomatedAudit('a1')).rejects.toThrow('scan failed');
+    expect(h.updates.at(-1)).toMatchObject({ status: 'failed', accessibilityScore: null, pagesScanned: 0 });
   });
 
   it('runAutomatedAudit throws when audit not found', async () => {
@@ -202,6 +252,35 @@ describe('WCAGChecker', () => {
 });
 
 describe('AccessibilityReportGenerator', () => {
+  it('cannot infer WCAG compliance from an empty issue register with no audit evidence', async () => {
+    h.queue = [[]];
+    const report = await new AccessibilityReportGenerator().generateComplianceReport('o1');
+    expect(report.summary.totalIssues).toBe(0);
+    expect(report.complianceScore).toBeNull();
+    expect(report.verificationStatus).toBe('UNVERIFIED');
+    expect(report.verificationReason).toContain('do not establish complete automated and manual WCAG audit coverage');
+    expect(report.issueBurdenScore).toBe(100);
+  });
+
+  it('keeps an empty issue report unverified after an actual scanner failure', async () => {
+    h.launch.mockRejectedValue(new Error('Browser executable missing'));
+    h.queue = [[], [auditRow], [], []];
+    await expect(new AccessibilityAuditManager().runAutomatedAudit('a1')).rejects.toThrow('Browser executable missing');
+    const report = await new AccessibilityReportGenerator().generateComplianceReport('o1');
+    expect(h.updates.at(-1)?.status).toBe('failed');
+    expect(report.complianceScore).toBeNull();
+    expect(report.verificationStatus).toBe('UNVERIFIED');
+  });
+
+  it('does not turn a completed single-page automated scan into full WCAG coverage', async () => {
+    h.queue = [[], [auditRow], [], []];
+    await new AccessibilityAuditManager().runAutomatedAudit('a1');
+    const report = await new AccessibilityReportGenerator().generateComplianceReport('o1');
+    expect(h.updates.at(-1)?.status).toBe('completed');
+    expect(report.complianceScore).toBeNull();
+    expect(report.verificationStatus).toBe('UNVERIFIED');
+  });
+
   it('generateComplianceReport summarizes issues and recommendations', async () => {
     h.queue = [[
       { status: 'open', severity: 'critical', wcagCriteria: '1.1.1' },
@@ -214,6 +293,8 @@ describe('AccessibilityReportGenerator', () => {
     expect(report.summary.totalIssues).toBe(4);
     expect(report.criteriaCoverage.length).toBeGreaterThan(0);
     expect(report.recommendations.length).toBeGreaterThan(0);
-    expect(report.complianceScore).toBeLessThan(100);
+    expect(report.complianceScore).toBeNull();
+    expect(report.verificationStatus).toBe('UNVERIFIED');
+    expect(report.issueBurdenScore).toBeLessThan(100);
   });
 });

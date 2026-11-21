@@ -15,6 +15,7 @@ import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -35,6 +36,8 @@ describe.skipIf(!URL)('the movement-insights consent read on the combined schema
   beforeAll(async () => {
     admin = await harness.start(URL!)
     for (const id of [GIVEN, WITHDRAWN, NONE]) await insertOrganization(admin, tag, { id })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [GIVEN, WITHDRAWN, NONE]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
     await admin.query(
       `INSERT INTO data_aggregation_consent (organization_id, consent_given, consent_date, categories, expires_at)
        VALUES ($1, true, '2026-01-15 12:00:00', '{grievance-type,sector-trend}', '2027-01-15 12:00:00'), ($2, false, '2025-06-01 12:00:00', '{systemic-issue}', NULL)`,

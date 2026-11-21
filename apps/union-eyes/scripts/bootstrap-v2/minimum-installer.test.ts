@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   compileMinimumRoleProvisioningSql,
+  currentPlanRequiresVector,
   INSTALLER_FUNCTION_OWNER_ROLES,
 } from './minimum-installer'
 import { CANONICAL_BOOTSTRAP_ROLES } from './execution-roles'
@@ -73,9 +74,19 @@ describe('bounded minimum installer prerequisites', () => {
       .filter((line) => line.includes('WITH ADMIN FALSE, INHERIT TRUE'))
     expect(inherited).toHaveLength(1)
     expect(inherited[0]).toBe(
-      `GRANT ${INSTALLER_FUNCTION_OWNER_ROLES.map((role) => `"${role}"`).join(',')} TO ue_v2_owner WITH ADMIN FALSE, INHERIT TRUE, SET TRUE;`,
+      `GRANT ${INSTALLER_FUNCTION_OWNER_ROLES.map((role) => `"${role}"`).join(',')} TO "ue_v2_owner" WITH ADMIN FALSE, INHERIT TRUE, SET TRUE;`,
     )
-    expect(sql).not.toContain('TO union_eyes_runtime')
-    expect(sql).not.toContain('TO union_eyes_system')
+    expect(sql).not.toMatch(/\bTO\s+"?union_eyes_(?:runtime|system)"?(?:\s|;)/i)
+  })
+})
+
+describe('source-selected optional extension prerequisite', () => {
+  it('requires vector only when the executable source plan declares it', () => {
+    expect(currentPlanRequiresVector({ statements: [] })).toBe(false)
+    expect(
+      currentPlanRequiresVector({
+        statements: [{ canonicalId: 'CURRENT_EXTENSION:vector' }],
+      } as never),
+    ).toBe(true)
   })
 })

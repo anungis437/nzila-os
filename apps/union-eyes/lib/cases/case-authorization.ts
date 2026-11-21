@@ -33,7 +33,7 @@ export interface CaseActor {
 export type CaseKernelAction = Extract<
   Action,
   | 'case:read' | 'case:read_internal' | 'case:comment' | 'case:write_notes' | 'case:draft_action' | 'case:upload_evidence'
-  | 'case:modify_document' | 'case:transition' | 'case:close' | 'case:assign' | 'case:export_sealed_evidence'
+  | 'case:modify_document' | 'case:disclose_to_member' | 'case:transition' | 'case:close' | 'case:assign' | 'case:export_sealed_evidence'
 >
 
 export async function getCaseActor(): Promise<CaseActor> {

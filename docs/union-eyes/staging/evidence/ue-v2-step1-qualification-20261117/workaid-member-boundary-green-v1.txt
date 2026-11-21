@@ -1,0 +1,12 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+ ✓ |union-eyes| lib/authority/__tests__/workaid-disclosure-member-boundary.test.ts (2 tests) 4ms
+ ✓ |union-eyes| lib/authority/__tests__/kernel-workaid.test.ts (23 tests) 5ms
+
+ Test Files  2 passed (2)
+      Tests  25 passed (25)
+   Start at  20:58:02
+   Duration  271ms (transform 54%, import 25%, tests 11%, setup 6%, worker 5%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/workaid-member-boundary-green-v1.json

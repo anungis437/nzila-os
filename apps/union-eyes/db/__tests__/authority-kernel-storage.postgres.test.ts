@@ -159,7 +159,7 @@ describe.skipIf(!URL)('authority storage on real PostgreSQL', () => {
     const results = await Promise.allSettled(conns.map((c) => run(c, U.member, (t) => runIdempotent(t,
       { organizationId: ORG, actorUserId: U.member, key, operation: 'recusal.declare', payload: { resource } },
       async () => ({ recusalId: await insertRecusal(t, { organizationId: ORG, principalUserId: U.member, resourceType: 'case', resourceId: resource, reason: 'conflict' }) })))))
-    const ok = results.filter((r): r is PromiseFulfilledResult<{ replayed: boolean; result: Record<string, unknown> }> => r.status === 'fulfilled')
+    const ok = results.filter((r) => r.status === 'fulfilled')
     expect(ok).toHaveLength(5)
     expect(ok.filter((r) => !r.value.replayed)).toHaveLength(1)
     expect(new Set(ok.map((r) => JSON.stringify(r.value.result))).size).toBe(1)
@@ -219,25 +219,28 @@ describe.skipIf(!URL)('authority storage on real PostgreSQL', () => {
     expect(rec).toEqual({ eventsWithoutAudit: [], auditRowsWithUnknownEvents: [], chainBreaks: [] })
   })
 
-  it('a financial step recorded by two actors at once is recorded once', async () => {
+  it('concurrent financial step requests both refuse before changing retained financial or audit history', async () => {
     const PAY = newUuid()
     const ACCT = newUuid()
     await setup.query(`INSERT INTO public.payments (id, organization_id, member_id, amount, currency) VALUES ($1,$2,$3,'10.00','CAD')`, [PAY, ORG, U.member])
-    const c = await conn()
-    const k = kitFor(c)
-    const money = { scope: { accountIds: [ACCT] }, monetaryLimitMinor: 100_000, currency: 'CAD' }
-    await k.grantMandate('financial', U.treasurer, ['view', 'prepare'], { ...money, approver: U.vp })
-    await k.grantMandate('financial', U.vp, ['approve'], { ...money, issuer: U.president, approver: U.treasurer })
-    await k.grantMandate('financial', U.president, ['execute'], { ...money, issuer: U.vp, approver: U.treasurer })
-    const step = (cn: pg.Client, who: string, s: 'registered' | 'prepared' | 'approved' | 'executed', extra: Record<string, unknown> = {}) =>
-      run(cn, who, (t) => recordFinancialStep(t, k.deps, { organizationId: ORG, actorUserId: who, paymentId: PAY, step: s, ...extra }))
-    await step(c, U.treasurer, 'registered', { accountId: ACCT, requiredApprovals: 1 })
-    await step(c, U.treasurer, 'prepared')
-    await step(c, U.vp, 'approved')
+    const history = async () => {
+      const result: Record<string, unknown> = {}
+      for (const table of ['payments', 'ue_authority_financial_steps', 'ue_authority_events', 'audit_logs']) {
+        result[table] = (await setup.query(`SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text), '[]'::jsonb) AS rows FROM public.${table} t`)).rows[0].rows
+      }
+      return result
+    }
+    const before = await history()
     const [a, b] = [await conn(), await conn()]
-    const results = await Promise.allSettled([step(a, U.president, 'executed'), step(b, U.president, 'executed')])
-    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
-    expect(await n(`SELECT count(*) n FROM ue_authority_financial_steps WHERE subject_id = $1 AND step = 'executed'`, [PAY])).toBe(1)
+    const step = (cn: pg.Client, who: string) => run(cn, who, (t) => recordFinancialStep(t, kitFor(cn).deps, {
+      organizationId: ORG, actorUserId: who, paymentId: PAY, step: 'registered', accountId: ACCT, requiredApprovals: 1,
+    }))
+    const results = await Promise.allSettled([step(a, U.treasurer), step(b, U.president)])
+    expect(results.map(result => result.status)).toEqual(['rejected', 'rejected'])
+    for (const result of results) {
+      expect(result).toMatchObject({ status: 'rejected', reason: { code: 'NOT_IMPLEMENTED', status: 501 } })
+    }
+    expect(await history()).toEqual(before)
   })
 
   it('events cannot be forged or removed by the runtime role on a real server', async () => {

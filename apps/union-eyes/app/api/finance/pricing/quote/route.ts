@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * POST /api/finance/pricing/quote — Compute a GTM pricing quote
  *
@@ -8,21 +9,20 @@
  * Aligned with: docs/plans/go-to-market/Draft Pricing Model.xlsx
  */
 
-import { z } from 'zod';
-import { withMinRole, type BaseAuthContext } from '@/lib/api-auth-guard';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
+import { z } from 'zod'
+import { withApi } from '@/lib/api/framework'
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
-} from '@/lib/api/standardized-responses';
+} from '@/lib/api/standardized-responses'
 import {
   computeQuote,
   type PricingQuoteInput,
   type DiscountRule,
-} from '@/services/platform-economics/pricing-calculator';
+} from '@/services/platform-economics/pricing-calculator'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const discountSchema = z.object({
   type: z.enum(['volume', 'contract_term', 'early_adopter', 'partner_referral', 'custom']),
@@ -31,7 +31,7 @@ const discountSchema = z.object({
   appliesTo: z.enum(['per_member', 'base_fee', 'total']),
   memberThreshold: z.number().int().min(0).optional(),
   contractTermMinMonths: z.number().int().min(0).optional(),
-});
+})
 
 const quoteSchema = z.object({
   memberCount: z.number().int().min(1).max(10_000_000),
@@ -41,46 +41,44 @@ const quoteSchema = z.object({
   contractTermMonths: z.number().int().min(1).max(120).optional(),
   contractYear: z.number().int().min(1).max(10).optional(),
   customDiscounts: z.array(discountSchema).max(10).optional(),
-});
+})
 
-export const POST = withMinRole('secretary_treasurer', async (request, context: BaseAuthContext) => {
-  const { userId, organizationId } = context;
-  if (!organizationId || !userId) {
-    return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized');
-  }
+export const POST = withApi(
+  { auth: { minRole: 'secretary_treasurer' }, rlsOrgContext: false },
+  async ({ request, userId, organizationId }) => {
+    if (!organizationId || !userId) {
+      return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Unauthorized')
+    }
 
-  try {
-    await requireEntitlement(organizationId, 'financial_intelligence_suite', userId);
-  } catch (err) {
-    return standardErrorResponse(ErrorCode.FORBIDDEN, err instanceof Error ? err.message : 'Entitlement required');
-  }
+    let rawBody: unknown
+    try {
+      rawBody = await request.json()
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON')
+    }
 
-  let rawBody: any;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON');
-  }
+    const parsed = quoteSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error)
+    }
 
-  const parsed = quoteSchema.safeParse(rawBody);
-  if (!parsed.success) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid input', parsed.error);
-  }
+    const input: PricingQuoteInput = {
+      memberCount: parsed.data.memberCount,
+      tier: parsed.data.tier,
+      regionCount: parsed.data.regionCount,
+      regions: parsed.data.regions,
+      contractTermMonths: parsed.data.contractTermMonths,
+      contractYear: parsed.data.contractYear,
+      customDiscounts: parsed.data.customDiscounts as DiscountRule[] | undefined,
+    }
 
-  const input: PricingQuoteInput = {
-    memberCount: parsed.data.memberCount,
-    tier: parsed.data.tier,
-    regionCount: parsed.data.regionCount,
-    regions: parsed.data.regions,
-    contractTermMonths: parsed.data.contractTermMonths,
-    contractYear: parsed.data.contractYear,
-    customDiscounts: parsed.data.customDiscounts as DiscountRule[] | undefined,
-  };
+    requireBaseFinancialAuthority()
 
-  try {
-    const quote = computeQuote(input);
-    return standardSuccessResponse(quote);
-  } catch (error) {
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Quote computation failed', error);
-  }
-});
+    try {
+      const quote = computeQuote(input)
+      return standardSuccessResponse(quote)
+    } catch (error) {
+      return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Quote computation failed', error)
+    }
+  },
+)

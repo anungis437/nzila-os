@@ -6,7 +6,7 @@ vi.mock('@/lib/db/with-rls-context', async () => (await import('@/lib/page-data/
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
 
 import { txDouble } from '@/lib/page-data/__tests__/tx-double';
-import { ensureOrganizationMembership, isSeedMembershipLinkingAllowed } from '../layout-bootstrap';
+import { ensureOrganizationMembership, isSeedMembershipLinkingAllowed, loadOrCreateProfile } from '../layout-bootstrap';
 
 const DEFAULT_ORG = '11111111-1111-4111-8111-111111111111';
 const ORG_A = '22222222-2222-4222-8222-222222222222';
@@ -50,6 +50,17 @@ describe('isSeedMembershipLinkingAllowed', () => {
     expect(isSeedMembershipLinkingAllowed()).toBe(false);
     vi.stubEnv('UE_ENVIRONMENT', 'staging');
     expect(isSeedMembershipLinkingAllowed()).toBe(false);
+  });
+});
+
+describe('the legacy bootstrap in canonical mode', () => {
+  it('refuses the profile and the membership bootstrap before any statement: the canonical membership is live authority', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    await expect(loadOrCreateProfile({ userId: PERSON, email: 'p@example.test' })).rejects.toMatchObject({ code: 'LEGACY_DASHBOARD_BOOTSTRAP_REFUSED' });
+    for (const input of [base, linking, { ...base, allowAutoProvisioning: false }])
+      await expect(ensureOrganizationMembership(input)).rejects.toMatchObject({ code: 'LEGACY_DASHBOARD_BOOTSTRAP_REFUSED' });
+    expect(txDouble.statements).toEqual([]);
+    expect(mocks.audit).not.toHaveBeenCalled();
   });
 });
 

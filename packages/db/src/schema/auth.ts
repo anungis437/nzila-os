@@ -18,6 +18,7 @@ import {
   integer,
   pgSchema,
   check,
+  index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { sql, relations } from 'drizzle-orm'
@@ -127,6 +128,16 @@ export const authUserSessions = userManagementSchema.table(
       'valid_expiry',
       sql`${table.expiresAt} > ${table.createdAt}`,
     ),
+    // Every authorized statement resolves the caller's session by token hash and user
+    // (user_management.auth_business_org_authorized). Without these the lookup scans every
+    // session ever issued. Same names and definitions as migrations-cache/0007.
+    tokenHash: uniqueIndex('idx_user_management_user_sessions_token_hash')
+      .on(table.sessionTokenHash)
+      .where(sql`${table.sessionTokenHash} IS NOT NULL`),
+    userId: index('idx_user_management_user_sessions_user_id').on(table.userId),
+    userActive: index('idx_user_management_user_sessions_user_active')
+      .on(table.userId, table.isActive)
+      .where(sql`${table.isActive} = true`),
   }),
 )
 

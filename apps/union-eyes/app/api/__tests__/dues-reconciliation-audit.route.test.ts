@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -32,6 +33,8 @@ vi.mock('drizzle-orm', () => ({ eq: vi.fn(), and: vi.fn() }));
 const ID = '00000000-0000-0000-0000-000000000001';
 const MEMBER = '00000000-0000-0000-0000-000000000002';
 
+const refusal = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
+
 const call = (fn: any, body: unknown) =>
   fn({ request: { json: async () => body }, organizationId: 'org_1', userId: 'u1' });
 
@@ -54,22 +57,36 @@ describe.each([
     m.audit.mockResolvedValue(undefined);
   });
 
-  it('writes the change and its audit record on the same transaction', async () => {
-    const { POST } = await import(/* @vite-ignore */ path);
-    await expect(call(POST, body)).resolves.toMatchObject({ success: true });
-    expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action }));
-  });
-
-  it('is a 404 with no audit when no line item matches', async () => {
-    m.rows = [];
-    const { POST } = await import(/* @vite-ignore */ path);
-    await expect(call(POST, body)).rejects.toMatchObject({ status: 404 });
+  const expectNothingTouched = () => {
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
+    expect(m.tx.update).not.toHaveBeenCalled();
     expect(m.audit).not.toHaveBeenCalled();
+  };
+
+  it('is refused as not implemented: no transaction, mandate check, write or audit record', async () => {
+    const { POST } = await import(/* @vite-ignore */ path);
+    await expect(call(POST, body)).rejects.toMatchObject(refusal);
+    expectNothingTouched();
   });
 
-  it('fails the operation when the audit write fails', async () => {
+  it('is refused as not implemented even where a line item would have matched, and writes no audit record', async () => {
+    m.rows = [{ id: 'l1' }];
+    const { POST } = await import(/* @vite-ignore */ path);
+    await expect(call(POST, body)).rejects.toMatchObject(refusal);
+    expectNothingTouched();
+  });
+
+  it('is refused as not implemented even where the audit write would have failed, so audit is never reached', async () => {
     m.audit.mockRejectedValue(new Error('audit down'));
     const { POST } = await import(/* @vite-ignore */ path);
-    await expect(call(POST, body)).rejects.toThrow('audit down');
+    await expect(call(POST, body)).rejects.toMatchObject(refusal);
+    expectNothingTouched();
+  });
+
+  it('still rejects an invalid body as a 400 before the boundary', async () => {
+    const { POST } = await import(/* @vite-ignore */ path);
+    await expect(call(POST, { remittanceId: 'not-a-uuid' })).rejects.toMatchObject({ status: 400 });
+    expectNothingTouched();
   });
 });

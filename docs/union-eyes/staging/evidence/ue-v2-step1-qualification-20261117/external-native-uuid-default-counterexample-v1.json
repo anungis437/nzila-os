@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-11-18T09:09:29.488335+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "ACTUAL_EXTERNAL_NATIVE_COHORT_SETUP_FAILURE_AND_UUID_GENERATOR_PROVENANCE",
+  "result": "FAIL_REPAIR_AND_RERUN_REQUIRED",
+  "counts": {
+    "passed": 0,
+    "failed": 16,
+    "skipped": 0
+  },
+  "failure": "All16selectedcases failed in setup with42501 permission denied for function gen_random_uuid; no external journey success inferred.",
+  "actualCatalogObservation": {
+    "scope": "READ_ONLY_ACTUAL_PG15_UUID_FUNCTION_AND_NEW_TABLE_DEFAULT_PROVENANCE",
+    "functions": [
+      {
+        "nspname": "pg_catalog",
+        "identity": "gen_random_uuid()",
+        "owner": "uev2admin",
+        "proacl": null,
+        "private_execute": true,
+        "runtime_execute": true
+      },
+      {
+        "nspname": "public",
+        "identity": "public.gen_random_uuid()",
+        "owner": "uev2admin",
+        "proacl": "{uev2admin=X/uev2admin}",
+        "private_execute": false,
+        "runtime_execute": false
+      }
+    ],
+    "defaults": [
+      {
+        "relname": "platform_identity_bindings",
+        "attname": "id",
+        "expression": "public.gen_random_uuid()"
+      },
+      {
+        "relname": "ue_external_read_consents",
+        "attname": "id",
+        "expression": "public.gen_random_uuid()"
+      }
+    ],
+    "readOnly": true
+  },
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-v1.json",
+      "sha256": "d154f8dd44c2539960ace09ddfd70dcb86738c6cb0877237de86b12bfcff347d",
+      "bytes": 29268
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-v1.log",
+      "sha256": "bc9d9625bc9d5c9e0ba794abdc65945d3e81b7e1c8d45fe3dd78fd5bc56da67a",
+      "bytes": 18394
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/external-v1-source.json",
+      "sha256": "79f2326f6b5a61ed598d9729d28b6fe3d12f0c4515cbbfc85bb8692c21a5df05",
+      "bytes": 173407
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/uuid-default-native-counterexample-v1.json",
+      "sha256": "11ab1ea09415a93fea9761a537743ddb50b80934ba89065600cc92bd8a3e63d8",
+      "bytes": 820
+    }
+  ],
+  "rootCause": "Explicit public before pg_catalog during creation bound two new UUID defaults to a quarantined public pgcrypto alias. Builtin pg_catalog generator remains callable.",
+  "requiredRepair": "Use builtin-first resolution while creating unqualified public tables and independently verify exact default function binding on fresh, transition and NOOP paths. No alias EXECUTE grants or historical data rewrites."
+}

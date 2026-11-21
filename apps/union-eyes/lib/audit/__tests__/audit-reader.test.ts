@@ -56,17 +56,22 @@ describe('audit reader', () => {
     expect(m.executed).toHaveLength(0)
   })
 
-  it('shows the canonical records too, newest first, each labelled with its store, with no severity or outcome invented', async () => {
+  it('shows only the canonical records in canonical mode, labelled with their store, with no severity or outcome invented, and never queries the legacy table', async () => {
     m.canonical = true
     const entries = await listAuditEntries(tx as never, 'org_1')
-    expect(entries.map((e) => [e.auditId, e.source])).toEqual([[ID_C, 'canonical'], [ID_L, 'legacy']])
+    expect(entries.map((e) => [e.auditId, e.source])).toEqual([[ID_C, 'canonical']])
     expect(entries[0]).toMatchObject({ severity: null, outcome: null, resourceId: 'r1', userId: 'u2' })
+    // The canonical runtime role holds no usage of the audit_security schema: a legacy read could only fail.
+    expect(m.projections).toHaveLength(0)
   })
 
   it('returns no details, changes, addresses or session data from either store', async () => {
     m.canonical = true
-    const text = JSON.stringify(await listAuditEntries(tx as never, 'org_1'))
-    expect(text).not.toMatch(/secret|10\.0\.0|ipAddress|details|metadata/)
+    const canonicalText = JSON.stringify(await listAuditEntries(tx as never, 'org_1'))
+    expect(canonicalText).not.toMatch(/secret|10\.0\.0|ipAddress|details|metadata/)
+    m.canonical = false
+    const legacyText = JSON.stringify(await listAuditEntries(tx as never, 'org_1'))
+    expect(legacyText).not.toMatch(/secret|10\.0\.0|ipAddress|details|metadata/)
   })
 
   it('reads only the columns an entry shows from the legacy store, never addresses, sessions, metadata or payloads', async () => {
@@ -94,13 +99,12 @@ describe('audit reader', () => {
     expect(m.legacyLimit).toBe(1)
   })
 
-  it('finds a canonical record by id in canonical mode, falls back to legacy, and answers null for neither', async () => {
+  it('finds a canonical record by id in canonical mode, never falls back to the legacy table, and answers null when the canonical store has none', async () => {
     m.canonical = true
     expect(await readAuditEntry(tx as never, 'org_1', ID_C)).toMatchObject({ source: 'canonical' })
     m.canonicalRows = []
-    expect(await readAuditEntry(tx as never, 'org_1', ID_L)).toMatchObject({ source: 'legacy' })
-    m.legacyRows = []
     expect(await readAuditEntry(tx as never, 'org_1', ID_L)).toBeNull()
+    expect(m.projections).toHaveLength(0)
   })
 
   it('does not look in the canonical store at all in legacy mode', async () => {

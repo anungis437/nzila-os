@@ -1,0 +1,1035 @@
+{
+  "kind": "MANIFEST_DEPENDENCY_CLOSURE_MATERIALITY_NOT_FINAL_IMAGE_PROOF",
+  "recordedAt": "2026-11-17T22:45:30.311Z",
+  "gitHeadAtCollection": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtyIntegrationSource": true,
+  "finalCandidateSha": null,
+  "lockfileSha256": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0",
+  "sbomSha256": "b999c11aba12ee013163f759f94f710defaa204b2f3b15a54ab2eaa9df25f962",
+  "source": "pnpm-lock.yaml production importer and snapshot traversal; all optional architectures included",
+  "licensePolicyVerdict": "FAIL_UNKNOWN_LICENSES_NO_ALLOWLIST_CHANGE",
+  "importers": [
+    "apps/union-eyes",
+    "packages/ai-control",
+    "packages/ai-core",
+    "packages/ai-sdk",
+    "packages/attestation-visibility",
+    "packages/blob",
+    "packages/continuity-review",
+    "packages/contracts",
+    "packages/crm-hubspot",
+    "packages/cupe-vocabulary",
+    "packages/db",
+    "packages/decision-core",
+    "packages/governance-middleware",
+    "packages/governance-operations",
+    "packages/governance-otel",
+    "packages/governance-review",
+    "packages/integrations-core",
+    "packages/intelligence",
+    "packages/ml-sdk",
+    "packages/nar",
+    "packages/oci-confidence",
+    "packages/operational-convergence",
+    "packages/org",
+    "packages/organizational-cognition-core",
+    "packages/organizational-governance-graph",
+    "packages/os-core",
+    "packages/payments-stripe",
+    "packages/pilot-mode",
+    "packages/platform-ai-contract",
+    "packages/platform-anomaly-engine",
+    "packages/platform-auth",
+    "packages/platform-change-management",
+    "packages/platform-cognition-core",
+    "packages/platform-context-orchestrator",
+    "packages/platform-contracts",
+    "packages/platform-data-fabric",
+    "packages/platform-decision-engine",
+    "packages/platform-decision-graph",
+    "packages/platform-entity-graph",
+    "packages/platform-environment",
+    "packages/platform-event-fabric",
+    "packages/platform-events",
+    "packages/platform-evidence-pack",
+    "packages/platform-governance",
+    "packages/platform-governed-ai",
+    "packages/platform-intelligence",
+    "packages/platform-knowledge-registry",
+    "packages/platform-observability",
+    "packages/platform-ontology",
+    "packages/platform-pilot-metrics",
+    "packages/platform-pilot-metrics-types",
+    "packages/platform-policy-engine",
+    "packages/platform-reasoning-engine",
+    "packages/platform-semantic-search",
+    "packages/platform-shell",
+    "packages/policies",
+    "packages/reality-env",
+    "packages/stabilization-signals",
+    "packages/tools-runtime",
+    "packages/trustcore-core",
+    "packages/ue-cognition",
+    "packages/ui",
+    "packages/workload-intelligence"
+  ],
+  "snapshotCount": 1639,
+  "uniqueProductionPackages": 1636,
+  "violationsInProductionClosure": [
+    {
+      "name": "@img/sharp-libvips-darwin-arm64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-darwin-x64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linux-arm64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linux-arm",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linux-ppc64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linux-riscv64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linux-s390x",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linux-x64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linuxmusl-arm64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-libvips-linuxmusl-x64",
+      "version": "1.3.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-wasm32",
+      "version": "0.35.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND LGPL-3.0-or-later AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-win32-arm64",
+      "version": "0.35.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-win32-ia32",
+      "version": "0.35.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@img/sharp-win32-x64",
+      "version": "0.35.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND LGPL-3.0-or-later"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-darwin",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-darwin",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-arm64",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-arm64",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-arm",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-arm",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-i686",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-i686",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-x64",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-linux-x64",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-win32-arm64",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-win32-arm64",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-win32-i686",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-win32-i686",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-win32-x64",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli-win32-x64",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli",
+      "version": "2.58.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@sentry/cli",
+      "version": "2.58.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "FSL-1.1-MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-darwin-arm64",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-darwin-x64",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-linux-arm64-gnu",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-linux-arm64-musl",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-linux-x64-gnu",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-linux-x64-musl",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-win32-arm64-msvc",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-win32-ia32-msvc",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@swc/core-win32-x64-msvc",
+      "version": "1.15.11",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "@tensorflow/tfjs-layers",
+      "version": "4.22.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "buffers",
+      "version": "0.1.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "bytesish",
+      "version": "0.4.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "(Apache-2.0 AND MIT)"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "chainsaw",
+      "version": "0.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT/X11"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "dompurify",
+      "version": "3.4.17",
+      "licenses": [
+        {
+          "license": {
+            "name": "(MPL-2.0 OR Apache-2.0)"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "duck",
+      "version": "0.1.12",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "expand-template",
+      "version": "2.0.3",
+      "licenses": [
+        {
+          "license": {
+            "name": "(MIT OR WTFPL)"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "google-protobuf",
+      "version": "3.21.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "(BSD-3-Clause AND Apache-2.0)"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "jszip",
+      "version": "3.10.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "(MIT OR GPL-3.0-or-later)"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-android-arm64",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-darwin-arm64",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-darwin-x64",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-freebsd-x64",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-linux-arm-gnueabihf",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-linux-arm64-gnu",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-linux-arm64-musl",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-linux-x64-gnu",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-linux-x64-musl",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-win32-arm64-msvc",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss-win32-x64-msvc",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "lightningcss",
+      "version": "1.32.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "limiter",
+      "version": "1.1.5",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "node-forge",
+      "version": "1.4.3",
+      "licenses": [
+        {
+          "license": {
+            "name": "(BSD-3-Clause OR GPL-2.0)"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "png-js",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "postal-mime",
+      "version": "2.7.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT-0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "rgbcolor",
+      "version": "1.0.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT OR SEE LICENSE IN FEEL-FREE.md"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "traverse",
+      "version": "0.3.9",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT/X11"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "url-template",
+      "version": "2.0.8",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    },
+    {
+      "name": "victory-vendor",
+      "version": "37.3.6",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT AND ISC"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": true
+    }
+  ],
+  "violationsOutsideProductionClosure": [
+    {
+      "name": "@csstools/color-helpers",
+      "version": "5.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT-0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "@csstools/color-helpers",
+      "version": "6.0.2",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT-0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "@csstools/css-syntax-patches-for-csstree",
+      "version": "1.1.2",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT-0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "argparse",
+      "version": "3.0.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "PSF-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "axe-core",
+      "version": "4.13.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "busboy",
+      "version": "1.6.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "exit",
+      "version": "0.1.2",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "spawndamnit",
+      "version": "3.0.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "SEE LICENSE IN LICENSE"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    },
+    {
+      "name": "streamsearch",
+      "version": "1.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "productionManifestDependencyClosure": false
+    }
+  ],
+  "limitations": [
+    "Manifest production dependency closure includes optional build tools and all target architectures; it does not establish final image presence",
+    "Final Union Eyes image and .nft traced runtime license inventory remains unexecuted",
+    "No license policy exemptions or vulnerability waivers added"
+  ]
+}

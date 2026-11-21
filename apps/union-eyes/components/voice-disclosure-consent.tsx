@@ -10,7 +10,11 @@ interface VoiceNotice {
   provider: string;
 }
 
-export function useVoiceDisclosure() {
+/**
+ * Load the approved voice notice. Pass `enabled: false` where voice is not offered (members): no notice is requested and
+ * the disclosure stays unavailable, so no control can become ready.
+ */
+export function useVoiceDisclosure(enabled = true) {
   const locale = useLocale();
   const [notice, setNotice] = useState<VoiceNotice | null>(null);
   const [unavailable, setUnavailable] = useState(false);
@@ -18,6 +22,7 @@ export function useVoiceDisclosure() {
   const [permission, setPermission] = useState(false);
 
   useEffect(() => {
+    if (!enabled) { setUnavailable(true); return; }
     let active = true;
     fetch('/api/voice/disclosure', { cache: 'no-store' })
       .then(async response => {
@@ -34,7 +39,7 @@ export function useVoiceDisclosure() {
       })
       .catch(() => { if (active) setUnavailable(true); });
     return () => { active = false; };
-  }, []);
+  }, [enabled]);
 
   const ready = Boolean(notice && acknowledged && permission && !unavailable);
   const appendDisclosure = useCallback((form: FormData): boolean => {

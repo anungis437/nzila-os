@@ -196,7 +196,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('[provision-runtime-db-roles] Failed:', err instanceof Error ? err.message : err)
+main().catch(() => {
+  // Nothing from the driver error is logged: its message, and fields derived from it, can echo the role DDL with password
+  // literals. Re-run against the database directly (psql) to see the server-side error.
+  console.error('[provision-runtime-db-roles] Failed: role provisioning did not complete (driver error withheld; it can carry role DDL)')
   process.exit(1)
 })

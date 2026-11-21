@@ -1,0 +1,39 @@
+{
+  "recordedAt": "2026-11-18T00:36:13.030762+00:00",
+  "scope": "INTERIM_NATIVE_UPGRADE_COUNTEREXAMPLE",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "historicalSourceCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "sourcePlanAtExecutionSha256": "d50251bb4bb77e0406f64baa64de1e6d10f8046f2e1dfa9b9c40a04d3785aa43",
+  "nativeTests": {
+    "passed": 0,
+    "failed": 3,
+    "skipped": 0,
+    "success": false
+  },
+  "finding": "Exact source-owned platform_identity_bindings relation absent from released topology; installer correctly refuses; missing current producer convergence must be implemented",
+  "missing": [
+    "platform_identity_bindings"
+  ],
+  "legacyScopePrerequisite": "0061 executed via real scoped migration executor after historical bootstrap refused four B002 tables without FORCE RLS",
+  "qualified": false,
+  "liveDataTouched": false,
+  "artifacts": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-red-v1.json",
+      "sha256": "05c0f0fb41d25bf225d57860cf06cbabcea85aab6ccca506368313cfe65dc4d0"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-red-v1.txt",
+      "sha256": "a299e19254cee9ce90dd2def6718b7a6b3f16c1a632f805f62e0aee84f54d0ac"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/legacy-bootstrap-force-rls-red-v1.txt",
+      "sha256": "106f4837c33f1e16485a2d5c4db617dec8d06bd11437a3316259e3fb064d734b"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/legacy-bootstrap-scope-prerequisite-v1.txt",
+      "sha256": "0f19f32ef7532a9864211684585ffa7d20ef0f417ab8896f4e1723d6c80c77fd"
+    }
+  ]
+}

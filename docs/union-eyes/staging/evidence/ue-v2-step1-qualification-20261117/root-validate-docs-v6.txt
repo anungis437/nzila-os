@@ -1,0 +1,14 @@
+
+> nzila-os@1.0.3 validate:docs /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+> tsx packages/platform-validation/src/doc-consistency.ts
+
+📝 Running Documentation Consistency Audit...
+
+Files scanned: 2814
+Findings:      3061
+  Errors:   0
+  Warnings: 1226
+  Info:     1835
+
+✅ No critical documentation errors
+Reports written to reports/doc-consistency.json and reports/doc-consistency.md

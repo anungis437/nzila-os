@@ -95,6 +95,24 @@ export interface Capability {
  */
 export const CAPABILITY_REGISTRY: readonly Capability[] = [
   {
+    id:'UE-CANONICAL-MEMBER-DIRECTORY-BOOTSTRAP',
+    title:'Canonical member contact projection after invitation acceptance',
+    state:'LIMITED',
+    ownedBy:['lib/members/own-directory-profile.ts','app/api/members/self/bootstrap/route.ts','components/members/member-directory-bootstrap.tsx'],
+    evidence:['scripts/bootstrap-v2/member-letter-delivery.native.test.ts — actual canonical PostgreSQL roles, concurrent own-profile creation, revoked/foreign/platform refusal and mandatory-audit rollback'],
+    targetWave:0,
+    notes:'Canonical authentication remains membership authority. An explicit own-session POST creates missing contact data and the business FK anchor, with mandatory audit in one transaction. Existing inactive/deleted profiles are not revived. Exact-source CI, qualified staging rollout and the controlled invited account directory readback are pending. No staging acceptance claim.',
+  },
+  {
+    id:'UE-APPROVED-LETTER-EMAIL',
+    title:'In-app email for approved and signed letters',
+    state:'LIMITED',
+    ownedBy:['lib/correspondence/email-delivery.ts','lib/correspondence/email-intent.ts','lib/services/correspondence-service.ts','app/api/correspondence/[id]/dispatch/route.ts','app/api/correspondence/[id]/email-status/route.ts'],
+    evidence:['scripts/bootstrap-v2/member-letter-delivery.native.test.ts — actual PostgreSQL outbox, provider-seam uncertainty, audited retry and receipt settlement; email-intent.test.ts — envelope and signer-summary integrity'],
+    targetWave:0,
+    notes:'Required for base by founder decision. Source implementation sends approved plain text with signer attribution separately to each recipient, using a sealed durable outbox and a stable provider key within23h. Provider acceptance is distinct from delivery and human receipt. Attachments are refused rather than omitted; existing signed letters need a verified summary through the approval/signing workflow. No private signature/profile visibility or new DB grant is added. The two attribution policy checks require separately qualified owner-operated compatibility repair before rollout. CI, actual provider delivery, controlled inbox receipt and final staging access proofs are pending. No PKI or staging GO claim.',
+  },
+  {
     id: 'UE-CASE-SEALED-EVIDENCE-EXPORT',
     title: 'Authorized case evidence PDF and sealed JSON download',
     state: 'LIMITED',
@@ -981,11 +999,11 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'components/dues/dues-payment-portal.tsx — reflects the member ledger only: it renders no payment form and no payment-method manager (both components were removed with the unmounted UI)',
       'app/api/dues/autopay/route.ts — confirmed does not exist (404)',
       'app/api/dues/payment-methods/[id]/route.ts (DELETE) and .../set-default/route.ts (POST) — confirmed do not exist (404)',
-      'Settlement now exists and is proven (lib/dues/dues-settlement.ts, verified Stripe webhook, idempotent, audited) but member dues collection is NOT initial launch scope: the initiation routes answer 501, and UE_MEMBER_DUES_PAYMENTS=1 no longer switches them on: no source names the merchant account or records the member consent to disclose the organization and member ids to the processor (lib/dues/member-dues-flag.ts)',
+      'Settlement is refused: SYSTEM holds zero authority over dues_transactions and member_dues_ledger (ZERO_SYSTEM_MUTATION_TABLES), the verified Stripe webhook answers 501 for every member dues event with no database effect, and the native proof shows the database refuses the settlement writer run as SYSTEM (scripts/bootstrap-v2/launch-defects-native.test.ts). Member dues collection is NOT initial launch scope: the initiation routes answer 501, and UE_MEMBER_DUES_PAYMENTS=1 no longer switches them on: no source names the merchant account or records the member consent to disclose the organization and member ids to the processor (lib/dues/member-dues-flag.ts)',
     ],
     targetWave: 0,
     notes:
-      'DISABLED, DORMANT. Owner decision (closed): dues are handled in an external system and Union Eyes reflects data at best, so member dues collection is not to be enabled and no member payment UI is to be built. The server-owned initiation (create-payment-intent, portal/dues/pay) and the verified-webhook settlement into member_dues_ledger remain implemented and off; no deployment flag switches initiation on.',
+      'DISABLED, DORMANT. Owner decision (closed): dues are handled in an external system and Union Eyes reflects data at best, so member dues collection is not to be enabled and no member payment UI is to be built. The server-owned initiation (create-payment-intent, portal/dues/pay) remain implemented and off; no deployment flag switches initiation on. Webhook settlement into member_dues_ledger is unavailable (501), and the database denies it to SYSTEM.',
   },
 
   // ------------------------------------------------------------------------
@@ -1589,15 +1607,19 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
     id: 'UE-FIN-AFFILIATE-REMITTANCES',
     title: 'CLC / National / federation affiliate remittances',
     state: 'NOT_IMPLEMENTED',
-    ownedBy: ['app/api/admin/clc/remittances/route.ts'],
+    ownedBy: ['app/api/admin/clc/remittances/route.ts', 'lib/organizations/per-capita-standing.ts', 'services/clc/compliance-reports.ts',
+      'app/api/admin/clc/analytics/forecast/route.ts', 'app/api/admin/clc/analytics/annual-report/route.ts',
+      'app/api/admin/clc/analytics/multi-year-trends/route.ts', 'app/api/admin/clc/analytics/trends/route.ts'],
     evidence: [
       'app/api/admin/clc/remittances/** — previously bound to organizationMembers (membership rows served/mutated as remittances; export/submit stubs answered "accepted"); all now answer HTTP 501.',
       'app/api/__tests__/financial-officer-containment.test.ts — asserts no organizationMembers/crudRoutes import and no "accepted" stub.',
-      'app/[locale]/dashboard/federation/remittances/page.tsx — reflects four counts from the remittance records that reached the organization (lib/organizations/per-capita-standing.ts, read in its own context), says dues are handled in an external system, and offers no filter, ledger or export; with no records it says so, and a failed read is an error, not zeros.',
+      'lib/reality/contained-storage.ts — the current canonical source contains per_capita_remittances (CONTAINED_NO_AUTHORITY: no runtime or system grant, lib/operations/catalog-v2-decisions.json). The remittance reflection (lib/organizations/per-capita-standing.ts, read by the federation and CLC dashboards) and the CLC remittance analytics (forecast, annual report, multi-year trends) answer 501 NOT_IMPLEMENTED with the reason before any statement; the dashboards show it as a failed read, never as zeros or a compliant position.',
+      'db/__tests__/affiliate-pages.postgres.test.ts and admin-routes.postgres.test.ts — native PostgreSQL: the 501, no row written, and the database still refusing the table to both application roles.',
     ],
     targetWave: 8,
     notes:
-      'Owner decision (closed): affiliate per-capita remittances are handled in an external system; Union Eyes reflects the records that reach it, read-only, and does not collect, calculate, submit, reconcile or export them. No remittance ledger is to be built here. ' +
+      'Owner decision (closed): affiliate per-capita remittances are handled in an external system; Union Eyes does not collect, calculate, submit, reconcile or export them. No remittance ledger is to be built here. ' +
+      'The read-only reflection of records that reach Union Eyes is also unavailable until the current source grants an application role a reviewed read of per_capita_remittances. ' +
       'Affiliate (per-capita) remittances are distinct from employer payroll-deduction remittances.',
   },
   {

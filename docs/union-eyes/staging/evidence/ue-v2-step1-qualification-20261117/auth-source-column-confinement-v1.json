@@ -1,0 +1,212 @@
+{
+  "collectedAt": "2026-11-18T01:50:20.908340+00:00",
+  "proof": "AUTH_CURRENT_SOURCE_COLUMN_CONFINEMENT",
+  "environment": "Owned disposable PGlite SQL engine; canonical current source-compiled auth DDL and RLS; no network or external database.",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "workingSourceQualificationOnly": true,
+  "sourceFiles": [
+    {
+      "file": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "4f6fc18d249603583477544e5c71b931fa5b9adc5e4a0cd8ced845ae721a9028",
+      "bytes": 37137,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/db/src/auth-storage-authority/privilege-expectations.ts",
+      "sha256": "1fbd4e3f84baf23bd431fb0871dc2d56ab8ca45fddee7b17eb7219e747a04f8a",
+      "bytes": 8425,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/db/src/auth-storage-authority/index.ts",
+      "sha256": "9346059cbb76b82ff03db72eb767e26c798db39a238fc57a8a7c67175f882c3c",
+      "bytes": 238,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/db/src/auth-storage-authority/source-columns.ts",
+      "sha256": "847929a262b3952106f3c27ff41f2b3012622dd0f02e347b251389ddec080d4f",
+      "bytes": 3155,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/db/src/auth-storage-authority/source-columns.test.ts",
+      "sha256": "99e572207f52e4337f7fb007e89dc258ee59b5a979a5e05481f90db6267fac19",
+      "bytes": 3302,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/auth-sql.ts",
+      "sha256": "c1ed87c8f5b1d324f3aa231261860613c4dadd57a09a3115604b5675b7ca266c",
+      "bytes": 718,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/auth-privileges.ts",
+      "sha256": "c695710de3e4e7306f76259d6001fe403668e07692a6f9754d700e04d2791248",
+      "bytes": 8565,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/auth-bootstrap-minimum.native.test.ts",
+      "sha256": "a692c8901fa4930b8a35e0c0c84dbe5d98a3bcc0a139d0a98ad1cd9d67da21f0",
+      "bytes": 10448,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/db/auth/auth-source-columns.pglite.test.ts",
+      "sha256": "7302676f8677efe84036a315084b22a77b1c98babbd8be0925446f5c8c826689",
+      "bytes": 19302,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "apps/union-eyes/lib/operations/canonical-catalog-admission.ts",
+      "sha256": "390541f29fb0fff030102fc3746fe25ac89ec7cb9896f051d5d59f4e5c737923",
+      "bytes": 14934,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "ba5f499dbe0ef5baf5e3a7ba1ec8f915849ab5c23edb6136438b14aaaa54b54d",
+      "bytes": 43135,
+      "changedByThisBatch": true
+    },
+    {
+      "file": "packages/db/src/schema/auth.ts",
+      "sha256": "04a0b11d1edc2729e9eb2e1eebe80d860fc3e49268f34af8066da26043cd12e6",
+      "bytes": 18184,
+      "changedByThisBatch": false
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/auth-fixture.ts",
+      "sha256": "89dd4e9ec8a203b1a0d3d11fd7254d1ca67614feff74193d09f16fcc6f0bce7f",
+      "bytes": 2703,
+      "changedByThisBatch": false
+    },
+    {
+      "file": "apps/union-eyes/lib/operations/catalog-admission-core.mjs",
+      "sha256": "e8d757c269417104111c8f753feeb4f29072e2309f5f6ed0dddfa9ccac588cdc",
+      "bytes": 24467,
+      "changedByThisBatch": false
+    },
+    {
+      "file": "apps/union-eyes/lib/operations/catalog-admission-core.d.mts",
+      "sha256": "69472c209c400cc26cf91cfd04aae591d4252b150a5cd4edc23eab2ff3f6560a",
+      "bytes": 719,
+      "changedByThisBatch": false
+    }
+  ],
+  "compiledArtifact": {
+    "producerPath": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+    "producerExport": "compileAuthBootstrapSql",
+    "algorithm": "SHA-256",
+    "value": "d5a66612180ec7d7a5b8592270193c8c8278712fb73c96e5eee16d2053edbccb",
+    "digestOf": "Generated SQL text, not the producer source file bytes"
+  },
+  "rootCause": "Bare table-level column-capable auth grants and wildcard ACL checks admitted retained physical fields outside the current canonical Drizzle declaration.",
+  "changes": [
+    "Expand SELECT/INSERT/UPDATE/REFERENCES against one field map derived from the actual canonical shared Drizzle auth schema. Unknown or invalid explicit fields fail closed.",
+    "Preserve independent phase privilege contracts, RLS predicates and table DELETE. Wildcard does not include system columns.",
+    "Preserve the existing same-transaction signup marker through explicit issuance-only SELECT users.xmin; all other role/system-column powers remain denied.",
+    "Revoke retained and system-column ACLs before installing current source permissions. Keep installer schema facts positive-only with a separate complete ACL column census.",
+    "Inspectors detect table-wide column-capable powers, retained-field powers, unexpected technical columns, and explicit system-column ACLs without misclassifying approved public table SELECT as an explicit column ACL."
+  ],
+  "counterexample": {
+    "receipt": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-v1.json",
+    "finding": "12 restricted-role retained-field SQL SELECTs allowed before repair; canonical controls2 allowed; foreign controls0 allowed.",
+    "normalApiResponseLeak": "NOT_ESTABLISHED"
+  },
+  "intermediateRegression": {
+    "artifact": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-source-columns-signup-dependency-red-v1.txt",
+    "passed": 30,
+    "failed": 1,
+    "cause": "Initial source-column confinement exposed the existing users.xmin technical dependency in the signup-session RLS predicate. Fixed through an explicit narrow read; predicate preserved."
+  },
+  "validation": {
+    "focused": {
+      "exitCode": 0,
+      "filesPassed": 5,
+      "testsPassed": 100,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "maxWorkers": 1,
+      "nodeHeapLimitMiB": 2048
+    },
+    "newSqlEngineRegressionCases": 24,
+    "retainedPhysicalFieldReadDenials": 12,
+    "effectiveColumnPrivilegeChecks": 15624,
+    "physicalTablePrivilegeChecks": 1386,
+    "legitimateOperations": [
+      "canonical own-user id/password projections",
+      "session creation",
+      "MFA enrollment and challenge insertion/update",
+      "signup and same-transaction session",
+      "password-reset redemption",
+      "invitation account creation, membership, session and final consumption"
+    ],
+    "negativeControls": [
+      "foreign-user reads and password writes",
+      "existing-account signup-session refusal",
+      "retained user UPDATE",
+      "unknown session INSERT column",
+      "identity/exact-email lookup xmin read refusal",
+      "issuance xmax read refusal",
+      "issuance other-table xmin refusal",
+      "prior explicit identity xmin/retained-field ACL removal",
+      "actual broad-table-grant inspector drift detection"
+    ],
+    "existingRevokePurposeRegressionsPassed": 8,
+    "existingInstallerRegressionsPassed": 56,
+    "existingCanonicalCatalogRegressionsPassed": 8,
+    "sharedSourceContractRegressionsPassed": 4,
+    "eslint": {
+      "exitCode": 0,
+      "files": 11,
+      "maxWarnings": 0,
+      "advisory": "Existing Next ESLint configuration emits a root Pages directory advisory when invoked from repository root; no lint diagnostics."
+    },
+    "gitDiffCheckExitCode": 0
+  },
+  "artifacts": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-source-columns-signup-dependency-red-v1.txt",
+      "sha256": "665b0947eb4688efec24f17d7fa430b216d4ab59da9755f19884b63418b9db7f",
+      "bytes": 1822
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-source-columns-focused-v1.txt",
+      "sha256": "292d89d8ffd599dcb3c42c2809f551c3160e45c5a85424b162c13770a7057e36",
+      "bytes": 1928
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-source-columns-focused-v1.json",
+      "sha256": "bb1ab7ec6223b0496881f5cf1c79decdd4baae1ee387e8a6d1751b200a6fcf96",
+      "bytes": 42476
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-source-columns-eslint-v1.txt",
+      "sha256": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45",
+      "bytes": 317
+    }
+  ],
+  "notProven": [
+    "native PostgreSQL15/16 execution of this repaired source",
+    "current source-plan and catalog-overlay regeneration",
+    "final integrated typecheck and required repository checks",
+    "production Next build/HTTP/browser/authenticated load",
+    "staging persona acceptance or STAGING GO"
+  ],
+  "rawSensitiveValuesPersisted": false,
+  "ownedSqlEngineCleanup": "Both PGlite test engines closed by awaited afterAll hooks, including after failures.",
+  "productionOrStagingChanges": false,
+  "financeFeatureImplementation": false,
+  "step2": "HELD",
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "b815750afa38d6851d0f7a979de99dd4bea7f116a5aedcfa6b925b5343d8db12",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/auth-source-column-confinement-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

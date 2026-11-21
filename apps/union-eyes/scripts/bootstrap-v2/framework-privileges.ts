@@ -1,3 +1,7 @@
+import {
+  membershipCatalogProjectionSql,
+  type CanonicalPostgresMajor,
+} from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import type pg from 'pg'
 import { AUTH_EXECUTION_ROLES } from './auth-sql'
 import {
@@ -39,7 +43,11 @@ function expectedColumns(
   return null
 }
 
-export async function inspectFrameworkPrivileges(client: pg.Client) {
+export async function inspectFrameworkPrivileges(
+  client: pg.Client,
+  options: { postgresMajor?: CanonicalPostgresMajor } = {},
+) {
+  const membershipProjection = membershipCatalogProjectionSql(options.postgresMajor)
   const failures: string[] = []
   const roles: string[] = Object.values(FRAMEWORK_ROLES)
   const flags = (
@@ -96,7 +104,7 @@ export async function inspectFrameworkPrivileges(client: pg.Client) {
       inherit_option: boolean
       set_option: boolean
     }>(
-      `SELECT member.rolname AS member,target.rolname AS target,m.admin_option,m.inherit_option,m.set_option
+      `SELECT member.rolname AS member,target.rolname AS target,${membershipProjection.adminOption} AS admin_option,${membershipProjection.inheritOption} AS inherit_option,${membershipProjection.setOption} AS set_option
        FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member JOIN pg_roles target ON target.oid=m.roleid
        WHERE member.rolname=ANY($1)`,
       [[...roles, 'union_eyes_runtime', 'union_eyes_system']],
@@ -105,9 +113,9 @@ export async function inspectFrameworkPrivileges(client: pg.Client) {
   for (const membership of memberships)
     if (
       !FRAMEWORK_MEMBERSHIPS[membership.member]?.includes(membership.target) ||
-      membership.admin_option ||
-      membership.inherit_option ||
-      !membership.set_option
+      membership.admin_option !== false ||
+      membership.inherit_option !== false ||
+      membership.set_option !== true
     )
       failures.push(`FRAMEWORK_MEMBERSHIP_UNSAFE:${membership.member}:${membership.target}`)
   for (const [member, targets] of Object.entries(FRAMEWORK_MEMBERSHIPS))

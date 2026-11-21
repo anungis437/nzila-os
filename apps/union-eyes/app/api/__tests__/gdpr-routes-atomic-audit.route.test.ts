@@ -42,7 +42,7 @@ vi.mock('@/lib/gdpr/consent-manager', () => {
 });
 vi.mock('@/lib/job-queue', () => ({ getReportQueue: m.getReportQueue }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
-vi.mock('@/db/schema', () => ({ organizations: { id: 'id' } }));
+vi.mock('@/db/schema', async () => ({ ...(await vi.importActual<Record<string, unknown>>('@/db/schema')), organizations: { id: 'id' } }));
 vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(() => 'eq') }));
 
 const ORG = '11111111-1111-4111-8111-111111111111';

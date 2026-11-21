@@ -1,0 +1,77 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/local-vault-fixture.test.ts > owned real-SDK production vault bootstrap > executes production durable encryption with accepted authority 8547ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/local-vault-fixture.test.ts > owned real-SDK production vault bootstrap > executes production durable encryption with revoked authority 1551ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/local-vault-fixture.test.ts > owned real-SDK production vault bootstrap > executes production durable encryption with untrusted-tls authority 1460ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/production-key-authority.test.ts > actual production encryption authority requirement > rejects a credential write without the production vault (fallback present: false) 1089ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/production-key-authority.test.ts > actual production encryption authority requirement > rejects a credential write without the production vault (fallback present: true) 1224ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/native-runtime-fixture.test.ts > owned qualification fixture credential boundaries > provisions four distinct non-inheriting unprivileged logins with no cross-gateway memberships 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/native-runtime-fixture.test.ts > owned qualification fixture credential boundaries > enters the runtime role inside the authority transaction before its first scoped operation, without changing inheritance 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/native-runtime-fixture.test.ts > owned qualification fixture credential boundaries > keeps the runtime helper tenant-scoped and rolls failed work and its role back 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/native-runtime-fixture.test.ts > owned qualification fixture credential boundaries > cannot use ordinary authentication credentials to enter auth-system execution or read raw auth data 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/native-runtime-fixture.test.ts > owned qualification fixture credential boundaries > uses distinct auth-system credentials for a purpose-bound revocation and denies ordinary identity/raw-bearer access 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/native-runtime-fixture.test.ts > owned qualification fixture credential boundaries > does not give the business runtime either auth gateway or an auth-system execution role 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > accepts every required component while retaining actual raw1 and global acceptance-unproven 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects a substituted global status FAIL 10ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects a substituted global status PASS 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects a substituted global status SKIPPED 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects a substituted global status UNEXECUTED 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects a substituted global status UNKNOWN 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects non-passing required components FAIL 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects non-passing required components SKIPPED 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects non-passing required components UNEXECUTED 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects non-passing required components UNKNOWN 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing required evidence browserAcceptance 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing required evidence authenticatedCaseworkLoad 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing required evidence httpSmoke 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing required evidence cleanup 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing required evidence sourcePlanDigest 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing required evidence networkObservations 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects raw CLI success, cancellation, launch failure and an unknown exit 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects stale source/plan/observer/execution provenance and mutated tracked source inputs 2ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects missing profiles/actions and successful labels on shortened, slow or erroring load samples 5ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > rejects unsafe observations, leaked credentials, disabled flags and every incomplete cleanup 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > checks actual raw artifact bytes and refuses changed-bytes 22ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > checks actual raw artifact bytes and refuses missing 20ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > checks actual raw artifact bytes and refuses duplicate 13ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > checks actual raw artifact bytes and refuses traversal 12ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > existing V2 engineering component evidence verification (synthetic parser fixtures) > checks actual raw artifact bytes and refuses wrong-index-sha 15ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > bounds each Node heap by default and refuses unvalidated resource overrides 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses disk-poor admission and cancels the owned build before the one-GiB floor 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > retains original licensed Poppins weights without a Google build-time fetch 5ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > does not copy any Next dotenv variant or dependency/build output 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > constructs synthetic children without inherited credentials, proxies or node injection 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > uses separate ordinary and system authentication credentials in the actual child environment 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > redacts the distinct auth-system password in plain and URL-encoded outputs and refuses persisted secrets 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: missing 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: ordinary 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: changed-password 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: external 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: other-port 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: other-database 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > refuses missing, reused or unowned auth-system credentials: encoded-alias 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > rejects external database URLs before a child can start 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > loads the real Windows preload and denies external and unowned loopback sockets 66ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/next-acceptance.test.ts > isolated actual Next acceptance boundary > permits owned HTTP while containing fetch, DNS, UDP and inherited workers 112ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > binds a real-password/MFA fixture through the canonical switch and returns its rotated session 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > refuses an unusable fixture organization binding: denied 3ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > refuses an unusable fixture organization binding: substitution 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > refuses an unusable fixture organization binding: unrotated 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > retains every recovered profile constraint without shortening the measured stages 8ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > rejects external, credential-bearing, redirect-like and unowned HTTP origins 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > fails empty, insufficient, slow and erroring samples using the full scheduled denominator 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > rejects successful HTTP projections for a different case, tenant or represented member 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > caps concurrent requests, records missed schedule slots and retains no cookie or case body 2ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/authenticated-casework-load.test.ts > reusable owned authenticated casework profile > counts HTTP and cross-resource response errors and enforces the shared request budget 1ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/browser-acceptance.test.ts > owned V2 browser qualification contracts (no application-runtime claim) > permits only the exact owned origin for HTTP and WebSocket traffic 7ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/browser-acceptance.test.ts > owned V2 browser qualification contracts (no application-runtime claim) > requires all four actual locale/viewport profiles and every named action check 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/browser-acceptance.test.ts > owned V2 browser qualification contracts (no application-runtime claim) > does not convert unexecuted or failed checks into browser qualification 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/browser-acceptance.test.ts > owned V2 browser qualification contracts (no application-runtime claim) > fails closed on denied external requests, browser exceptions, server errors or incomplete cleanup 0ms
+ ✓ |union-eyes-heavy| scripts/bootstrap-v2/browser-acceptance.test.ts > owned V2 browser qualification contracts (no application-runtime claim) > never serializes exception text containing credentials, cookies, tokens or DOM content 0ms
+
+ Test Files  6 passed (6)
+      Tests  68 passed (68)
+   Start at  19:40:14
+   Duration  19.03s (tests 82%, import 16%, transform 2%)
+

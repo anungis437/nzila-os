@@ -14,26 +14,18 @@ import {
   browsePublicPlaylists,
   browseTrending,
 } from '@/lib/actions/browse-actions'
-import type { CatalogListResult } from '@/lib/actions/catalog-actions'
-import type { EventListResult } from '@/lib/actions/event-actions'
-import type { PlaylistListResult } from '@/lib/actions/playlist-actions'
-import type { SearchResult } from '@/lib/actions/search-actions'
 import { BrowseGrid } from '@/components/dashboard/browse-grid'
 
-export default async function BrowsePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
+export default async function BrowsePage({ params }: { params: Promise<{ locale: string }> }) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
   const { locale } = await params
 
   const [publishedAssets, upcomingEvents, playlists, trending] = await Promise.all([
-    browsePublishedAssets() as Promise<CatalogListResult>,
-    browsePublishedEvents() as Promise<EventListResult>,
-    browsePublicPlaylists() as Promise<PlaylistListResult>,
-    browseTrending() as Promise<SearchResult[]>,
+    browsePublishedAssets(),
+    browsePublishedEvents(),
+    browsePublicPlaylists(),
+    browseTrending(),
   ])
 
   return (

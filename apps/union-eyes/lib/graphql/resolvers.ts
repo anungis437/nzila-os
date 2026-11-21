@@ -12,6 +12,7 @@ import {
   externalInsurancePolicies 
 } from '@/db/schema';
 import { perCapitaRemittances } from '@/db/schema';
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { eq, and, desc, gte, lte, sql as _sql, count } from 'drizzle-orm';
 import { getSystemStatus } from '@/lib/monitoring/status-page';
 import type { YogaInitialContext } from 'graphql-yoga';
@@ -173,6 +174,8 @@ export const resolvers = {
     },
 
     remittance: async (_parent: unknown, { id }: { id: string }) => {
+      // per_capita_remittances has no runtime or system grant in the current source: refused before any statement.
+      requireContainedStorageAuthority('per_capita_remittances');
       const result = await db
         .select()
         .from(perCapitaRemittances)
@@ -202,6 +205,7 @@ export const resolvers = {
       _parent: unknown, 
       { planType: _planType, status: filterStatus }: { planType?: string; status?: string }
     ) => {
+      requireContainedStorageAuthority('per_capita_remittances');
       let query = db.select().from(perCapitaRemittances);
 
       const conditions: SQL[] = [];

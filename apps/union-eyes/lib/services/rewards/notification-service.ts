@@ -1,79 +1,78 @@
+import { requireRewardsInstitutionalAuthority } from '@/lib/rewards/credit-authority'
 /**
  * Notification Triggers for Rewards System
  * Handles automatic email notifications for various reward events
  * Includes batch processing for credit expiration warnings
  */
 
-import { db } from '@/db';
-import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
-import { 
-  recognitionAwards, 
+import { db } from '@/db'
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context'
+import {
+  recognitionAwards,
   rewardRedemptions,
   organizations,
   users,
-  organizationMembers 
-} from '@/db/schema';
-import { rewardWalletLedger } from '@/db/schema/domains/infrastructure/rewards';
-import { 
-  sendAwardReceivedEmail, 
-  sendApprovalRequestEmail, 
-  sendCreditExpirationEmail, 
-  sendRedemptionConfirmationEmail 
-} from './email-service';
-import { eq, and, lte, lt, gte, sql, gt, desc, inArray } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
-import { claimExpiryWarning, releaseExpiryWarning } from './expiry-warning-marker';
+  organizationMembers,
+} from '@/db/schema'
+import { rewardWalletLedger } from '@/db/schema/domains/infrastructure/rewards'
+import {
+  sendAwardReceivedEmail,
+  sendApprovalRequestEmail,
+  sendCreditExpirationEmail,
+  sendRedemptionConfirmationEmail,
+} from './email-service'
+import { eq, and, lte, lt, gte, sql, gt, desc, inArray } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
+import { claimExpiryWarning, releaseExpiryWarning } from './expiry-warning-marker'
 
 // Batch configuration
-const BATCH_SIZE = 100;
-const EMAIL_RATE_LIMIT_MS = 100; // Rate limit for sending emails
+const BATCH_SIZE = 100
+const EMAIL_RATE_LIMIT_MS = 100 // Rate limit for sending emails
 
 interface ExpiringCreditsNotification {
-  userId: string;
-  organizationId: string;
-  userEmail: string;
-  userName: string;
-  organizationName: string;
-  expiringAmount: number;
-  expirationDate: Date;
-  daysRemaining: number;
+  userId: string
+  organizationId: string
+  userEmail: string
+  userName: string
+  organizationName: string
+  expiringAmount: number
+  expirationDate: Date
+  daysRemaining: number
 }
 
 interface NotificationResult {
-  success: boolean;
-  userId: string;
-  organizationId?: string;
-  emailSent: boolean;
+  success: boolean
+  userId: string
+  organizationId?: string
+  emailSent: boolean
   /** The warning for this lot and tier was already recorded by an earlier run. */
-  alreadyWarned?: boolean;
-  error?: string;
+  alreadyWarned?: boolean
+  error?: string
 }
 
-type ExpirationBatchCounter =
-  | 'usersNotified7Days'
-  | 'usersNotified14Days'
-  | 'usersNotified30Days';
+type ExpirationBatchCounter = 'usersNotified7Days' | 'usersNotified14Days' | 'usersNotified30Days'
 
 function asObject(value: any): Record<string, unknown> | null {
-  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null
 }
 
 function readStringProperty(value: any, key: string): string | undefined {
-  const objectValue = asObject(value);
-  const property = objectValue?.[key];
-  return typeof property === 'string' ? property : undefined;
+  const objectValue = asObject(value)
+  const property = objectValue?.[key]
+  return typeof property === 'string' ? property : undefined
 }
 
 function readNumberProperty(value: any, key: string): number | undefined {
-  const objectValue = asObject(value);
-  const property = objectValue?.[key];
-  return typeof property === 'number' ? property : undefined;
+  const objectValue = asObject(value)
+  const property = objectValue?.[key]
+  return typeof property === 'number' ? property : undefined
 }
 
 /**
  * Trigger notification when an award is issued
  */
 export async function notifyAwardIssued(awardId: string) {
+  requireRewardsInstitutionalAuthority()
   try {
     // Fetch award details with relationships
     const award = await db.query.recognitionAwards.findFirst({
@@ -82,27 +81,27 @@ export async function notifyAwardIssued(awardId: string) {
         awardType: true,
         organization: true,
       },
-    });
+    })
 
     if (!award || award.status !== 'issued') {
-      return { success: false, error: 'Award not found or not issued' };
+      return { success: false, error: 'Award not found or not issued' }
     }
 
     // Fetch recipient user details
     const recipient = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.userId, award.recipientUserId),
-    });
+    })
 
     // Fetch issuer user details (issuerUserId can be null for system awards)
-    const issuerUserId = award.issuerUserId;
+    const issuerUserId = award.issuerUserId
     const issuer = issuerUserId
       ? await db.query.users.findFirst({
           where: (users, { eq }) => eq(users.userId, issuerUserId),
         })
-      : null;
+      : null
 
     if (!recipient?.email) {
-      return { success: false, error: 'Recipient email not found' };
+      return { success: false, error: 'Recipient email not found' }
     }
 
     // Send notification email
@@ -116,12 +115,12 @@ export async function notifyAwardIssued(awardId: string) {
       creditsAwarded: readNumberProperty(award.awardType, 'defaultCreditAmount') || 0,
       awardId: award.id,
       orgName: readStringProperty(award.organization, 'name') || 'Organization',
-    });
+    })
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
-    logger.error('[Notifications] Error sending award issued notification', { error, awardId });
-    return { success: false, error };
+    logger.error('[Notifications] Error sending award issued notification', { error, awardId })
+    return { success: false, error }
   }
 }
 
@@ -129,6 +128,7 @@ export async function notifyAwardIssued(awardId: string) {
  * Trigger notification when an award requires approval
  */
 export async function notifyAwardPendingApproval(awardId: string) {
+  requireRewardsInstitutionalAuthority()
   try {
     // Fetch award details
     const award = await db.query.recognitionAwards.findFirst({
@@ -137,44 +137,41 @@ export async function notifyAwardPendingApproval(awardId: string) {
         awardType: true,
         organization: true,
       },
-    });
+    })
 
     if (!award || award.status !== 'pending') {
-      return { success: false, error: 'Award not found or not pending' };
+      return { success: false, error: 'Award not found or not pending' }
     }
 
     // Fetch recipient and issuer details
     const recipient = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.userId, award.recipientUserId),
-    });
-    const issuerUserId = award.issuerUserId;
+    })
+    const issuerUserId = award.issuerUserId
     const issuer = issuerUserId
       ? await db.query.users.findFirst({
           where: (users, { eq }) => eq(users.userId, issuerUserId),
         })
-      : null;
+      : null
 
     // Fetch organization admins
     const admins = await db.query.organizationMembers.findMany({
       where: (members, { eq, and, inArray }) =>
-        and(
-          eq(members.organizationId, award.orgId),
-          inArray(members.role, ['admin', 'owner'])
-        ),
-    });
+        and(eq(members.organizationId, award.orgId), inArray(members.role, ['admin', 'owner'])),
+    })
 
     // Send notification to all admins
     const results = await Promise.allSettled(
       admins.map(async (admin) => {
-        if (!admin.email) return Promise.resolve();
-        
+        if (!admin.email) return Promise.resolve()
+
         // Fetch admin user details
         const adminUser = await db.query.users.findFirst({
           where: eq(users.userId, admin.userId),
-        });
+        })
 
-        if (!adminUser) return Promise.resolve();
-        
+        if (!adminUser) return Promise.resolve()
+
         return sendApprovalRequestEmail({
           adminName: adminUser.displayName || adminUser.email.split('@')[0] || 'Admin',
           adminEmail: adminUser.email,
@@ -185,23 +182,23 @@ export async function notifyAwardPendingApproval(awardId: string) {
           creditsToAward: readNumberProperty(award.awardType, 'defaultCreditAmount') || 0,
           awardId: award.id,
           orgName: readStringProperty(award.organization, 'name') || 'Organization',
-        });
-      })
-    );
+        })
+      }),
+    )
 
-    const successCount = results.filter((r) => r.status === 'fulfilled').length;
+    const successCount = results.filter((r) => r.status === 'fulfilled').length
 
-    return { success: true, notifiedAdmins: successCount };
+    return { success: true, notifiedAdmins: successCount }
   } catch (error) {
-    logger.error('[Notifications] Error sending approval notifications', { error, awardId });
-    return { success: false, error };
+    logger.error('[Notifications] Error sending approval notifications', { error, awardId })
+    return { success: false, error }
   }
 }
 
 /**
  * Get users with expiring credits within the specified timeframe
  * Uses batched queries for performance
- * 
+ *
  * Expiry metadata is captured atomically on positive earning entries.
  * Cross-tenant scans are reserved for the existing system notification job;
  * an organization filter restricts tenant monitoring callers.
@@ -215,14 +212,17 @@ export async function getExpiringCreditsUsers(
   options: { exactDay?: boolean } = {},
   executor: RLSTx = db,
 ) {
-  const now = new Date();
-  const expiresBefore = new Date();
-  expiresBefore.setDate(expiresBefore.getDate() + daysBeforeExpiration);
+  requireRewardsInstitutionalAuthority()
+  const now = new Date()
+  const expiresBefore = new Date()
+  expiresBefore.setDate(expiresBefore.getDate() + daysBeforeExpiration)
   // exactDay selects the earnings that expire on the calendar day N days from today, so a daily run warns each earning once per
   // tier (30, 14 and 7 days out) instead of the three overlapping windows selecting the same row on every run.
-  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const windowStart = options.exactDay ? startOfDay(expiresBefore) : now;
-  const windowEnd = options.exactDay ? new Date(startOfDay(expiresBefore).getTime() + 24 * 60 * 60 * 1000) : null;
+  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const windowStart = options.exactDay ? startOfDay(expiresBefore) : now
+  const windowEnd = options.exactDay
+    ? new Date(startOfDay(expiresBefore).getTime() + 24 * 60 * 60 * 1000)
+    : null
 
   const rows = await executor
     .select({
@@ -238,19 +238,24 @@ export async function getExpiringCreditsUsers(
     .from(rewardWalletLedger)
     // The warning goes to the address the member holds in the organization the credits belong to: the scan runs as the system role,
     // which has no access to the canonical identity store (user_management), and the membership record is the organization's own.
-    .leftJoin(organizationMembers, and(
-      eq(organizationMembers.userId, rewardWalletLedger.userId),
-      eq(organizationMembers.organizationId, rewardWalletLedger.orgId)
-    ))
+    .leftJoin(
+      organizationMembers,
+      and(
+        eq(organizationMembers.userId, rewardWalletLedger.userId),
+        eq(organizationMembers.organizationId, rewardWalletLedger.orgId),
+      ),
+    )
     .leftJoin(organizations, eq(organizations.id, rewardWalletLedger.orgId))
     .where(
       and(
         gte(rewardWalletLedger.expiresAt, windowStart),
-        windowEnd ? lt(rewardWalletLedger.expiresAt, windowEnd) : lte(rewardWalletLedger.expiresAt, expiresBefore),
+        windowEnd
+          ? lt(rewardWalletLedger.expiresAt, windowEnd)
+          : lte(rewardWalletLedger.expiresAt, expiresBefore),
         gt(rewardWalletLedger.amountCredits, 0),
         eq(rewardWalletLedger.eventType, 'earn'),
-        organizationId ? eq(rewardWalletLedger.orgId, organizationId) : undefined
-      )
+        organizationId ? eq(rewardWalletLedger.orgId, organizationId) : undefined,
+      ),
     )
     .groupBy(
       rewardWalletLedger.userId,
@@ -258,32 +263,38 @@ export async function getExpiringCreditsUsers(
       organizationMembers.email,
       organizationMembers.name,
       rewardWalletLedger.orgId,
-      organizations.name
+      organizations.name,
     )
-    .limit(batchSize);
+    .limit(batchSize)
 
   // The earnings are dated lots, not allocated against spending, so what can still expire is at most what the member holds now.
-  const balances = await currentBalances(rows.map((row) => ({ orgId: row.orgId, userId: row.userId })), executor, organizationId);
+  const balances = await currentBalances(
+    rows.map((row) => ({ orgId: row.orgId, userId: row.userId })),
+    executor,
+    organizationId,
+  )
 
-  return rows
-    .filter((row) => row.userEmail && row.expirationDate)
-    .map((row) => {
-      const held = balances.get(`${row.orgId}:${row.userId}`) ?? 0;
-      return {
-        userId: row.userId,
-        organizationId: row.orgId,
-        userEmail: row.userEmail as string,
-        userName: row.userName || (row.userEmail as string).split('@')[0],
-        organizationName: row.organizationName || 'UnionEyes',
-        expiringAmount: Math.min(Number(row.expiringAmount) || 0, held),
-        expirationDate: row.expirationDate as Date,
-        daysRemaining: Math.ceil(
-          ((row.expirationDate as Date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        ),
-      } as ExpiringCreditsNotification;
-    })
-    // Credits that were spent can no longer expire, so there is nothing to warn about.
-    .filter((entry) => entry.expiringAmount > 0);
+  return (
+    rows
+      .filter((row) => row.userEmail && row.expirationDate)
+      .map((row) => {
+        const held = balances.get(`${row.orgId}:${row.userId}`) ?? 0
+        return {
+          userId: row.userId,
+          organizationId: row.orgId,
+          userEmail: row.userEmail as string,
+          userName: row.userName || (row.userEmail as string).split('@')[0],
+          organizationName: row.organizationName || 'UnionEyes',
+          expiringAmount: Math.min(Number(row.expiringAmount) || 0, held),
+          expirationDate: row.expirationDate as Date,
+          daysRemaining: Math.ceil(
+            ((row.expirationDate as Date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+          ),
+        } as ExpiringCreditsNotification
+      })
+      // Credits that were spent can no longer expire, so there is nothing to warn about.
+      .filter((entry) => entry.expiringAmount > 0)
+  )
 }
 
 /** The latest ledger balance of each organization and member in the list. */
@@ -292,40 +303,57 @@ async function currentBalances(
   executor: RLSTx = db,
   organizationId?: string,
 ): Promise<Map<string, number>> {
-  const balances = new Map<string, number>();
-  const userIds = [...new Set(members.map((member) => member.userId))];
-  const wanted = new Set(members.map((member) => `${member.orgId}:${member.userId}`));
+  const balances = new Map<string, number>()
+  const userIds = [...new Set(members.map((member) => member.userId))]
+  const wanted = new Set(members.map((member) => `${member.orgId}:${member.userId}`))
   for (let i = 0; i < userIds.length; i += 500) {
-    const chunk = userIds.slice(i, i + 500);
+    const chunk = userIds.slice(i, i + 500)
     const ledger = await executor
-      .select({ orgId: rewardWalletLedger.orgId, userId: rewardWalletLedger.userId, balanceAfter: rewardWalletLedger.balanceAfter })
+      .select({
+        orgId: rewardWalletLedger.orgId,
+        userId: rewardWalletLedger.userId,
+        balanceAfter: rewardWalletLedger.balanceAfter,
+      })
       .from(rewardWalletLedger)
       // An organization's scan reads only that organization's ledger, never another organization's balance for the same user id.
-      .where(organizationId ? and(eq(rewardWalletLedger.orgId, organizationId), inArray(rewardWalletLedger.userId, chunk)) : inArray(rewardWalletLedger.userId, chunk))
-      .orderBy(desc(rewardWalletLedger.createdAt));
+      .where(
+        organizationId
+          ? and(
+              eq(rewardWalletLedger.orgId, organizationId),
+              inArray(rewardWalletLedger.userId, chunk),
+            )
+          : inArray(rewardWalletLedger.userId, chunk),
+      )
+      .orderBy(desc(rewardWalletLedger.createdAt))
     for (const entry of ledger) {
-      const key = `${entry.orgId}:${entry.userId}`;
-      if (wanted.has(key) && !balances.has(key)) balances.set(key, Number(entry.balanceAfter) || 0);
+      const key = `${entry.orgId}:${entry.userId}`
+      if (wanted.has(key) && !balances.has(key)) balances.set(key, Number(entry.balanceAfter) || 0)
     }
   }
-  return balances;
+  return balances
 }
 
 /**
  * Send credit expiration notification to a single user
- * 
+ *
  */
 async function sendExpirationNotificationToUser(
   entry: ExpiringCreditsNotification,
   tierDays: number,
 ): Promise<NotificationResult> {
-  let claimed = false;
+  let claimed = false
   try {
     // The record is written before the mail leaves, so a retry or an overlapping run cannot mail the same lot twice. Each marker write is a
     // short system transaction of its own (the run has no tenant session), so no transaction is open while the mail is sent.
-    claimed = await withSystemContext((tx) => claimExpiryWarning(entry, tierDays, tx));
+    claimed = await withSystemContext((tx) => claimExpiryWarning(entry, tierDays, tx))
     if (!claimed) {
-      return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: false, alreadyWarned: true };
+      return {
+        success: true,
+        userId: entry.userId,
+        organizationId: entry.organizationId,
+        emailSent: false,
+        alreadyWarned: true,
+      }
     }
     await sendCreditExpirationEmail({
       recipientName: entry.userName,
@@ -333,28 +361,40 @@ async function sendExpirationNotificationToUser(
       orgName: entry.organizationName,
       expiringAmount: entry.expiringAmount,
       expirationDate: entry.expirationDate,
-    });
+    })
 
-    return { success: true, userId: entry.userId, organizationId: entry.organizationId, emailSent: true };
+    return {
+      success: true,
+      userId: entry.userId,
+      organizationId: entry.organizationId,
+      emailSent: true,
+    }
   } catch (error) {
-    logger.error('[Notifications] Error sending expiration notification', { error, userId: entry.userId });
+    logger.error('[Notifications] Error sending expiration notification', {
+      error,
+      userId: entry.userId,
+    })
     // A warning that was not delivered is not a warning that was given: release it so the next run tries again.
     if (claimed) {
-      await withSystemContext((tx) => releaseExpiryWarning(entry, tierDays, tx)).catch((releaseError: unknown) =>
-        logger.error('[Notifications] The expiry warning could not be released after a failed send; it stays recorded as given', {
-          error: releaseError instanceof Error ? releaseError.message : String(releaseError),
-          userId: entry.userId,
-          organizationId: entry.organizationId,
-        }),
-      );
+      await withSystemContext((tx) => releaseExpiryWarning(entry, tierDays, tx)).catch(
+        (releaseError: unknown) =>
+          logger.error(
+            '[Notifications] The expiry warning could not be released after a failed send; it stays recorded as given',
+            {
+              error: releaseError instanceof Error ? releaseError.message : String(releaseError),
+              userId: entry.userId,
+              organizationId: entry.organizationId,
+            },
+          ),
+      )
     }
-    return { 
-      success: false, 
-      userId: entry.userId, 
+    return {
+      success: false,
+      userId: entry.userId,
       organizationId: entry.organizationId,
-      emailSent: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
+      emailSent: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
 }
 
@@ -367,79 +407,84 @@ export async function notifyExpiringCredits(
   options: { exactDay?: boolean } = {},
   organizationIds?: readonly string[],
 ) {
+  requireRewardsInstitutionalAuthority()
   try {
-    const now = Date.now();
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + daysBeforeExpiration);
+    const now = Date.now()
+    const expirationDate = new Date()
+    expirationDate.setDate(expirationDate.getDate() + daysBeforeExpiration)
 
     logger.info('[Notifications] Checking for credits expiring', {
       daysBeforeExpiration,
       expiresBefore: expirationDate.toISOString(),
-    });
+    })
 
     // With the list of organizations to warn, each organization is scanned on its own: a system transaction of its own whose every read
     // carries that organization's predicate, so no read spans organizations and an organization left off the list (not active) is not
     // scanned at all. Without a list the scan crosses organizations, which only the system role may do.
-    const usersWithExpiringCredits: ExpiringCreditsNotification[] = [];
+    const usersWithExpiringCredits: ExpiringCreditsNotification[] = []
     if (organizationIds) {
       for (const organizationId of organizationIds) {
-        if (!organizationId) continue;
+        if (!organizationId) continue
         usersWithExpiringCredits.push(
-          ...(await withSystemContext((tx) => getExpiringCreditsUsers(daysBeforeExpiration, 10000, organizationId, options, tx))),
-        );
+          ...(await withSystemContext((tx) =>
+            getExpiringCreditsUsers(daysBeforeExpiration, 10000, organizationId, options, tx),
+          )),
+        )
       }
     } else {
       usersWithExpiringCredits.push(
-        ...(await withSystemContext((tx) => getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options, tx))),
-      );
+        ...(await withSystemContext((tx) =>
+          getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options, tx),
+        )),
+      )
     }
-    
+
     logger.info('[Notifications] Found users with expiring credits', {
       count: usersWithExpiringCredits.length,
-    });
+    })
 
-    const results: NotificationResult[] = [];
-    
+    const results: NotificationResult[] = []
+
     // Process in batches with rate limiting
     for (let i = 0; i < usersWithExpiringCredits.length; i += BATCH_SIZE) {
-      const batch = usersWithExpiringCredits.slice(i, i + BATCH_SIZE);
-      
+      const batch = usersWithExpiringCredits.slice(i, i + BATCH_SIZE)
+
       const batchResults = await Promise.all(
         batch.map(async (userEntry) => {
           // Rate limit between emails
-          await new Promise((resolve) => setTimeout(resolve, EMAIL_RATE_LIMIT_MS));
-          
-          return sendExpirationNotificationToUser(userEntry, daysBeforeExpiration);
-        })
-      );
-      
-      results.push(...batchResults);
+          await new Promise((resolve) => setTimeout(resolve, EMAIL_RATE_LIMIT_MS))
+
+          return sendExpirationNotificationToUser(userEntry, daysBeforeExpiration)
+        }),
+      )
+
+      results.push(...batchResults)
 
       // Log progress
-      const progress = Math.min(i + BATCH_SIZE, usersWithExpiringCredits.length);
+      const progress = Math.min(i + BATCH_SIZE, usersWithExpiringCredits.length)
       logger.info('[Notifications] Processed expiring credit batch', {
         processed: progress,
         total: usersWithExpiringCredits.length,
-      });
+      })
     }
 
-    const successCount = results.filter((r) => r.emailSent).length;
-    const failedCount = results.filter((r) => !r.emailSent && !r.alreadyWarned).length;
-    const duration = Date.now() - now;
+    const successCount = results.filter((r) => r.emailSent).length
+    const failedCount = results.filter((r) => !r.emailSent && !r.alreadyWarned).length
+    const duration = Date.now() - now
 
     logger.info('[Notifications] Completed expiration notifications', {
       sent: successCount,
       failed: failedCount,
       durationMs: duration,
-    });
+    })
 
     // The e-mails left the application, so who was mailed is reported per organization for the caller to audit.
-    const byOrganization: Record<string, { sent: number; failed: number }> = {};
+    const byOrganization: Record<string, { sent: number; failed: number }> = {}
     for (const entry of results) {
-      if (!entry.organizationId || entry.alreadyWarned) continue;
-      const tally = (byOrganization[entry.organizationId] ??= { sent: 0, failed: 0 });
-      if (entry.emailSent) tally.sent += 1;
-      else tally.failed += 1;
+      if (!entry.organizationId || entry.alreadyWarned) continue
+      const tally = (byOrganization[entry.organizationId] ??= { sent: 0, failed: 0 })
+      if (entry.emailSent) tally.sent += 1
+      else tally.failed += 1
     }
 
     return {
@@ -449,10 +494,10 @@ export async function notifyExpiringCredits(
       failed: failedCount,
       byOrganization,
       duration: `${duration}ms`,
-    };
+    }
   } catch (error) {
-    logger.error('[Notifications] Error sending expiration notifications', { error });
-    return { success: false, error };
+    logger.error('[Notifications] Error sending expiration notifications', { error })
+    return { success: false, error }
   }
 }
 
@@ -460,6 +505,7 @@ export async function notifyExpiringCredits(
  * Trigger notification when redemption is confirmed
  */
 export async function notifyRedemptionConfirmed(redemptionId: string) {
+  requireRewardsInstitutionalAuthority()
   try {
     // Fetch redemption details
     const redemption = await db.query.rewardRedemptions.findFirst({
@@ -467,19 +513,19 @@ export async function notifyRedemptionConfirmed(redemptionId: string) {
       with: {
         organization: true,
       },
-    });
+    })
 
     if (!redemption) {
-      return { success: false, error: 'Redemption not found' };
+      return { success: false, error: 'Redemption not found' }
     }
 
     // Fetch user details
     const user = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.userId, redemption.userId),
-    });
+    })
 
     if (!user?.email) {
-      return { success: false, error: 'User email not found' };
+      return { success: false, error: 'User email not found' }
     }
 
     // Send notification email
@@ -492,15 +538,15 @@ export async function notifyRedemptionConfirmed(redemptionId: string) {
         readStringProperty(redemption.providerPayloadJson, 'checkout_url'),
       redemptionId: redemption.id,
       orgName: readStringProperty(redemption.organization, 'name') || 'Organization',
-    });
+    })
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
     logger.error('[Notifications] Error sending redemption confirmation', {
       error,
       redemptionId,
-    });
-    return { success: false, error };
+    })
+    return { success: false, error }
   }
 }
 
@@ -509,33 +555,34 @@ export async function notifyRedemptionConfirmed(redemptionId: string) {
  * Should be run as a scheduled job (daily)
  */
 export async function sendBatchExpirationWarnings(organizationIds?: readonly string[]) {
+  requireRewardsInstitutionalAuthority()
   try {
-    const now = Date.now();
+    const now = Date.now()
     const results = {
       usersNotified7Days: 0,
       usersNotified14Days: 0,
       usersNotified30Days: 0,
       errors: [] as string[],
       byOrganization: {} as Record<string, { sent: number; failed: number }>,
-    };
+    }
 
     // Send notifications at multiple intervals
     const intervals: Array<{ days: number; counter: ExpirationBatchCounter }> = [
       { days: 7, counter: 'usersNotified7Days' },
       { days: 14, counter: 'usersNotified14Days' },
       { days: 30, counter: 'usersNotified30Days' },
-    ];
+    ]
 
     for (const interval of intervals) {
       // Each tier warns the earnings that expire exactly that many days from today, so a member is warned once per tier.
-      const result = await notifyExpiringCredits(interval.days, { exactDay: true }, organizationIds);
+      const result = await notifyExpiringCredits(interval.days, { exactDay: true }, organizationIds)
 
       if ('sent' in result) {
-        results[interval.counter] = result.sent ?? 0;
+        results[interval.counter] = result.sent ?? 0
         for (const [organizationId, tally] of Object.entries(result.byOrganization ?? {})) {
-          const total = (results.byOrganization[organizationId] ??= { sent: 0, failed: 0 });
-          total.sent += tally.sent;
-          total.failed += tally.failed;
+          const total = (results.byOrganization[organizationId] ??= { sent: 0, failed: 0 })
+          total.sent += tally.sent
+          total.failed += tally.failed
         }
       }
       if (!result.success) {
@@ -546,26 +593,26 @@ export async function sendBatchExpirationWarnings(organizationIds?: readonly str
               ? result.error
               : 'failed' in result && result.failed
                 ? `${result.failed} e-mail(s) were not sent`
-                : 'Unknown error';
-        results.errors.push(`Failed for ${interval.days} days: ${errorMessage}`);
+                : 'Unknown error'
+        results.errors.push(`Failed for ${interval.days} days: ${errorMessage}`)
       }
     }
 
-    const duration = Date.now() - now;
+    const duration = Date.now() - now
 
     logger.info('[Notifications] Batch expiration warnings completed', {
       durationMs: duration,
       results,
-    });
+    })
 
     return {
       success: results.errors.length === 0,
       ...results,
       duration: `${duration}ms`,
-    };
+    }
   } catch (error) {
-    logger.error('[Notifications] Error in batch expiration warnings', { error });
-    return { success: false, error };
+    logger.error('[Notifications] Error in batch expiration warnings', { error })
+    return { success: false, error }
   }
 }
 
@@ -573,6 +620,7 @@ export async function sendBatchExpirationWarnings(organizationIds?: readonly str
  * Get notification statistics for monitoring
  */
 export async function getNotificationStats(organizationId?: string) {
+  requireRewardsInstitutionalAuthority()
   try {
     // Sent-notification counts cannot be inferred from ledger eligibility.
     const stats = {
@@ -581,37 +629,41 @@ export async function getNotificationStats(organizationId?: string) {
       totalExpiringNotifications30Days: null,
       pendingAwards: 0,
       recentRedemptions: 0,
-    };
+    }
 
     // Count pending awards
     const [pendingResult] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(recognitionAwards)
-      .where(and(
-        eq(recognitionAwards.status, 'pending'),
-        organizationId ? eq(recognitionAwards.orgId, organizationId) : undefined
-      ));
-    
-    stats.pendingAwards = pendingResult?.count || 0;
+      .where(
+        and(
+          eq(recognitionAwards.status, 'pending'),
+          organizationId ? eq(recognitionAwards.orgId, organizationId) : undefined,
+        ),
+      )
+
+    stats.pendingAwards = pendingResult?.count || 0
 
     // Count recent redemptions
-    const oneDayAgo = new Date();
-    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-    
+    const oneDayAgo = new Date()
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1)
+
     const [redemptionResult] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(rewardRedemptions)
-      .where(and(
-        gte(rewardRedemptions.createdAt, oneDayAgo),
-        organizationId ? eq(rewardRedemptions.orgId, organizationId) : undefined
-      ));
-    
-    stats.recentRedemptions = redemptionResult?.count || 0;
+      .where(
+        and(
+          gte(rewardRedemptions.createdAt, oneDayAgo),
+          organizationId ? eq(rewardRedemptions.orgId, organizationId) : undefined,
+        ),
+      )
 
-    return { success: true, data: stats };
+    stats.recentRedemptions = redemptionResult?.count || 0
+
+    return { success: true, data: stats }
   } catch (error) {
-    logger.error('[Notifications] Error getting stats', { error, organizationId });
-    return { success: false, error };
+    logger.error('[Notifications] Error getting stats', { error, organizationId })
+    return { success: false, error }
   }
 }
 
@@ -626,34 +678,47 @@ export async function scheduleExpirationNotifications(
   creditsEarned: number,
   expiresAt: Date,
   orgId: string,
-  ledgerEntryId: string
+  ledgerEntryId: string,
 ) {
+  requireRewardsInstitutionalAuthority()
   try {
     if (!orgId || !ledgerEntryId || !Number.isFinite(expiresAt.getTime()) || creditsEarned <= 0) {
-      throw new Error('Expiration confirmation requires organization, earning entry, amount and date');
+      throw new Error(
+        'Expiration confirmation requires organization, earning entry, amount and date',
+      )
     }
     const [entry] = await db
       .select()
       .from(rewardWalletLedger)
-      .where(and(
-        eq(rewardWalletLedger.id, ledgerEntryId),
-        eq(rewardWalletLedger.orgId, orgId),
-        eq(rewardWalletLedger.userId, userId),
-        eq(rewardWalletLedger.eventType, 'earn')
-      ))
-      .limit(1);
+      .where(
+        and(
+          eq(rewardWalletLedger.id, ledgerEntryId),
+          eq(rewardWalletLedger.orgId, orgId),
+          eq(rewardWalletLedger.userId, userId),
+          eq(rewardWalletLedger.eventType, 'earn'),
+        ),
+      )
+      .limit(1)
 
-    if (!entry || entry.amountCredits !== creditsEarned || entry.expiresAt?.getTime() !== expiresAt.getTime()) {
-      throw new Error('Expiry must already be recorded on the matching earning entry');
+    if (
+      !entry ||
+      entry.amountCredits !== creditsEarned ||
+      entry.expiresAt?.getTime() !== expiresAt.getTime()
+    ) {
+      throw new Error('Expiry must already be recorded on the matching earning entry')
     }
 
     return {
       success: true,
       scheduled: 1,
       message: 'Recorded earning expiry is eligible for expiration warnings',
-    };
+    }
   } catch (error) {
-    logger.error('[Notifications] Error confirming recorded earning expiry', { error, userId, orgId });
-    return { success: false, error };
+    logger.error('[Notifications] Error confirming recorded earning expiry', {
+      error,
+      userId,
+      orgId,
+    })
+    return { success: false, error }
   }
 }

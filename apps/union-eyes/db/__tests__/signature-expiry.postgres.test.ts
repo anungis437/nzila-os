@@ -1,10 +1,12 @@
 /**
  * F06 R4 on real PostgreSQL — the signature expiry sweep under the real roles.
  *
- * The overdue documents are found by the SYSTEM role (a cross-organization SELECT on signature_documents only, the grant the storage-authority
- * manifest now declares) and each is expired inside its own organization as the RUNTIME role under row-level security, with the trail event and
- * the platform audit record in the same transaction. Proves the grant and policies are sufficient, that nothing outside the sweep's
- * authority is touched, and that organizations stay isolated.
+ * Expiring a document records a trail event, and the canonical source contains signature_audit_trail (CONTAINED_NO_AUTHORITY: no runtime
+ * or system grant). So the sweep is refused 501 NOT_IMPLEMENTED with the reason before it reads anything (lib/reality/contained-storage.ts;
+ * the sweep would also open each organization's context with no authenticated user, which canonical mode refuses). This proves the refusal
+ * at the strength the positive proof had: no document, signer, trail event or platform audit record changes, on a first or a second run or
+ * when an audit fault is armed, and the roles stay as declared (the system role reads signature_documents and writes nothing; a tenant
+ * session sees only its own organization).
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  * Needs UE_CANONICAL_BOOTSTRAP_V2=1 (the canonical audit ledger, where a system actor is recorded under the organization).
@@ -14,6 +16,8 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const holder = vi.hoisted(() => ({ pool: null as unknown }))
@@ -70,8 +74,8 @@ describe.skipIf(!URL)('signature expiry sweep on real PostgreSQL as the applicat
       await admin.query(`INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
         VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1) ON CONFLICT (id) DO NOTHING`, [org, slug, slug])
     }
-    // What the storage-authority manifest now grants the system role for this table (the bootstrap applies it from the manifest).
-    await admin.query('GRANT SELECT ON signature_documents TO union_eyes_system')
+    // The organization's declared reader, a real canonical member, for the tenant-session control below.
+    await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(orgA), orgA, 'member')
     await doc(ids.aOverdue, orgA, 'sent', '2020-01-01 00:00:00')
     await doc(ids.aOpen, orgA, 'sent', '2999-01-01 00:00:00')
     await doc(ids.aDone, orgA, 'completed', '2020-01-01 00:00:00')
@@ -88,64 +92,51 @@ describe.skipIf(!URL)('signature expiry sweep on real PostgreSQL as the applicat
     await admin?.end().catch(() => undefined)
   })
 
-  it('finds overdue internal documents across organizations as the system role and expires each under its own organization', async () => {
+  const unavailable = async (work: Promise<unknown>) =>
+    expect(await work.then(() => null, (error: unknown) => error)).toMatchObject({
+      name: 'ContainedStorageUnavailable', code: 'NOT_IMPLEMENTED', status: 501, storage: 'signature_audit_trail' })
+  const state = async () => ({
+    documents: (await admin.query('SELECT id::text, status::text FROM signature_documents WHERE id = ANY($1::uuid[]) ORDER BY id', [Object.values(ids)])).rows,
+    signers: (await admin.query('SELECT document_id::text, signing_order, status::text FROM document_signers WHERE document_id = ANY($1::uuid[]) ORDER BY document_id, signing_order', [Object.values(ids)])).rows,
+    trail: Number((await admin.query('SELECT count(*)::int AS n FROM signature_audit_trail')).rows[0].n),
+    audits: Number((await admin.query(`SELECT count(*)::int AS n FROM public.audit_logs WHERE action = 'signature.document.expire'`)).rows[0].n),
+  })
+
+  it('refuses the sweep 501 before reading: no overdue document of either organization, and no signer, is expired', async () => {
     const { SignatureService } = await import('../../lib/signature/signature-service')
-    const report = await SignatureService.expireOverdue({ now: new Date('2026-11-01T00:00:00Z'), pageSize: 100 })
-
-    expect(report.failures).toEqual([])
-    expect(report.truncated).toBe(false)
-    expect(report.expired).toBeGreaterThanOrEqual(2)
-
-    expect(await statusOf(ids.aOverdue)).toBe('expired')
-    expect(await statusOf(ids.bOverdue)).toBe('expired')
-    // current, final and provider-held documents are untouched
-    expect(await statusOf(ids.aOpen)).toBe('sent')
-    expect(await statusOf(ids.aDone)).toBe('completed')
-    expect(await statusOf(ids.aProvider)).toBe('sent')
-
-    const signers = (await admin.query('SELECT status::text FROM document_signers WHERE document_id = $1 ORDER BY signing_order', [ids.aOverdue])).rows.map((r) => r.status)
-    expect(signers).toEqual(['signed', 'expired', 'expired'])
+    const before = await state()
+    await unavailable(SignatureService.expireOverdue({ now: new Date('2026-11-01T00:00:00Z'), pageSize: 100 }))
+    expect(await state()).toEqual(before)
+    expect(await statusOf(ids.aOverdue)).toBe('sent')
+    expect(await statusOf(ids.bOverdue)).toBe('viewed')
   })
 
-  it('records the trail event and one platform audit record per document, under that document\'s organization', async () => {
-    const trail = (await admin.query(`SELECT document_id, event_type FROM signature_audit_trail WHERE document_id = ANY($1::uuid[]) AND event_type = 'document_expired'`, [[ids.aOverdue, ids.bOverdue]])).rows
-    expect(trail.map((r) => r.document_id).sort()).toEqual([ids.aOverdue, ids.bOverdue].sort())
-
-    const audits = (await admin.query(`SELECT organization_id, user_id, resource_id FROM public.audit_logs WHERE action = 'signature.document.expire' AND resource_id = ANY($1::text[])`, [[ids.aOverdue, ids.bOverdue]])).rows
-    expect(audits.map((r) => [r.resource_id, r.organization_id, r.user_id]).sort()).toEqual(
-      [[ids.aOverdue, orgA, 'system:signature-expiry'], [ids.bOverdue, orgB, 'system:signature-expiry']].sort(),
-    )
+  it('records no trail event and no platform audit record for any document', async () => {
+    const trail = (await admin.query(`SELECT document_id FROM signature_audit_trail WHERE document_id = ANY($1::uuid[]) AND event_type = 'document_expired'`, [[ids.aOverdue, ids.bOverdue]])).rows
+    expect(trail).toEqual([])
+    const audits = (await admin.query(`SELECT resource_id FROM public.audit_logs WHERE action = 'signature.document.expire' AND resource_id = ANY($1::text[])`, [[ids.aOverdue, ids.bOverdue]])).rows
+    expect(audits).toEqual([])
   })
 
-  it('is idempotent: a second run finds nothing to expire and writes no further records', async () => {
-    const before = Number((await admin.query(`SELECT count(*)::int AS n FROM public.audit_logs WHERE action = 'signature.document.expire'`)).rows[0].n)
+  it('refuses a second run the same way, and writes nothing further', async () => {
     const { SignatureService } = await import('../../lib/signature/signature-service')
-    const report = await SignatureService.expireOverdue({ now: new Date('2026-11-01T00:00:00Z') })
-
-    expect(report.expired).toBe(0)
-    expect(Number((await admin.query(`SELECT count(*)::int AS n FROM public.audit_logs WHERE action = 'signature.document.expire'`)).rows[0].n)).toBe(before)
+    const before = await state()
+    await unavailable(SignatureService.expireOverdue({ now: new Date('2026-11-01T00:00:00Z') }))
+    expect(await state()).toEqual(before)
   })
 
-  it('abandons a document\'s whole expiry when its audit record cannot be written, reports it, and still expires the others', async () => {
+  it('refuses before any audit is attempted: an armed audit fault can neither half-expire a document nor stop the refusal', async () => {
     const failing = randomUUID()
-    const fine = randomUUID()
     await doc(failing, orgA, 'sent', '2020-01-01 00:00:00')
     await signer(failing, 'pending', 1)
-    await doc(fine, orgA, 'sent', '2020-01-01 00:00:00')
     await admin.query(`CREATE OR REPLACE FUNCTION public.ue_fault_sig_expiry() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
       IF NEW.action = 'signature.document.expire' AND NEW.resource_id = '${failing}' THEN RAISE EXCEPTION 'injected audit fault'; END IF; RETURN NEW; END $$`)
     await admin.query('CREATE TRIGGER ue_fault_sig_expiry BEFORE INSERT ON public.audit_logs FOR EACH ROW EXECUTE FUNCTION public.ue_fault_sig_expiry()')
     try {
       const { SignatureService } = await import('../../lib/signature/signature-service')
-      const report = await SignatureService.expireOverdue({ now: new Date('2026-11-01T00:00:00Z') })
-
-      expect(report.failures.map((f) => f.documentId)).toEqual([failing])
-      expect(report.failures[0].reason).toMatch(/injected audit fault/)
-      // the failed document is exactly as it was: status, signer and trail all rolled back together
+      await unavailable(SignatureService.expireOverdue({ now: new Date('2026-11-01T00:00:00Z') }))
       expect(await statusOf(failing)).toBe('sent')
       expect((await admin.query('SELECT status::text FROM document_signers WHERE document_id = $1', [failing])).rows[0].status).toBe('pending')
-      expect((await admin.query(`SELECT count(*)::int AS n FROM signature_audit_trail WHERE document_id = $1 AND event_type = 'document_expired'`, [failing])).rows[0].n).toBe(0)
-      expect(await statusOf(fine)).toBe('expired')
     } finally {
       await admin.query('DROP TRIGGER IF EXISTS ue_fault_sig_expiry ON public.audit_logs')
       await admin.query('DROP FUNCTION IF EXISTS public.ue_fault_sig_expiry()')
@@ -160,12 +151,18 @@ describe.skipIf(!URL)('signature expiry sweep on real PostgreSQL as the applicat
       await expect(client.query(`UPDATE signature_documents SET status = 'voided'`)).rejects.toThrow(/permission denied/)
       await client.query('ROLLBACK')
 
-      await client.query('BEGIN')
-      await client.query('SET LOCAL ROLE union_eyes_runtime')
-      await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [orgA])
-      const visible = (await client.query('SELECT organization_id FROM signature_documents WHERE id = ANY($1::uuid[])', [[ids.aOverdue, ids.bOverdue]])).rows
+      // A tenant session of organization A (its declared member's verified business session) sees only its own organization's documents.
+      const visible = await withNativeCanonicalActor(nativeTenantReaderId(orgA), orgA, async (binding) => {
+        await client.query('BEGIN')
+        await client.query('SET LOCAL ROLE union_eyes_runtime')
+        await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [orgA])
+        await setNativeBusinessContext(client, binding)
+        const rows = (await client.query('SELECT organization_id FROM signature_documents WHERE id = ANY($1::uuid[])', [[ids.aOverdue, ids.bOverdue]])).rows
+        await client.query('ROLLBACK')
+        return rows
+      })
       expect(visible.map((r) => r.organization_id)).toEqual([orgA])
-      await client.query('ROLLBACK')
+      expect(Number((await admin.query(`SELECT count(*)::int AS n FROM pg_class WHERE relname = 'signature_documents' AND has_table_privilege('union_eyes_system', oid, 'SELECT')`)).rows[0].n)).toBe(1)
     } finally {
       client.release()
     }

@@ -34,7 +34,7 @@ class Round56PaymentsContainmentTests(unittest.TestCase):
         self.assertEqual(views.PaymentsViewSet.permission_classes, [views.DenyAllPermission])
 
     def test_deny_all_still_denies_authenticated_and_anonymous_requests(self):
-        permission = views.DenyAllPermission()
+        permission = views.PaymentsViewSet.permission_classes[0]()
         authenticated_request = MagicMock(user=MagicMock(is_authenticated=True))
         anonymous_request = MagicMock(user=MagicMock(is_authenticated=False))
 

@@ -216,17 +216,25 @@ check(
 const listenerActionsPath = 'apps/zonga/lib/actions/listener-actions.ts'
 const listenerActions = readFile(listenerActionsPath)
 
+// The engine runs in the listener-library service (actions hold no data access, NO_RAW_DB_IN_ACTIONS);
+// the action must delegate to it inside the verified personal context.
+const listenerLibrary = readFile('apps/zonga/lib/services/listener-library.ts')
 check(
-  listenerActions.includes('createRecommendationEngine'),
-  'Listener actions import recommendation engine',
+  listenerLibrary.includes('createRecommendationEngine') &&
+    /export async function recommendations\(/.test(listenerLibrary),
+  'Listener library service runs the recommendation engine',
+)
+check(
+  listenerLibrary.includes("from '@nzila/zonga-intelligence'"),
+  'Listener library depends on @nzila/zonga-intelligence',
 )
 check(
   listenerActions.includes('getRecommendationsForUser'),
   'getRecommendationsForUser server action exists',
 )
 check(
-  listenerActions.includes('@nzila/zonga-intelligence'),
-  'Listener actions depend on @nzila/zonga-intelligence',
+  /resolveOrgContext\('personal',\s*\(context\)\s*=>\s*recommendations\(context, opts\)\)/.test(listenerActions),
+  'getRecommendationsForUser delegates to the engine in the personal context',
 )
 
 // Verify zonga app package.json has intelligence dependency

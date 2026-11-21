@@ -18,7 +18,7 @@
  *
  * Neither path is delegable and neither can be reached by emergency access.
  */
-import { activeMembership, activeRecusal, build, deny, hasCapacity, isLive } from '../common'
+import { activeMembership, activeRecusal, build, deny, hasCapacity, isLive, validStringArray } from '../common'
 import type {
   AuthorityFacts,
   AuthorityRequest,
@@ -31,7 +31,7 @@ import type {
 const HANDLER: readonly Capacity[] = ['steward', 'chief_steward', 'officer']
 
 const consentLive = (c: DisclosureConsent, now: Date): boolean =>
-  isLive({ status: 'active', effectiveAt: c.grantedAt, expiresAt: c.expiresAt, revokedAt: c.revokedAt }, now)
+  validStringArray(c.categories) && isLive({ status: 'active', effectiveAt: c.grantedAt, expiresAt: c.expiresAt, revokedAt: c.revokedAt }, now)
 
 export function decideWorkAid(
   req: AuthorityRequest,
@@ -55,13 +55,13 @@ export function decideWorkAid(
   const membership = activeMembership(facts, orgId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
   const recusal =
-    activeRecusal(facts.recusals, me, req.resource, orgId) ??
+    activeRecusal(facts.recusals, me, req.resource, orgId, now) ??
     // A recusal from the underlying case also bars every WorkAid act on it: the matter is that case, referred.
-    activeRecusal(facts.recusals, me, { type: 'case', id: matter.caseId, organizationId: orgId }, orgId)
+    activeRecusal(facts.recusals, me, { type: 'case', id: matter.caseId, organizationId: orgId }, orgId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   const categories = req.categories ?? []
-  if (categories.length === 0 || categories.includes('*')) {
+  if (!validStringArray(categories) || categories.length === 0 || categories.includes('*')) {
     return deny(req, now, { code: 'CONSENT_SCOPE_EXCEEDED', detail: 'explicit information categories are required; wildcards are not accepted' })
   }
 
@@ -119,7 +119,7 @@ export function decideWorkAid(
 
   // workaid:receive_disclosure
   const d = facts.consents.find((c) => c.id === req.disclosureId)
-  if (!d || d.organizationId !== orgId || d.matterId !== matter.id || d.direction !== 'workaid_to_union') {
+  if (!d || d.organizationId !== orgId || d.matterId !== matter.id || d.memberUserId !== matter.memberUserId || d.direction !== 'workaid_to_union') {
     return deny(req, now, { code: 'CONSENT_REQUIRED', detail: 'no counsel disclosure record for this matter' })
   }
   if (d.issuer !== 'counsel') {

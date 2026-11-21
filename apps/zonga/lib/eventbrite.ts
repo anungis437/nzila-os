@@ -82,9 +82,13 @@ export class EventbriteClient {
   /* ── Core fetch wrapper ── */
 
   private async request<T>(path: string, params?: Record<string, string>): Promise<T> {
+    const base = new URL(EVENTBRITE_API_BASE)
     const url = new URL(`${EVENTBRITE_API_BASE}${path}`)
-    const apiHost = new URL(EVENTBRITE_API_BASE).hostname
-    if (url.hostname !== apiHost) {
+    if (
+      url.origin !== base.origin ||
+      !url.pathname.startsWith(`${base.pathname}/`) ||
+      url.pathname.split('/').includes('..')
+    ) {
       throw new Error('Invalid Eventbrite API path')
     }
     if (params) {
@@ -147,20 +151,20 @@ export class EventbriteClient {
     const data = await this.request<{
       events: EventbriteEvent[]
       pagination: EventbritePagination
-    }>(`/organizations/${orgId}/events/`, params)
+    }>(`/organizations/${encodeURIComponent(orgId)}/events/`, params)
 
     return { events: data.events, pagination: data.pagination }
   }
 
   async getEvent(eventId: string): Promise<EventbriteEvent> {
-    return this.request<EventbriteEvent>(`/events/${eventId}/`, { expand: 'venue' })
+    return this.request<EventbriteEvent>(`/events/${encodeURIComponent(eventId)}/`, { expand: 'venue' })
   }
 
   /* ── Ticket Classes ── */
 
   async listTicketClasses(eventId: string): Promise<EventbriteTicketClass[]> {
     const data = await this.request<{ ticket_classes: EventbriteTicketClass[] }>(
-      `/events/${eventId}/ticket_classes/`,
+      `/events/${encodeURIComponent(eventId)}/ticket_classes/`,
     )
     return data.ticket_classes
   }
@@ -168,7 +172,7 @@ export class EventbriteClient {
   /* ── Venue ── */
 
   async getVenue(venueId: string): Promise<EventbriteVenue> {
-    return this.request<EventbriteVenue>(`/venues/${venueId}/`)
+    return this.request<EventbriteVenue>(`/venues/${encodeURIComponent(venueId)}/`)
   }
 
   /* ── Token validation ── */

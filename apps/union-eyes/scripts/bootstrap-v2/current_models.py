@@ -151,6 +151,23 @@ def main():
                 if getattr(field, "enum_type", None):
                     columns[-1]["enumType"] = field.enum_type
                     columns[-1]["enumValues"] = [value for value, _ in field.base_field.flatchoices]
+            def metadata_constraint(constraint):
+                # Conditional unique rendering appends a deferred CREATE INDEX.
+                # Inspect through an isolated collector so create_model remains
+                # the sole executable DDL producer, and retain the real SQL for
+                # exact catalog verification of index-backed constraints.
+                with connection.schema_editor(collect_sql=True, atomic=False) as metadata_editor:
+                    rendered = constraint.constraint_sql(model, metadata_editor)
+                    deferred = list(metadata_editor.deferred_sql)
+                    index_backed = rendered is None and len(deferred) == 1 and str(deferred[0]).startswith("CREATE UNIQUE INDEX ")
+                    if rendered is None and not index_backed:
+                        raise RuntimeError("UE_V2_CURRENT_CONSTRAINT_SQL_UNRESOLVED:" + table + ":" + constraint.name)
+                    return {
+                        "name": constraint.name,
+                        "kind": type(constraint).__name__,
+                        "sql": str(deferred[0] if index_backed else rendered),
+                        "deferredUniqueIndex": index_backed,
+                    }
             models.append({
                 "table": table,
                 "app": model._meta.app_label,
@@ -160,11 +177,7 @@ def main():
                 "columns": columns,
                 "uniqueTogether": list(model._meta.unique_together),
                 "constraints": [constraint.deconstruct()[1:] for constraint in model._meta.constraints],
-                "databaseConstraints": [{
-                    "name": constraint.name,
-                    "kind": type(constraint).__name__,
-                    "sql": str(constraint.constraint_sql(model, editor)),
-                } for constraint in model._meta.constraints],
+                "databaseConstraints": [metadata_constraint(constraint) for constraint in model._meta.constraints],
             })
     with connection.schema_editor(collect_sql=True, atomic=False) as editor:
         for model in sorted(apps.get_models(), key=lambda value: value._meta.db_table):

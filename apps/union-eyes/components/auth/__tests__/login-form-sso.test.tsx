@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderView, screen, waitFor } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
+import en from '@/messages/en-CA.json';
 import '@testing-library/jest-dom/vitest';
 import { LoginForm } from '../login-form';
 
@@ -9,6 +11,10 @@ vi.mock('@nzila/platform-auth/entra/client', () => ({ signInWithEntra }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => '/login' }));
 vi.mock('next/image', () => ({ default: () => null }));
 vi.mock('next/link', () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
+
+function render(children: React.ReactNode) {
+  return renderView(<NextIntlClientProvider locale="en-CA" messages={en} timeZone="America/Toronto">{children}</NextIntlClientProvider>);
+}
 
 beforeEach(() => { signInWithEntra.mockReset().mockResolvedValue(undefined); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });

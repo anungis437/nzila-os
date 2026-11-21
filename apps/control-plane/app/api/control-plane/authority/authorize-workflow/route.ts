@@ -11,60 +11,17 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
-import { authorizeWorkflowTrigger } from '@/server/authority/workflow-authorizer'
+import { authorizeWorkflowTrigger } from '@/lib/services/authority/workflow-authorizer'
 import { WorkflowTriggerRequestSchema } from '@nzila/platform-contracts/control-system'
 import { createLogger } from '@nzila/os-core'
 import { enforceDecision } from '@nzila/decision-core'
-import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar'
-import { platformDb } from '@nzila/db/platform'
-import { auditRecords } from '@nzila/db/schema'
-import { desc, eq } from 'drizzle-orm'
+import { createPlatformNarProofAdapter } from '@/lib/services/platform-nar-proof'
 
 export const dynamic = 'force-dynamic'
 
 const logger = createLogger('control-plane:api:authority:authorize-workflow')
 
-const narProofAdapter = createNarProofAdapter({
-  keyId: process.env.NAR_SIGNING_KEY_ID,
-  getPreviousHash: async (organizationId) => {
-    const rows = await platformDb
-      .select({ hash: auditRecords.narHash })
-      .from(auditRecords)
-      .where(eq(auditRecords.organizationId, organizationId))
-      .orderBy(desc(auditRecords.createdAt))
-      .limit(1)
-    return rows[0]?.hash
-  },
-  persistRecord: async (record) => {
-    await platformDb.insert(auditRecords).values({
-      id: record.id,
-      decisionRecordId: record.decisionRecordId,
-      organizationId: record.organizationId,
-      decisionType: record.decisionType,
-      actionType: record.actionType,
-      actorId: record.actorId,
-      actorType: record.actorType,
-      resourceType: record.resourceType,
-      resourceId: record.resourceId,
-      policyId: record.policyId,
-      policyVersion: record.policyVersion,
-      inputHash: record.inputHash,
-      outcomeHash: record.outcomeHash,
-      payload: record.payload,
-      narHash: record.seal.hash,
-      narSignature: record.seal.signature,
-      previousHash: record.seal.previousHash,
-      keyId: record.seal.keyId,
-      storageType: record.storage?.type,
-      storageUri: record.storage?.uri,
-      immutable: record.storage?.immutable,
-      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
-      createdAt: new Date(record.createdAt),
-    })
-    return { auditRecordId: record.id }
-  },
-  getSigningSecret: getNarSigningSecret,
-})
+const narProofAdapter = createPlatformNarProofAdapter()
 
 export async function POST(request: NextRequest) {
   try {
@@ -100,11 +57,12 @@ export async function POST(request: NextRequest) {
 
   const triggerRequest = parsed.data
 
-  const actorType = triggerRequest.initiatedBy.actorType === 'system'
-    ? 'system'
-    : triggerRequest.initiatedBy.actorType === 'service'
-      ? 'api'
-      : 'user'
+  const actorType =
+    triggerRequest.initiatedBy.actorType === 'system'
+      ? 'system'
+      : triggerRequest.initiatedBy.actorType === 'service'
+        ? 'api'
+        : 'user'
 
   const decisionEvaluation = await enforceDecision({
     decisionType: 'platform.workflow.authorized',

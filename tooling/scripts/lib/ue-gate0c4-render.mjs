@@ -2,7 +2,7 @@
 import { ANCHOR_0C3_COMMIT, DOCS_0C4, DOCUMENTARY_LABEL, FILES_0C4 } from './ue-gate0c4-ids.mjs'
 import { sha256Of } from './ue-gate0c4-reconcile.mjs'
 
-const cell = (value) => String(value ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')
+const cell = (value) => String(value ?? '').replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ')
 const table = (header, rows) => [`| ${header.join(' | ')} |`, `| ${header.map(() => '---').join(' | ')} |`, ...rows.map((row) => `| ${row.map(cell).join(' | ')} |`)].join('\n')
 const bullets = (items) => items.map((item) => `- ${item}`).join('\n')
 const short = (id) => String(id).replace(/^DEF-/, '')

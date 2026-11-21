@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Mandate } from '@/lib/authority/ontology'
 import { ACCT, NOW, ORG, U, ago, DAY, mandate } from '@/lib/authority/__tests__/fixtures'
+import { ErrorCode } from '@/lib/api/errors'
+import { BaseFinancialCapabilityUnavailable } from '../base-release-boundary'
 import { assertPrincipalFinancialAuthority, decidePrincipalFinancialAuthority, type PrincipalFinancialInput } from '../principal-financial-authority'
 
 const REMITTANCE = '00000000-0000-4000-8000-000000000881'
@@ -67,15 +69,15 @@ describe('principal financial authority', () => {
     expect(decidePrincipalFinancialAuthority(input({ action: 'finance:view' }), conflicted, NOW).ok).toBe(true)
   })
 
-  it('stops at an organization with no live financial mandate and does not load the caller', async () => {
-    const query = vi.fn(async () => ({ rows: [{ n: 0 }] }))
-    await expect(assertPrincipalFinancialAuthority({ query }, input())).rejects.toMatchObject({ code: 'FINANCIAL_MANDATES_NOT_ISSUED' })
-    expect(query).toHaveBeenCalledTimes(1)
-  })
-
-  it('refuses an organization id that is not a uuid before any query', async () => {
-    const query = vi.fn()
-    await expect(assertPrincipalFinancialAuthority({ query }, input({ organizationId: 'org_1' }))).rejects.toMatchObject({ code: 'INVALID_REQUEST' })
+  it.each([
+    ['an organization with no live financial mandate', input(), 0],
+    ['an organization with live financial mandates', input(), 3],
+    ['an organization id that is not a uuid', input({ organizationId: 'org_1' }), 1],
+  ])('refuses %s with 501 NOT_IMPLEMENTED before any query, and does not load the caller', async (_label, request, n) => {
+    const query = vi.fn(async () => ({ rows: [{ n }] }))
+    const rejected = await assertPrincipalFinancialAuthority({ query }, request).then(() => null, (error: unknown) => error)
+    expect(rejected).toBeInstanceOf(BaseFinancialCapabilityUnavailable)
+    expect(rejected).toMatchObject({ status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' })
     expect(query).not.toHaveBeenCalled()
   })
 })

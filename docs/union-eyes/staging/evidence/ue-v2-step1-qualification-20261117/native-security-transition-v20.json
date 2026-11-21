@@ -1,0 +1,47 @@
+{
+  "recordedAt": "2026-11-18T09:09:29.488335+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "INTERIM_CURRENT_SOURCE_TRANSITION_ON_OWNED_RELEASED_PG15_CLONES",
+  "result": "FOUR_SELECTED_TRANSITION_TESTS_PASS",
+  "counts": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceBindings": 1279,
+  "dependencyClosureFiles": 962,
+  "sourceChangedDuringRun": false,
+  "testCases": [
+    "actual released-to-current security transaction on owned native PostgreSQL refuses an altered legacy policy and preserves the entire security state and history",
+    "actual released-to-current security transaction on owned native PostgreSQL rolls back roles, owners, ACLs and functions after a real database failure during the transition",
+    "actual released-to-current security transaction on owned native PostgreSQL restores the exact old constraint and full state after a real failure following its current replacement",
+    "actual released-to-current security transaction on owned native PostgreSQL qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP"
+  ],
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v20.json",
+      "sha256": "52a8c9b356c645286ad5ebed2bc4ff4e0870bd0f7898353fcdd4fa31148d6877",
+      "bytes": 2735
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v20-source.json",
+      "sha256": "6219915ba209333022d679264db7aca2a0948532fd4aab58ff16d49cfcf41621",
+      "bytes": 163613
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v20.txt",
+      "sha256": "da54ca06368b04c8ec3666de516d497ffb2006600bf8190dcb589b571928271d",
+      "bytes": 1294
+    }
+  ],
+  "limits": [
+    "Exact captured working-tree source only; subsequent source changes require rerun.",
+    "Tests exercise altered-policy refusal, real mid-DDL rollback, constraint-replacement rollback, history-preserving convergence and second current-security NOOP.",
+    "These structural/transaction checks did not exercise consent UUID generation; separate external-v1 failures remain adverse evidence.",
+    "No full fresh-bootstrap, complete application, full action matrix, staging or production qualification."
+  ]
+}

@@ -1,0 +1,1 @@
+Pages directory cannot be found at /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/pages or /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/src/pages. If using a custom path, please configure with the `no-html-link-for-pages` rule in your eslint config file.

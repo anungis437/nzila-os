@@ -1,0 +1,1 @@
+{"finding":"CONFIRMED_RESTRICTED_AUTH_SQL_ACCESS_TO_RETAINED_NONCANONICAL_COLUMNS","retainedColumnReadsAllowed":12,"canonicalProjectionControlsAllowed":2,"foreignRowControlsAllowed":0,"persistedRowsUnchangedAfterProbes":true,"sqlEngineClosed":true,"rawLegacyOrPasswordValuesPersisted":false}

@@ -1,0 +1,86 @@
+{
+  "scope": "DISPOSABLE_NATIVE_POSTGRESQL_HISTORICAL_SECURITY_TRANSITION",
+  "recordedAt": "2026-11-18T04:15:19.491355+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "tests": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceChangedDuringRun": false,
+  "cases": [
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL refuses an altered legacy policy and preserves the entire security state and history",
+      "status": "passed"
+    },
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL rolls back roles, owners, ACLs and functions after a real database failure during the transition",
+      "status": "passed"
+    },
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL restores the exact old constraint and full state after a real failure following its current replacement",
+      "status": "passed"
+    },
+    {
+      "case": "actual released-to-current security transaction on owned native PostgreSQL qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP",
+      "status": "passed"
+    }
+  ],
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v16.json",
+      "sha256": "59554dedf0a7b609200b449ce8324f8aa7dbb784a56ca5caef17a0e2623f4ae0",
+      "bytes": 2736
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v16.txt",
+      "sha256": "24f66ba1c645ce5ac98f77215cbb46b6686c2c74f8007139cd2a4a1467c59478",
+      "bytes": 1294
+    }
+  ],
+  "sourceBindingPublication": {
+    "rawPrivateOriginal": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v16-source.json",
+      "sha256": "d6d3d1032ca597ce9a925d8cc436e9fa90cc334b4ea31461fa5e9084e06ade32",
+      "bytes": 112604
+    },
+    "publishedNormalForm": {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/current-security-installer-native-v16-source-public.json",
+      "sha256": "f2b49df4063985005e108340fb5c2c14880d8484f783b44325e72b3feff65a76",
+      "bytes": 145284
+    },
+    "formatter": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/publication-format-json-v1.py",
+      "sha256": "a861936c82981f7a70c71b4d535404e0138973c7616b34216a32b6f572a64c87",
+      "bytes": 2783
+    },
+    "transformation": "Path-to-SHA maps become explicit path/sha256 record arrays; source digest values and observed outcomes are preserved."
+  },
+  "newSourceRepair": "Bounded public schema USAGE for the existing case authority reader; CREATE and grant options remain refused. Four companion producers and their strict inspectors share the source contract.",
+  "sourcePlan": {
+    "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+    "sha256": "c31006122b930fbd9a44f03e05f1ad2058670583c73cae3baafdfc645f03cd9a",
+    "bytes": 10066093,
+    "sourceCommitments": 851,
+    "nonPythonSourceDrift": []
+  },
+  "semanticTypecheck": {
+    "command": "pnpm exec tsc --noEmit --project apps/union-eyes/scripts/bootstrap-v2/manifest-typecheck.json",
+    "exitCode": 0,
+    "raw": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/manifest-typecheck-v7.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  },
+  "limits": [
+    "Owned synthetic PostgreSQL15 historical fixture only; no staging or production operation.",
+    "Security-stage transaction, old-data preservation and second-install NOOP proved. Whole production MJS and authenticated helper proof remains a separate running check.",
+    "No real institutional adoption or exact final candidate qualification is inferred."
+  ],
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

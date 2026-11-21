@@ -3,6 +3,7 @@
  * organization that supplied it (source_organization_id), so the audit record is attributed to that organization and
  * commits with the insert in the same transaction.
  */
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { and, eq } from 'drizzle-orm';
 import { arbitrationDecisions } from '@/db/schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -17,6 +18,7 @@ export async function createPrecedentAudited(
   scope: { organizationId: string; userId: string },
   data: PrecedentInput,
 ) {
+  requireContainedStorageAuthority('arbitration_decisions');
   // A content manager may create a draft, not self-publish a shared decision. No review/owner-provenance
   // workflow is yet implemented for this shared table. Explicitly override its public-by-default schema.
   return withRLSContext({ organizationId: scope.organizationId, userId: scope.userId }, async (tx) => {
@@ -69,6 +71,7 @@ export async function reviewPrecedentAudited(
   scope: { organizationId: string; userId: string },
   input: { id: string; outcome: PrecedentReviewOutcome; redactionConfirmed: boolean; consentConfirmed: boolean; notes?: string },
 ): Promise<PrecedentReviewResult> {
+  requireContainedStorageAuthority('arbitration_decisions');
   if (input.outcome === 'share' && !(input.redactionConfirmed && input.consentConfirmed)) return { ok: false, kind: 'attestation_required' };
   return withRLSContext({ organizationId: scope.organizationId, userId: scope.userId }, async (tx) => {
     const [row] = await tx

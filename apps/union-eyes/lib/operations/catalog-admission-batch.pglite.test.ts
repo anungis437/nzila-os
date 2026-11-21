@@ -1,17 +1,21 @@
 import { PGlite } from '@electric-sql/pglite'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AUTH_EXECUTION_ROLES } from '@nzila/db/auth-storage-authority'
-import { admissionQueries, type CatalogRow } from './catalog-admission-core.mjs'
-import { canonicalAdmissionQueries, CANONICAL_AUTH_QUERIES } from './canonical-catalog-admission'
+import { admissionQueries, assessCatalogAdmission, catalogContractDigest, type CatalogRow } from './catalog-admission-core.mjs'
+import { canonicalAdmissionQueriesForMajor, canonicalCatalogContract, CANONICAL_AUTH_QUERIES, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
 import { catalogSnapshotExecutor, compileCatalogSnapshot } from './catalog-admission-batch'
-import { evaluateCatalogAdmission } from './catalog-admission'
+import { CATALOG_POSTGRES_VERSION_QUERY, evaluateCatalogAdmission } from './catalog-admission'
+import historicalContract from './catalog-authority-contract.json'
+import { EXTERNAL_READ_OWNER } from '../external-resource-read/source'
 
 
-// Independent pre-optimization SQL oracles: the released scans must retain their
-// catalog values and fail-closed decisions after changing how rows are gathered.
+// Independent brute-force SQL oracles: retain the original ordinary-column
+// scan and policy values while checking the expanded security census too.
 const legacyPolicyQuery = `SELECT relation.relname AS table_name,
                  pol.polname,
                  pol.polcmd,
+                 pol.polpermissive,
+                 0=ANY(pol.polroles) AS public_role,
                  pg_get_expr(pol.polqual, pol.polrelid) AS qual,
                  pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check,
                  COALESCE(array_agg(role.rolname) FILTER (WHERE role.rolname IS NOT NULL), ARRAY[]::name[]) AS roles
@@ -20,7 +24,7 @@ const legacyPolicyQuery = `SELECT relation.relname AS table_name,
           JOIN pg_namespace namespace ON namespace.oid = relation.relnamespace
           LEFT JOIN pg_roles role ON role.oid = ANY (pol.polroles)
           WHERE namespace.nspname = 'public'
-          GROUP BY relation.relname, pol.polname, pol.polcmd, pol.polqual, pol.polwithcheck, pol.polrelid`
+          GROUP BY relation.relname, pol.polname, pol.polcmd, pol.polpermissive, pol.polqual, pol.polwithcheck, pol.polrelid, pol.polroles`
 const catalogRoles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
 const catalogRoleLiterals = catalogRoles.map(role => `'${role}'`).join(',')
 const legacyColumnsQuery = `SELECT r.rolname AS role,n.nspname AS schema_name,c.relname AS table_name,v.privilege,
@@ -32,6 +36,10 @@ const legacyColumnsQuery = `SELECT r.rolname AS role,n.nspname AS schema_name,c.
       (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
       AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
     GROUP BY r.rolname,n.nspname,c.relname,v.privilege`
+// Explicit system-column ACLs are now part of the source security contract.
+// This remains the independent per-column has_column_privilege scan, rather
+// than the production query's factored table-grant optimization.
+const completeColumnsQuery = legacyColumnsQuery.replace('a.attnum>0', 'a.attnum<>0')
 
 let database: PGlite | undefined
 afterEach(async () => { vi.unstubAllEnvs(); await database?.close(); database = undefined })
@@ -54,6 +62,22 @@ function expectPolicyValuesEqual(legacy: CatalogRow[], actual: CatalogRow[]) {
 
 async function query(statement: string) {
   return (await database!.query<CatalogRow>(statement)).rows
+}
+
+// These fixtures create no auth functions. Explicitly declare that source fact
+// for policy-only assessment; the immutable legacy production contract still
+// fails closed when it has no current function authority.
+const policyPayload = { ...historicalContract.payload, currentFunctions: [], requiredContainedParentPolicies: [], requiredPhysicalTriggers: [] }
+const policyContract = { payload: policyPayload, digest: catalogContractDigest(policyPayload) }
+async function assessFixture(execute: (statement: string) => Promise<CatalogRow[]>, canonical = false) {
+  const snapshots: Record<string, CatalogRow[]> = {}
+  for (const item of admissionQueries) snapshots[item.name] = await execute(item.sql)
+  const report = assessCatalogAdmission(canonical ? canonicalCatalogContract() : policyContract, snapshots, 'local-catalog-transport-equivalence')
+  if (canonical) {
+    report.violations.push(...await inspectCanonicalAuthCatalog(execute, { postgresMajor: 16 }))
+    report.ok = report.violations.length === 0
+  }
+  return report
 }
 
 describe('catalog snapshot PostgreSQL semantics', () => {
@@ -81,36 +105,55 @@ describe('catalog snapshot PostgreSQL semantics', () => {
     await database.exec('CREATE ROLE union_eyes_runtime NOLOGIN; CREATE ROLE union_eyes_system NOLOGIN')
     vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     const statements = admissionQueries.map(query => query.sql)
-    expect(statements).toHaveLength(12)
+    // The source contract added current function descriptor inspection.
+    // Existing core census plus the source-owned private execution role.
+    // Fifteen core reads include the independent current physical-trigger census.
+    expect(statements).toHaveLength(15)
     const serial = await evaluateCatalogAdmission(async statement => (await database!.query<CatalogRow>(statement)).rows)
     const envelope = (await database.query<CatalogRow>(compileCatalogSnapshot(statements))).rows
     expect(await evaluateCatalogAdmission(catalogSnapshotExecutor(statements, envelope))).toEqual(serial)
+    expect(serial.ok).toBe(false)
+    expect(serial.violations).toContain('current function source contract is missing')
     expect((await database.query("SELECT oid FROM pg_namespace WHERE nspname='user_management'")).rows).toEqual([])
   }, 20_000)
 
-  it('executes all 28 exact catalog reads in one statement and matches independent serial assessment', async () => {
+  it('compares all 61 source PG16 catalog reads while preserving rejection of the actual unsupported PGlite version', async () => {
     database = new PGlite()
     // Disposable local PostgreSQL catalog only; no Azure/live database or auth mock.
     for (const role of [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']) {
       await database.exec(`CREATE ROLE "${role}" NOLOGIN`)
     }
+    await database.exec(`CREATE ROLE "${EXTERNAL_READ_OWNER}" NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE`)
     await database.exec('CREATE SCHEMA user_management')
     vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
     vi.stubEnv('UE_ENVIRONMENT', 'local-catalog-transport-equivalence')
-    const statements = [...admissionQueries.map(query => query.sql), ...canonicalAdmissionQueries]
-    expect(statements).toHaveLength(28)
+    // PGlite currently embeds a newer server. Use the explicit source dialect
+    // for transport equivalence; never spoof the production version query.
+    const version = Number((await query(CATALOG_POSTGRES_VERSION_QUERY))[0].server_version_num)
+    expect(Number.isSafeInteger(version)).toBe(true)
+    expect([15, 16]).not.toContain(Math.floor(version / 10000))
+    await expect(evaluateCatalogAdmission(query)).rejects.toThrow('CANONICAL_POSTGRES_VERSION_UNSUPPORTED')
+    const statements = [...admissionQueries.map(query => query.sql), ...canonicalAdmissionQueriesForMajor(16)]
+    // Fourteen core reads, thirty existing canonical reads, seven protected
+    // external reads and the additive contained-parent policy census.
+    // The new physical contract contributes four reads plus the core trigger census; the audit author
+    // guard (db/auth/audit-author-guards.ts) is a further physical contract with its own four reads.
+    expect(statements).toHaveLength(61)
     const serialRows = new Map<string, CatalogRow[]>(), serialCalls: string[] = []
-    const serialReport = await evaluateCatalogAdmission(async statement => {
+    const serialReport = await assessFixture(async statement => {
       serialCalls.push(statement)
       const rows = (await database!.query<CatalogRow>(statement)).rows
       serialRows.set(statement, rows)
       return rows
-    })
-    expect(serialCalls).toEqual(statements)
+    }, true)
+    // The read-only inspector can request source identities in a different
+    // order than the batch pack. Preserve every identity and duplicate; the
+    // replay below still checks exact SQL/hash, every row and the full verdict.
+    expect([...serialCalls].sort()).toEqual([...statements].sort())
     const envelope = (await database.query<CatalogRow>(compileCatalogSnapshot(statements))).rows
     const replay = catalogSnapshotExecutor(statements, envelope)
     for (const statement of statements) expect(await replay(statement)).toEqual(serialRows.get(statement))
-    const batchedReport = await evaluateCatalogAdmission(replay)
+    const batchedReport = await assessFixture(replay, true)
     expect(batchedReport).toEqual(serialReport)
     // This intentionally incomplete local schema must remain inadmissible.
     expect(serialReport.ok).toBe(false)
@@ -178,12 +221,12 @@ describe('policy role-vector aggregation', () => {
     vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     vi.stubEnv('UE_ENVIRONMENT', 'local-policy-catalog-regression')
     let legacyPolicies: CatalogRow[] = [], actualPolicies: CatalogRow[] = []
-    const legacy = await evaluateCatalogAdmission(async statement => {
+    const legacy = await assessFixture(async statement => {
       const rows = await query(statement === policyQuery ? legacyPolicyQuery : statement)
       if (statement === policyQuery) legacyPolicies = rows
       return rows
     })
-    const actual = await evaluateCatalogAdmission(async statement => {
+    const actual = await assessFixture(async statement => {
       const rows = await query(statement)
       if (statement === policyQuery) actualPolicies = rows
       return rows
@@ -192,7 +235,7 @@ describe('policy role-vector aggregation', () => {
     const { violations: legacyViolations, ...legacyDecision } = legacy
     const { violations: actualViolations, ...actualDecision } = actual
     expect(actualDecision).toEqual(legacyDecision)
-    expect(actual.ok).toBe(ok)
+    expect(actual.ok, actual.violations.join('\n')).toBe(ok)
     // SQL never ordered policy rows. A different violation order is permitted
     // only when those rows changed order; preserve every violation/duplicate.
     if (JSON.stringify(actualViolations) !== JSON.stringify(legacyViolations)) expect(rawPolicyRowOrderEqual).toBe(false)
@@ -213,12 +256,31 @@ describe('factored canonical column privilege inspection', () => {
       CREATE TABLE public.excluded_public(zeta integer); CREATE VIEW user_management.excluded_view AS SELECT 1 AS zeta;`)
     const check = async (name: string) => {
       const legacy = await query(legacyColumnsQuery), actual = await query(CANONICAL_AUTH_QUERIES.columns)
-      expect(records(actual), name).toEqual(records(legacy))
-      expect(actual.some(row => ['zero_columns', 'excluded_public', 'excluded_view'].includes(String(row.table_name))), name).toBe(false)
+      const complete = await query(completeColumnsQuery)
+      expect(records(actual), `${name}: complete independent census`).toEqual(records(complete))
+      const key = (row: CatalogRow) => [row.role, row.schema_name, row.table_name, row.privilege].join('\0')
+      const original = new Map(legacy.map(row => [key(row), new Set(row.all_columns as string[])]))
+      const ordinary = actual.filter(row => original.has(key(row))).map(row => ({ ...row,
+        all_columns: (row.all_columns as string[]).filter(column => original.get(key(row))!.has(column)),
+        allowed_columns: (row.allowed_columns as string[]).filter(column => original.get(key(row))!.has(column)),
+      }))
+      expect(records(ordinary), `${name}: unchanged ordinary-column semantics`).toEqual(records(legacy))
+      expect(actual.some(row => ['excluded_public', 'excluded_view'].includes(String(row.table_name))), name).toBe(false)
+      const systemOnly = actual.filter(row => row.table_name === 'zero_columns')
+      expect(systemOnly.length, name).toBe(catalogRoles.length * 4)
+      for (const row of systemOnly) expect(row.all_columns, name).toEqual(['cmax', 'cmin', 'ctid', 'tableoid', 'xmax', 'xmin'])
       expect(actual.some(row => row.schema_name === 'public' && ['union_eyes_runtime', 'union_eyes_system'].includes(String(row.role))), name).toBe(false)
-      return actual
+      return ordinary
     }
     expect((await check('no grants')).every(row => (row.allowed_columns as string[]).length === 0)).toBe(true)
+    await database.exec('GRANT SELECT(xmin) ON user_management.column_fixture TO nzila_auth_lookup')
+    const ordinaryWithSystem = await check('explicit system-column-only SELECT')
+    const lookupSelect = (rows: CatalogRow[]) => rows.find(row => row.role === 'nzila_auth_lookup' && row.table_name === 'column_fixture' && row.privilege === 'SELECT')!
+    expect(lookupSelect(ordinaryWithSystem).allowed_columns).toEqual([])
+    expect(lookupSelect(await query(CANONICAL_AUTH_QUERIES.columns)).allowed_columns).toEqual(['xmin'])
+    await database.exec('REVOKE SELECT(xmin) ON user_management.column_fixture FROM nzila_auth_lookup')
+    await check('revoked system-column-only SELECT')
+    expect(lookupSelect(await query(CANONICAL_AUTH_QUERIES.columns)).allowed_columns).toEqual([])
     const changes = [
       { name: 'direct independent column grants for all four privileges', sql: 'GRANT SELECT(alpha),INSERT(middle),UPDATE(zeta),REFERENCES(alpha) ON user_management.column_fixture TO nzila_auth_gateway' },
       { name: 'PUBLIC column grant', sql: 'GRANT SELECT(middle) ON user_management.column_fixture TO PUBLIC' },

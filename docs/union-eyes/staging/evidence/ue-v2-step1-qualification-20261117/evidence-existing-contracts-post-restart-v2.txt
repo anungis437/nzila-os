@@ -1,0 +1,9 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  17:51:29
+   Duration  492ms (tests 64%, transform 24%, import 8%, worker 3%)
+

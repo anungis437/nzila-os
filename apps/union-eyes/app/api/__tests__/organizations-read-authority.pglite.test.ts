@@ -30,7 +30,7 @@ vi.mock('@/db/db', () => ({
 }));
 vi.mock('@/db/schema', async () => {
   const orgs = await vi.importActual<typeof import('@/db/schema-organizations')>('@/db/schema-organizations');
-  return { organizationMembers: orgs.organizationMembers, organizations: orgs.organizations };
+  return { ...(await vi.importActual<Record<string, unknown>>('@/db/schema')), organizationMembers: orgs.organizationMembers, organizations: orgs.organizations };
 });
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),

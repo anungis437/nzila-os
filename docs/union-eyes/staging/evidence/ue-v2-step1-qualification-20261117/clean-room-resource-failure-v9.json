@@ -1,0 +1,20 @@
+{
+  "qualification": "FAILED_RESOURCE_INTERRUPTION",
+  "sourceCommit": "0327fba86",
+  "command": "pnpm exec tsx scripts/bootstrap-v2/clean-room.ts",
+  "workingDirectory": "apps/union-eyes",
+  "containerName": "ue-v2-clean-97cd945f-fc46-47fa-ab4f-01ab04f8581e",
+  "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+  "memoryBytes": 1073741824,
+  "tmpfs": {
+    "/var/lib/postgresql/data": "rw,size=768m"
+  },
+  "oomKilled": true,
+  "postgresEvidence": "backend SIGKILL at 2026-11-17T21:37:11Z and crash recovery; 602MB of 768MB tmpfs occupied by proof clones",
+  "runnerLogSha256": "f6c8c626f163d489d2cbd13add48b51aab6884920bc7ecb0a8fef32b337b4ece",
+  "previousBootstrapRawIndex": "/private/tmp/ue-step1-bootstrap-raw-preserved-v8/index.json",
+  "finalReceiptProduced": false,
+  "promotionPerformed": false,
+  "ownedContainerRemoved": true,
+  "runnerLogAvailability": "Temporary-only log lost during host restart; hash is historical metadata, not available final proof"
+}

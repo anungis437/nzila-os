@@ -1,0 +1,20 @@
+{
+  "pythonVersion": "3.11.17",
+  "toolVersion": "pip-audit 2.10.1",
+  "command": [
+    "/usr/local/bin/python",
+    "-m",
+    "pip_audit",
+    "--require-hashes",
+    "--disable-pip",
+    "--strict",
+    "--progress-spinner",
+    "off",
+    "-r",
+    "/workspace/repo/apps/union-eyes/backend/requirements.lock",
+    "--format=json",
+    "--output=/workspace/python-lock-audit.json"
+  ],
+  "exitCode": 0,
+  "ignoreFlags": []
+}

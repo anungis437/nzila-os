@@ -17,12 +17,19 @@ export interface ExpiryWarning {
   daysRemaining: number
 }
 
-export function expiryWarningKey(warning: Pick<ExpiryWarning, 'expirationDate'>, tierDays: number): string {
+export function expiryWarningKey(
+  warning: Pick<ExpiryWarning, 'expirationDate'>,
+  tierDays: number,
+): string {
   return `rewards-expiry:${tierDays}:${warning.expirationDate.toISOString().slice(0, 10)}`
 }
 
 /** True when this run owns the warning; false when it was already recorded. The caller supplies the transaction it commits on (the cron's is a system one). */
-export async function claimExpiryWarning(warning: ExpiryWarning, tierDays: number, executor: RLSTx = db): Promise<boolean> {
+export async function claimExpiryWarning(
+  warning: ExpiryWarning,
+  tierDays: number,
+  executor: RLSTx = db,
+): Promise<boolean> {
   const rows = await executor
     .insert(inAppNotifications)
     .values({
@@ -31,14 +38,22 @@ export async function claimExpiryWarning(warning: ExpiryWarning, tierDays: numbe
       title: 'Reward credits are about to expire',
       message: `${warning.expiringAmount} credits expire on ${warning.expirationDate.toISOString().slice(0, 10)}.`,
       type: 'warning',
-      data: { dedupeKey: expiryWarningKey(warning, tierDays), kind: 'rewards_expiry_warning', tierDays },
+      data: {
+        dedupeKey: expiryWarningKey(warning, tierDays),
+        kind: 'rewards_expiry_warning',
+        tierDays,
+      },
     })
     .onConflictDoNothing()
     .returning({ id: inAppNotifications.id })
   return rows.length > 0
 }
 
-export async function releaseExpiryWarning(warning: ExpiryWarning, tierDays: number, executor: RLSTx = db): Promise<void> {
+export async function releaseExpiryWarning(
+  warning: ExpiryWarning,
+  tierDays: number,
+  executor: RLSTx = db,
+): Promise<void> {
   await executor
     .delete(inAppNotifications)
     .where(

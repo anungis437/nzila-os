@@ -1,0 +1,22 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+{"proof":"AUTH_SOURCE_COLUMN_EFFECTIVE_ACL_CENSUS","engine":"PGlite","nativeVerdict":"UNEXECUTED","effectiveColumnChecks":15624,"tablePrivilegeChecks":1386,"sourceFiles":{"bootstrap-sql.ts":"4f6fc18d249603583477544e5c71b931fa5b9adc5e4a0cd8ced845ae721a9028","privilege-expectations.ts":"1fbd4e3f84baf23bd431fb0871dc2d56ab8ca45fddee7b17eb7219e747a04f8a","source-columns.ts":"847929a262b3952106f3c27ff41f2b3012622dd0f02e347b251389ddec080d4f"},"compiledSqlSha256":"d5a66612180ec7d7a5b8592270193c8c8278712fb73c96e5eee16d2053edbccb"}
+ ✓ |union-eyes| db/auth/auth-source-columns.pglite.test.ts (24 tests) 1634ms
+   ✓ current-source auth columns at the physical SQL boundary (24)
+     ✓ makes the actual inspector reject a broad table grant instead of learning authority from physical columns 405ms
+{"proof":"AUTH_SYSTEM_PURPOSE_BOUNDARY","engine":"PGlite","nativeVerdict":"UNEXECUTED","compilerSourceSha256":"4f6fc18d249603583477544e5c71b931fa5b9adc5e4a0cd8ced845ae721a9028","compiledSqlSha256":"d5a66612180ec7d7a5b8592270193c8c8278712fb73c96e5eee16d2053edbccb"}
+ ✓ |union-eyes| db/auth/auth-system-purpose.pglite.test.ts (8 tests) 840ms
+ ✓ |union-eyes| db/__tests__/current-security-installer.test.ts (56 tests) 746ms
+ ✓ |union-eyes| lib/operations/canonical-catalog-admission.test.ts (8 tests) 74ms
+ ✓ |db| src/auth-storage-authority/source-columns.test.ts (4 tests) 3ms
+
+ Test Files  5 passed (5)
+      Tests  100 passed (100)
+   Start at  20:48:56
+   Duration  5.20s (tests 70%, import 27%, transform 3%)
+
+    Isolate  5 workers spawned · ~95ms startup each (spawn + environment, per file)
+             at least ~378ms faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/auth-source-columns-tests-v5.json

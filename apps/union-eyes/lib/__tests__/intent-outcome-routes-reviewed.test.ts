@@ -74,9 +74,6 @@ const NOW_ATOMIC = [
   'chatbot/sessions/route.ts',
   'integrations/framework/[id]/activate/route.ts',
   'integrations/framework/route.ts',
-  // The webhook verifies the provider's signature (a read) and records the payment in one transaction with its audit row; the provider call
-  // that is two-phase in the same service is the checkout, which this route never invokes.
-  'payments/webhooks/paypal/route.ts',
 ]
 
 describe('routes recorded as two-phase (intent, effect, outcome) are each reviewed', () => {
@@ -96,6 +93,18 @@ describe('F03 cross-organization financial routes remain truthful refusals', () 
     expect(entryOf(route)).toMatchObject({ data: 'NONE', audit: 'NONE' })
     expect(read(`app/api/${route}`)).toContain('ErrorCode.NOT_IMPLEMENTED')
     expect(read(`app/api/${route}`)).not.toContain('performAuditedOperation(')
+  })
+})
+
+describe('the PayPal dues webhook is a truthful refusal', () => {
+  // Dues payment processing is excluded from the base release: a verified capture event answers 501 and nothing is recorded.
+  it('has no data or audit effect, answers NOT_IMPLEMENTED for capture events and never runs a two-phase operation', () => {
+    const route = 'payments/webhooks/paypal/route.ts'
+    expect(entryOf(route)).toMatchObject({ data: 'NONE', audit: 'COMPUTE_ONLY' })
+    const source = read(`app/api/${route}`)
+    expect(source).toContain("ApiError.notImplemented(")
+    expect(source).toMatch(/error\.code === ErrorCode\.NOT_IMPLEMENTED\)[\s\S]*status: 501/)
+    expect(source).not.toMatch(/\bperformAuditedOperation\(|persistAtomicAudit\(/)
   })
 })
 

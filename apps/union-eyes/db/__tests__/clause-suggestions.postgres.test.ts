@@ -18,18 +18,29 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const state = vi.hoisted(() => ({ pool: null as unknown, schema: null as unknown }))
 
 type Role = 'union_eyes_runtime' | 'union_eyes_system'
 
+// Canonical V2 admits a tenant transaction only in a verified business session (ue_v2_verified_business_session): the organization's
+// tenant reads run in the real session of a live member of it (its declared reader), as a member's request would.
 async function inRole<T>(role: Role, organizationId: string | null, work: (tx: unknown) => Promise<T>): Promise<T> {
+  if (role === 'union_eyes_runtime' && organizationId)
+    return withNativeCanonicalActor(nativeTenantReaderId(organizationId), organizationId, (binding) => inRoleBound(role, organizationId, work, binding))
+  return inRoleBound(role, organizationId, work)
+}
+async function inRoleBound<T>(role: Role, organizationId: string | null, work: (tx: unknown) => Promise<T>,
+  binding?: Parameters<typeof installNativeBusinessContext>[1]): Promise<T> {
   const client = await (state.pool as pg.Pool).connect()
   try {
     return await drizzle(client, { schema: state.schema as never }).transaction(async (tx) => {
       await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
       await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId ?? ''}, true), set_config('app.current_user_id', '', true)`)
+      if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
       return work(tx)
     })
   } finally {
@@ -55,12 +66,14 @@ describe.skipIf(!URL)('clause suggestions on the combined schema, as the real ro
   let admin: pg.Client
   let pool: pg.Pool
 
-  const insertOrg = (id: string, name: string, type: string, path: string[]) =>
-    admin.query(
+  const insertOrg = async (id: string, name: string, type: string, path: string[]) => {
+    await admin.query(
       `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, province_territory, created_at, updated_at, remittance_day)
        VALUES ($1,$2,$3,$4,$5::uuid[],$6,ARRAY['public'],false,0,0,'{}','{}','active','ON',now(),now(),1)`,
       [id, name, `cs-${tag}-${id.slice(0, 6)}`, type, path, path.length - 1],
     )
+    await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(id), id, 'member')
+  }
 
   const insertClause = async (
     key: string,

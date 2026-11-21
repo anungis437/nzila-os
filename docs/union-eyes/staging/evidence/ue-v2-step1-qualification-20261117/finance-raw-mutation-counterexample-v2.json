@@ -1,0 +1,121 @@
+{
+  "scope": "BASE_RELEASE_SENSITIVE_FINANCE_DENIAL_COUNTEREXAMPLE",
+  "recordedAt": "2026-11-18T04:31:38.200503+00:00",
+  "verdict": "CONFIRMED_BLOCKING_DEFECT_REMEDIATION_IN_PROGRESS",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "actualRestrictedMemberObservation": {
+    "proof": "BASE_FINANCE_RAW_MUTATION_BOUNDARY",
+    "testSourceSha256": "5d04e81aedc191946adc5a0170dffeddede42aafc5bf9077a27057145db8d438",
+    "declaredActorRole": "member",
+    "context": {
+      "execution_role": "union_eyes_runtime",
+      "login_role": "ue_native_65104_mwlm91tf_cff574135a56_runtime",
+      "actor": "user_member_1",
+      "organization": "00000000-0000-4000-8000-000000000010",
+      "live_context": true
+    },
+    "guard": {
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    "policies": [
+      {
+        "policyname": "ue_org_isolation_delete",
+        "cmd": "DELETE",
+        "roles": "{union_eyes_runtime}",
+        "qual": "((organization_id)::text = current_setting('app.current_org_id'::text, true))",
+        "with_check": null
+      },
+      {
+        "policyname": "ue_org_isolation_insert",
+        "cmd": "INSERT",
+        "roles": "{union_eyes_runtime}",
+        "qual": null,
+        "with_check": "((organization_id)::text = current_setting('app.current_org_id'::text, true))"
+      },
+      {
+        "policyname": "ue_org_isolation_select",
+        "cmd": "SELECT",
+        "roles": "{union_eyes_runtime}",
+        "qual": "((organization_id)::text = current_setting('app.current_org_id'::text, true))",
+        "with_check": null
+      },
+      {
+        "policyname": "ue_org_isolation_update",
+        "cmd": "UPDATE",
+        "roles": "{union_eyes_runtime}",
+        "qual": "((organization_id)::text = current_setting('app.current_org_id'::text, true))",
+        "with_check": "((organization_id)::text = current_setting('app.current_org_id'::text, true))"
+      },
+      {
+        "policyname": "ue_system_full_access",
+        "cmd": "ALL",
+        "roles": "{union_eyes_system}",
+        "qual": "true",
+        "with_check": "true"
+      },
+      {
+        "policyname": "ue_v2_verified_business_session",
+        "cmd": "ALL",
+        "roles": "{union_eyes_runtime}",
+        "qual": "user_management.auth_business_org_authorized((NULLIF(current_setting('app.current_org_id'::text, true), ''::text))::uuid, NULL::text[])",
+        "with_check": "user_management.auth_business_org_authorized((NULLIF(current_setting('app.current_org_id'::text, true), ''::text))::uuid, NULL::text[])"
+      }
+    ],
+    "outcomes": [
+      {
+        "operation": "INSERT",
+        "affectedRows": 1,
+        "sqlState": null
+      },
+      {
+        "operation": "UPDATE",
+        "affectedRows": 1,
+        "sqlState": null
+      }
+    ],
+    "persisted": {
+      "insertedRows": 1,
+      "existingAmount": "42.00"
+    },
+    "qualification": "DENIAL_REQUIRED; any allowed write is an adverse counterexample, not finance feature proof"
+  },
+  "rawPrivateArtifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-mutation-native-v2.json",
+      "sha256": "48fcd5f568f8f355cd84523cc5f3febcdaf9a14c8ea19b0d42d045d6384c3870",
+      "bytes": 6326
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-mutation-native-v2.txt",
+      "sha256": "9c6d1ccf066ad481c0adba9ea85b345cb0d0fad82ed99f6637ef137b11d1f7bc",
+      "bytes": 5448
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-mutation-native-v2-source.json",
+      "sha256": "542ed135e8c8cfb056834b247f81c1db7223ad79247e7a755781b414003c460e",
+      "bytes": 1547
+    }
+  ],
+  "selectedTestResult": {
+    "passed": 0,
+    "failed": 1,
+    "otherTestsFilteredOut": 10,
+    "filteredTestsCountAsPassed": false
+  },
+  "initialAttempt": {
+    "raw": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-raw-mutation-native-v1.json",
+      "sha256": "b4ceb776dc691b5fb4372d682186b2d5895028dfaad079ca0c3126c00199d6d5",
+      "bytes": 6299
+    },
+    "result": "INSTRUMENTATION_FAILURE_URL_BINDING_SHADOWED_GLOBAL_CONSTRUCTOR",
+    "countsAsFinanceDenial": false
+  },
+  "remediationOwner": "step1_supply_qualification",
+  "remediationBoundary": "Prospective current-source billing family containment including private metadata helper carveout; preserve schema, rows and historical source decisions. Positive finance/dues remain excluded.",
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

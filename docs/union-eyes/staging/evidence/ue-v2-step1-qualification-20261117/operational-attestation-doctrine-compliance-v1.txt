@@ -1,0 +1,1 @@
+runtime-governance/generate-attestation: wrote /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/proof-artifacts/attestations/ue-step1-local-0327fba86786-20261117T214423/doctrine-compliance.json verdict=verified

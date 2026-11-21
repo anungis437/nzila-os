@@ -36,8 +36,10 @@ vi.mock('server-only', () => ({}))
 vi.mock('@/lib/db/with-rls-context', async () => (await import('./native-savepoint-harness')).contextModule)
 vi.mock('@/lib/audit/atomic-audit', async () => ({ persistAtomicAudit: (await import('./native-savepoint-harness')).recordAudit }))
 // The wrapper's observable contract for a handler: it runs with the context the request resolved; a route here opens its own tenant transaction.
+// The request's authenticated caller is who a withRLSContext naming no user acts as, as production's auth() resolves it.
 vi.mock('@/lib/api/with-api', () => ({
-  withApi: (_config: unknown, handler: (ctx: unknown) => Promise<unknown>) => async (ctx: unknown) => handler(ctx),
+  withApi: (_config: unknown, handler: (ctx: unknown) => Promise<unknown>) => async (ctx: { userId?: string | null }) =>
+    (await import('./native-savepoint-harness')).savepointHarness.asCaller(ctx?.userId, () => handler(ctx)),
 }))
 // The employment grant is issued from the session (auth()), and its durable audit is the hash-chain writer: both are boundaries here.
 vi.mock('@/lib/member-employment/authorize-employment-access', async (importOriginal) => ({
@@ -74,8 +76,9 @@ describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runt
   const rows = async (query: string, params: unknown[] = []) => (await admin.query(query, params)).rows as Row[]
   const inRuntime = <T>(organizationId: string, userId: string, work: (tx: { execute: (query: unknown) => Promise<unknown> }) => Promise<T>) =>
     savepointHarness.context(RUNTIME_ROLE, organizationId, userId, work as never) as Promise<T>
+  // Each organization is counted by its own declared administrator, through a real session in that organization.
   const count = async (organizationId: string, table: string) =>
-    Number(((await inRuntime(organizationId, ADMIN_A, (tx) => tx.execute(sql.raw(`SELECT count(*)::int AS n FROM ${table}`)))) as Row[])[0].n)
+    Number(((await inRuntime(organizationId, organizationId === ORG_B ? ADMIN_B : ADMIN_A, (tx) => tx.execute(sql.raw(`SELECT count(*)::int AS n FROM ${table}`)))) as Row[])[0].n)
   const codeOf = async (work: Promise<unknown>) => {
     const failure = await work.then(() => null, (error: unknown) => error as { code?: string; cause?: { code?: string } })
     return failure?.cause?.code ?? failure?.code ?? null
@@ -90,6 +93,10 @@ describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runt
     admin = await savepointHarness.start(URL)
     await insertOrganization(admin, tag, { id: ORG_A, name: `Alpha Union ${tag}` })
     await insertOrganization(admin, tag, { id: ORG_B, name: `Beta Union ${tag}` })
+    // The administrators who act in each organization: real canonical members acting through real sessions.
+    // Each is also the caller who opens their organization's pages (a service passing only { organizationId } acts as them).
+    await savepointHarness.declareCaller(ADMIN_A, ORG_A, 'admin')
+    await savepointHarness.declareCaller(ADMIN_B, ORG_B, 'admin')
   }, 180_000)
 
   afterAll(async () => {
@@ -132,7 +139,10 @@ describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runt
     let otherCommittee: string
 
     beforeAll(async () => {
-      for (const [user, role] of [[MEMBER, 'member'], [OUTSIDER, 'member'], [STEWARD, 'steward']] as const) await insertMember(admin, ORG_A, { userId: user, role })
+      for (const [user, role] of [[MEMBER, 'member'], [OUTSIDER, 'member'], [STEWARD, 'steward']] as const) {
+        await insertMember(admin, ORG_A, { userId: user, role })
+        await savepointHarness.declare(user, ORG_A, role)
+      }
       await insertMember(admin, ORG_B, { userId: ADMIN_B, role: 'admin' })
       const make = async (org: string, name: string) =>
         (await rows(`INSERT INTO committees (organization_id, name, committee_type) VALUES ($1, $2, 'bargaining') RETURNING id::text AS id`, [org, name]))[0].id as string
@@ -141,8 +151,12 @@ describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runt
       await admin.query(`INSERT INTO committee_memberships (committee_id, member_id, start_date) VALUES ($1, $2, current_date), ($3, $4, current_date)`, [committee, MEMBER, otherCommittee, ADMIN_B])
     })
 
-    const read = (organizationId: string, committeeId: string, userId: string) =>
-      inRuntime(organizationId, userId, () => committeeAccess.requireCommitteeReader(organizationId, committeeId, userId))
+    // A reader of their own organization asks within their live canonical request (the role lookup answers from it, as in production);
+    // a person asking in an organization they do not belong to has no request scope there.
+    const read = (organizationId: string, committeeId: string, userId: string) => {
+      const work = () => inRuntime(organizationId, userId, () => committeeAccess.requireCommitteeReader(organizationId, committeeId, userId))
+      return organizationId === ORG_A ? savepointHarness.asCanonicalRequest(userId, organizationId, work) : work()
+    }
 
     it('lets an active member of the committee read it, as the runtime role', async () => {
       await expect(read(ORG_A, committee, MEMBER)).resolves.toBeUndefined()
@@ -214,6 +228,9 @@ describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runt
   describe('the steward education routes (course_registrations UPDATE)', () => {
     const STEWARD = `edu-steward-${tag}`
     let session: string
+    beforeAll(async () => {
+      await savepointHarness.declare(STEWARD, ORG_A, 'steward')
+    })
     const registration = async (organizationId: string, member: string, flags: { attended: boolean; passed: boolean | null }) => {
       const course = (await rows(`INSERT INTO training_courses (organization_id, course_code, course_name, course_category, delivery_method, is_active, is_mandatory, duration_hours) VALUES ($1, $2, $3, 'safety', 'online', true, false, 4) RETURNING id::text AS id`, [organizationId, `C-${randomUUID().slice(0, 6)}`, `Course ${tag}`]))[0].id
       const sessionId = (await rows(`INSERT INTO course_sessions (organization_id, course_id, session_code, start_date, end_date, delivery_method) VALUES ($1, $2, $3, current_date, current_date, 'online') RETURNING id::text AS id`, [organizationId, course, `S-${randomUUID().slice(0, 6)}`]))[0].id

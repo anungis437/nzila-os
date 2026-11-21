@@ -159,7 +159,7 @@ export async function executeOwnershipBackfill(
     const current = (
       await exec.query<{ legacy: string | null; assignees: string }>(
         `SELECT g.union_rep_id::text AS legacy,
-                (SELECT count(*)::text FROM ue_authority_resource_relationships r
+                (SELECT count(*)::text FROM public.ue_authority_resource_relationships r
                   WHERE r.organization_id = g.organization_id AND r.resource_type = 'case' AND r.resource_id = g.id
                     AND r.relation = 'assignee' AND r.revoked_at IS NULL) AS assignees
            FROM public.grievances g

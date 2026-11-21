@@ -14,6 +14,7 @@
  * - Legal argument generation
  */
 
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import {
   buildOrgAiTrace,
   getAiClient,
@@ -106,6 +107,7 @@ export async function matchClaimToPrecedents(
   },
   options: PrecedentMatchOptions = {}
 ): Promise<PrecedentMatch[]> {
+  requireContainedStorageAuthority('arbitration_decisions');
   const {
     jurisdiction = claim.jurisdiction,
     issueType = claim.issueType,
@@ -374,6 +376,7 @@ export async function analyzeClaimWithPrecedents(
   },
   options?: PrecedentMatchOptions
 ): Promise<ClaimAnalysis> {
+  requireContainedStorageAuthority('arbitration_decisions');
   // Get matching precedents
   const matches = await matchClaimToPrecedents(claim, options);
 

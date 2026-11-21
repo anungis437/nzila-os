@@ -296,8 +296,12 @@ describe.skipIf(!URL_)('migration 0030 on the combined database', () => {
       expect(shared.qual).toMatch(/shared_with_org_ids/)
       expect(shared.qual).not.toMatch(/federation|congress/)
       for (const cmd of ['INSERT', 'UPDATE', 'DELETE']) {
-        const writers = found.filter((p) => p.cmd === cmd && p.roles.includes('union_eyes_runtime')).map((p) => p.policyname)
+        // Only one policy may admit a runtime write. Canonical V2 adds RESTRICTIVE policies (ue_v2_*), which can only narrow it.
+        const forCmd = found.filter((p) => p.cmd === cmd && p.roles.includes('union_eyes_runtime'))
+        const writers = forCmd.filter((p) => p.permissive === 'PERMISSIVE').map((p) => p.policyname)
         expect(writers, `${cmd} policies for union_eyes_runtime`).toEqual([`ue_org_isolation_${cmd.toLowerCase()}`])
+        for (const narrowing of forCmd.filter((p) => p.permissive !== 'PERMISSIVE'))
+          expect(narrowing, `${cmd} narrowing policy for union_eyes_runtime`).toMatchObject({ permissive: 'RESTRICTIVE', policyname: expect.stringMatching(/^ue_v2_/) })
       }
       const rls = (await combined.query(`SELECT relrowsecurity AS enabled, relforcerowsecurity AS forced FROM pg_class WHERE oid = 'public.arbitration_precedents'::regclass`)).rows[0]
       expect(rls).toEqual({ enabled: true, forced: true })

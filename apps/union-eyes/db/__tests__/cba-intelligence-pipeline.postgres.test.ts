@@ -31,16 +31,29 @@ vi.mock('@/lib/logger', () => {
 })
 
 const { harness, RUNTIME_ROLE } = await import('./native-route-harness')
+// The routes run every service call inside the caller's tenant transaction: lib/api/with-api.ts opens one for an authenticated,
+// organization-bound route in canonical mode, and the canonical topology admits a runtime statement only in a verified business session.
+// The dataset is shared reference data (GLOBAL_REFERENCE_DATA): the steward of any organization reads and writes the same rows.
+const CALLER = { organizationId: randomUUID(), userId: `cba-steward-${randomUUID().slice(0, 8)}` }
+const inRequest = <T extends object>(service: T): T => new Proxy(service, {
+  get(target, property) {
+    const value = (target as Record<PropertyKey, unknown>)[property]
+    // Only the service operations (async functions) are requests; a pure helper such as computeContentHash is called as it is.
+    return typeof value === 'function' && value.constructor.name === 'AsyncFunction'
+      ? (...args: unknown[]) => harness.tenant(RUNTIME_ROLE, CALLER.organizationId, CALLER.userId, () => (value as (...a: unknown[]) => Promise<unknown>)(...args))
+      : value
+  },
+})
 const schema = URL ? await import('@/db/schema') : null
-const sources = URL ? await import('@/lib/services/cba-intelligence/source-registry-service') : null
-const ingestion = URL ? await import('@/lib/services/cba-intelligence/ingestion-service') : null
-const documents = URL ? await import('@/lib/services/cba-intelligence/document-service') : null
-const extraction = URL ? await import('@/lib/services/cba-intelligence/extraction-service') : null
-const review = URL ? await import('@/lib/services/cba-intelligence/review-service') : null
-const benchmark = URL ? await import('@/lib/services/cba-intelligence/benchmark-service') : null
-const freshness = URL ? await import('@/lib/services/cba-intelligence/freshness-service') : null
-const health = URL ? await import('@/lib/services/cba-intelligence/health-service') : null
-const seed = URL ? await import('@/lib/services/cba-intelligence/seed-sources') : null
+const sources = URL ? inRequest(await import('@/lib/services/cba-intelligence/source-registry-service')) : null
+const ingestion = URL ? inRequest(await import('@/lib/services/cba-intelligence/ingestion-service')) : null
+const documents = URL ? inRequest(await import('@/lib/services/cba-intelligence/document-service')) : null
+const extraction = URL ? inRequest(await import('@/lib/services/cba-intelligence/extraction-service')) : null
+const review = URL ? inRequest(await import('@/lib/services/cba-intelligence/review-service')) : null
+const benchmark = URL ? inRequest(await import('@/lib/services/cba-intelligence/benchmark-service')) : null
+const freshness = URL ? inRequest(await import('@/lib/services/cba-intelligence/freshness-service')) : null
+const health = URL ? inRequest(await import('@/lib/services/cba-intelligence/health-service')) : null
+const seed = URL ? inRequest(await import('@/lib/services/cba-intelligence/seed-sources')) : null
 
 const first = (column: { enumValues?: readonly string[] | string[] }, index = 0) => (column.enumValues as readonly string[])[index]
 
@@ -66,6 +79,10 @@ describe.skipIf(!URL)('the CBA intelligence pipeline on the combined schema, as 
 
   beforeAll(async () => {
     admin = await harness.start(URL!)
+    await admin.query(
+      `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+       VALUES ($1,$2,$2,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`, [CALLER.organizationId, `cba-${tag}`])
+    await harness.setRole(CALLER.userId, CALLER.organizationId, 'steward')
   }, 60_000)
 
   afterAll(async () => {
@@ -276,7 +293,7 @@ describe.skipIf(!URL)('the CBA intelligence pipeline on the combined schema, as 
     it('records the decision and the status change together: a decision that cannot apply leaves no history', async () => {
       const before = await count('cba_intel_review_decisions')
       await expect(
-        harness.tenant(RUNTIME_ROLE, null, null, async (tx) => {
+        harness.tenant(RUNTIME_ROLE, CALLER.organizationId, CALLER.userId, async (tx) => {
           await review!.submitReview({ targetType: 'finding', targetId: state.findingIds[2], decision: 'approved', reviewerId: 'r', reviewerRole: 'steward' }, tx as never)
           throw new Error('the caller\'s audit failed')
         }),

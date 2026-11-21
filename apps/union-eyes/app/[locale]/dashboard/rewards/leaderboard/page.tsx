@@ -6,17 +6,17 @@
  * keep resolving. Locale is preserved from the dynamic segment.
  */
 
-import { redirect, permanentRedirect } from 'next/navigation';
+import { redirect, permanentRedirect } from 'next/navigation'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 type PageProps = {
-  params: Promise<{ locale: string }>;
-};
+  params: Promise<{ locale: string }>
+}
 
 export default async function LeaderboardRedirectPage({ params }: PageProps) {
-  const { locale } = await params;
-  permanentRedirect(`/${locale}/dashboard/rewards/recognition`);
+  const { locale } = await params
+  permanentRedirect(`/${locale}/dashboard/rewards/recognition`)
   // Fallback to satisfy types; permanentRedirect throws and never returns.
-  redirect(`/${locale}/dashboard/rewards/recognition`);
+  redirect(`/${locale}/dashboard/rewards/recognition`)
 }

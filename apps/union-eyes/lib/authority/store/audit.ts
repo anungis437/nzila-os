@@ -50,7 +50,7 @@ export async function auditAuthorityMutation(exec: SqlExecutor, input: Authority
   const events = (
     await exec.query<{ id: string; txid: string }>(
       `SELECT e.id::text AS id, e.txid::text AS txid
-         FROM ue_authority_events e
+         FROM public.ue_authority_events e
         WHERE e.organization_id = $1::uuid AND e.txid = txid_current()
           AND NOT EXISTS (
             SELECT 1 FROM public.audit_logs a
@@ -98,7 +98,7 @@ export interface AuditReconciliation {
  */
 export async function reconcileAuthorityAudit(exec: SqlExecutor, organizationId: string): Promise<AuditReconciliation> {
   const missing = await exec.query<{ id: string }>(
-    `SELECT e.id::text AS id FROM ue_authority_events e
+    `SELECT e.id::text AS id FROM public.ue_authority_events e
       WHERE e.organization_id = $1::uuid
         AND NOT EXISTS (SELECT 1 FROM public.audit_logs a
           WHERE a.organization_id = e.organization_id AND a.action LIKE 'authority.%'
@@ -109,7 +109,7 @@ export async function reconcileAuthorityAudit(exec: SqlExecutor, organizationId:
     `SELECT a.id::text AS id FROM public.audit_logs a
       WHERE a.organization_id = $1::uuid AND a.action LIKE 'authority.%'
         AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(a.details -> 'authorityEventIds') x
-                     WHERE NOT EXISTS (SELECT 1 FROM ue_authority_events e WHERE e.organization_id = a.organization_id AND e.id::text = x))`,
+                     WHERE NOT EXISTS (SELECT 1 FROM public.ue_authority_events e WHERE e.organization_id = a.organization_id AND e.id::text = x))`,
     [organizationId],
   )
   const chain = await exec.query<{ id: string }>(

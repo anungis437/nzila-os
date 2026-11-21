@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import { execFileSync } from 'node:child_process'
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
@@ -7,6 +8,16 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { connectLocalV2, createCurrentState } from './installer'
 import { compileMinimumRoleProvisioningSql } from './minimum-installer'
 import { iterateRuntimeSecurityReports } from './runtime-security'
+import { createRuntimeReportPump } from './runtime-session-proof'
+import { orderRuntimeReports } from './runtime-report-order'
+import {
+  GUARDED_CASE_RUNTIME_TABLES,
+  guardedCaseReportComplete,
+} from './runtime-guarded-case-fixtures'
+import { isWorkflowRuntimeTable, workflowReportComplete } from './runtime-workflow-fixtures'
+import { openRuntimeSessionFactory } from './runtime-column-fixtures'
+import { RUNTIME_COLUMN_PRIVILEGE_CONTRACTS } from './service-column-contracts'
+import { SYNC_LOG_OVERVIEW_COLUMNS } from '../../lib/dashboard-reads/data-source-contract'
 import { compileSecurity } from './security'
 import { qualifyNativePrivileges } from './manifest-security'
 import { folder, type V2Plan } from './source'
@@ -63,10 +74,46 @@ native('current tenant positive writes with genuine restricted execution', () =>
   const plan: V2Plan = JSON.parse(
     readFileSync(path.join(folder, 'UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'), 'utf8'),
   )
-  const rules = compileSecurity(plan).rules.filter((rule) =>
-    /RLS_REQUIRED$/.test(rule.classification),
+  const rules = orderRuntimeReports(
+    compileSecurity(plan).rules.filter((rule) => /RLS_REQUIRED$/.test(rule.classification)),
+    GUARDED_CASE_RUNTIME_TABLES,
+    Object.keys(RUNTIME_COLUMN_PRIVILEGE_CONTRACTS),
   )
+  // Independent oracle: the exact guard refusal of a direct write that bypasses each workflow.
+  const workflowRefusals: Record<string, string> = {
+    message_thread_assignments: '23001:ASSIGNMENT_NOT_THREAD_STATE',
+    message_thread_lifecycle: '23001:LIFECYCLE_NOT_THREAD_STATE',
+    ue_authority_acceptances: '42501:ONLY_THE_HOLDER_MAY_ACCEPT',
+    ue_authority_approval_decisions: '42501:ALREADY_DECIDED',
+    ue_authority_approval_requests: '23514:AUDIT_LINK_MISSING',
+    ue_authority_counsel_engagements: '23514:AUDIT_LINK_MISSING',
+    ue_authority_counsel_nonces: '23514:AUDIT_LINK_MISSING',
+    ue_authority_delegations: '42501:ISSUER_AUTHORITY_REQUIRED',
+    ue_authority_disclosure_consents: '23514:AUDIT_LINK_MISSING',
+    ue_authority_events: '42501:EVENT_RECORDING_TRIGGER_ONLY',
+    ue_authority_issuance_rules: '42501:ISSUANCE_RULE_MUST_START_DRAFT',
+    ue_authority_mandates: '42501:APPROVAL_NOT_SATISFIED',
+    ue_authority_recusals: '23514:AUDIT_LINK_MISSING',
+    ue_authority_resource_relationships: '42501:NO_ACTIVE_ISSUANCE_RULE',
+    ue_authority_reviews: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_consent_grants: '23514:WORKAID_GRANT_INVALID',
+    ue_authority_workaid_consent_texts: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_counsel_access: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_document_auths: '23514:WORKAID_DOCAUTH_INVALID',
+    ue_authority_workaid_matters: '23514:AUDIT_LINK_MISSING',
+    ue_authority_workaid_shares: '23514:AUDIT_LINK_MISSING',
+  }
+  let runtimeSessions: ReturnType<typeof openRuntimeSessionFactory> | undefined
   let iterator: ReturnType<typeof iterateRuntimeSecurityReports> | undefined
+  const reportControl: { signal?: AbortSignal } = {}
+  type NativeNext = Awaited<ReturnType<NonNullable<typeof iterator>['next']>>
+  let reportPump:
+    { next(signal: AbortSignal): Promise<NativeNext>; settle(): Promise<void> } | undefined
+  const nextNativeReport = (signal: AbortSignal) => {
+    if (!iterator) throw new Error('UE_V2_NATIVE_MATRIX_NOT_STARTED')
+    reportPump ??= createRuntimeReportPump(iterator, reportControl)
+    return reportPump.next(signal)
+  }
 
   beforeAll(async () => {
     container = execFileSync(
@@ -90,7 +137,7 @@ native('current tenant positive writes with genuine restricted execution', () =>
         '127.0.0.1::5432',
         '-e',
         `POSTGRES_PASSWORD=${password}`,
-        'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337',
+        nativePostgres16Image(),
       ],
       { encoding: 'utf8' },
     ).trim()
@@ -131,12 +178,31 @@ native('current tenant positive writes with genuine restricted execution', () =>
     await createCurrentState(seed, plan)
     await seed.query('COMMIT')
     expect((await qualifyNativePrivileges(seed, plan)).mismatches).toEqual([])
-    // The catalog qualifier must see a removed authorized SYSTEM read and an added unauthorized one. Both relations
-    // below carry table-level SYSTEM SELECT in current storage authority (86aa8adb2, a0404b79b), so the removal is of
-    // that grant; fee_adjustments and consent_records are SYSTEM INSERT-only, so any column read granted there is extra.
+    await seed.query('BEGIN')
+    try {
+      await seed.query(`CREATE FUNCTION public.ue_reward_guard_nomination(integer) RETURNS integer
+        LANGUAGE sql SECURITY INVOKER AS 'SELECT $1';
+        ALTER FUNCTION public.ue_reward_guard_nomination(integer) OWNER TO ue_v2_owner;
+        REVOKE ALL ON FUNCTION public.ue_reward_guard_nomination(integer) FROM PUBLIC;
+        GRANT EXECUTE ON FUNCTION public.ue_reward_guard_nomination(integer) TO union_eyes_runtime;`)
+      // A mode without canonical auth must not admit a same-name overload on
+      // the assumption that its physical contract was already checked.
+      const separate = await qualifyNativePrivileges(seed, { ...plan, authExecution: undefined })
+      expect(
+        separate.mismatches.some(
+          (message) =>
+            message.startsWith('FUNCTION_SEARCH_PATH_NOT_PINNED:') &&
+            message.endsWith('ue_reward_guard_nomination(integer)'),
+        ),
+      ).toBe(true)
+    } finally {
+      await seed.query('ROLLBACK')
+    }
+    // Remove one actual authorized sync-status column and add unauthorized
+    // content grants; the current source inspector must reject each drift.
     for (const [sql, mismatch] of [
       [
-        'REVOKE SELECT ON public.external_data_sync_log FROM union_eyes_system',
+        'REVOKE SELECT (sync_id) ON public.external_data_sync_log FROM union_eyes_system',
         'COLUMN_SELECT_GRANT_MISMATCH:external_data_sync_log.sync_id:union_eyes_system',
       ],
       [
@@ -144,7 +210,7 @@ native('current tenant positive writes with genuine restricted execution', () =>
         'COLUMN_SELECT_GRANT_MISMATCH:fee_adjustments.amount_cad:union_eyes_system',
       ],
       [
-        'REVOKE SELECT ON public.commercial_contracts FROM union_eyes_system',
+        'GRANT SELECT (contract_number) ON public.commercial_contracts TO union_eyes_system',
         'COLUMN_SELECT_GRANT_MISMATCH:commercial_contracts.contract_number:union_eyes_system',
       ],
       [
@@ -186,8 +252,24 @@ native('current tenant positive writes with genuine restricted execution', () =>
   }, 600000)
 
   afterAll(async () => {
+    const cleanupFailures: unknown[] = []
     try {
-      await Promise.all(opened.map((client) => client.end()))
+      // A timed-out test must finish its real transaction/bearer cleanup
+      // before the owned clients or database are disposed.
+      if (reportPump)
+        try {
+          await reportPump.settle()
+        } catch (error) {
+          cleanupFailures.push(error)
+        }
+      try {
+        await runtimeSessions?.dispose()
+      } catch (error) {
+        cleanupFailures.push(error)
+      }
+      const ended = await Promise.allSettled(opened.map((client) => client.end()))
+      for (const result of ended)
+        if (result.status === 'rejected') cleanupFailures.push(result.reason)
     } finally {
       if (container) {
         expect(
@@ -200,6 +282,8 @@ native('current tenant positive writes with genuine restricted execution', () =>
         execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
       }
     }
+    if (cleanupFailures.length)
+      throw new AggregateError(cleanupFailures, 'UE_V2_NATIVE_RUNTIME_CLEANUP_FAILED')
   })
 
   it('maps the actual Next application context to the canonical non-owner role and isolated rows', async () => {
@@ -474,7 +558,8 @@ native('current tenant positive writes with genuine restricted execution', () =>
       for (const sessionState of ['expired', 'revoked'] as const) {
         await seed.query(
           sessionState === 'expired'
-            ? "UPDATE user_management.user_sessions SET expires_at=now()-interval '1 second' WHERE user_id=$1"
+            ? // A genuinely expired session: valid_expiry requires expires_at > created_at.
+              "UPDATE user_management.user_sessions SET created_at=now()-interval '2 hours',expires_at=now()-interval '1 second' WHERE user_id=$1"
             : 'UPDATE user_management.user_sessions SET is_active=false WHERE user_id=$1',
           [frontendIdentity.actor],
         )
@@ -529,6 +614,40 @@ native('current tenant positive writes with genuine restricted execution', () =>
           ])
         ).rowCount,
       ).toBe(1)
+      const projection = await system.query(
+        `SELECT ${SYNC_LOG_OVERVIEW_COLUMNS.map((name) => `"${name}"`).join(',')} FROM public.external_data_sync_log WHERE sync_id=$1`,
+        [syncId],
+      )
+      expect(projection.rowCount).toBe(1)
+      expect(Object.keys(projection.rows[0]).sort()).toEqual([...SYNC_LOG_OVERVIEW_COLUMNS].sort())
+      expect(projection.rows[0]).toMatchObject({
+        sync_id: syncId,
+        status: 'completed',
+        records_processed: 1,
+      })
+      expect(
+        (
+          await system.query(
+            "SELECT has_table_privilege(current_user,'public.external_data_sync_log','SELECT') AS allowed",
+          )
+        ).rows[0].allowed,
+      ).toBe(false)
+      const declared = plan.tables.find((table) => table.name === 'external_data_sync_log')!
+      for (const column of declared.columns.filter(
+        (column) => !SYNC_LOG_OVERVIEW_COLUMNS.some((name) => name === column.name),
+      )) {
+        await system.query('SAVEPOINT ue_v2_excluded_sync_column')
+        try {
+          await expect(
+            system.query(
+              `SELECT "${column.name.replaceAll('"', '""')}" FROM public.external_data_sync_log WHERE sync_id=$1`,
+              [syncId],
+            ),
+          ).rejects.toMatchObject({ code: '42501' })
+        } finally {
+          await system.query('ROLLBACK TO SAVEPOINT ue_v2_excluded_sync_column')
+        }
+      }
       await system.query('SAVEPOINT ue_v2_broad_sync_read')
       await expect(
         system.query('SELECT * FROM public.external_data_sync_log'),
@@ -680,96 +799,184 @@ native('current tenant positive writes with genuine restricted execution', () =>
     }
   }, 120000)
 
-  it('qualifies the actual commercial transition selector without broad contract reads', async () => {
-    const organizationId = randomUUID()
-    const billingAccountId = randomUUID()
-    const contractNumber = `ue-v2-${randomUUID()}`
-    await seed.query(
-      `INSERT INTO public.organizations
-      (id,name,slug,organization_type,hierarchy_path,hierarchy_level,sectors,clc_affiliated,
-       member_count,active_member_count,settings,features_enabled,status,remittance_day,created_at,updated_at)
-      VALUES ($1::uuid,'Synthetic contract organization',$1::uuid::text,'local',ARRAY[]::text[],0,
-       ARRAY[]::varchar[],false,0,0,'{}',ARRAY[]::text[],'active',15,now(),now())`,
-      [organizationId],
-    )
-    await seed.query(
-      `INSERT INTO public.billing_accounts(id,organization_id,display_name,billing_email)
-       VALUES ($1,$2,'Synthetic billing account','ue-v2-commercial@example.invalid')`,
-      [billingAccountId, organizationId],
-    )
-    await system.query('BEGIN')
-    try {
-      await system.query('SET LOCAL ROLE union_eyes_system')
-      expect(
-        (
-          await system.query(
-            'SELECT id FROM public.commercial_contracts WHERE contract_number=$1',
-            [contractNumber],
-          )
-        ).rowCount,
-      ).toBe(0)
-      const inserted = await system.query<{ id: string }>(
-        `INSERT INTO public.commercial_contracts
-        (organization_id,billing_account_id,contract_number,name,status,effective_date,expiration_date)
-        VALUES ($1,$2,$3,'Synthetic pilot contract','pending_approval',now(),now()+interval '90 days')
-        RETURNING id`,
-        [organizationId, billingAccountId, contractNumber],
-      )
-      expect(inserted.rowCount).toBe(1)
-      expect(
-        (
-          await system.query(
-            "UPDATE public.commercial_contracts SET status='active',signed_at=now(),updated_at=now() WHERE id=$1",
-            [inserted.rows[0].id],
-          )
-        ).rowCount,
-      ).toBe(1)
-      await system.query('SET CONSTRAINTS ALL IMMEDIATE')
-      expect(
-        (
-          await system.query(
-            'SELECT id FROM public.commercial_contracts WHERE contract_number=$1',
-            [contractNumber],
-          )
-        ).rows,
-      ).toEqual([{ id: inserted.rows[0].id }])
-      await system.query('SAVEPOINT ue_v2_contract_content_read')
-      await expect(system.query('SELECT * FROM public.commercial_contracts')).rejects.toMatchObject(
-        {
-          code: '42501',
-        },
-      )
-      await system.query('ROLLBACK TO SAVEPOINT ue_v2_contract_content_read')
-    } finally {
-      await system.query('ROLLBACK')
+  it('denies commercial SYSTEM projections and mutations without qualifying finance features', async () => {
+    // The four allowed ordinary admission projections are covered in the full
+    // production-session column matrix below. SYSTEM has no commercial power.
+    for (const statement of [
+      'SELECT id FROM public.commercial_contracts',
+      'SELECT contract_number FROM public.commercial_contracts',
+      'SELECT * FROM public.commercial_contracts',
+      "INSERT INTO public.commercial_contracts(name) VALUES('Synthetic forbidden commercial write')",
+      "UPDATE public.commercial_contracts SET status='active'",
+      'DELETE FROM public.commercial_contracts',
+    ]) {
+      await system.query('BEGIN')
       try {
-        expect(
-          (
-            await seed.query(
-              'SELECT id FROM public.commercial_contracts WHERE contract_number=$1',
-              [contractNumber],
-            )
-          ).rowCount,
-        ).toBe(0)
+        await system.query('SET LOCAL ROLE union_eyes_system')
+        await expect(system.query(statement)).rejects.toMatchObject({ code: '42501' })
       } finally {
-        await seed.query('DELETE FROM public.billing_accounts WHERE id=$1', [billingAccountId])
-        await seed.query('DELETE FROM public.organizations WHERE id=$1', [organizationId])
+        await system.query('ROLLBACK')
       }
     }
   })
 
   for (const rule of rules) {
-    it(`${rule.table}: qualifies every source-authorized actor operation and constraints`, async () => {
-      iterator ??= iterateRuntimeSecurityReports(seed, runtime, system, plan, rules)
-      const next = await iterator.next()
+    it(`${rule.table}: qualifies every source-authorized actor operation and constraints`, async ({
+      signal,
+    }) => {
+      runtimeSessions ??= openRuntimeSessionFactory(seed, frontendAuthUrl)
+      iterator ??= iterateRuntimeSecurityReports(
+        seed,
+        runtime,
+        system,
+        plan,
+        rules,
+        undefined,
+        undefined,
+        undefined,
+        runtimeSessions,
+        reportControl,
+      )
+      const next = await nextNativeReport(signal)
       if (next.done) throw new Error(`UE_V2_NATIVE_TABLE_PROOF_MISSING:${rule.table}`)
       const report = next.value
       expect(report.table).toBe(rule.table)
       expect(report.status, report.failure).toBe('PASS')
-      for (const actorClass of ['MEMBER', 'ORG_ADMIN', 'PLATFORM_ADMIN']) {
-        expect(report?.cases, `${rule.table}:${actorClass}`).toContain(
-          `${actorClass}:FIXTURE_MUTATIONS_ROLLED_BACK`,
+      if (GUARDED_CASE_RUNTIME_TABLES.some((table) => table === rule.table)) {
+        // These tables are changed through their protected workflows. Raw
+        // mutation success is not an authorized substitute for those effects.
+        expect(guardedCaseReportComplete(report), rule.table).toBe(true)
+        for (const witness of [
+          'OWN_SOURCE_OPERATION_ROWS_VERIFIED',
+          'BIDIRECTIONAL_TENANT_READ_ISOLATION',
+          'MISSING_AND_FOREIGN_CONTEXT_DENIED',
+          'TITLE_ONLY_INSTITUTIONAL_POWER_DENIED',
+          'FAILED_MUTATION_HISTORY_UNCHANGED',
+          'ORIGINAL_HISTORY_BYTES_PRESERVED',
+          'SOURCE_SYSTEM_BOUNDARY_VERIFIED',
+        ])
+          expect(report.cases.filter((name) => name === `${rule.table}:${witness}`)).toHaveLength(1)
+        const sourceRollback = ['claims', 'claim_updates', 'claim_status_transitions'].includes(
+          rule.table,
         )
+          ? 'OWN_SOURCE_TRANSITION_AND_AUDIT_OUTBOX_ROLLBACK_VERIFIED'
+          : 'OWN_APPROVED_AMENDMENT_UPDATE_AND_ROLLBACK_VERIFIED'
+        expect(
+          report.cases.filter((name) => name === `${rule.table}:${sourceRollback}`),
+        ).toHaveLength(2)
+        const missingAudit =
+          rule.table === 'claims'
+            ? 'MISSING_CREATE_AUDIT_ROLLS_BACK_CLAIM_AND_TRIGGERED_JOURNAL'
+            : rule.table === 'claim_updates'
+              ? 'MISSING_HISTORY_AUDIT_ROLLS_BACK_OWN_ROW'
+              : rule.table === 'claim_status_transitions'
+                ? 'MISSING_CREATE_AUDIT_ROLLS_BACK_TRIGGERED_ROW'
+                : null
+        if (missingAudit)
+          expect(
+            report.cases.filter((name) => name === `${rule.table}:${missingAudit}`),
+          ).toHaveLength(1)
+        for (const actorClass of ['MEMBER', 'ORG_ADMIN', 'PLATFORM_ADMIN'])
+          for (const party of ['ORG_A', 'ORG_B'])
+            for (const witness of [
+              'LIVE_SOURCE_CLASS_VERIFIED',
+              'OWN_TENANT_READ_OBSERVED',
+              'FOREIGN_TENANT_READ_DENIED',
+              'MISSING_USER_READ_DENIED',
+              'MISSING_ORG_READ_DENIED',
+              'MISSING_BEARER_READ_DENIED',
+              'FOREIGN_ORG_CONTEXT_READ_DENIED',
+              'RAW_PROTECTED_WRITE_DENIED_42501',
+              'DENIED_WRITE_HISTORY_UNCHANGED',
+            ])
+              expect(
+                report.cases.filter(
+                  (name) => name === `${rule.table}:${actorClass}:${party}:${witness}`,
+                ),
+              ).toHaveLength(1)
+        expect(
+          report.cases.some((name) =>
+            /FIXTURE_MUTATIONS_ROLLED_BACK|OWN_INSERT_ALLOWED_CONSTRAINT_VERIFIED/.test(name),
+          ),
+        ).toBe(false)
+        return
+      }
+      if (isWorkflowRuntimeTable(rule.table)) {
+        // Kernel and conversation records exist only as their audited workflows produce them. A
+        // direct write is a bypass that the physical guard must refuse; it is never a positive.
+        expect(Object.hasOwn(workflowRefusals, rule.table), rule.table).toBe(true)
+        expect(workflowReportComplete(report), rule.table).toBe(true)
+        const workflowWitnesses = [
+          'OWN_WORKFLOW_OPERATION_ROWS_VERIFIED',
+          'BIDIRECTIONAL_TENANT_READ_ISOLATION',
+          'MISSING_AND_FOREIGN_CONTEXT_DENIED',
+          'WORKFLOW_BYPASS_DENIED_FOR_EVERY_ACTOR_CLASS',
+          'FAILED_MUTATION_HISTORY_UNCHANGED',
+          'ORIGINAL_WORKFLOW_ROWS_PRESERVED',
+          'SOURCE_SYSTEM_BOUNDARY_VERIFIED',
+          `RAW_BYPASS_REFUSAL:${workflowRefusals[rule.table]}`,
+        ]
+        // Counsel rows come only through the shipped counsel assertion pipeline, whose signature port
+        // is a fixture Ed25519 key. The product capability stays unproven: no production verifier.
+        const counselTable = [
+          'ue_authority_counsel_nonces',
+          'ue_authority_workaid_counsel_access',
+        ].includes(rule.table)
+        if (counselTable)
+          workflowWitnesses.push(
+            'COUNSEL_SIGNATURE_FIXTURE_KEY_VERIFIED',
+            'TAMPERED_ASSERTION_SIGNATURE_REFUSED',
+            'NONCE_SINGLE_USE_REPLAY_REFUSED',
+          )
+        const counselCapability = (report as { counselCapability?: unknown }).counselCapability
+        if (counselTable) expect(counselCapability).toBe('NOT_PROVEN_NO_PRODUCTION_VERIFIER')
+        else expect(Object.hasOwn(report, 'counselCapability')).toBe(false)
+        for (const witness of workflowWitnesses)
+          expect(report.cases.filter((name) => name === `${rule.table}:${witness}`)).toHaveLength(1)
+        const workflowActorWitnesses = [
+          'LIVE_SOURCE_CLASS_VERIFIED',
+          'OWN_TENANT_READ_OBSERVED',
+          'FOREIGN_TENANT_READ_DENIED',
+          'MISSING_USER_READ_DENIED',
+          'MISSING_ORG_READ_DENIED',
+          'MISSING_BEARER_READ_DENIED',
+          'FOREIGN_ORG_CONTEXT_READ_DENIED',
+          'RAW_WORKFLOW_BYPASS_REFUSED',
+          'DENIED_WRITE_HISTORY_UNCHANGED',
+        ]
+        for (const actorClass of ['MEMBER', 'ORG_ADMIN', 'PLATFORM_ADMIN'])
+          for (const party of ['ORG_A', 'ORG_B'])
+            for (const witness of workflowActorWitnesses)
+              expect(
+                report.cases.filter(
+                  (name) => name === `${rule.table}:${actorClass}:${party}:${witness}`,
+                ),
+              ).toHaveLength(1)
+        expect(report.cases).toHaveLength(
+          workflowWitnesses.length + 3 * 2 * workflowActorWitnesses.length,
+        )
+        expect(
+          report.cases.some((name) =>
+            /FIXTURE_MUTATIONS_ROLLED_BACK|OWN_INSERT_ALLOWED|OWN_UPDATE_ALLOWED|OWN_TENANT_INSERT_ALLOWED/.test(
+              name,
+            ),
+          ),
+        ).toBe(false)
+        return
+      }
+      for (const actorClass of ['MEMBER', 'ORG_ADMIN', 'PLATFORM_ADMIN']) {
+        if (RUNTIME_COLUMN_PRIVILEGE_CONTRACTS[rule.table]) {
+          expect(report.cases).toContain(`${actorClass}:COLUMN_SOURCE_AUTHORIZED_SELECT`)
+          expect(report.cases).toContain(`${actorClass}:COMMITTED_FOREIGN_ROW_HIDDEN`)
+          expect(report.cases).not.toContain(`${actorClass}:FIXTURE_MUTATIONS_ROLLED_BACK`)
+          if (rule.table === 'recognition_awards')
+            expect(report.cases).toContain(
+              `${actorClass}:COLUMN_SOURCE_AUTHORIZED_INSERT_AND_AUDIT_ROLLED_BACK`,
+            )
+        } else
+          expect(report.cases, `${rule.table}:${actorClass}`).toContain(
+            `${actorClass}:${rule.runtimePrivileges.some((privilege) => ['INSERT', 'UPDATE', 'DELETE'].includes(privilege)) ? 'FIXTURE_MUTATIONS_ROLLED_BACK' : 'READONLY_OR_DENIED_FIXTURE_RETAINED'}`,
+          )
         for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) {
           const expected = rule.runtimePrivileges.includes(privilege)
             ? privilege === 'SELECT'
@@ -788,11 +995,22 @@ native('current tenant positive writes with genuine restricted execution', () =>
     }, 120000)
   }
 
-  it('finishes the exact complete native matrix and verifies role-escalation denials', async () => {
-    if (!iterator) throw new Error('UE_V2_NATIVE_MATRIX_NOT_STARTED')
-    const next = await iterator.next()
+  it('finishes the exact complete native matrix and verifies role-escalation denials', async ({
+    signal,
+  }) => {
+    const next = await nextNativeReport(signal)
     if (!next.done) throw new Error(`UE_V2_NATIVE_EXTRA_TABLE_PROOF:${next.value.table}`)
     const proof = next.value
+    expect(proof.zeroSystemAuthorityQualification).toMatchObject({
+      result: 'PASS',
+      denominator: 9,
+      qualified: 9,
+    })
+    expect(
+      proof.zeroSystemAuthorityQualification.reports.every(
+        (report) => report.cases.length === 4 && report.status === 'PASS',
+      ),
+    ).toBe(true)
     expect(proof.reports.filter((report) => report.status === 'FAIL')).toEqual([])
     expect(proof.reports.map((report) => report.table)).toEqual(rules.map((rule) => rule.table))
     expect(proof.nativeActorClassQualification.result).toBe('PASS')

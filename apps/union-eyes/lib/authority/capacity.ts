@@ -15,6 +15,7 @@
  * Unknown roles map to no capacity (fail closed).
  */
 import type { Capacity } from './ontology'
+import { isPlatformOrganization, PLATFORM_ORGANIZATION_ROLE_CAPACITIES } from './platform-organization'
 
 const MEMBER: Capacity[] = ['member']
 
@@ -75,6 +76,19 @@ export function capacitiesForRole(role: string | null | undefined): readonly Cap
   if (!role) return []
   const key = role.toLowerCase()
   return Object.prototype.hasOwnProperty.call(ROLE_CAPACITIES, key) ? ROLE_CAPACITIES[key] : []
+}
+
+/**
+ * Capacities of a membership in a given organization. Inside the platform organization only the platform table applies
+ * (./platform-organization.ts); everywhere else only the customer table. Neither ever reaches across.
+ */
+export function capacitiesForMembership(role: string | null | undefined, organizationId: string | null | undefined): readonly Capacity[] {
+  if (!isPlatformOrganization(organizationId)) return capacitiesForRole(role)
+  if (!role) return []
+  const key = role.toLowerCase()
+  return Object.prototype.hasOwnProperty.call(PLATFORM_ORGANIZATION_ROLE_CAPACITIES, key)
+    ? PLATFORM_ORGANIZATION_ROLE_CAPACITIES[key]
+    : []
 }
 
 /**

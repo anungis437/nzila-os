@@ -3,6 +3,7 @@
  * POST /api/precedents/search - Search precedents
  */
 
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { NextResponse } from "next/server";
 import { searchPrecedents } from "@/lib/services/precedent-service";
 import { z } from "zod";
@@ -40,6 +41,7 @@ export const POST = withApi(
     openapi: { tags: ['Precedents'], summary: 'Search arbitration precedents' },
   },
   async ({ request, organizationId, userId }) => {
+  requireContainedStorageAuthority('arbitration_decisions');
   try {
       let body: unknown;
       try {

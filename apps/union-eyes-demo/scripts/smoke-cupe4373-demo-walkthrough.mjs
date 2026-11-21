@@ -49,12 +49,18 @@ const AUTHED_ROUTES = [
   '/en-CA/dashboard/work',
 ];
 
-const strip = (html) =>
-  html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ');
+const strip = (html) => {
+  let text = html;
+  let previous;
+  do {
+    previous = text;
+    text = text
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, ' ')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, ' ')
+      .replace(/<[^>]*>/g, ' ');
+  } while (text !== previous);
+  return text.replace(/[<>]/g, ' ').replace(/\s+/g, ' ');
+};
 
 const failures = [];
 const record = (ok, msg) => {

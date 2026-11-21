@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-17T21:44:23.406Z",
+  "candidateBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeDirty": true,
+  "qualificationState": "INTERIM_SOURCE_AND_LOCAL_ENGINEERING_ONLY",
+  "candidateIsFinal": false,
+  "sourceHashes": {
+    ".github/workflows/runtime-governance-attestation.yml": "sha256-a4b854c9a37c4d8466a43d51a7f2e601fd79180d0e3198a6148f24c014530e0d",
+    "tooling/runtime-governance/contracts.mjs": "sha256-65e9d058a10e265d142a05cf09a428030e2dc2b54355f68b4af79ef46685e6b9",
+    "tooling/runtime-governance/check-env.mjs": "sha256-d141ee4a37ec07977d5bdaf2aa6375d8dda95d0c652abaf01a9d25bdfb2b550d",
+    "tooling/runtime-governance/generate-attestation.mjs": "sha256-1f1fc493c5147cdd1aa6ef3e7ebc87d89cefb2921338ac71bf559eb68f02ab36",
+    "tooling/runtime-governance/write-evidence.mjs": "sha256-3ce2a945f970e9f7ec0c7818da34eb42a39540ffefdbbd0c45964fc643f9d72a",
+    "tooling/runtime-governance/check-pilot-boundaries.mjs": "sha256-5afa7f0b4f40659681b797273fd5ada6f39ecfa1bb4e9cc480cef25ca0857931",
+    "tooling/runtime-governance/README.md": "sha256-7abaedb444e9353e0f54955279f07f27564c89e7c6a7e92bfee21b1ced2a2964",
+    "tooling/contract-tests/runtime-governance-integrity.test.ts": "sha256-4fa660305968b2d226a946625af6d7b434523cbb8c500aed0614eb019450bfe4",
+    "tooling/contract-tests/sre-runtime-evidence.test.ts": "sha256-49ebd48aeda16db889c7ce3e0d489ba4d7cd0afb75fd75d0893e41f165965834",
+    "scripts/sre/audit-reliability.ts": "sha256-69289af6e9c1b5dcd64468cd51f0b6e88aede15700689b41422bb9b588707f6a",
+    "scripts/sre/generate-executive-dashboard.ts": "sha256-247ac8163eb20e1c86918e40f6669d4c074f2c473669b86370ccea471a231861",
+    "packages/runtime-attestation/src/attestation.ts": "sha256-5bbe5711140516b804f3e441ec70ea091bc56dfc0cf9379a35b54fb9a7be3a3d",
+    "packages/runtime-attestation/src/types.ts": "sha256-d8da4d1bef046fadc8e7399eb89da1dc7957e6aaf06e881f7432656439d6a489",
+    "packages/runtime-attestation/src/content-hash.ts": "sha256-ebfc9819ffd26035a4d6a057966ba76042176393037428e43dee7c263bca46f1",
+    "packages/runtime-attestation/src/ledger.ts": "sha256-c56296069d1dc7dd295846e8950f0452bea30d32003e9d45cd5f84a05572690f",
+    "packages/governance-runtime/src/release-identity.ts": "sha256-a0754b3e857af0c723d2cf0d08a005a8c5fff135cc2f12319422abd3ef82c399"
+  },
+  "observedCommands": [
+    {
+      "name": "access-review",
+      "command": "pnpm exec tsx scripts/ue/access-review-validate.ts",
+      "observedExitCode": 0,
+      "scope": "HISTORICAL_CURRENT_QUARTER_APPROVAL_SCHEMA_ONLY",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-access-review-v1.txt",
+      "logHash": "sha256-8c92419fc4fe2aaf0f8ed08b6f65c2f3fcdc62dcfd2749e67a55179bc5361fad"
+    },
+    {
+      "name": "sre-health",
+      "command": "pnpm exec tsx scripts/sre/validate-health-contract.ts",
+      "observedExitCode": 0,
+      "scope": "SOURCE_ENDPOINT_PRESENCE_ONLY",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-sre-health-v1.txt",
+      "logHash": "sha256-5f5ebb73e0882c0828081cf194db5ef58bbd67fa199bdff8d34936f57f669e15"
+    },
+    {
+      "name": "sre-synthetic",
+      "command": "pnpm exec tsx scripts/sre/synthetic-dry-run.ts",
+      "observedExitCode": 0,
+      "scope": "CONFIGURATION_ONLY_NO_NETWORK",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-sre-synthetic-v1.txt",
+      "logHash": "sha256-6452f396eb39af2f969caab91b108d1eaec40ccc98b8d215b16b0b4482268e76"
+    },
+    {
+      "name": "sre-alerts",
+      "command": "pnpm exec tsx scripts/sre/alert-routing-dry-run.ts",
+      "observedExitCode": 0,
+      "scope": "ROUTING_CONFIGURATION_ONLY_NO_DELIVERY",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-sre-alerts-v1.txt",
+      "logHash": "sha256-620188772da3c465b60020c449977223601b717577deccac9d3ab697cb2e7c8f"
+    },
+    {
+      "name": "sre-audit",
+      "command": "pnpm exec tsx scripts/sre/audit-reliability.ts",
+      "observedExitCode": 0,
+      "scope": "SOURCE_AND_CONFIGURATION_PRESENCE_ONLY",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-sre-audit-v1.txt",
+      "logHash": "sha256-3c2a1843ba3d031e92a4292affab529f47344a4eb1beafeb28afe4970534fe9d"
+    },
+    {
+      "name": "sre-dashboard",
+      "command": "pnpm exec tsx scripts/sre/generate-executive-dashboard.ts",
+      "observedExitCode": 0,
+      "scope": "SOURCE_AND_REFERENCED_SNAPSHOTS_ONLY",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-sre-dashboard-v1.txt",
+      "logHash": "sha256-70ee81e1738d3d450805c8c82ea048ff3cd9f7784e4f3eb902f31f4850cefa2e"
+    },
+    {
+      "name": "runtime-health-generation",
+      "command": "node tooling/scripts/generate-runtime-health-status.mjs",
+      "observedExitCode": 0,
+      "scope": "DETERMINISTIC_HISTORICAL_ARTIFACT_COMPOSITION",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-runtime-health-generation-v1.txt",
+      "logHash": "sha256-8fb19d11ca6581afca190c196276df7da431662f518ce9ca71ce847b04d80589"
+    },
+    {
+      "name": "runtime-health-validation",
+      "command": "node tooling/scripts/validate-runtime-health-status.mjs",
+      "observedExitCode": 0,
+      "scope": "HISTORICAL_ARTIFACT_SCHEMA_ONLY",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-runtime-health-validation-v1.txt",
+      "logHash": "sha256-690ab1b6d39d4fa6a237a46ac9506ccd7d5dae37f51cb74e43a74ffbea527e4e"
+    },
+    {
+      "name": "doctrine",
+      "command": "pnpm --filter @nzila/doctrine-enforcement test --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "12_LOCAL_CONTRACT_TESTS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-doctrine-v1.txt",
+      "logHash": "sha256-552c670373b7d2ed97bfb51a01f0ecf926fb67701e87669ca975ac239da40247"
+    },
+    {
+      "name": "telemetry",
+      "command": "pnpm --filter @nzila/governance-telemetry test --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "9_LOCAL_CONTRACT_TESTS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-telemetry-v1.txt",
+      "logHash": "sha256-9abd900cab729c3a0a8eea05ff2b19e007854331600ada7dcb8c490e4b3c5dff"
+    },
+    {
+      "name": "attestation-package",
+      "command": "pnpm --filter @nzila/runtime-attestation test --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "11_LOCAL_CONTRACT_TESTS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-attestation-package-v1.txt",
+      "logHash": "sha256-41084c4108f32e35bc259a283a732d8aa589d3cade1bad1c0dd7421fb5d95c18"
+    },
+    {
+      "name": "otel",
+      "command": "pnpm --filter @nzila/governance-otel test --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "5_LOCAL_CONTRACT_TESTS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-otel-v1.txt",
+      "logHash": "sha256-5085de97f67e2361d2aa3b71ab6552e707b0cd20cf5ad7c645f0d7e4f6ceab23"
+    },
+    {
+      "name": "middleware",
+      "command": "pnpm --filter @nzila/governance-middleware test --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "11_LOCAL_CONTRACT_TESTS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-middleware-v1.txt",
+      "logHash": "sha256-e60248b2ff71381fb4cf124b20b7481d9455e71a9eef2af2104295d895cd28af"
+    },
+    {
+      "name": "integrity-contracts",
+      "command": "pnpm exec vitest run --project contract-tests tooling/contract-tests/runtime-governance-integrity.test.ts tooling/contract-tests/access-review-validation.test.ts tooling/contract-tests/sre-runtime-evidence.test.ts --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "36_LOCAL_CONTRACT_TESTS_ZERO_SKIPS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-integrity-contracts-v1.txt",
+      "logHash": "sha256-3c0cfd5cc175eaa9448fca89d4a90cedd1bd7cbceba36e5fb3cee08455e0d21d"
+    },
+    {
+      "name": "operational-types",
+      "command": "pnpm exec tsc --ignoreConfig --noEmit --esModuleInterop --moduleResolution Bundler --module ESNext --target ES2022 --skipLibCheck --types node scripts/sre/generate-executive-dashboard.ts scripts/sre/audit-reliability.ts",
+      "observedExitCode": 0,
+      "scope": "LOCAL_SOURCE_TYPECHECK",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-operational-types-v1.txt",
+      "logHash": "sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "counterexample": {
+    "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-integrity-red-v1.txt",
+    "hash": "sha256-89051dfa767149f381778f35a72dfe38c0a9a46a253e42e318e3b86278336d03",
+    "testsFailedBefore": 17,
+    "testsPassedBefore": 1,
+    "total": 18
+  },
+  "findingsRemediated": [
+    "Attestation generator hashed evidence location strings and emitted an envelope rejected by its claimed canonical schema.",
+    "The workflow supplied a placeholder manifest hash and described unexecuted deployment as verified.",
+    "Evidence writer discarded the complete attestation, used a different hash/schema than the consumer, and lacked an atomic append boundary.",
+    "SRE dashboard relabeled general CI success as deployment success and failed CI as rollbacks; stale vulnerability remediation metrics became runtime incident metrics.",
+    "Runbook source checks referenced pre-move paths instead of the existing canonical documents."
+  ],
+  "limitations": [
+    "No live probe, alert delivery, application deployment, production or staging promotion was performed.",
+    "Existing Q4 access-review approval is historical owner evidence, not an invented independent review or a fresh account census.",
+    "Runtime health generator validates historical referenced artifacts; it does not measure this candidate running in an environment.",
+    "The local evidence ledger is append-only by exclusive creation, not trusted signing or immutable external storage.",
+    "Final integrated commit binding, full qualification and Step1 closure remain root responsibilities."
+  ],
+  "step2Started": false,
+  "stagingPromoted": false,
+  "productionPromoted": false
+}

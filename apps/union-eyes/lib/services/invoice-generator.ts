@@ -576,12 +576,20 @@ export class InvoiceGenerator {
   }
 
   private static renderHtmlFallback(doc: InstanceType<typeof PDFDocument>, html: string): void {
-    const text = html
-      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n\n')
-      .replace(/<[^>]+>/g, ' ')
+    // Strip markup until stable so nested fragments cannot reassemble into a tag; text only goes to PDF.
+    let stripped = html;
+    let previous: string;
+    do {
+      previous = stripped;
+      stripped = stripped
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, ' ')
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, ' ')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p\b[^>]*>/gi, '\n\n')
+        .replace(/<[^>]*>/g, ' ');
+    } while (stripped !== previous);
+    const text = stripped
+      .replace(/[<>]/g, ' ')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/\s+\n/g, '\n')

@@ -664,10 +664,35 @@
    "updated_by",
    "variables"
   ],
+  "case_authority_scopes": [
+   "claim_id",
+   "grievance_id",
+   "grievance_mirror_id",
+   "last_proposal_id",
+   "mirror_recorded_at",
+   "mirror_recorded_by",
+   "territory_id",
+   "unit_id"
+  ],
+  "case_respondents": [
+   "revoked_at",
+   "revoked_by",
+   "revoked_proposal_id"
+  ],
+  "case_scope_proposals": [
+   "applied_at",
+   "applied_by",
+   "territory_id",
+   "unit_id"
+  ],
   "case_studies": [
    "organization_id",
    "published_at",
    "testimonial"
+  ],
+  "case_territories": [
+   "retired_at",
+   "retired_by"
   ],
   "cba_clauses": [
    "article_number",
@@ -830,11 +855,17 @@
    "precedent_matches",
    "success_probability"
   ],
+  "claim_status_transitions": [
+   "changed_by",
+   "from_status",
+   "transaction_id"
+  ],
   "claim_updates": [
    "created_by",
    "is_internal",
    "message",
    "metadata",
+   "transition_id",
    "update_type"
   ],
   "claims": [
@@ -2523,6 +2554,7 @@
    "last_updated_by",
    "meeting_date",
    "related_grievance_ids",
+   "represented_member_user_id",
    "resolved_at",
    "response_deadline",
    "source_system",

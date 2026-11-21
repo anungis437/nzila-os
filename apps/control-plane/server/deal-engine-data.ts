@@ -49,8 +49,8 @@ import {
   getPartnerAdapter,
   getAccountAdapter,
   getFollowUpAdapter,
-} from "./adapters";
-import { enrichWithProofData } from "./adapters/proof";
+} from "../db/adapters";
+import { enrichWithProofData } from "../db/adapters/proof";
 
 // ── Seed parsers (fallback) ─────────────────────────────
 

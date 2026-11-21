@@ -1,43 +1,58 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Employer Remittances Collection Route
  *
  * GET  /api/dues/remittances — List employer remittances for the org
  * POST /api/dues/remittances — Create a new employer remittance record
  */
-import { withApi, ApiError, z } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
-import { rowsVisibleToGrant } from '@/lib/finance/principal-financial-authority';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { employerRemittances } from '@/db/schema/dues-finance-schema';
-import { desc } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
-import { buildUnionEvidencePack } from '@/lib/evidence';
+import { withApi, ApiError, z } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
+import { rowsVisibleToGrant } from '@/lib/finance/principal-financial-authority'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { employerRemittances } from '@/db/schema/dues-finance-schema'
+import { desc } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
+import { buildUnionEvidencePack } from '@/lib/evidence'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'List employer remittances' },
   },
   async ({ organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
+
+    requireBaseFinancialAuthority()
 
     const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
-      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view' });
+      const grant = await requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:view',
+      })
       return tx
         .select()
         .from(employerRemittances)
-        .where(rowsVisibleToGrant(grant, organizationId, employerRemittances.organizationId, employerRemittances.id))
-        .orderBy(desc(employerRemittances.createdAt));
-    });
+        .where(
+          rowsVisibleToGrant(
+            grant,
+            organizationId,
+            employerRemittances.organizationId,
+            employerRemittances.id,
+          ),
+        )
+        .orderBy(desc(employerRemittances.createdAt))
+    })
 
-    return { data: rows };
+    return { data: rows }
   },
-);
+)
 
 const createSchema = z.object({
   employerId: z.guid(),
@@ -51,20 +66,28 @@ const createSchema = z.object({
   remittanceNumber: z.string().optional(),
   notes: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
-});
+})
 
 export const POST = withApi(
   {
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Create an employer remittance' },
   },
   async ({ organizationId, userId, request }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
 
-    const body = createSchema.parse(await request.json());
+    const body = createSchema.parse(await request.json())
+
+    requireBaseFinancialAuthority()
 
     const remittance = await withRLSContext({ organizationId, userId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:prepare', employerId: body.employerId });
+      await requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:prepare',
+        employerId: body.employerId,
+      })
       const [row] = await tx
         .insert(employerRemittances)
         .values({
@@ -74,28 +97,43 @@ export const POST = withApi(
           isReconciled: false,
           createdBy: userId ?? undefined,
         })
-        .returning();
+        .returning()
       await persistAtomicAudit(tx, {
         organizationId,
         userId: userId!,
         action: 'dues.remittance.create',
         resourceType: 'employer_remittances',
         resourceId: row.id,
-        details: { employerId: body.employerId, totalAmount: body.totalAmount, memberCount: body.memberCount },
-      });
-      return row;
-    });
+        details: {
+          employerId: body.employerId,
+          totalAmount: body.totalAmount,
+          memberCount: body.memberCount,
+        },
+      })
+      return row
+    })
 
-    logger.info('Employer remittance created', { remittanceId: remittance.id, organizationId });
+    logger.info('Employer remittance created', { remittanceId: remittance.id, organizationId })
 
     // Evidence: fiduciary audit trail for remittance
     buildUnionEvidencePack({
       actionType: 'REMITTANCE_CREATED',
       orgId: organizationId,
       actorId: userId ?? 'unknown',
-      artifacts: [{ type: 'remittance', data: { remittanceId: remittance.id, totalAmount: body.totalAmount, memberCount: body.memberCount } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'REMITTANCE_CREATED' }))
+      artifacts: [
+        {
+          type: 'remittance',
+          data: {
+            remittanceId: remittance.id,
+            totalAmount: body.totalAmount,
+            memberCount: body.memberCount,
+          },
+        },
+      ],
+    }).catch((err) =>
+      logger.warn('Evidence pack failed', { error: String(err), actionType: 'REMITTANCE_CREATED' }),
+    )
 
-    return { data: remittance };
+    return { data: remittance }
   },
-);
+)

@@ -39,8 +39,9 @@ describe('rls-storage-authority registry composition (PR #752 round 9)', () => {
     expect(first.storageAuthorityManifest).toEqual(second.storageAuthorityManifest)
   })
 
-  it('aggregate entry count is 920 and every table key is unique', () => {
-    expect(fromIndex.length).toBe(920)
+  it('includes the four governed case-scope relations and every table key is unique', () => {
+    expect(fromIndex.length).toBe(924)
+    expect(fromIndex.filter(entry => ['case_territories','case_authority_scopes','case_scope_proposals','case_respondents'].includes(entry.table)).map(entry => entry.table).sort()).toEqual(['case_authority_scopes','case_respondents','case_scope_proposals','case_territories'])
     const seen = new Map<string, number>()
     for (const entry of fromIndex) seen.set(entry.table, (seen.get(entry.table) ?? 0) + 1)
     const duplicates = [...seen.entries()].filter(([, count]) => count > 1).map(([table]) => table)

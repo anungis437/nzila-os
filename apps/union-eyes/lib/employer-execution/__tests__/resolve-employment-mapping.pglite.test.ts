@@ -98,7 +98,7 @@ const {
   auditLog,
 } = schema
 
-vi.mock('@/db/schema', () => schema)
+vi.mock('@/db/schema', async () => ({ ...(await vi.importActual<Record<string, unknown>>('@/db/schema')), ...schema }))
 vi.mock('@/lib/audit/atomic-audit', () => ({
   persistAtomicAudit: async (tx: ReturnType<typeof drizzle>, entry: Record<string, unknown>) => {
     await tx.insert(auditLog).values({

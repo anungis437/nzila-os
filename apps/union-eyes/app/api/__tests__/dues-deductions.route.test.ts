@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
+const refused = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL };
+
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   select: vi.fn(),
@@ -53,37 +58,23 @@ describe('/api/dues/deductions route', () => {
     return seen;
   }
 
-  it('scopes the query by the authenticated context userId, not a client-supplied query param (IDOR fix)', async () => {
-    const seen = stubSelect();
-
+  it('refuses an authenticated member with 501 NOT_IMPLEMENTED and reads no payroll deductions', async () => {
+    stubSelect();
     const { GET } = await loadRoute();
-    // Context userId is 'user_real'; a route callable from a request whose
-    // query string tried to impersonate 'user_other' must be ignored,
-    // because the handler no longer reads request.nextUrl at all.
-    const result = await GET({ organizationId: 'org_1', userId: 'user_real' });
-
-    expect(result).toEqual({ data: [{ id: 'd1' }] });
-    // Both filter clauses reference the context-derived values.
-    expect(seen.where.and).toEqual([{ eq: ['organizationId', 'org_1'] }, { eq: ['userId', 'user_real'] }]);
+    await expect(GET({ organizationId: 'org_1', userId: 'user_real' })).rejects.toMatchObject(refused);
+    expect(m.select).not.toHaveBeenCalled();
   });
 
-  it('returns a member only what is theirs to see: no verifier, remittance line, employer, metadata or other deductions', async () => {
-    const seen = stubSelect();
+  it('refuses with 501 whatever the read would have returned, so no deduction rows can leak', async () => {
+    stubSelect([{ id: 'd1' }, { id: 'd2' }]);
     const { GET } = await loadRoute();
-    await GET({ organizationId: 'org_1', userId: 'user_real' });
-
-    expect(Object.keys(seen.fields ?? {}).sort()).toEqual(
-      ['createdAt', 'grossPay', 'id', 'netPay', 'payPeriodEnd', 'payPeriodStart', 'source', 'unionDuesAmount', 'verified', 'verifiedAt'].sort(),
+    const result = await GET({ organizationId: 'org_1', userId: 'user_other' }).then(
+      (value) => ({ value }),
+      (error: unknown) => ({ error }),
     );
-  });
-
-  it('lists the newest pay period first, within a bound', async () => {
-    const seen = stubSelect();
-    const { GET } = await loadRoute();
-    await GET({ organizationId: 'org_1', userId: 'user_real' });
-
-    expect(seen.order).toEqual({ desc: 'payPeriodStart' });
-    expect(seen.limit).toBe(1000);
+    expect(result).not.toHaveProperty('value');
+    expect((result as { error: unknown }).error).toMatchObject(refused);
+    expect(m.select).not.toHaveBeenCalled();
   });
 
   it('returns empty data when organization/user context is missing', async () => {

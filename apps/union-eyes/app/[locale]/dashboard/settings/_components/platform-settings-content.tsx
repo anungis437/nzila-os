@@ -80,7 +80,8 @@ export interface IntegrationRow {
 export interface PlatformSettingsData {
   settings: PlatformSettingsValues;
   apiKeys: ApiKeyRow[];
-  integrations: IntegrationRow[];
+  /** null: the deployment holds no authority to read the platform services' health. Never shown as an empty list. */
+  integrations: IntegrationRow[] | null;
   featuresEnabled: string[];
 }
 
@@ -404,7 +405,12 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
               {/* ═══════════ INTEGRATIONS ═══════════ */}
               {activeSection === "integrations" && (
                 <div className="space-y-4">
-                  {dbIntegrations.map((integ) => (
+                  {dbIntegrations === null && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-700">Platform service health is unavailable in this deployment.</p>
+                    </div>
+                  )}
+                  {dbIntegrations?.map((integ) => (
                     <div key={integ.label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-900">{integ.label}</p>

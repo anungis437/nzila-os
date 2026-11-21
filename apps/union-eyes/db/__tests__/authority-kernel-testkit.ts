@@ -27,10 +27,13 @@ export async function freshDb(): Promise<PGlite> {
   return db
 }
 
-export function kit(db: Db, memberships: MembershipSource = canonicalMembershipSource) {
+export type AuthorityActorRunner = <T>(userId: string, organizationId: string,
+  operation: (executor: SqlExecutor) => Promise<T>) => Promise<T>
+
+export function kit(db: Db, memberships: MembershipSource = canonicalMembershipSource, actorRunner?: AuthorityActorRunner) {
   const deps: EnforcementDeps = { memberships }
   const as = (user: string, org = ORG) => <T>(fn: (t: SqlExecutor) => Promise<T>): Promise<T> =>
-    runAuthorityTransaction(db as unknown as SqlExecutor, { organizationId: org, userId: user }, fn)
+    actorRunner ? actorRunner(user, org, fn) : runAuthorityTransaction(db as unknown as SqlExecutor, { organizationId: org, userId: user }, fn)
 
   /** The real adoption ceremony: the drafter requests, two other executives vote in their own sessions, then a third activates. */
   async function adoptRule(ruleId: string, instrument: string, org = ORG, drafter = U.president): Promise<void> {

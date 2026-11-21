@@ -6,6 +6,7 @@ import { hash, root } from './source'
 import { canonicalRoleSqlList } from './execution-roles'
 import { AUTH_EXECUTION_ROLES } from './auth-sql'
 import { FRAMEWORK_ROLES } from './framework-contract'
+import { EXTERNAL_READ_OWNER } from '../../lib/external-resource-read/source'
 
 export function producerOwnsSharedRole(producerId: string, canonicalId: string): boolean {
   const roles: readonly string[] =
@@ -13,6 +14,8 @@ export function producerOwnsSharedRole(producerId: string, canonicalId: string):
       ? Object.values(AUTH_EXECUTION_ROLES)
       : producerId === 'CANONICAL_FRAMEWORK_EXECUTION'
         ? Object.values(FRAMEWORK_ROLES)
+        : producerId === 'CANONICAL_EXTERNAL_READ_EXECUTION'
+          ? [EXTERNAL_READ_OWNER]
         : []
   const [kind, ...names] = canonicalId.split(':')
   return (
@@ -170,8 +173,20 @@ export async function beginManifestTrace(client: pg.Client) {
         current_setting('ue_v2.manifest_order')::integer,command_tag
       FROM pg_event_trigger_ddl_commands() command
       JOIN pg_constraint k ON
-        (command.classid='pg_class'::regclass AND k.conrelid=command.objid)
+        (command.classid='pg_class'::regclass AND k.conrelid=command.objid AND k.contype<>'t')
         OR (command.classid='pg_type'::regclass AND k.contypid=command.objid);
+      -- PostgreSQL reports the trigger DDL address, not its automatically-created
+      -- constraint. Bind only that exact trigger's internally-owned constraint at
+      -- this execution; a dependency on its older table cannot date its creation.
+      INSERT INTO ue_v2_manifest_trace.events
+      SELECT 'pg_constraint:'||k.oid::text||':0',
+        current_setting('ue_v2.manifest_order')::integer,command_tag
+      FROM pg_event_trigger_ddl_commands() command
+      JOIN pg_trigger t ON command.classid='pg_trigger'::regclass AND t.oid=command.objid
+      JOIN pg_constraint k ON k.oid=t.tgconstraint AND k.contype='t' AND k.conrelid=t.tgrelid
+      JOIN pg_depend d ON d.classid='pg_constraint'::regclass AND d.objid=k.oid AND d.objsubid=0
+        AND d.refclassid='pg_trigger'::regclass AND d.refobjid=t.oid AND d.refobjsubid=0
+        AND d.deptype='i';
     END $trace$;
     REVOKE ALL ON FUNCTION ue_v2_manifest_trace.capture() FROM PUBLIC;
     CREATE EVENT TRIGGER ue_v2_manifest_capture ON ddl_command_end
@@ -193,7 +208,8 @@ export async function beginManifestTrace(client: pg.Client) {
     await execute()
     if (
       producer.canonicalId === 'CANONICAL_AUTH_EXECUTION' ||
-      producer.canonicalId === 'CANONICAL_FRAMEWORK_EXECUTION'
+      producer.canonicalId === 'CANONICAL_FRAMEWORK_EXECUTION' ||
+      producer.canonicalId === 'CANONICAL_EXTERNAL_READ_EXECUTION'
     ) {
       const shared = (await inspectNativeAddresses(client)).filter((entry) =>
         producerOwnsSharedRole(producer.canonicalId, entry.canonicalId),

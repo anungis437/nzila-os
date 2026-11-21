@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-11-18T00:03:27.542812+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "scope": "APPLICATION_TYPESCRIPT_NO_EMIT_INTERIM",
+  "command": "NODE_OPTIONS=--max-old-space-size=6144 pnpm --filter @nzila/union-eyes typecheck",
+  "effectivePackageCommand": "node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit",
+  "exitCode": 0,
+  "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/application-typecheck-v6.txt",
+  "logSha256": "5a45e12bce9a7a6af7f6058b82008b2bd3834beef23c4e8a6ed505452c3a4928",
+  "sourceSha256": [
+    {
+      "path": "apps/union-eyes/tsconfig.json",
+      "sha256": "b819935f58367f0e290e5aebf01cb38449cd9b4a3e1728430f5b5ba5003e5359"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.ts",
+      "sha256": "c073f88f5ecdbf71feda22e29bff871c4868cc3967d5edf843b7ed36851e073c"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-privileges.ts",
+      "sha256": "aec7b3948df26a08b8357d7be768fa42763f05fcf9e275a830cad6600b43291a"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-privileges.ts",
+      "sha256": "51723822eb4244636ef8fd7902a765afcec5782a10d850ca0d3409afe7e79e09"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-sql.ts",
+      "sha256": "07e719c657c35039f153f4032a7587d004df54737cdafe6abb9227a48a9e1274"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/installer.ts",
+      "sha256": "0b51de898b3e4d26375bd26f2e5280c9e255f436ba09c1615926c44fef080a3b"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/manifest-security.ts",
+      "sha256": "17f8eff6bdf3e8b36bdeb4a3056da15e940cd7b729cfdb12a9d2108aef5979fd"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/minimum-installer.ts",
+      "sha256": "a05dd0813211e650eaa2890de66fbe29b5b310239c46bcb92bc479f263ced11a"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "181dd2428baea5607eee417017a88d4632be54ceb3d8f6cb866c7f7ebd2448e1"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/role-prerequisites.ts",
+      "sha256": "ce6283bcb869fb835dd088ac74ec924d785e81ca440df6ff971a24f1f2bd1ead"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/membership-semantics.ts",
+      "sha256": "fde5c410d2a98c1bb49bbe5027c1e2c2b6bf6e3d5b28bdca4ac925df963cb2a6"
+    }
+  ],
+  "limitations": [
+    "Not full monorepo typecheck or a final frozen candidate.",
+    "New tooling scripts outside this application tsconfig still require focused semantic checking.",
+    "Subsequent source changes require requalification."
+  ],
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "114b3306486e477e873670f1dd26d333548bc5916e72e9c0e29e7c1ba2957cbf",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/application-typecheck-v6.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

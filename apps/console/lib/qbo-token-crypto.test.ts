@@ -46,7 +46,8 @@ describe('qbo-token-crypto', () => {
     expect(a).not.toBe(b) // different IVs
   })
 
-  it('returns plaintext when no key is set', () => {
+  it('retains nonproduction plaintext compatibility when no key is set', () => {
+    env.NODE_ENV = 'test'
     delete env.QBO_TOKEN_ENCRYPTION_KEY
     delete env.AZURE_KEYVAULT_URL
     const plaintext = 'access-token-abc'
@@ -76,14 +77,15 @@ describe('qbo-token-crypto', () => {
     expect(() => decryptToken('enc:v1:only-one-part')).toThrow('Malformed encrypted token')
   })
 
-  it('falls back to plaintext when key length is invalid', () => {
+  it('rejects an invalid configured key instead of storing plaintext', () => {
     env.QBO_TOKEN_ENCRYPTION_KEY = 'deadbeef'
     const plaintext = 'access-token-invalid-key'
 
-    expect(encryptToken(plaintext)).toBe(plaintext)
+    expect(() => encryptToken(plaintext)).toThrow('exactly 64 hexadecimal')
   })
 
-  it('falls back to plaintext when key vault URL is set but local key is missing', () => {
+  it('retains nonproduction compatibility when key vault URL is set but local key is missing', () => {
+    env.NODE_ENV = 'test'
     env.AZURE_KEYVAULT_URL = 'https://example.vault.azure.net'
     delete env.QBO_TOKEN_ENCRYPTION_KEY
 

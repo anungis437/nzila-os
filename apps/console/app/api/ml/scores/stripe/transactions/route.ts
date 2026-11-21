@@ -1,3 +1,4 @@
+import { listStripeTransactionScores } from '@/lib/services/ml-read-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/scores/stripe/transactions
@@ -20,9 +21,7 @@
  *   includeFeatures optional boolean (default false; org_admin only)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { mlScoresStripeTxn, mlModels } from '@nzila/db/schema'
-import { eq, and, gte, lte, lt, count } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { createLogger } from '@nzila/os-core'
 
@@ -60,88 +59,17 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const startTs = new Date(startDate + 'T00:00:00Z')
-    const endTs = new Date(endDate + 'T23:59:59Z')
-    const cursorTs = cursor ? new Date(cursor) : null
-
-    const conditions = [
-      eq(mlScoresStripeTxn.orgId, orgId),
-      gte(mlScoresStripeTxn.occurredAt, startTs),
-      lte(mlScoresStripeTxn.occurredAt, endTs),
-      ...(isAnomalyParam !== null
-        ? [eq(mlScoresStripeTxn.isAnomaly, isAnomalyParam === 'true')]
-        : []),
-      ...(cursorTs ? [lt(mlScoresStripeTxn.occurredAt, cursorTs)] : []),
-    ]
-
-    // Period counts for summary header (runs against full period, ignoring cursor/limit)
-    const periodConditions = [
-      eq(mlScoresStripeTxn.orgId, orgId),
-      gte(mlScoresStripeTxn.occurredAt, startTs),
-      lte(mlScoresStripeTxn.occurredAt, endTs),
-    ]
-
-    const [rows, [totalRow], [anomalyRow]] = await Promise.all([
-      platformDb
-        .select({
-          id: mlScoresStripeTxn.id,
-          occurredAt: mlScoresStripeTxn.occurredAt,
-          amount: mlScoresStripeTxn.amount,
-          currency: mlScoresStripeTxn.currency,
-          score: mlScoresStripeTxn.score,
-          isAnomaly: mlScoresStripeTxn.isAnomaly,
-          threshold: mlScoresStripeTxn.threshold,
-          modelId: mlScoresStripeTxn.modelId,
-          modelKey: mlModels.modelKey,
-          inferenceRunId: mlScoresStripeTxn.inferenceRunId,
-          stripePaymentIntentId: mlScoresStripeTxn.stripePaymentIntentId,
-          stripeChargeId: mlScoresStripeTxn.stripeChargeId,
-          featuresJson: mlScoresStripeTxn.featuresJson,
-        })
-        .from(mlScoresStripeTxn)
-        .innerJoin(mlModels, eq(mlScoresStripeTxn.modelId, mlModels.id))
-        .where(and(...conditions))
-        .orderBy(mlScoresStripeTxn.occurredAt)
-        .limit(limit + 1),
-      platformDb
-        .select({ count: count() })
-        .from(mlScoresStripeTxn)
-        .where(and(...periodConditions)),
-      platformDb
-        .select({ count: count() })
-        .from(mlScoresStripeTxn)
-        .where(and(...periodConditions, eq(mlScoresStripeTxn.isAnomaly, true))),
-    ])
-
-    const hasMore = rows.length > limit
-    const items = hasMore ? rows.slice(0, limit) : rows
-    const nextCursor = hasMore ? items[items.length - 1].occurredAt.toISOString() : null
-
-    // Apply minScore filter post-query (score is numeric string from DB)
-    const filtered = minScore
-      ? items.filter((r) => parseFloat(String(r.score)) <= parseFloat(minScore))
-      : items
-
-    return NextResponse.json({
-      items: filtered.map((r) => ({
-        id: r.id,
-        occurredAt: r.occurredAt.toISOString(),
-        amount: r.amount,
-        currency: r.currency,
-        score: r.score,
-        isAnomaly: r.isAnomaly,
-        threshold: r.threshold,
-        modelId: r.modelId,
-        modelKey: r.modelKey,
-        inferenceRunId: r.inferenceRunId,
-        stripePaymentIntentId: r.stripePaymentIntentId,
-        stripeChargeId: r.stripeChargeId,
-        ...(includeFeatures ? { features: r.featuresJson } : {}),
-      })),
-      nextCursor,
-      totalInPeriod: totalRow?.count ?? 0,
-      anomalyInPeriod: anomalyRow?.count ?? 0,
+    const result = await listStripeTransactionScores({
+      orgId,
+      startDate,
+      endDate,
+      isAnomalyParam,
+      minScore,
+      limit,
+      cursor,
+      includeFeatures,
     })
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     logger.error('[ML /scores/stripe/transactions]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

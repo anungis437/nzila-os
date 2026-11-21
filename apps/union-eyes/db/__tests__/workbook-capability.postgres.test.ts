@@ -46,10 +46,8 @@ describe.skipIf(!URL)('unclaimed workbook path on real PostgreSQL as the applica
   beforeAll(async () => {
     admin = new pg.Client({ connectionString: URL })
     await admin.connect()
-    // What the manifest now declares for the system role on these tables.
-    await admin.query('GRANT SELECT, INSERT, UPDATE ON workbooks TO union_eyes_system')
-    await admin.query('GRANT INSERT ON workbook_modules TO union_eyes_system')
-    await admin.query('GRANT SELECT, INSERT, UPDATE, DELETE ON workbook_memory_holders TO union_eyes_system')
+    // The canonical catalog already grants the system role what the path needs (catalog-v2-decisions: workbooks SELECT/INSERT/UPDATE,
+    // workbook_modules INSERT, workbook_memory_holders SELECT/INSERT/UPDATE/DELETE); nothing is granted here.
     const migration = readFileSync(resolve(__dirname, '../migrations-platform/0056_workbook_capability.sql'), 'utf8')
     for (const statement of migration.split('--> statement-breakpoint')) await admin.query(statement)
   }, 120_000)
@@ -59,6 +57,19 @@ describe.skipIf(!URL)('unclaimed workbook path on real PostgreSQL as the applica
     await admin?.query('DELETE FROM workbook_modules WHERE workbook_id = $1', [id]).catch(() => undefined)
     await admin?.query('DELETE FROM workbooks WHERE id = $1', [id]).catch(() => undefined)
     await admin?.end().catch(() => undefined)
+  })
+
+  it('holds exactly the declared authority: the catalog grants, and EXECUTE on the workbook credential helper for the system role only', async () => {
+    const held = async (role: string, table: string, privilege: string) =>
+      (await admin.query('SELECT has_table_privilege($1, $2, $3) AS ok', [role, `public.${table}`, privilege])).rows[0].ok
+    for (const privilege of ['SELECT', 'INSERT', 'UPDATE']) expect(await held('union_eyes_system', 'workbooks', privilege), privilege).toBe(true)
+    expect(await held('union_eyes_system', 'workbook_modules', 'INSERT')).toBe(true)
+    for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) expect(await held('union_eyes_system', 'workbook_memory_holders', privilege), privilege).toBe(true)
+    const execute = (await admin.query(`SELECT r AS role, has_function_privilege(r, 'public.ue_is_workbook_system_principal()', 'EXECUTE') AS ok
+      FROM unnest(ARRAY['union_eyes_system','union_eyes_runtime','public']) r ORDER BY 1`)).rows
+    expect(execute).toEqual([{ role: 'public', ok: false }, { role: 'union_eyes_runtime', ok: false }, { role: 'union_eyes_system', ok: true }])
+    // The runtime role is refused the helper itself, so it can never pass the credential guard by calling it.
+    await expect(as('union_eyes_runtime', (c) => c.query('SELECT public.ue_is_workbook_system_principal()'), { 'app.current_user_id': user })).rejects.toThrow(/permission denied for function ue_is_workbook_system_principal/)
   })
 
   it('lets the system role create an unclaimed workbook with its capability hash and seed its modules', async () => {

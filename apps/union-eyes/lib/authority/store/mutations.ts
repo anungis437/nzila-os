@@ -14,6 +14,7 @@
  * database.
  */
 import { randomUUID } from 'node:crypto'
+import { hasPrimaryCaseHandlerOnlyPower } from '../common'
 import type { AuthorityRequest, Decision, MandateKind, MandateScope, ResourceType } from '../ontology'
 import { auditAuthorityMutation } from './audit'
 import { assertAllowed, enforceAuthority, requireCounselSession, type EnforcementDeps } from './enforce'
@@ -64,11 +65,14 @@ export interface InsertMandateInput {
 export async function insertMandate(exec: SqlExecutor, i: InsertMandateInput): Promise<string> {
   requireUuids(i.organizationId, i.id, i.issuanceRuleId, i.approvalRequestId, i.supersedesId)
   requirePrincipals(i.principalUserId, i.grantedBy, i.approvedBy)
+  if (i.kind === 'supervisory' && hasPrimaryCaseHandlerOnlyPower(i.powers)) {
+    throw new AuthorityStoreError('DENIED', 'supervisory mandate exceeds the primary case-handler-only ceiling')
+  }
   await bindSessionActor(exec, i.grantedBy, 'mandate issuer')
   const id = i.id ?? randomUUID()
   await one(
     exec,
-    `INSERT INTO ue_authority_mandates
+    `INSERT INTO public.ue_authority_mandates
        (id, organization_id, principal_user_id, kind, powers, scope, monetary_limit_minor, currency,
         source_instrument, granted_by, approved_by, justification, effective_at, expires_at,
         issuance_rule_id, approval_request_id, supersedes_id)
@@ -104,12 +108,12 @@ export async function changeMandateState(
   await bindSessionActor(exec, actorUserId, 'mandate actor')
   const sql =
     change === 'revoke'
-      ? `UPDATE ue_authority_mandates SET status = 'revoked', revoked_at = now(), revoked_by = $3
+      ? `UPDATE public.ue_authority_mandates SET status = 'revoked', revoked_at = now(), revoked_by = $3
           WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`
       : change === 'suspend'
-        ? `UPDATE ue_authority_mandates SET status = 'suspended'
+        ? `UPDATE public.ue_authority_mandates SET status = 'suspended'
             WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL AND status = 'active' AND $3::text IS NOT NULL RETURNING id`
-        : `UPDATE ue_authority_mandates SET status = 'active'
+        : `UPDATE public.ue_authority_mandates SET status = 'active'
             WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL AND status = 'suspended' AND $3::text IS NOT NULL RETURNING id`
   await one(exec, sql, [organizationId, id, actorUserId])
   await auditAuthorityMutation(exec, {
@@ -143,10 +147,17 @@ export interface InsertRelationshipInput {
 export async function insertRelationship(exec: SqlExecutor, i: InsertRelationshipInput): Promise<string> {
   requireUuids(i.organizationId, i.resourceId, i.issuanceRuleId)
   requirePrincipals(i.principalUserId, i.grantedBy)
+  if (i.origin !== 'explicit' || (i.resourceType === 'case' && (i.relation === 'creator' || i.relation === 'represented_member'))) {
+    throw new AuthorityStoreError('DENIED', 'derived subject relationships come only from canonical case source records')
+  }
+  if (i.resourceType === 'case' && (i.relation === 'owner' || i.relation === 'assignee') &&
+    (i.origin !== 'explicit' || !i.grantedBy || i.grantedBy === i.principalUserId || !i.issuanceRuleId)) {
+    throw new AuthorityStoreError('DENIED', 'primary case assignments require an independent governed explicit grant')
+  }
   if (i.grantedBy) await bindSessionActor(exec, i.grantedBy, 'relationship grantor')
   const row = await one(
     exec,
-    `INSERT INTO ue_authority_resource_relationships
+    `INSERT INTO public.ue_authority_resource_relationships
        (organization_id, principal_user_id, resource_type, resource_id, relation, permissions,
         privileged_access, origin, granted_by, effective_at, expires_at, issuance_rule_id)
      VALUES ($1,$2,$3,$4,$5,$6::text[],$7,$8,$9,$10,$11,$12) RETURNING id`,
@@ -172,7 +183,7 @@ export async function revokeRelationship(exec: SqlExecutor, organizationId: stri
   await bindSessionActor(exec, revokedBy, 'revoker')
   await one(
     exec,
-    `UPDATE ue_authority_resource_relationships SET status = 'revoked', revoked_at = now(), revoked_by = $3
+    `UPDATE public.ue_authority_resource_relationships SET status = 'revoked', revoked_at = now(), revoked_by = $3
      WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
     [organizationId, id, revokedBy],
   )
@@ -202,7 +213,7 @@ export async function insertDelegation(exec: SqlExecutor, i: InsertDelegationInp
   const id = i.id ?? randomUUID()
   await one(
     exec,
-    `INSERT INTO ue_authority_delegations
+    `INSERT INTO public.ue_authority_delegations
        (id, organization_id, delegator_user_id, delegate_user_id, office, actions, resource_types,
         effective_at, expires_at, issuance_rule_id, approval_request_id)
      VALUES ($1,$2,$3,$4,$5,$6::text[],$7::text[],$8,$9,$10,$11) RETURNING id`,
@@ -224,7 +235,7 @@ export async function revokeDelegation(exec: SqlExecutor, organizationId: string
   await bindSessionActor(exec, revokedBy, 'revoker')
   await one(
     exec,
-    `UPDATE ue_authority_delegations SET status = 'revoked', revoked_at = now(), revoked_by = $3
+    `UPDATE public.ue_authority_delegations SET status = 'revoked', revoked_at = now(), revoked_by = $3
      WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
     [organizationId, id, revokedBy],
   )
@@ -242,7 +253,7 @@ export async function insertAcceptance(
   await bindSessionActor(exec, i.acceptedBy, 'accepting holder')
   const row = await one(
     exec,
-    `INSERT INTO ue_authority_acceptances (organization_id, instrument_type, instrument_id, accepted_by) VALUES ($1,$2,$3,$4) RETURNING id`,
+    `INSERT INTO public.ue_authority_acceptances (organization_id, instrument_type, instrument_id, accepted_by) VALUES ($1,$2,$3,$4) RETURNING id`,
     [i.organizationId, i.instrumentType, i.instrumentId, i.acceptedBy],
   )
   const id = String(row.id)
@@ -267,7 +278,7 @@ export async function insertRecusal(
   await bindSessionActor(exec, i.principalUserId, 'recusing principal')
   const row = await one(
     exec,
-    `INSERT INTO ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason)
+    `INSERT INTO public.ue_authority_recusals (organization_id, principal_user_id, resource_type, resource_id, reason)
      VALUES ($1,$2,$3,$4,$5) RETURNING id`,
     [i.organizationId, i.principalUserId, i.resourceType, i.resourceId, i.reason],
   )
@@ -288,7 +299,7 @@ export async function liftRecusalRow(exec: SqlExecutor, organizationId: string, 
   await bindSessionActor(exec, liftedBy, 'recusal lifter')
   await one(
     exec,
-    `UPDATE ue_authority_recusals SET lifted_at = now(), lifted_by = $3
+    `UPDATE public.ue_authority_recusals SET lifted_at = now(), lifted_by = $3
      WHERE organization_id = $1 AND id = $2 AND lifted_at IS NULL RETURNING id`,
     [organizationId, id, liftedBy],
   )
@@ -322,7 +333,7 @@ export async function insertConsent(exec: SqlExecutor, i: InsertConsentInput, de
   else await bindSessionActor(exec, i.issuedBy, 'consent issuer')
   const row = await one(
     exec,
-    `INSERT INTO ue_authority_disclosure_consents
+    `INSERT INTO public.ue_authority_disclosure_consents
        (organization_id, member_user_id, matter_id, direction, issuer, issued_by, categories,
         recipient_user_id, purpose, granted_at, expires_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7::text[],$8,$9,$10,$11) RETURNING id`,
@@ -345,7 +356,7 @@ export async function revokeConsent(exec: SqlExecutor, organizationId: string, i
   await bindSessionActor(exec, revokedBy, 'revoker')
   await one(
     exec,
-    `UPDATE ue_authority_disclosure_consents SET revoked_at = now(), revoked_by = $3
+    `UPDATE public.ue_authority_disclosure_consents SET revoked_at = now(), revoked_by = $3
      WHERE organization_id = $1 AND id = $2 AND revoked_at IS NULL RETURNING id`,
     [organizationId, id, revokedBy],
   )
@@ -375,7 +386,7 @@ export async function openApprovalRequest(exec: SqlExecutor, i: OpenApprovalInpu
   const id = i.id ?? randomUUID()
   await one(
     exec,
-    `INSERT INTO ue_authority_approval_requests
+    `INSERT INTO public.ue_authority_approval_requests
        (id, organization_id, subject_type, subject_id, proposed_by, subject_author_id, required_approvals, risk_class,
         named_approver_ids, eligible_capacities, adverse_user_ids)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::text[],$10::text[],$11::text[]) RETURNING id`,
@@ -425,7 +436,7 @@ export async function recordApprovalDecision(
   const kernel = assertAllowed(await enforceAuthority(exec, deps, req, { authenticated: true }))
   const row = await one(
     exec,
-    `INSERT INTO ue_authority_approval_decisions
+    `INSERT INTO public.ue_authority_approval_decisions
        (organization_id, approval_request_id, approver_user_id, authority_line_user_id, delegation_id, decision, rationale)
      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
     [i.organizationId, i.approvalRequestId, i.approverUserId, kernel.authorityLineUserId, i.delegationId ?? null, i.decision, i.rationale ?? null],

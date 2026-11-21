@@ -1,6 +1,8 @@
+import { membershipCatalogProjectionSql, type CanonicalPostgresMajor } from './membership-semantics'
 export function compileRolePrerequisiteAssertions(
   roles: readonly string[],
   memberships: Readonly<Record<string, readonly string[]>>,
+  options: { postgresMajor?: CanonicalPostgresMajor } = {},
 ): string {
   if (
     !roles.length ||
@@ -14,6 +16,7 @@ export function compileRolePrerequisiteAssertions(
     )
   )
     throw new Error('CANONICAL_ROLE_PREREQUISITE_CONTRACT_INVALID')
+  const membership = membershipCatalogProjectionSql(options.postgresMajor)
   const names = roles.map((role) => `'${role}'`).join(',')
   const expected = Object.entries(memberships).flatMap(([member, targets]) =>
     targets.map((target) => `('${member}','${target}')`),
@@ -22,6 +25,7 @@ export function compileRolePrerequisiteAssertions(
     ? `VALUES ${expected.join(',')}`
     : 'SELECT NULL::text,NULL::text WHERE false'
   return `DO $role_prerequisite$ BEGIN
+    ${options.postgresMajor === 15 ? "IF current_setting('server_version_num')::integer NOT BETWEEN 150000 AND 159999 THEN RAISE EXCEPTION 'CANONICAL_PG15_ROLE_SEMANTICS_VERSION_MISMATCH'; END IF;" : ''}
     IF (SELECT count(*) FROM pg_roles WHERE rolname IN (${names}))<>${roles.length} THEN
       RAISE EXCEPTION 'CANONICAL_PREPROVISIONED_ROLE_MISSING';
     END IF;
@@ -32,13 +36,13 @@ export function compileRolePrerequisiteAssertions(
     IF EXISTS (
       WITH expected(member,target) AS (${expectedRows}),
       actual AS (
-        SELECT member.rolname AS member,target.rolname AS target,m.admin_option,m.inherit_option,m.set_option
+        SELECT member.rolname AS member,target.rolname AS target,${membership.adminOption} AS admin_option,${membership.inheritOption} AS inherit_option,${membership.setOption} AS set_option
         FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member
           JOIN pg_roles target ON target.oid=m.roleid WHERE member.rolname IN (${names})
       )
       SELECT FROM expected FULL JOIN actual USING(member,target)
         WHERE expected.member IS NULL OR actual.member IS NULL OR
-          actual.admin_option OR actual.inherit_option OR NOT actual.set_option
+          actual.admin_option IS NOT FALSE OR actual.inherit_option IS NOT FALSE OR actual.set_option IS NOT TRUE
     ) THEN
       RAISE EXCEPTION 'CANONICAL_PREPROVISIONED_MEMBERSHIP_DRIFT';
     END IF;

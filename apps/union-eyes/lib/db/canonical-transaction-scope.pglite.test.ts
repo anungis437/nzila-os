@@ -1,5 +1,7 @@
 /** Local physical regression. Synthetic tokens here are not real staging authentication evidence. */
 import { PGlite } from '@electric-sql/pglite'
+import { PgDialect } from 'drizzle-orm/pg-core'
+import type { SQL } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import type { AuthenticatedOrgBinding } from '@nzila/platform-auth/org-binding'
@@ -51,6 +53,10 @@ async function fixture() {
   }
   let sequence = 0
   const tx = {
+    execute: async (query: SQL) => {
+      const compiled = new PgDialect().sqlToQuery(query)
+      return pg.query(compiled.sql, compiled.params)
+    },
     transaction: async (operation: (tx: RLSTx) => Promise<unknown>) => {
       const savepoint = 'scope_' + ++sequence
       await pg.exec('SAVEPOINT ' + savepoint)
@@ -77,6 +83,29 @@ async function fixture() {
 }
 
 describe('verified nested tenant transaction lifetime', () => {
+  it('resolves canonical relations before a pooled connection temporary relation', async () => {
+    const f = await fixture()
+    try {
+      await f.pg.exec('BEGIN')
+      await f.context('outer')
+      const counterfeit = randomUUID()
+      await f.pg.exec('CREATE TEMP TABLE message_threads (LIKE public.message_threads) ON COMMIT DROP')
+      await f.pg.query('INSERT INTO pg_temp.message_threads VALUES($1,$2,NULL)', [counterfeit, f.org])
+      expect((await f.pg.query('SELECT id FROM message_threads')).rows).toEqual([{ id: counterfeit }])
+      await withCanonicalTenantScope(f.tx, f.binding, () =>
+        nestedCanonicalTenantScope('steward', f.org, async () => {
+          expect((await f.pg.query('SHOW search_path')).rows).toEqual([
+            { search_path: 'pg_catalog, public, pg_temp' },
+          ])
+          expect((await f.pg.query('SELECT id FROM message_threads')).rows).toEqual([{ id: f.id }])
+        }),
+      )
+      await f.pg.exec('COMMIT; RESET ROLE')
+    } finally {
+      await f.pg.close()
+    }
+  })
+
   it('reproduces the missing-history refusal when a released inner bridge remains in the outer GUC', async () => {
     const f = await fixture()
     try {

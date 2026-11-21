@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-17T23:27:22.060Z",
+  "candidateBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "workingTreeDirty": true,
+  "state": "SOURCE_IMPLEMENTED_TARGETED_VERIFIED_RUNTIME_UNEXECUTED",
+  "sourceHashes": [
+    {
+      "path": "apps/union-eyes/components/auth/login-form.tsx",
+      "sha256": "5990dee4747e5d7bea85afcc6e55ecdfbf241bd79e2cc1b0443f951031884c44"
+    },
+    {
+      "path": "apps/union-eyes/components/auth/__tests__/login-form-flows.test.tsx",
+      "sha256": "700efedcaa4b9b37a7debc249c303b40268c5571191ddeae5501f6326f53850f"
+    },
+    {
+      "path": "apps/union-eyes/components/auth/__tests__/login-form-sso.test.tsx",
+      "sha256": "cf874ed049d96c3b2f4a9897566fb9e7337221cc5dd6bef30a6a04dcc6083c87"
+    },
+    {
+      "path": "apps/union-eyes/components/claims/new-claim-form.tsx",
+      "sha256": "345a040ea63f09050d23855e9f2486bea4ecd83b5d25cb6f9c5ecb791e6a6d46"
+    },
+    {
+      "path": "apps/union-eyes/components/claims/new-claim-form.test.tsx",
+      "sha256": "a6114da61c6ced6e345a4c1fd11f8864720571dbc017e363b0fda2a62d949f30"
+    },
+    {
+      "path": "apps/union-eyes/messages/en-CA.json",
+      "sha256": "b4fc48edc188d923336197217718689a2123f9e9886ebc3f5114021298e2ff4b"
+    },
+    {
+      "path": "apps/union-eyes/messages/fr-CA.json",
+      "sha256": "9f9a48c2802108ef396025a3186d9f284260142332ec9cfada7b83b03272a6c4"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/authenticated-casework-load.ts",
+      "sha256": "ab205c50dfb3cf66f52c9b983de2ee025867f0fcd6325b4de20bd68cbe348851"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.ts",
+      "sha256": "d41114bfd6547be7ad34ed3d7a2f9c97941e097302b8a97c3572adc23d91eb08"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.test.ts",
+      "sha256": "b606cfd2e05dad5dff65a6d33f071fcbc891f45c60b2abf2e77ae1802a02bd98"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.ts",
+      "sha256": "ce8b22148c3f165e69fca864dc87bd92fb3637e9b139769731b8ef8d72cf2adf"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts",
+      "sha256": "e4042291f652de4cde481bcd42eaba5bafabc61cc725fa65db84e010179f2313"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/authenticated-casework-load.test.ts",
+      "sha256": "4cb5afa2e728bbcbb8d8caf264c5a76a09dd611aa1905a3723e057a4f9dd6c49"
+    }
+  ],
+  "localValidation": [
+    {
+      "workingDirectory": ".",
+      "command": "pnpm exec vitest run --project union-eyes apps/union-eyes/components/auth/__tests__/login-form-flows.test.tsx apps/union-eyes/components/auth/__tests__/login-form-sso.test.tsx apps/union-eyes/components/claims/new-claim-form.test.tsx --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "41_TARGETED_UI_TESTS_ZERO_SKIPS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-focused-v2.txt",
+      "sha256": "cd4fd2c2b1841a9495f8ef36d63b8f0c720b99d1d020d0072f8a278a17a70ad4"
+    },
+    {
+      "workingDirectory": ".",
+      "command": "pnpm exec vitest run --project union-eyes-heavy apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.test.ts apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts apps/union-eyes/scripts/bootstrap-v2/authenticated-casework-load.test.ts --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "23_HARNESS_CONTRACT_TESTS_ZERO_SKIPS_NO_APPLICATION_BROWSER_LAUNCH",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-harness-contracts-v2.txt",
+      "sha256": "c7260bc9095890b04841df36dbb8459e8c57b50e0a22cc4ea335d806bcba676b"
+    },
+    {
+      "workingDirectory": "apps/union-eyes",
+      "command": "pnpm exec eslint scripts/bootstrap-v2/browser-acceptance.ts scripts/bootstrap-v2/browser-acceptance.test.ts scripts/bootstrap-v2/next-acceptance.ts scripts/bootstrap-v2/next-acceptance.test.ts scripts/bootstrap-v2/authenticated-casework-load.ts scripts/bootstrap-v2/authenticated-casework-load.test.ts components/auth/login-form.tsx components/auth/__tests__/login-form-flows.test.tsx components/auth/__tests__/login-form-sso.test.tsx components/claims/new-claim-form.tsx components/claims/new-claim-form.test.tsx",
+      "observedExitCode": 0,
+      "scope": "FOCUSED_ESLINT_11_FILES_ZERO_ERRORS_ZERO_WARNINGS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-eslint-v2.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "browserRuntime": {
+    "status": "UNEXECUTED",
+    "profiles": [
+      "desktop-en",
+      "desktop-fr",
+      "mobile-en",
+      "mobile-fr"
+    ],
+    "driver": "installed Playwright 1.59.1",
+    "cachedEngine": "Chromium revision1217; no download or launch performed in this source batch"
+  },
+  "commandAfterSourcePlanRegeneration": {
+    "workingDirectory": "apps/union-eyes",
+    "command": "UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=1 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts"
+  },
+  "canonicalActionSubproofScope": [
+    "C06",
+    "C07",
+    "C08",
+    "C12",
+    "C21",
+    "C22",
+    "O10",
+    "O11",
+    "O12"
+  ],
+  "bounds": [
+    "Actual future browser proof uses the owned disposable production Next/native V2 fixture, actual password/MFA UI, canonical organization binding, live primary authority and one explicit synthetic grievance entitlement.",
+    "No QA session cookies, response fulfillment/stubs, provider email, staging target or production target are used.",
+    "The browser module requires all named checks in all four profiles plus successful cleanup and zero browser/server/external-request errors. Unexecuted checks remain unexecuted.",
+    "Required actual browser checks include real single-membership auto-binding and explicit multiple-membership UI selection, EN/FR control names and invalid-MFA feedback, keyboard authentication/reopening, persisted intake, deadline create/reschedule/complete/cancel and audit, denied member mutations without side effects, other-member/foreign-tenant/finance denials and revoked real sessions.",
+    "No physical-device, additional-browser-engine, full-WCAG, live inbox, complete stakeholder or whole-release qualification is asserted.",
+    "Next defaults to 4096 MB per Node process; explicit 1024–8192 MB overrides are validated and recorded. This is not a whole-host memory limit.",
+    "Disk admission requires 2 GiB before source copying and build launch. A 5-second watcher cancels the owned process group below 1 GiB and records incomplete proof. Live low-disk cancellation has not been exercised in this source batch.",
+    "Next state/HOME is a uniquely owned sibling outside the copied workspace. Progress output is redacted and retained separately; snapshot/state cleanup remain independent of progress-log write success."
+  ],
+  "step2Started": false,
+  "stagingPromoted": false,
+  "productionPromoted": false,
+  "remaining": "Final integrated type checking and repository checks, regenerated source commitments, and actual production build/HTTP/load/browser execution remain unexecuted for this source batch. No final Step1 claim is made.",
+  "supersedes": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-source-subproof-v1.json",
+  "sourceConfirmedFindingsAndRepairs": [
+    {
+      "finding": "Password/MFA authentication creates an unbound session; LoginForm navigated directly to the dashboard whose canonical layout requires a selected organization.",
+      "evidence": "packages/platform-auth/src/mfa/service.ts createSession; lib/auth/canonical-organization-selection.ts getCanonicalOrganizationChoices; app/[locale]/dashboard/layout.tsx canonical context requirement.",
+      "repair": "Read the real canonical choices after authentication; retain a valid active selection, auto-bind only one offered active membership, require an accessible explicit EN/FR choice for multiple, and refuse zero/failed/contradictory/stale choices without dashboard navigation.",
+      "actualPreRepairRuntimeStatus": "UNEXECUTED_SOURCE_CONFIRMED_FLOW_MISMATCH"
+    },
+    {
+      "finding": "The workload fixture producer returned unbound MFA cookies and passed them to withBearerOrgBinding, which explicitly rejects sessions without organizationId.",
+      "repair": "The shared producer authenticates through the real password/MFA endpoints, executes the real canonical organization switch, verifies the authority/resource confirmation and rotated cookie, and returns only the bound issued cookie. Browser UI profiles exercise their own chooser; fixture setup does not substitute for it.",
+      "actualPreRepairRuntimeStatus": "UNEXECUTED_SOURCE_CONFIRMED_FLOW_MISMATCH"
+    }
+  ],
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "788a0ba10d6ad545ae40243f2b7a7fbbc52d13367454892628edf651a70aa2d2",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/browser-ui-source-subproof-v2.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

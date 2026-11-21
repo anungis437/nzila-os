@@ -46,7 +46,9 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomic
 vi.mock('@/db/db', () => ({
   db: { select: vi.fn(() => selectChain(m.dbSelectQueue)) },
 }));
-vi.mock('@/db/schema', () => ({
+vi.mock('@/db/schema', async () => ({
+  // The real schema for every table this route does not stub (withApi's entitlement guard reads orgEntitlements at load).
+  ...(await vi.importActual<Record<string, unknown>>('@/db/schema')),
   surveys: { __name: 'surveys', id: 'id', organizationId: 'organizationId', allowAnonymous: 'allowAnonymous', allowMultipleResponses: 'allowMultipleResponses', status: 'status', publishedAt: 'publishedAt', closesAt: 'closesAt' },
   surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', responseTokenHash: 'responseTokenHash' },
   surveyQuestions: {

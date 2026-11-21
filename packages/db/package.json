@@ -20,6 +20,7 @@
     "./audit-hash": "./src/audit-hash.ts",
     "./authorization-audit": "./src/authorization-audit.ts",
     "./platform": "./src/platform.ts",
+    "./postgres-factory": "./src/postgres-factory.ts",
     "./org-registry": "./src/org-registry.ts",
     "./queries/trustcore": "./src/queries/trustcore.ts",
     "./eslint-no-shadow-db": "./eslint-no-shadow-db.mjs"

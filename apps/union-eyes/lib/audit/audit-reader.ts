@@ -1,12 +1,13 @@
 /**
  * Audit reader: what the audit routes show.
  *
- * Two stores hold audit records. persistAtomicAudit writes the hash-chained public.audit_logs (the Django core table) when the
- * canonical state context is on, and the legacy audit_security.audit_logs table otherwise. The audit routes read only the legacy
- * table, so in canonical mode they could not show a single record the mandatory writers produce, including the 'audit.entry.read'
- * record the detail route wrote itself.
+ * Two stores hold audit records, and a deployment reads the one it writes. persistAtomicAudit writes the hash-chained public.audit_logs
+ * (the Django core table) when the canonical state context is on, and the legacy audit_security.audit_logs table otherwise.
  *
- * Both are read here, in the caller's tenant transaction, and each entry says which store it came from. The canonical table records
+ * In canonical mode the legacy store is not read at all: the canonical current-security source grants the runtime role no usage of the
+ * audit_security schema (tooling/scripts/write-union-eyes-current-catalog.ts: runtimeSchemaUsage ['public','user_management'] and
+ * audit_security.audit_logs with no runtime privilege; the V2 source plan excludes that table), so a read of it can only fail. Outside
+ * canonical mode only the legacy store exists for the application. Each entry says which store it came from. The canonical table records
  * no severity and no outcome, so those are reported as null rather than invented. Nothing from details, changes, addresses or session
  * data is returned: those can hold confidential member information.
  */
@@ -67,6 +68,16 @@ const legacyEntryColumns = () => ({
 
 export async function listAuditEntries(tx: RLSTx, organizationId: string, limit = AUDIT_LIST_LIMIT): Promise<AuditEntryView[]> {
   const bound = Math.min(Math.max(1, Math.trunc(limit)), AUDIT_LIST_LIMIT)
+  if (currentStateContextEnabled()) {
+    const canonical = (await tx.execute(
+      sql`SELECT audit_id, action, resource_type, resource_id, user_id, created_at
+          FROM public.audit_logs
+          WHERE organization_id = ${organizationId}::uuid
+          ORDER BY created_at DESC, id DESC
+          LIMIT ${bound}`,
+    )) as unknown as CanonicalRow[]
+    return canonical.map(fromCanonical)
+  }
   const legacy = await tx
     .select(legacyEntryColumns())
     .from(auditLogs)
@@ -84,26 +95,12 @@ export async function listAuditEntries(tx: RLSTx, organizationId: string, limit 
     createdAt: row.createdAt ?? null,
     source: 'legacy',
   }))
-
-  if (currentStateContextEnabled()) {
-    const canonical = (await tx.execute(
-      sql`SELECT audit_id, action, resource_type, resource_id, user_id, created_at
-          FROM public.audit_logs
-          WHERE organization_id = ${organizationId}::uuid
-          ORDER BY created_at DESC, id DESC
-          LIMIT ${bound}`,
-    )) as unknown as CanonicalRow[]
-    entries.push(...canonical.map(fromCanonical))
-  }
-
   return entries
-    .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0))
-    .slice(0, bound)
 }
 
 /**
  * Whether the organization has at least one audit record whose action matches the pattern (SQL LIKE) and none of the excluded
- * patterns. It answers "did this happen", reads no details, and checks both stores.
+ * patterns. It answers "did this happen", reads no details, and checks the store the deployment writes.
  */
 export async function hasAuditedAction(
   tx: RLSTx,
@@ -111,20 +108,17 @@ export async function hasAuditedAction(
   actionLike: string,
   excludeLike: readonly string[] = [],
 ): Promise<boolean> {
-  const exclusionsLegacy = excludeLike.map((pattern) => sql`AND action NOT LIKE ${pattern}`)
-  const legacy = (await tx.execute(
-    sql`SELECT 1 AS found FROM audit_security.audit_logs
-        WHERE organization_id = ${organizationId}::uuid AND action LIKE ${actionLike} ${sql.join(exclusionsLegacy, sql` `)}
-        LIMIT 1`,
+  const exclusions = excludeLike.map((pattern) => sql`AND action NOT LIKE ${pattern}`)
+  const found = (await tx.execute(
+    currentStateContextEnabled()
+      ? sql`SELECT 1 AS found FROM public.audit_logs
+          WHERE organization_id = ${organizationId}::uuid AND action LIKE ${actionLike} ${sql.join(exclusions, sql` `)}
+          LIMIT 1`
+      : sql`SELECT 1 AS found FROM audit_security.audit_logs
+          WHERE organization_id = ${organizationId}::uuid AND action LIKE ${actionLike} ${sql.join(exclusions, sql` `)}
+          LIMIT 1`,
   )) as unknown as unknown[]
-  if (legacy.length > 0) return true
-  if (!currentStateContextEnabled()) return false
-  const canonical = (await tx.execute(
-    sql`SELECT 1 AS found FROM public.audit_logs
-        WHERE organization_id = ${organizationId}::uuid AND action LIKE ${actionLike} ${sql.join(exclusionsLegacy, sql` `)}
-        LIMIT 1`,
-  )) as unknown as unknown[]
-  return canonical.length > 0
+  return found.length > 0
 }
 
 export async function readAuditEntry(tx: RLSTx, organizationId: string, auditId: string): Promise<AuditEntryView | null> {
@@ -135,7 +129,7 @@ export async function readAuditEntry(tx: RLSTx, organizationId: string, auditId:
           WHERE audit_id = ${auditId}::uuid AND organization_id = ${organizationId}::uuid
           LIMIT 1`,
     )) as unknown as CanonicalRow[]
-    if (row) return fromCanonical(row)
+    return row ? fromCanonical(row) : null
   }
   const [legacy] = await tx
     .select(legacyEntryColumns())

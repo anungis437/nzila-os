@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * GET /api/dues/balance — Get the authenticated member's dues balance
  *
@@ -33,39 +34,39 @@
  * field (e.g. `sourceUpdatedAt`) rather than overloading `asOf`.
  */
 
-import { withApi } from '@/lib/api/framework';
-import { db } from '@/db/db';
-import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
-import { eq, and, sql, desc } from 'drizzle-orm';
-import { toCents } from '@/lib/decimal-safe';
+import { withApi } from '@/lib/api/framework'
+import { db } from '@/db/db'
+import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
+import { eq, and, sql, desc } from 'drizzle-orm'
+import { toCents } from '@/lib/decimal-safe'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 interface LastPayment {
-  amount: number;
-  date: string;
+  amount: number
+  date: string
 }
 
 type DuesBalanceContext =
   | {
-      source: 'native' | 'integration';
-      available: true;
-      currentBalance: number;
-      balanceStatus: 'paid_up' | 'owing' | 'credit';
-      isInArrears: boolean;
-      arrearsAmount: number;
-      lastPayment: LastPayment | null;
-      asOf: string;
+      source: 'native' | 'integration'
+      available: true
+      currentBalance: number
+      balanceStatus: 'paid_up' | 'owing' | 'credit'
+      isInArrears: boolean
+      arrearsAmount: number
+      lastPayment: LastPayment | null
+      asOf: string
     }
   | {
-      source: 'unavailable';
-      available: false;
-      currentBalance: null;
-      balanceStatus: null;
-      isInArrears: null;
-      arrearsAmount: null;
-      lastPayment: null;
-    };
+      source: 'unavailable'
+      available: false
+      currentBalance: null
+      balanceStatus: null
+      isInArrears: null
+      arrearsAmount: null
+      lastPayment: null
+    }
 
 const UNAVAILABLE: DuesBalanceContext = {
   source: 'unavailable',
@@ -75,11 +76,11 @@ const UNAVAILABLE: DuesBalanceContext = {
   isInArrears: null,
   arrearsAmount: null,
   lastPayment: null,
-};
+}
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { required: true, minRole: 'member' },
     openapi: {
       tags: ['Dues'],
@@ -88,12 +89,14 @@ export const GET = withApi(
   },
   async ({ userId, organizationId }): Promise<DuesBalanceContext> => {
     if (!userId || !organizationId) {
-      return UNAVAILABLE;
+      return UNAVAILABLE
     }
 
     // A single query establishes BOTH whether authoritative data exists
     // (postedCount) AND the balance components — scoped to status='posted'
     // only, so pending/reversed/voided rows can never satisfy either check.
+    requireBaseFinancialAuthority()
+
     const [row] = await db
       .select({
         postedCount: sql<string>`COUNT(*)`,
@@ -110,24 +113,25 @@ export const GET = withApi(
           eq(memberDuesLedger.organizationId, organizationId),
           eq(memberDuesLedger.status, 'posted'),
         ),
-      );
+      )
 
-    const postedCount = Number(row?.postedCount ?? 0);
+    const postedCount = Number(row?.postedCount ?? 0)
     if (postedCount === 0) {
       // No authoritative (posted) activity on file — whether because
       // Union Eyes has zero rows at all, or only pending/reversed/voided
       // ones. Neither case supports a financial conclusion.
-      return UNAVAILABLE;
+      return UNAVAILABLE
     }
 
-    const chargesCents = toCents(row?.totalCharges ?? '0');
-    const paymentsCents = toCents(row?.totalPayments ?? '0');
-    const creditsCents = toCents(row?.totalCredits ?? '0');
-    const adjustmentsCents = toCents(row?.totalAdjustments ?? '0');
-    const writeOffsCents = toCents(row?.totalWriteOffs ?? '0');
-    const balanceCents = chargesCents - paymentsCents - creditsCents - adjustmentsCents - writeOffsCents;
-    const currentBalance = balanceCents / 100;
-    const balanceStatus = balanceCents > 0 ? 'owing' : balanceCents < 0 ? 'credit' : 'paid_up';
+    const chargesCents = toCents(row?.totalCharges ?? '0')
+    const paymentsCents = toCents(row?.totalPayments ?? '0')
+    const creditsCents = toCents(row?.totalCredits ?? '0')
+    const adjustmentsCents = toCents(row?.totalAdjustments ?? '0')
+    const writeOffsCents = toCents(row?.totalWriteOffs ?? '0')
+    const balanceCents =
+      chargesCents - paymentsCents - creditsCents - adjustmentsCents - writeOffsCents
+    const currentBalance = balanceCents / 100
+    const balanceStatus = balanceCents > 0 ? 'owing' : balanceCents < 0 ? 'credit' : 'paid_up'
 
     const [lastPaymentRow] = await db
       .select({ amount: memberDuesLedger.amount, date: memberDuesLedger.transactionDate })
@@ -141,7 +145,7 @@ export const GET = withApi(
         ),
       )
       .orderBy(desc(memberDuesLedger.transactionDate))
-      .limit(1);
+      .limit(1)
 
     return {
       source: 'native',
@@ -151,9 +155,12 @@ export const GET = withApi(
       isInArrears: balanceStatus === 'owing',
       arrearsAmount: balanceStatus === 'owing' ? currentBalance : 0,
       lastPayment: lastPaymentRow
-        ? { amount: Number(lastPaymentRow.amount), date: new Date(lastPaymentRow.date).toISOString() }
+        ? {
+            amount: Number(lastPaymentRow.amount),
+            date: new Date(lastPaymentRow.date).toISOString(),
+          }
         : null,
       asOf: new Date().toISOString(),
-    };
+    }
   },
-);
+)

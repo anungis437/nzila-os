@@ -12,6 +12,7 @@ import {
 
 const m = vi.hoisted(() => ({
   getCaseActor: vi.fn(),
+  decideCaseCapabilitiesBatch: vi.fn(async () => new Map()),
   getCurrentUser: vi.fn(),
   checkRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 99 }),
   createRateLimitHeaders: vi.fn(() => ({})),
@@ -25,6 +26,11 @@ const m = vi.hoisted(() => ({
   executePostHandlerPolicies: vi.fn().mockResolvedValue(undefined),
   createCorrelationContext: vi.fn().mockReturnValue({ traceId: 'test-trace' }),
   correlationToHeaders: vi.fn().mockReturnValue({}),
+}));
+
+vi.mock('@/lib/authority/store/route-adapter', async original => ({
+  ...await original<typeof import('@/lib/authority/store/route-adapter')>(),
+  decideCaseCapabilitiesBatch: m.decideCaseCapabilitiesBatch,
 }));
 
 vi.mock('@/lib/cases/case-authorization', async (original) => ({
@@ -167,8 +173,8 @@ describe('Tier 2 — withApi: GET /api/cases', () => {
     m.getCurrentUser.mockResolvedValue(STEWARD_USER);
     m.getCaseActor.mockResolvedValue({ userId: 'user_test_001', organizationId: '00000000-0000-0000-0000-000000000001', role: 'steward' });
     m.withRLSContext.mockImplementation(
-      (fn: (tx: unknown) => Promise<unknown>) =>
-        fn({ execute: vi.fn().mockResolvedValue([]) })
+      async (contextOrFn: unknown, operation?: (tx: unknown) => Promise<unknown>) =>
+        (typeof contextOrFn === 'function' ? contextOrFn as (tx: unknown) => Promise<unknown> : operation!)({ execute: vi.fn().mockResolvedValue([]) })
     );
     m.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 99 });
     m.evaluateRoutePolicy.mockResolvedValue({ allow: true, directives: {} });
@@ -178,6 +184,10 @@ describe('Tier 2 — withApi: GET /api/cases', () => {
     const { GET } = await import('../cases/route');
     const res = await GET(makeGetRequest('cases'));
     expect([200, 201]).toContain(res.status);
+    expect(m.decideCaseCapabilitiesBatch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ userId: 'user_test_001', caseIds: [] }),
+    );
   });
 
   it('returns 401/403 when unauthenticated', async () => {

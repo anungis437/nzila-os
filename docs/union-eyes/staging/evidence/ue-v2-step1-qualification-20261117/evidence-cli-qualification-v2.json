@@ -1,0 +1,76 @@
+{
+  "kind": "LOCAL_ACTUAL_CLI_COMPONENT_QUALIFICATION",
+  "recordedAt": "2026-11-17T22:52:16.432546+00:00",
+  "gitHeadAtCollection": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtyIntegrationSource": true,
+  "finalCandidateSha": null,
+  "environment": "Controlled local filesystem artifacts and synthetic HMAC keys, no application or managed-environment acceptance",
+  "sourceHashes": [
+    {
+      "path": "apps/union-eyes/scripts/evidence/collect.mjs",
+      "sha256": "bb164cf1b7fd3bc197ceb5c1eff0b9d887263d55984a0fb44bbb094b04f124cb"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/seal.mjs",
+      "sha256": "078c4c4a49288af06918290ead693818cfe5c5a5b8b02cdd38ade6ecb4026912"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/verify.mjs",
+      "sha256": "6c126e762f0408177277c6d70798346f47a144a6b2ce5077fe40e01b21d0f567"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/__tests__/evidence-cli.test.ts",
+      "sha256": "e0ca3c809e3a3fc14b1974c827567c41fe0baaa603b587fa999057417e11dfc3"
+    }
+  ],
+  "actualCliTests": {
+    "passed": 19,
+    "failed": 0,
+    "pending": 0,
+    "json": "evidence-cli-results-post-restart-v2.json",
+    "log": "evidence-cli-tests-post-restart-v2.txt"
+  },
+  "existingEvidenceContracts": {
+    "passed": 28,
+    "failed": 0,
+    "log": "evidence-existing-contracts-post-restart-v2.txt"
+  },
+  "focusedLint": {
+    "exitCode": 0,
+    "log": "evidence-cli-lint-post-restart-v4.txt"
+  },
+  "collectorIncludeContract": {
+    "option": "--include-file <relative-file> (repeatable)",
+    "base": "--base-path, defaults to current working directory",
+    "explicitFilesRequired": true,
+    "defaultSevenOptionalLocationsPreserved": true,
+    "implicitDirectoryOrHomeScan": false,
+    "checks": [
+      "actual SHA256 and byte length",
+      "missing or nonregular explicit file refusal",
+      "traversal and Unix or Windows absolute path refusal",
+      "resolved symlink base confinement for explicit and optional inputs",
+      "identical file deduplication and conflicting name refusal",
+      "entire selection validated before prior manifest is replaced",
+      "recursive generated-output refusal including output-directory symlink alias"
+    ],
+    "completenessClaim": "NONE; caller must derive required explicit file list from the existing canonical qualification foundation"
+  },
+  "artifactHashes": {
+    "evidence-cli-tests-post-restart-v2.txt": "0eb069fb7547f912bd6ac3b65b7bfdb9d0e38d89c1a4df3d2b4761b564e1c84c",
+    "evidence-cli-results-post-restart-v2.json": "ed860fd7ce781c831922ab76c14679494487698648937bdd990bb1cb9a019474",
+    "evidence-cli-lint-post-restart-v4.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence-existing-contracts-post-restart-v2.txt": "8216bd4befbd3dec884ba1582dd42d19f2c0200d1519d6553c67de2f8ab774e2",
+    "dependency-workflow-validation-post-restart-v3.txt": "a6e21796fa9a25da83c1d96b0ab9bafd129307c85809288b41b06bae38d0ba31",
+    "historical-secret-containment-tests-post-restart-v2.txt": "13a5430ded5d22412e2f861c1ae874d956f4f0348a2d3aafea4f9b3c92c7e5d4"
+  },
+  "promotionsPerformed": false,
+  "step2Initiated": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "4ff2a8869d8673b1cd1bb54268c53178644cc218fbb62c6ce115aa21639c5423",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/evidence-cli-qualification-v2.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

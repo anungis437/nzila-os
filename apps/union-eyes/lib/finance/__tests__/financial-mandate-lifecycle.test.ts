@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { ErrorCode } from '@/lib/api/errors'
+import { BaseFinancialCapabilityUnavailable } from '../base-release-boundary'
 import { assertFinancialSegregation, financialMandatePhase, FinancialMandateLifecycleError, listExpiredFinancialMandates } from '../financial-mandate-lifecycle'
 import { assertLiveFinancialMandate } from '@/lib/authority/store/finance-route-adapter'
 import type { SqlExecutor } from '@/lib/authority/store/executor'
@@ -28,11 +30,16 @@ describe('financial mandate lifecycle', () => {
     expect(financialMandatePhase({ status: 'suspended', effectiveAt: new Date('2026-10-01'), expiresAt: new Date('2026-12-01') }, now)).toBe('suspended')
   })
 
-  it('answers FINANCIAL_MANDATES_NOT_ISSUED when the organization has no live financial mandate', async () => {
-    const exec = (n: number): SqlExecutor => ({ query: async () => ({ rows: [{ n }] }) })
-    await expect(assertLiveFinancialMandate(exec(0), ORG)).rejects.toMatchObject({ code: 'FINANCIAL_MANDATES_NOT_ISSUED' })
-    await expect(assertLiveFinancialMandate(exec(2), ORG)).resolves.toBeUndefined()
-    await expect(assertLiveFinancialMandate(exec(1), 'not-a-uuid')).rejects.toMatchObject({ code: 'INVALID_REQUEST' })
+  it('refuses with 501 NOT_IMPLEMENTED before reading any mandate, whatever the organization holds', async () => {
+    const refusal = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
+    for (const [n, organizationId] of [[0, ORG], [2, ORG], [1, 'not-a-uuid']] as const) {
+      const query = vi.fn(async () => ({ rows: [{ n }] }))
+      const exec: SqlExecutor = { query }
+      const rejected = await assertLiveFinancialMandate(exec, organizationId).then(() => null, (error: unknown) => error)
+      expect(rejected).toBeInstanceOf(BaseFinancialCapabilityUnavailable)
+      expect(rejected).toMatchObject(refusal)
+      expect(query).not.toHaveBeenCalled()
+    }
   })
 
   it('lists expired financial mandates with a select and does not update them', async () => {

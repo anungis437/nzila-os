@@ -1,0 +1,117 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > createAudit inserts and returns the audit 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > records a completed single-page scan only after the scanner actually returns no violations 3ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional playwright scanner dependency is missing 2ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when the optional @axe-core/playwright scanner dependency is missing 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner launch fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner newPage fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner goto fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner analyze fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > fails explicitly when scanner close fails and closes any launched browser 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit saves issues when violations exist 1ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit handles scan errors and rethrows 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > runAutomatedAudit throws when audit not found 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getAudit returns audit and issues 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getAudit throws when not found 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getOpenIssues applies all optional filters 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > getOpenIssues works without filters 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityAuditManager > resolveIssue updates the issue 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkColorContrast evaluates AA/AAA/fail 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkKeyboardAccessibility flags inaccessible interactive elements 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkAltText flags missing and short alt text 0ms
+ ✓ |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > WCAGChecker > checkHeadingHierarchy detects missing headings and skips 0ms
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > cannot infer WCAG compliance from an empty issue register with no audit evidence 2ms
+   → expected 100 to be null
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > keeps an empty issue report unverified after an actual scanner failure 2ms
+   → expected 100 to be null
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > does not turn a completed single-page automated scan into full WCAG coverage 1ms
+   → expected 100 to be null
+ × |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > generateComplianceReport summarizes issues and recommendations 0ms
+   → expected 83 to be null
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > cannot infer WCAG compliance from an empty issue register with no audit evidence
+AssertionError: expected 100 to be null
+
+- Expected:
+null
+
++ Received:
+100
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:259:36
+    257|     const report = await new AccessibilityReportGenerator().generateCo…
+    258|     expect(report.summary.totalIssues).toBe(0);
+    259|     expect(report.complianceScore).toBeNull();
+       |                                    ^
+    260|     expect(report.verificationStatus).toBe('UNVERIFIED');
+    261|     expect(report.issueBurdenScore).toBe(100);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > keeps an empty issue report unverified after an actual scanner failure
+AssertionError: expected 100 to be null
+
+- Expected:
+null
+
++ Received:
+100
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:270:36
+    268|     const report = await new AccessibilityReportGenerator().generateCo…
+    269|     expect(h.updates.at(-1)?.status).toBe('failed');
+    270|     expect(report.complianceScore).toBeNull();
+       |                                    ^
+    271|     expect(report.verificationStatus).toBe('UNVERIFIED');
+    272|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > does not turn a completed single-page automated scan into full WCAG coverage
+AssertionError: expected 100 to be null
+
+- Expected:
+null
+
++ Received:
+100
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:279:36
+    277|     const report = await new AccessibilityReportGenerator().generateCo…
+    278|     expect(h.updates.at(-1)?.status).toBe('completed');
+    279|     expect(report.complianceScore).toBeNull();
+       |                                    ^
+    280|     expect(report.verificationStatus).toBe('UNVERIFIED');
+    281|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |union-eyes| lib/accessibility/__tests__/accessibility-service.test.ts > AccessibilityReportGenerator > generateComplianceReport summarizes issues and recommendations
+AssertionError: expected 83 to be null
+
+- Expected:
+null
+
++ Received:
+83
+
+ ❯ lib/accessibility/__tests__/accessibility-service.test.ts:295:36
+    293|     expect(report.criteriaCoverage.length).toBeGreaterThan(0);
+    294|     expect(report.recommendations.length).toBeGreaterThan(0);
+    295|     expect(report.complianceScore).toBeNull();
+       |                                    ^
+    296|     expect(report.verificationStatus).toBe('UNVERIFIED');
+    297|     expect(report.issueBurdenScore).toBeLessThan(100);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 21 passed (25)
+   Start at  19:02:20
+   Duration  202ms (transform 43%, tests 29%, import 21%, setup 4%, worker 3%)
+

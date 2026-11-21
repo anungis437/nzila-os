@@ -18,6 +18,7 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import pg from 'pg'
+import { sql } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
 import { is } from 'drizzle-orm'
@@ -142,18 +143,17 @@ describe.skipIf(!URL)('canonical schema census against the real Django plus boot
     }
   }, 60_000)
 
-  it('dues_transactions serves both declarations as the runtime role: defaults apply, tenant isolation holds, the period is ordered (platform 0017)', async () => {
+  it('dues_transactions keeps both declarations and its shape (platform 0017), and the canonical source refuses it to every application role', async () => {
+    // The canonical source contains dues_transactions (CONTAINED_NO_AUTHORITY: no runtime or system grant; member dues are handled in an
+    // external system). The shape is proved as the owner of the data, the refusal as each application role.
     const client = new pg.Client({ connectionString: URL })
     await client.connect()
     try {
       const org = '00000000-0000-4000-8000-0000000000b1'
-      const other = '00000000-0000-4000-8000-0000000000b2'
       await client.query(`INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
         VALUES ($1,'census-dues','census-dues','local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1) ON CONFLICT (id) DO NOTHING`, [org])
       await client.query('BEGIN')
       try {
-        await client.query('SET LOCAL ROLE union_eyes_runtime')
-        await client.query("SELECT set_config('app.current_org_id', $1, true)", [org])
         const db = drizzle(client)
         const row = {
           organizationId: org, memberId: 'member-1', transactionType: 'charge', amount: '50.00', duesAmount: '50.00', totalAmount: '50.00',
@@ -163,17 +163,25 @@ describe.skipIf(!URL)('canonical schema census against the real Django plus boot
         expect(created.status).toBe('pending')
         expect(created.copeAmount).toBe('0.00')
         expect(created.id).toBeTruthy()
-        const [viaQueries] = await db.select().from(queryDuesTransactions)
+        const [viaQueries] = await db.select().from(queryDuesTransactions).where(sql`id = ${created.id}`)
         expect(viaQueries.id).toBe(created.id)
-        await client.query('SAVEPOINT cross_tenant')
-        await expect(db.insert(duesTransactions).values({ ...row, organizationId: other })).rejects.toThrow()
-        await client.query('ROLLBACK TO SAVEPOINT cross_tenant')
         await client.query('SAVEPOINT bad_period')
         await expect(db.insert(duesTransactions).values({ ...row, periodStart: '2026-11-01', periodEnd: '2026-10-01' })).rejects.toThrow()
         await client.query('ROLLBACK TO SAVEPOINT bad_period')
+        for (const role of ['union_eyes_runtime', 'union_eyes_system']) {
+          await client.query('SAVEPOINT refused')
+          await client.query(`SET LOCAL ROLE ${role}`)
+          await client.query("SELECT set_config('app.current_org_id', $1, true)", [org])
+          await expect(db.select().from(duesTransactions)).rejects.toThrow()
+          await client.query('ROLLBACK TO SAVEPOINT refused')
+          await client.query('RESET ROLE')
+        }
       } finally {
         await client.query('ROLLBACK')
       }
+      for (const role of ['union_eyes_runtime', 'union_eyes_system'])
+        for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'DELETE'])
+          expect((await client.query(`SELECT has_table_privilege($1, 'public.dues_transactions', $2) AS ok`, [role, privilege])).rows[0].ok, `${role} ${privilege}`).toBe(false)
     } finally {
       await client.end()
     }

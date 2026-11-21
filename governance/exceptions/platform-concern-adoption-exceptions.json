@@ -28,15 +28,6 @@
       "owner": "union-team",
       "justification": "Django-authoritative hybrid uses existing domain contract surfaces while route-level adapters are consolidated incrementally.",
       "expiresOn": "2026-11-30"
-    },
-    {
-      "app": "partners",
-      "path": "apps/partners",
-      "concern": "contracts",
-      "status": "legacy-migration-path",
-      "owner": "commerce-team",
-      "justification": "Partners relies on domain-shared contracts; migration to platform-contract adapters is in-progress. [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
     }
   ]
 }

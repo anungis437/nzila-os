@@ -8,6 +8,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { createPlatformNarProofAdapter } from '@/lib/audit/platform-nar-proof';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { validateIntakeRequest } from '@nzila/cupe-vocabulary';
 import { getCaseTypeById } from '@nzila/cupe-vocabulary';
@@ -26,58 +27,38 @@ import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { incidentInstant } from '@/lib/cases/incident-instant';
 import { enforceDecision, type DecisionProofAdapter } from '@nzila/decision-core';
-import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
-import { platformDb } from '@nzila/db/platform';
-import { auditRecords } from '@nzila/db/schema';
-import { desc } from 'drizzle-orm';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { canonicalNarProofAdapter, createCanonicalNarProofAdapter } from '@/lib/audit/canonical-nar-proof';
+import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
+import { ensureOwnDirectoryProfile } from '@/lib/members/own-directory-profile';
 
 export const dynamic = 'force-dynamic';
 
-const narProofAdapter = createNarProofAdapter({
-  keyId: process.env.NAR_SIGNING_KEY_ID,
-  getPreviousHash: async (organizationId) => {
-    const rows = await platformDb
-      .select({ hash: auditRecords.narHash })
-      .from(auditRecords)
-      .where(eq(auditRecords.organizationId, organizationId))
-      .orderBy(desc(auditRecords.createdAt))
-      .limit(1);
-    return rows[0]?.hash;
-  },
-  persistRecord: async (record) => {
-    await platformDb.insert(auditRecords).values({
-      id: record.id,
-      decisionRecordId: record.decisionRecordId,
-      organizationId: record.organizationId,
-      decisionType: record.decisionType,
-      actionType: record.actionType,
-      actorId: record.actorId,
-      actorType: record.actorType,
-      resourceType: record.resourceType,
-      resourceId: record.resourceId,
-      policyId: record.policyId,
-      policyVersion: record.policyVersion,
-      inputHash: record.inputHash,
-      outcomeHash: record.outcomeHash,
-      payload: record.payload,
-      narHash: record.seal.hash,
-      narSignature: record.seal.signature,
-      previousHash: record.seal.previousHash,
-      keyId: record.seal.keyId,
-      storageType: record.storage?.type,
-      storageUri: record.storage?.uri,
-      immutable: record.storage?.immutable,
-      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
-      createdAt: new Date(record.createdAt),
-    });
-    return { auditRecordId: record.id };
-  },
-  getSigningSecret: getNarSigningSecret,
-});
+const narProofAdapter = createPlatformNarProofAdapter();
 
+/**
+ * One canonical organization binding for the whole intake. The filing transaction takes the member's per-principal case-mail
+ * authority lock; any step inside it that opened a fresh binding (the canonical evidence pack resolves the actor) would insert a
+ * session row behind that same lock and wait on its own transaction. Establishing the binding first means every nested step
+ * reuses it. When no binding can be established the handler runs exactly as before and returns its own refusal.
+ */
 export async function POST(request: Request) {
+  if (!currentStateContextEnabled()) return handleIntake(request);
+  const { withCanonicalApiContext } = await import('@/lib/auth/canonical-context');
+  let established = false;
+  try {
+    return await withCanonicalApiContext(() => {
+      established = true;
+      return handleIntake(request);
+    });
+  } catch (error) {
+    // handleIntake never throws (it answers every failure itself), so this is the binding refusing to establish.
+    if (established) throw error;
+    return handleIntake(request);
+  }
+}
+
+async function handleIntake(request: Request) {
   try {
     // 1. Auth check
     const { userId, identityProvider, providerSubject } = await auth();
@@ -150,6 +131,8 @@ export async function POST(request: Request) {
     const idempotencyHash = createHash('sha256')
       .update(`${orgId}|${data.memberId}|${data.caseType}|${data.incidentDate}|${data.title}`)
       .digest('hex');
+    const directoryContact = canonical
+      ? await getCanonicalOrganizationContext({ expectedActorUserId: userId, organizationId: orgId }) : null;
 
     // 4c. Org-scoped duplicate check — runs inside withRLSContext to ensure
     //     RLS policies are active and cross-org leakage is impossible.
@@ -164,6 +147,7 @@ export async function POST(request: Request) {
           ),
         )
         .limit(1);
+      if (found && directoryContact) await ensureOwnDirectoryProfile(tx, directoryContact);
       return found ?? null;
     });
 
@@ -200,6 +184,7 @@ export async function POST(request: Request) {
     const { claim, canonicalDecision } = await withRLSContext(async (tx) => {
       // Filing is open to any active member of the organization; it opens a case for themselves and grants nothing else.
       await requireCaseFilingCapacity(tx, { userId, organizationId: orgId }, 'member');
+      if (directoryContact) await ensureOwnDirectoryProfile(tx, directoryContact);
       const newClaim = await createClaim(
         {
           organizationId: orgId,
@@ -231,11 +216,13 @@ export async function POST(request: Request) {
       await persistAtomicAudit(tx, {
         organizationId: orgId,
         userId,
-        action: 'case.intake_submitted',
+        // The database requires every new case's creation audit (ue_check_claim_journal_audit): claim.create, in this transaction.
+        action: 'claim.create',
         resourceType: 'claims',
         resourceId: newClaim.claimId,
         details: {
           event: 'CASE_INTAKE_SUBMITTED',
+          route: '/api/cases/intake',
           caseType: data.caseType,
           priority: data.priority,
           severity,

@@ -7,8 +7,11 @@ import {
 } from './business-session-event-guard'
 
 export const BUSINESS_SESSION_POLICY = 'ue_v2_verified_business_session'
+// Wrapped as an uncorrelated scalar subquery: its inputs are session settings only, so PostgreSQL
+// evaluates it once per statement (InitPlan) instead of once per row. The VOLATILE SECURITY DEFINER
+// check costs tens of milliseconds, which per row made ordinary tenant reads take seconds.
 export const BUSINESS_SESSION_PREDICATE =
-  "user_management.auth_business_org_authorized(NULLIF(current_setting('app.current_org_id',true),'')::uuid,NULL::text[])"
+  "(SELECT user_management.auth_business_org_authorized(NULLIF(current_setting('app.current_org_id',true),'')::uuid,NULL::text[]))"
 const quoted = (identifier: string) => `"${identifier.replaceAll('"', '""')}"`
 
 /** Additive only: no row, existing policy, privilege, or authentication instrument is changed. */
@@ -32,7 +35,7 @@ export const BUSINESS_SESSION_POLICY_QUERY = `SELECT c.relname AS table_name,c.o
 
 // PostgreSQL's deparsed expression, independently pinned by the native policy regression.
 export const BUSINESS_SESSION_CATALOG_PREDICATE =
-  "user_management.auth_business_org_authorized((NULLIF(current_setting('app.current_org_id'::text, true), ''::text))::uuid, NULL::text[])"
+  "( SELECT user_management.auth_business_org_authorized((NULLIF(current_setting('app.current_org_id'::text, true), ''::text))::uuid, NULL::text[]) AS auth_business_org_authorized)"
 const normalized = (value: unknown) =>
   typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : ''
 export function businessSessionPolicyViolations(

@@ -21,7 +21,7 @@ import {
 import {
   fetchLiveCostAnomalies,
   fetchLiveEvidenceSummary,
-} from "@/server/db-bridge";
+} from "@/db/queries/platform-overview";
 import {
   governanceStatusSchema,
   governanceAuditTimelineEntrySchema,

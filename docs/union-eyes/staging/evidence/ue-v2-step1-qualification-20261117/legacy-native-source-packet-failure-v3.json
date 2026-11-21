@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-11-18T00:19:45.706365+00:00",
+  "scope": "OWNED_HISTORICAL_FIXTURE_SOURCE_PACKET_FAILURE",
+  "reason": "Selected historical archive omitted app bootstrap compiler imported by authority projection; expanded to full tracked0327 tree",
+  "djangoMigrations": "Executed successfully before old bootstrap import failed",
+  "sourceCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "snapshotCompleteTrackedTree": true,
+  "testExecuted": false,
+  "qualified": false,
+  "cleanup": "Only exact freshly owned incomplete fixture removed; existing runtime/volumes untouched"
+}

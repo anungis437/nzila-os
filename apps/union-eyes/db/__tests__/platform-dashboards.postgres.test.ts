@@ -22,6 +22,7 @@ import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -65,6 +66,8 @@ describe.skipIf(!URL)('the platform dashboards\' reads on the combined schema, a
     await insertOrganization(admin, tag, { id: ORG_A, name: `Alpha ${tag}`, memberCount: 40 })
     await insertOrganization(admin, tag, { id: ORG_B, name: `Beta ${tag}`, memberCount: 60 })
     await insertOrganization(admin, tag, { id: PLATFORM_ORG, name: `Platform ${tag}`, type: 'congress' })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B, PLATFORM_ORG]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
 
     const grievance = async (organizationId: string, number: string, status: string) =>
       (await admin.query(`INSERT INTO grievances (grievance_number, description, organization_id, title, type, status) VALUES ($1, 'd', $2, 't', 'grievance', $3) RETURNING id::text AS id`, [`${number}-${tag}`, organizationId, status])).rows[0].id as string

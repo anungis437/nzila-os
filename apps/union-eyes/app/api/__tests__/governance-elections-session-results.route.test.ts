@@ -21,7 +21,7 @@ vi.mock('@/lib/voting/ballot-process-audit', () => ({ recordRecount: m.recordRec
 vi.mock('@/db/schema', () => ({ votingSessions: { id: 'id' }, votingOptions: { sessionId: 'sessionId', id: 'id', text: 'text' }, votes: { sessionId: 'sessionId', optionId: 'optionId' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
+  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and') };
 });
 
 async function loadRoute() {

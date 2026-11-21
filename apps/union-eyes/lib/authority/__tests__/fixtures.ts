@@ -83,7 +83,7 @@ export const mandate = (over: Partial<Mandate> = {}): Mandate => ({
 let relSeq = 1000
 export const relationship = (over: Partial<ResourceRelationship> = {}): ResourceRelationship => ({
   id: id(relSeq++), organizationId: ORG, principalUserId: U.steward, resource: ref('case', CASE_ID),
-  relation: 'assignee', permissions: [], privilegedAccess: false, origin: 'derived', grantedBy: null,
+  relation: 'assignee', permissions: [], privilegedAccess: false, origin: 'explicit', grantedBy: over.principalUserId === U.president ? U.chief : U.president,
   status: 'active', effectiveAt: ago(DAY), expiresAt: null, revokedAt: null, ...over,
 })
 

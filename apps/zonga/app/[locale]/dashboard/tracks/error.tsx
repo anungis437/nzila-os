@@ -3,7 +3,8 @@
  */
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
+import { browserErrorReference, recordBrowserError } from '@nzila/os-core/browser-diagnostics'
 
 export default function TracksError({
   error,
@@ -12,9 +13,13 @@ export default function TracksError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const localReference = useId()
+  const diagnosticReference = browserErrorReference(error.digest, localReference)
+
   useEffect(() => {
-    console.error('[Zonga Tracks Error]', error)
-  }, [error])
+    recordBrowserError({ app: 'zonga', surface: 'tracks', code: 'CLIENT_BOUNDARY_ERROR',
+      reference: diagnosticReference.value, referenceOrigin: diagnosticReference.origin })
+  }, [error, diagnosticReference.value, diagnosticReference.origin])
 
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-8 text-center">

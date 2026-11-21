@@ -44,10 +44,7 @@ vi.mock('@/lib/cases/case-authorization', async (original) => ({
 }));
 vi.mock('@/lib/workflow-engine', () => ({ updateClaimStatus: m.updateClaimStatus }));
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ getAllowedTransitions: m.getAllowedTransitions }));
-vi.mock('@/lib/workflow/state-bridge', () => ({
-  toLifecycleState: m.toLifecycleState,
-  toLegacyClaimStatus: m.toLegacyClaimStatus,
-}));
+
 vi.mock('@/lib/schema-error', () => ({ wrapSchemaQuery: m.wrapSchemaQuery }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/events', () => ({
@@ -108,8 +105,6 @@ describe('workflow/transition route', () => {
       data: { claimNumber: 'CLM-1', targetStatus: 'resolved', notes: 'done' },
     });
     m.getAllowedTransitions.mockReturnValue(['resolved']);
-    m.toLifecycleState.mockReturnValue('submitted');
-    m.toLegacyClaimStatus.mockImplementation((s: string) => s);
     m.updateClaimStatus.mockResolvedValue({ success: true, claim: { id: 'claim_1', status: 'resolved' } });
     m.wrapSchemaQuery.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.withRLSContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
@@ -239,6 +234,7 @@ describe('workflow/transition route', () => {
 
   it('returns 403 when the caller may transition but the kernel denies closing the case', async () => {
     const { POST } = await loadRoute();
+    m.transitionSchemaSafeParse.mockReturnValueOnce({success:true,data:{claimNumber:'CLM-1',targetStatus:'closed'}});
     const { ApiError } = await import('@/lib/api/errors');
     m.findReadableCase.mockImplementation(async (_tx: unknown, _actor: unknown, _ref: string, _lock: boolean, action: string) => {
       if (action === 'case:close') throw ApiError.forbidden('This action is not permitted for this case.');
@@ -248,7 +244,7 @@ describe('workflow/transition route', () => {
     const response = await POST(new NextRequest('http://localhost/api/workflow/transition', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'resolved' }),
+      body: JSON.stringify({ claimNumber: 'CLM-1', targetStatus: 'closed' }),
     }));
 
     expect(response.status).toBe(403);
@@ -282,4 +278,19 @@ describe('workflow/transition route', () => {
 
     expect(response.status).toBe(500);
   });
+  it('does not infer closure from an ordinary resolution',async()=>{
+    const {POST}=await loadRoute();
+    const response=await POST(new NextRequest('http://localhost/api/workflow/transition',{method:'POST',body:JSON.stringify({claimNumber:'CLM-1',targetStatus:'resolved'})}));
+    expect(response.status).toBe(200);
+    expect(m.findReadableCase.mock.calls.some(call=>call[4]==='case:close')).toBe(false);
+    expect(m.updateClaimStatus).toHaveBeenCalled();
+  });
+  it('protects the legacy rejected closure spelling before downstream mutation',async()=>{
+    const {POST}=await loadRoute();const {ApiError}=await import('@/lib/api/errors');
+    m.transitionSchemaSafeParse.mockReturnValueOnce({success:true,data:{claimNumber:'CLM-1',targetStatus:'rejected'}});
+    m.findReadableCase.mockImplementation(async(_tx,_actor,_ref,_lock,action)=>{if(action==='case:close')throw ApiError.forbidden();return {claimId:'claim_1',visibility:'internal'}});
+    const response=await POST(new NextRequest('http://localhost/api/workflow/transition',{method:'POST',body:JSON.stringify({claimNumber:'CLM-1',targetStatus:'rejected'})}));
+    expect(response.status).toBe(403);expect(m.updateClaimStatus).not.toHaveBeenCalled();
+  });
+
 });

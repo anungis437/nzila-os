@@ -14,7 +14,7 @@ vi.mock('@/db/schema', () => ({ governancePolicies: { organizationId: 'organizat
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditDataMutation }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), desc: vi.fn(() => 'desc'), count: vi.fn(() => 'count'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
+  return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), desc: vi.fn(() => 'desc'), count: vi.fn(() => 'count') };
 });
 
 async function loadRoute() {

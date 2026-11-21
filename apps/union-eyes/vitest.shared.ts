@@ -18,6 +18,7 @@ export const heavyTests = [
   "scripts/__tests__/rls-verify-deadline-engine-policies.pglite.test.ts",
   "db/__tests__/scoped-migrations-existing-env.test.ts",
   "db/__tests__/convergence-p0-contracts.test.ts",
+  "db/__tests__/db-default-initialization.test.ts",
   "lib/member-integrity/__tests__/member-query-importers.test.ts",
 ];
 

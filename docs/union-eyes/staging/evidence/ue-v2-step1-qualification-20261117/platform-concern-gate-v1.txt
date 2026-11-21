@@ -1,0 +1,39 @@
+
+═══════════════════════════════════════
+  Platform Concern Adoption Gate
+═══════════════════════════════════════
+
+  Apps scanned: 23
+  Fully adopted: 22
+  Exception-approved: 1
+  Legacy migration path: 0
+  Partially adopted: 0
+
+  ✓ union-eyes [PRODUCTION] fully adopted (3/3)
+  ✓ flow [PRODUCTION] fully adopted (6/6)
+  ✓ web [PRODUCTION] fully adopted (3/3)
+  ✓ partners [PILOT] fully adopted (4/4)
+  ✓ cfo [PRODUCTION] fully adopted (5/5)
+  ✓ console [PILOT] fully adopted (6/6)
+  ✓ control-plane [PILOT] fully adopted (9/9)
+  ✓ zonga [INCUBATING] fully adopted (3/3)
+  ✓ abr [INCUBATING] fully adopted (2/2)
+  ✓ cora [INCUBATING] fully adopted (2/2)
+  ✓ trade [INCUBATING] fully adopted (4/4)
+  ✓ agrimo [INCUBATING] fully adopted (2/2)
+  ✓ platform-admin [INCUBATING] fully adopted (5/5)
+  ✓ nzila-hq [EXPERIMENTAL] fully adopted (1/1)
+  • orchestrator-api [INCUBATING] exception-approved (3/3)
+  ✓ veridian-admin [INCUBATING] fully adopted (2/2)
+  ✓ veridian-care [INCUBATING] fully adopted (2/2)
+  ✓ veridian-site [INCUBATING] fully adopted (2/2)
+  ✓ nacp-exams [EXPERIMENTAL] fully adopted (1/1)
+  ✓ mobility [EXPERIMENTAL] fully adopted (1/1)
+  ✓ mobility-client-portal [EXPERIMENTAL] fully adopted (1/1)
+  ✓ test-scaffold-gp [EXPERIMENTAL] fully adopted (1/1)
+  ✓ weekone [EXPERIMENTAL] fully adopted (1/1)
+
+  Report: governance/reports/platform-concern-adoption-report.json
+
+  ✓ Platform concern adoption policy satisfied
+

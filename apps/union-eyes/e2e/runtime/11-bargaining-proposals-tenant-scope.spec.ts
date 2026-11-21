@@ -1,3 +1,4 @@
+import { runtimeRequestAs } from '../helpers/runtime-auth'
 /**
  * R-51: actual HTTP + PostgreSQL acceptance for a child table with no
  * organization_id.  The proposal must inherit tenant jurisdiction from its
@@ -8,21 +9,20 @@
  * This is distinct from mocked SQL-compiler/unit tests.
  */
 import { randomUUID } from 'node:crypto'
-import { cleanupBargainingQaRecords, type BargainingQaRecord } from '../../scripts/runtime/bargaining-proposals-cleanup'
-import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
+import {
+  cleanupBargainingQaRecords,
+  type BargainingQaRecord,
+} from '../../scripts/runtime/bargaining-proposals-cleanup'
+import { test, expect, type APIRequestContext } from '@playwright/test'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 
-const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002'
 const PRIMARY = UE_TEST_ORGS.primary.id
 const SECONDARY = UE_TEST_ORGS.secondary.id
 const U = UE_TEST_USERS
 
 const as = (actor: { userId: string; orgId: string }): Promise<APIRequestContext> =>
-  pwRequest.newContext({
-    baseURL: BASE,
-    extraHTTPHeaders: { cookie: `nzila_session=ue-seed-session-${actor.userId}; selected_org_id=${actor.orgId}` },
-  })
+  runtimeRequestAs(actor.userId, actor.orgId)
 
 type RecordShape = { id: string; negotiationId?: string; title?: string }
 const unwrap = (body: unknown): unknown => {
@@ -30,19 +30,29 @@ const unwrap = (body: unknown): unknown => {
   const first = value?.data ?? body
   return (first as { data?: unknown } | null)?.data ?? first
 }
-const requireId = async (response: Awaited<ReturnType<APIRequestContext['post']>>, label: string): Promise<string> => {
+const requireId = async (
+  response: Awaited<ReturnType<APIRequestContext['post']>>,
+  label: string,
+): Promise<string> => {
   const text = await response.text()
-  expect([200, 201], `${label}: HTTP ${response.status()} ${text.slice(0, 500)}`).toContain(response.status())
+  expect([200, 201], `${label}: HTTP ${response.status()} ${text.slice(0, 500)}`).toContain(
+    response.status(),
+  )
   const row = unwrap(JSON.parse(text)) as RecordShape
   expect(row?.id, `${label} must return the persisted id`).toMatch(/^[a-f0-9-]{36}$/i)
   return row.id
 }
 const negotiation = (marker: string) => ({
-  title: `QA scope ${marker}`, unionName: 'Synthetic union', employerName: 'Synthetic employer',
+  title: `QA scope ${marker}`,
+  unionName: 'Synthetic union',
+  employerName: 'Synthetic employer',
 })
 const proposal = (negotiationId: string, marker: string) => ({
-  negotiationId, proposalNumber: `QA-${marker}`, title: `Synthetic proposal ${marker}`,
-  description: 'Synthetic acceptance record', proposalType: 'union_demand',
+  negotiationId,
+  proposalNumber: `QA-${marker}`,
+  title: `Synthetic proposal ${marker}`,
+  description: 'Synthetic acceptance record',
+  proposalType: 'union_demand',
   proposedLanguage: 'Synthetic bargaining language for tenant-isolation verification.',
 })
 const readIds = async (api: APIRequestContext): Promise<string[]> => {
@@ -55,8 +65,12 @@ const readIds = async (api: APIRequestContext): Promise<string[]> => {
 
 test('R-51: bargaining proposal CRUD enforces its parent negotiation organization over real HTTP', async ({}, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'API journey runs once at desktop')
-  test.skip(!process.env.DATABASE_URL || process.env.QA_TEST_ENV !== 'true' ||
-    process.env.UE_ENVIRONMENT !== 'local', 'requires disposable native QA runtime')
+  test.skip(
+    !process.env.DATABASE_URL ||
+      process.env.QA_TEST_ENV !== 'true' ||
+      process.env.UE_ENVIRONMENT !== 'local',
+    'requires disposable native QA runtime',
+  )
   test.setTimeout(240_000)
   const records: BargainingQaRecord[] = []
   const primary = await as(U.stewardPrimary)
@@ -64,22 +78,34 @@ test('R-51: bargaining proposal CRUD enforces its parent negotiation organizatio
   const admin = await as(U.adminPrimary)
   const marker = randomUUID().slice(0, 10)
   try {
-    const nPrimary = await requireId(await primary.post('/api/bargaining/negotiations', {
-      data: negotiation(`primary-${marker}`),
-    }), 'primary negotiation')
+    const nPrimary = await requireId(
+      await primary.post('/api/bargaining/negotiations', {
+        data: negotiation(`primary-${marker}`),
+      }),
+      'primary negotiation',
+    )
     records.push({ table: 'negotiations', id: nPrimary, org: PRIMARY })
-    const nSecondary = await requireId(await secondary.post('/api/bargaining/negotiations', {
-      data: negotiation(`secondary-${marker}`),
-    }), 'secondary negotiation')
+    const nSecondary = await requireId(
+      await secondary.post('/api/bargaining/negotiations', {
+        data: negotiation(`secondary-${marker}`),
+      }),
+      'secondary negotiation',
+    )
     records.push({ table: 'negotiations', id: nSecondary, org: SECONDARY })
 
-    const pPrimary = await requireId(await primary.post('/api/bargaining/proposals', {
-      data: proposal(nPrimary, `primary-${marker}`),
-    }), 'primary proposal')
+    const pPrimary = await requireId(
+      await primary.post('/api/bargaining/proposals', {
+        data: proposal(nPrimary, `primary-${marker}`),
+      }),
+      'primary proposal',
+    )
     records.push({ table: 'bargaining_proposals', id: pPrimary, org: PRIMARY })
-    const pSecondary = await requireId(await secondary.post('/api/bargaining/proposals', {
-      data: proposal(nSecondary, `secondary-${marker}`),
-    }), 'secondary proposal')
+    const pSecondary = await requireId(
+      await secondary.post('/api/bargaining/proposals', {
+        data: proposal(nSecondary, `secondary-${marker}`),
+      }),
+      'secondary proposal',
+    )
     records.push({ table: 'bargaining_proposals', id: pSecondary, org: SECONDARY })
 
     expect(await readIds(primary)).toContain(pPrimary)
@@ -91,16 +117,22 @@ test('R-51: bargaining proposal CRUD enforces its parent negotiation organizatio
     for (const ctx of [primary, admin]) {
       const foreign = await ctx.get(`/api/bargaining/proposals/${pSecondary}`)
       expect([403, 404], 'foreign item read must be denied').toContain(foreign.status())
-      const changed = await ctx.patch(`/api/bargaining/proposals/${pSecondary}`, { data: { title: 'Hijacked' } })
+      const changed = await ctx.patch(`/api/bargaining/proposals/${pSecondary}`, {
+        data: { title: 'Hijacked' },
+      })
       expect([403, 404], 'foreign PATCH must be denied').toContain(changed.status())
     }
     const foreignDelete = await admin.delete(`/api/bargaining/proposals/${pSecondary}`)
-    expect([403, 404], 'administrator must not DELETE foreign tenant records').toContain(foreignDelete.status())
+    expect([403, 404], 'administrator must not DELETE foreign tenant records').toContain(
+      foreignDelete.status(),
+    )
 
     const forgedCreate = await primary.post('/api/bargaining/proposals', {
       data: proposal(nSecondary, `foreign-parent-${marker}`),
     })
-    expect([403, 404], 'a foreign negotiation may not be used to create a child').toContain(forgedCreate.status())
+    expect([403, 404], 'a foreign negotiation may not be used to create a child').toContain(
+      forgedCreate.status(),
+    )
 
     const attemptedMove = await primary.patch(`/api/bargaining/proposals/${pPrimary}`, {
       data: { negotiationId: nSecondary, title: 'Legitimate text amendment' },
@@ -108,7 +140,9 @@ test('R-51: bargaining proposal CRUD enforces its parent negotiation organizatio
     // Parent foreign keys are immutable through generic CRUD. Reject the whole
     // mass-assignment request rather than silently dropping negotiationId.
     expect(attemptedMove.status(), await attemptedMove.text()).toBe(400)
-    const afterRejectedMove = unwrap(await (await primary.get(`/api/bargaining/proposals/${pPrimary}`)).json()) as RecordShape
+    const afterRejectedMove = unwrap(
+      await (await primary.get(`/api/bargaining/proposals/${pPrimary}`)).json(),
+    ) as RecordShape
     expect(afterRejectedMove.negotiationId).toBe(nPrimary)
     expect(afterRejectedMove.title).toBe(`Synthetic proposal primary-${marker}`)
 
@@ -117,7 +151,9 @@ test('R-51: bargaining proposal CRUD enforces its parent negotiation organizatio
       data: { title: 'Legitimate text amendment' },
     })
     expect(validAmendment.status(), await validAmendment.text()).toBe(200)
-    const fresh = unwrap(await (await primary.get(`/api/bargaining/proposals/${pPrimary}`)).json()) as RecordShape
+    const fresh = unwrap(
+      await (await primary.get(`/api/bargaining/proposals/${pPrimary}`)).json(),
+    ) as RecordShape
     expect(fresh.negotiationId).toBe(nPrimary)
     expect(fresh.title).toBe('Legitimate text amendment')
     expect((await secondary.get(`/api/bargaining/proposals/${pPrimary}`)).status()).not.toBe(200)

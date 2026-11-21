@@ -23,6 +23,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const APP_ROOT = join(__dirname, '..', '..')
@@ -48,26 +50,40 @@ describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on
     for (const statement of statements) await admin.query(statement)
   }
   /** One statement as a real role in an organization, in a transaction that is rolled back; resolves to the rows, or to the SQLSTATE the database refused it with. */
+  // Canonical V2 admits a runtime statement in an organization only in a verified business session (ue_v2_verified_business_session): in
+  // one of the seeded organizations it runs in the real session of that organization's declared administrator; anywhere else, with none.
+  const sessionOrgs = new Set<string>()
   const as = async (role: string, organizationId: string | null, statement: string, params: unknown[] = []): Promise<{ rows?: Row[]; code?: string }> => {
-    await admin.query('BEGIN')
-    try {
-      await admin.query(`SET LOCAL ROLE ${role}`)
-      await admin.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
-      return { rows: (await admin.query(statement, params)).rows as Row[] }
-    } catch (error) {
-      return { code: (error as { code?: string }).code }
-    } finally {
-      await admin.query('ROLLBACK')
+    const attempt = async (binding?: Parameters<typeof setNativeBusinessContext>[1]) => {
+      await admin.query('BEGIN')
+      try {
+        await admin.query(`SET LOCAL ROLE ${role}`)
+        await admin.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
+        if (binding) await setNativeBusinessContext(admin, binding)
+        return { rows: (await admin.query(statement, params)).rows as Row[] }
+      } catch (error) {
+        return { code: (error as { code?: string }).code }
+      } finally {
+        await admin.query('ROLLBACK')
+      }
     }
+    if (role === RUNTIME && organizationId && sessionOrgs.has(organizationId))
+      return withNativeCanonicalActor(nativeTenantReaderId(organizationId, 'admin'), organizationId, (binding) => attempt(binding))
+    return attempt()
   }
+  // A column grant is a privilege too: canonical V2 grants some reads as exact column SELECTs (currentSecurity.approvedColumnGrants).
   const privileges = async (role: string, table: string) =>
-    (await Promise.all(['SELECT', 'INSERT', 'UPDATE', 'DELETE'].map(async (operation) => [operation, (await rows(`SELECT has_table_privilege($1, $2, $3) AS held`, [role, `public.${table}`, operation]))[0].held]))).filter(([, held]) => held).map(([operation]) => operation as string)
+    (await Promise.all(['SELECT', 'INSERT', 'UPDATE', 'DELETE'].map(async (operation) => [operation, (await rows(operation === 'DELETE' ? `SELECT has_table_privilege($1, $2, $3) AS held` : `SELECT has_any_column_privilege($1, $2, $3) AS held`, [role, `public.${table}`, operation]))[0].held]))).filter(([, held]) => held).map(([operation]) => operation as string)
+  // The shape the migrations own. Canonical V2 adds its RESTRICTIVE verified-business-session policy (it can only narrow) on the tenant
+  // relations; sessionPolicies() states exactly where.
+  const sessionPolicies = async (tables: string[]) =>
+    (await rows(`SELECT c.relname, p.polname, p.polpermissive FROM pg_policy p JOIN pg_class c ON c.oid = p.polrelid WHERE c.relnamespace = 'public'::regnamespace AND c.relname = ANY($1) AND p.polname LIKE 'ue\\_v2\\_%' ORDER BY 1, 2`, [tables]))
   const shapeOf = async (tables: string[]) =>
-    rows(
+    (await rows(
       `SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity, COALESCE((SELECT array_agg(p.polname::text ORDER BY p.polname) FROM pg_policy p WHERE p.polrelid = c.oid), '{}'::text[]) AS policies
          FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relname = ANY($1) ORDER BY c.relname`,
       [tables],
-    )
+    )).map((row) => ({ ...row, policies: (row.policies as string[]).filter((name) => !name.startsWith('ue_v2_')) }))
 
   const TABLES_0055 = ['committee_memberships', 'integration_sync_logs', 'job_classifications', 'shopify_config']
 
@@ -81,6 +97,8 @@ describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on
          VALUES ($1, $2, $3, 'local', '{}', 0, '{}', false, 0, 0, '{}', '{}', 'active', now(), now(), 1)`,
         [id, `Org ${name} ${tag}`, `m0055-${name.toLowerCase()}-${tag}`],
       )
+      await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(id, 'admin'), id, 'admin')
+      sessionOrgs.add(id)
     }
   }, 120_000)
 
@@ -113,6 +131,7 @@ describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on
 
     it('has forced row-level security and exactly the policies each relation\'s class needs', async () => {
       expect(await shapeOf(TABLES_0055)).toEqual(SHAPE)
+      expect(await sessionPolicies(TABLES_0055)).toEqual(['committee_memberships', 'integration_sync_logs', 'job_classifications'].map((relname) => ({ relname, polname: 'ue_v2_verified_business_session', polpermissive: false })))
     })
 
     it('shows the runtime role only its own organization\'s rows, directly (job_classifications) and through the parent (the two parent-owned relations)', async () => {
@@ -146,6 +165,7 @@ describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on
 
       await run(statementsOf('0055_census_ctx3_promoted_relations_rls_closure.sql', 'migrations-cache'))
       expect(await shapeOf(TABLES_0055)).toEqual(SHAPE)
+      expect((await sessionPolicies(TABLES_0055)).map((row) => row.relname)).toEqual(['committee_memberships', 'integration_sync_logs', 'job_classifications'])
     })
 
     it('refuses to apply when a relation it closes is missing', async () => {
@@ -224,8 +244,6 @@ describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on
       platform_invoices: ['SELECT', 'INSERT', 'UPDATE'],
       payment_allocations: ['INSERT'],
       platform_invoice_line_items: ['INSERT'],
-      reward_budget_envelopes: ['SELECT', 'UPDATE'],
-      reward_wallet_ledger: ['SELECT', 'INSERT'],
       org_subscriptions: ['SELECT', 'INSERT', 'UPDATE'],
       pilot_applications: ['SELECT', 'INSERT', 'UPDATE'],
       external_data_sync_log: ['SELECT', 'INSERT', 'UPDATE'],
@@ -265,6 +283,12 @@ describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on
       expect(await privileges(SYSTEM, 'grievances')).toEqual(['SELECT'])
       expect(await privileges(SYSTEM, 'grievance_deadlines')).toEqual(['SELECT'])
       expect(await privileges(SYSTEM, 'notifications')).toEqual([])
+    })
+
+    it('gives neither role any privilege on the reward ledgers the census once declared: canonical V2 contains them (no reward authority)', async () => {
+      // catalog-v2-decisions: reward_budget_envelopes and reward_wallet_ledger are CONTAINED_NO_AUTHORITY; the reward routes answer 501.
+      for (const table of ['reward_budget_envelopes', 'reward_wallet_ledger'])
+        for (const role of [SYSTEM, RUNTIME]) expect(await privileges(role, table), `${role} on ${table}`).toEqual([])
     })
 
     it('gives the runtime role no privilege on the system-only relations this task closed', async () => {

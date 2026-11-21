@@ -9,9 +9,9 @@
  *   - the daily education reminder job finds the sessions and certifications it must mail as the system role (system SELECT on course_registrations, training_courses,
  *     course_sessions, member_certifications), writes its delivery marker (in_app_notifications INSERT), skips what is already marked, and releases the marker of a
  *     mail the provider refused (DELETE);
- *   - the rewards cron awards the members' anniversaries as the system role (recognition_awards, reward_wallet_ledger INSERT, reward_budget_envelopes UPDATE, the audit entry
- *     of each organization on the same transaction), once a day, and the rewards expiry scan reads the ledger and the member's address inside the organization
- *     (organization_members, not the identity store), writes and claims the expiry marker once per lot and tier, and releases it when the mail fails;
+ *   - rewards automation has no recorded institutional authority (lib/rewards/credit-authority.ts; recognition_awards, reward_budget_envelopes and
+ *     reward_wallet_ledger are ZERO_SYSTEM_MUTATION_TABLES): the authenticated anniversary cron answers 501 and the expiry scan is refused, with no
+ *     award, ledger entry, budget use, mail, marker or audit entry;
  *   - the public pilot application (an applicant has no organization yet) is written by the system role after the body is validated, and an invalid body writes nothing;
  *   - the signed unsubscribe link ends a recipient's communications with every organization they belong to (communication_preferences, newsletter_list_subscribers,
  *     newsletter_distribution_lists, consent_records), as the system role.
@@ -202,34 +202,35 @@ describe.skipIf(!URL)('the cross-organization system jobs and webhooks, as the r
       )
     })
 
-    it('finds the lots in the organization of each member, reading the address from organization_members, and claims one marker per lot and tier', async () => {
+    // Rewards automation has no recorded institutional authority (lib/rewards/credit-authority.ts requireRewardsInstitutionalAuthority, the
+    // first statement of notifyExpiringCredits): the scan is refused before any read, mail or marker, whatever the ledger holds.
+    const refusedUnavailable = async () => {
+      const error = await rewardsNotifications.notifyExpiringCredits(7).then(() => null, (failure: unknown) => failure)
+      expect(error).toMatchObject({ name: 'RewardsInstitutionalAuthorityUnavailable', code: 'NOT_IMPLEMENTED', status: 501 })
+    }
+
+    it('refuses the scan NOT_IMPLEMENTED before reading a lot: no member is mailed and no marker is claimed', async () => {
       boundary.expiryMail.length = 0
 
-      const result = await rewardsNotifications.notifyExpiringCredits(7)
+      await refusedUnavailable()
 
-      expect(result).toMatchObject({ success: true, sent: 1, failed: 0 })
-      expect(boundary.expiryMail).toHaveLength(1)
-      expect(boundary.expiryMail[0]).toMatchObject({ recipientEmail: `${HOLDER}@example.test`, expiringAmount: 100 })
-      expect(await markers()).toEqual([{ user_id: HOLDER, key: `rewards-expiry:7:${lotDate()}` }])
-    })
-
-    it('warns nobody twice for the same lot and tier', async () => {
-      boundary.expiryMail.length = 0
-
-      const result = await rewardsNotifications.notifyExpiringCredits(7)
-
-      expect(result).toMatchObject({ success: true, sent: 0, failed: 0 })
       expect(boundary.expiryMail).toEqual([])
-      expect(await markers()).toHaveLength(1)
+      expect(await markers()).toEqual([])
     })
 
-    it('releases the marker when the mail cannot be sent, so the next run warns', async () => {
-      await admin.query(`DELETE FROM in_app_notifications WHERE organization_id = $1 AND data->>'kind' = 'rewards_expiry_warning'`, [ORG_B])
+    it('refuses again on the next run, so nobody is ever warned twice and no marker accumulates', async () => {
+      boundary.expiryMail.length = 0
+
+      await refusedUnavailable()
+
+      expect(boundary.expiryMail).toEqual([])
+      expect(await markers()).toEqual([])
+    })
+
+    it('refuses before the mail provider is reached, so a failing provider leaves no marker to release', async () => {
       boundary.failExpiryMail = true
       try {
-        const result = await rewardsNotifications.notifyExpiringCredits(7)
-
-        expect(result).toMatchObject({ success: false, failed: 1 })
+        await refusedUnavailable()
         expect(await markers()).toEqual([])
       } finally {
         boundary.failExpiryMail = false
@@ -263,23 +264,27 @@ describe.skipIf(!URL)('the cross-organization system jobs and webhooks, as the r
       }
     })
 
-    it('awards each member their anniversary as the system role: the award, the wallet ledger entry and the budget, in one transaction per organization with its audit entry', async () => {
+    const unavailable = async (response: Response) => {
+      expect(response.status).toBe(501)
+      expect(await response.json()).toMatchObject({ success: false, error: { code: 'NOT_IMPLEMENTED' }, capability: 'rewards.automation', capabilityState: 'NOT_IMPLEMENTED' })
+    }
+
+    it('answers the authenticated anniversary run NOT_IMPLEMENTED (501): no award, no wallet ledger entry, no budget use and no audit entry', async () => {
       const response = await rewardsCron.POST(new NextRequest('http://localhost/api/rewards/cron?task=anniversaries', { method: 'POST', headers: { 'x-cron-secret': secret } }))
 
-      expect(response.status, JSON.stringify(await response.clone().json()).slice(0, 800)).toBe(200)
-      expect(await rows(`SELECT recipient_user_id, status FROM recognition_awards WHERE org_id = $1 ORDER BY recipient_user_id`, [ORG_C])).toEqual(MEMBERS.map((member) => ({ recipient_user_id: member, status: 'issued' })))
-      expect(await rows(`SELECT user_id, event_type, amount_credits FROM reward_wallet_ledger WHERE org_id = $1 ORDER BY user_id`, [ORG_C])).toEqual(MEMBERS.map((member) => ({ user_id: member, event_type: 'earn', amount_credits: 5 })))
-      expect(await rows(`SELECT amount_used FROM reward_budget_envelopes WHERE org_id = $1`, [ORG_C])).toEqual([{ amount_used: 10 }])
-      expect(savepointHarness.audits.filter((entry) => entry.organizationId === ORG_C && entry.action === 'rewards.cron.anniversaries')).toHaveLength(1)
+      await unavailable(response)
+      expect(await rows(`SELECT recipient_user_id FROM recognition_awards WHERE org_id = $1`, [ORG_C])).toEqual([])
+      expect(await rows(`SELECT user_id FROM reward_wallet_ledger WHERE org_id = $1`, [ORG_C])).toEqual([])
+      expect(await rows(`SELECT amount_used FROM reward_budget_envelopes WHERE org_id = $1`, [ORG_C])).toEqual([{ amount_used: 0 }])
+      expect(savepointHarness.audits.filter((entry) => entry.organizationId === ORG_C && entry.action === 'rewards.cron.anniversaries')).toHaveLength(0)
     })
 
-    it('awards nobody a second time on the same day, and touches no other organization', async () => {
+    it('answers a repeat run the same way, and touches no other organization', async () => {
       const response = await rewardsCron.POST(new NextRequest('http://localhost/api/rewards/cron?task=anniversaries', { method: 'POST', headers: { 'x-cron-secret': secret } }))
 
-      expect(response.status).toBe(200)
-      expect(Number((await rows(`SELECT count(*)::int AS n FROM recognition_awards WHERE org_id = $1`, [ORG_C]))[0].n)).toBe(2)
-      expect(Number((await rows(`SELECT count(*)::int AS n FROM recognition_awards WHERE org_id = ANY($1)`, [[ORG_A, ORG_B]]))[0].n)).toBe(0)
-      expect(await rows(`SELECT amount_used FROM reward_budget_envelopes WHERE org_id = $1`, [ORG_C])).toEqual([{ amount_used: 10 }])
+      await unavailable(response)
+      expect(Number((await rows(`SELECT count(*)::int AS n FROM recognition_awards WHERE org_id = ANY($1)`, [[ORG_A, ORG_B, ORG_C]]))[0].n)).toBe(0)
+      expect(await rows(`SELECT amount_used FROM reward_budget_envelopes WHERE org_id = $1`, [ORG_C])).toEqual([{ amount_used: 0 }])
     })
   })
 

@@ -21,6 +21,8 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { eligibleQualityTiers, QUALITY_RANK } from '@/features/media/quality-ceiling'
+import type { QualityTier } from '@/features/media/types'
 
 const ROOT = resolve(__dirname, '..')
 
@@ -49,12 +51,27 @@ type ReadSourcePath =
 
 const SOURCE_TEXT: Record<ReadSourcePath, string> = {
   'app/api/payouts/route.ts': readFileSync(resolve(ROOT, 'app/api/payouts/route.ts'), 'utf-8'),
-  'features/media/playback-service.ts': readFileSync(resolve(ROOT, 'features/media/playback-service.ts'), 'utf-8'),
-  'features/media/resilience.ts': readFileSync(resolve(ROOT, 'features/media/resilience.ts'), 'utf-8'),
+  'features/media/playback-service.ts': readFileSync(
+    resolve(ROOT, 'features/media/playback-service.ts'),
+    'utf-8',
+  ),
+  'features/media/resilience.ts': readFileSync(
+    resolve(ROOT, 'features/media/resilience.ts'),
+    'utf-8',
+  ),
   'features/media/types.ts': readFileSync(resolve(ROOT, 'features/media/types.ts'), 'utf-8'),
-  'features/media/upload-service.ts': readFileSync(resolve(ROOT, 'features/media/upload-service.ts'), 'utf-8'),
-  'features/payouts/payout-service.ts': readFileSync(resolve(ROOT, 'features/payouts/payout-service.ts'), 'utf-8'),
-  'features/payouts/revenue-split.ts': readFileSync(resolve(ROOT, 'features/payouts/revenue-split.ts'), 'utf-8'),
+  'features/media/upload-service.ts': readFileSync(
+    resolve(ROOT, 'features/media/upload-service.ts'),
+    'utf-8',
+  ),
+  'features/payouts/payout-service.ts': readFileSync(
+    resolve(ROOT, 'features/payouts/payout-service.ts'),
+    'utf-8',
+  ),
+  'features/payouts/revenue-split.ts': readFileSync(
+    resolve(ROOT, 'features/payouts/revenue-split.ts'),
+    'utf-8',
+  ),
   'features/payouts/types.ts': readFileSync(resolve(ROOT, 'features/payouts/types.ts'), 'utf-8'),
   'lib/api-guards.ts': readFileSync(resolve(ROOT, 'lib/api-guards.ts'), 'utf-8'),
   'maturity.json': readFileSync(resolve(ROOT, 'maturity.json'), 'utf-8'),
@@ -67,23 +84,41 @@ function readSource(relPath: ReadSourcePath): string {
 function fileExists(relPath: ReportPath | 'maturity.json'): boolean {
   switch (relPath) {
     case '../../reports/product-reports/zonga/zonga-admin-gap-audit.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-admin-gap-audit.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-admin-gap-audit.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-auth-rbac-audit.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-backup-ir-plan.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-backup-ir-plan.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-backup-ir-plan.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-billing-payouts-readiness.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-client-onboarding-script.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-client-onboarding-script.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-client-onboarding-script.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-go-live-decision.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-go-live-decision.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-go-live-decision.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-launch-readiness.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-launch-readiness.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-launch-readiness.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-legal-launch-pack.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-legal-launch-pack.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-legal-launch-pack.md'),
+      )
     case '../../reports/product-reports/zonga/zonga-streaming-readiness.md':
-      return existsSync(resolve(ROOT, '../../reports/product-reports/zonga/zonga-streaming-readiness.md'))
+      return existsSync(
+        resolve(ROOT, '../../reports/product-reports/zonga/zonga-streaming-readiness.md'),
+      )
     case 'maturity.json':
       return existsSync(resolve(ROOT, 'maturity.json'))
     default:
@@ -215,7 +250,19 @@ describe('Streaming Resilience', () => {
 
   it('quality entitlement clamping is implemented', () => {
     const src = readSource('features/media/playback-service.ts')
-    expect(src).toContain('clampQuality')
+    expect(src).toContain('eligibleQualityTiers(preferredQuality, maxQualityTier)')
+    // Prove the ceiling for every fallback too; a renamed source symbol is
+    // not evidence that a standard request cannot receive a higher variant.
+    for (const requested of Object.keys(QUALITY_RANK) as QualityTier[])
+      for (const maximum of Object.keys(QUALITY_RANK) as QualityTier[]) {
+        const tiers = eligibleQualityTiers(requested, maximum)
+        expect(tiers.length).toBeGreaterThan(0)
+        for (const tier of tiers)
+          expect(QUALITY_RANK[tier]).toBeLessThanOrEqual(
+            Math.min(QUALITY_RANK[requested], QUALITY_RANK[maximum]),
+          )
+      }
+    expect(() => eligibleQualityTiers('unverified' as QualityTier)).toThrow()
   })
 })
 

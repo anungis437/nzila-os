@@ -342,7 +342,7 @@ test('a duplicate or changed route-method identity and a changed dynamic paramet
   const original = dynamic.route
   dynamic.route = original.replace(/\[([^\]]+)\]/, '[renamed$1]')
   const problems = runUniverse(renamed)
-  assert.ok(hasProblem(problems, new RegExp(`UNIVERSE-UNRECORDED-REMOVAL: historical operation ${original.replace(/[[\]|.]/g, '\\$&')}`)), 'the original identity left the manifest')
+  assert.ok(hasProblem(problems, new RegExp(`UNIVERSE-UNRECORDED-REMOVAL: historical operation ${original.replace(/[\\[\]|.]/g, '\\$&')}`)), 'the original identity left the manifest')
   assert.ok(hasProblem(problems, /UNIVERSE-UNRECORDED-ADDITION/), 'the renamed identity is an unrecorded addition')
   assert.ok(hasProblem(problems, /UNIVERSE-IDENTITY|UNIVERSE-ORPHAN-OWNERSHIP/))
 })

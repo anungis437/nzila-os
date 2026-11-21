@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const m = vi.hoisted(() => {
   class TestApiError extends Error {
@@ -18,12 +18,18 @@ const m = vi.hoisted(() => {
   }
 })
 
+const EXECUTIVE = vi.hoisted(() => ({ rows: (() => Promise.resolve([] as unknown[])) as () => Promise<unknown[]> }))
 vi.mock('@/lib/api/framework', () => ({ ApiError: m.ApiError }))
 vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdminUser }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }))
-vi.mock('@/lib/ai/ai-client', () => ({ UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000' }))
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }))
 vi.mock('@/lib/logger', () => ({ logger: { error: m.loggerError, info: vi.fn(), warn: vi.fn(), debug: vi.fn() } }))
+
+vi.mock('@nzila/db/schema', () => ({ authOrganizationUsers: { userId: 'user_id', organizationId: 'organization_id', isActive: 'is_active', role: 'role' } }))
+vi.mock('@nzila/platform-auth/auth-execution', () => ({
+  withAuthContext: (_context: unknown, work: () => unknown) => work(),
+  authDb: { select: () => ({ from: () => ({ where: () => ({ limit: () => EXECUTIVE.rows() }) }) }) },
+}))
 
 import { PLATFORM_CAPABILITIES, requirePlatformStaffAuthority } from '../platform-staff'
 
@@ -38,12 +44,12 @@ describe('requirePlatformStaffAuthority', () => {
     m.persistAtomicAudit.mockResolvedValue(undefined)
   })
 
-  it('returns the actor only when platform eligibility is backed by a live action-specific mandate', async () => {
+  it('returns the actor only when platform eligibility is backed by a live action-specific mandate, exercised from the platform organization', async () => {
     m.isPlatformAdminUser.mockResolvedValue(true)
 
-    await expect(requirePlatformStaffAuthority({ userId: 'staff_1', organizationId: 'org_1' }, 'platform.stats.read')).resolves.toEqual({
+    await expect(requirePlatformStaffAuthority({ userId: 'staff_1', organizationId: '00000000-0000-0000-0000-000000000000' }, 'platform.stats.read')).resolves.toEqual({
       userId: 'staff_1',
-      organizationId: 'org_1',
+      organizationId: '00000000-0000-0000-0000-000000000000',
     })
 
     expect(m.isPlatformAdminUser).toHaveBeenCalledWith('staff_1')
@@ -51,18 +57,45 @@ describe('requirePlatformStaffAuthority', () => {
     expect(m.persistAtomicAudit).not.toHaveBeenCalled()
   })
 
-  it('refuses an eligible platform administrator when no live scoped mandate exists', async () => {
+  it('refuses an eligible platform administrator in the platform organization when no live scoped mandate exists, and records it there', async () => {
     m.isPlatformAdminUser.mockResolvedValue(true)
     m.execute.mockResolvedValue([])
 
-    await expect(requirePlatformStaffAuthority({ userId: 'staff_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({
+    await expect(requirePlatformStaffAuthority({ userId: 'staff_1', organizationId: '00000000-0000-0000-0000-000000000000' }, 'platform.stats.read')).rejects.toMatchObject({
       status: 403,
       message: expect.stringContaining('platform-staff authority'),
     })
 
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ organizationId: '00000000-0000-0000-0000-000000000000', details: { reason: 'no_live_scoped_platform_staff_mandate' } }),
+      'failure',
+    )
+  })
+
+  it('refuses an eligible, even mandated, platform administrator acting from a customer organization, without reaching for the mandate', async () => {
+    m.isPlatformAdminUser.mockResolvedValue(true)
+
+    await expect(requirePlatformStaffAuthority({ userId: 'staff_1', organizationId: 'org_1' }, 'platform.organization.manage')).rejects.toMatchObject({ status: 403 })
+
+    expect(m.execute).not.toHaveBeenCalled()
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       'tx',
-      expect.objectContaining({ details: { reason: 'no_live_scoped_platform_staff_mandate' } }),
+      expect.objectContaining({ organizationId: 'org_1', action: 'platform.organization.manage.denied', details: { reason: 'not_acting_from_platform_organization' } }),
+      'failure',
+    )
+  })
+
+  it('records an unverifiable mandate lookup as a refusal instead of failing silently', async () => {
+    m.isPlatformAdminUser.mockResolvedValue(true)
+    m.execute.mockRejectedValue(new Error('binding refused'))
+
+    await expect(requirePlatformStaffAuthority({ userId: 'staff_1', organizationId: '00000000-0000-0000-0000-000000000000' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+
+    expect(m.loggerError).toHaveBeenCalledWith('platform_staff_mandate_unverifiable', { capability: 'platform.stats.read', error: 'binding refused' })
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ details: { reason: 'platform_staff_mandate_unverifiable' } }),
       'failure',
     )
   })
@@ -120,5 +153,43 @@ describe('requirePlatformStaffAuthority', () => {
       'platform.marketing_content.publish', 'platform.cba_dataset.curate',
     ])
     expect(new Set(PLATFORM_CAPABILITIES).size).toBe(PLATFORM_CAPABILITIES.length)
+  })
+  it('the platform organization is the system sentinel', async () => {
+    const { UE_SYSTEM_ORG_ID } = await vi.importActual<typeof import('@/lib/ai/ai-client')>('@/lib/ai/ai-client')
+    const { PLATFORM_ORGANIZATION_ID } = await import('@/lib/authority/platform-organization')
+    expect(PLATFORM_ORGANIZATION_ID).toBe(UE_SYSTEM_ORG_ID)
+  })
+
+  describe('the platform executive (the owner appointment)', () => {
+    beforeEach(() => { EXECUTIVE.rows = () => Promise.resolve([{ role: 'executive' }]) })
+    afterEach(() => { EXECUTIVE.rows = () => Promise.resolve([]) })
+
+    it('acts from any organization with no mandate, and every exercise is recorded as authorized', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(true)
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.organization.manage')).resolves.toEqual({ userId: 'owner_1', organizationId: 'org_1' })
+      expect(m.execute).not.toHaveBeenCalled()
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith('tx', expect.objectContaining({ organizationId: 'org_1', userId: 'owner_1',
+        action: 'platform.organization.manage.authorized', details: { basis: 'platform_executive' } }), 'success')
+    })
+
+    it('is refused when the exercise cannot be recorded', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(true)
+      m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit store down'))
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+      expect(m.loggerError).toHaveBeenCalledWith('platform_authority_not_recordable', { capability: 'platform.stats.read', error: 'audit store down' })
+    })
+
+    it('confers nothing without platform eligibility', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(false)
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+      expect(m.persistAtomicAudit).toHaveBeenCalledWith('tx', expect.objectContaining({ details: { reason: 'not_platform_staff_eligible' } }), 'failure')
+    })
+
+    it('falls back to the mandate path when the appointment cannot be read', async () => {
+      m.isPlatformAdminUser.mockResolvedValue(true)
+      EXECUTIVE.rows = () => Promise.reject(new Error('identity store down'))
+      await expect(requirePlatformStaffAuthority({ userId: 'owner_1', organizationId: 'org_1' }, 'platform.stats.read')).rejects.toMatchObject({ status: 403 })
+      expect(m.loggerError).toHaveBeenCalledWith('platform_executive_unverifiable', { capability: 'platform.stats.read', error: 'identity store down' })
+    })
   })
 })

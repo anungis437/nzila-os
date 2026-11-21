@@ -1,0 +1,30 @@
+{
+  "fixtures": [
+    {
+      "containerName": "ue-v2-system-53db6cee-4190-40db-9f36-45737eba12f1",
+      "containerId": "c5a659d9a56bab60b5661e2c45ff746a71387f7bb48e5760a7333252c8fa0f00",
+      "mission": "UE_BOOTSTRAP_V2_RUNTIME",
+      "status": "exited",
+      "exitCode": 255,
+      "oomKilled": false,
+      "postgresLogPath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/interrupted-run-state/ue-v2-system-53db6cee-4190-40db-9f36-45737eba12f1.postgres.log",
+      "postgresLogSha256": "0764f9418e8c9e6725f11e4a9716a185b603e45c65fd29443a9d9231755567f2",
+      "testVerdict": "INTERRUPTED_UNQUALIFIED",
+      "ownedContainerRemoved": true
+    },
+    {
+      "containerName": "ue-v2-clean-c1cc0c9f-368f-4097-9d75-3b60472480a6",
+      "containerId": "b43d2a6221bb5266a11b85d9eeee6d011b8a545e142104fa737092652f5aa4c5",
+      "mission": "UE_BOOTSTRAP_V2_CLEANROOM",
+      "status": "exited",
+      "exitCode": 255,
+      "oomKilled": false,
+      "postgresLogPath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/interrupted-run-state/ue-v2-clean-c1cc0c9f-368f-4097-9d75-3b60472480a6.postgres.log",
+      "postgresLogSha256": "b263304521c16c53f11af3212ab494b4b9872ba61be9b6c91d2d9e27a5f0d1c0",
+      "testVerdict": "INTERRUPTED_UNQUALIFIED",
+      "ownedContainerRemoved": true
+    }
+  ],
+  "retainedOtherContainersAndAllVolumes": true,
+  "promotionsPerformed": false
+}

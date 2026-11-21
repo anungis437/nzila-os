@@ -10,6 +10,12 @@
     "apps/*/lib/audit-timeline.ts",
     "apps/*/lib/actions/**",
     "apps/*/server/actions/**",
+    "apps/cfo/lib/services/cfo-records.ts",
+    "apps/cfo/lib/services/platform-administration.ts",
+    "apps/cfo/lib/services/reports.ts",
+    "apps/cfo/lib/services/security-records.ts",
+    "apps/zonga/lib/services/listener-social.ts",
+    "apps/zonga/lib/services/moderation-notifications.ts",
     "apps/control-plane/**",
     "packages/evidence/**",
     "packages/commerce-audit/**",
@@ -38,5 +44,9 @@
     "from.*platform-evidence-pack",
     "from.*evidence.*seal",
     "from.*audit.*timeline"
-  ]
+  ],
+  "relocatedFromActions": {
+    "note": "These exact files hold logic that lived under apps/*/lib/actions/** (allowlisted above) before the NO_RAW_DB_IN_ACTIONS refactor moved data access into services. Listing them by path keeps the previously accepted state without allowlisting lib/services/** as a whole.",
+    "followUp": "zonga listener-social and moderation-notifications use audit_log as primary storage for comments and notification de-duplication, and cfo stores CFO records as audit_log rows. That data model predates this change and should move to domain tables."
+  }
 }

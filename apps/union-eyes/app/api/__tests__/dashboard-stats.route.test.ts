@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   withRLSContext: vi.fn(),
   execute: vi.fn(),
   queries: [] as unknown[],
+  batch:vi.fn(),
 }));
 
 class FakeApiError extends Error {
@@ -14,6 +15,7 @@ class FakeApiError extends Error {
   static internal(message?: string) { return new FakeApiError(`internal:${message}`); }
 }
 
+vi.mock('@/lib/authority/store/route-adapter',()=>({decideCaseCapabilitiesBatch:m.batch}));
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: FakeApiError }));
 vi.mock('@/lib/cases/case-authorization', () => ({ getCaseActor: m.getCaseActor, caseReadScope: m.caseReadScope }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
@@ -28,10 +30,11 @@ describe('GET /api/dashboard/stats (R-24)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.queries.length = 0;
+    m.batch.mockImplementation(async(_tx,input)=>new Map(input.caseIds.map((id:string)=>[id,{'case:read':{effect:id==='denied'?'deny':'allow'}}])));
     m.withApi.mockImplementation((_cfg: unknown, handler: () => Promise<unknown>) => () => handler());
     m.execute.mockImplementation(async (query: { text: string }) => {
       m.queries.push(query);
-      return query.text.includes('organization_members') ? [{ activeMembers: 9 }] : [{ activeClaims: 2, pendingReviews: 1, resolvedCases: 3, highPriorityClaims: 1 }];
+      return query.text.includes('organization_members') ? [{ activeMembers: 9 }] : [{claimId:'a',status:'submitted',priority:'high'},{claimId:'b',status:'investigation',priority:'medium'},{claimId:'c',status:'resolved',priority:'medium'},{claimId:'d',status:'closed',priority:'medium'},{claimId:'e',status:'resolved',priority:'medium'},{claimId:'denied',status:'submitted',priority:'high'}];
     });
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (db: { execute: typeof m.execute }) => Promise<unknown>) => fn({ execute: m.execute }));
   });
@@ -66,6 +69,12 @@ describe('GET /api/dashboard/stats (R-24)', () => {
     m.withRLSContext.mockRejectedValue(new Error('connection lost'));
     const { GET } = await load();
     await expect(GET()).rejects.toMatchObject({ kind: expect.stringContaining('internal') });
+  });
+
+  it('does not report zero counts when canonical fact loading is unavailable',async()=>{
+    m.getCaseActor.mockResolvedValue({userId:'u1',organizationId:'org-1',role:'member'});
+    m.batch.mockRejectedValue(new Error('authority unavailable'));
+    const {GET}=await load();await expect(GET()).rejects.toMatchObject({kind:expect.stringContaining('internal')});
   });
 
   it('propagates a refusal for an identity with no case authority (platform roles)', async () => {

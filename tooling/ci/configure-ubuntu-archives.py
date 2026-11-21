@@ -35,6 +35,49 @@ def rewrite_source_text(text: str) -> str:
     )
 
 
+MAX_CNAME_HOPS = 8
+
+
+def validated_resolution(hostname: str, data: dict):
+    """Addresses and minimum TTL for hostname from one validated DNS-JSON answer, or None.
+
+    The official archive may be served through a CNAME (archive.ubuntu.com now resolves via a CDN name). Follow
+    exactly the CNAME chain the resolver returned, starting at hostname: each link must be the single CNAME owned
+    by the current name, the chain is bounded and acyclic, and only A records owned by the final name are accepted.
+    Every record used must carry a positive TTL. Records for unrelated names are ignored and never followed.
+    """
+    if data.get('Status') != 0 or data.get('CD') is not False or data.get('TC'):
+        return None
+    records = [answer for answer in data.get('Answer', []) if isinstance(answer, dict)]
+    owner = lambda answer: str(answer.get('name', '')).rstrip('.').lower()
+    current, seen, used = hostname.lower(), {hostname.lower()}, []
+    for _ in range(MAX_CNAME_HOPS + 1):
+        aliases = [answer for answer in records if answer.get('type') == 5 and owner(answer) == current]
+        if not aliases:
+            break
+        if len(aliases) != 1:
+            return None
+        target = str(aliases[0].get('data', '')).rstrip('.').lower()
+        if not target or target in seen:
+            return None
+        seen.add(target)
+        used.append(aliases[0])
+        current = target
+    else:
+        return None
+    answers = [answer for answer in records if answer.get('type') == 1 and owner(answer) == current]
+    if not answers:
+        return None
+    addresses = sorted({str(ipaddress.ip_address(answer['data'])) for answer in answers})
+    if any(not ipaddress.ip_address(address).is_global
+           or ipaddress.ip_address(address).version != 4 for address in addresses):
+        raise SystemExit('Only public IPv4 archive addresses are accepted')
+    used += answers
+    if any(int(answer.get('TTL', 0)) <= 0 for answer in used):
+        return None
+    return addresses, min(int(answer['TTL']) for answer in used)
+
+
 def configure_archive_resolution() -> list[dict]:
     """Keep normal TLS/GPG trust while avoiding the runner's failing resolver."""
     resolutions = []
@@ -43,7 +86,7 @@ def configure_archive_resolution() -> list[dict]:
                            'edns_client_subnet': '0.0.0.0/0'})
         # Default HTTPS validation remains enabled for both public resolvers.
         # A transient upstream SERVFAIL never becomes an accepted DNS answer.
-        addresses = []
+        addresses, minimum_ttl = [], 0
         last_status = 'no response'
         for attempt in range(3):
             for endpoint in ('https://dns.google/resolve?',
@@ -56,19 +99,10 @@ def configure_archive_resolution() -> list[dict]:
                     last_status = 'transport failure'
                     continue
                 last_status = str({key: data.get(key) for key in ('Status', 'CD', 'TC')})
-                if data.get('Status') != 0 or data.get('CD') is not False or data.get('TC'):
+                resolved = validated_resolution(hostname, data)
+                if not resolved:
                     continue
-                answers = [answer for answer in data.get('Answer', [])
-                           if answer.get('type') == 1 and answer.get('name', '').rstrip('.') == hostname]
-                addresses = sorted({str(ipaddress.ip_address(answer['data'])) for answer in answers})
-                if not addresses:
-                    continue
-                if any(not ipaddress.ip_address(address).is_global
-                       or ipaddress.ip_address(address).version != 4 for address in addresses):
-                    raise SystemExit('Only public IPv4 archive addresses are accepted')
-                if any(int(answer.get('TTL', 0)) <= 0 for answer in answers):
-                    addresses = []
-                    continue
+                addresses, minimum_ttl = resolved
                 break
             if addresses:
                 break
@@ -77,7 +111,7 @@ def configure_archive_resolution() -> list[dict]:
         if not addresses:
             raise SystemExit('Validated public DNS unavailable for ' + hostname + ': ' + last_status)
         resolutions.append({'hostname': hostname, 'addresses': addresses,
-                            'minimumTtl': min(int(answer['TTL']) for answer in answers)})
+                            'minimumTtl': minimum_ttl})
 
     hosts = Path('/etc/hosts')
     original = hosts.read_text()

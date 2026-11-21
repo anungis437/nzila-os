@@ -33,7 +33,7 @@ const tx = {
 
 // The intake row has no organization: it is written by the system role, and the ambient handle must never be used.
 vi.mock('@/db', () => ({ db: new Proxy({}, { get() { throw new Error('ambient db used outside a context'); } }) }));
-vi.mock('@/db/schema', () => ({ pilotApplications: pilotApplicationsTable, pilotContactVerifications: pilotContactVerificationsTable }));
+vi.mock('@/db/schema', async () => ({ ...(await vi.importActual<Record<string, unknown>>('@/db/schema')), pilotApplications: pilotApplicationsTable, pilotContactVerifications: pilotContactVerificationsTable }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn(async (operation: (t: typeof tx) => Promise<unknown>) => {
     m.contexts += 1;

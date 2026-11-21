@@ -43,10 +43,10 @@
  *      approveRemittance()/rejectRemittance() (the only writers of
  *      remittance_approvals) — already established in round 33 as part of
  *      a dead admin approval-workflow UI (its routes don't exist or are
- *      unwired stubs); reconfirmed here that the ONLY real reader of
- *      remittance_approvals is app/[locale]/dashboard/clc/staff/page.tsx,
- *      a national CLC dashboard reading via withSystemContext() with no
- *      per-caller organization filter — never an ordinary tenant path.
+ *      unwired stubs). The prospective base-release boundary now also
+ *      removes the national staff dashboard's financial reads; its
+ *      authorized page reports the excluded scope without querying
+ *      retained financial records.
  *
  * ROUND 34 CORRECTION (2026-09-04, second independent review pass):
  * independent review found the original realImporterFiles() scanned only
@@ -60,10 +60,9 @@
  * a hand-maintained directory allow-list). Also added explicit
  * zero-direct-call assertions for submitForApproval/approveRemittance/
  * rejectRemittance individually (previously only checked as a combined
- * regex group), and a structural (not just substring) proof that the CLC
- * dashboard's remittanceApprovals SELECT is nested inside its
- * withSystemContext() call, not merely present somewhere in the same
- * file.
+ * regex group). The later prospective base-release boundary replaces
+ * the former staff-reader assertion with a no-business-read lock;
+ * historical storage authority and records remain unchanged.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -146,11 +145,9 @@ describe('round 34: dead-writer reachability locks for the priority-tranche tabl
   });
 
   it('remittance-audit.ts\'s submitForApproval/approveRemittance/rejectRemittance (sole writers of remittance_approvals) have ZERO real callers reaching a live route', () => {
-    // The one UI consumer (components/admin/clc-approval-workflow.tsx) posts to
-    // routes that either don't exist or are unwired copy-paste stubs — see the
-    // MultiPartyIsolationMixin docstring (backend/billing/isolation.py) for the
-    // full trace. This asserts the underlying claim mechanically: the approve/
-    // reject routes referenced by that component do not exist as files.
+    // The former approval UI was retired with the out-of-scope finance surface.
+    // Keep the original route-absence assertion: no approve/reject endpoint may
+    // silently reactivate these service writers.
     expect(() =>
       readFileSync(resolve(APP_ROOT, 'app/api/admin/clc/remittances/[id]/approve/route.ts'), 'utf8'),
     ).toThrow();
@@ -183,33 +180,18 @@ describe('round 34: dead-writer reachability locks for the priority-tranche tabl
       const importers = realImporterFiles(`\\b${fnName}\\(`, auditFile);
       expect(
         importers,
-        `${fnName} has gained a real caller — remittance_approvals is currently SYSTEM_ONLY with ` +
-          `requiredSystemPrivileges=[SELECT] only (no UPDATE); a real caller of ${fnName} performs an ` +
-          `UPDATE and MUST have this entry's privilege set and containment revisited before it can pass.`,
+        `${fnName} has gained a real caller — current base-release remittance storage is contained ` +
+          `without ordinary/system privileges. A real caller must have independently qualified ` +
+          `scope and authority before this excluded operation can be enabled.`,
       ).toEqual([]);
     }
   });
 
-  it('remittance_approvals\' only real reader is the national CLC staff dashboard, and its SELECT is structurally nested inside withSystemContext (not just co-located in the same file)', () => {
+  it('keeps the excluded national staff metrics surface free of financial business reads', () => {
     const source = readFileSync(resolve(APP_ROOT, 'app/[locale]/dashboard/clc/staff/page.tsx'), 'utf8');
-    expect(source).toMatch(/remittanceApprovals/);
-
-    // Bound the withSystemContext(...) callback body to the next top-level
-    // function declaration (this file's natural sibling-boundary, same
-    // technique used elsewhere in this repo for method-body extraction) —
-    // proves the remittanceApprovals SELECT is INSIDE that block, not
-    // merely present somewhere else in the file.
-    const systemContextBlockMatch = source.match(
-      /withSystemContext\(async \(tx\) => \{[\s\S]*?(?=\nexport default async function )/,
-    );
-    expect(systemContextBlockMatch, 'withSystemContext(async (tx) => { ... }) block not found').toBeTruthy();
-    const systemContextBody = systemContextBlockMatch![0];
-    expect(systemContextBody).toMatch(/\.from\(remittanceApprovals\)/);
-    expect(systemContextBody).toMatch(/eq\(remittanceApprovals\.status, 'pending'\)/);
-
-    // Cross-checked against lib/auth/__tests__/clc-national-role-boundary.test.ts's
-    // own documentation of this exact dashboard as Model A (national,
-    // withSystemContext, no per-caller org filter) — not re-asserted in full
-    // here to avoid duplicating that file's scope.
+    expect(source).toMatch(/requireUser\(/);
+    expect(source).toMatch(/checkCLCStaffAccess\(/);
+    expect(source).toMatch(/not included in this release/);
+    expect(source).not.toMatch(/withSystemContext|withRLSContext|remittanceApprovals|perCapitaRemittances|clcOrganizationSyncLog|CLCApprovalWorkflow/);
   });
 });

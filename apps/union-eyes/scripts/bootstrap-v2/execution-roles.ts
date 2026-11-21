@@ -1,5 +1,6 @@
 import { AUTH_EXECUTION_ROLES } from './auth-sql'
 import { FRAMEWORK_ROLES } from './framework-contract'
+import { EXTERNAL_READ_OWNER } from '../../lib/external-resource-read/source'
 
 export const INSTALLER_FUNCTION_OWNER_ROLES = [
   AUTH_EXECUTION_ROLES.riskReader,
@@ -14,6 +15,7 @@ export const CANONICAL_BOOTSTRAP_ROLES = [
   'union_eyes_system',
   ...Object.values(AUTH_EXECUTION_ROLES),
   ...Object.values(FRAMEWORK_ROLES),
+  EXTERNAL_READ_OWNER,
 ]
 export const canonicalRoleSqlList = CANONICAL_BOOTSTRAP_ROLES.map(
   (role) => `'${role.replaceAll("'", "''")}'`,

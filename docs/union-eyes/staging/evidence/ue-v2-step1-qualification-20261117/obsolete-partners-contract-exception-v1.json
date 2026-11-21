@@ -1,0 +1,34 @@
+{
+  "scope": "EXISTING_EXCEPTION_RETIREMENT",
+  "removed": "Only Partners/contracts from existing platform-concern-adoption-exceptions.json",
+  "reason": "The unchanged gate does not require contracts for Partners. Its existing empty platform-adapters scaffold also satisfies only the gate presence criterion; it proves no implemented adapter.",
+  "gateCommand": "pnpm exec tsx scripts/platform-adoption-gate.ts",
+  "gateExitCode": 0,
+  "source": [
+    {
+      "path": "scripts/platform-adoption-gate.ts",
+      "sha256": "da111ba39be3c326c6e522ba6972baa72fe5ce3b47b0cc410709cf6fc010e452"
+    },
+    {
+      "path": "apps/partners/lib/platform-adapters/index.ts",
+      "sha256": "92edfccdc894c4d3294ad851c6dbde145ac80aff7b45c8acd2e8f044fb289708"
+    },
+    {
+      "path": "governance/exceptions/platform-concern-adoption-exceptions.json",
+      "sha256": "3c5b13ec44e05a012440abf33a92bdc1cd06da75fcc31708526d5883cc82ba96"
+    }
+  ],
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/platform-concern-gate-v1.txt",
+      "sha256": "1e73ee1ae4431e8ceea6edfe9bfabfae6ab07b940de0c398ae7216b6a1f76d1c"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/platform-concern-gate-result-v1.json",
+      "sha256": "ee54afa762a606479a5898a80ee536047b855919f71aa1fe3d0ee607d0af0909"
+    }
+  ],
+  "noExpiryExtension": true,
+  "noFeatureImplementationClaim": true,
+  "finalCandidateQualified": false
+}

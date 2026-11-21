@@ -23,7 +23,7 @@ import { loadDataSourceOverview, type SyncLogEntry } from '@/lib/dashboard-reads
 import { getAllDataSources } from '@/lib/report-executor';
 import {
   Database, Table2, RefreshCw, Clock, CheckCircle2, XCircle,
-  AlertTriangle, Users, FileText, Timer, DollarSign, TrendingUp,
+  AlertTriangle, Users, FileText, Timer, TrendingUp,
   Globe, BarChart3, Percent, Landmark,
 } from 'lucide-react';
 
@@ -63,7 +63,6 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   claims: <FileText className="h-5 w-5" />,
   organization_members: <Users className="h-5 w-5" />,
   claim_deadlines: <Timer className="h-5 w-5" />,
-  dues_assignments: <DollarSign className="h-5 w-5" />,
 };
 
 /* ─── helpers ─── */
@@ -113,7 +112,7 @@ export default async function DataSourcePage() {
     totalExternalRecords,
   } = await loadDataSourceOverview();
 
-  const internalSources = getAllDataSources();
+  const internalSources = getAllDataSources().filter(source => Object.hasOwn(internalCounts, source.table));
   const totalInternalRecords = Object.values(internalCounts).reduce((a, b) => a + b, 0);
   const totalSources = internalSources.length + EXTERNAL_SOURCES.length;
 
@@ -210,7 +209,7 @@ export default async function DataSourcePage() {
         <TabsContent value="internal" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {internalSources.map((ds) => {
-              const count = internalCounts[ds.table] ?? 0;
+              const count = internalCounts[ds.table];
               return (
                 <Card key={ds.id}>
                   <CardHeader className="pb-3">

@@ -1,3 +1,4 @@
+import { listUePriorityScores } from '@/lib/services/ml-read-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/scores/ue/cases/priority
@@ -24,9 +25,7 @@
  *   { items: UEPriorityScoreResponse[], nextCursor: string | null, total: number }
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { mlScoresUECasesPriority, mlModels } from '@nzila/db/schema'
-import { eq, and, gte, lte, lt, desc, or } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { createLogger } from '@nzila/os-core'
 
@@ -68,88 +67,16 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const startTs = new Date(startDate + 'T00:00:00Z')
-    const endTs = new Date(endDate + 'T23:59:59Z')
-
-    // Decode composite cursor: base64("<iso-timestamp>|<uuid>")
-    // Composite key prevents duplicate/skipped rows when rows share a timestamp.
-    let cursorTs: Date | null = null
-    let cursorId: string | null = null
-    if (cursor) {
-      try {
-        const decoded = Buffer.from(cursor, 'base64').toString('utf-8')
-        const pipeIdx = decoded.lastIndexOf('|')
-        if (pipeIdx === -1) throw new Error('malformed')
-        cursorTs = new Date(decoded.slice(0, pipeIdx))
-        cursorId = decoded.slice(pipeIdx + 1)
-        if (isNaN(cursorTs.getTime()) || !cursorId) throw new Error('invalid')
-      } catch {
-        return NextResponse.json({ error: 'Invalid cursor' }, { status: 400 })
-      }
-    }
-
-    const whereClause = and(
-      eq(mlScoresUECasesPriority.orgId, orgId),
-      gte(mlScoresUECasesPriority.occurredAt, startTs),
-      lte(mlScoresUECasesPriority.occurredAt, endTs),
-      ...(priorityFilter ? [eq(mlScoresUECasesPriority.predictedPriority, priorityFilter)] : []),
-      ...(cursorTs && cursorId
-        ? [or(
-            lt(mlScoresUECasesPriority.occurredAt, cursorTs),
-            and(
-              eq(mlScoresUECasesPriority.occurredAt, cursorTs),
-              lt(mlScoresUECasesPriority.id, cursorId),
-            ),
-          )]
-        : []),
-    )
-
-    const rows = await platformDb
-      .select({
-        id: mlScoresUECasesPriority.id,
-        caseId: mlScoresUECasesPriority.caseId,
-        occurredAt: mlScoresUECasesPriority.occurredAt,
-        score: mlScoresUECasesPriority.score,
-        predictedPriority: mlScoresUECasesPriority.predictedPriority,
-        actualPriority: mlScoresUECasesPriority.actualPriority,
-        modelId: mlScoresUECasesPriority.modelId,
-        modelKey: mlModels.modelKey,
-        inferenceRunId: mlScoresUECasesPriority.inferenceRunId,
-        createdAt: mlScoresUECasesPriority.createdAt,
-        featuresJson: mlScoresUECasesPriority.featuresJson,
-      })
-      .from(mlScoresUECasesPriority)
-      .innerJoin(mlModels, eq(mlScoresUECasesPriority.modelId, mlModels.id))
-      .where(whereClause)
-      .orderBy(desc(mlScoresUECasesPriority.occurredAt), desc(mlScoresUECasesPriority.id))
-      .limit(limit + 1)  // fetch one extra to detect next page
-
-    const hasMore = rows.length > limit
-    const pageRows = rows.slice(0, limit)
-
-    const nextCursor = hasMore
-      ? Buffer.from(
-          `${pageRows[pageRows.length - 1].occurredAt.toISOString()}|${pageRows[pageRows.length - 1].id}`,
-        ).toString('base64')
-      : null
-
-    return NextResponse.json({
-      items: pageRows.map((r) => ({
-        id: r.id,
-        caseId: r.caseId,
-        occurredAt: r.occurredAt.toISOString(),
-        score: r.score,
-        predictedPriority: r.predictedPriority,
-        actualPriority: r.actualPriority,
-        modelId: r.modelId,
-        modelKey: r.modelKey,
-        inferenceRunId: r.inferenceRunId,
-        createdAt: r.createdAt.toISOString(),
-        ...(includeFeatures ? { features: r.featuresJson } : {}),
-      })),
-      nextCursor,
-      total: pageRows.length,
+    const result = await listUePriorityScores({
+      orgId,
+      startDate,
+      endDate,
+      priorityFilter,
+      includeFeatures,
+      cursor,
+      limit,
     })
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     logger.error('[ML /scores/ue/cases/priority]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

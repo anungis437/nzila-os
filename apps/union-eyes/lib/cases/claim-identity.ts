@@ -1,4 +1,5 @@
 import { sql, type SQL } from 'drizzle-orm'
+import { ACTIVE_RECUSAL_SQL } from '@/lib/authority/common'
 import type { CaseActor } from './case-authorization'
 
 /**
@@ -42,7 +43,7 @@ export function claimIdentityVisible(actor: Pick<CaseActor, 'userId'>): SQL {
          AND NOT EXISTS (
            SELECT 1 FROM ue_authority_recusals z
             WHERE z.organization_id = r.organization_id AND z.principal_user_id = r.principal_user_id
-              AND z.resource_type = 'case' AND z.resource_id = r.resource_id AND z.lifted_at IS NULL)
+              AND z.resource_type = 'case' AND z.resource_id = r.resource_id AND ${sql.raw(ACTIVE_RECUSAL_SQL)})
     )
   )`
 }

@@ -6,6 +6,8 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   createSatisfactionSurvey: vi.fn(),
   evaluate: vi.fn(),
+  AttributionError:class extends Error{},
+  AlreadyAnsweredError:class extends Error{},
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -30,6 +32,7 @@ vi.mock('drizzle-orm', () => ({ eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), 
 vi.mock('@/lib/services/satisfaction-service', () => ({
   getPendingSurveys: vi.fn(),
   createSatisfactionSurvey: m.createSatisfactionSurvey,
+  SurveyAttributionError:m.AttributionError,SurveyAlreadyAnsweredError:m.AlreadyAnsweredError,
 }));
 vi.mock('@/lib/services/policy-engine', () => ({ policyEngine: { evaluate: m.evaluate } }));
 
@@ -155,18 +158,19 @@ describe('satisfaction POST (a steward creating a survey by hand)', () => {
     m.selected = [{ memberId: 'someone_else', assignedTo: 'lro_1', status: 'closed' }];
     await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
 
-    m.selected = [{ memberId: 'member_1', assignedTo: 'another_lro', status: 'closed' }];
-    await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
-
     // DEF-0B11-IDS-SATISFACTION-CREATE-DOES-NOT-CHECK-CLAIM-STATE-AND-ACCEPTS-ANY-REPRESENTATIVE-ID-ON-AN-UNASSIGNED-CLAIM
     for (const status of ['submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation', 'rejected']) {
       m.selected = [{ memberId: 'member_1', assignedTo: 'lro_1', status }];
       await expect(POST({ ...caller, body }), status).rejects.toMatchObject({ status: 409 });
     }
-    m.selected = [{ memberId: 'member_1', assignedTo: null, status: 'resolved' }];
-    await expect(POST({ ...caller, body })).rejects.toMatchObject({ status: 400 });
-
     expect(m.createSatisfactionSurvey).not.toHaveBeenCalled();
+  });
+  it('uses current service attribution when the legacy mirror is absent, and preserves canonical refusal for a truly unassigned case',async()=>{
+    const {POST}=await import('../satisfaction/route');
+    m.selected=[{memberId:'member_1',assignedTo:null,status:'resolved'}];
+    await expect(POST({...caller,body})).resolves.toEqual({id:'srv1'});
+    m.createSatisfactionSurvey.mockRejectedValueOnce(new m.AttributionError('No current governed primary representative'));
+    await expect(POST({...caller,body})).rejects.toMatchObject({status:400,message:expect.stringContaining('governed primary')});
   });
 });
 

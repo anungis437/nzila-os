@@ -203,8 +203,8 @@ function runSQL(sql) {
   }
   try {
     const result = execSync(
-      // codeql[js/incomplete-sanitization] - dev/migration script; SQL is developer-controlled, not user input
-      `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${sql.replace(/"/g, '\\"')}"`,
+      // Escape backslash, double quote, dollar and backtick for the shell double-quoted string
+      `"${PSQL}" ${DB_CONN} -t -A --pset=pager=off -c "${sql.replace(/[\\"$`]/g, '\\$&')}"`,
       { env: { ...process.env, PGPASSWORD: PG_PASSWORD }, encoding: 'utf-8' },
     );
     return result.trim();

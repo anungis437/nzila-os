@@ -1,495 +1,415 @@
-/**
- * Governed financial duties (UE-CONV-D-001 / D-002 / D-003) against the COMBINED deployed schema (Django `migrate` + the
- * approved Drizzle bootstrap), with the real finance route adapter and arrears posting running as the `union_eyes_runtime`
- * role under forced row-level security and the exact grants the storage-authority manifest activates. Nothing is mirrored;
- * the PGlite suite (lib/finance/finance-duties.pglite.test.ts) has no roles, so everything role-, grant- and
- * policy-dependent is proved here.
- *
- * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a FRESH disposable database (same preparation
- * as thread-assignment.postgres.test.ts). The suite installs a fault trigger on the audit tables of that database. Not a
- * staging isolation pass, not a credentialed acceptance.
+/** Base-release financial boundaries on an owned canonical PG15/16 clone.
+ * Financial/dues persistence is deferred. These are denial and preservation
+ * tests, not approval/adoption, financial feature, staging or release proof.
+ * Opting in requires the actual per-clone restricted LOGIN and auth URLs.
  */
 import { randomUUID } from 'node:crypto'
-import pg from 'pg'
-import { drizzle } from 'drizzle-orm/node-postgres'
+import { readFileSync } from 'node:fs'
+import type pg from 'pg'
 import { sql } from 'drizzle-orm'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { seedMembership, U, type Db } from './authority-kernel-harness'
-import { kit } from './authority-kernel-testkit'
-import { membershipSourceVia } from '../../lib/authority/store/identity'
-import type { SqlExecutor } from '../../lib/authority/store/executor'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { withNativeCanonicalActor } from '@/scripts/runtime/native-canonical-fixture'
+import { canonicalMembershipRole } from '@/lib/auth/canonical-membership-role'
+import { withCanonicalRequestScope } from '@/lib/auth/canonical-request-scope'
+import { insertOrganization } from './page-reads-seed'
+import { savepointHarness, RUNTIME_ROLE, SYSTEM_ROLE } from './native-savepoint-harness'
+import { BASE_RELEASE_FINANCIAL_DECLARATION_OWNERS } from '@/scripts/bootstrap-v2/current-authority'
+import { MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS } from '@/scripts/bootstrap-v2/module-admission-storage-contract'
+import {
+  CURRENT_REWARDS_TABLES,
+  REWARD_RUNTIME_COLUMN_CONTRACTS,
+  REWARD_SIGNATURE_COLUMN_CONTRACTS,
+} from '@/scripts/bootstrap-v2/rewards-storage-contract'
+import type { V2Plan } from '@/scripts/bootstrap-v2/source'
+import {
+  performFinancialDuty,
+  readFinancialTransaction,
+  requireFinancialDuty,
+} from '@/lib/authority/store/finance-route-adapter'
+import { recordArrearsPayment } from '@/lib/dues/arrears-payment'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
-
-const state = vi.hoisted(() => ({ db: null as unknown }))
-const m = vi.hoisted(() => ({ audit: vi.fn() }))
-const membership = vi.hoisted(() => ({ legacy: false }))
-// Only the best-effort refusal logger is a double; every transactional audit write is real.
-vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }))
-// The real membership source is used unless a test pins the legacy one; the pin exists only so the V2 audit-sink test below can run on this legacy database.
-vi.mock('@/lib/authority/store/active-membership-source', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/authority/store/active-membership-source')>()
-  const { canonicalMembershipSource } = await import('../../lib/authority/store/identity')
-  const activeMembershipSource: typeof actual.activeMembershipSource = (exec, organizationId, userIds) =>
-    membership.legacy ? canonicalMembershipSource(exec, organizationId, userIds) : actual.activeMembershipSource(exec, organizationId, userIds)
-  return { ...actual, activeMembershipSource }
-})
-
-type Tx = { execute: (q: unknown) => Promise<unknown> }
-type Role = 'union_eyes_runtime' | 'union_eyes_system'
-async function inRole<T>(role: Role, org: string, user: string, work: (tx: RLSTx) => Promise<T>): Promise<T> {
-  return (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
-    await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
-    await tx.execute(sql`SELECT set_config('app.current_user_id', ${user}, true), set_config('app.current_org_id', ${org}, true)`)
-    return work(tx as unknown as RLSTx)
-  })
+const plan = JSON.parse(
+  readFileSync(
+    new globalThis.URL(
+      '../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json',
+      import.meta.url,
+    ),
+    'utf8',
+  ),
+) as V2Plan
+const overlay = JSON.parse(
+  readFileSync(
+    new globalThis.URL('../../lib/operations/catalog-v2-decisions.json', import.meta.url),
+    'utf8',
+  ),
+) as {
+  currentSecurity: {
+    currentFunctions: Array<{ owner: string }>
+    dedicatedRolePrivileges: Array<{ role: string }>
+  }
+}
+const billing = plan.currentModels.models.filter(
+  (model) =>
+    model.app === 'billing' && model.source === 'apps/union-eyes/backend/billing/models.py',
+)
+const finance = [
+  ...new Set([
+    ...billing.map((model) => model.table),
+    ...Object.keys(BASE_RELEASE_FINANCIAL_DECLARATION_OWNERS),
+  ]),
+].sort()
+const credit = CURRENT_REWARDS_TABLES.filter(
+  (table) =>
+    !Object.hasOwn(REWARD_RUNTIME_COLUMN_CONTRACTS, table) &&
+    !Object.hasOwn(REWARD_SIGNATURE_COLUMN_CONTRACTS, table),
+)
+const financialWorkflow = ['ue_authority_financial_steps']
+const contained = [...finance, ...credit, ...financialWorkflow].sort()
+const requiredAuth = plan.authExecution
+if (!requiredAuth) throw new Error('Current source canonical auth execution contract required')
+const principals = [
+  ...new Set([
+    RUNTIME_ROLE,
+    SYSTEM_ROLE,
+    ...requiredAuth.roles,
+    ...overlay.currentSecurity.currentFunctions.map((fn) => fn.owner),
+    ...overlay.currentSecurity.dedicatedRolePrivileges.map((grant) => grant.role),
+  ]),
+]
+  .filter((role) => role !== 'ue_v2_owner')
+  .sort()
+const quote = (name: string) => {
+  if (!/^[a-z_][a-z0-9_]*$/.test(name)) throw new Error('Source-owned SQL identifier required')
+  return `"${name}"`
+}
+function errorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') return undefined
+  const value = error as { code?: string; cause?: unknown }
+  return value.code ?? errorCode(value.cause)
 }
 
-const adapterModule = URL ? await import('@/lib/authority/store/finance-route-adapter') : null
-const arrearsModule = URL ? await import('@/lib/dues/arrears-payment') : null
-const responseModule = URL ? await import('@/lib/finance/financial-duty-response') : null
+function actualRows(value: unknown): Record<string, unknown>[] {
+  if (
+    !Array.isArray(value) ||
+    value.some((row) => !row || typeof row !== 'object' || Array.isArray(row))
+  )
+    throw new Error('Actual native postgres-js row-array adapter required')
+  return value as Record<string, unknown>[]
+}
 
-describe.skipIf(!URL)('governed financial duties on the combined deployed schema, as the runtime role', () => {
-  const ORG_A = randomUUID()
-  const ORG_B = randomUUID()
-  const sfx = randomUUID().slice(0, 8)
-  const P = {
-    treasurer: U.treasurer,
-    vp: U.vp,
-    president: U.president,
-    reconciler: `fin-rec-${sfx}`,
-    otherAccount: `fin-oth-${sfx}`,
-    third: `fin-third-${sfx}`,
-    member: `fin-mem-${sfx}`,
-    member2: `fin-mem2-${sfx}`,
-    foreign: `fin-foreign-${sfx}`,
-  }
-  const ACCT = randomUUID()
-  const OTHER_ACCT = randomUUID()
-  let admin: pg.Client
-  let pool: pg.Pool
-  let rtClient: pg.Client
-  let sysClient: pg.Client
-  let k: ReturnType<typeof kit>
-
-  const scalar = async (query: string, params: unknown[] = []) => Number((await admin.query(query, params)).rows[0].n)
-  const money = (account: string, over: Record<string, unknown> = {}) => ({ scope: { accountIds: [account] }, monetaryLimitMinor: 500_000, currency: 'CAD', ...over })
-  const adapter = () => adapterModule!
-  const arrears = () => arrearsModule!
-
-  const addPayment = (id: string, amount: string, member: string | null, org = ORG_A, currency = 'CAD') =>
-    admin.query(`INSERT INTO payments (id, organization_id, created_at, updated_at, type, method, amount, currency, member_id) VALUES ($1,$2,now(),now(),'dues','cash',$3,$4,$5)`, [id, org, amount, currency, member])
-  const addArrears = (member: string, owed: string, org = ORG_A) =>
-    admin.query(`INSERT INTO member_arrears (user_id, organization_id, total_owed, arrears_status) VALUES ($1,$2,$3,'warning')`, [member, org, owed])
-  const steps = (pay: string, step: string) => scalar(`SELECT count(*) AS n FROM ue_authority_financial_steps WHERE subject_id = $1 AND step = $2`, [pay, step])
-  const ledgerRows = (member: string) => scalar(`SELECT count(*) AS n FROM member_dues_ledger WHERE user_id = $1`, [member])
-  const owed = async (member: string) => (await admin.query(`SELECT total_owed::text AS t FROM member_arrears WHERE user_id = $1`, [member])).rows[0].t as string
-
-  // Canonical V2 writes the hash-chained public.audit_logs; otherwise the same transaction writes audit_security.audit_logs.
-  const audits = (action: string, org = ORG_A) =>
-    scalar(
-      `SELECT (SELECT count(*) FROM audit_security.audit_logs WHERE action = $1 AND organization_id = $2) + (SELECT count(*) FROM public.audit_logs WHERE action = $1 AND organization_id = $2) AS n`,
-      [action, org],
+describe.skipIf(!URL)('deferred finance has no native storage or duty powers', () => {
+  let operator: pg.Client
+  const org = randomUUID(),
+    foreignOrg = randomUUID(),
+    actor = `finance-boundary-${randomUUID()}`
+  const ownAdmission = randomUUID(),
+    foreignAdmission = randomUUID()
+  const asActor = <T>(operation: () => Promise<T>) =>
+    withNativeCanonicalActor(actor, org, (binding) =>
+      withCanonicalRequestScope(
+        binding,
+        {
+          userId: binding.userId,
+          organizationId: binding.organizationId,
+          role: canonicalMembershipRole(binding.role, false),
+          email: `${actor}@example.invalid`,
+          firstName: null,
+          lastName: null,
+          isSystemAdmin: false,
+        },
+        operation,
+      ),
     )
-  const failAudit = (action: string) => admin.query(`INSERT INTO ue_fin_audit_faults(action) VALUES ($1) ON CONFLICT DO NOTHING`, [action])
-  const clearFaults = () => admin.query(`DELETE FROM ue_fin_audit_faults`)
-
-  const faultRaised = async (promise: Promise<unknown>) => {
-    const error = (await promise.then(() => null, (e: unknown) => e)) as { message?: string; cause?: { message?: string } } | null
-    expect(error, 'expected the audit fault to abort the transaction').not.toBeNull()
-    expect(`${error?.message} ${error?.cause?.message}`).toMatch(/injected audit fault/)
+  const history = async () => {
+    const result: Record<string, unknown> = {}
+    for (const table of [
+      ...contained,
+      ...Object.keys(MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS),
+      'audit_logs',
+    ]) {
+      result[table] = (
+        await operator.query(`SELECT count(*)::text AS count,
+        md5(COALESCE(string_agg(md5(to_jsonb(t)::text),'' ORDER BY md5(to_jsonb(t)::text)),'')) AS digest
+        FROM public.${quote(table)} AS t`)
+      ).rows[0]
+    }
+    return result
   }
-  const refused = (promise: Promise<unknown>, code: string, status: number) => expect(promise).rejects.toMatchObject({ code, status })
-  const dbRefused = async (promise: Promise<unknown>, pattern: RegExp) => {
-    const error = (await promise.then(() => null, (e: unknown) => e)) as { message?: string; cause?: { message?: string } } | null
-    expect(error, 'expected the statement to be refused').not.toBeNull()
-    expect(`${error!.message} ${error!.cause?.message ?? ''}`).toMatch(pattern)
-  }
-
-  const step = (who: string, transactionId: string, kind: 'registered' | 'prepared' | 'approved' | 'executed' | 'reconciled', extra: Record<string, unknown> = {}, org = ORG_A) =>
-    inRole('union_eyes_runtime', org, who, (tx) =>
-      adapter().performFinancialDuty(tx, { userId: who, organizationId: org, transactionId, step: kind, ...extra }, undefined, { action: `finance.payment.${kind}`, resourceType: 'payments', resourceId: transactionId }),
-    )
-  const register = (who: string, pay: string, account = ACCT, org = ORG_A) => step(who, pay, 'registered', { accountId: account, requiredApprovals: 1 }, org)
-  const post = (who: string, member: string, pay: string, amount: number) =>
-    inRole('union_eyes_runtime', ORG_A, who, (tx) => arrears().recordArrearsPayment(tx, { userId: who, organizationId: ORG_A, memberId: member, paymentId: pay, amount }))
-  const view = (who: string, pay: string, org = ORG_A) =>
-    inRole('union_eyes_runtime', org, who, (tx) => adapter().readFinancialTransaction(tx, { userId: who, organizationId: org, transactionId: pay }))
-  const duty = (who: string, pay: string, action: 'finance:view' | 'finance:approve', org = ORG_A) =>
-    inRole('union_eyes_runtime', org, who, (tx) => adapter().requireFinancialDuty(tx, { userId: who, organizationId: org, transactionId: pay, action }))
-
-  /** Registers, prepares and approves a payment through the real chain, leaving it ready for the executor. */
-  async function approvedPayment(amount: string, member: string) {
-    const pay = randomUUID()
-    await addPayment(pay, amount, member)
-    await register(P.treasurer, pay)
-    await step(P.treasurer, pay, 'prepared')
-    await step(P.vp, pay, 'approved')
-    return pay
-  }
-
   beforeAll(async () => {
-    admin = new pg.Client({ connectionString: URL })
-    await admin.connect()
-    const d: Db = { exec: (s) => admin.query(s), query: (s, p) => admin.query(s, p as unknown[]) as never }
-    for (const [org, slug] of [[ORG_A, `fin-a-${sfx}`], [ORG_B, `fin-b-${sfx}`]]) {
-      await admin.query(
-        `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
-         VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
-        [org, slug, slug],
+    expect(
+      process.env.UE_CANONICAL_BOOTSTRAP_V2,
+      'Opted-in native tests require current canonical source',
+    ).toBe('1')
+    operator = await savepointHarness.start(URL!) // rejects any operator action fallback
+    await insertOrganization(operator, randomUUID().slice(0, 8), { id: org })
+    await insertOrganization(operator, randomUUID().slice(0, 8), { id: foreignOrg })
+    await operator.query(
+      "INSERT INTO user_management.users(user_id,email,is_active,lifecycle_state,is_system_admin) VALUES($1,$2,true,'active',false)",
+      [actor, `${actor}@example.invalid`],
+    )
+    await operator.query(
+      "INSERT INTO user_management.organization_users(user_id,organization_id,role,is_active) VALUES($1,$2,'secretary_treasurer',true)",
+      [actor, org],
+    )
+    for (const [id, organization] of [
+      [ownAdmission, org],
+      [foreignAdmission, foreignOrg],
+    ])
+      await operator.query(
+        `INSERT INTO public.org_entitlements
+        (id,organization_id,feature_key,status,granted_at,current_usage,created_at,updated_at)
+        VALUES($1,$2,'grievance_case_suite','active',now(),0,now(),now())`,
+        [id, organization],
       )
-    }
-    const roles: Array<[string, string]> = [
-      [U.president, 'president'], [U.vp, 'vice_president'], [U.treasurer, 'secretary_treasurer'], [P.reconciler, 'secretary_treasurer'],
-      [P.otherAccount, 'secretary_treasurer'], [P.third, 'secretary_treasurer'], [P.member, 'member'], [P.member2, 'member'],
-    ]
-    for (const [user, role] of roles) await seedMembership(d, user, ORG_A, role)
-    await seedMembership(d, P.foreign, ORG_B, 'secretary_treasurer')
-    // Fault injection on both audit sinks of the disposable database, so rollback is proven against the real audit paths.
-    await admin.query(`CREATE TABLE IF NOT EXISTS ue_fin_audit_faults (action text PRIMARY KEY)`)
-    await admin.query(`GRANT SELECT ON ue_fin_audit_faults TO PUBLIC`)
-    await admin.query(`CREATE OR REPLACE FUNCTION ue_fin_audit_fault() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
-        IF EXISTS (SELECT 1 FROM ue_fin_audit_faults WHERE action = NEW.action) THEN RAISE EXCEPTION 'injected audit fault'; END IF; RETURN NEW; END $$`)
-    for (const table of ['audit_security.audit_logs', 'public.audit_logs']) {
-      await admin.query(`DROP TRIGGER IF EXISTS ue_fin_audit_fault_trg ON ${table}`)
-      await admin.query(`CREATE TRIGGER ue_fin_audit_fault_trg BEFORE INSERT ON ${table} FOR EACH ROW EXECUTE FUNCTION ue_fin_audit_fault()`)
-    }
-    pool = new pg.Pool({ connectionString: URL, max: 6 })
-    state.db = drizzle(pool)
-    // The institution's own ceremony runs as the runtime role; cross-principal identity reads go through the bounded system reader.
-    rtClient = new pg.Client({ connectionString: URL })
-    await rtClient.connect()
-    await rtClient.query('SET ROLE union_eyes_runtime')
-    sysClient = new pg.Client({ connectionString: URL })
-    await sysClient.connect()
-    await sysClient.query('SET ROLE union_eyes_system')
-    k = kit({ exec: (s) => rtClient.query(s), query: (s, p) => rtClient.query(s, p as unknown[]) as never }, membershipSourceVia(sysClient as unknown as SqlExecutor))
-    await k.adoptDefaultRules(ORG_A)
-  }, 180_000)
-
+  })
   afterAll(async () => {
-    for (const table of ['audit_security.audit_logs', 'public.audit_logs']) await admin?.query(`DROP TRIGGER IF EXISTS ue_fin_audit_fault_trg ON ${table}`).catch(() => undefined)
-    await rtClient?.end().catch(() => undefined)
-    await sysClient?.end().catch(() => undefined)
-    await pool?.end()
-    await admin?.end()
-  })
-  afterEach(async () => {
-    // A failed assertion must never leave a fault armed for the next financial journey.
-    // Clearing this disposable-database fixture does not alter production audit behavior.
-    delete process.env.UE_CANONICAL_BOOTSTRAP_V2
-    membership.legacy = false
-    await clearFaults()
-    m.audit.mockClear()
+    await savepointHarness.stop()
+    await operator?.end()
   })
 
-  it('applies the manifest privileges: the ledgers are append-only for the runtime role, row security is forced, and the system role has no finance authority', async () => {
-    const has = async (role: Role, table: string, privilege: string) =>
-      (await admin.query(`SELECT has_table_privilege($1, $2::regclass, $3) AS ok`, [role, table, privilege])).rows[0].ok as boolean
-    for (const privilege of ['SELECT', 'INSERT']) {
-      expect(await has('union_eyes_runtime', 'ue_authority_financial_steps', privilege), `steps ${privilege}`).toBe(true)
-      expect(await has('union_eyes_runtime', 'member_dues_ledger', privilege), `ledger ${privilege}`).toBe(true)
+  it('uses the complete reviewed source family rather than historical positive finance expectations', () => {
+    expect(billing).toHaveLength(81)
+    expect(Object.keys(BASE_RELEASE_FINANCIAL_DECLARATION_OWNERS)).toHaveLength(8)
+    expect(finance).toHaveLength(89)
+    expect(credit).toHaveLength(10)
+    expect(financialWorkflow).toEqual(['ue_authority_financial_steps'])
+    expect(new Set(contained).size).toBe(100)
+    expect(
+      Object.keys(MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS).some((name) =>
+        contained.includes(name),
+      ),
+    ).toBe(false)
+    for (const name of contained) {
+      const table = plan.tables.find((table) => table.name === name)
+      expect(table, name).toBeDefined()
+      expect(table!.authority?.requiredRuntimePrivileges, name).toEqual([])
+      expect(table!.authority?.requiredSystemPrivileges, name).toEqual([])
     }
-    for (const privilege of ['UPDATE', 'DELETE', 'TRUNCATE']) {
-      expect(await has('union_eyes_runtime', 'ue_authority_financial_steps', privilege), `steps ${privilege}`).toBe(false)
-      expect(await has('union_eyes_runtime', 'member_dues_ledger', privilege), `ledger ${privilege}`).toBe(false)
+  })
+
+  it('keeps exactly17 own-org SaaS admission columns separate from finance, with no monetary fields, mutation or SYSTEM powers', async () => {
+    expect(
+      Object.values(MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS).flatMap((spec) => spec.select),
+    ).toHaveLength(17)
+    for (const [table, spec] of Object.entries(MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS)) {
+      const rows = (
+        await operator.query(
+          `SELECT a.attname::text AS name,
+        has_column_privilege('union_eyes_runtime',a.attrelid,a.attnum,'SELECT') AS runtime_select,
+        has_column_privilege('union_eyes_runtime',a.attrelid,a.attnum,'SELECT WITH GRANT OPTION') AS grantable,
+        EXISTS(SELECT FROM unnest(ARRAY['INSERT','UPDATE','REFERENCES']) privilege
+          WHERE has_column_privilege('union_eyes_runtime',a.attrelid,a.attnum,privilege)) AS runtime_write,
+        EXISTS(SELECT FROM unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) privilege
+          WHERE has_column_privilege('union_eyes_system',a.attrelid,a.attnum,privilege)) AS system_any
+        FROM pg_catalog.pg_attribute a WHERE a.attrelid=$1::regclass AND a.attnum<>0 AND NOT a.attisdropped ORDER BY 1`,
+          [`public.${table}`],
+        )
+      ).rows
+      expect(
+        rows.filter((row) => row.runtime_select).map((row) => row.name),
+        table,
+      ).toEqual([...spec.select].sort())
+      expect(
+        rows.some((row) => row.grantable || row.runtime_write || row.system_any),
+        table,
+      ).toBe(false)
+      for (const role of [RUNTIME_ROLE, SYSTEM_ROLE])
+        for (const privilege of [
+          'SELECT',
+          'INSERT',
+          'UPDATE',
+          'DELETE',
+          'TRUNCATE',
+          'REFERENCES',
+          'TRIGGER',
+        ])
+          expect(
+            (
+              await operator.query('SELECT has_table_privilege($1,$2::regclass,$3) AS allowed', [
+                role,
+                `public.${table}`,
+                privilege,
+              ])
+            ).rows[0].allowed,
+          ).toBe(false)
     }
-    // The arrears balance is the one mutable row the posting changes, so the code's FOR UPDATE on it is permitted.
-    for (const privilege of ['SELECT', 'INSERT', 'UPDATE']) expect(await has('union_eyes_runtime', 'member_arrears', privilege), `arrears ${privilege}`).toBe(true)
-    expect(await has('union_eyes_runtime', 'payments', 'SELECT')).toBe(true)
-    for (const table of ['ue_authority_financial_steps', 'ue_authority_mandates', 'ue_authority_events']) {
-      expect(await has('union_eyes_system', table, 'SELECT'), `system ${table}`).toBe(false)
-    }
-    const forced = (await admin.query(`SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname IN ('ue_authority_financial_steps','member_arrears','member_dues_ledger','payments') AND relkind = 'r' ORDER BY 1`)).rows
-    expect(forced.map((r) => r.relname)).toEqual(['member_arrears', 'member_dues_ledger', 'payments', 'ue_authority_financial_steps'])
-    expect(forced.every((r) => r.relrowsecurity && r.relforcerowsecurity)).toBe(true)
-  })
-
-  describe('before the institution issues any financial mandate', () => {
-    const PAY = randomUUID()
-    beforeAll(async () => { await addPayment(PAY, '60.00', P.member) })
-
-    it('every finance duty is refused with an explicit, non-oracle answer', async () => {
-      await refused(register(P.treasurer, PAY), 'FINANCIAL_MANDATES_NOT_ISSUED', 403)
-      await refused(view(P.treasurer, PAY), 'FINANCIAL_MANDATES_NOT_ISSUED', 403)
-      await refused(step(P.president, PAY, 'approved'), 'FINANCIAL_MANDATES_NOT_ISSUED', 403)
-      // The same answer for a transaction that does not exist: it says nothing about any transaction id.
-      await refused(duty(P.treasurer, randomUUID(), 'finance:view'), 'FINANCIAL_MANDATES_NOT_ISSUED', 403)
-      // A member with no financial capacity is told nothing about the state of the institution either.
-      await refused(duty(P.member, PAY, 'finance:view'), 'NOT_FOUND', 404)
-    })
-
-    it('posting to arrears is refused and changes nothing', async () => {
-      await addArrears(P.member, '100.00')
-      await refused(post(P.president, P.member, PAY, 60), 'FINANCIAL_MANDATES_NOT_ISSUED', 403)
-      expect(await ledgerRows(P.member)).toBe(0)
-      expect(await owed(P.member)).toBe('100.00')
-    })
-  })
-
-  describe('a mandate for a different account confers nothing on this one', () => {
-    const PAY = randomUUID()
-    beforeAll(async () => {
-      await addPayment(PAY, '60.00', P.member)
-      await k.grantMandate('financial', P.otherAccount, ['view', 'prepare'], money(OTHER_ACCT, { approver: U.vp }), ORG_A)
-    })
-
-    it('registering on an account the caller holds no duty for is a recorded 403, and the transaction stays invisible', async () => {
-      await refused(register(P.otherAccount, PAY, ACCT), 'DUTY_NOT_HELD', 403)
-      expect(m.audit).toHaveBeenCalledTimes(1)
-      expect(await steps(PAY, 'registered')).toBe(0)
-      await refused(view(P.otherAccount, PAY), 'NOT_FOUND', 404)
-    })
-  })
-
-  describe('prepare, approve, execute and reconcile by different principals', () => {
-    const PAY = randomUUID()
-    const BAD_PAYER = randomUUID()
-
-    beforeAll(async () => {
-      await addPayment(PAY, '60.00', P.member)
-      await addPayment(BAD_PAYER, '10.00', P.member2)
-      await k.grantMandate('financial', U.treasurer, ['view', 'prepare'], money(ACCT, { approver: U.vp }), ORG_A)
-      await k.grantMandate('financial', U.vp, ['view', 'approve'], money(ACCT, { issuer: U.president, approver: U.treasurer }), ORG_A)
-      await k.grantMandate('financial', U.president, ['view', 'execute'], money(ACCT, { issuer: U.vp, approver: U.treasurer }), ORG_A)
-      await k.grantMandate('financial', P.reconciler, ['view', 'reconcile'], money(ACCT, { approver: U.vp }), ORG_A)
-    })
-
-    it('a caller without a financial capacity cannot register or see anything', async () => {
-      await refused(register(P.member, PAY), 'DUTY_NOT_HELD', 403)
-      await refused(duty(P.member, PAY, 'finance:view'), 'NOT_FOUND', 404)
-    })
-
-    it('registers and prepares; the preparer cannot approve their own transaction', async () => {
-      await register(P.treasurer, PAY)
-      await refused(register(P.treasurer, PAY), 'STEP_REFUSED', 409)
-      await step(P.treasurer, PAY, 'prepared')
-      const attempt = step(P.treasurer, PAY, 'approved')
-      await refused(attempt, 'DUTY_NOT_HELD', 403)
-      await expect(attempt).rejects.toMatchObject({ reasons: expect.arrayContaining(['SELF_APPROVAL']) })
-      expect(await steps(PAY, 'approved')).toBe(0)
-      expect(await audits('finance.payment.registered')).toBe(1)
-    })
-
-    it('a principal on another account cannot see the transaction at all', async () => {
-      await refused(view(P.otherAccount, PAY), 'NOT_FOUND', 404)
-      await refused(step(P.otherAccount, PAY, 'approved'), 'NOT_FOUND', 404)
-    })
-
-    it('the database refuses a raw out-of-order or duplicate ledger write from the runtime role, even with a valid session actor', async () => {
-      const raw = (actor: string, kind: string, pay = PAY) =>
-        inRole('union_eyes_runtime', ORG_A, actor, (tx) => (tx as unknown as Tx).execute(sql`INSERT INTO ue_authority_financial_steps (organization_id, subject_id, step, actor) VALUES (${ORG_A}, ${pay}, ${kind}, ${actor})`))
-      // Not yet approved: executing, reconciling or approving out of order is a state refusal.
-      await dbRefused(raw(P.president, 'executed'), /STATE_NOT_ELIGIBLE: required approvals not met/)
-      await dbRefused(raw(P.reconciler, 'reconciled'), /STATE_NOT_ELIGIBLE: not executed/)
-      await dbRefused(raw(P.treasurer, 'approved'), /SEGREGATION_OF_DUTIES: the preparer cannot approve/)
-      // An unregistered transaction accepts no step at all.
-      await dbRefused(raw(P.treasurer, 'prepared', BAD_PAYER), /STATE_NOT_ELIGIBLE: transaction is not registered/)
-      // A second registration or preparation is refused by the unique ledger index.
-      await dbRefused(inRole('union_eyes_runtime', ORG_A, P.treasurer, (tx) => (tx as unknown as Tx).execute(sql`INSERT INTO ue_authority_financial_steps (organization_id, subject_id, step, actor, account_id, required_approvals, amount_minor, currency) VALUES (${ORG_A}, ${PAY}, 'registered', ${P.treasurer}, ${ACCT}, 1, 6000, 'CAD')`)), /ue_authority_fin_step_uq/)
-      // A step recorded under someone else's identity is refused by the actor guard.
-      await dbRefused(inRole('union_eyes_runtime', ORG_A, P.treasurer, (tx) => (tx as unknown as Tx).execute(sql`INSERT INTO ue_authority_financial_steps (organization_id, subject_id, step, actor) VALUES (${ORG_A}, ${PAY}, 'approved', ${U.vp})`)), /ACTOR_NOT_SESSION/)
-      expect(await steps(PAY, 'executed')).toBe(0)
-      expect(await steps(PAY, 'approved')).toBe(0)
-    })
-
-    it('the approver, and only an approver, can approve; approving twice is refused', async () => {
-      await refused(step(P.president, PAY, 'approved'), 'DUTY_NOT_HELD', 403)
-      await step(P.vp, PAY, 'approved')
-      await refused(step(P.vp, PAY, 'approved'), 'DUTY_NOT_HELD', 403)
-      await dbRefused(inRole('union_eyes_runtime', ORG_A, P.vp, (tx) => (tx as unknown as Tx).execute(sql`INSERT INTO ue_authority_financial_steps (organization_id, subject_id, step, actor) VALUES (${ORG_A}, ${PAY}, 'approved', ${P.vp})`)), /ue_authority_fin_approver_uq/)
-      const seen = await view(P.treasurer, PAY)
-      expect(seen).toMatchObject({ state: 'approved', amountMinor: 6000, currency: 'CAD', accountId: ACCT, approvalsRecorded: 1 })
-    })
-
-    it('neither the preparer nor the approver can execute', async () => {
-      await refused(post(P.treasurer, P.member, PAY, 60), 'DUTY_NOT_HELD', 403)
-      const viaApprover = post(P.vp, P.member, PAY, 60)
-      await refused(viaApprover, 'DUTY_NOT_HELD', 403)
-      await expect(viaApprover).rejects.toMatchObject({ reasons: expect.arrayContaining(['SEGREGATION_OF_DUTIES']) })
-    })
-
-    it('an amount that differs from the record is refused, and so is a payer who is not the arrears member', async () => {
-      await refused(post(P.president, P.member, PAY, 59.99), 'FACT_MISMATCH', 409)
-      await expect(post(P.president, P.member, PAY, 60.001)).rejects.toMatchObject({ code: 'INVALID_REQUEST' })
-      await addArrears(P.member2, '30.00')
-      await refused(post(P.president, P.member2, PAY, 60), 'FACT_MISMATCH', 409)
-      expect(await steps(PAY, 'executed')).toBe(0)
-      expect(await ledgerRows(P.member)).toBe(0)
-      expect(await ledgerRows(P.member2)).toBe(0)
-      expect(await owed(P.member)).toBe('100.00')
-    })
-
-    it('an audit fault on either audit sink rolls back the ledger entry, the arrears update and the financial step together', async () => {
-      // dues.arrears.payment_record goes to audit_security.audit_logs (outside Canonical V2); authority.finance.executed to public.audit_logs.
-      for (const action of ['dues.arrears.payment_record', 'authority.finance.executed']) {
-        await failAudit(action)
-        await faultRaised(post(P.president, P.member, PAY, 60))
-        expect(await steps(PAY, 'executed'), action).toBe(0)
-        expect(await ledgerRows(P.member), action).toBe(0)
-        expect(await owed(P.member), action).toBe('100.00')
-        await clearFaults()
-      }
-    })
-
-    it('an independent executor posts it once: ledger, arrears, step and both audit records commit together', async () => {
-      const out = await post(P.president, P.member, PAY, 60)
-      expect(out.balanceAfter).toBe(40)
-      expect(await steps(PAY, 'executed')).toBe(1)
-      expect(await ledgerRows(P.member)).toBe(1)
-      expect(await owed(P.member)).toBe('40.00')
-      const ledger = (await admin.query(`SELECT amount::text AS amount, reference_id::text AS reference_id, created_by FROM member_dues_ledger WHERE user_id = $1`, [P.member])).rows[0]
-      expect(ledger).toMatchObject({ amount: '60.00', reference_id: PAY, created_by: P.president })
-      expect(await audits('dues.arrears.payment_record')).toBe(1)
-      expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'authority.finance.executed' AND organization_id = $1`, [ORG_A])).toBe(1)
-    })
-
-    it('cannot be posted twice, and the executor cannot reconcile their own execution', async () => {
-      await refused(post(P.president, P.member, PAY, 60), 'DUTY_NOT_HELD', 403)
-      expect(await ledgerRows(P.member)).toBe(1)
-      await refused(step(P.president, PAY, 'reconciled'), 'DUTY_NOT_HELD', 403)
-      await refused(step(P.treasurer, PAY, 'reconciled'), 'DUTY_NOT_HELD', 403)
-    })
-
-    it('an independent reconciler closes it', async () => {
-      await step(P.reconciler, PAY, 'reconciled')
-      expect((await view(P.treasurer, PAY)).state).toBe('reconciled')
-    })
-
-    it('keeps the ledgers append-only for the runtime role: UPDATE, DELETE, TRUNCATE and row locks are permission-denied', async () => {
-      const runtime = (work: (tx: Tx) => Promise<unknown>) => inRole('union_eyes_runtime', ORG_A, P.president, (tx) => work(tx as unknown as Tx))
-      await dbRefused(runtime((t) => t.execute(sql`UPDATE ue_authority_financial_steps SET amount_minor = 1 WHERE subject_id = ${PAY}`)), /permission denied/)
-      await dbRefused(runtime((t) => t.execute(sql`DELETE FROM ue_authority_financial_steps WHERE subject_id = ${PAY}`)), /permission denied/)
-      await dbRefused(runtime((t) => t.execute(sql`UPDATE member_dues_ledger SET amount = 1 WHERE user_id = ${P.member}`)), /permission denied/)
-      await dbRefused(runtime((t) => t.execute(sql`DELETE FROM member_dues_ledger WHERE user_id = ${P.member}`)), /permission denied/)
-      await dbRefused(runtime((t) => t.execute(sql`TRUNCATE member_dues_ledger`)), /permission denied/)
-      // Locking rows of a table without UPDATE privilege is itself refused: no code path may SELECT ... FOR UPDATE on these tables.
-      await dbRefused(runtime((t) => t.execute(sql`SELECT id FROM member_dues_ledger WHERE user_id = ${P.member} FOR UPDATE`)), /permission denied/)
-      await dbRefused(runtime((t) => t.execute(sql`SELECT id FROM ue_authority_financial_steps WHERE subject_id = ${PAY} FOR UPDATE`)), /permission denied/)
-      // The arrears row the posting does lock is lockable, and its lock needs no more than the UPDATE privilege it holds.
-      await runtime((t) => t.execute(sql`SELECT id FROM member_arrears WHERE user_id = ${P.member} FOR UPDATE`))
-      expect(await steps(PAY, 'executed')).toBe(1)
-      expect(await ledgerRows(P.member)).toBe(1)
-    })
-
-    it('an audit fault on a plain step, on either sink, rolls the step back', async () => {
-      const PAY2 = randomUUID()
-      await addPayment(PAY2, '12.00', P.member)
-      await register(P.treasurer, PAY2)
-      await failAudit('finance.payment.prepared')
-      await faultRaised(step(P.treasurer, PAY2, 'prepared'))
-      expect(await steps(PAY2, 'prepared')).toBe(0)
-      await clearFaults()
-      await step(P.treasurer, PAY2, 'prepared')
-      expect(await steps(PAY2, 'prepared')).toBe(1)
-
-      // This test runs the legacy-lineage runtime role against its real audit sink.
-      // Canonical V2 requires a live auth session and the auth-owned membership reader, so flipping an environment
-      // flag does not make this database V2. The missing-reader refusal and the hash-chained sink are covered below.
-    })
-
-    it('with the Canonical V2 flag on, an audit fault on the hash-chained sink also rolls the step back (membership read through the legacy source)', async () => {
-      // Only the membership read is pinned to the legacy source: the definer reader needs a V2-provisioned database (see the fail-closed test).
-      // The flag still selects the business-audit branch, so this proves that sink's atomicity, not end-to-end Canonical V2.
-      membership.legacy = true
-      process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
-      const PAY3 = randomUUID()
-      await addPayment(PAY3, '13.00', P.member)
-      await failAudit('finance.payment.registered')
-      await faultRaised(register(P.treasurer, PAY3))
-      expect(await steps(PAY3, 'registered')).toBe(0)
-      await clearFaults()
-      await register(P.treasurer, PAY3)
-      expect(await steps(PAY3, 'registered')).toBe(1)
-      expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'finance.payment.registered' AND organization_id = $1 AND resource_id = $2`, [ORG_A, PAY3])).toBe(1)
-    })
-
-    it('fails closed when Canonical V2 is requested without its auth-owned membership reader', async () => {
-      // This combined legacy fixture has no live V2 session/reader. If that changes,
-      // the suite must be upgraded to a real session-bound V2 acceptance rather than
-      // silently treating this test as proof of the canonical audit chain.
-      const reader = await admin.query(`SELECT to_regprocedure('user_management.ue_authority_membership_rows(uuid,text[])') AS fn`)
-      expect(reader.rows[0].fn, 'legacy fixture unexpectedly contains the V2 reader; run session-bound V2 qualification').toBeNull()
-      const pay = randomUUID()
-      await addPayment(pay, '13.00', P.member)
-      process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
-      try {
-        const error = await register(P.treasurer, pay).then(() => null, (e: { message?: string; cause?: { message?: string } }) => e)
-        expect(error, 'V2 must not succeed without its live identity authority').not.toBeNull()
-        expect(`${error?.message} ${error?.cause?.message}`).toMatch(/ue_authority_membership_rows/)
-        expect(await steps(pay, 'registered')).toBe(0)
-        expect(await scalar(`SELECT count(*) AS n FROM public.audit_logs WHERE action = 'finance.payment.registered' AND organization_id = $1 AND resource_id = $2`, [ORG_A, pay])).toBe(0)
-      } finally {
-        delete process.env.UE_CANONICAL_BOOTSTRAP_V2
-      }
-    })
-
-    it('lets exactly one of two truly concurrent executions win, on separate connections', async () => {
-      const member = `fin-race-${sfx}`
-      await addArrears(member, '100.00')
-      const pay = await approvedPayment('25.00', member)
-      const outcomes = await Promise.allSettled([post(P.president, member, pay, 25), post(P.president, member, pay, 25)])
-      expect(outcomes.filter((o) => o.status === 'fulfilled')).toHaveLength(1)
-      expect(outcomes.filter((o) => o.status === 'rejected')).toHaveLength(1)
-      expect(await steps(pay, 'executed')).toBe(1)
-      expect(await ledgerRows(member)).toBe(1)
-      expect(await owed(member)).toBe('75.00')
-    })
-
-    it('a membership that is revoked, then restored, ends and returns the duty at once (read live, never cached)', async () => {
-      const pay = randomUUID()
-      await addPayment(pay, '20.00', P.member)
-      await register(P.treasurer, pay)
-      await step(P.treasurer, pay, 'prepared')
-      await admin.query(`UPDATE user_management.organization_users SET is_active = false WHERE user_id = $1 AND organization_id = $2`, [U.vp, ORG_A])
-      await expect(step(P.vp, pay, 'approved')).rejects.toMatchObject({ status: expect.any(Number) })
-      expect(await steps(pay, 'approved')).toBe(0)
-      const denied = await step(P.vp, pay, 'approved').then(() => null, (e: { code: string }) => e.code)
-      expect(['NOT_FOUND', 'DUTY_NOT_HELD']).toContain(denied)
-      await admin.query(`UPDATE user_management.organization_users SET is_active = true WHERE user_id = $1 AND organization_id = $2`, [U.vp, ORG_A])
-      await step(P.vp, pay, 'approved')
-      expect(await steps(pay, 'approved')).toBe(1)
-    })
-
-    it('turns each real refusal into its documented HTTP answer', async () => {
-      const failure = (await step(P.president, PAY, 'approved').then(() => null, (e: unknown) => e)) as Error
-      const response = responseModule!.financialDutyErrorResponse(failure)
-      expect(response?.status).toBe(403)
-      expect(await response?.json()).toMatchObject({ success: false, error: { code: 'DUTY_NOT_HELD' } })
-      const hidden = responseModule!.financialDutyErrorResponse(await view(P.otherAccount, PAY).then(() => null, (e: unknown) => e))
-      expect(hidden?.status).toBe(404)
-    })
-  })
-
-  describe('another organization is invisible', () => {
-    const PAY_B = randomUUID()
-    beforeAll(async () => { await addPayment(PAY_B, '60.00', P.member, ORG_B) })
-
-    it('a foreign transaction is 404 for every duty, cannot be registered, and the foreign session cannot read or write this tenant', async () => {
-      await refused(view(P.treasurer, PAY_B), 'NOT_FOUND', 404)
-      await refused(step(P.vp, PAY_B, 'approved'), 'NOT_FOUND', 404)
-      await refused(register(P.treasurer, PAY_B), 'NOT_FOUND', 404)
-      await refused(post(P.president, P.member, PAY_B, 60), 'NOT_FOUND', 404)
-      // A session bound to the other organization claiming this organization in the request is not a way in.
-      const own = randomUUID()
-      await addPayment(own, '9.00', P.member)
-      await refused(inRole('union_eyes_runtime', ORG_B, P.foreign, (tx) => adapter().readFinancialTransaction(tx, { userId: P.foreign, organizationId: ORG_A, transactionId: own })), 'NOT_FOUND', 404)
-      const countRows = (org: string, table: string) =>
-        inRole('union_eyes_runtime', org, P.foreign, async (tx) => Number(((await (tx as unknown as Tx).execute(sql.raw(`SELECT count(*)::int AS n FROM ${table}`))) as { rows: Array<{ n: number }> }).rows[0].n))
-      for (const table of ['ue_authority_financial_steps', 'ue_authority_mandates', 'member_arrears', 'member_dues_ledger']) {
-        expect(await countRows(ORG_B, table), table).toBe(0)
-        expect(await scalar(`SELECT count(*) AS n FROM ${table} WHERE organization_id = $1`, [ORG_A]), `${table} in the owning tenant`).toBeGreaterThan(0)
-      }
-      await dbRefused(
-        inRole('union_eyes_runtime', ORG_B, P.foreign, (tx) => (tx as unknown as Tx).execute(sql`INSERT INTO member_dues_ledger (user_id, organization_id, transaction_type, effective_date, balance_before, balance_after, description) VALUES (${P.member}, ${ORG_A}, 'payment', now(), 1, 0, 'forged')`)),
-        /row-level security/,
+    const before = await history()
+    await asActor(() =>
+      savepointHarness.context(RUNTIME_ROLE, org, actor, async (tx) => {
+        const rows = actualRows(
+          await tx.execute(sql`SELECT id::text AS id FROM public.org_entitlements
+        WHERE id IN (${ownAdmission}::uuid,${foreignAdmission}::uuid)`),
+        )
+        expect(rows).toEqual([{ id: ownAdmission }])
+      }),
+    )
+    await savepointHarness.context(RUNTIME_ROLE, null, actor, async (tx) => {
+      const rows = actualRows(
+        await tx.execute(
+          sql`SELECT id FROM public.org_entitlements WHERE id=${ownAdmission}::uuid`,
+        ),
       )
-      await dbRefused(
-        inRole('union_eyes_runtime', ORG_B, P.foreign, (tx) => (tx as unknown as Tx).execute(sql`INSERT INTO ue_authority_financial_steps (organization_id, subject_id, step, actor, account_id, required_approvals, amount_minor, currency) VALUES (${ORG_A}, ${own}, 'registered', ${P.foreign}, ${ACCT}, 1, 900, 'CAD')`)),
-        /row-level security/,
-      )
-      expect(await scalar(`SELECT count(*) AS n FROM member_dues_ledger WHERE description = 'forged'`)).toBe(0)
+      expect(rows).toEqual([])
     })
+    expect(await history()).toEqual(before)
+  })
+
+  it('has zero effective table and ordinary/system-column powers for runtime, system and every current private source principal', async () => {
+    const rows = (
+      await operator.query(
+        `WITH wanted AS (
+        SELECT c.oid,c.relname FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+        WHERE n.nspname='public' AND c.relkind='r' AND c.relname=ANY($1::text[])
+      ) SELECT role.rolname::text AS role,wanted.relname::text AS table,
+        ARRAY(SELECT privilege FROM unnest(ARRAY['SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER']) privilege
+          WHERE has_table_privilege(role.oid,wanted.oid,privilege)) AS table_powers,
+        ARRAY(SELECT a.attname::text||':'||privilege FROM pg_catalog.pg_attribute a
+          CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) privilege
+          WHERE a.attrelid=wanted.oid AND a.attnum<>0 AND NOT a.attisdropped
+          AND has_column_privilege(role.oid,wanted.oid,a.attnum,privilege) ORDER BY 1) AS column_powers
+      FROM wanted CROSS JOIN pg_catalog.pg_roles role WHERE role.rolname=ANY($2::text[]) ORDER BY 1,2`,
+        [contained, principals],
+      )
+    ).rows
+    expect(rows).toHaveLength(contained.length * principals.length)
+    for (const row of rows) {
+      expect(row.table_powers, `${row.role}.${row.table}`).toEqual([])
+      expect(row.column_powers, `${row.role}.${row.table}`).toEqual([])
+    }
+  })
+
+  it.each([RUNTIME_ROLE, SYSTEM_ROLE])(
+    'denies actual %s SQL reads and writes under a restricted LOGIN without changing any retained row',
+    async (role) => {
+      const before = await history()
+      await asActor(() =>
+        savepointHarness.context(
+          role,
+          role === RUNTIME_ROLE ? org : null,
+          role === RUNTIME_ROLE ? actor : null,
+          async (tx) => {
+            const rows = actualRows(
+              await tx.execute(sql`SELECT current_user,session_user,rolsuper,rolbypassrls,
+        current_setting('app.current_org_id',true) AS selected_org
+        FROM pg_catalog.pg_roles WHERE rolname=current_user`),
+            )
+            expect(rows[0]).toMatchObject({
+              current_user: role,
+              rolsuper: false,
+              rolbypassrls: false,
+            })
+            expect(rows[0].session_user).toMatch(
+              new RegExp(`^ue_native_[a-z0-9_]+_${role === RUNTIME_ROLE ? 'runtime' : 'system'}$`),
+            )
+            if (role === RUNTIME_ROLE) {
+              const context = actualRows(
+                await tx.execute(sql`SELECT
+                user_management.auth_business_org_authorized(${org}::uuid,NULL::text[]) AS live_context`),
+              )
+              expect(context).toEqual([{ live_context: true }])
+            } else {
+              // SYSTEM has no source-authorized user_management namespace or
+              // business-predicate EXECUTE. It is measured as its own real
+              // restricted principal, never granted that authority for a test.
+              expect(rows[0].selected_org).toBe('')
+            }
+            for (const table of contained) {
+              const sourceColumn = plan.tables.find((candidate) => candidate.name === table)!
+                .columns[0].name
+              for (const statement of [
+                `SELECT * FROM public.${quote(table)} LIMIT 0`,
+                `INSERT INTO public.${quote(table)} DEFAULT VALUES`,
+                `UPDATE public.${quote(table)} SET ${quote(sourceColumn)}=${quote(sourceColumn)} WHERE false`,
+                `DELETE FROM public.${quote(table)} WHERE false`,
+              ]) {
+                await tx.execute(sql.raw('SAVEPOINT finance_no_power'))
+                try {
+                  const error = await tx.execute(sql.raw(statement)).then(
+                    () => null,
+                    (error: unknown) => error,
+                  )
+                  expect(errorCode(error), `${role}:${table}:${statement.split(' ')[0]}`).toBe(
+                    '42501',
+                  )
+                } finally {
+                  await tx.execute(sql.raw('ROLLBACK TO SAVEPOINT finance_no_power'))
+                }
+              }
+            }
+          },
+        ),
+      )
+      expect(await history()).toEqual(before)
+    },
+    120000,
+  )
+
+  it('refuses duties and dues posting before business callbacks, financial persistence or business audit', async () => {
+    const before = await history()
+    let businessCalls = 0
+    const paymentId = randomUUID()
+    const attempts: Array<(tx: RLSTx) => Promise<unknown>> = [
+      (tx: RLSTx) =>
+        readFinancialTransaction(tx, {
+          userId: actor,
+          organizationId: org,
+          transactionId: paymentId,
+        }),
+      (tx: RLSTx) =>
+        requireFinancialDuty(tx, {
+          userId: actor,
+          organizationId: org,
+          transactionId: paymentId,
+          action: 'finance:approve',
+        }),
+      (tx: RLSTx) =>
+        performFinancialDuty(
+          tx,
+          {
+            userId: actor,
+            organizationId: org,
+            transactionId: paymentId,
+            step: 'registered',
+            accountId: randomUUID(),
+            requiredApprovals: 1,
+          },
+          async () => {
+            businessCalls++
+            return {
+              result: null,
+              audit: {
+                action: 'must.not.execute',
+                resourceType: 'payments',
+                resourceId: paymentId,
+              },
+            }
+          },
+        ),
+      (tx: RLSTx) =>
+        recordArrearsPayment(tx, {
+          userId: actor,
+          organizationId: org,
+          memberId: actor,
+          paymentId,
+          amount: 10,
+        }),
+    ]
+    for (const attempt of attempts) {
+      const error = await asActor(() =>
+        savepointHarness.context(RUNTIME_ROLE, org, actor, (tx) => attempt(tx as unknown as RLSTx)),
+      ).then(
+        () => null,
+        (error: unknown) => error,
+      )
+      expect(error).toMatchObject({
+        name: 'BaseFinancialCapabilityUnavailable',
+        code: 'NOT_IMPLEMENTED',
+        status: 501,
+      })
+    }
+    expect(businessCalls).toBe(0)
+    expect(await history()).toEqual(before)
   })
 })

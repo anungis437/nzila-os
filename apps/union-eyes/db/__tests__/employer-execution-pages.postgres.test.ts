@@ -15,6 +15,7 @@ import { randomUUID } from 'node:crypto'
 import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -68,6 +69,8 @@ describe.skipIf(!URL)('the employer-execution page reads on the combined schema,
         [id, `Employer execution ${name} ${tag}`, `ee-${name.toLowerCase()}-${tag}`],
       )
     }
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
 
     ids.runA1 = await seedRun(ORG_A, 'A1', '2026-02-01T00:00:00Z')
     ids.runA2 = await seedRun(ORG_A, 'A2', '2026-03-01T00:00:00Z')

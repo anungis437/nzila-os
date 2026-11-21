@@ -10,8 +10,12 @@ import {
   FRAMEWORK_ROLES,
   PLATFORM_METADATA_MODEL_OWNERS,
 } from './framework-contract'
-import { SYSTEM_COLUMN_READ_CONTRACTS } from './service-column-contracts'
+import { RUNTIME_COLUMN_PRIVILEGE_CONTRACTS, SYSTEM_COLUMN_ONLY_READ_CONTRACTS, SYSTEM_COLUMN_READ_CONTRACTS } from './service-column-contracts'
+import { assertExternalSyncLogColumnAuthority, EXTERNAL_SYNC_LOG_SYSTEM_READ_COLUMNS } from './external-sync-log-storage-contract'
+import { assertCurrentRewardSource } from './rewards-storage-contract'
+import { assertCurrentModuleAdmissionSource } from './module-admission-storage-contract'
 import { compileBusinessSessionPolicy } from '../../db/auth/business-session-policy'
+import { compileContainedParentPolicy, type ContainedParentPolicy } from './contained-parent-policies'
 
 const ref = (table: string) => `public.${quote(table)}`
 const org = "nullif(current_setting('app.current_org_id', true), '')"
@@ -30,6 +34,7 @@ export interface SecurityRule {
   writePredicate: string | null
   checkPredicate: string | null
   runtimePrivileges: string[]
+  runtimeColumnPrivileges?: { privilege: 'SELECT' | 'INSERT'; columns: string[] }[]
   systemPrivileges: string[]
   systemSelectColumns?: string[]
   source: string
@@ -44,6 +49,7 @@ export function compileSecurity(plan: V2Plan) {
     'ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;',
   ]
   const rules: SecurityRule[] = []
+  const containedParentPolicies: ContainedParentPolicy[] = []
   const selfReferenceHelpers = new Set<string>()
   const geometry = (table: SourceTable, visited: string[]): string | null => {
     if (visited.includes(table.name)) return null
@@ -181,15 +187,37 @@ export function compileSecurity(plan: V2Plan) {
       authority?.requiredSystemPrivileges === 'TBD'
         ? []
         : [...(authority?.requiredSystemPrivileges ?? [])]
+    const syncLogProjection=assertExternalSyncLogColumnAuthority(table,runtimePrivileges,systemPrivileges)
+    const runtimeColumnContract = RUNTIME_COLUMN_PRIVILEGE_CONTRACTS[table.name]
+    const systemColumnContract = SYSTEM_COLUMN_ONLY_READ_CONTRACTS[table.name]
+    if (runtimeColumnContract || systemColumnContract) {
+      if (!assertCurrentRewardSource(table) && !assertCurrentModuleAdmissionSource(table))
+        throw new Error(`UE_V2_RUNTIME_COLUMN_SOURCE_REQUIRED:${table.name}`)
+      if (runtimeColumnContract && (systemPrivileges.length || runtimePrivileges.some(privilege =>
+        privilege !== 'SELECT' && !(privilege === 'INSERT' && runtimeColumnContract.insert))))
+        throw new Error(`UE_V2_REWARDS_RUNTIME_COLUMN_AUTHORITY_REQUIRED:${table.name}`)
+      if (systemColumnContract && (runtimePrivileges.length || systemPrivileges.some(privilege => privilege !== 'SELECT')))
+        throw new Error(`UE_V2_REWARDS_SIGNATURE_COLUMN_AUTHORITY_REQUIRED:${table.name}`)
+    }
+    const runtimeColumnPrivileges: NonNullable<SecurityRule['runtimeColumnPrivileges']> = runtimeColumnContract
+      ? [
+          ...(runtimePrivileges.includes('SELECT') ? [{ privilege: 'SELECT' as const, columns: [...runtimeColumnContract.select] }] : []),
+          ...(runtimePrivileges.includes('INSERT') && runtimeColumnContract.insert ? [{ privilege: 'INSERT' as const, columns: [...runtimeColumnContract.insert] }] : []),
+        ] : []
+    const runtimeTablePrivileges = runtimePrivileges.filter(privilege => !runtimeColumnPrivileges.some(contract => contract.privilege === privilege))
+    const systemTablePrivileges = systemColumnContract || syncLogProjection ? systemPrivileges.filter(privilege => privilege !== 'SELECT') : systemPrivileges
     const columnReadContract = SYSTEM_COLUMN_READ_CONTRACTS.find(
       (entry) => entry.table === table.name,
     )
-    const systemSelectColumns =
-      columnReadContract &&
+    const systemSelectColumns = syncLogProjection ? [...EXTERNAL_SYNC_LOG_SYSTEM_READ_COLUMNS] : systemColumnContract && systemPrivileges.includes('SELECT')
+      ? [...systemColumnContract]
+      : columnReadContract &&
       systemPrivileges.some((privilege) => privilege === 'INSERT' || privilege === 'UPDATE') &&
       !systemPrivileges.includes('SELECT')
         ? [...columnReadContract.columns]
         : []
+    if (runtimeColumnPrivileges.some(contract => contract.columns.some(name => !table.columns.some(column => column.name === name))))
+      throw new Error(`UE_V2_RUNTIME_SOURCE_COLUMN_REQUIRED:${table.name}`)
     if (systemSelectColumns.some((name) => !table.columns.some((column) => column.name === name)))
       throw new Error(`UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:${table.name}`)
     if (
@@ -260,9 +288,30 @@ export function compileSecurity(plan: V2Plan) {
       runtimePrivileges.some((privilege) => (privilege === 'SELECT' ? !predicate : !writePredicate))
     )
       complete = false
+    const containedParentChecks = table.foreignKeys.flatMap((foreignKey) => {
+      const parent = plan.tables.find((entry) => entry.name === foreignKey.table)
+      if (parent?.authority?.classification !== 'CONTAINED_NO_AUTHORITY') return []
+      const column = table.columns.find((entry) => entry.name === foreignKey.column)
+      if (!column || typeof column.notNull !== 'boolean')
+        throw new Error(`UE_V2_CONTAINED_PARENT_COLUMN_REQUIRED:${table.name}:${foreignKey.column}`)
+      if (!parent.columns.some((entry) => entry.name === foreignKey.referencedColumn))
+        throw new Error(`UE_V2_CONTAINED_PARENT_KEY_REQUIRED:${parent.name}:${foreignKey.referencedColumn}`)
+      // A contained parent has no ordinary or system visibility. Retaining a
+      // physical FK does not authorize associating a new child with that row.
+      return [column.notNull ? 'false' : `(${quote(column.name)} IS NULL)`]
+    })
     let checkPredicate = writePredicate
     if (complete && checkPredicate) {
       const parentChecks = table.foreignKeys.flatMap((foreignKey) => {
+        // These are participant attributions, not access to another person's
+        // private profile. The FK still requires the contact anchor to exist;
+        // canonical membership proves the referenced participant is active in
+        // this organization without granting SELECT on their private profile.
+        if (plan.authExecution && table.name === 'correspondence' && foreignKey.table === 'profiles'
+          && foreignKey.referencedColumn === 'user_id'
+          && ['drafted_by','assigned_signer_id','approved_by','signed_by','dispatched_by'].includes(foreignKey.column)) {
+          return [`(${quote(foreignKey.column)} IS NULL OR ${AUTH_BUSINESS_MEMBER_PARENT_PREDICATE}(${quote(foreignKey.column)}::text, (${org})::uuid))`]
+        }
         if (
           plan.authExecution &&
           foreignKey.table === 'user_management.users' &&
@@ -313,14 +362,31 @@ export function compileSecurity(plan: V2Plan) {
           `(${quote(foreignKey.column)} IS NULL OR EXISTS (SELECT 1 FROM ${ref(parent.name)} v2_fk WHERE v2_fk.${quote(foreignKey.referencedColumn)} = ${quote(table.name)}.${quote(foreignKey.column)}))`,
         ]
       })
-      if (parentChecks.length)
-        checkPredicate = `(${checkPredicate}) AND ${parentChecks.join(' AND ')}`
+      // grievances.represented_member_user_id references user_management.users through a physical
+      // guard (case-scope-physical-guards.ts), not a source-declared FK, so the loop above never sees
+      // it. Existence alone let a grievance name a member of another organization; the represented
+      // member must be an active member of the row's own organization.
+      const guardDeclaredMemberAttributions =
+        plan.authExecution && table.name === 'grievances'
+          ? [
+              `("represented_member_user_id" IS NULL OR ${AUTH_BUSINESS_MEMBER_PARENT_PREDICATE}("represented_member_user_id"::text, (${org})::uuid))`,
+            ]
+          : []
+      const allParentChecks = [...parentChecks, ...guardDeclaredMemberAttributions, ...containedParentChecks]
+      if (allParentChecks.length)
+        checkPredicate = `(${checkPredicate}) AND ${allParentChecks.join(' AND ')}`
     }
     statements.push(
       `ALTER TABLE ${ref(table.name)} ENABLE ROW LEVEL SECURITY;`,
       `ALTER TABLE ${ref(table.name)} FORCE ROW LEVEL SECURITY;`,
       `REVOKE ALL ON TABLE ${ref(table.name)} FROM PUBLIC, union_eyes_runtime, union_eyes_system;`,
     )
+    // A table REVOKE does not remove old per-column ACLs. Explicitly reset the
+    // current reviewed reward columns before their bounded projections. The
+    // legacy installer additionally quarantines all physical retained columns.
+    if (assertCurrentRewardSource(table) || assertCurrentModuleAdmissionSource(table) || syncLogProjection)
+      for (const privilege of ['SELECT', 'INSERT', 'UPDATE', 'REFERENCES'])
+        statements.push(`REVOKE ${privilege} (${table.columns.map(column => quote(column.name)).join(', ')}) ON TABLE ${ref(table.name)} FROM PUBLIC, union_eyes_runtime, union_eyes_system;`)
     if (!complete) {
       blockers.push({
         table: table.name,
@@ -339,28 +405,45 @@ export function compileSecurity(plan: V2Plan) {
         const using = privilege === 'SELECT' ? predicate : writePredicate
         if (!using) throw new Error(`UE_V2_WRITE_PREDICATE_REQUIRED:${table.name}`)
         const authenticated = plan.authExecution
-          ? `${AUTH_BUSINESS_ORG_PREDICATE}((${org})::uuid)`
+          ? // Session-only inputs: one evaluation per statement (InitPlan), not per row.
+            `(SELECT ${AUTH_BUSINESS_ORG_PREDICATE}((${org})::uuid))`
           : `${user} IS NOT NULL`
         const guard = `(${authenticated} AND (${using}))`
         const checkGuard = `(${authenticated} AND (${checkPredicate}))`
+        const columnGrant = runtimeColumnPrivileges.find(contract => contract.privilege === privilege)
         statements.push(
-          `GRANT ${privilege} ON TABLE ${ref(table.name)} TO union_eyes_runtime;`,
+          `GRANT ${privilege}${columnGrant ? ` (${columnGrant.columns.map(quote).join(', ')})` : ''} ON TABLE ${ref(table.name)} TO union_eyes_runtime;`,
           `CREATE POLICY ${quote(`ue_v2_${privilege.toLowerCase()}`)} ON ${ref(table.name)} FOR ${privilege} TO union_eyes_runtime ${privilege === 'INSERT' ? `WITH CHECK (${checkGuard})` : privilege === 'UPDATE' ? `USING (${guard}) WITH CHECK (${checkGuard})` : `USING (${guard})`};`,
         )
       }
       if (systemPrivileges.length) {
-        statements.push(
-          `GRANT ${systemPrivileges.join(', ')} ON TABLE ${ref(table.name)} TO union_eyes_system;`,
-        )
+        const systemCheck = containedParentChecks.length ? containedParentChecks.join(' AND ') : 'true'
+        if (systemTablePrivileges.length)
+          statements.push(`GRANT ${systemTablePrivileges.join(', ')} ON TABLE ${ref(table.name)} TO union_eyes_system;`)
         for (const privilege of systemPrivileges)
           statements.push(
-            `CREATE POLICY ${quote(`ue_v2_system_${privilege.toLowerCase()}`)} ON ${ref(table.name)} FOR ${privilege} TO union_eyes_system ${privilege === 'INSERT' ? 'WITH CHECK (true)' : privilege === 'UPDATE' ? 'USING (true) WITH CHECK (true)' : 'USING (true)'};`,
+            `CREATE POLICY ${quote(`ue_v2_system_${privilege.toLowerCase()}`)} ON ${ref(table.name)} FOR ${privilege} TO union_eyes_system ${privilege === 'INSERT' ? `WITH CHECK (${systemCheck})` : privilege === 'UPDATE' ? `USING (true) WITH CHECK (${systemCheck})` : 'USING (true)'};`,
           )
-        if (systemSelectColumns.length)
-          statements.push(
-            `GRANT SELECT (${systemSelectColumns.map(quote).join(', ')}) ON TABLE ${ref(table.name)} TO union_eyes_system;`,
-            `CREATE POLICY ue_v2_system_predicate_select ON ${ref(table.name)} FOR SELECT TO union_eyes_system USING (true);`,
-          )
+        if (systemSelectColumns.length) {
+          statements.push(`GRANT SELECT (${systemSelectColumns.map(quote).join(', ')}) ON TABLE ${ref(table.name)} TO union_eyes_system;`)
+          if (!systemPrivileges.includes('SELECT')) statements.push(`CREATE POLICY ue_v2_system_predicate_select ON ${ref(table.name)} FOR SELECT TO union_eyes_system USING (true);`)
+        }
+      }
+      if (containedParentChecks.length && complete) {
+        for (const command of ['INSERT', 'UPDATE'] as const) {
+          const roles: ContainedParentPolicy['roles'] = []
+          if (runtimePrivileges.includes(command)) roles.push('union_eyes_runtime')
+          if (systemPrivileges.includes(command)) roles.push('union_eyes_system')
+          if (!roles.length) continue
+          const spec: ContainedParentPolicy = {
+            schema: 'public', table: table.name,
+            name: `ue_v2_contained_parent_${command.toLowerCase()}`, command,
+            permissive: false, roles, using: command === 'UPDATE' ? 'true' : null,
+            predicate: [...new Set(containedParentChecks)].join(' AND '),
+          }
+          containedParentPolicies.push(spec)
+          statements.push(compileContainedParentPolicy(spec))
+        }
       }
       if (plan.authExecution && complete && runtimePrivileges.length) statements.push(compileBusinessSessionPolicy(table.name))
     }
@@ -370,8 +453,9 @@ export function compileSecurity(plan: V2Plan) {
       predicate,
       writePredicate,
       checkPredicate,
-      runtimePrivileges: complete ? runtimePrivileges : [],
-      systemPrivileges: complete ? systemPrivileges : [],
+      runtimePrivileges: complete ? runtimeTablePrivileges : [],
+      ...(runtimeColumnPrivileges.length ? { runtimeColumnPrivileges: complete ? runtimeColumnPrivileges : [] } : {}),
+      systemPrivileges: complete ? systemTablePrivileges : [],
       ...(systemSelectColumns.length
         ? { systemSelectColumns: complete ? systemSelectColumns : [] }
         : {}),
@@ -379,5 +463,5 @@ export function compileSecurity(plan: V2Plan) {
       status: complete ? 'COMPLETE' : 'DENY_UNRESOLVED',
     })
   }
-  return { rules, statements, blockers }
+  return { rules, statements, blockers, containedParentPolicies }
 }

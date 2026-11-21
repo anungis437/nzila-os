@@ -37,7 +37,10 @@ export function base32Encode(buf: Buffer): string {
 }
 
 export function base32Decode(encoded: string): Buffer {
-  const clean = encoded.toUpperCase().replace(/=+$/g, '').replace(/\s+/g, '') // codeql[js/polynomial-redos] - input is a short base32 token, not attacker-controlled with adversarial length
+  // Trim trailing '=' padding with a linear scan (a `/=+$/` regex is quadratic on long '=' runs)
+  let end = encoded.length
+  while (end > 0 && encoded.charCodeAt(end - 1) === 61) end--
+  const clean = encoded.slice(0, end).toUpperCase().replace(/\s/g, '')
   let bits = 0
   let value = 0
   const out: number[] = []

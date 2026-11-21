@@ -1,0 +1,148 @@
+{
+  "kind": "POST_RESTART_SUPPLY_COMPONENT_RECAPTURE",
+  "recordedAt": "2026-11-18T00:24:36.504632+00:00",
+  "head": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtyIntegrationSource": true,
+  "finalCandidateSha": null,
+  "overallStep1Verdict": "UNQUALIFIED",
+  "rawAudit": {
+    "command": [
+      "pnpm",
+      "audit",
+      "--json"
+    ],
+    "exitCode": 1,
+    "findings": {
+      "high": 1,
+      "critical": 0,
+      "other": 0
+    },
+    "advisory": "GHSA-fc5q-39xc-vjpf",
+    "registryVersion": "4.0.7",
+    "officialPatchedVersion": null,
+    "waiver": false,
+    "receipt": "pnpm-audit-receipt-v4.json"
+  },
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "tooling/security/picomatch-repeated-extglob.test.mjs",
+        "tooling/security/npm-bulk-audit.test.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "log": "security-node-tests-v4.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "tooling/security/vitest.audit.config.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/security-unit-tests-v4.json"
+      ],
+      "exitCode": 0,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "log": "security-unit-tests-v4.log"
+    }
+  ],
+  "productionManifestMateriality": {
+    "status": "COMPLETE_TRAVERSAL_ONLY",
+    "receipt": "picomatch-production-closure-v2.json",
+    "importers": 63,
+    "snapshots": 1639,
+    "unresolvedReferences": 0,
+    "containsPicomatch": true,
+    "examplePath": [
+      "apps/union-eyes",
+      "@sentry/nextjs@10.75.2",
+      "@rollup/plugin-commonjs@28.0.1",
+      "picomatch@4.0.7(local-patch)"
+    ],
+    "doesNotProve": "Final image contents, runtime reachability or vulnerability-policy pass"
+  },
+  "sourceHashes": [
+    {
+      "path": "package.json",
+      "sha256": "70ff115bedfe230bf2540e22f6d3a1858825802f09460723bb0a76cc18449a9f"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0"
+    },
+    {
+      "path": "patches/picomatch@4.0.7.patch",
+      "sha256": "84f9739f825f963ad0896f3320add6fa2f0ea137ce1a4c57c6eb0827fdd45d36"
+    },
+    {
+      "path": "tooling/security/picomatch-repeated-extglob.test.mjs",
+      "sha256": "f2c617510ff59b49c9a4fc8a1196f1373fd8c8ff10eea8c119d5f7066dea5ba5"
+    },
+    {
+      "path": "tooling/security/npm-bulk-audit.mjs",
+      "sha256": "2423bd3af73a701222532b3f5f910c80afc011bfdce3a34be39af749f2062b73"
+    },
+    {
+      "path": "tooling/security/npm-bulk-audit.test.mjs",
+      "sha256": "6ae5e01b0cc1510f2d7759c9b6edc827047b4e52350a69bb15919a28ea558572"
+    },
+    {
+      "path": "tooling/security/sbom.test.ts",
+      "sha256": "61952f7590317b927ed08347cd188179b503733b19e80531b4e3b4328f4f5ac6"
+    },
+    {
+      "path": "tooling/security/supply-chain-policy.ts",
+      "sha256": "2d96692b66adbc2fe6d7cdf1902c3425450e8855ccd4d2913c6a1f2e8e1d4291"
+    },
+    {
+      "path": "tooling/security/supply-chain-policy.test.ts",
+      "sha256": "9d24089a8feb8f883ab61d10e77ad3efb613177f64c0214d81ed5316473876f3"
+    },
+    {
+      "path": "scripts/generate-sbom.ts",
+      "sha256": "7d88d1a31f6d73f2e07880a0c56a9a666abeae88168f22808030ad5616baefe3"
+    }
+  ],
+  "artifacts": {
+    "picomatch-primary-state-v5.json": "cad037029ce57b8066906d9a46914687a5f5d1ec67ffac00c46c5c4baa52809d",
+    "picomatch-registry-raw-v5.json": "f5b19326b62bc9009139f82d9b3400421edf9fc0ade0212d49d1bac349659d77",
+    "picomatch-ghsa-raw-v5.json": "cc99706e61047047b6690db94abb98b5940d007196775c12902c0f79d8aedbd5",
+    "pnpm-audit-raw-v4.json": "f68a9d210d8af8056573a98998bca5d7c1ea6eb291f5e96b0d0577eb43973df5",
+    "pnpm-audit-stderr-v4.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pnpm-audit-receipt-v4.json": "a8134ebd615bcc45b5eba9bb7530503339f5771913bb97086fec37990d7f5c98",
+    "security-node-tests-v4.log": "0f7d2c446a3d9215414f62d491b3800bd3c5bcbcd6d0c761682c89e00d2a0c7d",
+    "security-unit-tests-v4.log": "bc584c333f57d3f30cae51e8982eda8daece9715ab8d0b4a9deb5da1382db819",
+    "security-unit-tests-v4.json": "d38cf088710ebab0d9247c21cce6fa4217c6644d4f4e0a1b7cadd61eb183ca69",
+    "picomatch-production-closure-v1.json": "75f8b484182ffc2f0cc126b247ca262fc6aadd4616710b53c312f103b76a3bd2",
+    "picomatch-production-closure-v2.json": "25a4855e2d283d01ddbe9ced0dc747f363facf205ca6c2aebcc62264f318c3aa"
+  },
+  "remaining": [
+    "No officially patched Picomatch release; full raw HIGH remains unwaived despite bounded local patch tests",
+    "Whole-workspace license policy remains failed;70violations in Union Eyes production manifest closure and9outside; final image license inventory/materiality pending",
+    "Four historical credential-looking values validity/revocation remains unverified; full history scan67findings is not passed",
+    "Final exact source/image provenance, image build, native transition, security scans and sealed qualification remain parent-owned; no image or staging/prod promotion performed"
+  ],
+  "notes": [
+    "Earlier unexecuted or lost raw logs are never promoted by this receipt; this receipt records the new actual executions only",
+    "Installer focused component receipt separately records21passing cases and3nativeunexecuted; root has separately reported production-tooling semantic typecheck pass"
+  ],
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "a1cccfbdce16011887a07e7510efe21a014d2dd27bfc095a974ba8c800f1d66b",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/supply-security-validation-v4.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

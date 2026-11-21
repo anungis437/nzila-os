@@ -1,3 +1,4 @@
+import { listTaxYears, createTaxYear } from '@/lib/services/finance-tax-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Tax Years
@@ -7,15 +8,9 @@
  * PR5 — Org-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { taxYears } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { CreateTaxYearInput } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const orgId = req.nextUrl.searchParams.get('orgId')
@@ -26,12 +21,8 @@ export async function GET(req: NextRequest) {
   const access = await requireOrgAccess(orgId)
   if (!access.ok) return access.response
 
-  const rows = await platformDb
-    .select()
-    .from(taxYears)
-    .where(eq(taxYears.orgId, orgId))
-
-  return NextResponse.json(rows)
+  const result = await listTaxYears(orgId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -46,24 +37,6 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await platformDb
-    .insert(taxYears)
-    .values(parsed.data)
-    .returning()
-
-  await recordFinanceAuditEvent({
-    orgId: parsed.data.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.TAX_YEAR_CREATE,
-    targetType: 'tax_year',
-    targetId: row.id,
-    afterJson: {
-      fiscalYearLabel: parsed.data.fiscalYearLabel,
-      startDate: parsed.data.startDate,
-      endDate: parsed.data.endDate,
-    },
-  })
-
-  return NextResponse.json(row, { status: 201 })
+  const result = await createTaxYear(parsed.data, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

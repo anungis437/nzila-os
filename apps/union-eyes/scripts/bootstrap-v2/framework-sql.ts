@@ -1,3 +1,7 @@
+import {
+  compileCanonicalMembershipGrant,
+  type CanonicalPostgresMajor,
+} from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import { quote, type V2Plan } from './source'
 import { compileRolePrerequisiteAssertions } from '../../../../packages/db/src/auth-storage-authority/role-prerequisites'
 import {
@@ -13,7 +17,7 @@ import {
 
 export function compileFrameworkSql(
   plan: V2Plan,
-  options: { rolesPreprovisioned?: boolean } = {},
+  options: { rolesPreprovisioned?: boolean; postgresMajor?: CanonicalPostgresMajor } = {},
 ): string {
   if (!plan.authExecution) throw new Error('UE_V2_FRAMEWORK_CANONICAL_AUTH_REQUIRED')
   for (const [table, owner] of Object.entries(FRAMEWORK_MODEL_OWNERS))
@@ -21,7 +25,7 @@ export function compileFrameworkSql(
       throw new Error(`UE_V2_FRAMEWORK_CURRENT_MODEL_REQUIRED:${table}`)
   const roles = Object.values(FRAMEWORK_ROLES)
   const statements = options.rolesPreprovisioned
-    ? [compileRolePrerequisiteAssertions(roles, FRAMEWORK_MEMBERSHIPS)]
+    ? [compileRolePrerequisiteAssertions(roles, FRAMEWORK_MEMBERSHIPS, options)]
     : roles.map(
         (role) => `DO $framework$ BEGIN
       IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='${role}') THEN
@@ -37,7 +41,12 @@ export function compileFrameworkSql(
     options.rolesPreprovisioned ? {} : FRAMEWORK_MEMBERSHIPS,
   ))
     statements.push(
-      `GRANT ${targets.map(quote).join(',')} TO ${quote(gateway)} WITH INHERIT FALSE, SET TRUE;`,
+      compileCanonicalMembershipGrant(
+        gateway,
+        targets,
+        { inherit: false, set: true, memberRoleInherit: false },
+        options.postgresMajor,
+      ),
     )
   statements.push(
     `GRANT USAGE ON SCHEMA public TO ${roles

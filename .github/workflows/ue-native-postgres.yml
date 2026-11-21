@@ -21,7 +21,7 @@ concurrency:
 jobs:
   combined-schema:
     name: Combined Django + Drizzle PostgreSQL ${{ matrix.pg }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -84,8 +84,8 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import { appendFileSync } from 'node:fs'
-          import { runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
-          const connection = runtimeEnv().DATABASE_URL
+          import { operatorDatabaseUrl } from './tooling/scripts/ue-runtime-up.mjs'
+          const connection = operatorDatabaseUrl()
           console.log('::add-mask::' + new URL(connection).password)
           const onDatabase = (database, host) => {
             const url = new URL(connection)
@@ -106,7 +106,7 @@ jobs:
 
       - name: Create the scratch database for the legacy RLS-enforcement suites
         shell: bash
-        run: docker exec ue-runtime-pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ue_rls_scratch'
+        run: docker exec ue-runtime-pg psql -U uev2admin -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ue_rls_scratch'
 
       # pgvector is an optional extension: the stock image does not carry it, so the database above was built without it and platform 0063 left
       # knowledge_base.embedding out. semantic-search.postgres.test.ts proves that state first, then enables the extension in its own clone and proves
@@ -116,14 +116,21 @@ jobs:
         run: |
           set -euo pipefail
           docker exec ue-runtime-pg bash -c 'apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "postgresql-${PG_MAJOR}-pgvector"'
-          version="$(docker exec ue-runtime-pg psql -U postgres -d postgres -Atc "SELECT default_version FROM pg_available_extensions WHERE name = 'vector'")"
+          version="$(docker exec ue-runtime-pg psql -U uev2admin -d postgres -Atc "SELECT default_version FROM pg_available_extensions WHERE name = 'vector'")"
           test -n "$version"
           echo "pgvector $version is available to the disposable server"
+
+      # queued-case-mail.native.test.ts proves capability binding and writer/admission lock ordering on its own disposable
+      # PostgreSQL 16 container, started with --pull never from this pinned image; pulling it here lets that proof run in this job.
+      - name: Provide the pinned image of the queued case mail proof
+        shell: bash
+        run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
 
       - name: Run every native PostgreSQL test, each file in its own clone of the converged database
         shell: bash
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          UE_QUEUED_MAIL_NATIVE: '1'
           UE_AUTHORITY_DJANGO: '1'
           UE_OWNERSHIP_NATIVE_PROOF: '1'
           UE_ELECTION_SUCCESSION_NATIVE_PROOF: '1'

@@ -1,9 +1,21 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 import base from './catalog-authority-contract.json'
 import { assessCatalogAdmission, catalogContractDigest } from './catalog-admission-core.mjs'
 import { canonicalCatalogContract, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
+import { compileSecurity } from '../../scripts/bootstrap-v2/security'
+import { compileAuthBootstrapSql } from '../../scripts/bootstrap-v2/auth-sql'
+import { parseSql } from '../../scripts/lib/sql-census/parse'
+import type { V2Plan } from '../../scripts/bootstrap-v2/source'
 
 const canonical = canonicalCatalogContract()
+// Classification/column fixtures isolate those checks; function authority has
+// a separate real-producer fixture below, and complete native qualification.
+const focusedPayload = {...canonical.payload,currentFunctions:[],requiredContainedParentPolicies:[],requiredPhysicalTriggers:[]}
+const focused = {payload:focusedPayload,digest:catalogContractDigest(focusedPayload)}
+let functionContract: typeof focused
+let functionRow: Record<string,unknown>
 const safeRole = { rolsuper: false, rolbypassrls: false, rolcreatedb: false, rolcreaterole: false }
 function snapshots() {
   return {
@@ -20,15 +32,28 @@ const approvedFunction = {
 }
 
 describe('canonical catalog admission', () => {
-  it('preserves every public manifest privilege and the original legacy contract, except documented V2 decisions', () => {
-    const inherited = canonical.payload.entries.slice(0, base.payload.entries.length)
-    const decided = new Set(['donations', 'evidence_packs', 'arbitration_decisions', 'signature_audit_trail'])
-    expect(inherited.filter(entry => !decided.has(entry.table))).toEqual(base.payload.entries.filter(entry => !decided.has(entry.table)))
-    // Pinned exactly so that any other change to the inherited manifest still fails this test.
-    expect(inherited.find(entry => entry.table === 'donations')).toMatchObject({
-      classification: 'TENANT_RLS_REQUIRED', runtime: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'], system: [],
+  beforeAll(async()=>{
+    const parsed=await parseSql(compileAuthBootstrapSql({rolesPreprovisioned:true}))
+    if(!parsed.ok) throw new Error('Current auth source must parse')
+    const producer=parsed.statements.find(statement=>statement.CreateFunctionStmt?.funcname.at(-1)?.String.sval==='auth_business_org_authorized')!.CreateFunctionStmt
+    const body=producer.options.find((option:Record<string,Record<string,unknown>>)=>option.DefElem.defname==='as').DefElem.arg.List.items[0].String.sval
+    const spec=(canonical.payload as typeof canonical.payload & {currentFunctions:Record<string,unknown>[]}).currentFunctions.find(fn=>fn.name==='auth_business_org_authorized')!
+    functionRow={...spec,body}
+    const payload={...canonical.payload,currentFunctions:[spec],requiredContainedParentPolicies:[],requiredPhysicalTriggers:[]}
+    functionContract={payload,digest:catalogContractDigest(payload)} as typeof focused
+  })
+
+  it('uses current source privileges and contains historical-only storage without changing the historical contract', () => {
+    const root=path.resolve(import.meta.dirname,'../../../..')
+    const plan=JSON.parse(readFileSync(path.join(root,'docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'),'utf8')) as V2Plan
+    const rules=compileSecurity(plan).rules.filter(rule=>!rule.table.includes('.'))
+    for(const rule of rules) expect(canonical.payload.entries.find(entry=>entry.table===rule.table)).toEqual({table:rule.table,classification:rule.classification,runtime:rule.runtimePrivileges,system:rule.systemPrivileges})
+    for(const prior of base.payload.entries.filter(entry=>!rules.some(rule=>rule.table===entry.table)))
+      expect(canonical.payload.entries.find(entry=>entry.table===prior.table)).toMatchObject({classification:'CONTAINED_NO_AUTHORITY',runtime:[],system:[]})
+    expect(canonical.payload.entries.find(entry => entry.table === 'donations')).toMatchObject({
+      classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [],
     })
-    expect(inherited.find(entry => entry.table === 'evidence_packs')).toMatchObject({ runtime: ['SELECT', 'INSERT', 'UPDATE'], system: ['SELECT'] })
+    expect(canonical.payload.entries.find(entry => entry.table === 'evidence_packs')).toMatchObject({ runtime: ['SELECT', 'INSERT', 'UPDATE'], system: ['SELECT'] })
     expect(base.payload.entries.find(entry => entry.table === 'donations')).toMatchObject({ classification: 'SEPARATE_DATABASE_BOUNDARY', runtime: [], system: [] })
     expect(canonical.payload.entries.find(entry => entry.table === 'ue_v2_bootstrap_receipt')).toMatchObject({ runtime: [], system: [] })
     expect(canonical.payload.runtimeSchemaUsage).toEqual(['public', 'user_management'])
@@ -46,17 +71,28 @@ describe('canonical catalog admission', () => {
       })
       expect(base.payload.entries.find(entry => entry.table === table)?.runtime.length).toBeGreaterThan(0)
       const relation = { schema_name: 'public', table_name: table, relkind: 'r', relrowsecurity: true, relforcerowsecurity: true }
-      expect(assessCatalogAdmission(canonical, { ...snapshots(), relations: [{ ...relation, runtime: [], system: [] }] }).ok).toBe(true)
-      expect(assessCatalogAdmission(canonical, { ...snapshots(), relations: [{ ...relation, runtime: ['SELECT'], system: [] }] }).ok).toBe(false)
+      expect(assessCatalogAdmission(focused, { ...snapshots(), relations: [{ ...relation, runtime: [], system: [] }] }).ok).toBe(true)
+      expect(assessCatalogAdmission(focused, { ...snapshots(), relations: [{ ...relation, runtime: ['SELECT'], system: [] }] }).ok).toBe(false)
     }
   })
 
-  it('uses table-level system SELECT without requiring redundant service column ACLs', () => {
-    for (const table of ['commercial_contracts', 'external_data_sync_log']) {
-      const entry = canonical.payload.entries.find(entry => entry.table === table)!
-      expect(entry.system).toContain('SELECT')
-      expect(canonical.payload.approvedColumnGrants.some(grant => grant.table === table)).toBe(false)
-    }
+  it('grants these service reads only as exact column SELECTs, never table-level', () => {
+    // commercial_contracts: the system role has no privilege at all (native matrix asserts 42501 for
+    // every statement); the runtime reads exactly four module-admission columns.
+    const contracts = canonical.payload.entries.find(entry => entry.table === 'commercial_contracts')!
+    expect(contracts.system).toEqual([])
+    expect(contracts.runtime).not.toContain('SELECT')
+    expect(canonical.payload.approvedColumnGrants.filter(grant => grant.table === 'commercial_contracts')).toEqual([
+      expect.objectContaining({ role: 'union_eyes_runtime', privilege: 'SELECT', columns: ['expiration_date', 'id', 'organization_id', 'status'], grantable: false }),
+    ])
+    // external_data_sync_log: the sync worker reads the thirteen overview fields by exact column grant;
+    // table-level SELECT would widen it to every column.
+    const syncLog = canonical.payload.entries.find(entry => entry.table === 'external_data_sync_log')!
+    expect(syncLog.system).not.toContain('SELECT')
+    const syncGrants = canonical.payload.approvedColumnGrants.filter(grant => grant.table === 'external_data_sync_log')
+    expect(syncGrants).toHaveLength(1)
+    expect(syncGrants[0]).toMatchObject({ role: 'union_eyes_system', privilege: 'SELECT', grantable: false })
+    expect(syncGrants[0].columns).toHaveLength(13)
   })
 
   it('does not repair or re-sign a corrupt packaged contract', () => {
@@ -66,12 +102,12 @@ describe('canonical catalog admission', () => {
   })
 
   it('admits only the source-approved runtime definer with exact owner and execution scope', () => {
-    expect(assessCatalogAdmission(canonical, { ...snapshots(), definers: [approvedFunction] }).violations).toEqual([])
+    expect(assessCatalogAdmission(functionContract, { ...snapshots(), currentFunctions:[functionRow],definers: [approvedFunction] }).violations).toEqual([])
     for (const change of [
       { owner: 'nzilaadmin' }, { proconfig: ['search_path=public'] }, { public_execute: true },
       { system_execute: true }, { runtime_execute: false }, { proname: 'unapproved_helper' },
     ]) {
-      expect(assessCatalogAdmission(canonical, { ...snapshots(), definers: [{ ...approvedFunction, ...change }] }).ok).toBe(false)
+      expect(assessCatalogAdmission(functionContract, { ...snapshots(),currentFunctions:[functionRow], definers: [{ ...approvedFunction, ...change }] }).ok).toBe(false)
     }
     expect(assessCatalogAdmission(base, { ...snapshots(), definers: [approvedFunction] }).violations
       .some(message => message.includes('SECURITY DEFINER'))).toBe(true)

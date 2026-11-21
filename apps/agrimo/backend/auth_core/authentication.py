@@ -83,4 +83,5 @@ class OIDCAuthentication(BaseAuthentication):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Token has expired")
         except jwt.InvalidTokenError as e:
-            raise AuthenticationFailed(f"Invalid token: {e}")
+            logger.warning("Invalid token: %s", e)
+            raise AuthenticationFailed("Invalid token")

@@ -1,0 +1,78 @@
+{
+  "scope": "INTERIM_SHARED_STRIPE_METADATA_AUTHORITY_BOUNDARY",
+  "recordedAt": "2026-11-18T06:47:32.230131+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "repair": [
+    "Four scoped Stripe constructors reject contradictory org/venture metadata before obtaining client/provider transport and write verified canonical metadata last.",
+    "Webhook scope extraction rejects contradictory top-level and nested organization metadata and malformed provided identifiers."
+  ],
+  "observedTests": {
+    "officialVitestShards": 2,
+    "officialBlobMerge": true,
+    "passed": 166,
+    "failed": 0,
+    "skipped": 0,
+    "uniqueTestFiles": 11
+  },
+  "sourceBindingsAtRecord": [
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/payments-stripe/src/primitives.ts",
+      "sha256": "dda177164ae1c0781ad071ad05bdc7a7df7db67eefe929f9cd88d2da5d5d9593",
+      "bytes": 8578
+    },
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/payments-stripe/src/webhooks.ts",
+      "sha256": "27b71f7d144fbe5a32646afb3d541b69f1aba9c8259e12021b3643a8dd67fea2",
+      "bytes": 2675
+    },
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/payments-stripe/src/__tests__/metadata-authority.test.ts",
+      "sha256": "efd65d343c89595034c8d7f16498049d5f1c6c846a7a969de044010601c37ad3",
+      "bytes": 3308
+    },
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/payments-stripe/src/__tests__/webhooks.test.ts",
+      "sha256": "79043312b7d28e6a3b8e3183bb15df2fb1a4ddf75ca048b1b65750b8561ad616",
+      "bytes": 5580
+    }
+  ],
+  "rawPrivateProof": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/stripe-metadata-authority-red-v1.txt",
+      "sha256": "1139e6fe413caec0a12b1676820339e36fd5707ca9cd1ac3643471805b79522a",
+      "bytes": 6313
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/stripe-metadata-authority-green-v1.txt",
+      "sha256": "2f4f0b7c284aa1c46e335c668d0caf96480bc158200a5a7b0ba62240c3777683",
+      "bytes": 443
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/stripe-webhook-scope-red-v1.txt",
+      "sha256": "d654a1566102f7de4d5a5e3a4d0d81eef7cbadedacccad05d1b55d1affb3eecf",
+      "bytes": 6677
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/stripe-metadata-authority-green-v2.txt",
+      "sha256": "7fa564d8d7c5421738b877b9de64c41034a879f07e644949a0908b5686760917",
+      "bytes": 444
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/stripe-metadata-typecheck-v1.txt",
+      "sha256": "3b94f0faaf57225e99329f3e60c16ea7cd1575920cae4f7d051cf4ac8d3de84d",
+      "bytes": 160
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/vitest-shard-mechanics-v1/merged.json",
+      "sha256": "79765cb813c112e7151728b3626aee6a80893a56cd42fc621a2b4c413562b83a",
+      "bytes": 53561
+    }
+  ],
+  "limits": [
+    "Component client transports are mocked; no live provider operation or integration acceptance.",
+    "Source hashes at record do not substitute for final candidate-bound full-suite qualification.",
+    "Package has no configured lint script or ESLint configuration; no package lint success is claimed."
+  ],
+  "finalCandidateQualified": false
+}

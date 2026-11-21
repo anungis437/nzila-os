@@ -141,6 +141,8 @@ export async function withRLSContext<T>(
       { organizationId: explicitOrgId, expectedActorUserId: userId },
       (binding) =>
         db.transaction(async (tx) => {
+          // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+          await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
           await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
           try {
             await tx.execute(authenticatedOrgBindingSql(binding))
@@ -202,6 +204,8 @@ export async function withRLSContext<T>(
   // Execute in transaction to ensure context is properly scoped
   // set_config with is_local=true is equivalent to SET LOCAL but supports parameters
   return await db.transaction(async (tx) => {
+    // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+    await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
     // Set user context for RLS policies
     // This makes the user ID available to all RLS policies as:
     // current_setting('app.current_user_id', true)
@@ -254,6 +258,8 @@ export async function withPrincipalOnlyContext<T>(
     )
   }
   return await db.transaction(async (tx) => {
+    // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+    await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
     return tenantContextStorage.run(tx, () => operation(tx))
@@ -303,6 +309,8 @@ export async function withExplicitUserContext<T>(
   }
 
   return await db.transaction(async (tx) => {
+    // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+    await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)
     // NzilaOS PR-UE-02: Set org context when provided
     if (orgId) {
@@ -536,6 +544,8 @@ export async function withPlatformAdminRLSContext<T>(
   // rationale as withSystemContext above). app.current_user_id is set to
   // adminId for audit/logging only; it is not what grants access.
   return await systemDb.transaction(async (tx) => {
+    // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+    await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
     if (currentStateContextEnabled()) await tx.execute(sql`SET LOCAL ROLE union_eyes_system`)
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${adminId}, true)`)
     await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)

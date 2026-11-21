@@ -1,21 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { PgDialect } from 'drizzle-orm/pg-core';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withSystemContext: vi.fn(),
   db: { execute: vi.fn() },
   auditDataMutation: vi.fn(),
-  sqlTemplate: vi.fn((..._parts: unknown[]) => 'sql'),
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, z: require('zod') }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditDataMutation }));
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return { ...actual, sql: Object.assign(m.sqlTemplate, { mapWith: vi.fn() }) };
-});
 
 async function loadRoute() {
   return import('../governance/reserved-matters/route');
@@ -59,7 +55,7 @@ describe('governance/reserved-matters route', () => {
       organizationId: 'org_1',
     });
 
-    const statement = (m.sqlTemplate.mock.calls[0]?.[0] as readonly string[]).join('?');
+    const statement = new PgDialect().sqlToQuery(m.db.execute.mock.calls[0]![0]).sql;
     expect(statement).toMatch(/INSERT INTO reserved_matter_votes \([^)]*\bproposed_date\b[^)]*\bvoting_deadline\b/s);
   });
 });

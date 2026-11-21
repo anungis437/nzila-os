@@ -1,0 +1,81 @@
+{
+  "scope": "DISPOSABLE_HASH_LOCKED_14_ENDPOINT_REWARD_CREDIT_AUTOMATION_DENIAL",
+  "recordedAt": "2026-11-18T07:42:19.352176+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "repair": "AutomationExecutionLogViewSet now uses its existing unconditional DenyAllPermission. Other13 actual registered endpoint permissions and all models/history remain unchanged.",
+  "actualRuntime": {
+    "pythonVersion": "3.11.17",
+    "djangoVersion": "5.2.18",
+    "lockedInstalledDistributions": 87,
+    "testsRun": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "endpointClasses": 14,
+    "actualDispatches": 420,
+    "allDispatchResponses403": true,
+    "databaseConnectionAttempts": 0,
+    "providerNetworkAttempts": 0,
+    "envFileReadAttempts": 0,
+    "copiedSourceUnchanged": true
+  },
+  "red": {
+    "testsRun": 1,
+    "failedSubtests": 30,
+    "actualDispatches": 420,
+    "endpointClasses": 14,
+    "cause": "Thirty non403 subcases on AutomationExecutionLog across five personas/six exposed actions. All other390dispatches returned403."
+  },
+  "cleanupConfirmed": true,
+  "sourceBindingsAtRecord": [
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/backend/core/views.py",
+      "sha256": "453ff86dcaf1bcc58d0ca6d36bf478f12f03b526226eb11b418867a6a0640dcc",
+      "bytes": 33513
+    },
+    {
+      "path": "/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/backend/unions/test_base_release_rewards_boundary.py",
+      "sha256": "39d842173a79a4ed4b282851d96a307b9dbbf2040713fad3087ab533250c731f",
+      "bytes": 5607
+    }
+  ],
+  "rawPrivateProof": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/rewards-backend-boundary-remediation-v1.json",
+      "sha256": "c4c44f74bb4721d40c1ddc784a10f8e4938be58cf3b03a8286f99c279794b13b",
+      "bytes": 3733
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/red-v1-rewards-result.json",
+      "sha256": "e7889a7ec8bb8b05cc2a2829e9d6d7ef6995686e08f0919f8751f799ebd0918c",
+      "bytes": 100651
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/green-v1-rewards-result.json",
+      "sha256": "a332df78e73e294368687d9d181308b139d7ef3866d7d48af5fe1fd44667769b",
+      "bytes": 99399
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/python-rewards-container-red-v1.json",
+      "sha256": "ad20f8be7c464ba943b62cc75f91f5bc17aeeac33dd95b707ccb0cd4cc18d8c1",
+      "bytes": 52016
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/python-rewards-container-green-v1.json",
+      "sha256": "ed8ad01900564de5b399c43dc16c653550e6ce0db49865cd3b6106f25879a9a0",
+      "bytes": 52016
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/rewards-native-python-v1.py",
+      "sha256": "7f8ed6f2a5255a5e5ee4769d138cde36b01a5be86aef0b16d26e6e8d10992302",
+      "bytes": 11343
+    }
+  ],
+  "limits": [
+    "Actual DRFdispatch over source-imported routers under locked Python; no live database, browser or staging execution.",
+    "Python runtime is3.11.17, not the separately declared collector target3.11.14.",
+    "Positive credit/provider/automation features are excluded; no feature capability qualified."
+  ],
+  "finalCandidateQualified": false
+}

@@ -61,7 +61,7 @@ export async function reconcileCaseOwnership(
   if (page.length > 0) {
     const rows = (
       await exec.query<Row>(
-        `SELECT resource_id::text AS case_id, principal_user_id FROM ue_authority_resource_relationships
+        `SELECT resource_id::text AS case_id, principal_user_id FROM public.ue_authority_resource_relationships
           WHERE organization_id = $1::uuid AND resource_type = 'case' AND relation IN ('assignee', 'owner')
             AND status = 'active' AND revoked_at IS NULL AND effective_at <= now() AND (expires_at IS NULL OR expires_at > now())
             AND resource_id = ANY($2::uuid[])`,

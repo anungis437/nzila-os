@@ -5,6 +5,8 @@
  * Never use this helper against any shared, staging or production database.
  */
 import pg from 'pg'
+import { ownedRuntimeOperatorUrl } from './fixture-auth'
+import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
 
 export type BargainingQaRecord = {
   table: 'negotiations' | 'bargaining_proposals'
@@ -13,9 +15,7 @@ export type BargainingQaRecord = {
 }
 
 export async function cleanupBargainingQaRecords(records: BargainingQaRecord[]): Promise<void> {
-  // An absent URL must not be silently interpreted as localhost or an alternate database.
-  const connection = process.env.DATABASE_URL
-  if (!connection) throw new Error('Refusing cleanup without an explicit disposable QA DATABASE_URL')
+  const connection = ownedRuntimeOperatorUrl()
   const url = new URL(connection)
   if (
     !['localhost', '127.0.0.1'].includes(url.hostname) ||
@@ -25,18 +25,35 @@ export async function cleanupBargainingQaRecords(records: BargainingQaRecord[]):
   ) {
     throw new Error('Refusing cleanup outside isolated local Union Eyes QA database')
   }
+  if (
+    records.some(
+      (row) =>
+        !['negotiations', 'bargaining_proposals'].includes(row.table) ||
+        !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(row.id) ||
+        ![UE_TEST_ORGS.primary.id, UE_TEST_ORGS.secondary.id].some((id) => id === row.org),
+    )
+  )
+    throw new Error('Only exact returned fixture records and organizations may be cleaned up')
   const db = new pg.Client({ connectionString: url.toString() })
   await db.connect()
   try {
+    await db.query('BEGIN')
     for (const row of records.filter((r) => r.table === 'bargaining_proposals')) {
       await db.query(
-        'DELETE FROM bargaining_proposals WHERE id = $1 AND negotiation_id IN (SELECT id FROM negotiations WHERE organization_id = $2)',
+        'DELETE FROM public.bargaining_proposals WHERE id = $1 AND negotiation_id IN (SELECT id FROM public.negotiations WHERE organization_id = $2)',
         [row.id, row.org],
       )
     }
     for (const row of records.filter((r) => r.table === 'negotiations')) {
-      await db.query('DELETE FROM negotiations WHERE id = $1 AND organization_id = $2', [row.id, row.org])
+      await db.query('DELETE FROM public.negotiations WHERE id = $1 AND organization_id = $2', [
+        row.id,
+        row.org,
+      ])
     }
+    await db.query('COMMIT')
+  } catch (error) {
+    await db.query('ROLLBACK')
+    throw error
   } finally {
     await db.end()
   }

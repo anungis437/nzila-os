@@ -4,7 +4,9 @@ EXACT isolation mechanism its manifest disposition claims, and that the
 ViewSets deliberately left contained (Category C/D in the round-33 DenyAll
 inventory, PLUS donation_receipts — re-contained by the round-33
 correction after independent review found no proven tenant CRUD authority)
-still are. This is a regression lock, not a re-proof of mixin logic (that's
+still are. The prospective base release now excludes every billing operation;
+retained mixin wiring does not enable these routes. This is a regression lock,
+not a re-proof of mixin logic (that's
 covered by tests_isolation.py and tests_mixed_and_multiparty_isolation.py)
 — it fails loudly if a future edit silently swaps a ViewSet's
 permission_classes/mixin without updating the evidence in finance.ts.
@@ -29,22 +31,22 @@ from billing.isolation import (  # noqa: E402
     GlobalPlusTenantIsolationMixin,
     MultiPartyIsolationMixin,
 )
-from rest_framework import permissions, viewsets  # noqa: E402
+from rest_framework import viewsets  # noqa: E402
 
 
-class RestoredSurfaceWiringTests(unittest.TestCase):
-    """Surfaces restored/remediated this round: correct mixin + permission."""
+class RetainedIsolationWiringTests(unittest.TestCase):
+    """Retain the mixin contracts while financial routes deny every caller."""
 
     def test_account_mappings_uses_global_plus_tenant_mixin_read_only(self):
         self.assertTrue(issubclass(views.AccountMappingsViewSet, GlobalPlusTenantIsolationMixin))
         self.assertTrue(issubclass(views.AccountMappingsViewSet, viewsets.ReadOnlyModelViewSet))
         self.assertFalse(issubclass(views.AccountMappingsViewSet, viewsets.ModelViewSet))
-        self.assertEqual(views.AccountMappingsViewSet.permission_classes, [permissions.IsAuthenticated])
+        self.assertEqual(views.AccountMappingsViewSet.permission_classes, [views.SharedDenyAllPermission])
         self.assertEqual(views.AccountMappingsViewSet.tenant_field, "organization_id")
 
     def test_per_capita_remittances_uses_multi_party_mixin_with_correct_fields(self):
         self.assertTrue(issubclass(views.PerCapitaRemittancesViewSet, MultiPartyIsolationMixin))
-        self.assertEqual(views.PerCapitaRemittancesViewSet.permission_classes, [permissions.IsAuthenticated])
+        self.assertEqual(views.PerCapitaRemittancesViewSet.permission_classes, [views.SharedDenyAllPermission])
         self.assertEqual(views.PerCapitaRemittancesViewSet.from_field, "from_organization_id")
         self.assertEqual(views.PerCapitaRemittancesViewSet.to_field, "to_organization_id")
 

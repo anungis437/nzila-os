@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL_MESSAGE = 'Finance and dues persistence are not available in this release.';
+/** The wrapper turns the boundary's ApiError into a 501 with the NOT_IMPLEMENTED code and the decided message. */
+async function expectRefusal(response: Response) {
+  expect(response.status).toBe(501);
+  expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL_MESSAGE });
+}
 
 const m = vi.hoisted(() => {
   // The member lookup of the own-record decision: select().from().where().limit() answers the queued memberships
@@ -59,10 +67,10 @@ describe('dues/calculate route', () => {
     m.DuesCalculationEngine.calculateMemberDues.mockResolvedValue({ amount: 500, period: '2026-01' });
   });
 
-  it('asks the wrapper for the financial intelligence entitlement and the organization\'s own tenant transaction, and leaves the role to the handler', async () => {
+  it('asks the wrapper for the organization\'s own tenant transaction, and leaves the role to the handler', async () => {
     const { POST } = await loadRoute();
     const options = declaredOptions(POST);
-    expect(options).toMatchObject({ entitlement: 'financial_intelligence_suite', rlsOrgContext: true });
+    expect(options).toMatchObject({ rlsOrgContext: true });
     expect(options.auth?.minRole).toBeUndefined();
   });
 
@@ -109,25 +117,21 @@ describe('dues/calculate route', () => {
     expect(response.status).toBe(429);
   });
 
-  it('calculates dues for the caller organization, on the caller organization\'s transaction, from the member and period alone', async () => {
+  it('refuses a valid calculation with 501 and never calls the engine or audits a calculation', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(post({ ...valid, memberData: { grossWages: 1 } }), ctx);
+    await expectRefusal(await POST(post({ ...valid, memberData: { grossWages: 1 } }), ctx));
 
-    expect(response.status).toBe(200);
-    expect(m.DuesCalculationEngine.calculateMemberDues).toHaveBeenCalledWith(
-      { organizationId: 'org_1', memberId: MEMBER, periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-01-31') },
-      m.db,
-    );
-    expect(m.logApiAuditEvent).toHaveBeenCalled();
+    expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
+    expect(m.logApiAuditEvent).not.toHaveBeenCalled();
   });
 
-  it('is refused without the entitlement, and calculates nothing', async () => {
+  it('refuses with 501 whether or not the organization holds the entitlement: no module grants it', async () => {
     const { POST } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('no module'));
-    const response = await POST(post(valid), ctx);
-
-    expect(response.status).toBe(403);
-    expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'financial_intelligence_suite', 'u1');
+    for (const entitled of [true, false]) {
+      if (entitled) m.requireEntitlement.mockResolvedValue(undefined);
+      else m.requireEntitlement.mockRejectedValue(new Error('no module'));
+      await expectRefusal(await POST(post(valid), ctx));
+    }
     expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
   });
 
@@ -140,20 +144,21 @@ describe('dues/calculate route', () => {
     expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
   });
 
-  it('accepts a body that names the caller organization', async () => {
+  it('lets a body that names the caller organization past the organization check, and refuses it with 501', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(post({ ...valid, organizationId: 'org_1' }), ctx);
-
-    expect(response.status).toBe(200);
+    await expectRefusal(await POST(post({ ...valid, organizationId: 'org_1' }), ctx));
+    expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
   });
 
-  it('reports a calculation that failed as a 500, and one that has no result as not found', async () => {
+  it.each([
+    ['an engine that would fail', () => m.DuesCalculationEngine.calculateMemberDues.mockRejectedValue(new Error('engine down'))],
+    ['an engine that would find no result', () => m.DuesCalculationEngine.calculateMemberDues.mockResolvedValue(null)],
+  ])('answers 501 for %s: the engine is never reached', async (_label, arrange) => {
+    arrange();
     const { POST } = await loadRoute();
-    m.DuesCalculationEngine.calculateMemberDues.mockRejectedValueOnce(new Error('engine down'));
-    expect((await POST(post(valid), ctx)).status).toBe(500);
-
-    m.DuesCalculationEngine.calculateMemberDues.mockResolvedValueOnce(null);
-    expect((await POST(post(valid), ctx)).status).toBe(404);
+    await expectRefusal(await POST(post(valid), ctx));
+    expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
+    expect(m.logApiAuditEvent).not.toHaveBeenCalled();
   });
 
   describe('financial data of a member', () => {
@@ -170,19 +175,19 @@ describe('dues/calculate route', () => {
       expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
     });
 
-    it('lets the financial authority calculate any member, without looking the membership up', async () => {
-      const response = await call(OTHER);
-      expect(response.status).toBe(200);
+    it('lets the financial authority past the member check without looking the membership up, and then refuses with 501', async () => {
+      await expectRefusal(await call(OTHER));
       expect(m.hasRole).toHaveBeenCalledWith('secretary_treasurer');
       expect(m.db.select).not.toHaveBeenCalled();
+      expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
     });
 
-    it("lets a member calculate their own dues without the financial authority: the member id is a membership of the caller's user", async () => {
+    it("passes the own-record decision for a member without the financial authority, then is refused with 501: the member id is a membership of the caller's user", async () => {
       m.hasRole.mockResolvedValue(false);
       m.memberships.push([{ userId: 'u1' }]);
-      const response = await call(OTHER, 'u1');
-      expect(response.status).toBe(200);
+      await expectRefusal(await call(OTHER, 'u1'));
       expect(m.db.select).toHaveBeenCalledTimes(1);
+      expect(m.DuesCalculationEngine.calculateMemberDues).not.toHaveBeenCalled();
     });
 
     it("refuses a member the dues of another member's membership, and of a membership that is not in the organization", async () => {

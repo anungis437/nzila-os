@@ -37,12 +37,17 @@ vi.mock('@/db/schema-organizations', () => ({
   organizations: { id: 'id' },
 }));
 
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
-  and: vi.fn((...args: any[]) => ({ type: 'and', args })),
-  sql: vi.fn((str: any) => ({ type: 'sql', value: str })),
-  relations: vi.fn(() => ({})),
-}));
+vi.mock('drizzle-orm', async () => {
+  const actual = await vi.importActual<typeof import('drizzle-orm')>('drizzle-orm');
+  return {
+    ...actual,
+    eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
+    and: vi.fn((...args: any[]) => ({ type: 'and', args })),
+    // The stubbed tag keeps drizzle's sql.raw/join/... helpers, which schema modules call at load.
+    sql: Object.assign(vi.fn((str: any) => ({ type: 'sql', value: str })), actual.sql),
+    relations: vi.fn(() => ({})),
+  };
+});
 
 vi.mock('@nzila/os-core', () => ({
   createLogger: vi.fn(() => ({

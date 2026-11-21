@@ -77,7 +77,9 @@ native('authority kernel on the real v2 identity architecture', () => {
     await owner.query(compileSyntheticAuthFixtureSql())
     await owner.query(`CREATE ROLE union_eyes_runtime LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'synthetic-only';
       CREATE ROLE union_eyes_system LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'synthetic-only';`)
-    await owner.query(compileAuthBootstrapSql())
+    // The auth bootstrap compiles role-membership grants for the server's own major (PostgreSQL 15 has no INHERIT/SET grant options).
+    const major = Math.floor(Number((await owner.query('SHOW server_version_num')).rows[0].server_version_num) / 10000)
+    await owner.query(compileAuthBootstrapSql({ postgresMajor: major === 15 ? 15 : 16 }))
     await owner.query(compileAuthorityMembershipReaderSql())
     await owner.query(`CREATE ROLE auth_proof_login LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS PASSWORD 'synthetic-only';
       CREATE ROLE auth_proof_system_login LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS PASSWORD 'synthetic-only';

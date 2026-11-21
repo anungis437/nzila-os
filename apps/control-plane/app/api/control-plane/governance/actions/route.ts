@@ -18,60 +18,16 @@ import {
   submitGovernanceAction,
   decideApproval,
   executeGovernanceAction,
-} from '@/server/governance/state-machine'
+  listGovernanceActions,
+} from '@/lib/services/governance/state-machine'
 import type { GovernanceActionType } from '@nzila/os-core'
-import { platformDb } from '@nzila/db/platform'
-import { governanceActions } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
 import { createLogger } from '@nzila/os-core'
 import { enforceDecision } from '@nzila/decision-core'
-import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar'
-import { auditRecords } from '@nzila/db/schema'
-import { desc } from 'drizzle-orm'
+import { createPlatformNarProofAdapter } from '@/lib/services/platform-nar-proof'
 
 const logger = createLogger('control-plane:api:governance:actions')
 
-const narProofAdapter = createNarProofAdapter({
-  keyId: process.env.NAR_SIGNING_KEY_ID,
-  getPreviousHash: async (organizationId) => {
-    const rows = await platformDb
-      .select({ hash: auditRecords.narHash })
-      .from(auditRecords)
-      .where(eq(auditRecords.organizationId, organizationId))
-      .orderBy(desc(auditRecords.createdAt))
-      .limit(1)
-    return rows[0]?.hash
-  },
-  persistRecord: async (record) => {
-    await platformDb.insert(auditRecords).values({
-      id: record.id,
-      decisionRecordId: record.decisionRecordId,
-      organizationId: record.organizationId,
-      decisionType: record.decisionType,
-      actionType: record.actionType,
-      actorId: record.actorId,
-      actorType: record.actorType,
-      resourceType: record.resourceType,
-      resourceId: record.resourceId,
-      policyId: record.policyId,
-      policyVersion: record.policyVersion,
-      inputHash: record.inputHash,
-      outcomeHash: record.outcomeHash,
-      payload: record.payload,
-      narHash: record.seal.hash,
-      narSignature: record.seal.signature,
-      previousHash: record.seal.previousHash,
-      keyId: record.seal.keyId,
-      storageType: record.storage?.type,
-      storageUri: record.storage?.uri,
-      immutable: record.storage?.immutable,
-      retentionUntil: record.storage?.retentionUntil ? new Date(record.storage.retentionUntil) : null,
-      createdAt: new Date(record.createdAt),
-    })
-    return { auditRecordId: record.id }
-  },
-  getSigningSecret: getNarSigningSecret,
-})
+const narProofAdapter = createPlatformNarProofAdapter()
 
 // ── Request schemas ──────────────────────────────────────────────────────────
 
@@ -325,11 +281,7 @@ export async function GET(request: NextRequest) {
     }
     const orgId = parseUuidParam(rawOrgId, 'orgId')
 
-    const actions = await platformDb
-      .select()
-      .from(governanceActions)
-      .where(eq(governanceActions.orgId, orgId))
-      .orderBy(governanceActions.createdAt)
+    const actions = await listGovernanceActions(orgId)
 
     return NextResponse.json({ ok: true, data: actions })
   } catch (error) {

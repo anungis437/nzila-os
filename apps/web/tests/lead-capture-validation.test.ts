@@ -13,9 +13,32 @@ const leadCaptureSchema = z.object({
   source: z.enum(['website', 'referral', 'event', 'organic']).default('website'),
 })
 
-function sanitizeInput(text: string): string {
-  // codeql[js/incomplete-multi-character-sanitization] - test helper only, not production sanitization
-  return text.replace(/<script[\s>][\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, '').trim()
+function sanitizeInput(input: string): string {
+  // Linear scan: every '<' opens markup that is skipped to its closing '>', so no tag can survive or be reassembled,
+  // and <script>/<style> bodies and comments are dropped with their content.
+  const lower = input.toLowerCase()
+  const out: string[] = []
+  let i = 0
+  while (i < input.length) {
+    const open = input.indexOf('<', i)
+    if (open === -1) { out.push(input.slice(i)); break }
+    out.push(input.slice(i, open))
+    if (lower.startsWith('<!--', open)) {
+      const close = lower.indexOf('-->', open + 4)
+      i = close === -1 ? input.length : close + 3
+      continue
+    }
+    const element = ['script', 'style'].find((name) => lower.startsWith(`<${name}`, open) && !/[a-z0-9]/.test(lower.charAt(open + name.length + 1)))
+    if (element) {
+      const closing = lower.indexOf(`</${element}`, open)
+      const end = closing === -1 ? -1 : lower.indexOf('>', closing)
+      i = end === -1 ? input.length : end + 1
+      continue
+    }
+    const end = input.indexOf('>', open)
+    i = end === -1 ? input.length : end + 1
+  }
+  return out.join('').replace(/>/g, '').trim()
 }
 
 describe('Lead Capture Validation', () => {

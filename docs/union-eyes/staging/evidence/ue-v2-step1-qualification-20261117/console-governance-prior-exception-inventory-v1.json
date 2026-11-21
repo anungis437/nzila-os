@@ -1,0 +1,216 @@
+{
+  "at": "2026-11-18T01:53:09.869254+00:00",
+  "todayUTC": "2026-11-18",
+  "method": "Read-only current registry inventory; same date-only through-UTC-day expiry convention as governance-helpers.ts. No waivers altered.",
+  "registries": [
+    {
+      "file": "governance/exceptions/arch-layer.json",
+      "sha256": "4c0fc42c91552d788bb9cd33851ed28d4d4aa25075b43f76be9f7d6fe5b43b97",
+      "entries": 5,
+      "expired": 5,
+      "expiredPaths": [
+        "apps/console/**",
+        "apps/union-eyes/**",
+        "apps/flow/**",
+        "apps/control-plane/**",
+        "apps/nzila-hq/**"
+      ]
+    },
+    {
+      "file": "governance/exceptions/exception-schema.json",
+      "sha256": "1e2f447e47e91ce4431b999093d5b12bc53d7d5134843dfbfebef76194c3bd1b",
+      "entries": 0,
+      "expired": 0,
+      "expiredPaths": []
+    },
+    {
+      "file": "governance/exceptions/mutation-idempotency.json",
+      "sha256": "b24b090ddf1c7e4f68134e458d2a855dc4b7b0738a1661e58b99103cf57e3b23",
+      "entries": 35,
+      "expired": 0,
+      "expiredPaths": []
+    },
+    {
+      "file": "governance/exceptions/no-console.json",
+      "sha256": "e0479092a79662ad637e48d2953761dddb9508524496648678aa3adb7c471b78",
+      "entries": 12,
+      "expired": 12,
+      "expiredPaths": [
+        "apps/union-eyes/lib/console-wrapper.ts",
+        "apps/cfo/app/*/dashboard/error.tsx",
+        "apps/cfo/app/*/dashboard/*/error.tsx",
+        "apps/cfo/app/*/dashboard/*/*/error.tsx",
+        "apps/zonga/app/*/dashboard/error.tsx",
+        "apps/zonga/app/*/dashboard/*/error.tsx",
+        "apps/partners/app/**/admin/error.tsx",
+        "apps/partners/app/**/portal/error.tsx",
+        "apps/nacp-exams/app/*/dashboard/error.tsx",
+        "apps/console/components/ui/ErrorPanel.tsx",
+        "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+        "apps/union-eyes/instrumentation.ts"
+      ]
+    },
+    {
+      "file": "governance/exceptions/no-direct-provider.json",
+      "sha256": "5572bf9d8051c796881846052148aec1af3cb4c962ad731bdcee6d46d94988bf",
+      "entries": 2,
+      "expired": 2,
+      "expiredPaths": [
+        "apps/union-eyes/services/financial-service/src/services/notification-service.ts",
+        "apps/union-eyes/services/twilio-sms-service.ts"
+      ]
+    },
+    {
+      "file": "governance/exceptions/no-raw-db-in-actions.json",
+      "sha256": "9f5ef44bc5960d31a10633c7d96cf9dde46b34bc01ef16f8b79a42fdec794259",
+      "entries": 1,
+      "expired": 1,
+      "expiredPaths": [
+        "apps/union-eyes/actions/admin-actions.ts"
+      ]
+    },
+    {
+      "file": "governance/exceptions/org-required-server-actions.json",
+      "sha256": "fc54e1cbc8ae9f9d3ef20e79d6ca8700ca5705f7664d59398e1a89a4a0657e69",
+      "entries": 27,
+      "expired": 27,
+      "expiredPaths": [
+        "apps/cfo/lib/actions/advisory-actions.ts",
+        "apps/cfo/lib/actions/audit-actions.ts",
+        "apps/cfo/lib/actions/client-actions.ts",
+        "apps/cfo/lib/actions/import-actions.ts",
+        "apps/cfo/lib/actions/integration-actions.ts",
+        "apps/cfo/lib/actions/ledger-actions.ts",
+        "apps/cfo/lib/actions/misc-actions.ts",
+        "apps/cfo/lib/actions/notification-actions.ts",
+        "apps/cfo/lib/actions/platform-admin-actions.ts",
+        "apps/cfo/lib/actions/report-actions.ts",
+        "apps/cfo/lib/actions/security-actions.ts",
+        "apps/cfo/lib/actions/workflow-actions.ts",
+        "apps/partners/lib/actions/admin-actions.ts",
+        "apps/partners/lib/actions/ai-deal-actions.ts",
+        "apps/partners/lib/actions/certification-actions.ts",
+        "apps/partners/lib/actions/commission-actions.ts",
+        "apps/partners/lib/actions/deal-actions.ts",
+        "apps/union-eyes/actions/analytics-actions.ts",
+        "apps/union-eyes/actions/member-employment-actions.ts",
+        "apps/union-eyes/actions/rewards-actions.ts",
+        "apps/union-eyes/actions/admin-actions.ts",
+        "apps/zonga/lib/actions/download-actions.ts",
+        "apps/zonga/lib/actions/listener-actions.ts",
+        "apps/zonga/lib/actions/notification-actions.ts",
+        "apps/zonga/lib/actions/search-actions.ts",
+        "apps/zonga/lib/actions/social-actions.ts",
+        "apps/zonga/lib/actions/streaming-actions.ts"
+      ]
+    },
+    {
+      "file": "governance/exceptions/platform-adoption-exceptions.json",
+      "sha256": "271bfabc72cce51838136ae98d084231e4fc4d2dee5ef56bc092276d36ca1c9d",
+      "entries": 13,
+      "expired": 0,
+      "expiredPaths": []
+    },
+    {
+      "file": "governance/exceptions/platform-concern-adoption-exceptions.json",
+      "sha256": "de8521b7f19171513f13ff4985e62e7613355ba88a52d5b7fb37407f89631b26",
+      "entries": 4,
+      "expired": 1,
+      "expiredPaths": [
+        "apps/partners"
+      ]
+    },
+    {
+      "file": "governance/exceptions/server-action-auth.json",
+      "sha256": "88b3a701f5e05b96fb7d11c4e83664e90f600b22572b29508514291d282b8831",
+      "entries": 0,
+      "expired": 0,
+      "expiredPaths": []
+    },
+    {
+      "file": "governance/exceptions/stack-authority.json",
+      "sha256": "d988e69e3692fc92824913c0aac9d5040d0fe6d66b596223740c70f118c0cbbe",
+      "entries": 26,
+      "expired": 8,
+      "expiredPaths": [
+        "apps/union-eyes/actions/admin-actions.ts",
+        "apps/union-eyes/actions/analytics-actions.ts",
+        "apps/union-eyes/app/api/portal/dues/pay/route.ts",
+        "apps/union-eyes/app/*/dashboard/layout.tsx",
+        "apps/union-eyes/app/api/grievances/**/route.ts",
+        "apps/union-eyes/app/api/cases/intake/route.ts",
+        "apps/union-eyes/app/api/cases/*/escalate/route.ts",
+        "apps/union-eyes/app/api/exit-interviews/**/route.ts"
+      ]
+    },
+    {
+      "file": "governance/exceptions/ts-strict.json",
+      "sha256": "31c5fc767b2cd5b4f9f6e498421b7850f17c8f42605e2c8e1b3fdf46acc3d7ce",
+      "entries": 0,
+      "expired": 0,
+      "expiredPaths": []
+    }
+  ],
+  "consoleEntries": [
+    {
+      "path": "apps/union-eyes/lib/console-wrapper.ts",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/cfo/app/*/dashboard/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/cfo/app/*/dashboard/*/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/cfo/app/*/dashboard/*/*/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/zonga/app/*/dashboard/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/zonga/app/*/dashboard/*/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/partners/app/**/admin/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/partners/app/**/portal/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/nacp-exams/app/*/dashboard/error.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/console/components/ui/ErrorPanel.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    },
+    {
+      "path": "apps/union-eyes/instrumentation.ts",
+      "expiresOn": "2026-11-17",
+      "expired": true
+    }
+  ]
+}

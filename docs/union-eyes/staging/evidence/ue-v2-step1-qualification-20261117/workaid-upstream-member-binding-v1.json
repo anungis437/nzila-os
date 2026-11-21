@@ -1,0 +1,40 @@
+{
+  "scope": "INTERIM_SECURITY_BOUNDARY_REGRESSION",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "upstreamPullRequest": 1268,
+  "upstreamRepairCommit": "039ceda56db1700b26c5524afcd240aacdabb280",
+  "upstreamTestCommit": "e29e89c502de230b5917d5e91ce0adbb6567fa55",
+  "counterexample": "Matching matter and recipient with a different represented member was incorrectly allowed.",
+  "repair": "Require disclosure.memberUserId to match matter.memberUserId.",
+  "tests": {
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0
+  },
+  "source": [
+    {
+      "path": "apps/union-eyes/lib/authority/policies/workaid.ts",
+      "sha256": "9fff54e192a0406c85d7fbf3398f8d3119165be33b2e69876a47fb1f1a3848ad"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/__tests__/workaid-disclosure-member-boundary.test.ts",
+      "sha256": "cc5e3e754b409b3a496f2f14981d6884384c9d6b1dfe161111f8ff90ea9d4b5a"
+    }
+  ],
+  "raw": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/workaid-member-boundary-red-v1.txt",
+      "sha256": "78e1bcb4291513729d86f580f7818a701c7f1cbab031db588b6a61c8eae63a0d"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/workaid-member-boundary-green-v1.txt",
+      "sha256": "3f5b3b3abd350251b1e835c19c6367e08be60e7204cb0471b1d89b83a3e518b0"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/workaid-member-boundary-green-v1.json",
+      "sha256": "6d781719a51575d53261dd9b4a006c7c18c821ee9eede799c24cf2cb73f8b6fc"
+    }
+  ],
+  "finalCandidateQualified": false,
+  "scopeLimitation": "No WorkAid feature activation or deployment; pure authority kernel boundary regression."
+}

@@ -20,7 +20,7 @@
  * @see docs/phases/PHASE_5_COMMUNICATIONS.md
  */
 
-import twilio from 'twilio';
+import { twilioAdapter } from '@nzila/comms-sms';
 import { Redis } from '@upstash/redis';
 import { db } from '@/db';
 import { eq, and, sql } from 'drizzle-orm';
@@ -56,7 +56,21 @@ if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
   logger.warn('Twilio credentials not configured. SMS features will not work.');
 }
 
-const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+// Provider access goes through the platform SMS adapter (@nzila/comms-sms), never the Twilio SDK.
+const twilioCredentials = {
+  accountSid: TWILIO_ACCOUNT_SID,
+  authToken: TWILIO_AUTH_TOKEN,
+  fromNumber: TWILIO_PHONE_NUMBER,
+};
+
+/** Sends a system SMS (auto-reply, opt-out confirmation) and throws on provider failure. */
+async function sendSystemSms(organizationId: string, to: string, body: string, correlationId: string): Promise<void> {
+  const sent = await twilioAdapter.send(
+    { orgId: organizationId, channel: 'sms', to, body, correlationId },
+    twilioCredentials,
+  );
+  if (!sent.ok) throw new Error(sent.error ?? 'Twilio send failed');
+}
 
 // Twilio rate limit: 1 message per second per phone number
 const RATE_LIMIT_MESSAGES_PER_MINUTE = 60;
@@ -300,12 +314,22 @@ export async function sendSms(options: SendSmsOptions): Promise<SmsServiceResult
       .returning();
 
     // Send via Twilio
-    const twilioMessage = await twilioClient.messages.create({
-      from: TWILIO_PHONE_NUMBER,
-      to: phoneNumber,
-      body: message,
-      statusCallback: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/twilio`,
-    });
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const sent = await twilioAdapter.send(
+      {
+        orgId: organizationId,
+        channel: 'sms',
+        to: phoneNumber,
+        body: message,
+        correlationId: dbMessage.id,
+        metadata: appUrl ? { statusCallback: `${appUrl}/api/webhooks/twilio` } : undefined,
+      },
+      twilioCredentials,
+    );
+    if (!sent.ok || !sent.providerMessageId) {
+      throw new Error(sent.error ?? 'Twilio send returned no message id');
+    }
+    const twilioMessage = { sid: sent.providerMessageId };
 
     // Update database with Twilio SID and sent status
     await db
@@ -557,11 +581,12 @@ export async function handleInboundSms(data: TwilioWebhookData): Promise<void> {
     logger.info('Inbound SMS received', { from: '[REDACTED]', messageLength: (Body || '').length });
 
     if (TWILIO_PHONE_NUMBER) {
-      await twilioClient.messages.create({
-        from: TWILIO_PHONE_NUMBER,
-        to: From,
-        body: 'Thanks for your message. We have received it and will follow up soon.',
-      });
+      await sendSystemSms(
+        organizationId,
+        From,
+        'Thanks for your message. We have received it and will follow up soon.',
+        `inbound-ack:${MessageSid}`,
+      );
     }
   } catch (error) {
     logger.error('Failed to handle inbound SMS', { error });
@@ -596,11 +621,12 @@ export async function handleOptOut(
     logger.info('Phone number opted out', { phoneNumber, via, organizationId });
 
     // Send confirmation SMS (required by TCPA)
-    await twilioClient.messages.create({
-      from: TWILIO_PHONE_NUMBER,
-      to: phoneNumber,
-      body: 'You have been unsubscribed from SMS messages. Reply START to opt back in.',
-    });
+    await sendSystemSms(
+      organizationId,
+      phoneNumber,
+      'You have been unsubscribed from SMS messages. Reply START to opt back in.',
+      `opt-out:${organizationId}:${phoneNumber}`,
+    );
   } catch (error) {
     logger.error('Failed to handle opt-out', { error, phoneNumber, organizationId });
   }

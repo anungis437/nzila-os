@@ -22,6 +22,9 @@ let db: ReturnType<typeof drizzle>
 beforeAll(async () => {
   pg=new PGlite()
   await pg.exec(fs.readFileSync(new URL('./fixtures/canonical-claim-write.sql',import.meta.url),'utf8'))
+  // Apply the current additive history-origin column to the preserved M3 fixture.
+  // The actual FK and sole writer are qualified separately by native domain tests.
+  await pg.exec('ALTER TABLE claim_updates ADD COLUMN transition_id uuid UNIQUE')
   await pg.exec(`CREATE ROLE claim_test_runtime;
     GRANT SELECT, INSERT, UPDATE ON claims, claim_updates TO claim_test_runtime;
     ALTER TABLE claims ENABLE ROW LEVEL SECURITY;

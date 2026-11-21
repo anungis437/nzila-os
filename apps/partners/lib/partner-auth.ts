@@ -15,8 +15,9 @@ import { auth, currentUser as _currentUser } from '@nzila/platform-auth/entra/se
 import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
 // Partner tables are non-Org-scoped (see NON_ORG_SCOPED_TABLES) — use platformDb
 import { platformDb } from '@nzila/db/platform'
-import { partners, partnerEntities, partnerUsers } from '@nzila/db/schema'
-import { eq, and, sql, desc } from 'drizzle-orm'
+import { partners, partnerUsers } from '@nzila/db/schema'
+import { eq, sql, desc } from 'drizzle-orm'
+import { findPartnerEntityEntitlement } from '../queries/partner-action-facts'
 
 export type PlatformRole = 'platform:admin' | 'platform:ops' | 'platform:finance'
 export type PartnerType = 'channel' | 'isv' | 'enterprise'
@@ -88,40 +89,9 @@ export async function requirePartnerEntityAccess(
     return { ok: false, error: 'Unauthenticated', status: 401 }
   }
 
-  // Resolve partner via user membership (platform-auth no longer provides Clerk org IDs)
-  const [partner] = await platformDb
-    .select({ id: partners.id, tier: partners.tier })
-    .from(partners)
-    .innerJoin(partnerUsers, and(eq(partnerUsers.partnerId, partners.id), eq(partnerUsers.userId, session.userId)))
-    .limit(1)
-
-  if (!partner) {
-    return { ok: false, error: 'No partner record for this user', status: 403 }
-  }
-
-  // Check entity entitlement
-  const [entitlement] = await platformDb
-    .select({ id: partnerEntities.id, allowedViews: partnerEntities.allowedViews })
-    .from(partnerEntities)
-    .where(
-      and(
-        eq(partnerEntities.partnerId, partner.id),
-        eq(partnerEntities.orgId, orgId),
-      ),
-    )
-    .limit(1)
-
-  if (!entitlement) {
-    return { ok: false, error: 'No access to this entity', status: 403 }
-  }
-
-  // Check that the required view is in allowedViews
-  const views = entitlement.allowedViews ?? []
-  if (!views.includes(requiredView)) {
-    return { ok: false, error: `View "${requiredView}" not entitled`, status: 403 }
-  }
-
-  return { ok: true, partner, orgId }
+  const entitlement = await findPartnerEntityEntitlement(session.userId, requiredView, orgId)
+  if (!entitlement) return { ok: false, error: 'No current partner entitlement for this entity and view', status: 403 }
+  return { ok: true, partner: { id: entitlement.partnerId, tier: entitlement.tier }, orgId: entitlement.orgId }
 }
 
 /**
@@ -137,27 +107,8 @@ export async function resolvePartnerEntityIdForView(
   const session = await auth()
   if (!session.userId) return null
 
-  // Resolve partner via user membership (platform-auth no longer provides Clerk org IDs)
-  const [partner] = await platformDb
-    .select({ id: partners.id })
-    .from(partners)
-    .innerJoin(partnerUsers, and(eq(partnerUsers.partnerId, partners.id), eq(partnerUsers.userId, session.userId)))
-    .limit(1)
-
-  if (!partner) return null
-
-  const [entitlement] = await platformDb
-    .select({ orgId: partnerEntities.orgId, allowedViews: partnerEntities.allowedViews })
-    .from(partnerEntities)
-    .where(eq(partnerEntities.partnerId, partner.id))
-    .limit(1)
-
-  if (!entitlement) return null
-
-  const views = entitlement.allowedViews ?? []
-  if (!views.includes(requiredView)) return null
-
-  return entitlement.orgId
+  const entitlement = await findPartnerEntityEntitlement(session.userId, requiredView)
+  return entitlement?.orgId ?? null
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

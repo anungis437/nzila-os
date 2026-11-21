@@ -1,0 +1,487 @@
+{
+  "method": "Read-only exact source-hash verification of transitive matched runtime files and unchanged literal scanner semantics. No registry/gate/clock/source edits.",
+  "sourceDriftFromTransitiveAudit": [],
+  "consoleExceptionEntries": [
+    {
+      "exceptionPath": "apps/union-eyes/lib/console-wrapper.ts",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/union-eyes/lib/console-wrapper.ts",
+          "sha256": "d9be7c3c55ed9e08daf1f84405a664b05daa0aff67736a9552df31e183914857",
+          "literalEmissions": []
+        }
+      ],
+      "literalEmissions": 0
+    },
+    {
+      "exceptionPath": "apps/cfo/app/*/dashboard/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/error.tsx",
+          "sha256": "7f33700bbfa29674af8a44815c247f9ca9df1bf62552318394f6fbd3bf8a34cc",
+          "literalEmissions": [
+            {
+              "line": 23,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 1
+    },
+    {
+      "exceptionPath": "apps/cfo/app/*/dashboard/*/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/advisory-ai/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/ai-insights/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/alerts/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/audit/error.tsx",
+          "sha256": "ac8821a78d459cb3c4c5f23e8b076f1377fe23c675e04883c1ee3b14aec39ee7",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/client-portal/error.tsx",
+          "sha256": "86b3b9b4792231b5a90ce079eb1784af6457cc0ba01a1b8f12454e58487537cd",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/clients/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/documents/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/integrations/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/ledger/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/messages/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/notifications/error.tsx",
+          "sha256": "3e651614acf7f5385fa208c7ada3c5241c95973ff656f77ac459b617124d329a",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/platform-admin/error.tsx",
+          "sha256": "109a6de6548eab756ffe223fce242877d7e6254b3e93d5c26f20f8ebf161d934",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/reports/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/security/error.tsx",
+          "sha256": "b3f84183ced2fdde36c35c1b525094242967841a64cd1ee55b7761db8fe88179",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/settings/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/tasks/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/tax-tools/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/workflows/error.tsx",
+          "sha256": "ba182a49d88b3294e90b8f5759b7acd1c6919b1f809a1969ef537c6b29a59594",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 18
+    },
+    {
+      "exceptionPath": "apps/cfo/app/*/dashboard/*/*/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/documents/upload/error.tsx",
+          "sha256": "f6fef41fcb48b094f43462f789a717b87e04ace06aed992923ed69f7ef015063",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/workflows/[id]/error.tsx",
+          "sha256": "e37b9df5d8c609899609b62b7d5855390d21a13fee279b77a85de30f8de753ab",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/cfo/app/[locale]/dashboard/workflows/new/error.tsx",
+          "sha256": "d426cf0500289476a8c3b9f4ab7915881795441cfeef71ef706c24ba4ff5fadd",
+          "literalEmissions": [
+            {
+              "line": 17,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 3
+    },
+    {
+      "exceptionPath": "apps/zonga/app/*/dashboard/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/error.tsx",
+          "sha256": "57c16d7048e286ee307594a69e32fa2828e5dda71bc8c81b171fb0b51c77bf8e",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 1
+    },
+    {
+      "exceptionPath": "apps/zonga/app/*/dashboard/*/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/artists/error.tsx",
+          "sha256": "32defaa08417dfdbf2b17b8defa5dd0ddc33b30cc0e89340cc2fbfcff1fb8311",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/browse/error.tsx",
+          "sha256": "61e3a048ca23869e4779861a7a8dfbe583aefd938693c659c6cb3139d00d733c",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/events/error.tsx",
+          "sha256": "5154c883e9042e38b1a5ee048fcd30e2bcf68e33a0a75db66946076a18645435",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/notifications/error.tsx",
+          "sha256": "910dacb5cb183379f357346c62bb2b43395224510514ab536d16efb16d81a852",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/playlists/error.tsx",
+          "sha256": "a4b95a4f725a17aedafc2de8b43d8a5f0150aa94bf5b4a4e8b378790d150f847",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/zonga/app/[locale]/dashboard/tracks/error.tsx",
+          "sha256": "85693a0af8904a97842da366951ff1d24cc74bddbb2be8096abd7154a37721b4",
+          "literalEmissions": [
+            {
+              "line": 16,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 6
+    },
+    {
+      "exceptionPath": "apps/partners/app/**/admin/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/partners/app/[locale]/admin/error.tsx",
+          "sha256": "d93614930b082597dbab76136600da70b80cde1b2f88f5b1fd614b81bfc8856c",
+          "literalEmissions": [
+            {
+              "line": 13,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/partners/app/admin/error.tsx",
+          "sha256": "d93614930b082597dbab76136600da70b80cde1b2f88f5b1fd614b81bfc8856c",
+          "literalEmissions": [
+            {
+              "line": 13,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 2
+    },
+    {
+      "exceptionPath": "apps/partners/app/**/portal/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/partners/app/[locale]/portal/error.tsx",
+          "sha256": "250ba5e6fdda9eedc438b3da7def703f46076cdc611a0b31fde6ebbc8f0ae01f",
+          "literalEmissions": [
+            {
+              "line": 13,
+              "method": "error"
+            }
+          ]
+        },
+        {
+          "file": "apps/partners/app/portal/error.tsx",
+          "sha256": "250ba5e6fdda9eedc438b3da7def703f46076cdc611a0b31fde6ebbc8f0ae01f",
+          "literalEmissions": [
+            {
+              "line": 13,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 2
+    },
+    {
+      "exceptionPath": "apps/nacp-exams/app/*/dashboard/error.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/nacp-exams/app/[locale]/dashboard/error.tsx",
+          "sha256": "53980f93e98e639227ac202133e3ae04a791f69ea8eaf48b94fd7bba995a552c",
+          "literalEmissions": [
+            {
+              "line": 13,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 1
+    },
+    {
+      "exceptionPath": "apps/console/components/ui/ErrorPanel.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/console/components/ui/ErrorPanel.tsx",
+          "sha256": "c4516bd427d3dd7e2b88d9f2cb8efd8173c75662a4e3b9496b2e75340d18abb3",
+          "literalEmissions": [
+            {
+              "line": 55,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 1
+    },
+    {
+      "exceptionPath": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/nzila-hq/components/primitives/ErrorPanel.tsx",
+          "sha256": "28ab80d337dadf6cff896d6da4c3ddd65ed367c0c5f2d7d9f2f2face97483118",
+          "literalEmissions": [
+            {
+              "line": 31,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 1
+    },
+    {
+      "exceptionPath": "apps/union-eyes/instrumentation.ts",
+      "expiresOn": "2026-11-17",
+      "actualRuntimeFiles": [
+        {
+          "file": "apps/union-eyes/instrumentation.ts",
+          "sha256": "dc14f235e34883116ff247da6289f9976e95d5485d960951003da5d5d02cb014",
+          "literalEmissions": [
+            {
+              "line": 35,
+              "method": "error"
+            },
+            {
+              "line": 44,
+              "method": "error"
+            },
+            {
+              "line": 59,
+              "method": "error"
+            },
+            {
+              "line": 64,
+              "method": "error"
+            },
+            {
+              "line": 80,
+              "method": "error"
+            },
+            {
+              "line": 81,
+              "method": "error"
+            }
+          ]
+        }
+      ],
+      "literalEmissions": 6
+    }
+  ],
+  "browserEmissions": 36,
+  "ueInstrumentationEmissions": 6
+}

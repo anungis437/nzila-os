@@ -975,10 +975,12 @@ export const RATE_LIMITS = {
    * hard-blocking all authenticated traffic. Explicit per-route limits remain
    * fail-closed regardless of this setting.
    *
-   * 1 200 requests per 5 minutes per organization (~240 req/min).
+   * 12 000 requests per 5 minutes per organization (~40 req/s): twice the qualified authenticated casework load of 20 req/s for one
+   * organization (scripts/bootstrap-v2/authenticated-casework-load.ts). The former 1 200 (~4 req/s) throttled ordinary casework the
+   * moment a real Redis enforced it; sensitive routes keep their own tighter, fail-closed limits.
    */
   DEFAULT_API_ORG: {
-    limit: 1200,
+    limit: 12000,
     window: 300, // 5 minutes
     identifier: 'default-api-org',
     failOpen: true,

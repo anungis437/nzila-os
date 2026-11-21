@@ -3,6 +3,7 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { openNativeRuntimeFixture } from './native-runtime-fixture'
 import { iterateRuntimeSecurityReports } from './runtime-security'
+import { openRuntimeSessionFactory } from './runtime-column-fixtures'
 import { compileSecurity } from './security'
 import { folder, type V2Plan } from './source'
 import { systemMutationContracts, systemMutationRules } from './system-mutation-contracts'
@@ -15,10 +16,13 @@ native('source-authorized native SYSTEM mutation SQL components (not whole calle
   const rules = systemMutationRules(plan)
   const contracts = systemMutationContracts(plan)
   let fixture: Awaited<ReturnType<typeof openNativeRuntimeFixture>>
+  let sessions: ReturnType<typeof openRuntimeSessionFactory> | undefined
   let iterator: ReturnType<typeof iterateRuntimeSecurityReports>
   const reports: { table: string; status: string; failure?: string }[] = []
   beforeAll(async () => {
-    fixture = await openNativeRuntimeFixture(plan)
+    fixture = await openNativeRuntimeFixture(plan, { auth: true })
+    if (!fixture.authUrl) throw new Error('UE_V2_OWNED_AUTH_URL_REQUIRED')
+    sessions = openRuntimeSessionFactory(fixture.seed, fixture.authUrl, fixture.authSystemUrl)
     iterator = iterateRuntimeSecurityReports(
       fixture.seed,
       fixture.runtime,
@@ -28,10 +32,15 @@ native('source-authorized native SYSTEM mutation SQL components (not whole calle
       undefined,
       contracts,
       fixture.systemWriter,
+      sessions,
     )
   }, 600000)
   afterAll(async () => {
-    if (fixture) await fixture.dispose()
+    try {
+      await sessions?.dispose()
+    } finally {
+      if (fixture) await fixture.dispose()
+    }
   })
 
   for (const rule of rules) {
@@ -77,7 +86,7 @@ native('source-authorized native SYSTEM mutation SQL components (not whole calle
       }
     }, 120000)
   }
-  it('finishes the exact 89-table source-bound component census with no inferred caller mapping', async () => {
+  it('finishes the exact current source-bound component census with no inferred caller mapping', async () => {
     const next = await iterator.next()
     expect(next.done).toBe(true)
     if (!next.done) throw new Error('UE_V2_SYSTEM_NATIVE_EXTRA_TABLE')
@@ -91,14 +100,24 @@ native('source-authorized native SYSTEM mutation SQL components (not whole calle
     )
     expect(reports.map((report) => report.table)).toEqual(rules.map((rule) => rule.table))
     expect(reports.filter((report) => report.status !== 'PASS')).toEqual([])
-    expect(reports).toHaveLength(89)
-    expect(next.value.qualified).toBe(89)
+    expect(reports).toHaveLength(rules.length)
+    expect(next.value.qualified).toBe(rules.length)
+    expect(next.value.zeroSystemAuthorityQualification).toMatchObject({
+      result: 'PASS',
+      denominator: 9,
+      qualified: 9,
+    })
+    expect(
+      next.value.zeroSystemAuthorityQualification.reports.every(
+        (report) => report.cases.length === 4 && report.status === 'PASS',
+      ),
+    ).toBe(true)
     expect(next.value.applicationActorMapping).toBe('NOT_PROVEN')
     expect(next.value.wholeSecurityQualification).toBe('NOT_PROVEN')
     expect(next.value.nativeSystemMutationQualification).toMatchObject({
       result: 'PASS',
-      denominator: 89,
-      qualified: 89,
+      denominator: rules.length,
+      qualified: rules.length,
       actualCallerExecution: 'NOT_PROVEN',
       wholeSecurityQualification: 'NOT_PROVEN',
     })

@@ -1,0 +1,134 @@
+{
+  "kind": "INTERIM_SUPPLY_SECURITY_COMPONENT_EVIDENCE_AFTER_HOST_RESTART",
+  "recordedAt": "2026-11-17T22:52:16.452953+00:00",
+  "gitHeadAtCollection": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtyIntegrationSource": true,
+  "finalCandidateSha": null,
+  "overallStep1Verdict": "UNQUALIFIED",
+  "step2Initiated": false,
+  "stagingOrProductionPromotionPerformed": false,
+  "sourceHashes": [
+    {
+      "path": ".github/workflows/dependency-audit.yml",
+      "sha256": "a1244c285c32bc5055104e578f192d3621db6149ec770386840473109378b2f0"
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock",
+      "sha256": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979"
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock.metadata.json",
+      "sha256": "bc6f92ffc55a04173cb5d6dce8e113156f337d04c8a6c4c2e2017bf26211e4a4"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/seal.mjs",
+      "sha256": "078c4c4a49288af06918290ead693818cfe5c5a5b8b02cdd38ade6ecb4026912"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/verify.mjs",
+      "sha256": "6c126e762f0408177277c6d70798346f47a144a6b2ce5077fe40e01b21d0f567"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/__tests__/evidence-cli.test.ts",
+      "sha256": "e0ca3c809e3a3fc14b1974c827567c41fe0baaa603b587fa999057417e11dfc3"
+    },
+    {
+      "path": "packages/automation/generators/infra/.env.migration",
+      "sha256": "5af2b5556fad2b4de5be6b4ca5af84f2d16ca6e99397a08d864c0a72d58fc607"
+    },
+    {
+      "path": "reports/security/gitleaks-report.json",
+      "sha256": "aef20f27676b53a0f81b717efd305795f14d912dbba4713802b7345291720516"
+    },
+    {
+      "path": "tooling/security/historical-secret-containment.test.mjs",
+      "sha256": "6e8055f5b437e92ddaa8778c6decfc56e19d9e6e9e3b333bbfc42615fb870d08"
+    },
+    {
+      "path": "apps/union-eyes/scripts/evidence/collect.mjs",
+      "sha256": "bb164cf1b7fd3bc197ceb5c1eff0b9d887263d55984a0fb44bbb094b04f124cb"
+    }
+  ],
+  "certifi": {
+    "advisory": "https://github.com/advisories/GHSA-6q48-6c7w-9gw2",
+    "previousVersion": "2026.7.22",
+    "correctedVersion": "2026.10.19",
+    "artifactUrl": "https://files.pythonhosted.org/packages/c4/51/29046e48f693c54e5b7412216d447a1d8362c9653148d98c02cdf65fa733/certifi-2026.10.19-py3-none-any.whl",
+    "artifactSha256": "42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b",
+    "artifactBytesReverifiedAfterRestart": true,
+    "currentLockSha256": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979",
+    "distributionCount": 87,
+    "directDependencies": 27,
+    "validatedTargetTransitiveEdges": 117,
+    "target": {
+      "ABI": "cp311",
+      "EXACT_PATCH": "3.11.14",
+      "IMPLEMENTATION": "cp",
+      "PLATFORM": "manylinux2014_x86_64",
+      "PYTHON": "3.11.14"
+    },
+    "preRestartExecution": "Two full offline pip target resolutions produced this exact lock; strict pip-audit observed 87 dependencies, zero findings/skips without ignores",
+    "postRestartArtifactLimitation": "Temporary raw pip resolver and audit logs were lost during host restart; strict audit and exact target resolver execution must be recaptured before final qualification",
+    "pythonLockCi": "Existing dependency-audit workflow now audits the exact hashlocked graph with --require-hashes --disable-pip --strict and no ignore flags, preserving raw JSON artifact"
+  },
+  "picomatch": {
+    "advisory": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+    "affected": "<=4.0.7",
+    "officialPatchedVersion": null,
+    "rawAuditVerdict": "FAIL_HIGH_1247710",
+    "localPatchSha256": "84f9739f825f963ad0896f3320add6fa2f0ea137ce1a4c57c6eb0827fdd45d36",
+    "officialStateEvidence": "picomatch-primary-state-v4.json",
+    "rawHighNotWaived": true
+  },
+  "evidenceIntegrity": {
+    "fixed": [
+      "Authoritative signer/verifier/import errors cannot downgrade to unsigned inline cryptography",
+      "Configured HMAC key requires its matching authenticated envelope and key identifier",
+      "Production requires a signing key of at least 32 characters",
+      "Verifier checks every indexed artifact exists and matches exact bytes and size within its confined base path"
+    ],
+    "preRestartExecutedTests": {
+      "actualCliTestsPassed": 13,
+      "existingEvidenceContractsPassed": 28,
+      "sbomPolicyTestsPassed": 41,
+      "nodeMatcherAndBulkAuditTestsPassed": 56
+    },
+    "postRestartArtifactLimitation": "Only the earlier Python resolver and audit raw logs still need recapture; new actual evidence CLI and existing contract logs have been captured durably",
+    "postRestartVerified": {
+      "actualCliTestsPassed": 19,
+      "existingEvidenceContractsPassed": 28,
+      "focusedLintExitCode": 0,
+      "receipt": "evidence-cli-qualification-v2.json"
+    }
+  },
+  "secretContainment": {
+    "triage": "historical-secret-triage-v1.json",
+    "sourceContainment": "historical-secret-source-containment-v1.json",
+    "fullHistoryVerdict": "FAIL_67_FINDINGS",
+    "distinctUnknownCredentialValues": 4,
+    "unknownFindingRows": 13,
+    "revocation": "UNVERIFIED",
+    "postRestartContainmentTests": {
+      "passed": 2,
+      "failed": 0,
+      "log": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/containment-validation-v2.log",
+      "sha256": "13a5430ded5d22412e2f861c1ae874d956f4f0348a2d3aafea4f9b3c92c7e5d4"
+    }
+  },
+  "licenseMateriality": "supply-license-materiality-v1.json",
+  "remaining": [
+    "Final exact-candidate application image build, runtime dependency inventory and container scan",
+    "Raw Picomatch HIGH advisory remains unresolved upstream; patch is not a waiver",
+    "License policy remains failed; final image presence/materiality remains unexecuted",
+    "Historical credential validity and revocation remain unverified",
+    "Recapture post-certifi Python audit and exact target resolver logs after host restart",
+    "Final integrated regression, CI, secret scans and evidence sealing remain root-owned qualification work"
+  ],
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "a8895df4f8a151980311d8242e46fbdf2aba984cf1d87cb37ee562f334a57849",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/supply-security-validation-v3.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

@@ -147,7 +147,7 @@ test('6. a previously classified operation silently reverted to undecided fails'
   const old = anchored.anchoredEntries.find((item) => item[4] !== 'SCOPE_UNDECIDED')
   const live = anchored.entries.find((item) => item[0] === old[0] && item[1] === old[1])
   live[4] = 'SCOPE_UNDECIDED'
-  assert.ok(hasProblem(run(anchored), new RegExp(`${old[0].replace(/[[\]/.]/g, '\\$&')}\\|${old[1]} was silently reverted`)))
+  assert.ok(hasProblem(run(anchored), new RegExp(`${old[0].replace(/[\\[\]/.]/g, '\\$&')}\\|${old[1]} was silently reverted`)))
   const downgraded = fixture()
   record(downgraded, CRUD_POST).status = 'UNRESOLVED'
   assert.ok(run(downgraded).problems.length > 0)

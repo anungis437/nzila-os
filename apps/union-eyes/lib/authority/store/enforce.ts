@@ -7,7 +7,8 @@
  * facts come from the injected loader (the canonical one by default), and
  * relationships DERIVED from source records are merged with the kernel-owned ones.
  */
-import { deny } from '../common'
+import { assessMandate, deny, isLive } from '../common'
+import { assertAuthorityReadLock, lockAuthorityRead, lockAuthorityReadSet } from './read-lock'
 import { decide } from '../kernel'
 import type { AuthorityFacts, AuthorityRequest, Decision, ReasonCode, ResourceFacts, ResourceRelationship } from '../ontology'
 import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
@@ -63,6 +64,13 @@ export async function requireCounselSession(
   }
   const ok = await deps.counsel.isCounselFor(exec, { organizationId: input.organizationId, matterId: input.matterId, userId })
   if (ok !== true) throw new AuthorityStoreError('DENIED', 'COUNSEL_NOT_VERIFIED: the session principal is not verified counsel for this matter')
+  const matter = (
+    await exec.query<{ member_user_id: string; referred_by: string; case_id: string }>(
+      `SELECT member_user_id, referred_by, case_id::text AS case_id FROM public.ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
+      [input.organizationId, input.matterId],
+    )
+  ).rows[0]
+  if (matter) await lockAuthorityReadSet(exec, {principalUserId:userId,organizationId:input.organizationId,resourceIds:[input.matterId,matter.case_id]})
   const now = (deps.now ?? (() => new Date()))()
   const union = (await deps.memberships(exec, input.organizationId, [userId])).filter((m) => m.userId === userId && m.organizationId === input.organizationId)
   // An engagement is an institutional appointment, not a membership: a suspended, deactivated or removed member (or an
@@ -70,12 +78,6 @@ export async function requireCounselSession(
   if (union.length > 1 || union.some((m) => m.status !== 'active')) {
     throw new AuthorityStoreError('DENIED', 'COUNSEL_MEMBERSHIP_NOT_ACTIVE: a union member acts as counsel only while an active member of this organization')
   }
-  const matter = (
-    await exec.query<{ member_user_id: string; referred_by: string; case_id: string }>(
-      `SELECT member_user_id, referred_by, case_id::text AS case_id FROM ue_authority_workaid_matters WHERE organization_id = $1 AND id = $2`,
-      [input.organizationId, input.matterId],
-    )
-  ).rows[0]
   if (!matter) {
     if (union.length > 0 || deps.counsel.engagement) throw new AuthorityStoreError('DENIED', 'COUNSEL_CONFLICT_UNVERIFIABLE: the matter is unknown, so counsel cannot be cleared')
     return userId
@@ -91,6 +93,9 @@ export async function requireCounselSession(
   if (deps.counsel.engagement && union.length === 0 && !engagement) {
     throw new AuthorityStoreError('DENIED', 'COUNSEL_ENGAGEMENT_REQUIRED: no engagement is recorded for this counsel on this matter')
   }
+  const heldMandates = union.length > 0 ? await loadHolderMandates(exec, input.organizationId, userId) : []
+  const caseRelationships = union.length > 0 ? await loadRelationships(exec, input.organizationId, userId, 'case', matter.case_id) : []
+  const evaluatedAt = (deps.now ?? (() => new Date()))()
   const result = evaluateCounselCapacity(
     {
       userId,
@@ -98,13 +103,13 @@ export async function requireCounselSession(
       referrerUserId: String(matter.referred_by),
       adverseUserIds: adverse,
       unionCapacities: union.flatMap((m) => [...m.capacities]),
-      holdsLiveMandate: union.length > 0 && (await loadHolderMandates(exec, input.organizationId, userId)).length > 0,
-      hasCaseRelationship: union.length > 0 && (await loadRelationships(exec, input.organizationId, userId, 'case', matter.case_id)).length > 0,
+      holdsLiveMandate: heldMandates.some(m => assessMandate(m,input.organizationId,evaluatedAt).effective),
+      hasCaseRelationship: [...caseRelationships, ...(loaded?.relationships ?? [])].some(r => r.principalUserId === userId && isLive(r,evaluatedAt)),
     },
     engagement,
     input.organizationId,
     input.matterId,
-    now,
+    evaluatedAt,
   )
   if (!result.ok) throw new AuthorityStoreError('DENIED', `${result.code}: ${result.reason}`)
   return userId
@@ -127,6 +132,7 @@ export async function enforceAuthority(
     if (session !== req.principalUserId) {
       return deny(req, now, { code: 'PRINCIPAL_MISMATCH', detail: 'the decided principal is not the authenticated principal of this transaction' })
     }
+    await lockAuthorityRead(exec, req)
     let facts: AuthorityFacts = await loadAuthorityFacts(exec, deps.memberships, {
       organizationId: req.organizationId,
       principalUserId: req.principalUserId,
@@ -158,7 +164,9 @@ export async function enforceAuthority(
         }
       }
     }
-    return decide(req, facts, resource, now)
+    await assertAuthorityReadLock(exec)
+    const evaluatedAt = (deps.now ?? (() => new Date()))()
+    return decide(req, facts, resource, evaluatedAt)
   } catch (error) {
     return deny(req, now, {
       code: 'FACTS_CONTRADICTORY',
@@ -204,6 +212,7 @@ export async function enforceCaseProjection(
     if (!session) return refuse('PRINCIPAL_NOT_AUTHENTICATED', 'no authenticated session is bound to this transaction')
     if (session !== input.principalUserId)
       return refuse('PRINCIPAL_MISMATCH', 'the decided principal is not the authenticated principal of this transaction')
+    await lockAuthorityRead(exec, request)
     let facts = await loadAuthorityFacts(exec, deps.memberships, {
       organizationId: input.organizationId, principalUserId: input.principalUserId,
       authenticated: true, resource: request.resource, now,
@@ -215,6 +224,7 @@ export async function enforceCaseProjection(
       ...facts,
       relationships: [...facts.relationships, ...loaded.relationships.filter(r => r.principalUserId === input.principalUserId)],
     }
+    await assertAuthorityReadLock(exec)
     const evaluatedAt = (deps.now ?? (() => new Date()))()
     return Object.fromEntries(CASE_PROJECTION_ACTIONS.map(action =>
       [action, decide({ ...request, action }, facts, loaded?.resource ?? null, evaluatedAt)],

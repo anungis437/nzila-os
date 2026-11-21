@@ -4,20 +4,24 @@
  * State machine for the correspondence lifecycle:
  *   draft → pending_review → approved → signed → dispatched → delivered
  *
- * Integrates with:
- *  - PKI signature service (document / hash signing)
- *  - Notification service (dispatch alerts)
- *  - Document storage service (PDF persistence)
- *  - Audit service (platform-wide audit log)
+ * Stored signer attestation, mandatory database audit, and a separately
+ * reconciled durable email outbox. This is not a PKI certificate or a claim
+ * that a recipient read the letter.
  */
 
 import crypto from "crypto";
 import { db } from "@/db";
-import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { ApiError } from "@/lib/api/errors";
+import { getActiveTenantDb } from '@/db/tenant-context-storage';
+import { mayReadCorrespondence, requireCorrespondenceWrite, requireCorrespondenceDisclosure } from '@/lib/correspondence/access';
+import { notificationQueue, notificationDeliveryLog } from '@/db/schema/domains/communications/notifications';
+import { CORRESPONDENCE_EMAIL_PURPOSE, correspondenceEmailKey, sealCorrespondenceSignature,
+  signedCorrespondenceDocumentHash } from '@/lib/correspondence/email-intent';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import {
   correspondence,
   correspondenceRecipients,
@@ -58,7 +62,7 @@ const STATE_TRANSITIONS: Record<CorrespondenceStatus, CorrespondenceStatus[]> = 
 // AUDIT TRAIL HELPERS
 // ============================================================================
 
-async function appendAuditEntry(params: {
+export async function appendAuditEntry(params: {
   /** The transaction that changes the correspondence; the trail entry must commit with it. */
   exec: RLSTx;
   correspondenceId: string;
@@ -158,6 +162,8 @@ export async function createCorrespondence(params: CreateCorrespondenceParams) {
 
   // The letter, its recipients, its trail entry and the platform audit commit together.
   const created = await withRLSContext({ organizationId }, async (tx) => {
+    await requireCorrespondenceWrite(tx, { organizationId, grievanceId: grievanceId ?? null }, draftedBy);
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`correspondence-reference:${organizationId}`},0))`);
     // Generate reference number: LTR-YYYY-NNNN
     const year = new Date().getFullYear();
     const countResult = await tx
@@ -241,7 +247,12 @@ export async function getCorrespondenceById(id: string) {
     .from(correspondence)
     .where(eq(correspondence.id, id))
     .limit(1);
-  return rows[0] ?? null;
+  const row = rows[0];
+  if (!row) return null;
+  if (!currentStateContextEnabled()) return row;
+  const tx = getActiveTenantDb();
+  if (!tx) throw ApiError.forbidden('Tenant transaction required');
+  return await mayReadCorrespondence(tx, row) ? row : null;
 }
 
 export async function getCorrespondenceWithDetails(id: string) {
@@ -299,10 +310,17 @@ export async function listCorrespondence(params: ListCorrespondenceParams) {
     .from(correspondence)
     .where(and(...conditions))
     .orderBy(desc(correspondence.updatedAt))
-    .limit(params.limit ?? 50)
-    .offset(params.offset ?? 0);
+    ;
 
-  return rows;
+  if (!currentStateContextEnabled()) return rows.slice(Math.max(0,params.offset ?? 0),Math.max(0,params.offset ?? 0)+(params.limit ?? 50));
+  const tx = getActiveTenantDb();
+  if (!tx) throw ApiError.forbidden('Tenant transaction required');
+  // Apply case authority before pagination and the returned count. Hidden case
+  // letters must not change a page's count or consume its visible slots.
+  const visible = [];
+  for (const row of rows) if (await mayReadCorrespondence(tx, row)) visible.push(row);
+  const offset = Math.max(0, params.offset ?? 0);
+  return visible.slice(offset, offset + Math.min(100, Math.max(1, params.limit ?? 50)));
 }
 
 // ============================================================================
@@ -344,6 +362,7 @@ export async function updateCorrespondence(params: UpdateCorrespondenceParams) {
   const fields = Object.keys(updates).filter((k) => k !== "updatedAt");
 
   return withRLSContext({ organizationId: existing.organizationId }, async (tx) => {
+    await requireCorrespondenceWrite(tx, existing, params.actorUserId);
     // Only a draft is editable: the status in the predicate keeps an edit from landing on a letter that moved on.
     const [updated] = await tx
       .update(correspondence)
@@ -425,7 +444,10 @@ async function transition(id: string, ctx: TransitionContext, spec: TransitionSp
   validateTransition(existing.status as CorrespondenceStatus, spec.target);
 
   return withRLSContext({ organizationId: existing.organizationId }, async (tx) => {
-    await spec.guard?.(existing, tx);
+    const [locked] = await tx.select().from(correspondence).where(eq(correspondence.id, id)).for('update');
+    if (!locked || locked.status !== existing.status) throw ApiError.conflict('The correspondence changed state');
+    await requireCorrespondenceWrite(tx, locked, ctx.actorUserId);
+    await spec.guard?.(locked, tx);
     const [updated] = await tx
       .update(correspondence)
       .set({ ...spec.set, status: spec.target, updatedAt: new Date() })
@@ -513,13 +535,15 @@ export interface SignCorrespondenceParams extends TransitionContext {
  * Only the assigned signer can sign. The correspondence must be approved.
  */
 export async function signCorrespondence(id: string, params: SignCorrespondenceParams) {
+  const signedAt = new Date();
+  const signingColumns: Record<string,unknown> = {signatureId:params.signatureId,signedBy:params.actorUserId,signedAt};
   return transition(id, params, {
     target: "signed",
     event: "signed",
     action: "CORRESPONDENCE_SIGNED",
     description: "Correspondence signed",
     metadata: { signatureId: params.signatureId },
-    set: { signatureId: params.signatureId, signedBy: params.actorUserId, signedAt: new Date() },
+    set: signingColumns,
     guard: async (existing, tx) => {
       if (existing.assignedSignerId && existing.assignedSignerId !== params.actorUserId) {
         throw new Error("Only the assigned signer can sign this correspondence");
@@ -531,11 +555,20 @@ export async function signCorrespondence(id: string, params: SignCorrespondenceP
           and(
             eq(userSignatures.id, params.signatureId),
             eq(userSignatures.userId, params.actorUserId),
+            eq(userSignatures.organizationId, existing.organizationId),
             eq(userSignatures.isActive, true),
           ),
         )
         .limit(1);
       if (!sig[0]) throw new Error("Signature not found or does not belong to this user");
+      if (currentStateContextEnabled()) {
+        const recipients=await tx.select().from(correspondenceRecipients).where(eq(correspondenceRecipients.correspondenceId,id));
+        const summary=sealCorrespondenceSignature({purpose:'ue-correspondence-signature/1',organizationId:existing.organizationId,
+          correspondenceId:id,signatureId:params.signatureId,signedBy:params.actorUserId,signedAt:signedAt.toISOString(),
+          documentHash:signedCorrespondenceDocumentHash(existing,recipients),imageHash:sig[0].imageHash,
+          displayName:sig[0].displayName,displayTitle:sig[0].displayTitle},correspondenceEmailKey());
+        signingColumns.templateVariables={...(existing.templateVariables as Record<string,unknown>??{}),ueSignedEmailProof:summary};
+      }
     },
   });
 }
@@ -552,12 +585,17 @@ export interface DispatchCorrespondenceParams extends TransitionContext {
  * Mark correspondence as dispatched to recipients.
  */
 export async function dispatchCorrespondence(id: string, params: DispatchCorrespondenceParams) {
+  if (params.dispatchMethod === 'email') throw ApiError.conflict('Email dispatch requires a durable provider receipt');
   return transition(id, params, {
     target: "dispatched",
     event: "dispatched",
     action: "CORRESPONDENCE_DISPATCHED",
     description: `Dispatched via ${params.dispatchMethod}`,
     metadata: { dispatchMethod: params.dispatchMethod },
+    guard: async (existing, tx) => {
+      await requireCorrespondenceDisclosure(tx,existing,params.actorUserId);
+      await protectQueuedEmail(tx, existing, false);
+    },
     set: {
       dispatchedAt: new Date(),
       dispatchedBy: params.actorUserId,
@@ -587,8 +625,30 @@ export async function cancelCorrespondence(id: string, reason: string, ctx: Tran
     event: "cancelled",
     action: "CORRESPONDENCE_CANCELLED",
     description: `Cancelled: ${reason}`,
+    guard: async (existing, tx) => { await protectQueuedEmail(tx, existing, true); },
     metadata: { reason },
   });
+}
+
+/** The parent is already locked. Cancellation is possible only before any
+ * attempt; a suppressed or invalid unattempted task is equally safe to retire.
+ * The append-only attempt ledger prevents a mutable queue counter from erasing a provider attempt. */
+async function protectQueuedEmail(tx: RLSTx, letter: CorrespondenceRow, cancel: boolean) {
+  if (letter.status !== 'signed' || !letter.signedAt) return;
+  const queued = await tx.select().from(notificationQueue).where(and(
+    sql`${notificationQueue.payload}->>'purpose' = ${CORRESPONDENCE_EMAIL_PURPOSE}`,
+    sql`${notificationQueue.payload}->>'correspondenceId' = ${letter.id}`,
+    gte(notificationQueue.createdAt,letter.signedAt))).for('update');
+  for (const task of queued) {
+    if (task.errorMessage === 'CORRESPONDENCE_CANCELLED') continue;
+    const [attempt]=await tx.select({id:notificationDeliveryLog.id}).from(notificationDeliveryLog).where(and(
+      eq(notificationDeliveryLog.organizationId,letter.organizationId),eq(notificationDeliveryLog.notificationId,task.id),
+      sql`${notificationDeliveryLog.event} IN ('attempted','accepted','unconfirmed','rejected','receipt_recovered')`)).limit(1);
+    if (!cancel || attempt || task.attemptCount !== '0' || !['pending','failed'].includes(task.status))
+      throw ApiError.conflict('Email is queued or may already have been accepted. Reconcile its status before changing dispatch.');
+    await tx.update(notificationQueue).set({status:'completed',completedAt:new Date(),updatedAt:new Date(),
+      errorMessage:'CORRESPONDENCE_CANCELLED'}).where(and(eq(notificationQueue.id,task.id),eq(notificationQueue.organizationId,letter.organizationId)));
+  }
 }
 
 // ============================================================================

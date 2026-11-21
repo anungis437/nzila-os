@@ -1,89 +1,94 @@
+import { requireRewardsInstitutionalAuthority } from '@/lib/rewards/credit-authority'
 /**
  * Email Notification Service for Rewards System
  * Sends email notifications for award events, redemptions, and more
  */
 
-import { getFromEmail, sendResendEmail } from '@/lib/email-service';
-import { logger } from '@/lib/logger';
+import { getFromEmail, sendResendEmail } from '@/lib/email-service'
+import { logger } from '@/lib/logger'
 
 interface _EmailRecipient {
-  email: string;
-  name: string;
+  email: string
+  name: string
 }
 
 interface AwardNotificationData {
-  recipientName: string;
-  recipientEmail: string;
-  issuerName: string;
-  awardTypeName: string;
-  awardTypeIcon?: string;
-  message: string;
-  creditsAwarded: number;
-  awardId: string;
-  orgName: string;
+  recipientName: string
+  recipientEmail: string
+  issuerName: string
+  awardTypeName: string
+  awardTypeIcon?: string
+  message: string
+  creditsAwarded: number
+  awardId: string
+  orgName: string
 }
 
 interface ApprovalNotificationData {
-  adminName: string;
-  adminEmail: string;
-  awardTypeName: string;
-  recipientName: string;
-  issuerName: string;
-  message: string;
-  creditsToAward: number;
-  awardId: string;
-  orgName: string;
+  adminName: string
+  adminEmail: string
+  awardTypeName: string
+  recipientName: string
+  issuerName: string
+  message: string
+  creditsToAward: number
+  awardId: string
+  orgName: string
 }
 
 interface ExpirationNotificationData {
-  recipientName: string;
-  recipientEmail: string;
-  expiringAmount: number;
-  expirationDate: Date;
-  orgName: string;
+  recipientName: string
+  recipientEmail: string
+  expiringAmount: number
+  expirationDate: Date
+  orgName: string
 }
 
 interface RedemptionNotificationData {
-  recipientName: string;
-  recipientEmail: string;
-  creditsRedeemed: number;
-  checkoutUrl?: string;
-  redemptionId: string;
-  orgName: string;
+  recipientName: string
+  recipientEmail: string
+  creditsRedeemed: number
+  checkoutUrl?: string
+  redemptionId: string
+  orgName: string
 }
 
 /**
  * Send award received notification
  */
 export async function sendAwardReceivedEmail(data: AwardNotificationData) {
+  requireRewardsInstitutionalAuthority()
   try {
-    const result = await sendResendEmail({
-      from: getFromEmail(`${data.orgName} Rewards`),
-      to: data.recipientEmail,
-      subject: `🎉 You've been recognized by ${data.issuerName}!`,
-      html: generateAwardReceivedHTML(data),
-    }, {
-      feature: 'rewards_email',
-      templateId: 'award_received',
-    });
+    const result = await sendResendEmail(
+      {
+        from: getFromEmail(`${data.orgName} Rewards`),
+        to: data.recipientEmail,
+        subject: `🎉 You've been recognized by ${data.issuerName}!`,
+        html: generateAwardReceivedHTML(data),
+      },
+      {
+        feature: 'rewards_email',
+        templateId: 'award_received',
+      },
+    )
 
     if (!result.success) {
       logger.error('[Email] Failed to send award notification', {
         error: result.error,
         recipientEmail: data.recipientEmail,
         awardId: data.awardId,
-      });
-      return { success: false, error: result.error };
+      })
+      return { success: false, error: result.error }
     }
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
     logger.error('[Email] Error sending award notification', {
       error,
       recipientEmail: data.recipientEmail,
       awardId: data.awardId,
-    });
-    return { success: false, error };
+    })
+    return { success: false, error }
   }
 }
 
@@ -91,34 +96,38 @@ export async function sendAwardReceivedEmail(data: AwardNotificationData) {
  * Send approval request notification to admins
  */
 export async function sendApprovalRequestEmail(data: ApprovalNotificationData) {
+  requireRewardsInstitutionalAuthority()
   try {
-    const result = await sendResendEmail({
-      from: getFromEmail(`${data.orgName} Rewards`),
-      to: data.adminEmail,
-      subject: `⚡ Award Pending Approval: ${data.awardTypeName}`,
-      html: generateApprovalRequestHTML(data),
-    }, {
-      feature: 'rewards_email',
-      templateId: 'approval_request',
-    });
+    const result = await sendResendEmail(
+      {
+        from: getFromEmail(`${data.orgName} Rewards`),
+        to: data.adminEmail,
+        subject: `⚡ Award Pending Approval: ${data.awardTypeName}`,
+        html: generateApprovalRequestHTML(data),
+      },
+      {
+        feature: 'rewards_email',
+        templateId: 'approval_request',
+      },
+    )
 
     if (!result.success) {
       logger.error('[Email] Failed to send approval request', {
         error: result.error,
         adminEmail: data.adminEmail,
         awardId: data.awardId,
-      });
-      return { success: false, error: result.error };
+      })
+      return { success: false, error: result.error }
     }
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
     logger.error('[Email] Error sending approval request', {
       error,
       adminEmail: data.adminEmail,
       awardId: data.awardId,
-    });
-    return { success: false, error };
+    })
+    return { success: false, error }
   }
 }
 
@@ -126,32 +135,36 @@ export async function sendApprovalRequestEmail(data: ApprovalNotificationData) {
  * Send credit expiration warning
  */
 export async function sendCreditExpirationEmail(data: ExpirationNotificationData) {
+  requireRewardsInstitutionalAuthority()
   try {
-    const result = await sendResendEmail({
-      from: getFromEmail(`${data.orgName} Rewards`),
-      to: data.recipientEmail,
-      subject: `⚠️ Your credits are expiring soon!`,
-      html: generateExpirationWarningHTML(data),
-    }, {
-      feature: 'rewards_email',
-      templateId: 'credit_expiration',
-    });
+    const result = await sendResendEmail(
+      {
+        from: getFromEmail(`${data.orgName} Rewards`),
+        to: data.recipientEmail,
+        subject: `⚠️ Your credits are expiring soon!`,
+        html: generateExpirationWarningHTML(data),
+      },
+      {
+        feature: 'rewards_email',
+        templateId: 'credit_expiration',
+      },
+    )
 
     if (!result.success) {
       logger.error('[Email] Failed to send expiration warning', {
         error: result.error,
         recipientEmail: data.recipientEmail,
-      });
-      return { success: false, error: result.error };
+      })
+      return { success: false, error: result.error }
     }
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
     logger.error('[Email] Error sending expiration warning', {
       error,
       recipientEmail: data.recipientEmail,
-    });
-    return { success: false, error };
+    })
+    return { success: false, error }
   }
 }
 
@@ -159,34 +172,38 @@ export async function sendCreditExpirationEmail(data: ExpirationNotificationData
  * Send redemption confirmation
  */
 export async function sendRedemptionConfirmationEmail(data: RedemptionNotificationData) {
+  requireRewardsInstitutionalAuthority()
   try {
-    const result = await sendResendEmail({
-      from: getFromEmail(`${data.orgName} Rewards`),
-      to: data.recipientEmail,
-      subject: `✅ Redemption Confirmed: ${data.creditsRedeemed} credits`,
-      html: generateRedemptionConfirmationHTML(data),
-    }, {
-      feature: 'rewards_email',
-      templateId: 'redemption_confirmation',
-    });
+    const result = await sendResendEmail(
+      {
+        from: getFromEmail(`${data.orgName} Rewards`),
+        to: data.recipientEmail,
+        subject: `✅ Redemption Confirmed: ${data.creditsRedeemed} credits`,
+        html: generateRedemptionConfirmationHTML(data),
+      },
+      {
+        feature: 'rewards_email',
+        templateId: 'redemption_confirmation',
+      },
+    )
 
     if (!result.success) {
       logger.error('[Email] Failed to send redemption confirmation', {
         error: result.error,
         recipientEmail: data.recipientEmail,
         redemptionId: data.redemptionId,
-      });
-      return { success: false, error: result.error };
+      })
+      return { success: false, error: result.error }
     }
 
-    return { success: true };
+    return { success: true }
   } catch (error) {
     logger.error('[Email] Error sending redemption confirmation', {
       error,
       recipientEmail: data.recipientEmail,
       redemptionId: data.redemptionId,
-    });
-    return { success: false, error };
+    })
+    return { success: false, error }
   }
 }
 
@@ -237,7 +254,7 @@ function generateAwardReceivedHTML(data: AwardNotificationData): string {
   </div>
 </body>
 </html>
-  `;
+  `
 }
 
 function generateApprovalRequestHTML(data: ApprovalNotificationData): string {
@@ -294,13 +311,13 @@ function generateApprovalRequestHTML(data: ApprovalNotificationData): string {
   </div>
 </body>
 </html>
-  `;
+  `
 }
 
 function generateExpirationWarningHTML(data: ExpirationNotificationData): string {
   const daysUntilExpiration = Math.ceil(
-    (data.expirationDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  );
+    (data.expirationDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+  )
 
   return `
 <!DOCTYPE html>
@@ -338,7 +355,7 @@ function generateExpirationWarningHTML(data: ExpirationNotificationData): string
   </div>
 </body>
 </html>
-  `;
+  `
 }
 
 function generateRedemptionConfirmationHTML(data: RedemptionNotificationData): string {
@@ -373,12 +390,16 @@ function generateRedemptionConfirmationHTML(data: RedemptionNotificationData): s
       </table>
     </div>
     
-    ${data.checkoutUrl ? `
+    ${
+      data.checkoutUrl
+        ? `
     <div style="text-align: center; margin: 30px 0;">
       <p style="font-size: 16px; margin-bottom: 15px;">Complete your order on Shopify:</p>
       <a href="${data.checkoutUrl}" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">Complete Checkout</a>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
     
     <p style="font-size: 14px; color: #666; margin-top: 30px;">
       Thank you for being part of our recognition program! 🎉
@@ -390,6 +411,5 @@ function generateRedemptionConfirmationHTML(data: RedemptionNotificationData): s
   </div>
 </body>
 </html>
-  `;
+  `
 }
-

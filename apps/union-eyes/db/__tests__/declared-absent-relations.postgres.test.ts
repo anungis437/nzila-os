@@ -14,6 +14,9 @@
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database that has no other session open:
  * the round trip runs in a clone of it (CREATE DATABASE ... TEMPLATE), which PostgreSQL only allows for a database that is not in use.
  */
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { nativeTenantReaderId, seedDeclaredCanonicalActor } from './native-declared-actor'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -84,11 +87,19 @@ describe.skipIf(!URL)('the declared relations platform 0061 and cache 0052 creat
     return url.toString()
   }
 
+  // A tenant statement runs in the verified business session of the organization's declared reader (a real canonical member), as the
+  // canonical topology requires (ue_v2_verified_business_session); the system role and an organization-less handle run with none.
   async function inRole<T>(client: pg.Client, role: string, org: string | null, work: () => Promise<T>): Promise<T> {
+    if (role === RUNTIME_ROLE && org)
+      return withNativeCanonicalActor(nativeTenantReaderId(org), org, (binding) => inRoleBound(client, role, org, work, binding))
+    return inRoleBound(client, role, org, work)
+  }
+  async function inRoleBound<T>(client: pg.Client, role: string, org: string | null, work: () => Promise<T>, binding?: AuthenticatedOrgBinding): Promise<T> {
     await client.query('BEGIN')
     try {
       await client.query(`SET LOCAL ROLE ${role}`)
       if (org) await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [org])
+      if (binding) await setNativeBusinessContext(client, binding)
       const result = await work()
       await client.query('COMMIT')
       return result
@@ -154,6 +165,7 @@ describe.skipIf(!URL)('the declared relations platform 0061 and cache 0052 creat
          VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
         [org, `absent-${org.slice(0, 8)}`, `absent-${org.slice(0, 8)}`],
       )
+      await seedDeclaredCanonicalActor(admin, nativeTenantReaderId(org), org, 'member')
     }
   }, 240_000)
 
@@ -200,8 +212,10 @@ describe.skipIf(!URL)('the declared relations platform 0061 and cache 0052 creat
         expect((await admin.query(`SELECT has_table_privilege($1, 'public.cba_intel_freshness_log', $2) AS ok`, [role, op])).rows[0].ok, `${role} ${op}`).toBe(false)
       }
     }
+    // The canonical source enables and forces row security on every source relation, the shared CBA reference tables included (their
+    // declared GLOBAL_REFERENCE_DATA policies admit them); the freshness log is not a source relation and stays closed by privilege alone.
     const forced = (await admin.query(`SELECT relname FROM pg_class WHERE relnamespace = 'public'::regnamespace AND relforcerowsecurity AND relname = ANY ($1)`, [ALL])).rows.map((r) => r.relname).sort()
-    expect(forced).toEqual([...TENANT, ...SYSTEM_ONLY].sort())
+    expect(forced).toEqual(ALL.filter((name) => name !== 'cba_intel_freshness_log').sort())
   })
 
   describe('tenant tables, as the runtime role', () => {

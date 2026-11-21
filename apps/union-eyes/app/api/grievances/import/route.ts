@@ -1,48 +1,19 @@
+import {
+  importGrievanceRow, openGrievanceImportSession, finalizeGrievanceImportBatch,
+  listGrievanceImportSessions, readGrievanceImportSession, type BatchTally,
+} from '@/lib/services/grievance-import-service';
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
 import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
-import { db } from '@/db/db';
-import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
-import { grievances } from '@/db/schema/domains/claims/grievances';
-import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
-import { ingestionBatches, ingestionRecords } from '@/db/schema/ingestion-schema';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { hasCaseFilingCapacity } from '@/lib/cases/case-authorization';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { logger } from '@/lib/logger';
 import { ErrorCode, standardErrorResponse, standardSuccessResponse } from '@/lib/api/standardized-responses';
-import { randomBytes, createHash } from 'crypto';
-import { and, desc, eq, ne, or, sql } from 'drizzle-orm';
-
-// ingestion_records has no organization column: a record belongs to its batch, and the batch to an organization.
-const recordInOrganization = (organizationId: string) =>
-  sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`;
 
 // Bounds apply before any batch is created, not just to individual rows.
 const MAX_IMPORT_BODY_BYTES = 2 * 1024 * 1024;
 const MAX_IMPORT_ROWS = 500;
-
-const grievanceTypeValues = [
-  'individual', 'group', 'policy', 'contract', 'harassment',
-  'discrimination', 'safety', 'seniority', 'discipline', 'termination', 'other',
-] as const;
-
-const importItemSchema = z.object({
-  type: z.enum(grievanceTypeValues).default('other'),
-  title: z.string().min(5).max(500),
-  description: z.string().min(10).max(10_000),
-  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
-  grievantName: z.string().max(255).optional(),
-  grievantEmail: z.string().email().max(255).optional(),
-  employerName: z.string().max(255).optional(),
-  workplaceName: z.string().max(255).optional(),
-  cbaArticle: z.string().max(100).optional(),
-  cbaSection: z.string().max(100).optional(),
-  incidentDate: z.string().datetime({ offset: true }).optional().or(z.string().date().optional()),
-  desiredOutcome: z.string().max(5_000).optional(),
-  createOfficialCase: z.boolean().optional(),
-});
 
 const importRequestSchema = z.object({
   format: z.enum(['json', 'csv']),
@@ -55,28 +26,6 @@ const importRequestSchema = z.object({
   resumeFailedOnly: z.boolean().optional(),
   defaultCreateOfficialCase: z.boolean().optional(),
 });
-
-type MappedImportRow = ReturnType<typeof mapImportRowToCanonical>;
-
-function coerceExternalId(row: Record<string, unknown>): string | null {
-  const candidate = row.externalId ?? row.external_id ?? row.caseId ?? row.case_id ?? row.reference ?? null;
-  const value = candidate ? String(candidate).trim() : '';
-  return value.length > 0 ? value : null;
-}
-
-function computeFingerprint(row: MappedImportRow): string {
-  const payload = {
-    type: row.type,
-    title: row.title.trim().toLowerCase(),
-    description: row.description.trim().toLowerCase(),
-    grievantEmail: (row.grievantEmail ?? '').trim().toLowerCase(),
-    incidentDate: row.incidentDate ?? null,
-    employerName: (row.employerName ?? '').trim().toLowerCase(),
-    workplaceName: (row.workplaceName ?? '').trim().toLowerCase(),
-  };
-
-  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
-}
 
 function parseCsvLine(line: string): string[] {
   const out: string[] = [];
@@ -131,262 +80,13 @@ function parseCsvPayload(payload: string): Array<Record<string, string>> {
   return rows;
 }
 
-function mapImportRowToCanonical(row: Record<string, unknown>, defaultCreateOfficialCase: boolean) {
-  const typeCandidate = String(row.type ?? row.case_type ?? row.category ?? 'other').toLowerCase();
-  const type = grievanceTypeValues.includes(typeCandidate as (typeof grievanceTypeValues)[number])
-    ? (typeCandidate as (typeof grievanceTypeValues)[number])
-    : 'other';
-
-  return {
-    type,
-    title: String(row.title ?? row.case_title ?? row.subject ?? '').trim(),
-    description: String(row.description ?? row.details ?? row.summary ?? '').trim(),
-    priority: row.priority ? String(row.priority).toLowerCase() : undefined,
-    grievantName: row.grievantName ? String(row.grievantName) : row.grievant_name ? String(row.grievant_name) : undefined,
-    grievantEmail: row.grievantEmail ? String(row.grievantEmail) : row.grievant_email ? String(row.grievant_email) : undefined,
-    employerName: row.employerName ? String(row.employerName) : row.employer_name ? String(row.employer_name) : undefined,
-    workplaceName: row.workplaceName ? String(row.workplaceName) : row.workplace_name ? String(row.workplace_name) : undefined,
-    cbaArticle: row.cbaArticle ? String(row.cbaArticle) : row.cba_article ? String(row.cba_article) : undefined,
-    cbaSection: row.cbaSection ? String(row.cbaSection) : row.cba_section ? String(row.cba_section) : undefined,
-    incidentDate: row.incidentDate ? String(row.incidentDate) : row.incident_date ? String(row.incident_date) : undefined,
-    desiredOutcome: row.desiredOutcome ? String(row.desiredOutcome) : row.desired_outcome ? String(row.desired_outcome) : undefined,
-    createOfficialCase: typeof row.createOfficialCase === 'boolean'
-      ? row.createOfficialCase
-      : typeof row.create_official_case === 'boolean'
-        ? row.create_official_case
-        : defaultCreateOfficialCase,
-  };
-}
-
-type RowOutcome =
-  | { kind: 'duplicate'; existingGrievanceId: string }
-  | { kind: 'invalid'; reason: string }
-  | { kind: 'imported'; grievanceId: string; grievanceNumber: string; mode: 'official_case' | 'intake' };
-
-/**
- * One source row, in one organization transaction: its ingestion record, the duplicate check, the case it becomes, the audit of that and the
- * record's final state commit together, so a row is either fully imported (and resumable as such) or not recorded at all.
- */
-async function importRow(
-  tx: RLSTx,
-  input: {
-    organizationId: string;
-    userId: string;
-    batchId: string;
-    sourceSystem: string;
-    index: number;
-    source: Record<string, unknown>;
-    defaultCreateOfficialCase: boolean;
-  },
-): Promise<RowOutcome> {
-  const { organizationId, userId, batchId, sourceSystem, index, source } = input;
-  const mapped = mapImportRowToCanonical(source, input.defaultCreateOfficialCase);
-  const externalId = coerceExternalId(source);
-  const fingerprint = computeFingerprint(mapped);
-
-  const [record] = await tx
-    .insert(ingestionRecords)
-    .values({
-      batchId,
-      recordIndex: index,
-      recordType: 'grievance',
-      externalId,
-      status: 'pending',
-      fingerprint,
-    })
-    .returning({ id: ingestionRecords.id });
-
-  await trackPilotEvent({
-    userId,
-    organizationId,
-    sessionId: `server:grievance-import`,
-    eventType: 'mapping_applied',
-    metadata: { rowIndex: index, mode: mapped.createOfficialCase ? 'official_case' : 'intake' },
-  }, tx);
-
-  // A duplicate is a row of this organization's earlier imports from the same source system that already succeeded, with the same external id or content.
-  const [duplicate] = await tx
-    .select({ resolvedId: ingestionRecords.resolvedId })
-    .from(ingestionRecords)
-    .innerJoin(ingestionBatches, eq(ingestionBatches.id, ingestionRecords.batchId))
-    .where(
-      and(
-        eq(ingestionBatches.organizationId, organizationId),
-        eq(ingestionBatches.sourceSystem, sourceSystem),
-        eq(ingestionRecords.recordType, 'grievance'),
-        ne(ingestionRecords.id, record.id),
-        eq(ingestionRecords.status, 'succeeded'),
-        or(externalId ? eq(ingestionRecords.externalId, externalId) : undefined, eq(ingestionRecords.fingerprint, fingerprint)),
-      ),
-    )
-    .orderBy(desc(ingestionRecords.createdAt))
-    .limit(1);
-
-  if (duplicate?.resolvedId) {
-    await tx
-      .update(ingestionRecords)
-      .set({
-        status: 'skipped',
-        errorMessage: 'Duplicate row already imported',
-        resolvedId: duplicate.resolvedId,
-        processedAt: new Date(),
-      })
-      .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
-
-    return { kind: 'duplicate', existingGrievanceId: duplicate.resolvedId };
-  }
-
-  const validated = importItemSchema.safeParse(mapped);
-  if (!validated.success) {
-    const reason = validated.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ');
-
-    await tx
-      .update(ingestionRecords)
-      .set({
-        status: 'failed',
-        errorMessage: reason,
-        errorDetails: { issues: validated.error.issues },
-        processedAt: new Date(),
-      })
-      .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
-
-    await trackPilotEvent({
-      userId,
-      organizationId,
-      sessionId: `server:grievance-import`,
-      eventType: 'validation_failed',
-      metadata: { rowIndex: index, reason },
-    }, tx);
-
-    return { kind: 'invalid', reason };
-  }
-
-  const row = validated.data;
-  const mode = row.createOfficialCase ? 'official_case' : 'intake';
-
-  const grievanceNumber = `GRV-IMP-${Date.now()}-${randomBytes(3).toString('hex')}`;
-  const [g] = await tx.insert(grievances).values({
-    grievanceNumber,
-    type: row.type,
-    title: row.title,
-    description: row.description,
-    priority: row.createOfficialCase ? (row.priority ?? 'medium') : 'low',
-    status: row.createOfficialCase ? 'filed' : 'draft',
-    organizationId,
-    createdBy: userId,
-    filedDate: row.createOfficialCase ? new Date() : null,
-    grievantName: row.grievantName ?? null,
-    grievantEmail: row.grievantEmail ?? null,
-    employerName: row.employerName ?? null,
-    workplaceName: row.workplaceName ?? null,
-    cbaArticle: row.cbaArticle ?? null,
-    cbaSection: row.cbaSection ?? null,
-    incidentDate: row.incidentDate ? new Date(row.incidentDate) : null,
-    desiredOutcome: row.desiredOutcome ?? null,
-    isGroupGrievance: row.type === 'group',
-  }).returning();
-
-  await tx.insert(grievanceEvents).values({
-    grievanceId: g.id,
-    eventType: row.createOfficialCase ? 'created' : 'intake_submitted',
-    actorUserId: userId,
-    notes: row.createOfficialCase ? 'Case imported via governed ingestion' : 'Intake imported via governed ingestion',
-  });
-
-  // Each imported row commits together with its audit record.
-  await persistAtomicAudit(tx, {
-    organizationId,
-    userId,
-    action: 'grievance.import_row',
-    resourceType: 'grievances',
-    resourceId: g.id,
-    details: { operation: 'bulk_import', grievanceNumber: g.grievanceNumber, status: g.status, mode },
-  });
-
-  await trackPilotEvent({
-    userId,
-    organizationId,
-    sessionId: `server:grievance-import`,
-    eventType: 'case_imported',
-    metadata: {
-      grievanceId: g.id,
-      grievanceNumber: g.grievanceNumber,
-      mode,
-    },
-  }, tx);
-
-  if (row.createOfficialCase) {
-    await trackPilotEvent({
-      userId,
-      organizationId,
-      sessionId: `server:grievance-import`,
-      eventType: 'case_created',
-      metadata: { grievanceId: g.id, source: 'governed_import' },
-    }, tx);
-  }
-
-  await tx
-    .update(ingestionRecords)
-    .set({
-      status: 'succeeded',
-      resolvedId: g.id,
-      processedAt: new Date(),
-    })
-    .where(and(eq(ingestionRecords.id, record.id), recordInOrganization(organizationId)));
-
-  return { kind: 'imported', grievanceId: g.id, grievanceNumber: g.grievanceNumber, mode };
-}
-
-interface BatchTally {
-  total: number;
-  processed: number;
-  succeeded: number;
-  failed: number;
-  skipped: number;
-  errors: Array<{ rowIndex: number; reason: string }>;
-}
-
-/** The session status and its audit commit together. A failed audit leaves the session running. */
 async function finalizeBatch(
-  organizationId: string,
-  userId: string,
-  batchId: string,
-  sourceSystem: string,
-  status: 'completed' | 'partial' | 'failed',
-  tally: BatchTally,
-  imported: number,
+  organizationId: string, userId: string, batchId: string, sourceSystem: string,
+  status: 'completed' | 'partial' | 'failed', tally: BatchTally, imported: number,
 ) {
-  await withRLSContext({ organizationId }, async (tx) => {
-    await tx
-      .update(ingestionBatches)
-      .set({
-        status,
-        totalRecords: tally.total,
-        processed: tally.processed,
-        succeeded: tally.succeeded,
-        failed: tally.failed,
-        skipped: tally.skipped,
-        completedAt: new Date(),
-        errorSummary: tally.errors,
-      })
-      .where(and(eq(ingestionBatches.id, batchId), eq(ingestionBatches.organizationId, organizationId)));
-
-    await persistAtomicAudit(tx, {
-      organizationId,
-      userId,
-      action: 'grievance.import_batch',
-      resourceType: 'ingestion_batches',
-      resourceId: batchId,
-      details: {
-        importSessionId: batchId,
-        sourceSystem,
-        totalRows: tally.total,
-        importedRows: imported,
-        skippedRows: tally.skipped,
-        failedRows: tally.failed,
-      },
-    });
-  });
+  return withRLSContext({ organizationId }, tx =>
+    finalizeGrievanceImportBatch(tx, organizationId, userId, batchId, sourceSystem, status, tally, imported),
+  );
 }
 
 export const POST = withApi(
@@ -448,63 +148,12 @@ export const POST = withApi(
 
     // The session: a resumed one must belong to this organization; a new one is created and committed before any row is read.
     const requestedSession = parsed.data.importSessionId;
-    const session = await withRLSContext({ organizationId }, async (tx) => {
-      if (requestedSession) {
-        const [existingBatch] = await tx
-          .select({ id: ingestionBatches.id })
-          .from(ingestionBatches)
-          .where(
-            and(
-              eq(ingestionBatches.id, requestedSession),
-              eq(ingestionBatches.organizationId, organizationId),
-            ),
-          )
-          .limit(1);
-        if (!existingBatch) return null;
-      }
-
-      const batchId = requestedSession
-        ? requestedSession
-        : (
-            await tx
-              .insert(ingestionBatches)
-              .values({
-                organizationId,
-                sourceSystem,
-                status: 'running',
-                totalRecords: sourceRows.length,
-                processed: 0,
-                succeeded: 0,
-                failed: 0,
-                skipped: 0,
-                startedAt: new Date(),
-                createdBy: userId,
-                metadata: {
-                  format: parsed.data.format,
-                  resumeFailedOnly: parsed.data.resumeFailedOnly ?? false,
-                },
-              })
-              .returning({ id: ingestionBatches.id })
-          )[0].id;
-
-      const processedIndexes = parsed.data.resumeFailedOnly
-        ? new Set(
-            (
-              await tx
-                .select({ recordIndex: ingestionRecords.recordIndex })
-                .from(ingestionRecords)
-                .where(
-                  and(
-                    eq(ingestionRecords.batchId, batchId),
-                    eq(ingestionRecords.status, 'succeeded'),
-                  ),
-                )
-            ).map((r) => r.recordIndex),
-          )
-        : new Set<number>();
-
-      return { batchId, processedIndexes };
-    });
+    const session = await withRLSContext({ organizationId }, (tx) =>
+      openGrievanceImportSession(tx, {
+        organizationId, userId, requestedSession, sourceSystem, totalRows: sourceRows.length,
+        format: parsed.data.format, resumeFailedOnly: parsed.data.resumeFailedOnly ?? false,
+      }),
+    );
 
     if (!session) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, 'Import session not found for this organization');
@@ -526,7 +175,7 @@ export const POST = withApi(
         }
 
         const outcome = await withRLSContext({ organizationId }, (tx) =>
-          importRow(tx, {
+          importGrievanceRow(tx, {
             organizationId,
             userId,
             batchId,
@@ -588,7 +237,7 @@ export const GET = withApi(
     // No role floor: viewing import sessions is an office-bearer capacity on the canonical membership (hasCaseFilingCapacity below).
     auth: { required: true },
     entitlement: 'grievance_case_suite',
-    // Every read below goes through the ambient handle, so the handler runs in the caller's organization transaction.
+    // The service reads on this caller organization transaction; canonical nested reads reuse it.
     rlsOrgContext: true,
     openapi: { tags: ['Grievances'], summary: 'List import sessions or read one with its records' },
   },
@@ -604,12 +253,7 @@ export const GET = withApi(
 
     const sessionId = new URL(request.url).searchParams.get('importSessionId');
     if (!sessionId) {
-      const recent = await db
-        .select()
-        .from(ingestionBatches)
-        .where(eq(ingestionBatches.organizationId, organizationId))
-        .orderBy(sql`${ingestionBatches.createdAt} DESC`)
-        .limit(25);
+      const recent = await withRLSContext({ organizationId }, tx => listGrievanceImportSessions(tx, organizationId));
 
       return standardSuccessResponse({ sessions: recent });
     }
@@ -617,30 +261,8 @@ export const GET = withApi(
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'importSessionId must be a valid session identifier');
     }
 
-    const [batch] = await db
-      .select()
-      .from(ingestionBatches)
-      .where(
-        and(
-          eq(ingestionBatches.id, sessionId),
-          eq(ingestionBatches.organizationId, organizationId),
-        ),
-      )
-      .limit(1);
-
-    if (!batch) {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, 'Import session not found');
-    }
-
-    const records = await db
-      .select()
-      .from(ingestionRecords)
-      .where(and(eq(ingestionRecords.batchId, sessionId), recordInOrganization(organizationId)))
-      .orderBy(sql`${ingestionRecords.recordIndex} ASC`);
-
-    return standardSuccessResponse({
-      session: batch,
-      records,
-    });
+    const result = await withRLSContext({ organizationId }, tx => readGrievanceImportSession(tx, organizationId, sessionId));
+    if (!result) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Import session not found');
+    return standardSuccessResponse(result);
   },
 );

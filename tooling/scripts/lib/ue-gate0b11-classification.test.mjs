@@ -884,7 +884,7 @@ test('NEGATIVE 12: each risk category raised by the source is refused without a 
     const args = fixture()
     strip(args, category)
     if (record(args, id).riskScreen[category]) delete record(args, id).riskScreen[category]
-    assert.ok(hasProblem(run(args), new RegExp(`operation ${id.replace(/[[\]|.]/g, '\\$&')} raises ${category}`)), `${category} on ${id}`)
+    assert.ok(hasProblem(run(args), new RegExp(`operation ${id.replace(/[\\[\]|.]/g, '\\$&')} raises ${category}`)), `${category} on ${id}`)
   }
 
   for (const category of ['GET_WITH_SIDE_EFFECTS', 'AUDIT_OUTSIDE_DATA_TRANSACTION', 'PUBLICATION_BYPASSES_CLASSIFICATION_OR_CONSENT']) {
@@ -963,7 +963,7 @@ test('NEGATIVE 13: the Gate 0B.7 to 0B.10 release dispositions are preserved, a 
   const outsiderId = `${outsider[0]}|${outsider[1]}`
   outsider[2] = ruleId
   outsider[4] = 'OWNED'
-  assert.ok(hasProblem(run(overreach), new RegExp(`owns ${outsiderId.replace(/[[\]|.]/g, '\\$&')}, which is outside the frozen tranche`)))
+  assert.ok(hasProblem(run(overreach), new RegExp(`owns ${outsiderId.replace(/[\\[\]|.]/g, '\\$&')}, which is outside the frozen tranche`)))
   assert.equal(entryOf(fixture(), outsiderId)[4], 'SCOPE_UNDECIDED')
 
   const gate = validateGate0(matrix, { base })

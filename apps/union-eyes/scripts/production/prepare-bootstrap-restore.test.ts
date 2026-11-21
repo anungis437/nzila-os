@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   FUNCTION_OWNER_ROLES,
+  ISOLATED_EXTERNAL_READ_OWNER,
   transformReceiptDump,
   transformSchemaDump,
 } from './prepare-bootstrap-restore'
@@ -27,7 +28,11 @@ describe('bootstrap restore transform', () => {
     const out = transformSchemaDump(dump)
     const lines = out.split('\n')
     expect(out).not.toContain('CREATE EXTENSION')
-    expect(lines[lines.indexOf('\\restrict abc123') + 1]).toBe('SET ROLE ue_v2_owner;')
+    const restrict = lines.indexOf('\\restrict abc123')
+    // The isolated external-read owner is granted to ue_v2_owner (SET only) by the operator login,
+    // then the restore runs as ue_v2_owner.
+    expect(lines[restrict + 1]).toContain(`GRANT ${ISOLATED_EXTERNAL_READ_OWNER} TO ue_v2_owner WITH ADMIN FALSE,INHERIT FALSE,SET TRUE`)
+    expect(lines[restrict + 2]).toBe('SET ROLE ue_v2_owner;')
     for (const role of FUNCTION_OWNER_ROLES) {
       expect(out).toContain(role)
     }
@@ -44,6 +49,66 @@ describe('bootstrap restore transform', () => {
     expect(revokePublic).toBeGreaterThan(grantPublic)
     expect(revokeUm).toBeGreaterThan(grantUm)
     expect(unrestrict).toBeGreaterThan(revokeUm)
+    // The external-read owner's CREATE and membership are restore-only too.
+    expect(lines[grantPublic]).toContain(ISOLATED_EXTERNAL_READ_OWNER)
+    expect(lines[revokePublic]).toContain(ISOLATED_EXTERNAL_READ_OWNER)
+    const reset = lines.indexOf('RESET ROLE;')
+    const revokeMembership = lines.indexOf(`REVOKE ${ISOLATED_EXTERNAL_READ_OWNER} FROM ue_v2_owner;`)
+    expect(reset).toBeGreaterThan(revokeUm)
+    expect(revokeMembership).toBe(reset + 1)
+    expect(unrestrict).toBe(revokeMembership + 1)
+  })
+
+  it('applies ACLs of objects owned by the isolated external-read role as that role', () => {
+    const fn = 'public.ue_external_payload_valid(payload jsonb)'
+    const withExternal = dump.replace(
+      'CREATE TABLE public.t (id int);',
+      [
+        'CREATE TABLE public.t (id int);',
+        `ALTER FUNCTION ${fn} OWNER TO ${ISOLATED_EXTERNAL_READ_OWNER};`,
+        '--',
+        `-- Name: FUNCTION ue_external_payload_valid(payload jsonb); Type: ACL; Schema: public; Owner: ${ISOLATED_EXTERNAL_READ_OWNER}`,
+        '--',
+        '',
+        `REVOKE ALL ON FUNCTION ${fn} FROM PUBLIC;`,
+        `GRANT ALL ON FUNCTION ${fn} TO ${ISOLATED_EXTERNAL_READ_OWNER};`,
+        '',
+        '--',
+        '-- Name: TABLE t; Type: ACL; Schema: public; Owner: ue_v2_owner',
+        '--',
+        '',
+        'GRANT SELECT ON TABLE public.t TO union_eyes_runtime;',
+      ].join('\n'),
+    )
+    const lines = transformSchemaDump(withExternal).split('\n')
+    const enter = lines.indexOf(`SET ROLE ${ISOLATED_EXTERNAL_READ_OWNER};`)
+    const revoke = lines.indexOf(`REVOKE ALL ON FUNCTION ${fn} FROM PUBLIC;`)
+    const grant = lines.indexOf(`GRANT ALL ON FUNCTION ${fn} TO ${ISOLATED_EXTERNAL_READ_OWNER};`)
+    const tableHeader = lines.findIndex((l) => l.startsWith('-- Name: TABLE t; Type: ACL'))
+    expect(enter).toBeGreaterThan(-1)
+    expect(revoke).toBeGreaterThan(enter)
+    expect(grant).toBeGreaterThan(revoke)
+    // The next TOC entry, owned by ue_v2_owner, is applied as ue_v2_owner again.
+    expect(lines[tableHeader - 1]).toBe('SET ROLE ue_v2_owner;')
+    expect(lines.slice(grant, tableHeader).filter((l) => l.startsWith('SET ROLE')).length).toBe(1)
+    // An external-owned ACL entry that is the dump's last entry is closed before the CREATE revokes.
+    const last = dump.replace(
+      'CREATE TABLE public.t (id int);',
+      [
+        `ALTER FUNCTION ${fn} OWNER TO ${ISOLATED_EXTERNAL_READ_OWNER};`,
+        `-- Name: FUNCTION ue_external_payload_valid(payload jsonb); Type: ACL; Schema: public; Owner: ${ISOLATED_EXTERNAL_READ_OWNER}`,
+        `REVOKE ALL ON FUNCTION ${fn} FROM PUBLIC;`,
+      ].join('\n'),
+    )
+    const lastLines = transformSchemaDump(last).split('\n')
+    const revokeCreate = lastLines.findIndex((l) => l.startsWith('REVOKE CREATE ON SCHEMA public'))
+    expect(lastLines[revokeCreate - 1]).toBe('SET ROLE ue_v2_owner;')
+    // Externally owned objects with no owner-applied ACL entry are refused, not restored with defaults.
+    expect(() =>
+      transformSchemaDump(
+        dump.replace('CREATE TABLE public.t (id int);', `ALTER FUNCTION ${fn} OWNER TO ${ISOLATED_EXTERNAL_READ_OWNER};`),
+      ),
+    ).toThrow(/WITHOUT_OWNER_ACLS/)
   })
 
   it('refuses a dump with CRLF endings, which corrupts function bodies', () => {

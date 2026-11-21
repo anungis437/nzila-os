@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -45,50 +48,51 @@ describe('finance/dashboard route', () => {
     });
   });
 
-  it('asks the wrapper for a secretary-treasurer, the entitlement and the organization\'s own tenant transaction', async () => {
+  const nothingRead = () => {
+    expect(m.getBillingAccount).not.toHaveBeenCalled();
+    expect(m.getLedgerSummary).not.toHaveBeenCalled();
+    expect(m.getInvoices).not.toHaveBeenCalled();
+    expect(m.getChargebacks).not.toHaveBeenCalled();
+    expect(m.generateDuesAlignmentReport).not.toHaveBeenCalled();
+  };
+
+  it('asks the wrapper for a secretary-treasurer and declares no entitlement and no ambient tenant transaction', async () => {
     const { GET } = await loadRoute();
-    expect(declaredOptions(GET)).toMatchObject({
+    const options = declaredOptions(GET);
+    expect(options).toMatchObject({
       auth: { minRole: 'secretary_treasurer' },
-      entitlement: 'financial_intelligence_suite',
-      rlsOrgContext: true,
+      rlsOrgContext: false,
       registry: { audience: 'officer', evidenceRequired: true },
     });
+    expect(options.entitlement).toBeUndefined();
   });
 
-  it('returns 403 when the entitlement check fails, and reads nothing', async () => {
+  it.each([
+    ['for the requested period', `?periodId=${PERIOD}`],
+    ['without a period', ''],
+  ])('refuses the dashboard %s with 501 NOT_IMPLEMENTED and reads nothing', async (_label, query) => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('Entitlement missing'));
 
-    const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
+    const response = await GET(new NextRequest(`http://localhost/api/finance/dashboard${query}`), ctx);
 
-    expect(response.status).toBe(403);
-    expect(m.getBillingAccount).not.toHaveBeenCalled();
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    nothingRead();
   });
 
-  it('returns the dashboard of the caller organization for the requested period', async () => {
+  it('refuses with 501 whether or not the organization holds the module: no entitlement check or read runs', async () => {
     const { GET } = await loadRoute();
+    for (const entitled of [true, false]) {
+      m.requireEntitlement.mockReset();
+      if (entitled) m.requireEntitlement.mockResolvedValue(undefined);
+      else m.requireEntitlement.mockRejectedValue(new Error('Entitlement missing'));
+      const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
 
-    const response = await GET(new NextRequest(`http://localhost/api/finance/dashboard?periodId=${PERIOD}`), ctx);
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(m.getBillingAccount).toHaveBeenCalledWith('org_1');
-    expect(m.getLedgerSummary).toHaveBeenCalledWith({ organizationId: 'org_1', billingPeriodId: PERIOD });
-    expect(m.generateDuesAlignmentReport).toHaveBeenCalledWith('org_1', PERIOD);
-    expect(payload.data.duesAlignment.anomalyCount).toBe(1);
-  });
-
-  it('returns the dashboard without a period', async () => {
-    const { GET } = await loadRoute();
-
-    const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(m.getLedgerSummary).not.toHaveBeenCalled();
-    expect(m.generateDuesAlignmentReport).toHaveBeenCalledWith('org_1', 'current');
-    expect(payload.data.billingAccount.id).toBe('ba_1');
-    expect(payload.data.recentChargebacks).toHaveLength(1);
+      expect(response.status).toBe(501);
+      expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    }
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    nothingRead();
   });
 
   it('answers a period id that is not a uuid as a client error, never as a database fault', async () => {
@@ -100,12 +104,14 @@ describe('finance/dashboard route', () => {
     expect(m.getBillingAccount).not.toHaveBeenCalled();
   });
 
-  it('returns 500 for unexpected service errors', async () => {
+  it('never reaches the services, so a service failure cannot surface: 501 NOT_IMPLEMENTED, not 500', async () => {
     const { GET } = await loadRoute();
-    m.getInvoices.mockRejectedValueOnce(new Error('db down'));
+    m.getInvoices.mockRejectedValue(new Error('db down'));
 
     const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    nothingRead();
   });
 });

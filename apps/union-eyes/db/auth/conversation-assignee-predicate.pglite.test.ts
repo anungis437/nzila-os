@@ -16,10 +16,11 @@ let pg: PGlite
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(`
-    REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+    REVOKE ALL ON SCHEMA public FROM PUBLIC;
     CREATE ROLE nzila_auth_org_authority_reader NOLOGIN NOINHERIT;
     CREATE ROLE union_eyes_runtime NOLOGIN NOINHERIT;
     CREATE ROLE union_eyes_system NOLOGIN NOINHERIT;
+    GRANT USAGE ON SCHEMA public TO union_eyes_runtime,union_eyes_system;
     CREATE SCHEMA user_management;
     CREATE TABLE user_management.users(user_id text PRIMARY KEY,is_active boolean,lifecycle_state text);
     CREATE TABLE user_management.organization_users(user_id text,organization_id uuid,role text,is_active boolean);
@@ -94,6 +95,8 @@ describe('bounded canonical conversation assignee predicate', () => {
   it('pins the exact function body, overload count, owner, settings and execution ACL', async () => {
     const rows = (await pg.query<Record<string, unknown>>(CONVERSATION_ASSIGNEE_CATALOG_QUERY)).rows
     expect(conversationAssigneePredicateViolations(rows)).toEqual([])
+    for (const change of [{ reader_public_usage: false }, { reader_public_create: true }, { reader_public_grant_option: true }])
+      expect(conversationAssigneePredicateViolations(rows.map((row, index) => index === 0 ? { ...row, ...change } : row))).not.toEqual([])
   })
 
   it('refuses to overwrite an existing predicate', async () => {

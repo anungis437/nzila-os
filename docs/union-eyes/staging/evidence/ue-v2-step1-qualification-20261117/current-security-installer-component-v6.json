@@ -1,0 +1,67 @@
+{
+  "schema": "ue-step1-component-qualification-v6",
+  "recordedAt": "2026-11-18T02:00:02.987968+00:00",
+  "finalCandidateSha": null,
+  "dirtyIntegrationSource": true,
+  "source": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "27e252c3b65fcedc8348bdf8f69bfee984a52ba1a93eed715091d4a558597758"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "2c2cd78df210edba3510884a0f79bc2bdd52918e69c4cf43bd853484d777592d"
+    }
+  ],
+  "nativeV5": {
+    "status": "FAILED_BEFORE_THIS_REPAIR",
+    "counts": {
+      "numTotalTests": 3,
+      "numPassedTests": 2,
+      "numFailedTests": 1,
+      "numPendingTests": 0
+    },
+    "privateRawPath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v5.json",
+    "sha256": "f1f420a408d2b803a3fc98f0e6b74620c1d689a4b472f678a7b1a3d146c619a6",
+    "sourceChangedDuringRun": false
+  },
+  "finding": "Framework execution required actor helper EXECUTE before the final source ACL restoration. The failure was inside the framework statement loop, before companion execution.",
+  "repair": [
+    "Restore each framework function exact projected source EXECUTE ACL immediately after its verified CREATE/REPLACE statement, before another function/policy can depend on it.",
+    "Retain final whole-source function ACL restoration and catalog validation. No temporary role, broader grant, changed RLS predicate, policy disablement or source SQL body change.",
+    "Use a validated structural AuthTypeNode copy with named identifier and modifier-array checks, preserving unknown AST properties. This addresses parent-reported TypeScript inference errors without a blanket cast."
+  ],
+  "checks": {
+    "focusedInstaller": {
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-installer-unit-v11.log"
+    },
+    "actualNodeLoaderAndStages": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-stage-unit-v9.log"
+    },
+    "focusedLint": {
+      "exitCode": 0,
+      "log": "current-security-installer-lint-v12.log"
+    }
+  },
+  "artifacts": {
+    "current-security-installer-unit-v11.log": "d09c0c9e529f4cc36f8617ee8c226c05136481dc12a3944182f184fe331a4805",
+    "current-security-stage-unit-v9.log": "d1d5cf082c645001d6a6ee4b2e747c43c6ad72370a5be200e438d1c2e95368d5",
+    "current-security-installer-lint-v12.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+  },
+  "required": "Parent must rerun expanded semantic checking and actual native qualification; neither is claimed passed for this repair.",
+  "readiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "a354bbc4129fbda5c304a8dca8c03037cbd23b54dcafcbcc59b6953adccc1a49",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v6.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}
