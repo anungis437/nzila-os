@@ -94,7 +94,12 @@ jobs:
             .map(s => s.sourceDigest));
           assert.equal(historicalDigests.size, 1, 'Multiple historical enum digests');
           const historicalSyntheticDigest = [...historicalDigests][0];
-          const canonicalMapDigest = crypto.createHash('sha256').update(JSON.stringify(
+          const currentEnumDigests = new Set(newPlan.statements
+            .filter(s => s.canonicalId.startsWith('CURRENT_ENUM:'))
+            .map(s => s.sourceDigest));
+          assert.equal(currentEnumDigests.size, 1, 'Multiple generated enum digests');
+          const currentEnumDigest = [...currentEnumDigests][0];
+          const canonicalModelDigest = crypto.createHash('sha256').update(JSON.stringify(
             Object.entries(newPlan.currentModels.sourceDigests)
               .sort(([a],[b]) => a < b ? -1 : a > b ? 1 : 0)
           )).digest('hex');
@@ -106,12 +111,19 @@ jobs:
             assert.equal(oldStatement.canonicalId, newStatement?.canonicalId, 'Statement identity changed');
             assert.equal(oldStatement.sql, newStatement?.sql, 'Executable SQL changed');
             assert.equal(oldStatement.source, newStatement?.source, 'Statement source changed');
-            assert.equal(oldStatement.sourceDigest, historicalSyntheticDigest, 'Unexpected old synthetic digest');
-            assert.equal(newStatement.sourceDigest, canonicalMapDigest, 'Unexpected new statement source digest');
-            assert.ok(oldStatement.canonicalId.startsWith('CURRENT_ENUM:') ||
-              oldStatement.canonicalId.startsWith('DJANGO_CURRENT:'),
-              'Unexpected synthetic statement changed');
-            expected.statements[i].sourceDigest = canonicalMapDigest;
+            if (oldStatement.canonicalId.startsWith('CURRENT_ENUM:') ||
+                oldStatement.canonicalId === 'CURRENT_EXTENSION:vector') {
+              // These statements are sourced from the full commitments map.
+              // A changed pnpm-lock digest necessarily changes their source digest.
+              assert.equal(oldStatement.sourceDigest, historicalSyntheticDigest, 'Unexpected historical statement digest');
+              assert.equal(newStatement.sourceDigest, currentEnumDigest, 'Inconsistent generated statement digest');
+            } else if (oldStatement.canonicalId.startsWith('DJANGO_CURRENT:')) {
+              // The fallback Django projection uses the sorted Python source map.
+              assert.equal(newStatement.sourceDigest, canonicalModelDigest, 'Unexpected Django fallback digest');
+            } else {
+              throw Error('UNEXPECTED_SYNTHETIC_STATEMENT_CHANGE:' + oldStatement.canonicalId);
+            }
+            expected.statements[i].sourceDigest = newStatement.sourceDigest;
             canonicalizedStatements++;
           }
           console.log('Canonicalized derived statement source digests: ' + canonicalizedStatements);
