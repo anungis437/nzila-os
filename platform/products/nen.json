@@ -1,0 +1,22 @@
+{
+  "slug": "nen",
+  "name": "Nzila Economic Network",
+  "tier": 4,
+  "tierLabel": "lab",
+  "status": "incubating",
+  "owner": "Nzila Ventures",
+  "pricingTier": "n/a",
+  "telemetryRequired": false,
+  "finopsEnabled": false,
+  "trustProfile": "tier-3-internal",
+  "launchStage": "incubating",
+  "publicVisible": false,
+  "gtmPosture": "hold",
+  "proofLevel": "none",
+  "strategicRole": "Black-owned enterprise discovery, buyer connections, commercial teaming, procurement, economic evidence and intergenerational business ownership across Canada, Africa and the diaspora. Experimental product integration only: no signed institutional partners, contracts, live deployments or verified economic outcomes.",
+  "generatedAt": "2026-09-01T00:00:00.000Z",
+  "generatedFrom": [
+    "governance/portfolio/product-catalog.json",
+    "platform/products/envelope.config.json"
+  ]
+}

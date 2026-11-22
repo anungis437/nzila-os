@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-09-01T00:00:00.000Z",
-  "count": 28,
+  "count": 29,
   "products": [
     {
       "slug": "abr",
@@ -70,6 +70,12 @@
     },
     {
       "slug": "nacp-exams",
+      "tier": 4,
+      "tierLabel": "lab",
+      "publicVisible": false
+    },
+    {
+      "slug": "nen",
       "tier": 4,
       "tierLabel": "lab",
       "publicVisible": false

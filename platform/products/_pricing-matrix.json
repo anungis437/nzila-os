@@ -20,6 +20,7 @@
       "console",
       "control-plane",
       "mobility-client-portal",
+      "nen",
       "nzila-hq",
       "orchestrator-api",
       "partners",
