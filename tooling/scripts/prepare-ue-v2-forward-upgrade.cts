@@ -21,7 +21,7 @@ const git = (args: string[]) =>
 async function main() {
   const exported = arg('--export'),
     out = arg('--out')
-  const applicationSourceSha = '57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3'
+  const applicationSourceSha = 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c'
   const operatorSourceSha = git(['rev-parse', 'HEAD'])
   const plan = JSON.parse(
     fs.readFileSync(

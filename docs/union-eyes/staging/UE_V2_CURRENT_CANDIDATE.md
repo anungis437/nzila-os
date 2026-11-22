@@ -1,36 +1,26 @@
 # Union Eyes V2 current base candidate
 
-Proposed source: `57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3`, the merge commit of [PR #1269](https://github.com/anungis437/nzila-os/pull/1269).
+Admitted application source: `f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c`, the exact tested head of [PR #1279](https://github.com/anungis437/nzila-os/pull/1279), normally merged as `2b630d4876ddf5ab76753a98556ac29b89f43d01`. The application source and workflow/infrastructure source are recorded separately.
 
-- Exact-head CI passed on `30572d9acf6b273df70c4ac3aa66c484ff5d86d0`, with no failures.
-- V2 engineering qualification passed: four browser profiles at 11/11, and 20 automated WCAG 2.1 A/AA scans with no critical or serious violations.
-- The native authority kernel passed: 25 suites, 470 tests.
-- The re-enabled red-team suite passed.
+The [source admission record](evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json) binds:
 
-The [main-only build](https://github.com/anungis437/nzila-os/actions/runs/44949770898) passed. The qualified application image is `nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:7b6c8ebfed04a70d69283e31480c39a1989e93b283b24eed48c784e6000d590e`.
+- 19 successful required checks and 122 successful / 11 skipped registered checks, with no failures;
+- all five required local commands; the complete test run had 41,236 passing, zero failing, 1,616 skipped and 13 pending conditional semantic-vector cases;
+- four EN/FR desktop/mobile browser profiles at 11/11, the unchanged authenticated casework load, and production-build HTTP/cross-tenant/restart QA;
+- 25 native PostgreSQL 16 kernel files with 470 passing tests and no failures or skips, plus the separate 363-case native runtime-security matrix with no failures or skips.
 
-The [protected rollout](https://github.com/anungis437/nzila-os/actions/runs/44962785190) applied infrastructure but failed application readiness. On November 22, the new revision had no ready replicas and no traffic; the prior revision retained all traffic. Read-only database inspection confirmed that seven required tables, five nullable columns and the `ue_external_read_reader` role were absent. The rollout did not execute a forward schema upgrade.
+The source validates organization-selection and case-intake receipts, uses the current authority projection for the table census, follows the containment wrapper's actual response shape, and isolates the external-read native test's credentials. Existing census limits remain unchanged. The [main-contained-source image build](https://github.com/anungis437/nzila-os/actions/runs/45075259257) passed. Its [release manifest](evidence/ue-v2-forward-upgrade-20261122/release-manifest-f3aad7ff.json) binds application image `nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:39bad81ecdbda6618d238dd9c308c3672bc19568bf3ec3d022550131f4fdb1ee`. Deployment acceptance remains pending.
 
-A data-preserving forward upgrade is under qualification. It retains installed migrations, bootstrap receipts, historical tables, existing rows and sequence values; it does not restore a fresh database over live staging. Its staging rehearsal must roll back and verify the original catalog before an apply operation can bind the exact rehearsal plan and preimage. Local proofs are engineering evidence only.
+Observed staging still serves `cccfc8c311a1017f80241bf089c00ef0c6828751`, with public health and readiness passing. All live accounts, cases and other data are preserved. The earlier candidate `57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3` and its [qualified build](https://github.com/anungis437/nzila-os/actions/runs/44949770898) keep their own evidence: its [protected rollout](https://github.com/anungis437/nzila-os/actions/runs/44962785190) applied infrastructure but failed startup readiness and retained the prior traffic. It did not run a forward database upgrade. Read-only inspection found seven required tables, five nullable columns and the external-reader role absent.
 
-The [disposable PostgreSQL 16 proof](evidence/ue-v2-forward-upgrade-20261122/local-managed-preservation-proof.json) preserved 779 original tables, six synthetic rows and 20 sequences, removed temporary privileges, passed packaged catalog admission and verified rollback after an injected DDL failure. Its tool bytes are individually hash-bound; it is not a live-staging receipt.
+The data-preserving upgrade in [PR #1278](https://github.com/anungis437/nzila-os/pull/1278) is bound to that exact source and image; normal admission and protected execution remain pending. It retains existing rows/columns/sequences, 40 immutable migrations, bootstrap receipts and historical objects. It adds the reviewed schema/security differences without restoring or seeding over live staging. Its [disposable managed-operator proof](evidence/ue-v2-forward-upgrade-20261122/local-managed-preservation-proof.json) preserved 779 original tables, six synthetic rows and 20 sequences, removed temporary privileges, passed packaged admission and verified rollback after an injected failure. This is separate from live staging evidence.
 
-The [old-release contract comparison](evidence/ue-v2-forward-upgrade-20261122/old-release-forward-compatibility.json) identifies six of the seven new tables as unknown to CCC's admission contract. CCC cannot be treated as a schema-compatible rollback after commit. Before applying, the protected operation verifies the already-deployed `rel57728a2a75` revision and its exact image. After the database qualifies, it restarts that revision if activation previously failed, waits for its health and source identity, finishes the previously reviewed rollout by moving staging traffic, and verifies the public version and health. It retains the old revision for history. Failures before commit roll back; failures after commit require forward recovery with the preserved database, rather than routing to the incompatible old image or reversing schema changes. Brief staging interruption is possible during this coordinated transition. None of these checks establishes full base-release acceptance.
+A protected staging rehearsal must roll back and verify the original catalog. Apply then requires that actual successful main rehearsal run and its exact plan/preimage digests. After commit, the operator must start the previously prepared zero-traffic revision at its exact image, verify readiness/version, move staging traffic and verify the public application. The [old-release comparison](evidence/ue-v2-forward-upgrade-20261122/old-release-forward-compatibility.json) shows CCC cannot admit six new tables: after commit, recovery must preserve the upgraded database and move forward to a compatible qualified image. Before-commit failures roll back. No reset, down migration or automatic routing to an incompatible old image is permitted.
 
-Still pending: qualification and normal admission of that upgrade, its protected staging rehearsal and application, successful startup and rollout of this exact image, then deployed persona and base-action qualification. **STAGING_NO_GO** for full base release.
+The [persona and lifecycle census](evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json) contains 35 stakeholder families (26 required), 39 stored role values (34 required boundary checks), and 16 required lifecycle stages. Seven provider navigation profiles are a subset. The broader matrix includes scoped appointments/delegations, external participants, provider/worker actors, cross-organization denial, revocation, expiry and recovery. Roles and shared menus do not prove those action boundaries. Each required row remains open until its scoped evidence is reconciled to this exact candidate in the [single action ledger](UE_V2_BASE_ACTION_COVERAGE.json).
 
-Observed staging source remains `cccfc8c311a1017f80241bf089c00ef0c6828751`. Its deployed evidence keeps its own provenance and is not acceptance of this candidate.
+Still pending: normal admission of the final bound upgrade, protected zero-traffic preparation/rehearsal/apply, actual data-preservation/startup proof, and complete deployed persona/base-action qualification. **STAGING_NO_GO** for the full base release. Prior accepted-source subset results remain historical.
 
-The candidate adds:
+CI accessibility scans cover WCAG 2.0/2.1 A/AA. The named full WCAG 2.2 AA target, manual assistive-technology behavior and fresh deployed bilingual/error states are not inferred from those scans. The old structural trace's training-guide association is not evidence that core language/accessibility code is absent, and does not complete the unimplemented guide product. Physical-device/extra-engine certification and full-traffic failover retain their explicit deferred scope.
 
-- transitive authority classification of every mutation export;
-- native-PostgreSQL authority-kernel coverage;
-- browser accessibility repairs found by the new scans;
-- bilingual catalog completeness;
-- the counsel assertion signature verifier.
-
-Automated scans are not a manual assistive-technology audit. Translation quality and physical devices are not verified.
-
-Default menus, kernel case permissions, immutable migrations and live data remain protected. The [action ledger](UE_V2_BASE_ACTION_COVERAGE.json) is unfinished.
-
-CHG-2026-0114 ends `2026-11-23T03:00:00Z` under the founder window record. Production deployment is excluded, as are Finance/dues and Financial Officer 2.1. Global programme readiness and Phase 3B remain held.
+CHG-2026-0114 ends `2026-11-23T03:00:00Z`. The founder continues to authorize qualified staging execution and evidence collection; anungis/anungis437 are the same founder, and Codex's review is attributed without an independent human approval claim. Finance/dues persistence and Financial Officer 2.1 are excluded; sensitive finance denial checks remain required. Production deployment is not authorized. Global programme readiness and Phase 3B remain held.

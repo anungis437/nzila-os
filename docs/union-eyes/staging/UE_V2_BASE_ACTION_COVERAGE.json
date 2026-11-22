@@ -5,7 +5,7 @@
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
   "currentRepairBranch": "fix/ue-staging-forward-upgrade-20261122",
-  "currentRepairRuntimeQualification": "MERGED_ENGINEERING_COMPONENTS_QUALIFIED_STAGING_STARTUP_BLOCKED_FULL_BASE_UNQUALIFIED",
+  "currentRepairRuntimeQualification": "EXACT_HEAD_ENGINEERING_QUALIFIED_NEW_IMAGE_AND_LIVE_FORWARD_UPGRADE_PENDING_FULL_BASE_UNQUALIFIED",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -10029,21 +10029,15 @@
     "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
     "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
   ],
-  "proposedCandidateSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+  "proposedCandidateSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
   "sourceAdmission": {
-    "pullRequest": 1269,
-    "sourceHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
-    "normalMergeSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
-    "allRequiredTrustedChecksPassed": 16,
-    "checkRuns": {
-      "success": 131,
-      "skipped": 11,
-      "neutral": 1,
-      "failure": 0
-    },
-    "conditionalSkipsRemainRecorded": true,
-    "evidence": "evidence/ue-v2-step1-closure-57728a2a/exact-source-ci.json",
-    "newSourceRuntimeQualification": "BLOCKED_ON_PRESERVING_LIVE_SCHEMA_UPGRADE_NOT_FULL_BASE_ACCEPTANCE"
+    "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+    "pullRequest": 1279,
+    "normalMergeSha": "2b630d4876ddf5ab76753a98556ac29b89f43d01",
+    "requiredTrustedChecksPassed": 19,
+    "registeredCheckRunsFinishedWithoutFailure": 133,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+    "deployedAcceptance": "PENDING_NOT_INFERRED"
   },
   "currentDeployedSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
   "currentDeployedWorkflowSha": null,
@@ -10072,6 +10066,25 @@
         "conditionalSkipsRemainRecorded": true,
         "newSourceRuntimeQualification": "PENDING"
       }
+    },
+    {
+      "applicationSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+      "admission": {
+        "pullRequest": 1269,
+        "sourceHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
+        "normalMergeSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+        "allRequiredTrustedChecksPassed": 16,
+        "checkRuns": {
+          "success": 131,
+          "skipped": 11,
+          "neutral": 1,
+          "failure": 0
+        },
+        "conditionalSkipsRemainRecorded": true,
+        "evidence": "evidence/ue-v2-step1-closure-57728a2a/exact-source-ci.json",
+        "newSourceRuntimeQualification": "BLOCKED_ON_PRESERVING_LIVE_SCHEMA_UPGRADE_NOT_FULL_BASE_ACCEPTANCE"
+      },
+      "retainedWhenBindingApplicationSource": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c"
     }
   ],
   "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
@@ -11150,34 +11163,10 @@
     "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117",
     "sourceProofNeverInheritsPriorRuntimeAcceptance": true,
     "latestEngineeringObservation": {
-      "recordedAt": "2026-11-22T19:45:00Z",
-      "candidateSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
-      "exactPullRequestHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
-      "pullRequest": 1269,
-      "state": "MERGED_COMPONENT_PROOFS_VERIFIED_NOT_FULL_BASE_ACCEPTANCE",
-      "sourceAndEnvironmentEvidence": [
-        "https://github.com/anungis437/nzila-os/actions/runs/44946518604",
-        "https://github.com/anungis437/nzila-os/actions/runs/44946518155",
-        "https://github.com/anungis437/nzila-os/actions/runs/44946518327",
-        "https://github.com/anungis437/nzila-os/actions/runs/44946520802",
-        "https://github.com/anungis437/nzila-os/actions/runs/44946523411",
-        "https://github.com/anungis437/nzila-os/actions/runs/44949770898",
-        "https://github.com/anungis437/nzila-os/actions/runs/44962785190"
-      ],
-      "confirmedObservations": {
-        "exactHeadCI": "131_SUCCESS_11_SKIPPED_1_NEUTRAL_ZERO_FAILURES",
-        "browser": "FOUR_PROFILES_11_OF_11_20_AUTOMATED_AXE_SCANS_ZERO_CRITICAL_SERIOUS",
-        "nativeRuntime": "SOURCE_PROVENANCE_AND_DISPATCH_MATRIX_363_OF_363_ZERO_SKIP",
-        "build": "MAIN_APPLICATION_IMAGE_BUILT_DIGEST_PINNED",
-        "staging": "NEW_REVISION_NOT_READY_OLD_CCC_REVISION_RETAINS_ALL_TRAFFIC",
-        "rootCause": "LIVE_SCHEMA_MISSING_SEVEN_TABLES_FIVE_NULLABLE_COLUMNS_AND_EXTERNAL_READ_ROLE"
-      },
-      "remainingQualification": [
-        "Qualify and admit the data-preserving forward upgrade; rehearse with rollback on staging before exact-plan-bound apply.",
-        "Prove original data and sequences preserved, temporary privileges removed, packaged catalog admission and exact application startup.",
-        "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
-        "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
-      ]
+      "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+      "state": "REQUIRED_LOCAL_AND_EXACT_HEAD_CI_COMMANDS_PASSED_DEPLOYED_QUALIFICATION_OPEN",
+      "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+      "fullBaseGo": false
     },
     "readonlyStagingPreflight": {
       "evidence": "evidence/ue-v2-step1-qualification-20261117/readonly-staging-authority-preflight-v3.json",
@@ -11297,6 +11286,36 @@
         "step2Held": true,
         "stagingAndProductionPromoted": false,
         "liveDataMutated": false
+      },
+      {
+        "recordedAt": "2026-11-22T19:45:00Z",
+        "candidateSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+        "exactPullRequestHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
+        "pullRequest": 1269,
+        "state": "MERGED_COMPONENT_PROOFS_VERIFIED_NOT_FULL_BASE_ACCEPTANCE",
+        "sourceAndEnvironmentEvidence": [
+          "https://github.com/anungis437/nzila-os/actions/runs/44946518604",
+          "https://github.com/anungis437/nzila-os/actions/runs/44946518155",
+          "https://github.com/anungis437/nzila-os/actions/runs/44946518327",
+          "https://github.com/anungis437/nzila-os/actions/runs/44946520802",
+          "https://github.com/anungis437/nzila-os/actions/runs/44946523411",
+          "https://github.com/anungis437/nzila-os/actions/runs/44949770898",
+          "https://github.com/anungis437/nzila-os/actions/runs/44962785190"
+        ],
+        "confirmedObservations": {
+          "exactHeadCI": "131_SUCCESS_11_SKIPPED_1_NEUTRAL_ZERO_FAILURES",
+          "browser": "FOUR_PROFILES_11_OF_11_20_AUTOMATED_AXE_SCANS_ZERO_CRITICAL_SERIOUS",
+          "nativeRuntime": "SOURCE_PROVENANCE_AND_DISPATCH_MATRIX_363_OF_363_ZERO_SKIP",
+          "build": "MAIN_APPLICATION_IMAGE_BUILT_DIGEST_PINNED",
+          "staging": "NEW_REVISION_NOT_READY_OLD_CCC_REVISION_RETAINS_ALL_TRAFFIC",
+          "rootCause": "LIVE_SCHEMA_MISSING_SEVEN_TABLES_FIVE_NULLABLE_COLUMNS_AND_EXTERNAL_READ_ROLE"
+        },
+        "remainingQualification": [
+          "Qualify and admit the data-preserving forward upgrade; rehearse with rollback on staging before exact-plan-bound apply.",
+          "Prove original data and sequences preserved, temporary privileges removed, packaged catalog admission and exact application startup.",
+          "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
+          "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
+        ]
       }
     ],
     "step1ClosureRegister": {
@@ -11582,6 +11601,36 @@
         },
         "note": "A later commit that only records this register re-runs CI; these results bind to 5bc5b3cf9."
       }
+    },
+    "fullPersonaCoverageDenominator": {
+      "source": "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
+      "evidence": "evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json",
+      "stakeholderFamilies": 35,
+      "requiredStakeholderFamilies": 26,
+      "storedRoleValues": 39,
+      "requiredRoleBoundaries": 34,
+      "requiredLifecycleStages": 16,
+      "sevenNavigationProfilesAreOnlyASubset": true,
+      "runtimeQualification": "OPEN_NOT_INFERRED_FROM_SOURCE_OR_NAVIGATION_SUBSET"
+    },
+    "latestOwnerStagingExecutionDirection": {
+      "recordedDate": "2026-11-22",
+      "instruction": "Keep going from Claude’s merged work. Fix staging startup without deleting live data, finish the persona and base-release checks, and reconcile the release ledger. Keep finance out of scope and do not deploy to production.",
+      "scope": "Qualified staging engineering, real controlled persona/base checks and ledger reconciliation under CHG-2026-0114. Prior Step2 holds do not create a staging engineering prohibition; customer/institutional adoption and production remain held.",
+      "liveDataResetAuthorized": false,
+      "productionAuthorized": false
+    },
+    "sourceTraceLimitation": {
+      "historicalTrace": "evidence/ue-v2-step1-qualification-20261117/s1-a02-a05-a06-evidence-trace-v1.json",
+      "historicalRow": "UE-OMIT-A11Y-BILINGUAL",
+      "finding": "The shared-base-action structural trace reaches only NOT_IMPLEMENTED training guides through O12. It is not proof that core accessibility/bilingual code is absent. Training-guide publication is not falsely completed.",
+      "directCoreEvidence": [
+        "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.ts",
+        "apps/union-eyes/lib/__tests__/i18n-bilingual-completeness.test.ts",
+        "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json"
+      ],
+      "limits": "Current CI scans WCAG 2.0/2.1 A/AA and exercised EN/FR core browser states; full named WCAG 2.2 AA and fresh deployed base-state qualification are not inferred.",
+      "status": "DIRECT_SOURCE_COMPONENT_TRACE_RECORDED_QUALIFICATION_OPEN"
     }
   },
   "currentMergedApplicationSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
@@ -11604,5 +11653,11 @@
     }
   ],
   "currentDeployedWorkflowProvenance": "Prior live application rollout workflow SHA not inferred from the later failed rollout; failed candidate rollout used 6bba9465f9c99ca7559a24c19f5a11c9e41c353c.",
-  "lastReconciledAt": "2026-11-22T20:02:49.387835+00:00"
+  "lastReconciledAt": "2026-11-22T20:02:49.387835+00:00",
+  "currentCandidateStagingDecision": {
+    "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+    "decision": "STAGING_NO_GO_FULL_BASE_QUALIFICATION_OPEN",
+    "previousAcceptedSubsetDecisionRemainsHistorical": true,
+    "noAcceptedPriorEvidenceInherited": true
+  }
 }

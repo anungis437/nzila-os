@@ -1,0 +1,232 @@
+{
+  "recordedAt": "2026-11-22T22:03:36.005220+00:00",
+  "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+  "mainAdmissionMergeSha": "2b630d4876ddf5ab76753a98556ac29b89f43d01",
+  "pullRequest": 1279,
+  "pullRequestUrl": "https://github.com/anungis437/nzila-os/pull/1279",
+  "requiredTrustedContexts": 19,
+  "requiredTrustedChecks": [
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370619866",
+      "name": "Merge Authority / Ops Documentation",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370617897",
+      "name": "Merge Authority / IaC Security",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370614127",
+      "name": "Merge Authority / Hash Chain Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370615989",
+      "name": "Merge Authority / Operating Layer",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370612177",
+      "name": "Merge Authority / Governance Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370610460",
+      "name": "Merge Authority / Repository Inventory",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370608831",
+      "name": "Merge Authority / Architectural Contracts",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370605064",
+      "name": "Merge Authority / Migration Chain",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370607111",
+      "name": "Merge Authority / Affected Build",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370601047",
+      "name": "Merge Authority / Schema Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370602741",
+      "name": "Merge Authority / PostgreSQL RLS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370599050",
+      "name": "Merge Authority / Unit Tests",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137370596687",
+      "name": "Merge Authority / Lint & Typecheck",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137360094601",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137360092888",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137360090864",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45071422780/job/137359007998",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45071422780/job/137359007999",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45071422780/job/137359007751",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    }
+  ],
+  "registeredChecks": {
+    "total": 133,
+    "byConclusion": {
+      "SKIPPED": 11,
+      "SUCCESS": 122
+    }
+  },
+  "localRequiredCommands": {
+    "status": "PASS",
+    "commands": [
+      "pnpm lint",
+      "pnpm typecheck",
+      "pnpm test:fast",
+      "pnpm validate:docs",
+      "pnpm governance:audit"
+    ],
+    "assertionStatuses": {
+      "passed": 41236,
+      "failed": 0,
+      "skipped": 1616,
+      "pending": 13
+    },
+    "conditionalPendingVariant": "13 semantic-search cases require a vector-column schema variant; they remain unexecuted in the canonical loopback template.",
+    "earlierFailuresAndInterruptedRunRetained": true
+  },
+  "componentQualification": {
+    "sourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+    "status": "OBSERVED_PASSED_SOURCE_COMPONENTS_NOT_FINAL_RELEASE_ACCEPTANCE",
+    "nativeKernel": {
+      "runId": "45071422838",
+      "postgresMajor": 16,
+      "files": 25,
+      "passed": 470,
+      "failed": 0,
+      "skipped": 0
+    },
+    "runtimeSecurityMatrix": {
+      "runId": "45071811721",
+      "passed": 363,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browserAndLoad": {
+      "runId": "45071422901",
+      "profiles": [
+        {
+          "id": "desktop-en",
+          "passedChecks": 11
+        },
+        {
+          "id": "desktop-fr",
+          "passedChecks": 11
+        },
+        {
+          "id": "mobile-en",
+          "passedChecks": 11
+        },
+        {
+          "id": "mobile-fr",
+          "passedChecks": 11
+        }
+      ],
+      "loadProfile": {
+        "warmupSeconds": 10,
+        "warmupRequestsPerSecond": 5,
+        "stages": [
+          {
+            "concurrency": 1,
+            "durationSeconds": 60,
+            "requestsPerSecond": 5
+          },
+          {
+            "concurrency": 5,
+            "durationSeconds": 180,
+            "requestsPerSecond": 20
+          }
+        ],
+        "minimumScheduledThroughputRatio": 0.95,
+        "p95Ms": 500,
+        "p99Ms": 1500,
+        "errorRate": 0,
+        "maxRequests": 10000
+      },
+      "stageResults": [
+        {
+          "concurrency": 1,
+          "requests": 300,
+          "scheduledRequests": 300,
+          "errors": 0,
+          "p95Ms": 71.07336099998793,
+          "p99Ms": 73.79171999997925,
+          "passed": true
+        },
+        {
+          "concurrency": 5,
+          "requests": 3599,
+          "scheduledRequests": 3600,
+          "errors": 0,
+          "p95Ms": 71.91445099998964,
+          "p99Ms": 93.7670930000022,
+          "passed": true
+        }
+      ],
+      "rawCliExitCode": 1,
+      "globalAcceptanceStatus": "HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN"
+    },
+    "actualStagingAcceptance": false,
+    "productionAuthorized": false,
+    "personaScope": "Seven existing provider navigation profiles remain only a subset of 35 stakeholder families, 34 required role boundaries and 16 required lifecycle stages."
+  },
+  "reviewAttribution": "Codex engineering/security review under standing sole-founder delegation; anungis and anungis437 are one founder, not independent human reviewers.",
+  "imageBuild": {
+    "runId": "45075259257",
+    "url": "https://github.com/anungis437/nzila-os/actions/runs/45075259257",
+    "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+    "workflowSourceSha": "2b630d4876ddf5ab76753a98556ac29b89f43d01",
+    "status": "SUCCESS",
+    "releaseManifest": "release-manifest-f3aad7ff.json",
+    "appImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:39bad81ecdbda6618d238dd9c308c3672bc19568bf3ec3d022550131f4fdb1ee",
+    "createdAt": "2026-11-22T22:14:15.300Z"
+  },
+  "schemaPlanDigest": "4a6f7127801d1dd1eb1e57ea370805326ff6764978c97c9de277dceda9c4f908",
+  "liveServingSourceAtThisRecord": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "stagingDataUpgradeExecuted": false,
+  "fullPersonaAcceptance": false,
+  "fullBaseReleaseAcceptance": false,
+  "productionAuthorized": false
+}

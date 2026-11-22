@@ -17,7 +17,7 @@
   "approval_status": "APPROVED",
   "implementation_window_start": "2026-11-10T00:00:00Z",
   "implementation_window_end": "2026-11-23T03:00:00Z",
-  "rollback_plan": "For the data-preserving forward upgrade, a failure before commit rolls back the entire transaction and verifies the original catalog; all original rows, sequences and migration/bootstrap history must remain unchanged. After commit, CCC cannot admit the upgraded schema: preserve the upgraded database and recover forward to the qualified 57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3 image through readiness/version-gated staging cutover or the existing protected staging rollout. Do not route to a schema-incompatible old image, reverse schema, reset data or touch production. For other staging changes, a prior digest/revision can be restored only after its schema compatibility is proven. Retain all failure and recovery evidence.",
+  "rollback_plan": "For the data-preserving forward upgrade, a failure before commit rolls back the entire transaction and verifies the original catalog; all original rows, sequences and migration/bootstrap history must remain unchanged. After commit, CCC cannot admit the upgraded schema: preserve the upgraded database and recover forward to the qualified f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c image through readiness/version-gated staging cutover or the existing protected staging rollout. Do not route to a schema-incompatible old image, reverse schema, reset data or touch production. For other staging changes, a prior digest/revision can be restored only after its schema compatibility is proven. Retain all failure and recovery evidence.",
   "test_evidence_refs": [
     "https://github.com/anungis437/nzila-os/pull/1137",
     "https://github.com/anungis437/nzila-os/pull/1155",
@@ -201,7 +201,12 @@
     "https://github.com/anungis437/nzila-os/pull/1269",
     "https://github.com/anungis437/nzila-os/pull/1278",
     "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/local-managed-preservation-proof.json",
-    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/old-release-forward-compatibility.json"
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/old-release-forward-compatibility.json",
+    "https://github.com/anungis437/nzila-os/pull/1279",
+    "https://github.com/anungis437/nzila-os/actions/runs/45075259257",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/release-manifest-f3aad7ff.json",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json"
   ],
   "linked_prs": [
     "1137",
@@ -267,7 +272,9 @@
     "1252",
     "1256",
     "1258",
-    "1269"
+    "1269",
+    "1278",
+    "1279"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -317,11 +324,13 @@
     "7d939bf5399ef768cc71a837730a6ff143d079d1",
     "41dba402dd53fec280091f11f46a99077dd91465",
     "cccfc8c311a1017f80241bf089c00ef0c6828751",
-    "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3"
+    "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+    "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+    "2b630d4876ddf5ab76753a98556ac29b89f43d01"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-21T21:09:50.968385+00:00",
+  "updated_at": "2026-11-22T22:19:33.533903+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -330,7 +339,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+    "candidate_sha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true
