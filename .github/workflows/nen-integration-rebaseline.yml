@@ -31,6 +31,21 @@ jobs:
           persist-credentials: true
       - uses: ./.github/actions/setup-monorepo
 
+      - name: Install the hash-pinned native Gitleaks pre-commit scanner
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gitleaks_8.30.1_linux_x64.tar.gz"
+          curl --fail --location --retry 3 --retry-delay 2 \
+            'https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz' \
+            --output "$archive"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/nen-bin"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/nen-bin" gitleaks
+          chmod +x "$RUNNER_TEMP/nen-bin/gitleaks"
+          echo "$RUNNER_TEMP/nen-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/nen-bin/gitleaks" version
+
       - name: Save the committed source-plan baseline
         shell: bash
         run: cp docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json "$RUNNER_TEMP/nen-v2-plan-before.json"
@@ -60,7 +75,8 @@ jobs:
         run: |
           set -euo pipefail
           pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test
-          pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test --check
+          # Determinism already proven above; verify committed bytes without repeating it.
+          pnpm exec tsx scripts/bootstrap-v2/plan.ts --check
 
       - name: Refuse any change beyond the monorepo lock commitment
         shell: bash
