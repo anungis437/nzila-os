@@ -1,0 +1,113 @@
+name: NEN Integration Rebaseline (feature branch only)
+
+# One-time, source-bound repair of the NEN lockfile's downstream provenance.
+# Never runs on main. Does not weaken any Union Eyes validation gate.
+on:
+  push:
+    branches:
+      - feat/nen-black-enterprise-foundation
+    paths:
+      - .github/workflows/nen-integration-rebaseline.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nen-integration-rebaseline-feature
+  cancel-in-progress: false
+
+jobs:
+  rebaseline:
+    if: github.ref == 'refs/heads/feat/nen-black-enterprise-foundation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      UE_V2_PYTHON_IMAGE: python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: feat/nen-black-enterprise-foundation
+          persist-credentials: true
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Save the committed source-plan baseline
+        shell: bash
+        run: cp docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json "$RUNNER_TEMP/nen-v2-plan-before.json"
+
+      - name: Build the exact hash-locked V2 wheelhouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheelhouse="$RUNNER_TEMP/ue-v2-wheelhouse"
+          mkdir -p "$wheelhouse"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$wheelhouse:/wheels" \
+            "$UE_V2_PYTHON_IMAGE" \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+              --require-hashes --no-deps --only-binary=:all: \
+              -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$wheelhouse"/*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$wheelhouse" >> "$GITHUB_ENV"
+
+      - name: Generate source plan deterministically from the current sources
+        working-directory: apps/union-eyes
+        shell: bash
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test
+          pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test --check
+
+      - name: Refuse any change beyond the monorepo lock commitment
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          const crypto = require('node:crypto');
+          const path = 'docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json';
+          const oldPlan = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/nen-v2-plan-before.json', 'utf8'));
+          const newPlan = JSON.parse(fs.readFileSync(path, 'utf8'));
+          assert.ok(oldPlan.sourceCommitments?.['pnpm-lock.yaml'], 'Missing prior lock commitment');
+          const digest = crypto.createHash('sha256').update(fs.readFileSync('pnpm-lock.yaml','utf8')).digest('hex');
+          assert.equal(newPlan.sourceCommitments?.['pnpm-lock.yaml'], digest, 'New source commitment does not match locked bytes');
+          assert.notEqual(oldPlan.sourceCommitments['pnpm-lock.yaml'], digest, 'Unexpected unchanged lock commitment');
+          const expected = JSON.parse(JSON.stringify(oldPlan));
+          expected.sourceCommitments['pnpm-lock.yaml'] = digest;
+          assert.deepStrictEqual(newPlan, expected, 'Source plan changed beyond the NEN dependency lock digest');
+          console.log('PASS: only pnpm-lock.yaml source commitment changed');
+          NODE
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test "$(git diff --name-only)" = "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json"
+
+      - name: Commit the governed source-plan rebaseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json
+          git commit -m 'chore(nen): rebaseline UE V2 source commitment for NEN lock change'
+          git push origin HEAD:refs/heads/feat/nen-black-enterprise-foundation
+
+      - name: Regenerate registry-backed license evidence for the changed lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/generate-sbom.ts --refresh-metadata
+          pnpm exec tsx scripts/generate-sbom.ts
+          test "$(git diff --name-only)" = "ops/security/npm-package-metadata.json"
+          test -s ops/security/sbom.json
+
+      - name: Commit source-verified SBOM metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add ops/security/npm-package-metadata.json
+          git commit -m 'chore(nen): refresh SBOM registry evidence for NEN lock change'
+          git push origin HEAD:refs/heads/feat/nen-black-enterprise-foundation
