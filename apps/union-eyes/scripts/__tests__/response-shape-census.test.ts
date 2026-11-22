@@ -10,7 +10,7 @@ import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
 import { extractFromSource } from '../lib/frontend-census/client-calls'
 import { readsOfRequest } from '../lib/frontend-census/response-reads'
-import { RouteResponseReader, type Shape } from '../lib/frontend-census/route-response'
+import { RouteResponseReader, objectOf, type Shape } from '../lib/frontend-census/route-response'
 import { judgeRead, runCensus } from '../runtime/response-shape-census'
 
 const describeShape = (shape: Shape): unknown => {
@@ -25,6 +25,27 @@ const shapes = (code: string, method = 'GET') => {
 }
 
 const answer = (code: string, method = 'GET') => describeShape(shapes(code, method) ?? null) as { keys: Record<string, unknown>; open: boolean } | null
+
+describe('the containment wrapper success contract', () => {
+  it('follows the original CRUD method and removes imported/spread withheld columns', () => {
+    const files: Record<string, string> = {
+      'app/api/x/route.ts': `import { WITHHELD } from './projection'
+        const factory = crudRoutes({table: records,itemRoute:true,omitFromResponse:[...WITHHELD]})
+        const {GET} = containedStorageHandlers('records',{GET:factory.GET})
+        export {GET}`,
+      'projection.ts': `const PRIVATE=['secret'] as const; export const WITHHELD=[...PRIVATE] as const`,
+    }
+    const reader = new RouteResponseReader({read:name=>files[name]??null,resolve:(_from,specifier)=>specifier==='./projection'?'projection.ts':null},
+      {shapeOfNode:()=>null,rowShapeOfTable:()=>objectOf({id:null,title:null,secret:null})})
+    expect(describeShape(reader.shapesOf('app/api/x/route.ts').get('GET')??null)).toEqual({keys:{success:null,data:{keys:{data:{keys:{id:null,title:null},open:false}},open:false},timestamp:null},open:false})
+  })
+
+  it('keeps a row unknown when its withheld columns cannot be resolved', () => {
+    const reader = new RouteResponseReader({read:()=>`const {GET}=crudRoutes({table:records,itemRoute:true,omitFromResponse:runtimeColumns});export {GET}`,resolve:()=>null},
+      {shapeOfNode:()=>null,rowShapeOfTable:()=>objectOf({id:null,secret:null})})
+    expect(describeShape(reader.shapesOf('app/api/x/route.ts').get('GET')??null)).toEqual({keys:{success:null,data:{keys:{data:null},open:false},timestamp:null},open:false})
+  })
+})
 
 describe('reading the answer of a route', () => {
   it('wraps what a withApi handler returns under data, as the framework does', () => {

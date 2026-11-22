@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signInWithEntra } from '@nzila/platform-auth/entra/client';
 import { defaultLocale, locales } from '@/i18n/config';
-import { CANONICAL_ORGANIZATION_AUTHORITY } from '@/lib/auth/organization-authority';
+import { organizationChoicesResponse, organizationSwitchResponse } from '@/lib/client/organization-selection-response';
 import { getJson, localeOfPath, postJson, NETWORK_MESSAGE, UNEXPECTED_MESSAGE } from './auth-client';
 
 type Mode = 'password' | 'magic-link' | 'sso';
@@ -49,22 +49,19 @@ type LoginFormProps = {
 type OrganizationChoice = { id: string; name: string; slug: string };
 
 function offeredOrganizations(data: Record<string, unknown>): OrganizationChoice[] | null {
-  if (data.organizationAuthority !== CANONICAL_ORGANIZATION_AUTHORITY ||
-      !Array.isArray(data.organizations) || !Array.isArray(data.memberships) ||
-      !(data.activeOrganizationId === null || typeof data.activeOrganizationId === 'string')) return null;
+  const parsed = organizationChoicesResponse.safeParse(data);
+  if (!parsed.success) return null;
+  const answer = parsed.data;
   const membershipIds = new Set<string>();
-  for (const membership of data.memberships) {
-    if (!membership || typeof membership !== 'object' || typeof membership.organizationId !== 'string') return null;
+  for (const membership of answer.memberships) {
     membershipIds.add(membership.organizationId);
   }
   const choices: OrganizationChoice[] = [];
-  for (const organization of data.organizations) {
-    if (!organization || typeof organization !== 'object' ||
-        typeof organization.id !== 'string' || typeof organization.name !== 'string' || typeof organization.slug !== 'string' ||
-        !membershipIds.has(organization.id) || choices.some((choice) => choice.id === organization.id)) return null;
+  for (const organization of answer.organizations) {
+    if (!membershipIds.has(organization.id) || choices.some((choice) => choice.id === organization.id)) return null;
     choices.push({ id: organization.id, name: organization.name, slug: organization.slug });
   }
-  if (typeof data.activeOrganizationId === 'string' && !choices.some((choice) => choice.id === data.activeOrganizationId)) return null;
+  if (answer.activeOrganizationId !== null && !choices.some((choice) => choice.id === answer.activeOrganizationId)) return null;
   return choices;
 }
 
@@ -103,10 +100,9 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
   async function bindOrganization(id: string) {
     const answer = await postJson('/api/organizations/switch', { organizationId: id }, t('organizationSelectionFailed'));
     if (!answer.ok) { setError(localizeMessage(answer.message)); return; }
-    const selected = answer.data.organization;
-    if (answer.data.success !== true || answer.data.organizationAuthority !== CANONICAL_ORGANIZATION_AUTHORITY ||
-        answer.data.activeOrganizationId !== id || !selected || typeof selected !== 'object' ||
-        !('id' in selected) || selected.id !== id) { setError(t('unexpectedError')); return; }
+    const selected = organizationSwitchResponse.safeParse(answer.data);
+    if (!selected.success || selected.data.activeOrganizationId !== id ||
+        selected.data.organization.id !== id) { setError(t('unexpectedError')); return; }
     router.push(postLoginPath);
   }
 
