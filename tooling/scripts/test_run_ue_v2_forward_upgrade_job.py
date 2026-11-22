@@ -1,6 +1,7 @@
 import importlib.util
 import contextlib
 import io
+import copy
 import json
 import pathlib
 import subprocess
@@ -15,6 +16,26 @@ spec.loader.exec_module(runner)
 
 
 class ForwardJobControls(unittest.TestCase):
+    def test_apply_requires_successful_same_source_rehearsal_rollback_cleanup_and_digests(self):
+        source, plan, before, run_id = "a" * 40, "b" * 64, "c" * 64, "123"
+        run = {"id": 123, "path": ".github/workflows/ue-v2-staging-forward-upgrade.yml", "head_branch": "main",
+               "head_sha": source, "event": "workflow_dispatch", "status": "completed", "conclusion": "success",
+               "repository": {"full_name": "anungis437/nzila-os"}}
+        receipt = {"operatorSourceSha": source, "applicationSourceSha": runner.APPLICATION_SOURCE, "operation": "rehearse",
+                   "executionRunId": run_id, "status": "PASS_STAGING_TRANSACTIONAL_REHEARSAL", "changesCommitted": False,
+                   "fullRollbackVerified": True, "temporaryPrivilegesRemoved": True, "productionDeployment": False,
+                   "planDigest": plan, "beforeDigest": before}
+        control = {"operatorSourceSha": source, "applicationSourceSha": runner.APPLICATION_SOURCE, "operation": "rehearse",
+                   "runId": run_id, "status": "PASS", "executionStatus": "Succeeded", "ownedJobAndSecretRemoved": True}
+        runner.validate_rehearsal(run, receipt, control, source, run_id, plan, before)
+        for index, key, value in [(0, "head_sha", "d" * 40), (0, "head_branch", "another"), (0, "conclusion", "failure"),
+                                  (0, "path", ".github/workflows/unrelated.yml"), (1, "operation", "preflight"),
+                                  (1, "changesCommitted", True), (1, "fullRollbackVerified", False), (1, "planDigest", "d" * 64),
+                                  (1, "beforeDigest", "d" * 64), (2, "ownedJobAndSecretRemoved", False), (2, "executionStatus", "Failed")]:
+            records = copy.deepcopy([run, receipt, control]); records[index][key] = value
+            with self.subTest(index=index, key=key), self.assertRaises(AssertionError):
+                runner.validate_rehearsal(*records, source, run_id, plan, before)
+
     def test_native_job_schema_uses_secret_references_and_pinned_staging_boundaries(self):
         spec = runner.job_spec("qualified-image", "synthetic-private-value", "a" * 40, "rehearse", "123", "ue-v2-forward-123")
         props = spec["properties"]

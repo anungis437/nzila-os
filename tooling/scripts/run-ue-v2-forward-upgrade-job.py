@@ -102,6 +102,50 @@ def job_spec(image, password, source, operation, run_id, name):
     }
 
 
+def validate_rehearsal(run, receipt, control, source, rehearsal_id, plan, before):
+    assert str(run.get("id")) == rehearsal_id, "REHEARSAL_RUN_ID_REFUSED"
+    assert run.get("path") == ".github/workflows/ue-v2-staging-forward-upgrade.yml", "REHEARSAL_WORKFLOW_REFUSED"
+    assert run.get("head_branch") == "main" and run.get("head_sha") == source, "REHEARSAL_SOURCE_REFUSED"
+    assert run.get("event") == "workflow_dispatch" and run.get("status") == "completed" and run.get("conclusion") == "success", "REHEARSAL_RUN_NOT_SUCCESSFUL"
+    assert run.get("repository", {}).get("full_name") == "anungis437/nzila-os", "REHEARSAL_REPOSITORY_REFUSED"
+    for record in [receipt, control]:
+        assert record.get("operatorSourceSha") == source and record.get("applicationSourceSha") == APPLICATION_SOURCE, "REHEARSAL_ARTIFACT_SOURCE_REFUSED"
+        assert record.get("operation") == "rehearse", "REHEARSAL_OPERATION_REFUSED"
+    assert receipt.get("executionRunId") == rehearsal_id and control.get("runId") == rehearsal_id, "REHEARSAL_ID_REFUSED"
+    assert receipt.get("status") == "PASS_STAGING_TRANSACTIONAL_REHEARSAL", "REHEARSAL_RECEIPT_NOT_SUCCESSFUL"
+    assert receipt.get("changesCommitted") is False and receipt.get("fullRollbackVerified") is True, "REHEARSAL_ROLLBACK_NOT_PROVEN"
+    assert receipt.get("temporaryPrivilegesRemoved") is True and receipt.get("productionDeployment") is False
+    assert control.get("status") == "PASS" and control.get("executionStatus") == "Succeeded" and control.get("ownedJobAndSecretRemoved") is True, "REHEARSAL_CLEANUP_NOT_PROVEN"
+    assert receipt.get("planDigest") == plan and receipt.get("beforeDigest") == before, "REHEARSAL_DIGEST_BINDING_REFUSED"
+
+
+def require_rehearsal(source):
+    rehearsal_id = os.environ.get("REHEARSAL_RUN_ID", "")
+    assert re.fullmatch(r"[0-9]+", rehearsal_id), "SUCCESSFUL_REHEARSAL_RUN_ID_REQUIRED"
+    for key in ["EXPECTED_PLAN", "EXPECTED_BEFORE"]:
+        assert re.fullmatch(r"[a-f0-9]{64}", os.environ.get(key, "")), "REHEARSAL_DIGEST_REQUIRED"
+    def gh(*args):
+        try:
+            result = subprocess.run(["gh", *args], capture_output=True, text=True, timeout=60)
+        except subprocess.TimeoutExpired:
+            raise AzureFailure("Rehearsal evidence retrieval timed out") from None
+        if result.returncode:
+            raise AzureFailure("Rehearsal GitHub evidence retrieval failed")
+        return result.stdout
+    try:
+        run = json.loads(gh("api", f"repos/anungis437/nzila-os/actions/runs/{rehearsal_id}"))
+        with tempfile.TemporaryDirectory(prefix="ue-rehearsal-receipt-") as private:
+            gh("run", "download", rehearsal_id, "--repo", "anungis437/nzila-os",
+               "--name", f"ue-staging-forward-upgrade-{rehearsal_id}", "--dir", private)
+            receipt = json.loads((pathlib.Path(private) / "operation-receipt.json").read_text())
+            control = json.loads((pathlib.Path(private) / "job-control.json").read_text())
+            validate_rehearsal(run, receipt, control, source, rehearsal_id,
+                               os.environ["EXPECTED_PLAN"], os.environ["EXPECTED_BEFORE"])
+    except (ValueError, TypeError, AttributeError, OSError):
+        raise AzureFailure("Rehearsal evidence is unreadable") from None
+    return rehearsal_id
+
+
 def main():
     assert os.environ.get("GITHUB_REF") == "refs/heads/main", "MAIN_ONLY"
     assert os.environ.get("GITHUB_REPOSITORY") == "anungis437/nzila-os", "REPOSITORY_REFUSED"
@@ -114,6 +158,7 @@ def main():
     assert operation in ("preflight", "rehearse", "apply")
     assert re.fullmatch(r"nzilaventuresacr\.azurecr\.io/nzila-os-union-eyes-v2@sha256:[a-f0-9]{64}", image)
     assert password, "PROTECTED_STAGING_SECRET_MISSING"
+    rehearsal_id = require_rehearsal(source) if operation == "apply" else None
     assert azure("account", "show", "--query", "id", "-o", "tsv") == SUBSCRIPTION
     name = f"ue-v2-forward-{run_id}"
     assert len(name) < 32
@@ -121,6 +166,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     record = {"status": "FAIL", "runId": run_id, "operatorSourceSha": source, "applicationSourceSha": APPLICATION_SOURCE,
               "operation": operation, "image": image, "job": name, "productionDeployment": False}
+    if rehearsal_id:
+        record["rehearsalRunId"] = rehearsal_id
     receipt = None
     try:
         # JSON is a YAML subset accepted by the existing Azure CLI. The private

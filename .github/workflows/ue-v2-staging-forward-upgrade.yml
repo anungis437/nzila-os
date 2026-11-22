@@ -22,6 +22,9 @@ on:
       expected_before_digest:
         description: Successful staging rehearsal preimage digest (apply only)
         type: string
+      rehearsal_run_id:
+        description: Successful main workflow rehearsal run with rollback and cleanup receipts (apply only)
+        type: string
 
 permissions:
   contents: read
@@ -175,6 +178,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      actions: read
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
@@ -184,6 +188,7 @@ jobs:
           OPERATION: ${{ inputs.operation }}
           EXPECTED_PLAN: ${{ inputs.expected_plan_digest }}
           EXPECTED_BEFORE: ${{ inputs.expected_before_digest }}
+          REHEARSAL_RUN_ID: ${{ inputs.rehearsal_run_id }}
         run: |
           node - <<'NODE'
           const fs = require('node:fs'), assert = require('node:assert/strict')
@@ -192,7 +197,10 @@ jobs:
           assert.equal(c.approval_status, 'APPROVED')
           assert(Date.now() >= Date.parse(c.implementation_window_start) && Date.now() < Date.parse(c.implementation_window_end))
           assert(['preflight','rehearse','apply'].includes(process.env.OPERATION))
-          if (process.env.OPERATION === 'apply') for (const n of ['EXPECTED_PLAN','EXPECTED_BEFORE']) assert(/^[a-f0-9]{64}$/.test(process.env[n] || ''))
+          if (process.env.OPERATION === 'apply') {
+            for (const n of ['EXPECTED_PLAN','EXPECTED_BEFORE']) assert(/^[a-f0-9]{64}$/.test(process.env[n] || ''))
+            assert(/^[0-9]+$/.test(process.env.REHEARSAL_RUN_ID || ''))
+          }
           NODE
       - uses: azure/login@v2
         with:
@@ -205,6 +213,8 @@ jobs:
           OPERATION: ${{ inputs.operation }}
           EXPECTED_PLAN: ${{ inputs.expected_plan_digest }}
           EXPECTED_BEFORE: ${{ inputs.expected_before_digest }}
+          REHEARSAL_RUN_ID: ${{ inputs.rehearsal_run_id }}
+          GH_TOKEN: ${{ github.token }}
           PG_ADMIN_PASSWORD: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD }}
         run: |
           python3 tooling/scripts/run-ue-v2-forward-upgrade-job.py
