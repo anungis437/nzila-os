@@ -79,6 +79,36 @@ jobs:
           assert.notEqual(oldPlan.sourceCommitments['pnpm-lock.yaml'], digest, 'Unexpected unchanged lock commitment');
           const expected = JSON.parse(JSON.stringify(oldPlan));
           expected.sourceCommitments['pnpm-lock.yaml'] = digest;
+          const sourcePath = 'apps/union-eyes/scripts/bootstrap-v2/source.ts';
+          const sourceDigest = crypto.createHash('sha256').update(fs.readFileSync(sourcePath, 'utf8')).digest('hex');
+          assert.ok(expected.sourceCommitments[sourcePath], 'Missing canonical generator commitment');
+          expected.sourceCommitments[sourcePath] = sourceDigest;
+          // All 252 diagnosed generated-field differences came from the
+          // unordered source-digest-map fingerprint. Permit ONLY the exact
+          // canonical digest on unchanged, source-unowned SQL statements.
+          const oldMapDigest = crypto.createHash('sha256')
+            .update(JSON.stringify(oldPlan.currentModels.sourceDigests)).digest('hex');
+          const canonicalMapDigest = crypto.createHash('sha256').update(JSON.stringify(
+            Object.entries(newPlan.currentModels.sourceDigests)
+              .sort(([a],[b]) => a < b ? -1 : a > b ? 1 : 0)
+          )).digest('hex');
+          let canonicalizedStatements = 0;
+          for (let i = 0; i < oldPlan.statements.length; i++) {
+            const oldStatement = oldPlan.statements[i];
+            const newStatement = newPlan.statements[i];
+            if (oldStatement.sourceDigest === newStatement?.sourceDigest) continue;
+            assert.equal(oldStatement.canonicalId, newStatement?.canonicalId, 'Statement identity changed');
+            assert.equal(oldStatement.sql, newStatement?.sql, 'Executable SQL changed');
+            assert.equal(oldStatement.source, newStatement?.source, 'Statement source changed');
+            assert.equal(oldStatement.sourceDigest, oldMapDigest, 'Unexpected old statement source digest');
+            assert.equal(newStatement.sourceDigest, canonicalMapDigest, 'Unexpected new statement source digest');
+            assert.ok(oldStatement.canonicalId.startsWith('CURRENT_ENUM:') ||
+              oldStatement.canonicalId.startsWith('DJANGO_CURRENT:'),
+              'Unexpected synthetic statement changed');
+            expected.statements[i].sourceDigest = canonicalMapDigest;
+            canonicalizedStatements++;
+          }
+          console.log('Canonicalized derived statement source digests: ' + canonicalizedStatements);
           const differences = [];
           function compare(a, b, location = '') {
             if (Object.is(a, b)) return;
