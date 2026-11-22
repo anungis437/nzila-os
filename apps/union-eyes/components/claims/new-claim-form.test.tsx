@@ -55,6 +55,15 @@ afterEach(() => {
 })
 
 describe('NewClaimForm', () => {
+  it.each([17, { id: 'claim-9' }])('rejects a non-string case receipt before tracking or navigating: %j', async (claimId) => {
+    intakeAnswers(filed({ success: true, claimId }))
+    const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    fillAndSubmit(container)
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'Case was created but no case ID was returned' })))
+    expect(h.trackCaseCreated).not.toHaveBeenCalled()
+    expect(h.push).not.toHaveBeenCalled()
+  })
+
   it('never requests the voice notice for a member, who is not offered voice, and opens submission once hydrated', async () => {
     intakeAnswers({ ok: true, status: 200, json: async () => ({}) })
     const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
