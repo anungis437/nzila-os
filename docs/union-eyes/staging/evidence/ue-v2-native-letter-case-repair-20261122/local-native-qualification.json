@@ -97,5 +97,13 @@
   "liveDataModified": false,
   "stagingDeploymentPerformed": false,
   "stagingGo": false,
-  "productionAuthorized": false
+  "productionAuthorized": false,
+  "observedSourceSha": "a9c47099242c13e23efc72562ca63f3a6cabcc8b",
+  "sourceInputsScope": "These digests describe the tested runtime snapshot committed as A9. Later packaging corrections and final qualification require their own exact-head CI receipts.",
+  "packagingFollowup": {
+    "reason": "Exact-head A9 CI refused the stale current-catalog source-plan fingerprint and literal credentialed test URI.",
+    "catalogFix": "Regenerate with tooling/scripts/write-union-eyes-current-catalog.ts; only currentSecurity.sourcePlanDigest changes, preserving all functions, triggers, policies and privilege declarations.",
+    "fixtureConnectionFix": "Construct the disposable connection in the test process from runtime environment values; retain the existing secrets contract without exclusions.",
+    "stagingAcceptanceClaimed": false
+  }
 }
