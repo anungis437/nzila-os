@@ -904,13 +904,23 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
       const file = `${directory}/${name}`
       commitments[file] = hash(readFileSync(path.join(root, ...file.split('/')), 'utf8'))
     }
+  // Synthetic, source-unowned statements must depend on the *set* of model
+  // source commitments, not Python dictionary insertion order. Sorting by
+  // Unicode code unit is stable across hosts and independent of locale.
+  const canonicalModelSourceDigest = hash(
+    JSON.stringify(
+      Object.entries(currentModels.sourceDigests).sort(([left], [right]) =>
+        left < right ? -1 : left > right ? 1 : 0,
+      ),
+    ),
+  )
   const statements = currentModels.ddl.map((entry, index) => {
     const model = currentModels.models.find((value) => value.table === entry.owner)
     return {
       canonicalId: `DJANGO_CURRENT:${entry.owner}:${index}`,
       sql: entry.sql,
       source: model?.source ?? 'apps/union-eyes/scripts/bootstrap-v2/current_models.py',
-      sourceDigest: model?.sourceDigest ?? hash(JSON.stringify(currentModels.sourceDigests)),
+      sourceDigest: model?.sourceDigest ?? canonicalModelSourceDigest,
     }
   })
   for (const model of currentModels.models)
