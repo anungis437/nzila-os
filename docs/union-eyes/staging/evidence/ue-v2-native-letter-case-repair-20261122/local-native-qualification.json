@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-11-22T23:01:41.141199+00:00",
+  "status": "TARGETED_NATIVE_POSTGRES_PASS_FINAL_CANDIDATE_AND_STAGING_UNQUALIFIED",
+  "baseRepositorySha": "2b630d4876ddf5ab76753a98556ac29b89f43d01",
+  "sourceInputs": {
+    ".github/workflows/ue-bootstrap-v2-provenance.yml": "8c6a5dd0eb6ecd0cf82553a39c55e5f1c2ffe6706fa339f036cffbf5e9cb854d",
+    "apps/union-eyes/db/queries/__tests__/canonical-claim-writes.pglite.test.ts": "7ce94f9fce62bcac1bc2f75ad16cc237da42e5227ff938b14bdef112f0310afd",
+    "apps/union-eyes/db/queries/__tests__/claims-queries.test.ts": "cb4523cc61cc0907bf7e776fd717763705d6a374ec4faef1482de383349eacc8",
+    "apps/union-eyes/db/queries/claims-queries.ts": "f3223b7cce10ed27a4e67506187e63be54b953ec276e076998953abf43243809",
+    "apps/union-eyes/lib/authority/store/case-read-batch.ts": "3c58deb84548611d45fc77672df7db7bedec28901ca90c0a6b39ab56d0edd31c",
+    "apps/union-eyes/lib/authority/store/enforce.ts": "d17a95d2f04c4b4e6e94b46b8e56f1a1a06a1772cc5e2ffe96fcd696381286b5",
+    "apps/union-eyes/lib/authority/store/read-lock.ts": "c3d93bf686e8563020714c7a72c6f6b2918dd3f8d66df09e225c830ec514d133",
+    "apps/union-eyes/lib/correspondence/email-delivery.ts": "0fb99d0ccfcf3f85548e979d1318b66280dee17f0bf3f4250464991797859d9c",
+    "apps/union-eyes/scripts/bootstrap-v2/member-letter-delivery.native.test.ts": "7dc1c65fb82d9a87d4572457911625e2903bea75ae7e1ae10310c00a20a9c52b",
+    "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json": "43e954b9fd36cd91a83a1789c784a681e44c093eaea746ee52d67e6aa67bcca8"
+  },
+  "sourcePlan": {
+    "tables": 783,
+    "statements": 6326,
+    "changedStatementSql": 0,
+    "changedStatementMetadata": 252,
+    "repeatGenerationVerified": true,
+    "sourceFingerprintChanges": [
+      "lib/authority/store/case-read-batch.ts",
+      "lib/authority/store/enforce.ts",
+      "lib/authority/store/read-lock.ts"
+    ]
+  },
+  "nativeResult": {
+    "passed": 37,
+    "failed": 0,
+    "skippedOrPending": 0,
+    "testFiles": 3,
+    "resultSha256": "40e0450cce26c1de1f16995e6096eef26c01d7752046b5129d464924b47d3c07",
+    "environment": "DISPOSABLE_LOOPBACK_DOCKER_POSTGRES_16",
+    "testFilesSource": [
+      "apps/union-eyes/scripts/bootstrap-v2/member-letter-delivery.native.test.ts",
+      "apps/union-eyes/scripts/bootstrap-v2/daily-audit-seal-native.test.ts",
+      "apps/union-eyes/scripts/bootstrap-v2/audit-chain-native.test.ts"
+    ]
+  },
+  "otherObservedLocalChecks": {
+    "claimQueriesAndCanonicalWrites": 25,
+    "frontendContractCensus": 53,
+    "canonicalGrantCensus": 1,
+    "authorityAndFrontendFocused": 130,
+    "applicationTypecheck": {
+      "status": "PASS_BEFORE_FOUR_ADDITIONAL_NATIVE_TEST_CASES",
+      "finalExactHeadRepositoryTypecheck": "PENDING"
+    }
+  },
+  "measuredCaseReadQueries": {
+    "cases": 3,
+    "individual": 42,
+    "batched": 18,
+    "thresholdRelaxed": false
+  },
+  "rootCauseFamilies": [
+    {
+      "actions": [
+        "C08",
+        "C12",
+        "C22"
+      ],
+      "problem": "Count-based claim numbers collide during simultaneous creation and can collide with a surviving number after a gap.",
+      "repair": "Transaction advisory lock per organization and UTC date; allocate after the maximum matching existing suffix; preserve existing records and numbering format."
+    },
+    {
+      "actions": [
+        "C13",
+        "C16",
+        "C22"
+      ],
+      "problem": "The email transport directly reads tenant correspondence despite having no table grant.",
+      "repair": "Use the bounded database-issued context and immutable intent snapshot; preserve private table denials. Native controls verify live body/recipient/approval/signature mutation suppression and provider retry/audit rollback."
+    },
+    {
+      "actions": [
+        "O02",
+        "C22"
+      ],
+      "problem": "Collection projections redundantly reacquire an already locked resource set.",
+      "repair": "Opaque executor/actor/tenant/resource/transaction bound read scope; all facts, decisions, fresh clock and transaction checks retained. Forged, foreign, substituted-executor and cross-transaction scopes are refused."
+    }
+  ],
+  "fixtureCorrections": [
+    "Canonical creation audit in the same member transaction.",
+    "Assignment fixture uses a genuinely adopted synthetic rule, actual distinct canonical executive sessions, authenticated attribution and linked authority audit.",
+    "Synthetic recipient email verification and nonUUID subject session are explicit.",
+    "Revocation fixture retains authenticated attribution and linked audit."
+  ],
+  "qualificationLimits": [
+    "Fixture setup is privileged and synthetic; it does not establish an actual institution adoption or independent human approval.",
+    "Service/transaction logic uses real canonical PostgreSQL roles; provider, NAR and outer API/session seams are controlled fixtures, not real Entra or inbox proof.",
+    "The complete repository suite, new exact-head CI/build and actual staging acceptance are not established by these focused results."
+  ],
+  "liveDataModified": false,
+  "stagingDeploymentPerformed": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

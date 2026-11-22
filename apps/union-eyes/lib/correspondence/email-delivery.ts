@@ -162,12 +162,10 @@ async function claimEmail(now: Date): Promise<{ row:QueueRow; intent:Corresponde
       await record(tx,row,'review_required',{reason:'authority_capability_required'});return null
     }
     const context=await queuedCaseMailContext(drizzleExecutor(tx),{queueId:row.id,capability:intent.authorityCapability})
-    const [letter]=await tx.select().from(correspondence).where(and(eq(correspondence.id,intent.correspondenceId),eq(correspondence.organizationId,intent.organizationId)))
-    let unchanged=false
-    if(context.allowed && letter?.status==='signed') {
-      try { unchanged=(await signedEmailMaterial(tx,letter,key)).contentHash===intent.contentHash } catch { unchanged=false }
-    }
-    if(!context.allowed || !unchanged) {
+    // The bounded database verifier checks the current approval, signature
+    // metadata, content and recipients against the immutable minted snapshot.
+    // The transport consumes the sealed envelope without tenant-table access.
+    if(!context.allowed) {
       await tx.update(notificationQueue).set({status:'failed',errorMessage:'CORRESPONDENCE_AUTHORITY_OR_CONTENT_CHANGED',updatedAt:now}).where(and(eq(notificationQueue.id,row.id),eq(notificationQueue.organizationId,row.organizationId)))
       await record(tx,row,'suppressed',{reason:'authority_or_content_changed'});return null
     }
