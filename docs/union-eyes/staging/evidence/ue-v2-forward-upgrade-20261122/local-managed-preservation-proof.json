@@ -1,0 +1,46 @@
+{
+  "evidenceClass": "DISPOSABLE_LOCAL_ENGINEERING_PROOF_NOT_STAGING",
+  "recordedAt": "2026-11-22T19:51:00Z",
+  "qualificationSourceIsBaseCommit": true,
+  "uncommittedToolBytesBoundBySha256": true,
+  "status": "PASS_DISPOSABLE_MANAGED_FORWARD_UPGRADE",
+  "qualificationSourceSha": "52f61e7de4cc102619f2050e128951c43ab8b8ee",
+  "toolSources": {
+    "tooling/scripts/prove-ue-v2-forward-upgrade.cts": "0dc734944f4a438e91815d04d693ef890e14e9e276c58b1e8dac72f5583bd981",
+    "tooling/scripts/lib/ue-v2-forward-upgrade.ts": "352d90252e980b9f22daff7717b1208ea5ed5ee5a2912f6d4c9429fb1bf648a8",
+    "tooling/scripts/lib/ue-v2-forward-upgrade-runtime.ts": "7e98963889bd0b4882c79f45975f9418578b06f56a71733c0cad1bea5af2428f"
+  },
+  "image": "pgvector/pgvector:0.8.1-pg16@sha256:417eabe00c71238357315d66d024607c6b9a414be3a3ea401d442c5bcbf0c00d",
+  "source": "52f61e7de4cc102619f2050e128951c43ab8b8ee",
+  "originalSource": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "injectedFailureRollback": true,
+  "originalBootstrapReceiptPreserved": true,
+  "packagedAdmission": {
+    "ok": true,
+    "violations": []
+  },
+  "qualification": {
+    "phase": "RESTORE_OPEN",
+    "objects": 24928,
+    "retainedObjects": 7,
+    "referenceDigest": "26d822a3defe448c9fd8a1c9688217b11a5426c5c171dedc066bfbf840822406",
+    "actualDigest": "de1ac4299c0851cb6d9c77dd63d50ff5427c3cb9a0ff7bb6f42bde26b01370cd"
+  },
+  "originalTables": 779,
+  "originalRows": "6",
+  "originalDataDigest": "bf0ba1fbe38014c252326304eaef58030385654e9e9173db49ea400f76311a63",
+  "sequences": 20,
+  "sequenceDigest": "42024d3035c1da19be84ac90d0fe42bde18b72fac5d8ed7447307fa7d4cca3cc",
+  "statements": 8547,
+  "planDigest": "8a926aeefed838cf9e393c63212ca75b5a4998844b1dbc4e664a5069a27df8e0",
+  "temporaryPrivilegesRemoved": true,
+  "liveDataDeleted": false,
+  "finalQualification": {
+    "phase": "FINAL",
+    "objects": 24927,
+    "retainedObjects": 7,
+    "referenceDigest": "26d822a3defe448c9fd8a1c9688217b11a5426c5c171dedc066bfbf840822406",
+    "actualDigest": "020542b99a9641d6b8718c5bc3f43beefefeeff79e189ba8872ebaa487a93b8f"
+  },
+  "stagingAcceptance": false
+}

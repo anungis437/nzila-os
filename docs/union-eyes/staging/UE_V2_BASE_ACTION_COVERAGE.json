@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-step1-integrated-20261117",
-  "currentRepairRuntimeQualification": "STEP_1_ENGINEERING_OPEN_EXACT_CANDIDATE_PROOF_PENDING_STEP_2_HELD",
+  "currentRepairBranch": "fix/ue-staging-preserve-data-20261122",
+  "currentRepairRuntimeQualification": "MERGED_ENGINEERING_COMPONENTS_QUALIFIED_STAGING_STARTUP_BLOCKED_FULL_BASE_UNQUALIFIED",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -10024,11 +10024,10 @@
     "Automatic legal filing-date calculation and intake deadline email reminders remain absent, distinct from implemented staff deadline management"
   ],
   "nextExecution": [
-    "Finish staging binding CI and normal main admission for the source already merged in PR1252.",
-    "Complete exact-main-bound native qualification, immutable build, reviewed preview and authorized staging-only rollout.",
-    "Qualify repaired organization-admin/onboarding positive and negative actions on that exact deployment.",
-    "Qualify claim and formal-grievance automatic workload/expertise matching, loaded EN/FR phone controls and authenticated case reads.",
-    "Complete connected casework, document/evidence, leadership and required operational actions; reconcile the full base ledger from actual evidence."
+    "Qualify and admit the data-preserving forward upgrade; rehearse with rollback on staging before exact-plan-bound apply.",
+    "Prove original data and sequences preserved, temporary privileges removed, packaged catalog admission and exact application startup.",
+    "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
+    "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
   ],
   "proposedCandidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
   "sourceAdmission": {
@@ -11124,63 +11123,43 @@
     "currentlyServingWorkflowSha": "c3b7349260d3736860f4faef5b72c20c68d3ce63"
   },
   "currentStep1Execution": {
-    "branch": "fix/ue-step1-integrated-20261117",
-    "candidateSha": null,
-    "status": "ENGINEERING_QUALIFICATION_OPEN",
+    "branch": "fix/ue-staging-preserve-data-20261122",
+    "candidateSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+    "status": "MERGED_ENGINEERING_COMPONENTS_QUALIFIED_STAGING_STARTUP_BLOCKED",
     "step2Held": true,
     "promotionsPerformed": false,
     "legacyRuntimeFieldsAreHistoricalSnapshots": true,
     "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117",
     "sourceProofNeverInheritsPriorRuntimeAcceptance": true,
     "latestEngineeringObservation": {
-      "recordedAt": "2026-11-18T13:26:22.885958+00:00",
-      "state": "CONFIRMED_COMPONENT_CORRECTIONS_INTEGRATED_NATIVE_AND_FINAL_QUALIFICATION_OPEN",
-      "candidateSha": null,
-      "sourceBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
-      "currentWorkingTreeUncommitted": true,
-      "interimEvidence": [
-        "native-security-transition-v21.json",
-        "production-mjs-and-restricted-companions-v6.json",
-        "external-native-qualified-component-v2.json",
-        "fresh-native-runtime-diagnostic-v2.json",
-        "picomatch-wrapper-negation-remediation-v7.json",
-        "notification-recipient-storage-component-v1.json"
+      "recordedAt": "2026-11-22T19:45:00Z",
+      "candidateSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+      "exactPullRequestHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
+      "pullRequest": 1269,
+      "state": "MERGED_COMPONENT_PROOFS_VERIFIED_NOT_FULL_BASE_ACCEPTANCE",
+      "sourceAndEnvironmentEvidence": [
+        "https://github.com/anungis437/nzila-os/actions/runs/44946518604",
+        "https://github.com/anungis437/nzila-os/actions/runs/44946518155",
+        "https://github.com/anungis437/nzila-os/actions/runs/44946518327",
+        "https://github.com/anungis437/nzila-os/actions/runs/44946520802",
+        "https://github.com/anungis437/nzila-os/actions/runs/44946523411",
+        "https://github.com/anungis437/nzila-os/actions/runs/44949770898",
+        "https://github.com/anungis437/nzila-os/actions/runs/44962785190"
       ],
-      "evidencePathsRelativeTo": "evidence/ue-v2-step1-qualification-20261117",
       "confirmedObservations": {
-        "priorPlan18SecurityTransition": "4_NATIVE_PG15_PASS_ZERO_SKIP_SOURCE_UNCHANGED",
-        "priorPlan18ProductionEntrypoint": "TWO_ACTUAL_MJS_RUNS_AND7_RESTRICTED_SESSION_PROBES_PASS_APPLICATION_READY_FALSE",
-        "priorPlan18ExternalReader": "16_NATIVE_PG15_PASS_ZERO_SKIP1041_SOURCE_BINDINGS_UNCHANGED_SYNTHETIC_BYTES_NOT_BROWSER_OR_LIVE_ADOPTION",
-        "freshPg16RuntimeV2": "INTERRUPTED_AFTER8_OBSERVED_FAILURES_NO_FINAL_REPORT_NO_FULL_COVERAGE_CLAIM_SOURCE_UNCHANGED_OWNED_CONTAINER_CLEANED",
-        "freshBootstrapOrder": "62_FOCUSED_PASS_AFTER_ACTUAL_PERMISSION_FAILURE_FINAL_NATIVE_RERUN_REQUIRED",
-        "financialBoundary": "SOURCE107_AND_RECONCILED_KERNEL65_PASS_ZERO_SKIP_89_FINANCE10_CREDIT1_JOURNAL_NATIVE_CENSUS_PENDING",
-        "moduleAdmission": "FOUR_SEPARATE_OPERATIONAL_TABLES17_RUNTIME_READ_COLUMNS_COMPONENT_PROOF_ONLY_NATIVE_MATRIX_PENDING",
-        "picomatchInstalled": "ACTUAL_PATCHED4_0_7_PARSER71_PASS_ZERO_SKIP_FROZEN_INSTALL0_RAW_AUDIT1_HIGH_REMAINS",
-        "recipientStorage": "10_SQL_ENGINE_PASS_ZERO_SKIP_TWO_ENTRYPOINT_SEMANTIC0_UNAPPLIED_MIGRATION",
-        "documentation": "V7_ZERO_CRITICAL_ERRORS1225_WARNINGS1835_INFO_FINAL_CANDIDATE_RECHECK_REQUIRED",
-        "rootSemanticDiagnostic": "24_ENTRYPOINT_RUN_FAILED3_OLD_STORAGE_TEST_PREDICATE_DIAGNOSTICS_REPAIRED_RECHECK_PENDING",
-        "sourcePlan": "V21_C101DE562180C26E1B4AFC5BC415F47C062F1106DAA8F9592ACFDD4BE88D925E_NOW_STALE_AFTER_COHERENT_SOURCE_AND_LOCK_EDITS",
-        "cfoTransitiveFamily": "FROZEN756_COMPONENT_PASS_NOT_WHOLE_CANDIDATE",
-        "zongaConnectedFamily": "SOURCE_REMEDIATION_AND_ACTUAL_SQL_COMPONENT_REQUALIFICATION_IN_PROGRESS",
-        "storageCapacity": "POSTINSTALL_REGENERABLE_CACHE_PRUNING_RESTORED_APPROX5_5_GIB_SOURCE_EVIDENCE_INSTALLED_TOOLS_AND_LIVE_DATA_PRESERVED"
+        "exactHeadCI": "131_SUCCESS_11_SKIPPED_1_NEUTRAL_ZERO_FAILURES",
+        "browser": "FOUR_PROFILES_11_OF_11_20_AUTOMATED_AXE_SCANS_ZERO_CRITICAL_SERIOUS",
+        "nativeRuntime": "SOURCE_PROVENANCE_AND_DISPATCH_MATRIX_363_OF_363_ZERO_SKIP",
+        "build": "MAIN_APPLICATION_IMAGE_BUILT_DIGEST_PINNED",
+        "staging": "NEW_REVISION_NOT_READY_OLD_CCC_REVISION_RETAINS_ALL_TRAFFIC",
+        "rootCause": "LIVE_SCHEMA_MISSING_SEVEN_TABLES_FIVE_NULLABLE_COLUMNS_AND_EXTERNAL_READ_ROLE"
       },
-      "currentRemediation": [
-        "Exact13-column system sync-log contract for actual dashboard/cron callers, with no broad read or excluded dues count",
-        "Source-specific real-session six-table case/scope/journal fixtures using production workflow and atomic audit operations; current physical guards stay enforced",
-        "Connected transitive action, public DTO, moderation audit/notification and source-backed media access corrections"
-      ],
       "remainingQualification": [
-        "Freeze coherent producer bytes, regenerate plan/overlay and requalify current legacy transition, real startup and native15/16 matrices, including seven column-contract paths and100 sensitive finance/credit/journal denials.",
-        "Run all17 financial boundary cases and69 handlers with real sessions/role floors/no effects on the qualified current template; no positive finance feature work.",
-        "Complete required five root checks, full official fast-suite shards and contracts, full application/backend regressions, native bootstrap/physical guards and recovery against one exact integrated candidate.",
-        "Execute existing real disposable build/HTTP/EN-FR desktop/mobile browser/accessibility and unchanged measured-load acceptance. The harness covers bounded families and never substitutes for all37 chains.",
-        "Resolve raw dependency HIGH, exact final image/SBOM/license materiality, historical credential revocation evidence, and security-design/access/reliability/runtime-governance requirements without waivers.",
-        "Bind all22 functional and15 operational canonical chains to substantive exact-candidate positive, denial, tenant, lifecycle, audit and recovery proofs; finish adversarial review, seal and verify evidence.",
-        "Retain Step2/live stakeholder/provider/inbox/environment acceptance and every staging/production promotion on hold; preserve original777 history and live Azure data."
-      ],
-      "step2Held": true,
-      "stagingAndProductionPromoted": false,
-      "liveDataMutated": false
+        "Qualify and admit the data-preserving forward upgrade; rehearse with rollback on staging before exact-plan-bound apply.",
+        "Prove original data and sequences preserved, temporary privileges removed, packaged catalog admission and exact application startup.",
+        "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
+        "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
+      ]
     },
     "readonlyStagingPreflight": {
       "evidence": "evidence/ue-v2-step1-qualification-20261117/readonly-staging-authority-preflight-v3.json",
@@ -11250,6 +11229,56 @@
         "step2Held": true,
         "stagingAndProductionPromoted": false,
         "executionRecoveryEvidence": "evidence/ue-v2-step1-qualification-20261117/interrupted-qualification-v1.json"
+      },
+      {
+        "recordedAt": "2026-11-18T13:26:22.885958+00:00",
+        "state": "CONFIRMED_COMPONENT_CORRECTIONS_INTEGRATED_NATIVE_AND_FINAL_QUALIFICATION_OPEN",
+        "candidateSha": null,
+        "sourceBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+        "currentWorkingTreeUncommitted": true,
+        "interimEvidence": [
+          "native-security-transition-v21.json",
+          "production-mjs-and-restricted-companions-v6.json",
+          "external-native-qualified-component-v2.json",
+          "fresh-native-runtime-diagnostic-v2.json",
+          "picomatch-wrapper-negation-remediation-v7.json",
+          "notification-recipient-storage-component-v1.json"
+        ],
+        "evidencePathsRelativeTo": "evidence/ue-v2-step1-qualification-20261117",
+        "confirmedObservations": {
+          "priorPlan18SecurityTransition": "4_NATIVE_PG15_PASS_ZERO_SKIP_SOURCE_UNCHANGED",
+          "priorPlan18ProductionEntrypoint": "TWO_ACTUAL_MJS_RUNS_AND7_RESTRICTED_SESSION_PROBES_PASS_APPLICATION_READY_FALSE",
+          "priorPlan18ExternalReader": "16_NATIVE_PG15_PASS_ZERO_SKIP1041_SOURCE_BINDINGS_UNCHANGED_SYNTHETIC_BYTES_NOT_BROWSER_OR_LIVE_ADOPTION",
+          "freshPg16RuntimeV2": "INTERRUPTED_AFTER8_OBSERVED_FAILURES_NO_FINAL_REPORT_NO_FULL_COVERAGE_CLAIM_SOURCE_UNCHANGED_OWNED_CONTAINER_CLEANED",
+          "freshBootstrapOrder": "62_FOCUSED_PASS_AFTER_ACTUAL_PERMISSION_FAILURE_FINAL_NATIVE_RERUN_REQUIRED",
+          "financialBoundary": "SOURCE107_AND_RECONCILED_KERNEL65_PASS_ZERO_SKIP_89_FINANCE10_CREDIT1_JOURNAL_NATIVE_CENSUS_PENDING",
+          "moduleAdmission": "FOUR_SEPARATE_OPERATIONAL_TABLES17_RUNTIME_READ_COLUMNS_COMPONENT_PROOF_ONLY_NATIVE_MATRIX_PENDING",
+          "picomatchInstalled": "ACTUAL_PATCHED4_0_7_PARSER71_PASS_ZERO_SKIP_FROZEN_INSTALL0_RAW_AUDIT1_HIGH_REMAINS",
+          "recipientStorage": "10_SQL_ENGINE_PASS_ZERO_SKIP_TWO_ENTRYPOINT_SEMANTIC0_UNAPPLIED_MIGRATION",
+          "documentation": "V7_ZERO_CRITICAL_ERRORS1225_WARNINGS1835_INFO_FINAL_CANDIDATE_RECHECK_REQUIRED",
+          "rootSemanticDiagnostic": "24_ENTRYPOINT_RUN_FAILED3_OLD_STORAGE_TEST_PREDICATE_DIAGNOSTICS_REPAIRED_RECHECK_PENDING",
+          "sourcePlan": "V21_C101DE562180C26E1B4AFC5BC415F47C062F1106DAA8F9592ACFDD4BE88D925E_NOW_STALE_AFTER_COHERENT_SOURCE_AND_LOCK_EDITS",
+          "cfoTransitiveFamily": "FROZEN756_COMPONENT_PASS_NOT_WHOLE_CANDIDATE",
+          "zongaConnectedFamily": "SOURCE_REMEDIATION_AND_ACTUAL_SQL_COMPONENT_REQUALIFICATION_IN_PROGRESS",
+          "storageCapacity": "POSTINSTALL_REGENERABLE_CACHE_PRUNING_RESTORED_APPROX5_5_GIB_SOURCE_EVIDENCE_INSTALLED_TOOLS_AND_LIVE_DATA_PRESERVED"
+        },
+        "currentRemediation": [
+          "Exact13-column system sync-log contract for actual dashboard/cron callers, with no broad read or excluded dues count",
+          "Source-specific real-session six-table case/scope/journal fixtures using production workflow and atomic audit operations; current physical guards stay enforced",
+          "Connected transitive action, public DTO, moderation audit/notification and source-backed media access corrections"
+        ],
+        "remainingQualification": [
+          "Freeze coherent producer bytes, regenerate plan/overlay and requalify current legacy transition, real startup and native15/16 matrices, including seven column-contract paths and100 sensitive finance/credit/journal denials.",
+          "Run all17 financial boundary cases and69 handlers with real sessions/role floors/no effects on the qualified current template; no positive finance feature work.",
+          "Complete required five root checks, full official fast-suite shards and contracts, full application/backend regressions, native bootstrap/physical guards and recovery against one exact integrated candidate.",
+          "Execute existing real disposable build/HTTP/EN-FR desktop/mobile browser/accessibility and unchanged measured-load acceptance. The harness covers bounded families and never substitutes for all37 chains.",
+          "Resolve raw dependency HIGH, exact final image/SBOM/license materiality, historical credential revocation evidence, and security-design/access/reliability/runtime-governance requirements without waivers.",
+          "Bind all22 functional and15 operational canonical chains to substantive exact-candidate positive, denial, tenant, lifecycle, audit and recovery proofs; finish adversarial review, seal and verify evidence.",
+          "Retain Step2/live stakeholder/provider/inbox/environment acceptance and every staging/production promotion on hold; preserve original777 history and live Azure data."
+        ],
+        "step2Held": true,
+        "stagingAndProductionPromoted": false,
+        "liveDataMutated": false
       }
     ],
     "step1ClosureRegister": {
@@ -11536,5 +11565,15 @@
         "note": "A later commit that only records this register re-runs CI; these results bind to 5bc5b3cf9."
       }
     }
+  },
+  "currentMergedApplicationSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+  "observedStagingAt20261122": {
+    "applicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+    "trafficPercent": 100,
+    "candidateApplicationSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+    "candidateTrafficPercent": 0,
+    "candidateReadyReplicas": 0,
+    "fullBaseAcceptance": "NOT_PROVEN",
+    "productionDeployment": false
   }
 }
