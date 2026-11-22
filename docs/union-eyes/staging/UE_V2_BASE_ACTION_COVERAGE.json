@@ -10029,19 +10029,24 @@
     "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
     "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
   ],
-  "proposedCandidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "proposedCandidateSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
   "sourceAdmission": {
-    "pullRequest": 1252,
-    "sourceHeadSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
-    "normalMergeSha": "1ecb345ca5871b89ac8cb7b0ec379aab0a4ef323",
+    "pullRequest": 1269,
+    "sourceHeadSha": "30572d9acf6b273df70c4ac3aa66c484ff5d86d0",
+    "normalMergeSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
     "allRequiredTrustedChecksPassed": 16,
-    "allRegisteredCheckRunsConcludedWithoutFailure": 129,
-    "workflowRunsConcludedWithoutFailure": 26,
+    "checkRuns": {
+      "success": 131,
+      "skipped": 11,
+      "neutral": 1,
+      "failure": 0
+    },
     "conditionalSkipsRemainRecorded": true,
-    "newSourceRuntimeQualification": "PENDING"
+    "evidence": "evidence/ue-v2-step1-closure-57728a2a/exact-source-ci.json",
+    "newSourceRuntimeQualification": "BLOCKED_ON_PRESERVING_LIVE_SCHEMA_UPGRADE_NOT_FULL_BASE_ACCEPTANCE"
   },
-  "currentDeployedSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
-  "currentDeployedWorkflowSha": "5fae54b471e84d73eab5e44d723aee12a0add797",
+  "currentDeployedSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "currentDeployedWorkflowSha": null,
   "currentFollowupLocalEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json",
   "sourceAdmissionHistory": [
     {
@@ -10052,6 +10057,19 @@
         "normalMergeSha": "14e10b94252f183a0246127fba5a9d174ccb22e8",
         "allRequiredTrustedChecksPassed": 16,
         "allRegisteredCheckRunsConcludedWithoutFailure": 130,
+        "newSourceRuntimeQualification": "PENDING"
+      }
+    },
+    {
+      "recordedBeforeStagingForwardUpgrade": true,
+      "admission": {
+        "pullRequest": 1252,
+        "sourceHeadSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+        "normalMergeSha": "1ecb345ca5871b89ac8cb7b0ec379aab0a4ef323",
+        "allRequiredTrustedChecksPassed": 16,
+        "allRegisteredCheckRunsConcludedWithoutFailure": 129,
+        "workflowRunsConcludedWithoutFailure": 26,
+        "conditionalSkipsRemainRecorded": true,
         "newSourceRuntimeQualification": "PENDING"
       }
     }
@@ -11574,6 +11592,17 @@
     "candidateTrafficPercent": 0,
     "candidateReadyReplicas": 0,
     "fullBaseAcceptance": "NOT_PROVEN",
-    "productionDeployment": false
-  }
+    "productionDeployment": false,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/observed-runtime-before-upgrade.json"
+  },
+  "historicalRuntimePointerSnapshots": [
+    {
+      "reason": "Reconciled stale current pointers from direct version and health observation; original acceptance remains historical",
+      "currentDeployedSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+      "currentDeployedWorkflowSha": "5fae54b471e84d73eab5e44d723aee12a0add797",
+      "proposedCandidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465"
+    }
+  ],
+  "currentDeployedWorkflowProvenance": "Prior live application rollout workflow SHA not inferred from the later failed rollout; failed candidate rollout used 6bba9465f9c99ca7559a24c19f5a11c9e41c353c.",
+  "lastReconciledAt": "2026-11-22T20:02:49.387835+00:00"
 }
