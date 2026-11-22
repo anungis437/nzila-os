@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-21 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-22 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -38,7 +38,7 @@
 | trade | Next.js | 3008 | ✅ | ✅ | ✅ | ✅ | 56 | Cross-border trade infrastructure: deals, financing states, listings, |
 | trustcore | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 98 |  |
 | trustcore-trustops | Next.js | 3018 | ✅ | ✅ | ✅ | ✅ | 20 |  |
-| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 6709 | Full-stack union case management platform — grievance lifecycle, collective barg |
+| union-eyes | Next.js + Django | 3002 | ✅ | ✅ | ✅ | ✅ | 6712 | Full-stack union case management platform — grievance lifecycle, collective barg |
 | union-eyes-demo | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 80 |  |
 | veridian-admin | Next.js | 3012 | ✅ | ✅ | ❌ | ✅ | 23 |  |
 | veridian-care | Next.js | 3011 | ✅ | ✅ | ❌ | ✅ | 26 |  |

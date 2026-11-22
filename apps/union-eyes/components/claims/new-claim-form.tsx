@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
 import { isRecord, readApiError } from "@/lib/client/api-envelope";
+import { caseIntakeResponse } from "@/lib/client/case-intake-response";
 import { dayOf } from "@/lib/client/day";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
@@ -273,8 +274,9 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
         throw new Error(await readApiError(response, "Failed to create claim"));
       }
 
-      const result = await response.json();
-      const claimId = result.claimId;
+      const result: unknown = await response.json();
+      const receipt = caseIntakeResponse.safeParse(result);
+      const claimId = receipt.success ? receipt.data.claimId : null;
 
       if (!claimId) {
         throw new Error("Case was created but no case ID was returned");

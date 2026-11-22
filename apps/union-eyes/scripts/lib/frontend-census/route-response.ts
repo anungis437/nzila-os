@@ -390,6 +390,24 @@ export class RouteResponseReader {
               const name = ts.isIdentifier(element.name) ? element.name.text : null
               if (name && methods.has(name) && isExported(statement, name)) out.set(name, crudShape(name, item, row))
             }
+          } else if (ts.isObjectBindingPattern(declaration.name) && ts.isCallExpression(initializer) && /(?:^|\.)containedStorageHandlers$/.test(calleeText(initializer))) {
+            // This producer returns 501 or delegates unchanged to the supplied
+            // method. Read only that method's genuine CRUD success contract.
+            const handlers = initializer.arguments[1] && unwrap(initializer.arguments[1])
+            if (!handlers || !ts.isObjectLiteralExpression(handlers)) continue
+            for (const element of declaration.name.elements) {
+              const name = ts.isIdentifier(element.name) ? element.name.text : null
+              if (!name || !methods.has(name) || !isExported(statement, name)) continue
+              const property = handlers.properties.find((p) => ts.isPropertyAssignment(p) && propertyName(p.name) === (element.propertyName?.getText() ?? name))
+              const reference = property && ts.isPropertyAssignment(property) ? unwrap(property.initializer) : null
+              if (!reference || !ts.isPropertyAccessExpression(reference) || reference.name.text !== name || !ts.isIdentifier(reference.expression)) continue
+              const factory = this.localConst(reference.expression)?.initializer
+              const call = factory && unwrap(factory)
+              if (!call || !ts.isCallExpression(call) || !/(?:^|\.)crudRoutes$/.test(calleeText(call))) continue
+              const options = call.arguments.map(unwrap).find(ts.isObjectLiteralExpression)
+              const item = !!options?.properties.some((p) => ts.isPropertyAssignment(p) && propertyName(p.name) === 'itemRoute' && unwrap(p.initializer).kind === ts.SyntaxKind.TrueKeyword)
+              out.set(name, crudShape(name, item, options ? this.crudRow(options) : null))
+            }
           }
         }
       }
@@ -408,11 +426,48 @@ export class RouteResponseReader {
     const row = node ? (this.types?.rowShapeOfTable?.(node) ?? null) : null
     if (!row || row.kind !== 'object') return row
     const omitted = property('omitFromResponse')
-    const list = omitted && ts.isPropertyAssignment(omitted) ? unwrap(omitted.initializer) : null
-    if (!list || !ts.isArrayLiteralExpression(list)) return row
+    if (!omitted) return row
+    const list = ts.isPropertyAssignment(omitted) ? this.literalStrings(omitted.initializer, options.getSourceFile()) : null
+    if (!list) return null
     const keys = new Map(row.keys)
-    for (const element of list.elements) if (ts.isStringLiteralLike(element)) keys.delete(element.text)
+    for (const name of list) keys.delete(name)
     return { kind: 'object', keys, open: row.open }
+  }
+
+  private literalStrings(expression: ts.Expression, source: ts.SourceFile, depth = 0): string[] | null {
+    if (depth > MAX_DEPTH) return null
+    const node = unwrap(expression)
+    if (ts.isArrayLiteralExpression(node)) {
+      const result: string[] = []
+      for (const item of node.elements) {
+        if (ts.isStringLiteralLike(item)) result.push(item.text)
+        else if (ts.isSpreadElement(item)) {
+          const nested = this.literalStrings(item.expression, source, depth + 1)
+          if (!nested) return null
+          result.push(...nested)
+        } else return null
+      }
+      return result
+    }
+    if (!ts.isIdentifier(node)) return null
+    const local = this.localConst(node)
+    if (local?.initializer && !this.isMutated(local)) return this.literalStrings(local.initializer, source, depth + 1)
+    for (const statement of source.statements) {
+      if (!ts.isImportDeclaration(statement) || !ts.isStringLiteralLike(statement.moduleSpecifier)) continue
+      const bindings = statement.importClause?.namedBindings
+      const binding = bindings && ts.isNamedImports(bindings) ? bindings.elements.find((item) => item.name.text === node.text) : null
+      if (!binding) continue
+      const file = this.files.resolve(source.fileName, statement.moduleSpecifier.text)
+      const other = file ? this.source(file) : null
+      if (!other) return null
+      for (const declaration of other.statements) {
+        if (!ts.isVariableStatement(declaration) || !(declaration.declarationList.flags & ts.NodeFlags.Const)) continue
+        for (const value of declaration.declarationList.declarations)
+          if (ts.isIdentifier(value.name) && value.name.text === (binding.propertyName ?? binding.name).text && value.initializer && !this.isMutated(value))
+            return this.literalStrings(value.initializer, other, depth + 1)
+      }
+    }
+    return null
   }
 
   private shapeOfExport(initializer: ts.Expression, source: ts.SourceFile): Shape {

@@ -186,6 +186,17 @@ jobs:
           UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
+      - name: Union Eyes frontend and storage authority censuses
+        if: matrix.lane == 'union-eyes'
+        working-directory: apps/union-eyes
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
+          set -euo pipefail
+          pnpm exec vitest run --config vitest.census.config.ts --maxWorkers=1
+          pnpm exec vitest run --config vitest.heavy.config.ts scripts/__tests__/generate-public-schema-grant-census.test.ts --maxWorkers=1
+
       - name: Union Eyes staging evidence and release-control regressions
         if: matrix.lane == 'shared'
         run: |
