@@ -1,0 +1,16 @@
+{
+  "evidenceClass": "EXECUTED_SOURCE_CONTRACT_COMPARISON_NOT_LIVE_OLD_REVISION_FAILURE",
+  "oldApplicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "qualifiedTargetSourceSha": "52f61e7de4cc102619f2050e128951c43ab8b8ee",
+  "unclassifiedTables": [
+    "public.case_authority_scopes",
+    "public.case_respondents",
+    "public.case_scope_proposals",
+    "public.case_territories",
+    "public.ue_external_read_consents",
+    "public.ue_external_read_qualifications"
+  ],
+  "oldRuntimeAdmissionRejectsUnclassifiedTables": true,
+  "postCommitRecovery": "FORWARD_TO_QUALIFIED_577_REVISION_RETAIN_ALL_DATA",
+  "stagingDataModified": false
+}

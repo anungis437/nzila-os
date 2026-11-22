@@ -16,6 +16,40 @@ spec.loader.exec_module(runner)
 
 
 class ForwardJobControls(unittest.TestCase):
+    def test_cutover_waits_for_correct_revision_image_and_runtime_source(self):
+        healthy = {"healthState": "Healthy", "runningState": "Running"}
+        def response(host, path):
+            return {"gitSha": runner.APPLICATION_SOURCE} if path == "/api/version" else {"status": "healthy"}
+        with patch.object(runner, "candidate_revision", return_value=healthy), patch.object(runner, "http_json", side_effect=response) as http, patch.object(runner, "azure", return_value="") as azure:
+            result = runner.settle_existing_revision(attempts=1)
+            self.assertTrue(result["liveVersionAndHealthVerified"])
+            self.assertEqual(result["trafficPercent"], 100)
+            self.assertEqual(result["baseReleaseAcceptance"], "NOT_PROVEN_BY_ROLLOUT")
+            self.assertEqual(http.call_args_list[0].args, (runner.TARGET_REVISION + "." + runner.STAGING_DOMAIN, "/api/version"))
+            self.assertIn(runner.TARGET_REVISION + "=100", azure.call_args.args)
+        failed_activation = {"healthState": "Unhealthy", "runningState": "ActivationFailed"}
+        with patch.object(runner, "candidate_revision", side_effect=[failed_activation, healthy]), patch.object(runner, "http_json", side_effect=response), patch.object(runner, "azure", return_value="") as azure:
+            runner.settle_existing_revision(attempts=1)
+            self.assertEqual(azure.call_args_list[0].args[:3], ("containerapp", "revision", "restart"))
+            self.assertIn(runner.TARGET_REVISION, azure.call_args_list[0].args)
+            self.assertEqual(azure.call_args_list[1].args[:4], ("containerapp", "ingress", "traffic", "set"))
+        for properties, body in [({"healthState": "Unhealthy", "runningState": "Running"}, {}),
+                                 (healthy, {"gitSha": "wrong-source"}),
+                                 (healthy, {"gitSha": runner.APPLICATION_SOURCE, "status": "degraded"})]:
+            with self.subTest(properties=properties, body=body), patch.object(runner, "candidate_revision", return_value=properties), patch.object(runner, "http_json", return_value=body), patch.object(runner.time, "sleep"), patch.object(runner, "azure") as azure:
+                with self.assertRaises((AssertionError, runner.AzureFailure)):
+                    runner.settle_existing_revision(attempts=1)
+                azure.assert_not_called()
+
+    def test_apply_preflight_rejects_changed_image_or_prior_traffic_before_any_database_job(self):
+        wrong = {"active": True, "template": {"containers": [{"image": "unqualified-image"}]}}
+        with patch.object(runner, "azure", return_value=json.dumps(wrong)) as azure, self.assertRaisesRegex(AssertionError, "IMAGE_PROVENANCE_REFUSED"):
+            runner.prepare_apply_cutover()
+        self.assertTrue(all("create" not in call.args for call in azure.call_args_list))
+        with patch.object(runner, "candidate_revision"), patch.object(runner, "azure", return_value=json.dumps([{"revisionName": "different-revision", "weight": 100}])) as azure, self.assertRaisesRegex(AssertionError, "PRIOR_TRAFFIC_CHANGED"):
+            runner.prepare_apply_cutover()
+        self.assertTrue(all("create" not in call.args for call in azure.call_args_list))
+
     def test_apply_requires_successful_same_source_rehearsal_rollback_cleanup_and_digests(self):
         source, plan, before, run_id = "a" * 40, "b" * 64, "c" * 64, "123"
         run = {"id": 123, "path": ".github/workflows/ue-v2-staging-forward-upgrade.yml", "head_branch": "main",

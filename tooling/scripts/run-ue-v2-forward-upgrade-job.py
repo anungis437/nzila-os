@@ -7,6 +7,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.request
 
 SUBSCRIPTION = "d562ba7f-d891-4504-a489-10917c0ebaaf"
 GROUP = "nzila-canada-staging-rg"
@@ -15,6 +17,11 @@ IDENTITY = f"/subscriptions/{SUBSCRIPTION}/resourceGroups/{GROUP}/providers/Micr
 APPLICATION_SOURCE = "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3"
 STAGING_LOG_WORKSPACE = "ce2ff61f-0059-46eb-b18b-a9be8162d009"
 ADMIN_SECRET_NAME = "operator-password"
+APP_NAME = "nzila-ue-v2-staging-app"
+TARGET_REVISION = APP_NAME + "--rel" + APPLICATION_SOURCE[:10]
+PRIOR_REVISION = APP_NAME + "--relcccfc8c311"
+APPLICATION_IMAGE = "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:7b6c8ebfed04a70d69283e31480c39a1989e93b283b24eed48c784e6000d590e"
+STAGING_DOMAIN = "whitemoss-055b7430.canadacentral.azurecontainerapps.io"
 
 
 class AzureFailure(RuntimeError):
@@ -61,6 +68,72 @@ def extract_receipts(raw):
         except ValueError:
             continue
     return receipts
+
+
+def candidate_revision():
+    properties = json.loads(azure("containerapp", "revision", "show", "-g", GROUP, "-n", APP_NAME,
+                                  "--revision", TARGET_REVISION, "--query", "properties", "-o", "json"))
+    assert properties.get("active") is True, "QUALIFIED_EXISTING_REVISION_NOT_ACTIVE"
+    images = [c.get("image") for c in properties.get("template", {}).get("containers", [])]
+    assert APPLICATION_IMAGE in images, "EXISTING_REVISION_IMAGE_PROVENANCE_REFUSED"
+    return properties
+
+
+def http_json(host, path):
+    assert host in [APP_NAME + "." + STAGING_DOMAIN, TARGET_REVISION + "." + STAGING_DOMAIN]
+    assert path in ["/api/version", "/api/health"]
+    with urllib.request.urlopen("https://" + host + path, timeout=10) as response:
+        return json.load(response)
+
+
+def prepare_apply_cutover():
+    # The new tables include objects unknown to CCC's catalog contract. Its health
+    # gate therefore cannot be the post-commit rollback. Finish the already
+    # reviewed rollout of this existing immutable revision, without an ARM apply.
+    candidate_revision()
+    traffic = json.loads(azure("containerapp", "show", "-g", GROUP, "-n", APP_NAME,
+                               "--query", "properties.configuration.ingress.traffic", "-o", "json"))
+    assert any(t.get("revisionName") == PRIOR_REVISION and t.get("weight") == 100 for t in traffic), "PRIOR_TRAFFIC_CHANGED_BEFORE_UPGRADE"
+    assert http_json(APP_NAME + "." + STAGING_DOMAIN, "/api/version").get("gitSha") == "cccfc8c311a1017f80241bf089c00ef0c6828751", "PRIOR_LIVE_SOURCE_CHANGED"
+
+
+def settle_existing_revision(attempts=60):
+    initial = candidate_revision()
+    if initial.get("runningState") == "ActivationFailed":
+        azure("containerapp", "revision", "restart", "-g", GROUP, "-n", APP_NAME,
+              "--revision", TARGET_REVISION, "-o", "none")
+    deadline = time.monotonic() + 300
+    for _ in range(attempts):
+        properties = candidate_revision()
+        if properties.get("healthState") == "Healthy" and properties.get("runningState") == "Running":
+            try:
+                version = http_json(TARGET_REVISION + "." + STAGING_DOMAIN, "/api/version")
+                assert version.get("gitSha") == APPLICATION_SOURCE, "READY_REVISION_SOURCE_PROVENANCE_REFUSED"
+                health = http_json(TARGET_REVISION + "." + STAGING_DOMAIN, "/api/health")
+                if health.get("status") == "healthy":
+                    break
+            except (urllib.error.URLError, TimeoutError, ValueError):
+                pass
+        if time.monotonic() >= deadline:
+            raise AzureFailure("UPGRADE_COMMITTED_FORWARD_RECOVERY_REQUIRED_REVISION_NOT_READY")
+        time.sleep(5)
+    else:
+        raise AzureFailure("UPGRADE_COMMITTED_FORWARD_RECOVERY_REQUIRED_REVISION_NOT_READY")
+    azure("containerapp", "ingress", "traffic", "set", "-g", GROUP, "-n", APP_NAME,
+          "--revision-weight", TARGET_REVISION + "=100", "-o", "none")
+    for _ in range(12):
+        try:
+            version = http_json(APP_NAME + "." + STAGING_DOMAIN, "/api/version")
+            health = http_json(APP_NAME + "." + STAGING_DOMAIN, "/api/health")
+            if version.get("gitSha") == APPLICATION_SOURCE and health.get("status") == "healthy":
+                return {"revision": TARGET_REVISION, "applicationSourceSha": APPLICATION_SOURCE,
+                        "applicationImage": APPLICATION_IMAGE, "trafficPercent": 100,
+                        "liveVersionAndHealthVerified": True, "priorRevisionRetained": True,
+                        "baseReleaseAcceptance": "NOT_PROVEN_BY_ROLLOUT"}
+        except (urllib.error.URLError, TimeoutError, ValueError):
+            pass
+        time.sleep(5)
+    raise AzureFailure("UPGRADE_COMMITTED_FORWARD_RECOVERY_REQUIRED_PUBLIC_SOURCE_NOT_VERIFIED")
 
 
 def job_spec(image, password, source, operation, run_id, name):
@@ -160,6 +233,8 @@ def main():
     assert password, "PROTECTED_STAGING_SECRET_MISSING"
     rehearsal_id = require_rehearsal(source) if operation == "apply" else None
     assert azure("account", "show", "--query", "id", "-o", "tsv") == SUBSCRIPTION
+    if operation == "apply":
+        prepare_apply_cutover()
     name = f"ue-v2-forward-{run_id}"
     assert len(name) < 32
     out = pathlib.Path("artifacts/ue-v2-forward-upgrade")
@@ -225,6 +300,9 @@ def main():
         expected = {"preflight": "PASS_READ_ONLY_PREFLIGHT", "rehearse": "PASS_STAGING_TRANSACTIONAL_REHEARSAL", "apply": "PASS_STAGING_FORWARD_UPGRADE"}
         assert receipt.get("status") == expected[operation], "DATABASE_OPERATION_DID_NOT_QUALIFY"
         assert receipt.get("applicationSourceSha") == APPLICATION_SOURCE and receipt.get("operation") == operation
+        record["databaseOperationQualified"] = True
+        if operation == "apply":
+            record["stagingCutover"] = settle_existing_revision()
         record["status"] = "PASS"
         print(json.dumps({"job": name, "execution": execution, "operation": operation, "status": receipt["status"],
                           "planDigest": receipt["planDigest"], "beforeDigest": receipt["beforeDigest"]}))

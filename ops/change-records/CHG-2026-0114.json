@@ -1,7 +1,7 @@
 {
   "change_id": "CHG-2026-0114",
   "title": "Union Eyes V2 staging: Step 1 integration (authority, accessibility, counsel verifier)",
-  "description": "Deploy and qualify the V2 Step 1 integration merge (PR #1269) on the dedicated V2 staging stack: authority-guard and native-kernel coverage, browser accessibility repairs, bilingual completeness and the counsel assertion signature verifier. Preserve live staging data, exact source/main/image/native provenance and fail-closed sensitive finance boundaries. Finance feature implementation, production, Phase 3B and live-data resets remain excluded.",
+  "description": "Deploy and qualify the V2 Step 1 integration merge (PR #1269) on the dedicated V2 staging stack: authority-guard and native-kernel coverage, browser accessibility repairs, bilingual completeness and the counsel assertion signature verifier. Preserve live staging data, exact source/main/image/native provenance and fail-closed sensitive finance boundaries. Finance feature implementation, production, Phase 3B and live-data resets remain excluded. The November 22 continuation also covers the qualified data-preserving forward schema upgrade and readiness-gated settlement of the already-deployed exact 57728a2a75 staging revision. It does not authorize a database rebuild, historical migration replay, production change or finance feature.",
   "service": "union-eyes",
   "environment": "STAGING",
   "change_type": "NORMAL",
@@ -17,7 +17,7 @@
   "approval_status": "APPROVED",
   "implementation_window_start": "2026-11-10T00:00:00Z",
   "implementation_window_end": "2026-11-23T03:00:00Z",
-  "rollback_plan": "Use the ue-v2-staging-deploy workflow's captured prior digest and revision to restore the previous staging revision. If migration or runtime qualification fails, stop acceptance, preserve evidence, and execute the separately reviewed staging rollback path. Do not touch production or delete the staging stack under this change.",
+  "rollback_plan": "For the data-preserving forward upgrade, a failure before commit rolls back the entire transaction and verifies the original catalog; all original rows, sequences and migration/bootstrap history must remain unchanged. After commit, CCC cannot admit the upgraded schema: preserve the upgraded database and recover forward to the qualified 57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3 image through readiness/version-gated staging cutover or the existing protected staging rollout. Do not route to a schema-incompatible old image, reverse schema, reset data or touch production. For other staging changes, a prior digest/revision can be restored only after its schema compatibility is proven. Retain all failure and recovery evidence.",
   "test_evidence_refs": [
     "https://github.com/anungis437/nzila-os/pull/1137",
     "https://github.com/anungis437/nzila-os/pull/1155",
@@ -198,7 +198,10 @@
     "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/observed-source-before-binding.json",
     "docs/union-eyes/staging/evidence/ue-v2-step1-closure-57728a2a/exact-source-ci.json",
     "docs/union-eyes/staging/evidence/ue-v2-step1-closure-57728a2a/founder-window-extension.json",
-    "https://github.com/anungis437/nzila-os/pull/1269"
+    "https://github.com/anungis437/nzila-os/pull/1269",
+    "https://github.com/anungis437/nzila-os/pull/1278",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/local-managed-preservation-proof.json",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/old-release-forward-compatibility.json"
   ],
   "linked_prs": [
     "1137",
