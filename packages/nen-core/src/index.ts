@@ -4,7 +4,7 @@
  * Actor context must be supplied by Nzila platform-auth after tenant resolution.
  * The functions below are authorization defense-in-depth, not session authentication.
  */
-export type Permission = 'nen.team.propose' | 'nen.team.acknowledge' | 'nen.team.approve' | 'nen.contract.accept'
+export type Permission = 'nen.team.propose' | 'nen.team.acknowledge' | 'nen.team.approve' | 'nen.contract.accept' | 'nen.team.view'
 export type Actor = Readonly<{ userId: string; organizationId: string; permissions: readonly Permission[] }>
 export type TeamMember = Readonly<{
   organizationId: string
@@ -43,6 +43,9 @@ function requireActor(actor: Actor, organizationId: string, permission: Permissi
   requireCondition(Boolean(actor.userId && actor.organizationId), 'UNAUTHENTICATED_ACTOR')
   requireCondition(actor.organizationId === organizationId && actor.permissions.includes(permission), 'AUTHORITY_DENIED')
 }
+function freezePlan(plan: TeamPlan): TeamPlan {
+  return Object.freeze({ ...plan, members: Object.freeze(plan.members.map(member => Object.freeze({ ...member }))) })
+}
 function nonblank(value: string): boolean { return typeof value === 'string' && value.trim().length > 0 && value.length <= 300 }
 function validBps(value: number): boolean { return Number.isSafeInteger(value) && value >= 0 && value <= 10_000 }
 function validatePlan(plan: TeamPlan): void {
@@ -65,7 +68,7 @@ export function proposeTeam(input: Omit<TeamPlan, 'revision' | 'buyerApproval' |
   requireCondition(input.members.every(m => m.role === 'lead' ? m.consent === 'accepted' : m.consent === 'pending'), 'PARTNERS_MUST_DECIDE_THEMSELVES')
   const plan: TeamPlan = { ...input, members: input.members.map(m => ({ ...m })), revision: 1, buyerApproval: 'pending', status: 'proposed' }
   validatePlan(plan)
-  return plan
+  return freezePlan(plan)
 }
 export function decidePartnership(plan: TeamPlan, actor: Actor, decision: 'accepted' | 'declined', expectedRevision: number): TeamPlan {
   requireCondition(plan.status === 'proposed' && plan.buyerApproval === 'pending', 'PLAN_FROZEN')
@@ -73,7 +76,7 @@ export function decidePartnership(plan: TeamPlan, actor: Actor, decision: 'accep
   requireActor(actor, actor.organizationId, 'nen.team.acknowledge')
   const member = plan.members.find(m => m.organizationId === actor.organizationId && m.role === 'partner')
   requireCondition(member && member.consent === 'pending', 'PARTNER_NOT_PENDING')
-  return { ...plan, revision: plan.revision + 1, members: plan.members.map(m => m.organizationId === actor.organizationId ? { ...m, consent: decision } : m) }
+  return freezePlan({ ...plan, revision: plan.revision + 1, members: plan.members.map(m => m.organizationId === actor.organizationId ? { ...m, consent: decision } : m) })
 }
 export function approveBuyer(plan: TeamPlan, actor: Actor, expectedRevision: number): TeamPlan {
   requireCondition(plan.status === 'proposed' && plan.buyerApproval === 'pending', 'PLAN_FROZEN')
@@ -81,7 +84,7 @@ export function approveBuyer(plan: TeamPlan, actor: Actor, expectedRevision: num
   requireActor(actor, plan.buyerOrganizationId, 'nen.team.approve')
   requireCondition(plan.members.every(m => m.consent === 'accepted'), 'PARTNER_ACCEPTANCE_REQUIRED')
   validatePlan(plan)
-  return { ...plan, revision: plan.revision + 1, buyerApproval: 'approved' }
+  return freezePlan({ ...plan, revision: plan.revision + 1, buyerApproval: 'approved' })
 }
 export function acceptTeamContract(plan: TeamPlan, actor: Actor, expectedRevision: number): TeamPlan {
   requireCondition(plan.status === 'proposed', 'PLAN_FROZEN')
@@ -89,10 +92,13 @@ export function acceptTeamContract(plan: TeamPlan, actor: Actor, expectedRevisio
   requireActor(actor, plan.leadOrganizationId, 'nen.contract.accept')
   requireCondition(plan.buyerApproval === 'approved' && plan.members.every(m => m.consent === 'accepted'), 'TEAM_APPROVAL_REQUIRED')
   validatePlan(plan)
-  return { ...plan, revision: plan.revision + 1, status: 'active' }
+  return freezePlan({ ...plan, revision: plan.revision + 1, status: 'active' })
 }
 /** Deterministic cent-level allocation; fractional cent remainder stays with lead. */
 export function getAllocations(plan: TeamPlan, actor: Actor): readonly Allocation[] {
+  requireCondition(Boolean(actor.userId && actor.organizationId), 'UNAUTHENTICATED_ACTOR')
+  requireCondition(actor.permissions.includes('nen.team.view'), 'AUTHORITY_DENIED')
+  validatePlan(plan)
   requireCondition(plan.members.some(m => m.organizationId === actor.organizationId) || actor.organizationId === plan.buyerOrganizationId, 'NO_CONTRACT_ACCESS')
   requireCondition(plan.buyerApproval === 'approved', 'TEAM_NOT_APPROVED')
   const others = plan.members.filter(m => m.role === 'partner')
@@ -110,12 +116,15 @@ export function getAllocations(plan: TeamPlan, actor: Actor): readonly Allocatio
     ? all
     : all.filter(item => item.organizationId === actor.organizationId)
 }
-export function economicSummary(plan: TeamPlan): Readonly<{
+export function economicSummary(plan: TeamPlan, actor: Actor): Readonly<{
   grossContractCents: number
   receivedCents: 0
   source: 'proposed_team_contract'
   independentlyVerified: false
 }> {
+  requireCondition(Boolean(actor.userId && actor.organizationId), 'UNAUTHENTICATED_ACTOR')
+  requireCondition(actor.permissions.includes('nen.team.view'), 'AUTHORITY_DENIED')
+  requireCondition(plan.members.some(m => m.organizationId === actor.organizationId) || actor.organizationId === plan.buyerOrganizationId, 'NO_CONTRACT_ACCESS')
   validatePlan(plan)
   return { grossContractCents: plan.contractValueCents, receivedCents: 0, source: 'proposed_team_contract', independentlyVerified: false }
 }
