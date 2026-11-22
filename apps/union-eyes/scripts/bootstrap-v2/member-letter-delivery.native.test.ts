@@ -44,12 +44,21 @@ import { POST as escalate } from '../../app/api/cases/[caseId]/escalate/route'
 import { ensureOwnDirectoryProfile } from '../../lib/members/own-directory-profile'
 import { queueCorrespondenceEmail, processCorrespondenceEmails, settleCorrespondenceEmail } from '../../lib/correspondence/email-delivery'
 import { cancelCorrespondence, signCorrespondence } from '../../lib/services/correspondence-service'
+import { adoptGuardedIssuanceRule, type GuardedWithin } from './runtime-guarded-case-fixtures'
+import { DEFAULT_ISSUANCE_TEMPLATES } from '../../lib/authority/issuance'
+import { drizzleExecutor } from '../../lib/authority/store/route-adapter'
+import { persistAtomicAudit } from '../../lib/audit/atomic-audit'
+import { auditAuthorityMutation } from '../../lib/authority/store/audit'
+import { assertAuthorityReadSetScope, lockAuthorityReadSet, type AuthorityReadSetScope } from '../../lib/authority/store/read-lock'
+import type { SqlExecutor } from '../../lib/authority/store/executor'
 
 const native=process.env.UE_V2_NATIVE_MANIFEST === '1'?describe:describe.skip
 native('member directory and letter outbox on actual canonical PostgreSQL roles',()=>{
   let fixture:Awaited<ReturnType<typeof openNativeRuntimeFixture>>
   let runtime:ReturnType<typeof postgres>,system:ReturnType<typeof postgres>
   const org=randomUUID(),foreignOrg=randomUUID(),member=randomUUID(),staff=randomUUID(),signer=randomUUID(),platform=randomUUID()
+  const executives=[randomUUID(),randomUUID(),randomUUID()] as const
+  let assignmentRuleId:string
   const bindings=new Map<string,AuthenticatedOrgBinding>()
   const priorMode=process.env.UE_CANONICAL_BOOTSTRAP_V2,priorKey=process.env.EVIDENCE_SEAL_KEY
   const tenant=<T>(userId:string,fn:(tx:RLSTx)=>Promise<T>)=>drizzle(runtime).transaction(async tx=>{
@@ -73,16 +82,25 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     for(const id of [org,foreignOrg]) await fixture.seed.query(`INSERT INTO public.organizations
       (id,name,slug,organization_type,hierarchy_path,hierarchy_level,sectors,clc_affiliated,member_count,active_member_count,settings,features_enabled,status,remittance_day,created_at,updated_at)
       VALUES ($1::uuid,'Native letter','native-letter-'||$1::text,'local',ARRAY[]::text[],0,ARRAY[]::varchar[],false,0,0,'{}',ARRAY[]::text[],'active',15,now(),now())`,[id])
-    for(const [userId,role] of [[member,'member'],[staff,'steward'],[signer,'officer'],[platform,'system_admin']]){
+    for(const [userId,role] of [[member,'member'],[staff,'steward'],[signer,'officer'],[platform,'system_admin'],
+      [executives[0],'president'],[executives[1],'vice_president'],[executives[2],'secretary_treasurer']]){
       const sessionToken='synthetic-session-'+randomUUID(),expiresAt=new Date(Date.now()+60*60_000)
       bindings.set(userId,{userId,organizationId:org,role,sessionToken,expiresAt,authority:'pg-session'})
-      await fixture.seed.query(`INSERT INTO user_management.users(user_id,email) VALUES ($1,$2);
+      await fixture.seed.query(`INSERT INTO user_management.users(user_id,email,email_verified) VALUES ($1,$2,true);
       `,[userId,`${userId}@example.invalid`])
       await fixture.seed.query('INSERT INTO user_management.organization_users(user_id,organization_id,role) VALUES ($1,$2,$3)',[userId,org,role])
       await fixture.seed.query(`INSERT INTO user_management.user_sessions(user_id,organization_id,session_token,session_token_hash,expires_at)
         VALUES ($1,$2,$3,$4,$5)`,[userId,org,sessionToken,createHash('sha256').update(sessionToken).digest('hex'),expiresAt])
     }
     for(const id of [staff,signer]) await tenant(id,tx=>ensureOwnDirectoryProfile(tx,contact(id)))
+    const actor=(userId:string)=>({userId,organizationId:org})
+    const within:GuardedWithin=(principal,operation)=>tenant(principal.userId,tx=>operation(tx,drizzleExecutor(tx)))
+    const {rationale:_rationale,...template}=DEFAULT_ISSUANCE_TEMPLATES.find(entry=>entry.domain==='case_assignment'&&entry.operation==='issue')!
+    // Synthetic adoption belongs only to this disposable fixture. Its three
+    // distinct canonical sessions exercise the existing approval ceremony.
+    assignmentRuleId=(await adoptGuardedIssuanceRule(within,{organizationId:org,member:actor(member),officer:actor(signer),
+      handler:actor(staff),executives:[actor(executives[0]),actor(executives[1]),actor(executives[2])],
+      classes:[actor(member),actor(staff),actor(platform)]},template)).ruleId
   },600_000)
   beforeEach(()=>{h.send.mockReset();h.send.mockResolvedValue({success:true,messageId:randomUUID()})})
   afterAll(async()=>{
@@ -140,6 +158,7 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     const id=await signedLetter()
     await Promise.all([tenant(staff,()=>queueCorrespondenceEmail(id,org,staff)),tenant(staff,()=>queueCorrespondenceEmail(id,org,staff))])
     expect(await tasks(id)).toHaveLength(1)
+    await expect(h.system!(tx=>tx.select({id:correspondence.id}).from(correspondence))).rejects.toThrow()
     h.send.mockImplementationOnce(async()=>{expect(getActiveTenantDb()).toBeUndefined();return {success:true,messageId:randomUUID()}})
     const reports=await Promise.all([processCorrespondenceEmails(1),processCorrespondenceEmails(1)])
     expect(reports.reduce((n,v)=>n+v.attempted,0)).toBe(1)
@@ -219,6 +238,15 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     await processCorrespondenceEmails();expect(h.send).not.toHaveBeenCalled()
     expect((await tasks(id))[0]).toMatchObject({status:'failed',attempt_count:'0',error_message:'CORRESPONDENCE_INVALID_SEAL'})
   })
+  it.each(['body','recipient','approval','signature'] as const)('suppresses queued email after live %s material changes without private system reads',async(change)=>{
+    const id=await signedLetter();await tenant(staff,()=>queueCorrespondenceEmail(id,org,staff))
+    if(change==='body')await fixture.seed.query("UPDATE public.correspondence SET body='Changed after signing' WHERE id=$1",[id])
+    if(change==='recipient')await fixture.seed.query("UPDATE public.correspondence_recipients SET email='other@example.invalid' WHERE correspondence_id=$1",[id])
+    if(change==='approval')await fixture.seed.query("UPDATE public.correspondence SET status='draft' WHERE id=$1",[id])
+    if(change==='signature')await fixture.seed.query("UPDATE public.correspondence SET signed_at=signed_at+interval '1 microsecond' WHERE id=$1",[id])
+    await processCorrespondenceEmails();expect(h.send).not.toHaveBeenCalled()
+    expect((await tasks(id))[0]).toMatchObject({status:'failed',attempt_count:'0',error_message:'CORRESPONDENCE_AUTHORITY_OR_CONTENT_CHANGED'})
+  })
   it('does not restart a correctly sealed task after its provider replay window expires',async()=>{
     const id=await signedLetter();await tenant(staff,()=>queueCorrespondenceEmail(id,org,staff))
     const task=(await tasks(id))[0],createdAt=new Date(Date.now()-24*60*60_000)
@@ -260,17 +288,63 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     expect(await tenant(staff,()=>settleCorrespondenceEmail(id,org,staff))).toMatchObject({state:'accepted'})
   })
 
+  const fileClaim=async(subject=member)=>{
+    if(!bindings.has(subject)){
+      const sessionToken='synthetic-session-'+randomUUID(),expiresAt=new Date(Date.now()+60*60_000)
+      bindings.set(subject,{userId:subject,organizationId:org,role:'member',sessionToken,expiresAt,authority:'pg-session'})
+      await fixture.seed.query(`INSERT INTO user_management.user_sessions(user_id,organization_id,session_token,session_token_hash,expires_at)
+        VALUES ($1,$2,$3,$4,$5)`,[subject,org,sessionToken,createHash('sha256').update(sessionToken).digest('hex'),expiresAt])
+    }
+    return tenant(subject,async tx=>{
+      const created=await createClaim({organizationId:org,memberId:subject,claimType:'wage_dispute',
+        description:'Synthetic verified member narrative with enough investigation details',priority:'medium',status:'submitted'},tx)
+      await persistAtomicAudit(tx,{organizationId:org,userId:subject,action:'claim.create',resourceType:'claims',resourceId:created.claimId,details:{synthetic:true}})
+      return created
+    })
+  }
   const assignedClaim=async(subject=member)=>{
-    // Fixture preparation is privileged; every operation under test uses the authenticated runtime role.
-    const claim=await drizzlePg(fixture.seed).transaction(tx=>createClaim({organizationId:org,memberId:subject,claimType:'wage_dispute',
-      description:'Synthetic verified member narrative with enough investigation details',priority:'medium',status:'submitted'},tx as unknown as RLSTx))
-    await fixture.seed.query(`INSERT INTO public.ue_authority_resource_relationships
-      (id,organization_id,principal_user_id,resource_type,resource_id,relation,permissions,privileged_access,origin,granted_by,status,effective_at)
-      VALUES ($1,$2,$3,'case',$4,'assignee',ARRAY[]::text[],false,'explicit',$5,'active',now()-interval '1 minute')`,[randomUUID(),org,staff,claim.claimId,signer])
+    const claim=await fileClaim(subject)
+    // This assignment is synthetic fixture preparation. Its adopted rule,
+    // authenticated issuer and canonical audit remain enforced by PostgreSQL.
+    await drizzlePg(fixture.seed).transaction(async tx=>{
+      await tx.execute(authenticatedOrgBindingSql(bindings.get(signer)!))
+      await tx.execute(sql`INSERT INTO public.ue_authority_resource_relationships
+        (id,organization_id,principal_user_id,resource_type,resource_id,relation,permissions,privileged_access,origin,granted_by,status,effective_at,issuance_rule_id)
+        VALUES (${randomUUID()},${org},${staff},'case',${claim.claimId},'assignee',ARRAY[]::text[],false,'explicit',${signer},'active',now()-interval '1 minute',${assignmentRuleId})`)
+      await auditAuthorityMutation(drizzleExecutor(tx as unknown as RLSTx),{organizationId:org,action:'fixture.assignment',
+        resourceType:'case',resourceId:claim.claimId,details:{synthetic:true}})
+    })
     return claim
   }
+  it('commits five simultaneous intakes with distinct numbers and mandatory creation audits',async()=>{
+    const claims=await Promise.all(Array.from({length:5},()=>fileClaim()))
+    expect(new Set(claims.map(claim=>claim.claimNumber)).size).toBe(5)
+    const audits=await fixture.seed.query("SELECT count(*)::int AS n FROM public.audit_logs WHERE action='claim.create' AND resource_id=ANY($1::text[])",[claims.map(claim=>claim.claimId)])
+    expect(audits.rows[0].n).toBe(5)
+  })
+  it('refuses forged, foreign and stale transaction read scopes even after fresh locks are acquired',async()=>{
+    const resource=randomUUID(),other=randomUUID()
+    const input={principalUserId:staff,organizationId:org,resourceId:resource}
+    const exec:SqlExecutor={async query<T>(text:string,params:unknown[]=[]){return {rows:(await fixture.seed.query(text,params)).rows as T[]}}}
+    let scope:AuthorityReadSetScope
+    try{
+      await fixture.seed.query('BEGIN')
+      await drizzlePg(fixture.seed).execute(authenticatedOrgBindingSql(bindings.get(staff)!))
+      scope=await lockAuthorityReadSet(exec,{principalUserId:staff,organizationId:org,resourceIds:[resource]})
+      await assertAuthorityReadSetScope(exec,scope,input)
+      for(const invalid of [{...input,principalUserId:member},{...input,organizationId:foreignOrg},{...input,resourceId:other}])
+        await expect(assertAuthorityReadSetScope(exec,scope,invalid)).rejects.toThrow('does not cover')
+      await expect(assertAuthorityReadSetScope(exec,{} as AuthorityReadSetScope,input)).rejects.toThrow('does not cover')
+      await expect(assertAuthorityReadSetScope({...exec},scope,input)).rejects.toThrow('does not cover')
+      await fixture.seed.query('COMMIT;BEGIN')
+      await drizzlePg(fixture.seed).execute(authenticatedOrgBindingSql(bindings.get(staff)!))
+      await lockAuthorityReadSet(exec,{principalUserId:staff,organizationId:org,resourceIds:[resource]})
+      await expect(assertAuthorityReadSetScope(exec,scope,input)).rejects.toThrow('another transaction')
+    }finally{await fixture.seed.query('ROLLBACK')}
+  })
   it('coalesces fresh case projections on real canonical roles without changing an action decision',async()=>{
-    const caseIds=(await Promise.all([assignedClaim(),assignedClaim(),assignedClaim()])).map(claim=>claim.claimId)
+    const caseIds:string[]=[]
+    for(let index=0;index<3;index++)caseIds.push((await assignedClaim()).claimId)
     await tenant(staff,async tx=>{
       let independentQueries=0,batchedQueries=0
       const independent={execute:(query:Parameters<RLSTx['execute']>[0])=>{independentQueries++;return tx.execute(query)}}
@@ -281,6 +355,7 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
       for(const caseId of caseIds)expected.push([caseId,summarize(await decideCaseCapabilities(independent as RLSTx,{userId:staff,organizationId:org,caseId}))])
       const actual=await decideCaseCapabilitiesBatch(batched as RLSTx,{userId:staff,organizationId:org,caseIds})
       expect([...actual].map(([id,actions])=>[id,summarize(actions)])).toEqual(expected)
+      console.info('NATIVE_CASE_READ_QUERY_COUNTS',JSON.stringify({cases:caseIds.length,independentQueries,batchedQueries}))
       expect(batchedQueries).toBeLessThan(independentQueries/2)
     })
     await tenant(member,async tx=>{
@@ -303,7 +378,12 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
   })
   it('suppresses a queued disclosure after primary access is revoked without a provider side effect',async()=>{
     const claim=await assignedClaim();await advance(claim.claimNumber!)
-    await fixture.seed.query("UPDATE public.ue_authority_resource_relationships SET status='revoked',revoked_at=now(),revoked_by=$3 WHERE organization_id=$1 AND resource_id=$2",[org,claim.claimId,signer])
+    await drizzlePg(fixture.seed).transaction(async tx=>{
+      await tx.execute(authenticatedOrgBindingSql(bindings.get(signer)!))
+      await tx.execute(sql`UPDATE public.ue_authority_resource_relationships SET status='revoked',revoked_at=now(),revoked_by=${signer}
+        WHERE organization_id=${org} AND resource_id=${claim.claimId}`)
+      await auditAuthorityMutation(drizzleExecutor(tx as unknown as RLSTx),{organizationId:org,action:'fixture.revoke',resourceType:'case',resourceId:claim.claimId,details:{synthetic:true}})
+    })
     await processCaseStatusEmails();expect(h.send).not.toHaveBeenCalled()
     expect((await caseTasks(claim.claimId))[0]).toMatchObject({status:'failed',error_message:'CASE_STATUS_AUTHORITY_REVOKED',attempt_count:'0'})
   })
@@ -335,7 +415,7 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     request:new Request(`http://localhost/api/cases/${id}/escalate`,{method:'POST',body:JSON.stringify({notes:'Synthetic private escalation strategy'})})} as never))
   it('preserves one logical case and canonical nonUUID member identity through concurrent escalation',async()=>{
     const subject='native-canonical-member-'+randomUUID()
-    await fixture.seed.query('INSERT INTO user_management.users(user_id,email) VALUES ($1,$2)',[subject,`${subject}@example.invalid`])
+    await fixture.seed.query('INSERT INTO user_management.users(user_id,email,email_verified) VALUES ($1,$2,true)',[subject,`${subject}@example.invalid`])
     await fixture.seed.query("INSERT INTO user_management.organization_users(user_id,organization_id,role) VALUES ($1,$2,'member')",[subject,org])
     const claim=await assignedClaim(subject);await mature(claim.claimId)
     const results=await Promise.all([escalateClaim(claim.claimId),escalateClaim(claim.claimId)])

@@ -13,11 +13,11 @@ export async function decideCaseCapabilitiesBatch(tx:RLSTx,input:{userId:string;
   const ids=[...new Set(input.caseIds)]
   if(ids.some(id=>!isUuid(id)))throw new Error('Canonical case identity required')
   const database=drizzleExecutor(tx)
-  await lockAuthorityReadSet(database,{principalUserId:input.userId,organizationId:input.organizationId,resourceIds:ids})
   const batch=createReadBatchExecutor(database)
+  const readScope=await lockAuthorityReadSet(batch.executor,{principalUserId:input.userId,organizationId:input.organizationId,resourceIds:ids})
   const projections=await Promise.all(ids.map(async caseId=>[caseId,await enforceCaseProjection(batch.executor,deps,{
     principalUserId:input.userId,organizationId:input.organizationId,caseId,
-  })] as const))
+  },readScope)] as const))
   // The kernel refuses unavailable facts; a collection must additionally expose the outage,
   // never manufacture an apparently successful empty list or a zero aggregate.
   batch.assertHealthy()
