@@ -24,6 +24,7 @@
 | Maestria | 4 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
+| Nzila Economic Network | 4 | incubating | hold | pre-revenue | none | medium |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
 | Union Eyes Demo | 4 | incubating | internal-only | internal-cost-center | internal-proof | medium |
 | Veridian Admin | 4 | incubating | hold | pre-revenue | internal-proof | high |
@@ -57,6 +58,7 @@
 | Maestria | INCUBATING | internal-only | internal | HOLD |
 | Mobility | INCUBATING | internal-only | internal | HOLD |
 | NACP Exams | INCUBATING | internal-only | internal | HOLD |
+| Nzila Economic Network | UNREGISTERED | internal-only | internal | HOLD |
 | Trade | INCUBATING | internal-only | internal | HOLD |
 | Union Eyes Demo | INCUBATING | internal-only | internal | HOLD |
 | Veridian Admin | INCUBATING | internal-only | internal | HOLD |

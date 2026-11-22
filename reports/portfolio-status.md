@@ -25,6 +25,7 @@ Authority: governance/portfolio/product-catalog.json
 | Maestria | 4 | incubating | internal-only | internal-cost-center | internal-proof | high |
 | Mobility | 4 | incubating | hold | pre-revenue | none | low |
 | NACP Exams | 4 | incubating | hold | pre-revenue | none | low |
+| Nzila Economic Network | 4 | incubating | hold | pre-revenue | none | medium |
 | Trade | 4 | incubating | hold | pre-revenue | none | low |
 | Union Eyes Demo | 4 | incubating | internal-only | internal-cost-center | internal-proof | medium |
 | Veridian Admin | 4 | incubating | hold | pre-revenue | internal-proof | high |
@@ -76,6 +77,7 @@ Weights: revenue=0.2, traction=0.2, strategic_fit=0.2, maintenance_burden=0.1, r
 | Maestria | 4.8 | HOLD | INCUBATING | internal-only |
 | Mobility | 3.6 | HOLD | INCUBATING | internal-only |
 | NACP Exams | 3.6 | HOLD | INCUBATING | internal-only |
+| Nzila Economic Network | 3.8 | HOLD | UNREGISTERED | internal-only |
 | Trade | 3.6 | HOLD | INCUBATING | internal-only |
 | Union Eyes Demo | 4.6 | HOLD | INCUBATING | internal-only |
 | Veridian Admin | 5.2 | HOLD | INCUBATING | internal-only |

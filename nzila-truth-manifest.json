@@ -123,6 +123,7 @@
     "maestria": "incubating",
     "mobility": "incubating",
     "nacp-exams": "incubating",
+    "nen": "incubating",
     "trade": "incubating",
     "union-eyes-demo": "incubating",
     "veridian-admin": "incubating",
@@ -333,6 +334,17 @@
       "revenue_status": "pre-revenue",
       "priority": "low"
     },
+    "nen": {
+      "registry_tier": "UNREGISTERED",
+      "deployment_status": "incubating",
+      "readiness_tier": "internal-only",
+      "exposure": "internal",
+      "portfolio_tier": 4,
+      "gtm_posture": "hold",
+      "proof_level": "none",
+      "revenue_status": "pre-revenue",
+      "priority": "medium"
+    },
     "trade": {
       "registry_tier": "INCUBATING",
       "deployment_status": "incubating",
@@ -477,6 +489,7 @@
         "maestria",
         "mobility",
         "nacp-exams",
+        "nen",
         "trade",
         "union-eyes-demo",
         "veridian-admin",
@@ -520,6 +533,7 @@
         "maestria",
         "mobility",
         "nacp-exams",
+        "nen",
         "trade",
         "union-eyes-demo",
         "veridian-admin",
