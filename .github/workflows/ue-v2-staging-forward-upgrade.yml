@@ -164,6 +164,23 @@ jobs:
           docker build -f tooling/docker/ue-v2-forward-upgrade.Dockerfile \
             --build-arg "QUALIFIED_APPLICATION_IMAGE=$QUALIFIED_APPLICATION_IMAGE" \
             --build-arg "OPERATOR_SOURCE_SHA=$GITHUB_SHA" -t "$TAG" "$RUNNER_TEMP/operator-context"
+          # Exercise the actual packaged entrypoint with networking disabled.
+          # Missing runtime modules must fail before publication or staging use.
+          set +e
+          docker run --rm --network none -e UE_UPGRADE_OPERATION=preflight -e UE_ENVIRONMENT=production \
+            "$TAG" > "$RUNNER_TEMP/forward-image-refusal.log" 2>&1
+          REFUSAL_STATUS=$?
+          set -e
+          test "$REFUSAL_STATUS" -eq 1
+          node - <<'NODE'
+          const fs = require('node:fs'), assert = require('node:assert/strict')
+          const lines = fs.readFileSync(process.env.RUNNER_TEMP + '/forward-image-refusal.log','utf8').split('\n')
+          const line = lines.find(s => s.startsWith('UE_UPGRADE_RECEIPT '))
+          assert(line, 'Packaged operator must emit its structured refusal receipt')
+          const receipt = JSON.parse(line.slice('UE_UPGRADE_RECEIPT '.length))
+          assert.equal(receipt.status, 'FAIL'); assert.equal(receipt.failure, 'UE_UPGRADE_STAGING_ONLY')
+          assert.equal(receipt.changesCommitted, false); assert.equal(receipt.productionDeployment, false)
+          NODE
           docker push "$TAG"
           DIGEST=$(az acr manifest show-metadata -r "$REGISTRY" -n "$IMAGE_REPOSITORY:forward-upgrade-$GITHUB_SHA" --query digest -o tsv)
           [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
