@@ -433,7 +433,7 @@
       "name": "nen",
       "language": "typescript",
       "framework": "Next.js",
-      "port": 3018,
+      "port": 3022,
       "hasReadme": true,
       "hasEnvExample": true,
       "dependsOnPlatformShell": false,

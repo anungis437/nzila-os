@@ -387,7 +387,7 @@
       "evidence_export": false,
       "demo_seed": false,
       "docs_complete": true,
-      "port": 3018,
+      "port": 3022,
       "environments": {
         "staging": null,
         "production": null

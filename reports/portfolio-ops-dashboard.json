@@ -381,8 +381,8 @@
       "recommendation": "HOLD",
       "weighted_score": 3.8,
       "readiness_tier": "internal-only",
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3022
     },
     {
       "id": "trade",

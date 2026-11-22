@@ -1414,8 +1414,8 @@
         "readiness": 2,
         "margin_potential": 2
       },
-      "registry_tier": "UNREGISTERED",
-      "dev_port": null
+      "registry_tier": "EXPERIMENTAL",
+      "dev_port": 3022
     },
     {
       "id": "trade",

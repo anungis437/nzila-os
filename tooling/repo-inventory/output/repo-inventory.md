@@ -30,7 +30,7 @@
 | mobility | Next.js | 3012 | ✅ | ✅ | ✅ | ✅ | 41 | Investment migration advisory platform — case management, program intelligence,  |
 | mobility-client-portal | Next.js | 3013 | ✅ | ✅ | ❌ | ✅ | 32 | Client-facing portal for investment migration applicants to track cases, upload  |
 | nacp-exams | Next.js | 3011 | ✅ | ✅ | ✅ | ✅ | 64 | DRC-native national education and examination infrastructure. Modeled on the |
-| nen | Next.js | 3018 | ✅ | ✅ | ❌ | ✅ | 7 |  |
+| nen | Next.js | 3022 | ✅ | ✅ | ❌ | ✅ | 7 |  |
 | nzila-hq | Next.js | 3020 | ✅ | ✅ | ❌ | ✅ | 107 |  |
 | orchestrator-api | Fastify | — | ✅ | ✅ | ❌ | ❌ | 36 | Fastify-based API server for workflow orchestration, job dispatch, and platform  |
 | partners | Next.js | 3004 | ✅ | ✅ | ✅ | ✅ | 114 | Partner portal for managing deals, commissions, certifications, and go-to-market |

@@ -335,7 +335,7 @@
       "priority": "low"
     },
     "nen": {
-      "registry_tier": "UNREGISTERED",
+      "registry_tier": "EXPERIMENTAL",
       "deployment_status": "incubating",
       "readiness_tier": "internal-only",
       "exposure": "internal",

@@ -4,7 +4,7 @@
 
 NEN is an EXPERIMENTAL Nzila OS product, intentionally separate from Union Eyes, CIVIC, Partners and Flow. Public landing, existing platform-auth sign-in and a signed-in read-only workspace shell are included. No business/financial records, test identities, or NEN grants are provisioned.
 
-- `pnpm --filter @nzila/nen dev` — local development (port 3018).
+- `pnpm --filter @nzila/nen dev` — local development (port 3022).
 - `pnpm --filter @nzila/nen typecheck` and `pnpm --filter @nzila/nen build` — integration checks once dependencies are installed.
 - `pnpm --filter @nzila/nen-core test` — tested deterministic teaming/contract-share domain.
 

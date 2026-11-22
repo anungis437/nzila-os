@@ -58,7 +58,7 @@
 | Maestria | INCUBATING | internal-only | internal | HOLD |
 | Mobility | INCUBATING | internal-only | internal | HOLD |
 | NACP Exams | INCUBATING | internal-only | internal | HOLD |
-| Nzila Economic Network | UNREGISTERED | internal-only | internal | HOLD |
+| Nzila Economic Network | EXPERIMENTAL | internal-only | internal | HOLD |
 | Trade | INCUBATING | internal-only | internal | HOLD |
 | Union Eyes Demo | INCUBATING | internal-only | internal | HOLD |
 | Veridian Admin | INCUBATING | internal-only | internal | HOLD |

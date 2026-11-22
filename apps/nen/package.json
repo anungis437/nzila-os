@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3018",
+    "dev": "next dev --port 3022",
     "build": "next build",
-    "start": "next start --port 3018",
+    "start": "next start --port 3022",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },

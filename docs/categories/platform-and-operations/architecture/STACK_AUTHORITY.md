@@ -28,6 +28,7 @@ audit trails, and lets contract tests enforce structural invariants.
 | **console** | **TS/Drizzle** | `createScopedDb` + `platformDb` | — | **Reference implementation** |
 | **cfo** | **TS/Drizzle** | `createScopedDb` + `createAuditedScopedDb` + `platformDb` | — | Console-aligned |
 | **cora** | **TS/Drizzle** | `@nzila/agri-db` + `resolveOrgContext` | — | Cooperative management vertical |
+| **nen** | **TS/Drizzle target** | Next.js read-only shell; PostgreSQL persistence pending | — | EXPERIMENTAL; customer writes disabled until org-scope and audit gates pass |
 | **partners** | **TS/Drizzle** | `createAuditedScopedDb` + `platformDb` | — | Console-aligned + entitlements |
 | **agrimo** | **TS/Drizzle** | `@nzila/agri-db` + `resolveOrgContext` | — | Agricultural traceability vertical |
 | **nacp-exams** | **TS/Drizzle** | `platformDb` + `resolveOrgContext` | — | Clean vertical |

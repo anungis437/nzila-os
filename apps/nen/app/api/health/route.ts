@@ -1,3 +1,3 @@
 import { NextResponse } from 'next/server'
-/** Process liveness only. Does not assert DB readiness, institutional admission or product certification. */
-export function GET() { return NextResponse.json({ application: 'nen', process: 'alive', productionReady: false }) }
+/** Process liveness only. No claim of DB readiness or commercial admission. */
+export function GET() { return NextResponse.json({ application: 'nen', status: 'alive', timestamp: new Date().toISOString(), productionReady: false }) }

@@ -116,3 +116,12 @@ exceptions:
       adoption is staged before PILOT promotion.
     owner: platform-core
     reviewDate: "2027-04-01"
+
+  - app: nen
+    missing: platform-shell
+    reason: >-
+      EXPERIMENTAL Black Enterprise public portal uses a distinct bilingual
+      identity. Its read-only workbench uses platform-auth; institutional
+      records remain disabled until mandates and shell treatment pass review.
+    owner: platform-core
+    reviewDate: "2027-02-01"
