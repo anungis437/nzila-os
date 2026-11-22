@@ -92,6 +92,13 @@
       "owner": "platform-core",
       "justification": "INCUBATING commerce orchestration surface with a bespoke growth and marketing shell. Uses platform-auth for identity. Full platform-shell adoption is staged before PILOT promotion.",
       "expiresOn": "2027-04-01"
+    },
+    {
+      "path": "apps/nen",
+      "package": "platform-shell",
+      "owner": "platform-core",
+      "justification": "Experimental Black Enterprise public portal uses dedicated bilingual branding and platform-auth; business records remain disabled until authoritative institutional mandates and shell review for PILOT.",
+      "expiresOn": "2027-02-01"
     }
   ]
 }

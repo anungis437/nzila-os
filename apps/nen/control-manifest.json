@@ -1,0 +1,19 @@
+{
+  "$schema": "https://nzilaos.dev/schemas/control-manifest.json",
+  "app": "nen",
+  "version": "1.0.0",
+  "riskLevel": "low",
+  "policyProfile": "commerce",
+  "description": "Experimental Black Enterprise discovery and teaming app; customer and financial records disabled.",
+  "controls": {
+    "enforcement": false,
+    "governance": false,
+    "audit": false,
+    "observability": true,
+    "security": true,
+    "aiControl": false,
+    "contracts": false,
+    "events": false
+  },
+  "exceptions": []
+}

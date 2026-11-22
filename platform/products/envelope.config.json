@@ -233,6 +233,14 @@
       "trustProfile": "tier-3-internal",
       "launchStage": "incubating",
       "publicVisible": false
+    },
+    "nen": {
+      "pricingTier": "n/a",
+      "telemetryRequired": false,
+      "finopsEnabled": false,
+      "trustProfile": "tier-3-internal",
+      "launchStage": "incubating",
+      "publicVisible": false
     }
   }
 }

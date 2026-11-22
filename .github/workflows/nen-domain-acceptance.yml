@@ -1,0 +1,39 @@
+name: NEN Domain and App Acceptance
+
+# Independently tests the EXPERIMENTAL product, which does not yet have
+# a test:coverage target in the shared Turbo coverage matrix.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/nen/**'
+      - 'packages/nen-core/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/nen-domain-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nen-acceptance:
+    name: NEN core, bilingual shell, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ./.github/actions/setup-monorepo
+      - name: Typecheck the authority-aware domain core
+        run: pnpm --filter @nzila/nen-core typecheck
+      - name: Run consent, buyer authority, cent-allocation and privacy regressions
+        run: pnpm --filter @nzila/nen-core test
+      - name: Lint the NEN app
+        run: pnpm --filter @nzila/nen lint
+      - name: Typecheck the NEN app
+        run: pnpm --filter @nzila/nen typecheck
+      - name: Build the nonproduction NEN app
+        run: pnpm --filter @nzila/nen build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
+          AUTH_SECRET: ci_nen_build_only_not_a_real_credential_32_chars
+          NEXT_PUBLIC_CONSOLE_URL: https://console.nzila.app

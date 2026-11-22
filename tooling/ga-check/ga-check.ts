@@ -688,6 +688,7 @@ const checkPlatformScore = runGate('STUDIO-PLATFORM-SCORE', 'Studio maturity: Ev
     'apps/veridian-site': 3,  // INCUBATING — health public site, platform wiring planned pre-PILOT
     'apps/maestria': 4,  // INCUBATING — platform wiring staged pre-PILOT
     'apps/union-eyes-demo': 3, // INCUBATING — standalone CUPE 4373 demo instance, isolated from tenant context (no DB / no AI-ML client / no OTEL) by design
+    'apps/nen': 2, // EXPERIMENTAL only — Black Enterprise public shell + auth, no data writes. Remove/raise before PILOT admission.
     'apps/civic': 0, // HOLD stub — catalog-only positioning front door; no runtime platform wiring by design
   }
 

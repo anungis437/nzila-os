@@ -67,6 +67,7 @@ const TS_AUTHORITATIVE_APPS = [
   'weekone',
   'orchestrator-api',
   'nzila-hq',
+  'nen',
   'maestria',
   'trustcore',
   'trustcore-trustops',

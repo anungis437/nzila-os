@@ -161,6 +161,13 @@
       "tier": "EXPERIMENTAL",
       "owner": "platform",
       "domain": "testing"
+    },
+    {
+      "name": "nen",
+      "path": "apps/nen",
+      "tier": "EXPERIMENTAL",
+      "owner": "founders",
+      "domain": "commerce"
     }
   ],
   "platform_services": [
@@ -169,8 +176,17 @@
       "path": "packages/platform-governance",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["governance evaluation", "policy check", "compliance posture"],
-      "used_by": ["control-plane", "console", "abr", "cora"],
+      "apis": [
+        "governance evaluation",
+        "policy check",
+        "compliance posture"
+      ],
+      "used_by": [
+        "control-plane",
+        "console",
+        "abr",
+        "cora"
+      ],
       "control_plane_visible": true
     },
     {
@@ -178,8 +194,14 @@
       "path": "packages/platform-intelligence",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["AI insights", "signal triage", "intelligence feed"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "AI insights",
+        "signal triage",
+        "intelligence feed"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -187,8 +209,15 @@
       "path": "packages/platform-ai-query",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["structured AI query", "prompt execution"],
-      "used_by": ["control-plane", "union-eyes", "cfo"],
+      "apis": [
+        "structured AI query",
+        "prompt execution"
+      ],
+      "used_by": [
+        "control-plane",
+        "union-eyes",
+        "cfo"
+      ],
       "control_plane_visible": true
     },
     {
@@ -196,8 +225,13 @@
       "path": "packages/platform-anomaly-engine",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["anomaly detection", "threshold alerts"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "anomaly detection",
+        "threshold alerts"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -205,8 +239,18 @@
       "path": "packages/platform-policy-engine",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["policy evaluation", "rule enforcement"],
-      "used_by": ["union-eyes", "zonga", "cfo", "partners", "web", "console"],
+      "apis": [
+        "policy evaluation",
+        "rule enforcement"
+      ],
+      "used_by": [
+        "union-eyes",
+        "zonga",
+        "cfo",
+        "partners",
+        "web",
+        "console"
+      ],
       "control_plane_visible": false
     },
     {
@@ -214,8 +258,14 @@
       "path": "packages/platform-change-management",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["change request lifecycle", "change calendar", "approval workflow"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "change request lifecycle",
+        "change calendar",
+        "approval workflow"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -223,8 +273,14 @@
       "path": "packages/platform-decision-engine",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["decision lifecycle", "decision review", "recommendation"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "decision lifecycle",
+        "decision review",
+        "recommendation"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -232,8 +288,14 @@
       "path": "packages/platform-environment",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["environment status", "env orchestration", "health checks"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "environment status",
+        "env orchestration",
+        "health checks"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -241,8 +303,14 @@
       "path": "packages/platform-auth",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["authentication", "authorization", "session guards"],
-      "used_by": ["all apps"],
+      "apis": [
+        "authentication",
+        "authorization",
+        "session guards"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -250,8 +318,15 @@
       "path": "packages/platform-contracts",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["platform contracts", "health", "metrics", "governance"],
-      "used_by": ["all apps"],
+      "apis": [
+        "platform contracts",
+        "health",
+        "metrics",
+        "governance"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -259,8 +334,14 @@
       "path": "packages/platform-observability",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["telemetry collection", "metrics export", "trace propagation"],
-      "used_by": ["all apps"],
+      "apis": [
+        "telemetry collection",
+        "metrics export",
+        "trace propagation"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -268,8 +349,13 @@
       "path": "packages/platform-notifications",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["notification orchestration", "dispatch contracts"],
-      "used_by": ["all apps"],
+      "apis": [
+        "notification orchestration",
+        "dispatch contracts"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -277,8 +363,14 @@
       "path": "packages/platform-billing",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["billing primitives", "invoice and subscription contracts"],
-      "used_by": ["commerce apps", "finance apps"],
+      "apis": [
+        "billing primitives",
+        "invoice and subscription contracts"
+      ],
+      "used_by": [
+        "commerce apps",
+        "finance apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -286,8 +378,15 @@
       "path": "packages/platform-revenue",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["revenue aggregation", "monetization contracts"],
-      "used_by": ["control-plane", "commerce apps", "media apps"],
+      "apis": [
+        "revenue aggregation",
+        "monetization contracts"
+      ],
+      "used_by": [
+        "control-plane",
+        "commerce apps",
+        "media apps"
+      ],
       "control_plane_visible": true
     },
     {
@@ -295,8 +394,15 @@
       "path": "packages/platform-integrations",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["connector orchestration", "integration runtime governance"],
-      "used_by": ["control-plane", "platform-admin", "app runtimes"],
+      "apis": [
+        "connector orchestration",
+        "integration runtime governance"
+      ],
+      "used_by": [
+        "control-plane",
+        "platform-admin",
+        "app runtimes"
+      ],
       "control_plane_visible": false
     },
     {
@@ -304,8 +410,15 @@
       "path": "packages/platform-evidence-pack",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["evidence packaging", "evidence export", "compliance artifact generation"],
-      "used_by": ["control-plane", "union-eyes"],
+      "apis": [
+        "evidence packaging",
+        "evidence export",
+        "compliance artifact generation"
+      ],
+      "used_by": [
+        "control-plane",
+        "union-eyes"
+      ],
       "control_plane_visible": true
     },
     {
@@ -313,8 +426,14 @@
       "path": "packages/platform-compliance-snapshots",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["compliance snapshot capture", "snapshot comparison"],
-      "used_by": ["control-plane", "cora"],
+      "apis": [
+        "compliance snapshot capture",
+        "snapshot comparison"
+      ],
+      "used_by": [
+        "control-plane",
+        "cora"
+      ],
       "control_plane_visible": true
     },
     {
@@ -322,8 +441,13 @@
       "path": "packages/platform-agent-workflows",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["agent recommendation", "workflow orchestration"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "agent recommendation",
+        "workflow orchestration"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -331,8 +455,13 @@
       "path": "packages/platform-ai-governance",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["AI model governance", "prompt audit"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "AI model governance",
+        "prompt audit"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -340,8 +469,13 @@
       "path": "packages/platform-procurement-proof",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["procurement pack generation", "evidence validation"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "procurement pack generation",
+        "evidence validation"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": true
     },
     {
@@ -349,8 +483,14 @@
       "path": "packages/platform-feature-flags",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["feature flag evaluation", "flag management"],
-      "used_by": ["control-plane", "all apps"],
+      "apis": [
+        "feature flag evaluation",
+        "flag management"
+      ],
+      "used_by": [
+        "control-plane",
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -358,8 +498,13 @@
       "path": "packages/platform-deploy",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["deployment orchestration", "rollback"],
-      "used_by": ["infrastructure"],
+      "apis": [
+        "deployment orchestration",
+        "rollback"
+      ],
+      "used_by": [
+        "infrastructure"
+      ],
       "control_plane_visible": false
     },
     {
@@ -367,8 +512,13 @@
       "path": "packages/platform-events",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["domain event bus", "event dispatch"],
-      "used_by": ["all apps"],
+      "apis": [
+        "domain event bus",
+        "event dispatch"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -376,8 +526,13 @@
       "path": "packages/platform-event-fabric",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["cross-service event fabric", "event correlation"],
-      "used_by": ["platform services"],
+      "apis": [
+        "cross-service event fabric",
+        "event correlation"
+      ],
+      "used_by": [
+        "platform services"
+      ],
       "control_plane_visible": false
     },
     {
@@ -385,8 +540,14 @@
       "path": "packages/platform-export",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["data export", "report generation"],
-      "used_by": ["control-plane", "cfo"],
+      "apis": [
+        "data export",
+        "report generation"
+      ],
+      "used_by": [
+        "control-plane",
+        "cfo"
+      ],
       "control_plane_visible": false
     },
     {
@@ -394,8 +555,13 @@
       "path": "packages/platform-metrics",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["metrics collection", "metric aggregation"],
-      "used_by": ["all apps"],
+      "apis": [
+        "metrics collection",
+        "metric aggregation"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -403,8 +569,13 @@
       "path": "packages/platform-isolation",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["org isolation", "org boundary enforcement"],
-      "used_by": ["all apps"],
+      "apis": [
+        "org isolation",
+        "org boundary enforcement"
+      ],
+      "used_by": [
+        "all apps"
+      ],
       "control_plane_visible": false
     },
     {
@@ -412,8 +583,13 @@
       "path": "packages/platform-proof",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["proof generation", "hash chain"],
-      "used_by": ["union-eyes"],
+      "apis": [
+        "proof generation",
+        "hash chain"
+      ],
+      "used_by": [
+        "union-eyes"
+      ],
       "control_plane_visible": false
     },
     {
@@ -421,8 +597,12 @@
       "path": "packages/platform-utils",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["shared utilities"],
-      "used_by": ["all packages"],
+      "apis": [
+        "shared utilities"
+      ],
+      "used_by": [
+        "all packages"
+      ],
       "control_plane_visible": false
     },
     {
@@ -430,8 +610,13 @@
       "path": "packages/platform-validation",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["validation runners", "architecture audit"],
-      "used_by": ["CI"],
+      "apis": [
+        "validation runners",
+        "architecture audit"
+      ],
+      "used_by": [
+        "CI"
+      ],
       "control_plane_visible": false
     },
     {
@@ -439,8 +624,14 @@
       "path": "packages/platform-ai-contract",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["AI output schemas", "contract validation"],
-      "used_by": ["ai-core", "ai-sdk"],
+      "apis": [
+        "AI output schemas",
+        "contract validation"
+      ],
+      "used_by": [
+        "ai-core",
+        "ai-sdk"
+      ],
       "control_plane_visible": false
     },
     {
@@ -448,8 +639,13 @@
       "path": "packages/platform-governed-ai",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["governed AI execution", "prompt guardrails"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "governed AI execution",
+        "prompt guardrails"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": false
     },
     {
@@ -457,7 +653,10 @@
       "path": "packages/platform-reasoning-engine",
       "owner": "platform",
       "lifecycle": "EXPERIMENTAL",
-      "apis": ["reasoning chains", "inference"],
+      "apis": [
+        "reasoning chains",
+        "inference"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -466,8 +665,13 @@
       "path": "packages/platform-semantic-search",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["semantic search", "vector query"],
-      "used_by": ["agrimo"],
+      "apis": [
+        "semantic search",
+        "vector query"
+      ],
+      "used_by": [
+        "agrimo"
+      ],
       "control_plane_visible": false
     },
     {
@@ -475,7 +679,10 @@
       "path": "packages/platform-context-orchestrator",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["context assembly", "multi-source fusion"],
+      "apis": [
+        "context assembly",
+        "multi-source fusion"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -484,7 +691,10 @@
       "path": "packages/platform-knowledge-registry",
       "owner": "platform",
       "lifecycle": "EXPERIMENTAL",
-      "apis": ["knowledge storage", "knowledge retrieval"],
+      "apis": [
+        "knowledge storage",
+        "knowledge retrieval"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -493,8 +703,13 @@
       "path": "packages/platform-decision-graph",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["decision graph traversal", "dependency analysis"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "decision graph traversal",
+        "dependency analysis"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": false
     },
     {
@@ -502,7 +717,10 @@
       "path": "packages/platform-ontology",
       "owner": "platform",
       "lifecycle": "EXPERIMENTAL",
-      "apis": ["ontology management", "concept graph"],
+      "apis": [
+        "ontology management",
+        "concept graph"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -511,7 +729,10 @@
       "path": "packages/platform-entity-graph",
       "owner": "platform",
       "lifecycle": "EXPERIMENTAL",
-      "apis": ["entity relationships", "graph queries"],
+      "apis": [
+        "entity relationships",
+        "graph queries"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -520,7 +741,10 @@
       "path": "packages/platform-data-fabric",
       "owner": "platform",
       "lifecycle": "EXPERIMENTAL",
-      "apis": ["cross-domain data mesh", "data lineage"],
+      "apis": [
+        "cross-domain data mesh",
+        "data lineage"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -529,8 +753,13 @@
       "path": "packages/platform-cost",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["cost tracking", "cost attribution"],
-      "used_by": ["cfo"],
+      "apis": [
+        "cost tracking",
+        "cost attribution"
+      ],
+      "used_by": [
+        "cfo"
+      ],
       "control_plane_visible": false
     },
     {
@@ -538,7 +767,10 @@
       "path": "packages/platform-marketplace",
       "owner": "platform",
       "lifecycle": "EXPERIMENTAL",
-      "apis": ["marketplace catalog", "service discovery"],
+      "apis": [
+        "marketplace catalog",
+        "service discovery"
+      ],
       "used_by": [],
       "control_plane_visible": false
     },
@@ -547,8 +779,13 @@
       "path": "packages/platform-performance",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["performance measurement", "perf budgets"],
-      "used_by": ["CI"],
+      "apis": [
+        "performance measurement",
+        "perf budgets"
+      ],
+      "used_by": [
+        "CI"
+      ],
       "control_plane_visible": false
     },
     {
@@ -556,8 +793,13 @@
       "path": "packages/platform-assurance",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["assurance checks", "readiness validation"],
-      "used_by": ["CI"],
+      "apis": [
+        "assurance checks",
+        "readiness validation"
+      ],
+      "used_by": [
+        "CI"
+      ],
       "control_plane_visible": false
     },
     {
@@ -565,8 +807,13 @@
       "path": "packages/platform-rfp-generator",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["RFP generation", "procurement evidence"],
-      "used_by": ["CI"],
+      "apis": [
+        "RFP generation",
+        "procurement evidence"
+      ],
+      "used_by": [
+        "CI"
+      ],
       "control_plane_visible": false
     },
     {
@@ -574,8 +821,14 @@
       "path": "packages/platform-ops",
       "owner": "platform",
       "lifecycle": "STABLE",
-      "apis": ["operational utilities", "runbook support"],
-      "used_by": ["CI", "infrastructure"],
+      "apis": [
+        "operational utilities",
+        "runbook support"
+      ],
+      "used_by": [
+        "CI",
+        "infrastructure"
+      ],
       "control_plane_visible": false
     },
     {
@@ -583,8 +836,14 @@
       "path": "packages/platform-rum",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["real user monitoring", "client telemetry"],
-      "used_by": ["web", "console"],
+      "apis": [
+        "real user monitoring",
+        "client telemetry"
+      ],
+      "used_by": [
+        "web",
+        "console"
+      ],
       "control_plane_visible": false
     },
     {
@@ -592,8 +851,14 @@
       "path": "packages/platform-commerce-org",
       "owner": "commerce",
       "lifecycle": "STABLE",
-      "apis": ["commerce org context", "org scoping"],
-      "used_by": ["partners", "cfo"],
+      "apis": [
+        "commerce org context",
+        "org scoping"
+      ],
+      "used_by": [
+        "partners",
+        "cfo"
+      ],
       "control_plane_visible": false
     },
     {
@@ -601,33 +866,83 @@
       "path": "packages/platform-integrations-control-plane",
       "owner": "platform",
       "lifecycle": "EVOLVING",
-      "apis": ["integration status", "integration health"],
-      "used_by": ["control-plane"],
+      "apis": [
+        "integration status",
+        "integration health"
+      ],
+      "used_by": [
+        "control-plane"
+      ],
       "control_plane_visible": false
     }
   ],
   "shared_packages": [
-    { "name": "os-core", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "db", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "config", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "org", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "blob", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "ui", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
+    {
+      "name": "os-core",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "db",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "config",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "org",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "blob",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "ui",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
     {
       "name": "otel-core",
       "category": "PLATFORM_CORE",
       "owner": "platform",
       "stability": "STABLE"
     },
-    { "name": "secrets", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
-    { "name": "evidence", "category": "PLATFORM_CORE", "owner": "platform", "stability": "STABLE" },
+    {
+      "name": "secrets",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
+    {
+      "name": "evidence",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
     {
       "name": "contracts",
       "category": "PLATFORM_CORE",
       "owner": "platform",
       "stability": "EVOLVING"
     },
-    { "name": "events", "category": "PLATFORM_CORE", "owner": "platform", "stability": "EVOLVING" },
+    {
+      "name": "events",
+      "category": "PLATFORM_CORE",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
     {
       "name": "observability",
       "category": "PLATFORM_CORE",
@@ -658,7 +973,12 @@
       "owner": "platform",
       "stability": "STABLE"
     },
-    { "name": "ai-sdk", "category": "AI_INTELLIGENCE", "owner": "platform", "stability": "STABLE" },
+    {
+      "name": "ai-sdk",
+      "category": "AI_INTELLIGENCE",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
     {
       "name": "ai-registry",
       "category": "AI_INTELLIGENCE",
@@ -737,14 +1057,24 @@
       "owner": "commerce",
       "stability": "STABLE"
     },
-    { "name": "agri-core", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
+    {
+      "name": "agri-core",
+      "category": "DOMAIN_SHARED",
+      "owner": "agri",
+      "stability": "EVOLVING"
+    },
     {
       "name": "agri-adapters",
       "category": "DOMAIN_SHARED",
       "owner": "agri",
       "stability": "EVOLVING"
     },
-    { "name": "agri-db", "category": "DOMAIN_SHARED", "owner": "agri", "stability": "EVOLVING" },
+    {
+      "name": "agri-db",
+      "category": "DOMAIN_SHARED",
+      "owner": "agri",
+      "stability": "EVOLVING"
+    },
     {
       "name": "agri-events",
       "category": "DOMAIN_SHARED",
@@ -841,17 +1171,42 @@
       "owner": "commerce",
       "stability": "STABLE"
     },
-    { "name": "fx", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
-    { "name": "tax", "category": "APP_SUPPORT", "owner": "commerce", "stability": "STABLE" },
-    { "name": "finops", "category": "APP_SUPPORT", "owner": "finance", "stability": "EVOLVING" },
-    { "name": "qbo", "category": "APP_SUPPORT", "owner": "finance", "stability": "EVOLVING" },
+    {
+      "name": "fx",
+      "category": "APP_SUPPORT",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "tax",
+      "category": "APP_SUPPORT",
+      "owner": "commerce",
+      "stability": "STABLE"
+    },
+    {
+      "name": "finops",
+      "category": "APP_SUPPORT",
+      "owner": "finance",
+      "stability": "EVOLVING"
+    },
+    {
+      "name": "qbo",
+      "category": "APP_SUPPORT",
+      "owner": "finance",
+      "stability": "EVOLVING"
+    },
     {
       "name": "pricing-engine",
       "category": "APP_SUPPORT",
       "owner": "commerce",
       "stability": "STABLE"
     },
-    { "name": "webhooks", "category": "APP_SUPPORT", "owner": "platform", "stability": "STABLE" },
+    {
+      "name": "webhooks",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "STABLE"
+    },
     {
       "name": "comms-email",
       "category": "APP_SUPPORT",
@@ -936,7 +1291,12 @@
       "owner": "platform",
       "stability": "EVOLVING"
     },
-    { "name": "cli", "category": "APP_SUPPORT", "owner": "platform", "stability": "EVOLVING" },
+    {
+      "name": "cli",
+      "category": "APP_SUPPORT",
+      "owner": "platform",
+      "stability": "EVOLVING"
+    },
     {
       "name": "scripts-book",
       "category": "APP_SUPPORT",
@@ -972,30 +1332,130 @@
     }
   ],
   "control_plane_surfaces": [
-    { "route": "/overview", "bucket": "HEALTH", "source": "aggregated" },
-    { "route": "/governance", "bucket": "HEALTH", "source": "platform-governance" },
-    { "route": "/environments", "bucket": "HEALTH", "source": "platform-environment" },
-    { "route": "/changes", "bucket": "ATTENTION", "source": "platform-change-management" },
-    { "route": "/change-calendar", "bucket": "HEALTH", "source": "platform-change-management" },
-    { "route": "/decisions", "bucket": "ATTENTION", "source": "platform-decision-engine" },
-    { "route": "/decision-summary", "bucket": "ATTENTION", "source": "platform-decision-engine" },
-    { "route": "/intelligence", "bucket": "ATTENTION", "source": "platform-intelligence" },
-    { "route": "/anomalies", "bucket": "ATTENTION", "source": "platform-anomaly-engine" },
-    { "route": "/agents", "bucket": "ACTION", "source": "platform-agent-workflows" },
-    { "route": "/modules", "bucket": "HEALTH", "source": "module-registry" },
-    { "route": "/procurement", "bucket": "ACTION", "source": "platform-procurement-proof" },
-    { "route": "/architecture", "bucket": "HEALTH", "source": "architecture-checks" },
-    { "route": "/accounts", "bucket": "ATTENTION", "source": "platform-growth-os" },
-    { "route": "/ai", "bucket": "HEALTH", "source": "platform-ai-ops" },
-    { "route": "/follow-ups", "bucket": "ATTENTION", "source": "platform-growth-os" },
-    { "route": "/ingestion", "bucket": "ATTENTION", "source": "platform-ingestion" },
-    { "route": "/integrations", "bucket": "ATTENTION", "source": "platform-integration-fabric" },
-    { "route": "/partners", "bucket": "ATTENTION", "source": "platform-growth-os" },
-    { "route": "/pilots", "bucket": "HEALTH", "source": "platform-pilots" },
-    { "route": "/pipeline", "bucket": "ATTENTION", "source": "platform-growth-os" },
-    { "route": "/proof", "bucket": "HEALTH", "source": "platform-procurement-proof" },
-    { "route": "/proposals", "bucket": "ATTENTION", "source": "platform-growth-os" },
-    { "route": "/revenue", "bucket": "HEALTH", "source": "platform-revenue" },
-    { "route": "/streaming", "bucket": "HEALTH", "source": "platform-streaming" }
+    {
+      "route": "/overview",
+      "bucket": "HEALTH",
+      "source": "aggregated"
+    },
+    {
+      "route": "/governance",
+      "bucket": "HEALTH",
+      "source": "platform-governance"
+    },
+    {
+      "route": "/environments",
+      "bucket": "HEALTH",
+      "source": "platform-environment"
+    },
+    {
+      "route": "/changes",
+      "bucket": "ATTENTION",
+      "source": "platform-change-management"
+    },
+    {
+      "route": "/change-calendar",
+      "bucket": "HEALTH",
+      "source": "platform-change-management"
+    },
+    {
+      "route": "/decisions",
+      "bucket": "ATTENTION",
+      "source": "platform-decision-engine"
+    },
+    {
+      "route": "/decision-summary",
+      "bucket": "ATTENTION",
+      "source": "platform-decision-engine"
+    },
+    {
+      "route": "/intelligence",
+      "bucket": "ATTENTION",
+      "source": "platform-intelligence"
+    },
+    {
+      "route": "/anomalies",
+      "bucket": "ATTENTION",
+      "source": "platform-anomaly-engine"
+    },
+    {
+      "route": "/agents",
+      "bucket": "ACTION",
+      "source": "platform-agent-workflows"
+    },
+    {
+      "route": "/modules",
+      "bucket": "HEALTH",
+      "source": "module-registry"
+    },
+    {
+      "route": "/procurement",
+      "bucket": "ACTION",
+      "source": "platform-procurement-proof"
+    },
+    {
+      "route": "/architecture",
+      "bucket": "HEALTH",
+      "source": "architecture-checks"
+    },
+    {
+      "route": "/accounts",
+      "bucket": "ATTENTION",
+      "source": "platform-growth-os"
+    },
+    {
+      "route": "/ai",
+      "bucket": "HEALTH",
+      "source": "platform-ai-ops"
+    },
+    {
+      "route": "/follow-ups",
+      "bucket": "ATTENTION",
+      "source": "platform-growth-os"
+    },
+    {
+      "route": "/ingestion",
+      "bucket": "ATTENTION",
+      "source": "platform-ingestion"
+    },
+    {
+      "route": "/integrations",
+      "bucket": "ATTENTION",
+      "source": "platform-integration-fabric"
+    },
+    {
+      "route": "/partners",
+      "bucket": "ATTENTION",
+      "source": "platform-growth-os"
+    },
+    {
+      "route": "/pilots",
+      "bucket": "HEALTH",
+      "source": "platform-pilots"
+    },
+    {
+      "route": "/pipeline",
+      "bucket": "ATTENTION",
+      "source": "platform-growth-os"
+    },
+    {
+      "route": "/proof",
+      "bucket": "HEALTH",
+      "source": "platform-procurement-proof"
+    },
+    {
+      "route": "/proposals",
+      "bucket": "ATTENTION",
+      "source": "platform-growth-os"
+    },
+    {
+      "route": "/revenue",
+      "bucket": "HEALTH",
+      "source": "platform-revenue"
+    },
+    {
+      "route": "/streaming",
+      "bucket": "HEALTH",
+      "source": "platform-streaming"
+    }
   ]
 }

@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-21T00:00:00.000Z",
-  "appCount": 28,
-  "packageCount": 225,
-  "workspacePackageCount": 260,
-  "workflowCount": 72,
+  "generatedAt": "2026-11-22T00:00:00.000Z",
+  "appCount": 29,
+  "packageCount": 226,
+  "workspacePackageCount": 262,
+  "workflowCount": 73,
   "contractTestCount": 309,
   "tsTestFileCount": 3857,
   "pythonTestFileCount": 54,
@@ -428,6 +428,23 @@
       ],
       "purpose": "DRC-native national education and examination infrastructure. Modeled on the",
       "codeFileCount": 64
+    },
+    {
+      "name": "nen",
+      "language": "typescript",
+      "framework": "Next.js",
+      "port": 3022,
+      "hasReadme": true,
+      "hasEnvExample": true,
+      "dependsOnPlatformShell": false,
+      "dependsOnPlatformAuth": true,
+      "nzilaDeps": [
+        "config",
+        "nen-core",
+        "platform-auth"
+      ],
+      "purpose": "",
+      "codeFileCount": 7
     },
     {
       "name": "nzila-hq",
@@ -891,6 +908,7 @@
     "gitops-deploy.yml",
     "lighthouse.yml",
     "merge-authority.yml",
+    "nen-domain-acceptance.yml",
     "nzila-ga-gate.yml",
     "nzila-governance.yml",
     "nzila-playbook-runner.yml",
