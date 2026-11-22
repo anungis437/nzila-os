@@ -228,6 +228,9 @@ def main():
         record["status"] = "PASS"
         print(json.dumps({"job": name, "execution": execution, "operation": operation, "status": receipt["status"],
                           "planDigest": receipt["planDigest"], "beforeDigest": receipt["beforeDigest"]}))
+    except (AssertionError, AzureFailure) as error:
+        record["failure"] = str(error)
+        raise
     finally:
         try:
             tags = json.loads(azure("containerapp", "job", "show", "-g", GROUP, "-n", name, "--query", "tags", "-o", "json"))

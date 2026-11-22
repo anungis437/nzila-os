@@ -143,6 +143,7 @@ class ForwardJobControls(unittest.TestCase):
                             runner.main()
                     raw = pathlib.Path("artifacts/ue-v2-forward-upgrade/job-control.json").read_text()
                     self.assertEqual(json.loads(raw)["status"], "FAIL_OWNED_JOB_CLEANUP_UNCONFIRMED")
+                    self.assertEqual(json.loads(raw)["failure"], "Synthetic creation failure")
                     self.assertNotIn(env["PG_ADMIN_PASSWORD"], raw)
                     self.assertFalse(any("delete" in args for args in calls))
                 finally:

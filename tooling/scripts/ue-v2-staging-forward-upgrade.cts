@@ -58,7 +58,7 @@ async function main() {
   assert.equal(manifest.operatorSourceSha, operatorSource)
   assert.equal(manifest.sourcePlanDigest, PLAN_DIGEST)
   for (const [file, digest] of Object.entries(manifest.files) as [string, string][]) {
-    assert(/^[a-z-]+\.json$|^schema\.sql$/.test(file), 'UE_UPGRADE_ASSET_NAME_REFUSED')
+    assert(/^(?:[a-z-]+\.json|schema\.sql)$/.test(file), 'UE_UPGRADE_ASSET_NAME_REFUSED')
     assert.equal(
       sha(fs.readFileSync(path.join(root, file))),
       digest,
