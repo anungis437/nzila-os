@@ -305,6 +305,18 @@ az role assignment create --assignee-object-id "$DEPLOY_PID" --assignee-principa
   --condition "$(cond "$ACR_PULL")" --condition-version 2.0
 ```
 
+**Base-operations Reader grants (added 2026-11-21).** The Bicep declares ARM-metadata **Reader** grants for the
+staging app identity `nzila-ue-v2-staging-id` on the six core scheduled jobs and on the PostgreSQL server
+(`coreJobMetadataReaders` in `modules/apps.bicep`, `stagingBackupMetadataReader` in `main.bicep`). The base
+operational monitor uses them to read job executions and backup metadata. The staging resource group's conditioned
+administrator assignment must therefore also allow:
+- writing **Reader** only when the principal is that app identity;
+- deleting **Reader** assignments only when they belong to that app identity.
+
+The Key Vault clauses are unchanged. Apply this to an existing setup with the owner-run
+`tooling/scripts/ops/ue-v2-staging-deployer-rbac-condition.sh`. It does a dry run by default and writes only
+with `--apply`. Without it, the apply-time what-if fails with `roleAssignments/write` denied on those scopes.
+
 ### Step 5: verify (read-only)
 
 ```bash
@@ -315,7 +327,7 @@ for ID in nzila-os-ue-staging-plan nzila-os-ue-staging-deploy; do
 done
 ```
 
-Expected: exactly the rows in section 2, no subscription-scope row, and one federated credential per
+Expected: exactly the rows in section 2 (the staging resource-group administrator condition includes the base-operations Reader clauses for `nzila-ue-v2-staging-id`), no subscription-scope row, and one federated credential per
 identity whose subject ends in `environment:ue-staging-plan` or `environment:ue-staging`.
 
 ### Step 6: GitHub environments
