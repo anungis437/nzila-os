@@ -1,0 +1,26 @@
+{
+  "name": "@nzila/nen",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3018",
+    "build": "next build",
+    "start": "next start --port 3018",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nzila/nen-core": "workspace:*",
+    "@nzila/platform-auth": "workspace:*",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@nzila/config": "workspace:*",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^6"
+  }
+}
