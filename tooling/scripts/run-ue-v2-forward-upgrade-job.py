@@ -209,7 +209,7 @@ def require_rehearsal(source):
         run = json.loads(gh("api", f"repos/anungis437/nzila-os/actions/runs/{rehearsal_id}"))
         with tempfile.TemporaryDirectory(prefix="ue-rehearsal-receipt-") as private:
             gh("run", "download", rehearsal_id, "--repo", "anungis437/nzila-os",
-               "--name", f"ue-staging-forward-upgrade-{rehearsal_id}", "--dir", private)
+               "--name", f"ue-staging-forward-upgrade-rehearse-{rehearsal_id}", "--dir", private)
             receipt = json.loads((pathlib.Path(private) / "operation-receipt.json").read_text())
             control = json.loads((pathlib.Path(private) / "job-control.json").read_text())
             validate_rehearsal(run, receipt, control, source, rehearsal_id,

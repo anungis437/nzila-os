@@ -16,6 +16,39 @@ spec.loader.exec_module(runner)
 
 
 class ForwardJobControls(unittest.TestCase):
+    def test_apply_downloads_the_published_rehearsal_artifact_and_requires_its_receipts(self):
+        source, plan, before, run_id = "a" * 40, "b" * 64, "c" * 64, "123"
+        workflow = path.parents[2] / ".github/workflows/ue-v2-staging-forward-upgrade.yml"
+        self.assertIn("name: ue-staging-forward-upgrade-${{ inputs.operation }}-${{ github.run_id }}", workflow.read_text())
+        run = {"id": 123, "path": ".github/workflows/ue-v2-staging-forward-upgrade.yml", "head_branch": "main",
+               "head_sha": source, "event": "workflow_dispatch", "status": "completed", "conclusion": "success",
+               "repository": {"full_name": "anungis437/nzila-os"}}
+        receipt = {"operatorSourceSha": source, "applicationSourceSha": runner.APPLICATION_SOURCE, "operation": "rehearse",
+                   "executionRunId": run_id, "status": "PASS_STAGING_TRANSACTIONAL_REHEARSAL", "changesCommitted": False,
+                   "fullRollbackVerified": True, "temporaryPrivilegesRemoved": True, "productionDeployment": False,
+                   "planDigest": plan, "beforeDigest": before}
+        control = {"operatorSourceSha": source, "applicationSourceSha": runner.APPLICATION_SOURCE, "operation": "rehearse",
+                   "runId": run_id, "status": "PASS", "executionStatus": "Succeeded", "ownedJobAndSecretRemoved": True}
+        for missing in [None, "operation-receipt.json", "job-control.json"]:
+            with self.subTest(missing=missing):
+                def gh(argv, **kwargs):
+                    if argv[1] == "api":
+                        return subprocess.CompletedProcess(argv, 0, json.dumps(run), "")
+                    self.assertEqual(argv[:4], ["gh", "run", "download", run_id])
+                    self.assertEqual(argv[argv.index("--name") + 1], "ue-staging-forward-upgrade-rehearse-123")
+                    directory = pathlib.Path(argv[argv.index("--dir") + 1])
+                    for name, value in [("operation-receipt.json", receipt), ("job-control.json", control)]:
+                        if name != missing:
+                            (directory / name).write_text(json.dumps(value))
+                    return subprocess.CompletedProcess(argv, 0, "", "")
+                with patch.dict(runner.os.environ, {"REHEARSAL_RUN_ID": run_id, "EXPECTED_PLAN": plan, "EXPECTED_BEFORE": before}), patch.object(runner.subprocess, "run", side_effect=gh), patch.object(runner, "azure") as azure:
+                    if missing:
+                        with self.assertRaisesRegex(runner.AzureFailure, "unreadable"):
+                            runner.require_rehearsal(source)
+                    else:
+                        self.assertEqual(runner.require_rehearsal(source), run_id)
+                    azure.assert_not_called()
+
     def test_cutover_waits_for_correct_revision_image_and_runtime_source(self):
         healthy = {"healthState": "Healthy", "runningState": "Running"}
         def response(host, path):
