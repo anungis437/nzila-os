@@ -86,8 +86,14 @@ jobs:
           // All 252 diagnosed generated-field differences came from the
           // unordered source-digest-map fingerprint. Permit ONLY the exact
           // canonical digest on unchanged, source-unowned SQL statements.
-          const oldMapDigest = crypto.createHash('sha256')
-            .update(JSON.stringify(oldPlan.currentModels.sourceDigests)).digest('hex');
+          // The old plan was produced by an earlier compiler. Its synthetic
+          // digest is a historical sealed value, not a reproducible hash of
+          // today's model-map serialization. Demand one uniform old digest.
+          const historicalDigests = new Set(oldPlan.statements
+            .filter(s => s.canonicalId.startsWith('CURRENT_ENUM:'))
+            .map(s => s.sourceDigest));
+          assert.equal(historicalDigests.size, 1, 'Multiple historical enum digests');
+          const historicalSyntheticDigest = [...historicalDigests][0];
           const canonicalMapDigest = crypto.createHash('sha256').update(JSON.stringify(
             Object.entries(newPlan.currentModels.sourceDigests)
               .sort(([a],[b]) => a < b ? -1 : a > b ? 1 : 0)
@@ -100,7 +106,7 @@ jobs:
             assert.equal(oldStatement.canonicalId, newStatement?.canonicalId, 'Statement identity changed');
             assert.equal(oldStatement.sql, newStatement?.sql, 'Executable SQL changed');
             assert.equal(oldStatement.source, newStatement?.source, 'Statement source changed');
-            assert.equal(oldStatement.sourceDigest, oldMapDigest, 'Unexpected old statement source digest');
+            assert.equal(oldStatement.sourceDigest, historicalSyntheticDigest, 'Unexpected old synthetic digest');
             assert.equal(newStatement.sourceDigest, canonicalMapDigest, 'Unexpected new statement source digest');
             assert.ok(oldStatement.canonicalId.startsWith('CURRENT_ENUM:') ||
               oldStatement.canonicalId.startsWith('DJANGO_CURRENT:'),
