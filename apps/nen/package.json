@@ -19,8 +19,8 @@
   "devDependencies": {
     "@nzila/config": "workspace:*",
     "@types/node": "^25",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "typescript": "^6"
   }
 }
