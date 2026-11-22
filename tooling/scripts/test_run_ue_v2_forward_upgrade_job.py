@@ -1,4 +1,6 @@
 import importlib.util
+import contextlib
+import io
 import json
 import pathlib
 import subprocess
@@ -23,6 +25,42 @@ class ForwardJobControls(unittest.TestCase):
         self.assertEqual(env["PGPASSWORD"], {"name": "PGPASSWORD", "secretRef": runner.ADMIN_SECRET_NAME})
         self.assertEqual(env["PGDATABASE"]["value"], "ue_v2_staging")
         self.assertNotIn("synthetic-private-value", json.dumps(props["template"]))
+
+    def test_private_configuration_is_removed_and_never_becomes_an_argument_or_artifact(self):
+        env = {"GITHUB_REF": "refs/heads/main", "GITHUB_REPOSITORY": "anungis437/nzila-os", "GITHUB_RUN_ID": "123",
+               "GITHUB_SHA": "a" * 40, "OPERATION": "preflight", "PG_ADMIN_PASSWORD": "synthetic-private-value",
+               "OPERATOR_IMAGE": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:" + "b" * 64}
+        manifests = []
+        receipt = {"executionRunId": "123", "operatorSourceSha": env["GITHUB_SHA"],
+                   "applicationSourceSha": runner.APPLICATION_SOURCE, "operation": "preflight",
+                   "status": "PASS_READ_ONLY_PREFLIGHT", "planDigest": "c" * 64, "beforeDigest": "d" * 64}
+        def azure(*args, **kwargs):
+            self.assertNotIn(env["PG_ADMIN_PASSWORD"], repr(args))
+            if args[0] == "account": return runner.SUBSCRIPTION
+            if "create" in args:
+                manifest = pathlib.Path(args[args.index("--yaml") + 1]); manifests.append(manifest)
+                self.assertEqual(manifest.stat().st_mode & 0o777, 0o600)
+                spec = json.loads(manifest.read_text())
+                self.assertEqual(spec["properties"]["configuration"]["secrets"][0]["value"], env["PG_ADMIN_PASSWORD"])
+                return ""
+            if "start" in args: return "ue-v2-forward-123-abc"
+            if "execution" in args: return "Succeeded"
+            if "logs" in args: return "UE_UPGRADE_RECEIPT " + json.dumps(receipt)
+            if "show" in args: return json.dumps({"runId": "123", "scope": "staging-forward-upgrade"})
+            if "delete" in args: return ""
+            self.fail("Unexpected Azure operation")
+        cwd = runner.os.getcwd()
+        try:
+            with tempfile.TemporaryDirectory() as tmp, patch.dict(runner.os.environ, env, clear=True), patch.object(runner, "azure", side_effect=azure), contextlib.redirect_stdout(io.StringIO()):
+                runner.os.chdir(tmp)
+                runner.main()
+                self.assertTrue(manifests and all(not p.exists() for p in manifests))
+                outputs = list(pathlib.Path("artifacts").rglob("*"))
+                for path in outputs:
+                    if path.is_file(): self.assertNotIn(env["PG_ADMIN_PASSWORD"], path.read_text())
+                self.assertTrue(json.loads(pathlib.Path("artifacts/ue-v2-forward-upgrade/job-control.json").read_text())["ownedJobAndSecretRemoved"])
+        finally:
+            runner.os.chdir(cwd)
 
     def test_receipts_are_structured_and_incomplete_output_is_not_a_receipt(self):
         receipt = {"status": "PASS_READ_ONLY_PREFLIGHT", "executionRunId": "123"}
