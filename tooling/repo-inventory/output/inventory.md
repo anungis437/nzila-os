@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-21 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-22 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,7 +9,7 @@
 | Apps | 29 |
 | Packages (packages/*) | 226 |
 | Workspace Packages (apps|packages|services|tooling) | 262 |
-| GitHub Workflows | 72 |
+| GitHub Workflows | 74 |
 | Contract Test Files | 309 |
 | TS/JS Test Files | 3857 |
 | Python Test Files | 54 |
@@ -86,6 +86,8 @@
 - gitops-deploy.yml
 - lighthouse.yml
 - merge-authority.yml
+- nen-catalog-rebaseline.yml
+- nen-domain-acceptance.yml
 - nzila-ga-gate.yml
 - nzila-governance.yml
 - nzila-playbook-runner.yml
