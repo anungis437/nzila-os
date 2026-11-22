@@ -80,7 +80,18 @@ jobs:
       - name: Reproduce the original canonical schema without live data
         env:
           TSX_TSCONFIG_PATH: ${{ github.workspace }}/.ue-previous-source/apps/union-eyes/tsconfig.json
+          UE_V2_WHEELHOUSE: ${{ runner.temp }}/ue-old-wheels
         run: |
+          set -euo pipefail
+          mkdir -p "$UE_V2_WHEELHOUSE"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/.ue-previous-source/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$UE_V2_WHEELHOUSE:/wheels" \
+            python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+            --require-hashes --no-deps --only-binary=:all: -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' .ue-previous-source/apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$UE_V2_WHEELHOUSE/"*.whl | awk '{print $1}' | sort)
           pnpm --dir .ue-previous-source install --frozen-lockfile --ignore-scripts
           pnpm --dir .ue-previous-source exec tsx tooling/scripts/export-ue-v2-staging-schema.cts --out "$RUNNER_TEMP/ue-old-export"
       - name: Qualify the current schema export and retained managed upgrade
