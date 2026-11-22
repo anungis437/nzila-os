@@ -8,7 +8,7 @@
  * relationships DERIVED from source records are merged with the kernel-owned ones.
  */
 import { assessMandate, deny, isLive } from '../common'
-import { assertAuthorityReadLock, lockAuthorityRead, lockAuthorityReadSet } from './read-lock'
+import { assertAuthorityReadLock, assertAuthorityReadSetScope, lockAuthorityRead, lockAuthorityReadSet, type AuthorityReadSetScope } from './read-lock'
 import { decide } from '../kernel'
 import type { AuthorityFacts, AuthorityRequest, Decision, ReasonCode, ResourceFacts, ResourceRelationship } from '../ontology'
 import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
@@ -197,6 +197,7 @@ export async function enforceCaseProjection(
   exec: SqlExecutor,
   deps: EnforcementDeps,
   input: { principalUserId: string; organizationId: string; caseId: string },
+  readScope?: AuthorityReadSetScope,
 ): Promise<Record<CaseProjectionAction, Decision>> {
   const request: AuthorityRequest = {
     principalUserId: input.principalUserId, organizationId: input.organizationId,
@@ -212,7 +213,8 @@ export async function enforceCaseProjection(
     if (!session) return refuse('PRINCIPAL_NOT_AUTHENTICATED', 'no authenticated session is bound to this transaction')
     if (session !== input.principalUserId)
       return refuse('PRINCIPAL_MISMATCH', 'the decided principal is not the authenticated principal of this transaction')
-    await lockAuthorityRead(exec, request)
+    if(readScope)await assertAuthorityReadSetScope(exec,readScope,{principalUserId:input.principalUserId,organizationId:input.organizationId,resourceId:input.caseId})
+    else await lockAuthorityRead(exec, request)
     let facts = await loadAuthorityFacts(exec, deps.memberships, {
       organizationId: input.organizationId, principalUserId: input.principalUserId,
       authenticated: true, resource: request.resource, now,

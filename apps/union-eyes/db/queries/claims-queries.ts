@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, count, gte, lt } from "drizzle-orm";
+import { eq, and, desc, sql, count } from "drizzle-orm";
 import { claims, claimUpdates } from "../schema/claims-schema";
 import { organizations } from "../schema-organizations";
 import { withRLSContext, type RLSTx } from "@/lib/db/with-rls-context";
@@ -24,23 +24,21 @@ export const createClaim = async (
       const date = new Date();
       const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
       
-      // Get count of claims today to generate sequential number
-      const todayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const todayEnd = new Date(todayStart);
-      todayEnd.setDate(todayEnd.getDate() + 1);
-      
-      const todayCount = await dbOrTx
-        .select({ count: count() })
+      // Serialize allocation through the caller's transaction, including its
+      // audit commit. Count-based allocation collides under concurrency and
+      // can reuse an existing number after a record is removed.
+      const prefix = `CASE-${dateStr}-`;
+      await dbOrTx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`ue:claim-number:${data.organizationId}:${dateStr}`},0))`);
+      const [allocation] = await dbOrTx
+        .select({ nextNumber: sql<string>`(coalesce(max(CASE
+          WHEN ${claims.claimNumber} ~ ${`^${prefix}[0-9]+$`}
+          THEN substring(${claims.claimNumber} from ${prefix.length + 1}::integer)::numeric
+          END),0)+1)::text` })
         .from(claims)
-        .where(
-          and(
-            gte(claims.createdAt, todayStart),
-            lt(claims.createdAt, todayEnd)
-          )
-        );
-      
-      const sequentialNum = (todayCount[0]?.count || 0) + 1;
-      const claimNumber = `CASE-${dateStr}-${sequentialNum.toString().padStart(4, '0')}`;
+        .where(eq(claims.organizationId, data.organizationId));
+      if (!allocation || !/^[1-9][0-9]*$/.test(allocation.nextNumber)) throw new Error('Claim number allocation failed');
+      const claimNumber = prefix + allocation.nextNumber.padStart(4, '0');
+      if (claimNumber.length > 50) throw new Error('Claim number capacity exceeded');
       
       const [newClaim] = await dbOrTx
         .insert(claims)
