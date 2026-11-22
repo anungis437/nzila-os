@@ -1817,10 +1817,10 @@ importers:
         specifier: ^25
         version: 25.5.2
       '@types/react':
-        specifier: ^19
+        specifier: 19.3.0
         version: 19.3.0
       '@types/react-dom':
-        specifier: ^19
+        specifier: 19.3.0
         version: 19.3.0(@types/react@19.3.0)
       typescript:
         specifier: ^6
