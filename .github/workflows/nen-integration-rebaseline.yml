@@ -79,8 +79,19 @@ jobs:
           assert.notEqual(oldPlan.sourceCommitments['pnpm-lock.yaml'], digest, 'Unexpected unchanged lock commitment');
           const expected = JSON.parse(JSON.stringify(oldPlan));
           expected.sourceCommitments['pnpm-lock.yaml'] = digest;
-          assert.deepStrictEqual(newPlan, expected, 'Source plan changed beyond the NEN dependency lock digest');
-          console.log('PASS: only pnpm-lock.yaml source commitment changed');
+          const differences = [];
+          function compare(a, b, location = '') {
+            if (Object.is(a, b)) return;
+            if (a && b && typeof a === 'object' && typeof b === 'object' && Array.isArray(a) === Array.isArray(b)) {
+              const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+              for (const key of keys) compare(a[key], b[key], location + '/' + key);
+              return;
+            }
+            differences.push({ path: location, old: String(b).slice(0,100), new: String(a).slice(0,100) });
+          }
+          compare(newPlan, expected);
+          console.log(JSON.stringify({ changedFields: differences.length, firstDifferences: differences.slice(0,35) }, null, 2));
+          assert.equal(differences.length, 0, 'Source plan changed beyond the NEN dependency lock digest');
           NODE
           test "$(git diff --name-only | wc -l)" -eq 1
           test "$(git diff --name-only)" = "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json"
@@ -101,6 +112,9 @@ jobs:
           set -euo pipefail
           pnpm exec tsx scripts/generate-sbom.ts --refresh-metadata
           pnpm exec tsx scripts/generate-sbom.ts
+          # The generated SBOM contains a fresh UUID and timestamp; retain only
+          # source-verified registry evidence in the branch commit.
+          git restore -- ops/security/sbom.json
           test "$(git diff --name-only)" = "ops/security/npm-package-metadata.json"
           test -s ops/security/sbom.json
 
