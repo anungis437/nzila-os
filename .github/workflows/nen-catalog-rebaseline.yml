@@ -44,8 +44,8 @@ jobs:
         run: |
           set -euo pipefail
           cp apps/union-eyes/lib/operations/catalog-v2-decisions.json "$RUNNER_TEMP/nen-catalog-before.json"
-          pnpm exec tsx tooling/scripts/write-union-eyes-current-catalog.ts --write
-          pnpm exec tsx tooling/scripts/write-union-eyes-current-catalog.ts
+          pnpm exec tsx --tsconfig apps/union-eyes/tsconfig.json tooling/scripts/write-union-eyes-current-catalog.ts --write
+          pnpm exec tsx --tsconfig apps/union-eyes/tsconfig.json tooling/scripts/write-union-eyes-current-catalog.ts
       - name: Require exact unchanged authority content and refreshed source digest
         shell: bash
         run: |
