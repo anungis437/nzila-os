@@ -100,7 +100,37 @@ export function parseLockfilePackages(lockfilePath) {
   }
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i]
-    if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
+    // YAML forbids tab indentation. A tab-prefixed snapshot can otherwise be
+    // silently skipped, allowing a resolved dependency to evade the audit.
+    if (/^[ \t]*\t/.test(line)) {
+      throw new Error('Tab indentation in pnpm-lock.yaml snapshots is not permitted')
+    }
+    // pnpm v9 writes snapshots as its final top-level section. Never stop
+    // inventorying at an unexpected top-level mapping: doing so could hide
+    // vulnerable resolved packages after an injected section header.
+    if (/^[^\s#][^:]*:/.test(line)) {
+      throw new Error('Unexpected top-level section after pnpm snapshots; dependency inventory incomplete')
+    }
+    // YAML document boundaries and bare top-level scalars must not split the
+    // resolved graph into a second document that the inventory still trusts.
+    // Comments and blank lines are permitted; pnpm emits no other unindented
+    // content inside snapshots.
+    if (line.trim() && !line.trimStart().startsWith('#') && !line.startsWith(' ')) {
+      throw new Error('Unexpected unindented content in pnpm snapshots; audit inventory ambiguous')
+    }
+    // pnpm v9 emits two-space YAML indentation levels. Reject every odd
+    // indentation depth, including deeper malformed keys that would otherwise
+    // be silently omitted from the audited dependency graph.
+    const leadingSpaces = /^ */.exec(line)[0].length
+    if (leadingSpaces % 2 !== 0 && line.trim() && !line.trimStart().startsWith('#')) {
+      throw new Error('Malformed snapshot indentation in pnpm-lock.yaml')
+    }
+    // A snapshot-shaped key nested at an even indentation depth is not a
+    // legitimate pnpm dependency mapping. Refuse it instead of silently
+    // omitting an installed package from the security inventory.
+    if (leadingSpaces >= 4 && /^ {4,}(?:'[^']+@[^']+'|[^\s'\"]+@[^\s:]+):(?: \{\})?\s*$/.test(line)) {
+      throw new Error('Nested resolved snapshot key in pnpm-lock.yaml')
+    }
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
     // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
     // that starts with `@`), followed by `:` and either nothing (a nested mapping
@@ -156,8 +186,17 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
             typeof adv.id === 'string' && /^[1-9][0-9]*$/.test(adv.id) &&
             Number.isSafeInteger(Number(adv.id))) ||
           !SEVERITY_ORDER.includes(adv.severity) ||
-          typeof adv.title !== 'string' || !adv.title.trim()) {
+          typeof adv.title !== 'string' || !adv.title.trim() ||
+          typeof adv.vulnerable_versions !== 'string' || !adv.vulnerable_versions.trim()) {
         throw new Error(`Invalid advisory record for ${pkgName}`)
+      }
+      // Reject conflicting package identity supplied by the registry instead of
+      // silently overwriting it with the response-map key. Inconsistent audit
+      // evidence must not be normalized into a seemingly trustworthy finding.
+      for (const alias of ['package', 'module_name', 'name']) {
+        if (Object.prototype.hasOwnProperty.call(adv, alias) && adv[alias] !== pkgName) {
+          throw new Error(`Conflicting advisory package identity for ${pkgName}`)
+        }
       }
       const key = String(adv.id)
       // Never let a repeated advisory ID overwrite an earlier finding. The
@@ -174,12 +213,18 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
   return flat
 }
 
-async function fetchAdvisories(pkgMap) {
-  const requestBody = {}
+export async function fetchAdvisories(pkgMap) {
+  // Null-prototype map prevents package names such as __proto__ from being
+  // silently dropped by the Object.prototype setter during JSON serialization.
+  // An omitted installed package would make a clean audit untrustworthy.
+  const requestBody = Object.create(null)
   for (const [name, versions] of pkgMap) requestBody[name] = [...versions]
 
   const response = await fetch(BULK_ENDPOINT, {
     method: 'POST',
+    // Never forward the installed dependency inventory to a redirected origin.
+    // Registry redirects are not audit completion evidence.
+    redirect: 'manual',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
     signal: AbortSignal.timeout(30000),
@@ -187,7 +232,16 @@ async function fetchAdvisories(pkgMap) {
     throw new Error(`Audit registry unreachable: ${err.message}`)
   })
 
-  if (!response.ok) {
+  // A successful status is insufficient if a transport shim or future fetch
+  // implementation followed a redirect despite the manual policy. Reject
+  // redirected responses before parsing or certifying their advisory payload.
+  if (response.redirected === true ||
+      (typeof response.url === 'string' && response.url !== '' && response.url !== BULK_ENDPOINT)) {
+    throw new Error('Audit registry response was redirected or came from an unexpected endpoint')
+  }
+  // Partial-content and other non-200 2xx responses cannot certify a complete audit.
+  // Check the actual HTTP status, not only the transport's `ok` flag.
+  if (response.status !== 200 || response.ok !== true) {
     throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
   }
   let raw
