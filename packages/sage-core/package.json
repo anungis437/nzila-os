@@ -23,7 +23,8 @@
     "./postgres-repository": "./src/postgres-repository.ts",
     "./synthesis-context": "./src/synthesis-context.ts",
     "./claim-chain": "./src/claim-chain.ts",
-    "./institutional-context": "./src/institutional-context.ts"
+    "./institutional-context": "./src/institutional-context.ts",
+    "./institutional-authority": "./src/institutional-authority.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
