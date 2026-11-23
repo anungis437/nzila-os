@@ -20,6 +20,7 @@ param publicHostName string
 param siteUrl string
 param emailFrom string
 param emailReplyTo string
+param resendReceiptReadSecretName string = ''
 param entraClientId string = ''
 param entraTenantId string = ''
 param minReplicas int = 2
@@ -63,6 +64,10 @@ var secretNames = [
   'resend-api-key'
   'storage-account-key'
 ]
+var receiptReadSecretNames = deploymentEnvironment == 'staging' && !empty(resendReceiptReadSecretName) ? [resendReceiptReadSecretName] : []
+var receiptReadEnvironment = deploymentEnvironment == 'staging' && !empty(resendReceiptReadSecretName) ? [
+  { name: 'RESEND_RECEIPT_READ_API_KEY', secretRef: resendReceiptReadSecretName }
+] : []
 var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url', 'nar-signing-secret', 'evidence-seal-key'] : []
 var authSystemEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-system-database-url' }
@@ -92,7 +97,7 @@ var entraEnv = entraConfigured ? concat([
   { name: 'AZURE_AD_STAGING_SINGLE_TENANT', value: 'true' }
   { name: 'AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS', value: '900' }
 ] : []) : []
-var secrets = [for n in concat(secretNames, stagingAuthSystemSecretNames, stripeSecretNames, entraSecretNames): {
+var secrets = [for n in concat(secretNames, stagingAuthSystemSecretNames, stripeSecretNames, entraSecretNames, receiptReadSecretNames): {
   name: n
   keyVaultUrl: '${kvBase}secrets/${n}'
   identity: identityId
@@ -237,7 +242,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_URL', secretRef: 'redis-url' }
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
             { name: 'AZURE_STORAGE_ACCOUNT_KEY', secretRef: 'storage-account-key' }
-          ], stripeEnv, entraEnv, authSystemEnvironment, stagingEnvironment)
+          ], stripeEnv, entraEnv, authSystemEnvironment, stagingEnvironment, receiptReadEnvironment)
         }
       ]
       scale: {
@@ -257,8 +262,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 // is visible as a failed execution instead of a silent success. The manifest is the only place a schedule is declared.
 var allScheduledJobs = loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json').jobs
 var scheduledJobs = filter(allScheduledJobs, job => contains(union({ environments: ['staging', 'prod'] }, job).environments, deploymentEnvironment))
-var baseWorkerCodes = ['dlrem', 'dlovd', 'alert', 'sla', 'reap', 'sigexp']
-var baseWorkers = filter(scheduledJobs, job => contains(baseWorkerCodes, job.code))
+var baseWorkers = filter(scheduledJobs, job => contains(job, 'baseOperationalCadenceMinutes'))
 var operationalJobs = [for job in baseWorkers: {
   code: job.code
   resourceId: resourceId('Microsoft.App/jobs', contains(job, 'legacyJobSuffix') ? '${take(prefix, 32 - length(job.legacyJobSuffix) - 1)}-${job.legacyJobSuffix}' : '${take(prefix, 18)}-${job.code}')
@@ -275,10 +279,12 @@ resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
     environmentId: environmentId
     workloadProfileName: 'Consumption'
     configuration: {
-      triggerType: 'Schedule'
+      // Retain the existing contained job and its history without scheduling a guaranteed 501.
+      triggerType: deploymentEnvironment == 'staging' && union({ stagingManualOnly: false }, job).stagingManualOnly ? 'Manual' : 'Schedule'
       replicaTimeout: job.timeoutSeconds + 20
       replicaRetryLimit: 1
-      scheduleTriggerConfig: { cronExpression: job.schedule, parallelism: 1, replicaCompletionCount: 1 }
+      scheduleTriggerConfig: deploymentEnvironment == 'staging' && union({ stagingManualOnly: false }, job).stagingManualOnly ? null : { cronExpression: job.schedule, parallelism: 1, replicaCompletionCount: 1 }
+      manualTriggerConfig: deploymentEnvironment == 'staging' && union({ stagingManualOnly: false }, job).stagingManualOnly ? { parallelism: 1, replicaCompletionCount: 1 } : null
       registries: [{ server: acrLoginServer, identity: identityId }]
       secrets: [
         { name: 'cron-secret', keyVaultUrl: '${kvBase}secrets/cron-secret', identity: identityId }
@@ -302,9 +308,9 @@ resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
   }
 }]
 
-// ARM metadata only, scoped to each of the six existing core jobs. This is
+// ARM metadata only, scoped to each of the manifest-declared active base jobs. This is
 // not a database privilege or a resource-group/subscription Reader grant.
-resource coreJobMetadataReaders 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (job, index) in scheduledJobs: if (deploymentEnvironment == 'staging' && contains(baseWorkerCodes, job.code)) {
+resource coreJobMetadataReaders 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (job, index) in scheduledJobs: if (deploymentEnvironment == 'staging' && contains(job, 'baseOperationalCadenceMinutes')) {
   name: guid(cronJobs[index].id, identityId, 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
   scope: cronJobs[index]
   properties: {

@@ -106,6 +106,8 @@ param siteUrl string = env == 'prod' ? 'https://unioneyes.app' : ''
 @description('Sender and reply-to addresses. Required for staging (no production default); use a staging-verified sender.')
 param emailFrom string = env == 'prod' ? 'noreply@unioneyes.app' : ''
 param emailReplyTo string = env == 'prod' ? 'support@unioneyes.app' : ''
+@description('Existing staging Key Vault secret name for a separate Resend receipt-reading key. Empty leaves mail health unverified; never supply the key value as a parameter.')
+param resendReceiptReadSecretName string = ''
 @description('Entra application registration identifiers. The secret stays in Key Vault as azure-ad-client-secret. Empty defaults preserve existing production configuration.')
 param entraClientId string = ''
 param entraTenantId string = ''
@@ -431,7 +433,7 @@ var stagingRuntimeSecretNames = concat([
   'redis-url'
   'resend-api-key'
   'storage-account-key'
-], !empty(entraClientId) && !empty(entraTenantId) ? ['azure-ad-client-secret'] : [], enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : [])
+], !empty(entraClientId) && !empty(entraTenantId) ? ['azure-ad-client-secret'] : [], enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : [], env == 'staging' && !empty(resendReceiptReadSecretName) ? [resendReceiptReadSecretName] : [])
 resource stagingRuntimeSecrets 'Microsoft.KeyVault/vaults/secrets@2023-07-01' existing = [for secretName in stagingRuntimeSecretNames: {
   parent: kv
   name: secretName
@@ -546,6 +548,7 @@ module apps 'modules/apps.bicep' = if (deployApplications) {
     siteUrl: siteUrl
     emailFrom: emailFrom
     emailReplyTo: emailReplyTo
+    resendReceiptReadSecretName: resendReceiptReadSecretName
     entraClientId: entraClientId
     entraTenantId: entraTenantId
     minReplicas: appMinReplicas

@@ -8,15 +8,30 @@ describe('configured provider receipt health without another email send', () => 
   })))
   it('requires an actual persisted provider id and configured key', async () => {
     const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher)
-    vi.stubEnv('RESEND_API_KEY', '')
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', '')
     expect((await probeReminderMailProvider(receipt)).state).toBe('fail')
-    vi.stubEnv('RESEND_API_KEY', 'synthetic-provider-key-only')
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', 'synthetic-provider-key-only')
     expect((await probeReminderMailProvider(undefined)).state).toBe('fail')
     expect((await probeReminderMailProvider({ ...receipt, id: '../../arbitrary' })).state).toBe('fail')
     expect(fetcher).not.toHaveBeenCalled()
   })
+  it('never substitutes the send-only key for missing receipt-reading authority', async () => {
+    vi.stubEnv('RESEND_API_KEY', 'synthetic-send-only-key')
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', '')
+    const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher)
+    expect((await probeReminderMailProvider(receipt)).state).toBe('fail')
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+  it('uses only the dedicated key and only a read request for the persisted receipt', async () => {
+    vi.stubEnv('RESEND_API_KEY', 'synthetic-send-only-key')
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', 'synthetic-receipt-read-key'); response('delivered')
+    await probeReminderMailProvider(receipt)
+    expect(fetch).toHaveBeenCalledWith(`https://api.resend.com/emails/${receipt.id}`, expect.objectContaining({
+      method: 'GET', headers: { Authorization: 'Bearer synthetic-receipt-read-key' },
+    }))
+  })
   it('reports provider delivery without returning the recipient, message or inbox claim', async () => {
-    vi.stubEnv('RESEND_API_KEY', 'synthetic-provider-key-only'); response('delivered')
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', 'synthetic-provider-key-only'); response('delivered')
     const measured = await probeReminderMailProvider(receipt)
     expect(measured.state).toBe('ok')
     expect(measured.note).toContain('human inbox receipt is separate')
@@ -24,17 +39,17 @@ describe('configured provider receipt health without another email send', () => 
     expect(fetch).toHaveBeenCalledWith(`https://api.resend.com/emails/${receipt.id}`, expect.objectContaining({ redirect: 'error' }))
   })
   it('distinguishes a recent accepted email from delivery and fails if it never settles', async () => {
-    vi.stubEnv('RESEND_API_KEY', 'synthetic-provider-key-only'); response('sent')
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', 'synthetic-provider-key-only'); response('sent')
     expect((await probeReminderMailProvider(receipt)).note).toContain('delivery is pending')
     expect((await probeReminderMailProvider({ ...receipt, sent_at: '2020-01-01T00:00:00Z' })).state).toBe('fail')
   })
   it.each(['bounced', 'complained', 'failed', 'delivery_delayed', 'unknown'])(
     'fails for provider event %s instead of treating any response as healthy', async event => {
-      vi.stubEnv('RESEND_API_KEY', 'synthetic-provider-key-only'); response(event)
+      vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', 'synthetic-provider-key-only'); response(event)
       expect((await probeReminderMailProvider(receipt)).state).toBe('fail')
     })
   it('fails on a denied read, mismatched id and credential-bearing provider exception', async () => {
-    vi.stubEnv('RESEND_API_KEY', 'synthetic-provider-key-only'); response('delivered', false)
+    vi.stubEnv('RESEND_RECEIPT_READ_API_KEY', 'synthetic-provider-key-only'); response('delivered', false)
     expect((await probeReminderMailProvider(receipt)).state).toBe('fail')
     response('delivered', true, '22222222-2222-4222-8222-222222222222')
     expect((await probeReminderMailProvider(receipt)).state).toBe('fail')

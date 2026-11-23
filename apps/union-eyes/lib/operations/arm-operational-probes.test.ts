@@ -40,8 +40,8 @@ describe('measured backup and core worker freshness', () => {
     }
     expect(measureWorkerExecutions([run('Succeeded', 10, 9), run('Running', 1)], 5, now).state).toBe('ok')
   })
-  it('binds exactly the six core job resources to the database resource group', () => {
-    expect(parseOperationalArmConfiguration(JSON.stringify(configuration)).jobs).toHaveLength(6)
+  it('binds exactly the five active base job resources to the database resource group', () => {
+    expect(parseOperationalArmConfiguration(JSON.stringify(configuration)).jobs).toHaveLength(5)
     for (const invalid of [{}, { ...configuration, jobs: [] }, { ...configuration, jobs: configuration.jobs.map(() => configuration.jobs[0]) },
       { ...configuration, jobs: configuration.jobs.map(j => ({ ...j, resourceId: j.resourceId.replace('ue-staging/', 'elsewhere/') })) }]) {
       expect(() => parseOperationalArmConfiguration(JSON.stringify(invalid))).toThrow('CONFIGURATION_INVALID')
@@ -65,7 +65,7 @@ describe('measured backup and core worker freshness', () => {
       const result = await probeAzureOperations(parseOperationalArmConfiguration(JSON.stringify(configuration)), '11111111-1111-4111-8111-111111111111')
       expect(Object.values(result).every(check => check.state === 'ok')).toBe(true)
       expect(JSON.stringify(result)).not.toContain('never-serialize')
-      expect(fetcher).toHaveBeenCalledTimes(7)
+      expect(fetcher).toHaveBeenCalledTimes(1 + Object.keys(BASE_WORKER_CADENCES).length)
     } finally { vi.useRealTimers() }
   })
   it('fails every measurement if identity access is unavailable and sanitizes provider errors', async () => {

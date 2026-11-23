@@ -1,0 +1,49 @@
+{
+  "schema": "UE_BASE_MONITOR_FAILURE_FAMILY_V1",
+  "observedApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "observedDeploymentOperatorSha": "8b2583405b5265f78d5b627fafa79fe508f33b02",
+  "observedQaWorkflowSha": "ddd813360fac155203b67d39b0b3df774be89222",
+  "observedRuntime": {
+    "sourceMatchedMonitorHttpStatus": 500,
+    "measurementsPassed": 9,
+    "measurementsFailed": 2,
+    "failedScopes": [
+      "sigexp",
+      "mail"
+    ],
+    "signatureCause": "Canonical generic e-signature audit storage is contained; the scheduled expiry job answers 501. Approved-letter signing and evidence sealing are separate required base capabilities.",
+    "mailCause": "The existing configured sender credential returns 401 restricted_api_key for a receipt read; no delivery or inbox claim is made."
+  },
+  "scopeAuthority": [
+    "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json#historicalCapabilities/UE-OMIT-PKI-SIGNING-WORKFLOW",
+    "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json#historicalCapabilities/UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS"
+  ],
+  "sourceRemediation": {
+    "workerScope": "The scheduled job manifest owns active base cadences for both infrastructure and runtime monitoring; all five active worker limits remain enforced.",
+    "genericSignatureStagingJob": "Retain the existing job and execution history with a manual trigger; no storage authority or generic signature implementation added.",
+    "mailReceiptRead": "Use a dedicated server-only RESEND_RECEIPT_READ_API_KEY through an optional exact-secret staging Key Vault reference. Never fall back to the send-only key or expose credentials through client environment variables.",
+    "credentialProvisioning": "PENDING_OWNER_SECURE_SECRET_REFERENCE; no key value is in this record or repository.",
+    "databaseSchemaChanges": false,
+    "liveBusinessDataChanges": false
+  },
+  "ownedTestPrerequisite": {
+    "expiredSyntheticModuleAdmissionObserved": true,
+    "originalRowRetained": true,
+    "expiryOnlyRenewalRollbackVerified": true,
+    "boundedUntil": "2026-11-24T03:00:00Z",
+    "commercialOrInstitutionalContractCreated": false,
+    "financialAuthorityGranted": false,
+    "note": "This is controlled technical QA admission; it is not customer adoption or commercial license evidence."
+  },
+  "validation": {
+    "focusedOperationAssertionsPassed": 32,
+    "localBicepCompilation": "PASS",
+    "fiveRequiredRepositoryCommands": "PENDING_EXACT_COMMIT",
+    "ci": "PENDING",
+    "qualifiedRollout": "PENDING",
+    "actualPostRepairMonitor": "PENDING"
+  },
+  "fullBaseReleaseAccepted": false,
+  "productionDeployment": false,
+  "financeFeatureImplementation": false
+}

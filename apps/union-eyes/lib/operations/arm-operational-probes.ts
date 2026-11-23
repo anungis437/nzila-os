@@ -1,17 +1,18 @@
 import { ManagedIdentityCredential } from '@azure/identity'
 import { z } from 'zod'
+import { BASE_WORKER_CODES, BASE_WORKER_CADENCES } from './base-worker-scope'
+export { BASE_WORKER_CADENCES } from './base-worker-scope'
 
 const RESOURCE_GROUP = /^\/subscriptions\/[0-9a-f-]{36}\/resourceGroups\/[a-z0-9_.()-]+$/i
 const POSTGRES_ID = /^\/subscriptions\/[0-9a-f-]{36}\/resourceGroups\/[a-z0-9_.()-]+\/providers\/Microsoft\.DBforPostgreSQL\/flexibleServers\/[a-z0-9-]+$/i
 const JOB_ID = /^\/subscriptions\/[0-9a-f-]{36}\/resourceGroups\/[a-z0-9_.()-]+\/providers\/Microsoft\.App\/jobs\/[a-z0-9-]+$/i
-export const BASE_WORKER_CADENCES = { dlrem: 5, dlovd: 15, alert: 10, sla: 15, reap: 30, sigexp: 30 } as const
 export const MAX_BACKUP_AGE_MS = 26 * 60 * 60_000
 const SKEW_MS = 5 * 60_000
 
 const configurationSchema = z.object({
   postgresResourceId: z.string().regex(POSTGRES_ID),
-  jobs: z.array(z.object({ code: z.enum(['dlrem', 'dlovd', 'alert', 'sla', 'reap', 'sigexp']),
-    resourceId: z.string().regex(JOB_ID) }).strict()).length(6),
+  jobs: z.array(z.object({ code: z.enum(BASE_WORKER_CODES),
+    resourceId: z.string().regex(JOB_ID) }).strict()).length(BASE_WORKER_CODES.length),
 }).strict()
 export type OperationalArmConfiguration = z.infer<typeof configurationSchema>
 export type OperationalMeasurement = { state: 'ok' | 'fail'; note: string; ageMs?: number }
@@ -20,8 +21,8 @@ export function parseOperationalArmConfiguration(value: string | undefined): Ope
   try {
     const parsed = configurationSchema.parse(JSON.parse(value ?? ''))
     const group = parsed.postgresResourceId.split('/providers/')[0]
-    if (!RESOURCE_GROUP.test(group) || new Set(parsed.jobs.map(job => job.code)).size !== 6 ||
-      new Set(parsed.jobs.map(job => job.resourceId.toLowerCase())).size !== 6 ||
+    if (!RESOURCE_GROUP.test(group) || new Set(parsed.jobs.map(job => job.code)).size !== BASE_WORKER_CODES.length ||
+      new Set(parsed.jobs.map(job => job.resourceId.toLowerCase())).size !== BASE_WORKER_CODES.length ||
       parsed.jobs.some(job => job.resourceId.split('/providers/')[0].toLowerCase() !== group.toLowerCase())) {
       throw new Error('invalid scope')
     }

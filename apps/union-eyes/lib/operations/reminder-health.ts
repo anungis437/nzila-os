@@ -27,14 +27,15 @@ export async function readLatestReminderReceipt(tx: RLSTx) {
 
 export async function probeReminderMailProvider(row: { id: string; sent_at: string } | undefined) {
   const failed = (note: string) => ({ state: 'fail' as const, note })
-  const key = process.env.RESEND_API_KEY
-  if (!key || key.trim().length < 16) return failed('The configured email provider credential is unavailable')
+  // Sending credentials deliberately have no receipt-reading authority.
+  const key = process.env.RESEND_RECEIPT_READ_API_KEY
+  if (!key || key.trim().length < 16) return failed('The dedicated email receipt-reading credential is unavailable')
   if (!row || !z.guid().safeParse(row.id).success) return failed('No persisted provider receipt is available for a mail health read')
   const sentAt = Date.parse(row.sent_at)
   if (!Number.isFinite(sentAt) || sentAt > Date.now() + 5 * 60_000) return failed('Persisted email receipt timestamp is invalid')
   try {
     const response = await fetch(`https://api.resend.com/emails/${row.id}`, {
-      headers: { Authorization: `Bearer ${key}` }, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000),
+      method: 'GET', headers: { Authorization: `Bearer ${key}` }, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000),
     })
     if (!response.ok) return failed('The configured email provider could not verify the persisted receipt')
     const body = z.object({ id: z.guid(), last_event: z.string() }).parse(await response.json())
