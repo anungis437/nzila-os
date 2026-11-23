@@ -70,6 +70,10 @@ Root migrations (authoritative for SAGE):
 Offline checksum + apply tooling (does **not** close B-005):
 
 ```bash
+node tooling/scripts/sage-b005-build-provenance.mjs \
+  --git-sha "$(git rev-parse HEAD)" \
+  --out reports/proof-runs/sage-b005-build-provenance.json \
+  [--expected-image-digest sha256:…]
 node tooling/scripts/sage-b005-migration-preflight.mjs verify
 node tooling/scripts/sage-b005-migration-preflight.mjs apply --url "$SAGE_PG_TEST_URL"
 node tooling/scripts/sage-b005-migration-preflight.mjs receipt --out reports/proof-runs/sage-b005-migration.json
