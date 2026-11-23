@@ -1,0 +1,89 @@
+{
+  "sourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
+  "localFivePassed": true,
+  "fullContractsPassed": 10173,
+  "ciSuccessful": 125,
+  "ciSkipped": 10,
+  "requiredInstances": 19,
+  "requiredNames": 16,
+  "postgresProfiles": [
+    {
+      "path": "ue-native-pg-15-e508c801f5e1f929dfaff2c33b55862f57785485/receipt.json",
+      "sha256": "86540a15e18bbcf797848580ff0b190cf167db361c18d2be3c76cb3650d82993",
+      "passed": 1057,
+      "failed": 0,
+      "skipped": 4
+    },
+    {
+      "path": "ue-native-pg-16-e508c801f5e1f929dfaff2c33b55862f57785485/receipt.json",
+      "sha256": "f708f4ac329bd19efcccdde1e0b1d4d7508c9a14229c1013a192988ddaca69d6",
+      "passed": 1057,
+      "failed": 0,
+      "skipped": 4
+    }
+  ],
+  "httpBrowserPhases": [
+    {
+      "path": "ue-http-runtime-e508c801f5e1f929dfaff2c33b55862f57785485/.ue-runtime/playwright-main.json",
+      "stats": {
+        "startTime": "2026-11-23T22:05:40.271Z",
+        "duration": 620856.875,
+        "expected": 97,
+        "skipped": 158,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "8e5453622d6b17beaac688534ef5e1a14ebd7fc0ab567ba0ee398fa7061b2018"
+    },
+    {
+      "path": "ue-http-runtime-e508c801f5e1f929dfaff2c33b55862f57785485/.ue-runtime/playwright-restart-persistence.json",
+      "stats": {
+        "startTime": "2026-11-23T22:28:29.412Z",
+        "duration": 12942.193,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "da7d32e8c68818562a73f1a567e41d2b0f5f10e21c909e83d35b37aa83040f8f"
+    },
+    {
+      "path": "ue-http-runtime-e508c801f5e1f929dfaff2c33b55862f57785485/.ue-runtime/playwright-restart-pre-case.json",
+      "stats": {
+        "startTime": "2026-11-23T22:16:02.303Z",
+        "duration": 11335.723,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "21f9ce0263b1fff31a43eaec0bf1b81a58338ae1f2f479916bc260c60a1a5451"
+    },
+    {
+      "path": "ue-http-runtime-e508c801f5e1f929dfaff2c33b55862f57785485/.ue-runtime/playwright-restart-pre-mandates.json",
+      "stats": {
+        "startTime": "2026-11-23T22:16:14.626Z",
+        "duration": 158300.626,
+        "expected": 9,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "1eb45cea91323536e1a76e7e00ff56cbcae98af3e4a958d5a3fb33d48f0f5963"
+    }
+  ],
+  "physicalSqlUnchanged": true,
+  "catalogAuthorityUnchanged": true,
+  "stagingAcceptance": false,
+  "productionDeployment": false,
+  "schema": "UE_ADMITTED_APPLICATION_SOURCE_V1",
+  "pullRequest": "https://github.com/anungis437/nzila-os/pull/1307",
+  "normalMainAdmissionMergeSha": "97cd90fb029af07dbfcbf4455c1068acfd6e1cb8",
+  "sourceApplicationSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
+  "roleBoundariesRequired": 34,
+  "requiredScopeNodes": 654,
+  "previousSchemaAdmissionSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "databaseDdlRequired": false,
+  "originalDatabaseUpgradeReceiptMustRemainUnchanged": true,
+  "stagingDeploymentPending": true
+}
