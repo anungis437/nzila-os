@@ -271,6 +271,21 @@ async function main() {
       "CREATE EVENT TRIGGER ue_guard_deadline_reassignment_convergence_policy ON ddl_command_end WHEN TAG IN('CREATE POLICY','ALTER POLICY') EXECUTE FUNCTION public.ue_guard_deadline_reassignment_convergence_policy()",
     )
 
+    // Reproduce the complete live historical ownership family. Their bodies
+    // already match the old qualified export; original migrations retained the
+    // administrator ownership and default PUBLIC execution. The upgrade must
+    // hand off ownership, preserve dependent triggers, and close legacy ACLs.
+    const historicalFunctionOwners = [
+      'message_assignment_guard()',
+      'message_threads_assignment_requires_history()',
+      'message_threads_guard_update()',
+      'triage_guard()',
+    ]
+    for (const identity of historicalFunctionOwners) {
+      await provider.query(`ALTER FUNCTION public.${identity} OWNER TO uev2admin`)
+      await provider.query(`GRANT EXECUTE ON FUNCTION public.${identity} TO PUBLIC`)
+    }
+
     const oldRuntime = await open(
       'ue_staging_runtime',
       loginPasswords.ue_staging_runtime,
@@ -317,6 +332,11 @@ async function main() {
     }
     fs.writeFileSync(path.join(out, 'bundle.json'), JSON.stringify(bundle))
     console.log('PROOF plan compiled', statements.length)
+    const ownerHandoffs = statements.filter((s) => s.phase === 'canonical-function-owner')
+    assert.deepEqual(
+      ownerHandoffs.map((s) => s.object).sort(),
+      [...historicalFunctionOwners].sort(),
+    )
 
     await c.query('BEGIN')
     await assert.rejects(
@@ -441,6 +461,8 @@ async function main() {
         liveAdministratorAttributesChanged: false,
       },
       originalBootstrapReceiptPreserved: true,
+      historicalFunctionOwnerHandoffs: historicalFunctionOwners,
+      historicalFunctionOwnershipAndAclFamilyQualified: true,
       packagedAdmission: { ok: admission.ok, violations: admission.violations },
       ...receipt,
       finalQualification,

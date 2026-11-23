@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-staging-managed-admin-profile",
-  "currentRepairRuntimeQualification": "CANDIDATE_PREPARED_ZERO_TRAFFIC_LIVE_DATABASE_REHEARSAL_FAILED_REPAIR_UNQUALIFIED",
+  "currentRepairBranch": "fix/ue-staging-function-owner-handoff",
+  "currentRepairRuntimeQualification": "MANAGED_ADMIN_REPAIR_MERGED_HISTORICAL_FUNCTION_OWNER_FAMILY_UNQUALIFIED",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -11678,15 +11678,20 @@
     "noAcceptedPriorEvidenceInherited": true
   },
   "currentOperatorQualification": {
-    "state": "SOURCE_REPAIR_REQUALIFICATION_REQUIRED",
-    "supersededHead": "d0c641e16f437c8e3dfb388641b81cf211006818",
-    "nativePreservationCiOnSupersededHead": 45086966180,
-    "failedSharedCoverageJob": 137407797189,
-    "repairEvidence": "evidence/ue-v2-forward-upgrade-20261122/shared-candidate-gate-repair.json",
-    "finalLocalFiveAndCiOpen": true,
-    "stagingExecuted": false
+    "state": "FUNCTION_OWNERSHIP_HANDOFF_REPAIR_REQUALIFICATION_REQUIRED",
+    "previousAdmittedOperatorHead": "11065d04a9236f052064e49a8b01c58b0780627d",
+    "previousMainAdmissionMergeSha": "464205ace986a07951dc95af3336edb4a4e127a2",
+    "previousOperatorPullRequest": 1282,
+    "allFiveLocalChecksPassedOnPreviousHead": true,
+    "requiredCiContextsPassedOnPreviousHead": 19,
+    "actualRehearsalRun": "45101930240",
+    "actualRehearsal": "FAILED42501_FUNCTION_OWNER_MISMATCH",
+    "independentAfterFailureCatalogRollbackVerified": true,
+    "successfulFullRehearsalStillRequired": true,
+    "applyLaunched": false,
+    "finalLocalFiveAndCiOpen": true
   },
-  "currentStagingFailureEvidence": "evidence/ue-v2-forward-upgrade-20261122/actual-managed-admin-refusal.json",
+  "currentStagingFailureEvidence": "evidence/ue-v2-forward-upgrade-20261122/actual-function-owner-refusal.json",
   "personaCoverageDenominators": {
     "source": "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
     "census": "evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json",
@@ -11702,7 +11707,6 @@
     "sevenNavigationProfilesAreSubsetOnly": true,
     "currentCandidateAcceptanceInferred": false
   },
-  "currentOperatorRepairPullRequest": "https://github.com/anungis437/nzila-os/pull/1282",
   "operatorRepairBranchPolicyHistory": {
     "supersededPullRequest": 1281,
     "sourceSha": "1cdc11fa339e5faf2ebf0b276b80c5523b0253dd",
