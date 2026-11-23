@@ -300,10 +300,10 @@ test('CLI fails closed on a missing change record and a tag manifest', () => {
 
 test('CHG-2026-0114 founder direction accepts only the exact candidate and preserves staging boundaries', () => {
   const approved = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
-  const sha = 'aa545415cfe4b172733000cfc6510712d4de0cba'
+  const sha = 'd4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366'
   const opts = { changeId: 'CHG-2026-0114', sourceSha: sha, nowMs: Date.parse('2026-11-10T12:00:00Z') }
   assert.deepEqual(changeRecordDefects(approved, opts), [])
-  for (const candidate of ['57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3', 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c', 'a9c47099242c13e23efc72562ca63f3a6cabcc8b', 'f'.repeat(40)]) {
+  for (const candidate of ['aa545415cfe4b172733000cfc6510712d4de0cba', '57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3', 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c', 'a9c47099242c13e23efc72562ca63f3a6cabcc8b', 'f'.repeat(40)]) {
     const changed = { ...approved, linked_commits: [...approved.linked_commits, candidate],
       founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: candidate } }
     assert.ok(changeRecordDefects(changed, { ...opts, sourceSha: candidate }).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
@@ -399,7 +399,7 @@ test('the workflow-style portable gate copy keeps its reviewed candidate after t
     const cli = path.join(directory, 'scripts/union-eyes-v2-staging-gate-cli.mjs')
     const run = source => spawnSync(process.execPath, [cli, '--gate', 'change-record', '--change-id', 'CHG-2026-0114',
       '--source-sha', source, '--change-dir', changes, '--now', '2026-11-23T00:00:00Z'], { cwd: directory, encoding: 'utf8' })
-    const admitted = run('aa545415cfe4b172733000cfc6510712d4de0cba')
+    const admitted = run('d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366')
     assert.equal(admitted.status, 0, admitted.stdout + admitted.stderr)
     assert.deepEqual(JSON.parse(admitted.stdout).defects, [])
     const stale = 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c'

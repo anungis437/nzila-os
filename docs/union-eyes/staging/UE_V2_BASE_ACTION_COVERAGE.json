@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-clerk-correspondence-scope",
-  "currentRepairRuntimeQualification": "COMBINED_SEQUENCE_ACL_AND_CLERK_REPAIR_QUALIFICATION_PENDING",
+  "currentRepairBranch": "fix/ue-d4124cd1-staging-binding",
+  "currentRepairRuntimeQualification": "APPLICATION_SOURCE_AND_IMAGE_QUALIFIED_OPERATOR_BINDING_PENDING_NO_STAGING_ACCEPTANCE",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -5095,7 +5095,7 @@
       "action": "Correspondence approval and dispatch",
       "state": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
       "evidenceSummary": "Dedicated draft/revision/submit/approve/sign/dispatch routes exist; navigation is not execution proof.",
-      "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit. Clerk (SA11) source policy mismatch on aa545415 is recorded: generic rank normalization maps Clerk to Member despite declared letter permissions. Explicit local-staff letter gates and page/service/API regressions are under local validation; no deployed repair, actual provider or inbox acceptance is claimed.",
+      "remaining": "Enabled staff draft through recipient-safe dispatch, controlled inbox receipt and audit on the final deployed candidate. The Clerk letter-policy repair is source-qualified at d4124cd1 with five local commands and fresh CI/native tests; staging deployment, real Clerk page/API access, approval/signing refusals and actual provider/inbox acceptance remain unqualified. Other Clerk responsibilities remain within the full stakeholder scope.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -10023,15 +10023,16 @@
     "Federation roll-ups and cross-union analytics",
     "Automatic legal filing-date calculation and intake deadline email reminders remain absent, distinct from implemented staff deadline management"
   ],
-  "nextExecution": "The exact-AA digest-attested image is built. Qualify and normally admit the rebound preserving upgrade, then execute protected zero-traffic preparation, full rollback rehearsal, same-plan/preimage apply, data-preservation/readiness/version-gated staging cutover, and the full persona/base-action matrix. Keep every existing current action state unqualified until its own exact-candidate evidence is reconciled.",
-  "proposedCandidateSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "nextExecution": "The exact D4 source d4124cd1 and immutable build 45129434713 are qualified. Qualify and normally admit the final source/image-bound operator, then execute protected zero-traffic preparation, successful rollback rehearsal, same-plan/preimage apply, data-preservation/readiness/version-gated staging cutover and the complete 26-family/34-role/16-stage persona/base-action matrix. Every current action remains unqualified until its own exact-candidate evidence is reconciled. Finance implementation and production remain excluded.",
+  "proposedCandidateSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
   "sourceAdmission": {
-    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
-    "pullRequest": 1280,
-    "normalMergeSha": "8bc84aa0a1c7be5ac2524b0265836ff429c3c063",
+    "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+    "pullRequest": 1284,
+    "incorporatedPullRequest": 1285,
+    "normalMergeSha": "a82dfa0788a4cdbb6063ea3fe6c284fe4619f10f",
     "requiredTrustedChecksPassed": 19,
-    "registeredCheckRunsFinishedWithoutFailure": 134,
-    "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json",
+    "registeredCheckRunsFinishedWithoutFailure": 139,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-d4124cd1.json",
     "deployedAcceptance": "PENDING_NOT_INFERRED"
   },
   "currentDeployedSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
@@ -10094,6 +10095,15 @@
       },
       "currentDisposition": "HELD_AFTER_NEW_NATIVE_FAILURES_FIXED_IN_AA",
       "evidence": "evidence/ue-v2-forward-upgrade-20261122/candidate-transition-aa545415.json"
+    },
+    {
+      "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+      "pullRequest": 1280,
+      "normalMergeSha": "8bc84aa0a1c7be5ac2524b0265836ff429c3c063",
+      "requiredTrustedChecksPassed": 19,
+      "registeredCheckRunsFinishedWithoutFailure": 134,
+      "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json",
+      "deployedAcceptance": "PENDING_NOT_INFERRED"
     }
   ],
   "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
@@ -11172,10 +11182,10 @@
     "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117",
     "sourceProofNeverInheritsPriorRuntimeAcceptance": true,
     "latestEngineeringObservation": {
-      "recordedAt": "2026-11-22T23:53:03.825818+00:00",
-      "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
-      "state": "APPLICATION_ADMISSION_AND_IMAGE_COMPLETE_SHARED_OPERATOR_BINDING_REQUALIFICATION_OPEN",
-      "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json",
+      "recordedAt": "2026-11-23T07:33:01.657714+00:00",
+      "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+      "state": "APPLICATION_SOURCE_AND_IMAGE_QUALIFIED_OPERATOR_BINDING_PENDING",
+      "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-d4124cd1.json",
       "stagingAcceptanceInferred": false
     },
     "readonlyStagingPreflight": {
@@ -11650,7 +11660,7 @@
       "status": "DIRECT_SOURCE_COMPONENT_TRACE_RECORDED_QUALIFICATION_OPEN"
     }
   },
-  "currentMergedApplicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "currentMergedApplicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
   "observedStagingAt20261122": {
     "applicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
     "trafficPercent": 100,
@@ -11670,9 +11680,9 @@
     }
   ],
   "currentDeployedWorkflowProvenance": "Prior live application rollout workflow SHA not inferred from the later failed rollout; failed candidate rollout used 6bba9465f9c99ca7559a24c19f5a11c9e41c353c.",
-  "lastReconciledAt": "2026-11-23T00:31:21.325189+00:00",
+  "lastReconciledAt": "2026-11-23T07:33:49.373182+00:00",
   "currentCandidateStagingDecision": {
-    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
     "decision": "STAGING_NO_GO_FULL_BASE_QUALIFICATION_OPEN",
     "previousAcceptedSubsetDecisionRemainsHistorical": true,
     "noAcceptedPriorEvidenceInherited": true
@@ -11767,7 +11777,7 @@
     "absorbedOperatorDraft": 1285,
     "operatorImplementationSource": "fe9c7c1730b92cc7b8f3ceae0204c1b1d6310016",
     "applicationImplementationSource": "e9fda55556481baa1c3c240dfe78a6ca7c48f4d0",
-    "state": "IMPLEMENTED_COMBINED_SOURCE_NOT_QUALIFIED",
+    "state": "SOURCE_AND_BUILD_MANIFEST_QUALIFIED_LIVE_OPERATOR_BINDING_PENDING",
     "reason": "Qualify both repairs on one integrated commit rather than admit an intermediate application. Prior raw failed checks and live rehearsal remain historical failures.",
     "previousOperatorLocalFailure": "16 external-reader cases refused because the required owned native template was absent. No test is skipped or treated as passed to resolve this; rebuild the owned template and run the full command on the combined candidate.",
     "fullBaseStagingAcceptance": false,
@@ -11840,6 +11850,27 @@
         "unchangedFullApplicationSuiteVerified": true,
         "runtimeAcceptanceInferred": false
       }
-    }
+    },
+    "qualifiedSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+    "mainAdmissionMergeSha": "a82dfa0788a4cdbb6063ea3fe6c284fe4619f10f",
+    "sourceAdmissionEvidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-d4124cd1.json",
+    "mandatoryLocalCommandsPassed": 5,
+    "requiredTrustedContextsPassed": 19,
+    "registeredChecksFinishedWithoutFailure": 139,
+    "imageBuildRun": 45129434713,
+    "imageQualification": "SUCCESS_45129434713_REGISTRY_REATTESTATION_BEFORE_DEPLOY_REQUIRED",
+    "qualifiedApplicationImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:c25666f05287b43887c2a5afb23ea89768062610767ac2cb0a1570f13619eef0"
+  },
+  "nextPreservingOperatorBinding": {
+    "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+    "sourcePlanDigest": "7d010442aee62b7689553f79417849305a53d78fe851c8b17430abe826dfe877",
+    "state": "WORKING_BINDING_FULL_FIVE_AND_CI_REQUIRED",
+    "buildRunId": 45129434713,
+    "actualAzureUpgradeApplyLaunched": false,
+    "currentServingSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+    "fullScopeBeyondSevenRequired": true,
+    "financeImplementationAuthorized": false,
+    "productionAuthorized": false,
+    "applicationImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:c25666f05287b43887c2a5afb23ea89768062610767ac2cb0a1570f13619eef0"
   }
 }

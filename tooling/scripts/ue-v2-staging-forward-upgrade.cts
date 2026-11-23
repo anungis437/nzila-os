@@ -20,8 +20,8 @@ import {
   type ForwardUpgradeBundle,
 } from './lib/ue-v2-forward-upgrade-runtime'
 
-const APPLICATION_SOURCE = 'aa545415cfe4b172733000cfc6510712d4de0cba'
-const PLAN_DIGEST = 'b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4'
+const APPLICATION_SOURCE = 'd4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366'
+const PLAN_DIGEST = '7d010442aee62b7689553f79417849305a53d78fe851c8b17430abe826dfe877'
 const HOST = 'nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com'
 const sha = (v: string | Buffer) => createHash('sha256').update(v).digest('hex')
 let commitAttempted = false,
