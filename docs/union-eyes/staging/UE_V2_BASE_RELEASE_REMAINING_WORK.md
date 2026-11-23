@@ -18,6 +18,8 @@ The bounded ownership repair was admitted through [PR #1283](https://github.com/
 
 The full role review also found a Clerk correspondence defect in application `aa545415`: the generic guard normalizes `clerk` to `member`, blocking the declared letter workflow. The [source reproduction](evidence/ue-clerk-correspondence-20261123/source-role-policy-mismatch-aa.json) executes the actual normalization/catalogue declarations; it does not claim a staging failure. The repair uses explicit local letter-role checks and a shared page/service boundary. Full repository checks, exact-source CI, deployed Clerk access, approval/signing refusals and actual mail delivery remain required. Other Clerk responsibilities are not closed by this repair.
 
+The [Clerk packaging and native controls](evidence/ue-clerk-correspondence-20261123/local-packaging-and-native-controls.json) passed 28 disposable PostgreSQL cases and 389 focused contracts in the working tree. The official generators refreshed the changed guard commitment and 252 statement source digests; all 6,326 SQL statements are unchanged. Identity-provider checks still reject SDKs, vendor variables and provider usage in the union-role files. The earlier CI source-record and scanner failures remain recorded. Final-source repository checks, CI and staging actions remain pending; no provider delivery or inbox acceptance is inferred.
+
 The older dated sections below retain their original candidate scope and are historical evidence.
 
 ## November 16 runtime qualification delta

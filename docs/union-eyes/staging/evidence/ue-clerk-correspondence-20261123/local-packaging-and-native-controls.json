@@ -1,0 +1,78 @@
+{
+  "status": "TARGETED_TESTED_WORKING_TREE_NOT_STAGING",
+  "sourceHeadBeforePackagingCommit": "1e5c0b5c4836518c480e471e82b03c088502250c",
+  "actorRole": "clerk",
+  "stakeholderFamily": "SA11",
+  "baseAction": "C16",
+  "sourcePlan": {
+    "generator": "apps/union-eyes/scripts/bootstrap-v2/plan.ts --self-test; tooling/scripts/write-union-eyes-current-catalog.ts --write; same overlay script check",
+    "sourceCommitmentsUpdated": [
+      "apps/union-eyes/lib/api/with-api.ts"
+    ],
+    "sqlStatementsUnchanged": 6326,
+    "statementMetadataChanges": {
+      "sourceDigest": 252
+    },
+    "oldSourcePlanDigest": "b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4",
+    "newSourcePlanDigest": "7ba53f9216472bf87242100c2fd3f5f0412de2b73de79899b17d25199ca4a8a0",
+    "catalogOverlayOnlyPlanDigestChanged": true,
+    "sqlPermissionsChanged": false
+  },
+  "observedPriorCiFailures": {
+    "sourceCommitment": "UE_V2_SOURCE_COMMITMENT_DRIFT:apps/union-eyes/lib/api/with-api.ts",
+    "sourcePlan": "UE_V2_SOURCE_PLAN_DRIFT",
+    "providerScanner": "The removed identity provider and the declared union Clerk occupation share a word. New exact domain files retain SDK, environment-variable, provider-component and provider-description refusal checks."
+  },
+  "focusedContracts": {
+    "passed": 389,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Existing persona access plus auth-reality contracts; seven navigation profiles are a subset only."
+  },
+  "nativeDatabase": {
+    "passed": 28,
+    "failed": 0,
+    "pending": 0,
+    "database": "Owned disposable PostgreSQL 16 using canonical scoped roles",
+    "newClerkScenario": "Clerk creates/submits an ordinary letter; a distinct officer approves and signs; Clerk queues and cancels the unattempted email; durable states and four Clerk audit actions are checked.",
+    "provider": "Mocked seam; no real email or inbox proof",
+    "earlierAttempt": "Failed fixture setup while local Docker was unavailable: zero passed,28 unexecuted; retained separately."
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/union-eyes/lib/api/with-api.ts",
+      "sha256": "758ed95e7d06b45078273a0502390c42582e8334d76c41e5582eaae76aa34f22"
+    },
+    {
+      "path": "apps/union-eyes/lib/correspondence/roles.ts",
+      "sha256": "89c3f1d6049ae78df7386bc2fa7ec43a525118ffe637557ac62c6691012a6662"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/member-letter-delivery.native.test.ts",
+      "sha256": "3048ae6571b96766d262286ee81fe87a3e60cd0248f8ba74a88c3a1b6a60098e"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "a6b1b46ce16e5ba19fcc3c862e9d98e72114b2459f646f5d9037dab07581a334"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-v2-decisions.json",
+      "sha256": "287f6b299ceb620b400fe35f8a40e596e91f5ae59e619fe4c22c008c1607a815"
+    },
+    {
+      "path": "tooling/contract-tests/ue-auth-reality.test.ts",
+      "sha256": "0a7e71408bd5661684dde6bbc768ced1f9efeeb4d649addc9e59b99cfe4f5f3f"
+    }
+  ],
+  "remaining": [
+    "Five required repository commands on final integrated commit",
+    "Fresh exact-source CI and native acceptance",
+    "Qualified staging startup preserving existing data",
+    "Real Clerk page/API actions and tenant/case/signing denials",
+    "Actual approved-letter provider/inbox/audit proof",
+    "Other Clerk responsibilities C13,C17,C21 and the full26 required stakeholder families/34 role boundaries remain unqualified"
+  ],
+  "liveDataChanged": false,
+  "actualStagingAcceptance": false,
+  "productionDeployment": false
+}

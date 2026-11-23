@@ -11728,7 +11728,9 @@
     "deployedRepairVerified": false,
     "fullPersonaOrActionAcceptanceClaimed": false,
     "financeFeaturesInScope": false,
-    "productionAuthorized": false
+    "productionAuthorized": false,
+    "localPackagingAndNativeEvidence": "evidence/ue-clerk-correspondence-20261123/local-packaging-and-native-controls.json",
+    "qualification": "TARGETED_TESTED_WORKING_TREE_EXACT_SOURCE_CI_AND_STAGING_PENDING"
   },
   "currentFunctionOwnerOperatorAdmission": {
     "qualifiedHead": "6771e3b61053aa0a33f25af839f933ecc78b22fa",
