@@ -43,7 +43,7 @@ import { decideCaseCapabilities,decideCaseCapabilitiesBatch } from '../../lib/au
 import { POST as escalate } from '../../app/api/cases/[caseId]/escalate/route'
 import { ensureOwnDirectoryProfile } from '../../lib/members/own-directory-profile'
 import { queueCorrespondenceEmail, processCorrespondenceEmails, settleCorrespondenceEmail } from '../../lib/correspondence/email-delivery'
-import { cancelCorrespondence, signCorrespondence } from '../../lib/services/correspondence-service'
+import { approveCorrespondence, cancelCorrespondence, createCorrespondence, saveUserSignature, signCorrespondence, submitForReview } from '../../lib/services/correspondence-service'
 import { adoptGuardedIssuanceRule, type GuardedWithin } from './runtime-guarded-case-fixtures'
 import { DEFAULT_ISSUANCE_TEMPLATES } from '../../lib/authority/issuance'
 import { drizzleExecutor } from '../../lib/authority/store/route-adapter'
@@ -56,7 +56,7 @@ const native=process.env.UE_V2_NATIVE_MANIFEST === '1'?describe:describe.skip
 native('member directory and letter outbox on actual canonical PostgreSQL roles',()=>{
   let fixture:Awaited<ReturnType<typeof openNativeRuntimeFixture>>
   let runtime:ReturnType<typeof postgres>,system:ReturnType<typeof postgres>
-  const org=randomUUID(),foreignOrg=randomUUID(),member=randomUUID(),staff=randomUUID(),signer=randomUUID(),platform=randomUUID()
+  const org=randomUUID(),foreignOrg=randomUUID(),member=randomUUID(),staff=randomUUID(),clerk=randomUUID(),signer=randomUUID(),platform=randomUUID()
   const executives=[randomUUID(),randomUUID(),randomUUID()] as const
   let assignmentRuleId:string
   const bindings=new Map<string,AuthenticatedOrgBinding>()
@@ -82,7 +82,7 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     for(const id of [org,foreignOrg]) await fixture.seed.query(`INSERT INTO public.organizations
       (id,name,slug,organization_type,hierarchy_path,hierarchy_level,sectors,clc_affiliated,member_count,active_member_count,settings,features_enabled,status,remittance_day,created_at,updated_at)
       VALUES ($1::uuid,'Native letter','native-letter-'||$1::text,'local',ARRAY[]::text[],0,ARRAY[]::varchar[],false,0,0,'{}',ARRAY[]::text[],'active',15,now(),now())`,[id])
-    for(const [userId,role] of [[member,'member'],[staff,'steward'],[signer,'officer'],[platform,'system_admin'],
+    for(const [userId,role] of [[member,'member'],[staff,'steward'],[clerk,'clerk'],[signer,'officer'],[platform,'system_admin'],
       [executives[0],'president'],[executives[1],'vice_president'],[executives[2],'secretary_treasurer']]){
       const sessionToken='synthetic-session-'+randomUUID(),expiresAt=new Date(Date.now()+60*60_000)
       bindings.set(userId,{userId,organizationId:org,role,sessionToken,expiresAt,authority:'pg-session'})
@@ -92,7 +92,7 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
       await fixture.seed.query(`INSERT INTO user_management.user_sessions(user_id,organization_id,session_token,session_token_hash,expires_at)
         VALUES ($1,$2,$3,$4,$5)`,[userId,org,sessionToken,createHash('sha256').update(sessionToken).digest('hex'),expiresAt])
     }
-    for(const id of [staff,signer]) await tenant(id,tx=>ensureOwnDirectoryProfile(tx,contact(id)))
+    for(const id of [staff,clerk,signer]) await tenant(id,tx=>ensureOwnDirectoryProfile(tx,contact(id)))
     const actor=(userId:string)=>({userId,organizationId:org})
     const within:GuardedWithin=(principal,operation)=>tenant(principal.userId,tx=>operation(tx,drizzleExecutor(tx)))
     const {rationale:_rationale,...template}=DEFAULT_ISSUANCE_TEMPLATES.find(entry=>entry.domain==='case_assignment'&&entry.operation==='issue')!
@@ -154,6 +154,24 @@ native('member directory and letter outbox on actual canonical PostgreSQL roles'
     return id
   }
   const tasks=async(id:string)=>(await fixture.seed.query("SELECT id,status,attempt_count,error_message,payload FROM public.notification_queue WHERE payload->>'correspondenceId'=$1",[id])).rows
+  it('lets a live canonical Clerk draft, submit, queue and cancel an ordinary letter through real PostgreSQL policies',async()=>{
+    const draft=await tenant(clerk,()=>createCorrespondence({organizationId:org,draftedBy:clerk,assignedSignerId:signer,
+      subject:'Synthetic Clerk letter',body:'Controlled native correspondence',
+      recipients:[{name:'Controlled recipient',email:'controlled@example.invalid'}]}))
+    await tenant(clerk,()=>submitForReview(draft.id,{actorUserId:clerk}))
+    await tenant(signer,()=>approveCorrespondence(draft.id,{actorUserId:signer}))
+    const signature=await tenant(signer,()=>saveUserSignature({organizationId:org,userId:signer,displayName:'Synthetic Signer',
+      source:'typed',imageUrl:'data:image/png;base64,c3ludGhldGlj',imageHash:'a'.repeat(64)}))
+    await tenant(signer,()=>signCorrespondence(draft.id,{signatureId:signature.id,actorUserId:signer}))
+    await tenant(clerk,()=>queueCorrespondenceEmail(draft.id,org,clerk))
+    expect(await tasks(draft.id)).toHaveLength(1)
+    expect((await tasks(draft.id))[0]).toMatchObject({status:'pending',attempt_count:'0'})
+    expect(h.send).not.toHaveBeenCalled()
+    await tenant(clerk,()=>cancelCorrespondence(draft.id,'Controlled native retirement',{actorUserId:clerk}))
+    expect((await tasks(draft.id))[0]).toMatchObject({status:'completed',error_message:'CORRESPONDENCE_CANCELLED'})
+    const audits=(await fixture.seed.query('SELECT action FROM public.audit_logs WHERE resource_id=$1 AND user_id=$2',[draft.id,clerk])).rows.map(row=>row.action)
+    expect(audits).toEqual(expect.arrayContaining(['CORRESPONDENCE_CREATED','CORRESPONDENCE_SUBMITTED_FOR_REVIEW','CORRESPONDENCE_EMAIL_QUEUED','CORRESPONDENCE_CANCELLED']))
+  })
   it('durably queues once, calls the provider outside tenant scope and finalizes only a verified receipt',async()=>{
     const id=await signedLetter()
     await Promise.all([tenant(staff,()=>queueCorrespondenceEmail(id,org,staff)),tenant(staff,()=>queueCorrespondenceEmail(id,org,staff))])
