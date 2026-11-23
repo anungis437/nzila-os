@@ -16,7 +16,7 @@
     "census:untyped": "tsx scripts/runtime/untyped-read-census.ts --strict",
     "census:day-render": "tsx scripts/runtime/day-render-census.ts --strict",
     "census:nav-guards": "tsx scripts/runtime/nav-guard-census.ts --strict",
-    "qualification:case-access": "vitest run --project union-eyes --maxWorkers=2 scripts/__tests__/nav-guard-census.test.ts lib/__tests__/route-coverage-manifest.test.ts app/[locale]/dashboard/workbench/page.test.tsx app/api/__tests__/grievances-id.route.test.ts app/api/__tests__/grievances-status.route.test.ts app/api/__tests__/cases-transition-facts.route.test.ts app/api/__tests__/workflow-transition.route.test.ts lib/workflow/__tests__/claim-transition-policy.test.ts lib/workflow/__tests__/grievance-transition-policy.test.ts components/grievances/__tests__/grievance-detail-model.test.ts components/grievances/__tests__/grievance-detail-console.test.tsx lib/dashboard/__tests__/role-experience.test.ts lib/dashboard/__tests__/dual-nav-honesty.test.ts components/__tests__/sidebar.test.tsx",
+    "qualification:case-access": "vitest run --project union-eyes --maxWorkers=2 scripts/__tests__/nav-guard-census.test.ts lib/__tests__/route-coverage-manifest.test.ts app/[locale]/dashboard/workbench/page.test.tsx app/api/__tests__/grievances-id.route.test.ts app/api/__tests__/grievances-status.route.test.ts app/api/__tests__/cases-transition-facts.route.test.ts app/api/__tests__/workflow-transition.route.test.ts lib/workflow/__tests__/claim-transition-policy.test.ts lib/workflow/__tests__/grievance-transition-policy.test.ts components/grievances/__tests__/grievance-detail-model.test.ts components/grievances/__tests__/grievance-detail-console.test.tsx lib/dashboard/__tests__/role-experience.test.ts lib/dashboard/__tests__/dual-nav-honesty.test.ts components/__tests__/sidebar.test.tsx lib/messaging/thread-assignment.pglite.test.ts components/workbench/case-status-actions.test.tsx lib/dashboard/role-experience.test.ts",
     "census:wiring": "tsx scripts/runtime/component-wiring-census.ts --strict",
     "census:fake-content": "tsx scripts/runtime/fake-content-census.ts --strict",
     "census:dead-controls": "tsx scripts/runtime/dead-controls-census.ts --strict",
@@ -104,7 +104,9 @@
     "schema:contract:generate": "tsx scripts/schema-authority/generate-canonical-schema.ts",
     "schema:contract:verify": "tsx scripts/schema-authority/verify-runtime-contract.ts",
     "schema:contract:fresh-build": "tsx scripts/schema-authority/fresh-build.ts",
-    "schema:authority:lint": "tsx scripts/schema-authority/lint-authority.ts"
+    "schema:authority:lint": "tsx scripts/schema-authority/lint-authority.ts",
+    "qualification:ui-census": "vitest run --config vitest.census.config.ts --maxWorkers=1",
+    "qualification:native-context": "node scripts/runtime/run-native-context-preflight.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",

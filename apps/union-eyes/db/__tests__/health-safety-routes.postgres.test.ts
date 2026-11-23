@@ -106,7 +106,7 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
     )
   const newOrgMember = (who: { id: string; organizationId: string; role: string }) =>
     admin.query(
-      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,$6,'active')`,
+      `INSERT INTO organization_members (exempt_from_per_capita, id, user_id, organization_id, name, email, role, status) VALUES (false, $1,$2,$3,$4,$5,$6,'active')`,
       [who.id, who.id, who.organizationId, `Actor ${tag}`, `actor-${who.id}@${tag}.test`, who.role],
     )
   // A steward's case authority over a member depends on a real, covered employment record (DEF-0B4/0B5): one such
@@ -117,7 +117,7 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
     const memberId = randomUUID()
     const department = 'Shop Floor'
     await admin.query(
-      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,'member','active')`,
+      `INSERT INTO organization_members (exempt_from_per_capita, id, user_id, organization_id, name, email, role, status) VALUES (false, $1,$2,$3,$4,$5,'member','active')`,
       [memberId, memberId, organizationId, `Member ${tag}`, `member-${memberId}@${tag}.test`],
     )
     await admin.query(

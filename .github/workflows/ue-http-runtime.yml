@@ -230,6 +230,8 @@ jobs:
             .ue-runtime/playwright-restart-pre-mandates.json
             .ue-runtime/playwright-restart-persistence.json
             artifacts/ue-http-runtime/receipt.json
+            apps/union-eyes/test-results/runtime/**/error-context.md
+            apps/union-eyes/test-results/runtime/**/test-failed-*.png
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7

@@ -50,6 +50,9 @@ jobs:
       - name: Check connected case access contracts before the whole suite
         run: pnpm --filter @nzila/union-eyes qualification:case-access
 
+      - name: Check frontend response contracts before the whole suite
+        run: pnpm --filter @nzila/union-eyes qualification:ui-census
+
       - name: Run the full declared Union Eyes Vitest project, not a directory subset
         shell: bash
         run: |

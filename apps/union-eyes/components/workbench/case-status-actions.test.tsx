@@ -70,6 +70,9 @@ describe.each(['en-CA', 'fr-CA'] as const)('server-qualified case status control
     expect(screen.queryByRole('combobox')).toBeNull()
   })
   it.each([
+    null, 'invalid', [], 42,
+    { caseId: 'synthetic-case', currentStatus: 'resolved', allowedTransitions: ['closed', 'closed'] },
+    { caseId: 'synthetic-case', currentStatus: 'resolved', allowedTransitions: [null] },
     { caseId: 'another-case', currentStatus: 'resolved', allowedTransitions: ['closed'] },
     { caseId: 'synthetic-case', currentStatus: 'resolved', allowedTransitions: ['arbitration'] },
     {

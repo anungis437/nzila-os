@@ -134,7 +134,7 @@ describe('grievances/[id] route', () => {
     const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
     expect(response.status).toBe(200);
     expect((await response.json()).data.allowedStatuses).toContain('closed');
-    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
   });
 
   it('returns forbidden for a steward-level user with no ownership, grant or authorship', async () => {

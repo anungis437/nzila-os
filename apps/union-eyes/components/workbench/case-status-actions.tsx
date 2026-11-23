@@ -28,15 +28,20 @@ export function CaseStatusActions(props: {
       try {
         const response = await fetch(`/api/cases/${props.caseId}/next-actions`)
         if (!response.ok) throw new Error('Case actions unavailable')
-        const body = await response.json()
+        const raw: unknown = await response.json()
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('Invalid case actions')
+        if (Reflect.get(raw, 'success') === false) throw new Error('Case actions failed')
+        const body = raw as {
+          error?: unknown; caseId?: unknown; currentStatus?: unknown; allowedTransitions?: unknown
+        }
+        const values: unknown = body.allowedTransitions
         if (
           body.error ||
-          body.success === false ||
           body.caseId !== props.caseId ||
-          !Array.isArray(body.allowedTransitions) ||
-          new Set(body.allowedTransitions).size !== body.allowedTransitions.length ||
-          !body.allowedTransitions.every(
-            (value: unknown) =>
+          !Array.isArray(values) ||
+          new Set(values).size !== values.length ||
+          !values.every(
+            (value: unknown): value is ClaimTransitionTarget =>
               typeof value === 'string' &&
               (CLAIM_TRANSITION_TARGETS as readonly string[]).includes(value),
           )
@@ -51,7 +56,7 @@ export function CaseStatusActions(props: {
                   kind: 'loaded',
                   caseId: props.caseId,
                   sourceStatus: props.sourceStatus,
-                  values: body.allowedTransitions,
+                  values,
                 },
           )
       } catch {

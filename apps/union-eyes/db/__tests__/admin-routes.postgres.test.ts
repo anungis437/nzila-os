@@ -148,8 +148,8 @@ describe.skipIf(!URL)('the admin routes on the combined schema, as the real role
 
     for (const [id, userId, organizationId, name] of [[MEMBER_A, `member-a-${tag}`, ORG_A, 'Member A'], [MEMBER_B, `member-b-${tag}`, ORG_B, 'Member B']] as const) {
       await admin.query(
-        `INSERT INTO organization_members (id, user_id, organization_id, role, status, is_primary, name, email, joined_at, created_at, updated_at)
-         VALUES ($1,$2,$3,'member','active',false,$4,$5,now(),now(),now())`,
+        `INSERT INTO organization_members (exempt_from_per_capita, id, user_id, organization_id, role, status, is_primary, name, email, joined_at, created_at, updated_at)
+         VALUES (false, $1,$2,$3,'member','active',false,$4,$5,now(),now(),now())`,
         [id, userId, organizationId, name, `${userId}@union.test`],
       )
     }

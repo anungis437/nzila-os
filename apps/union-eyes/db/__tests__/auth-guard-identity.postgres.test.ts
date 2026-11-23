@@ -68,8 +68,8 @@ describe.skipIf(!URL)('the identity and role lookups on the combined schema, as 
     )
   const newMember = (userId: string, organizationId: string, role: string, status = 'active', deleted = false) =>
     admin.query(
-      `INSERT INTO organization_members (user_id, organization_id, role, status, is_primary, name, email, joined_at, deleted_at, created_at, updated_at)
-       VALUES ($1,$2,$3,$4,false,$1,$1 || '@example.test',now(), ${deleted ? 'now()' : 'NULL'}, now(), now())`,
+      `INSERT INTO organization_members (exempt_from_per_capita, user_id, organization_id, role, status, is_primary, name, email, joined_at, deleted_at, created_at, updated_at)
+       VALUES (false, $1,$2,$3,$4,false,$1,$1 || '@example.test',now(), ${deleted ? 'now()' : 'NULL'}, now(), now())`,
       [userId, organizationId, role, status],
     )
   const signedInAs = (userId: string | null, orgId: string | null = null, cookies: Record<string, string> = {}) => {

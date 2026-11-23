@@ -44,8 +44,6 @@ const ids = (body: unknown): string[] => {
 
 const apiOnly = (testInfo: { project: { name: string } }) => testInfo.project.name !== 'desktop'
 
-test.describe.configure({ mode: 'serial' })
-
 test.describe('foundation: health, authentication, entitlement', () => {
   test('the stack is healthy: database, auth and catalog authority admission', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
@@ -97,6 +95,8 @@ test.describe('foundation: health, authentication, entitlement', () => {
 })
 
 test.describe('journey A: member files, authority decides who can see it', () => {
+  // Only these steps depend on the filing made by the first step. Persona navigation is independent.
+  test.describe.configure({ mode: 'serial' })
   const title = `Runtime acceptance ${Date.now()}`
   let caseId = ''
   let claimNumber = ''
@@ -383,6 +383,10 @@ test.describe('landing and navigation by stakeholder, at desktop, tablet and mob
         path: testInfo.outputPath(`${role}-${testInfo.project.name}.png`),
         fullPage: false,
       })
+      // Support Agent is an operational role, not a canonical case handler.
+      if (role === 'staff') {
+        await expect(page.locator('a[href$="/dashboard/workbench"], a[href$="/dashboard/grievances"]')).toHaveCount(0)
+      }
       // Navigation labels the information-architecture contract requires are present somewhere on the page.
       if (testInfo.project.name === 'desktop') {
         for (const label of REQUIRED_VISIBLE_LABELS[role].slice(0, 3)) {

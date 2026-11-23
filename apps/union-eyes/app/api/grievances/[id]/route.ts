@@ -155,7 +155,7 @@ export const GET = withApi(
       });
     }
 
-    const response = standardSuccessResponse({
+    return standardSuccessResponse({
       ...(internal ? grievance : memberGrievanceView(grievance)),
       events: internal ? events : memberGrievanceEvents(events),
       documents: governedDocuments,
@@ -165,7 +165,5 @@ export const GET = withApi(
       collaborators: internal ? collaborators : [],
       effectiveAccess: {...effectiveAccess, canViewCase: true, canViewInternal: internal},
     });
-    response.headers.set('Cache-Control', 'no-store');
-    return response;
   },
 );
