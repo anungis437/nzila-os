@@ -1,6 +1,6 @@
 # CIVIC / CLEAR / SAGE — Product Ceiling and Decision Baseline
 
-**Record:** CCS-CEILING-2026-11-23 · **Version:** 1.1 proposed freeze · **Owner:** Nzila Ventures · **Baseline:** main `c103aa2fd5f90011f6aa4bfb8a45cdf37910f786` · **Decision state:** prepared for founder acceptance, not represented as signed · **Implementation:** paused.
+**Record:** CCS-CEILING-2026-11-23 · **Version:** 1.2 owner-accepted design freeze · **Owner:** Nzila Ventures · **Baseline:** main `c103aa2fd5f90011f6aa4bfb8a45cdf37910f786` · **Decision state:** ACCEPTED_BY_OWNER on 2026-11-23 · **Implementation:** bounded engineering authorized; no production, real-client data or CIVIC runtime authorization implied.
 
 This is a design-only decision instrument. It neither authorizes CIVIC runtime nor deploys SAGE, changes the canonical OCI method or admits real institutional data. The existing `CIVIC_PRODUCT_GO_LIVE = NO_GO`, `runtimeAuthorization.authorized = false` and SAGE external launch `NO_GO` remain effective.
 
@@ -118,7 +118,7 @@ External institutional facts cannot be invented at product design time: actual s
 
 ## 10. Work packages — implementation intentionally NOT begun
 
-L0: approved contract/ceiling, method source map, product information architecture, R/D/T and persona-action test specification.
+L0: owner-accepted contract/ceiling, method source map, product information architecture, R/D/T and persona-action test specification.
 
 L1: SAGE runtime correctness, staging migration, identity/route fixes, deployed RLS and service proof.
 
@@ -138,7 +138,7 @@ Work packages can proceed in parallel after founder acceptance and C1 constituti
 
 ## 11. Gate sequence
 
-- **C0 Design:** Founder accepts D01–D34, dispositions C01–C08, interface maps, R/D/T acceptance; version anchored.
+- **C0 Design: ACCEPTED_BY_OWNER (2026-11-23).** D01–D34 and the R/D/T acceptance contract establish the versioned baseline; implementation runs against this ceiling, not a new methodology.
 - **C1 Authorization:** Owner-authorized bounded implementation scope clears CIVIC constitutional guard; explicit environment/data/personas; historical synthetic grants remain terminated.
 - **C2 Core:** Live SAGE staging, migration, auth, evidence and audit refuse invalid access and admit legitimate flows.
 - **C3 Product:** R, D, T each PASS with executable honest negative proof and unchanged canonical OCI/CLEAR.
@@ -148,7 +148,7 @@ Work packages can proceed in parallel after founder acceptance and C1 constituti
 
 ## 12. Review posture
 
-This document is a product ceiling **proposal**, not a record of a new founder signature. Creating it does not amend protected runtime authority, prices or constitutional doctrine, and does not authorize a product rollout. External reviewers provide later validation and amendment requests; internal engineering uses the accepted versioned contract as its stable target.
+This document records founder acceptance of the product ceiling (2026-11-23: 'design accepted, you may proceed') for bounded engineering; it is not institutional customer consent or a CIVIC production grant. Creating it does not amend protected runtime authority, prices or constitutional doctrine, and does not authorize a product rollout. External reviewers provide later validation and amendment requests; internal engineering uses the accepted versioned contract as its stable target.
 
 **Primary source links:** `docs/oci/OCI_METHOD.md`; `docs/oci/CANON.md`; `docs/oci/oci-product-ladder.md`; `docs/oci/OCI_DELIVERY_MODEL.md`; `docs/public-service/clear-method-canonical.md`; `docs/public-service/sage-workspace-canonical.md`; `docs/CIVIC_OCI_ALIGNMENT.md`; `governance/foundations/civic-oci-doctrine.contract.json`; `docs/public-service/operations/three-reality-hardening-report.md`; `docs/public-service/operations/proof-runs/005-sage-operational-launch-evidence/07-gate-reassessment.md`.
 
