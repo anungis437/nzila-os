@@ -41,5 +41,10 @@ export * from './synthesis-context'
 export * from './claim-chain'
 export * from './institutional-context'
 
-// Institutionally verified mandate admission (pure contract; not yet route-wired).
+// Institutionally verified mandate admission + transactional enforcement store.
 export * from './institutional-authority'
+export * from './institutional-mandate-store'
+export * from './institutional-mandate-enforcement'
+
+// CLEAR executive accountability draft (requires explicit human adoption later).
+export * from './accountability-draft'
