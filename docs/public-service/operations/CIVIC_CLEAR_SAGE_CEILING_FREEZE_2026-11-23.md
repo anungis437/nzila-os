@@ -1,6 +1,6 @@
 # CIVIC / CLEAR / SAGE — Product Ceiling and Decision Baseline
 
-**Record:** CCS-CEILING-2026-11-23 · **Version:** 1.0 proposed freeze · **Owner:** Nzila Ventures · **Baseline:** main `c103aa2fd5f90011f6aa4bfb8a45cdf37910f786` · **Decision state:** prepared for founder acceptance, not represented as signed · **Implementation:** paused.
+**Record:** CCS-CEILING-2026-11-23 · **Version:** 1.1 proposed freeze · **Owner:** Nzila Ventures · **Baseline:** main `c103aa2fd5f90011f6aa4bfb8a45cdf37910f786` · **Decision state:** prepared for founder acceptance, not represented as signed · **Implementation:** paused.
 
 This is a design-only decision instrument. It neither authorizes CIVIC runtime nor deploys SAGE, changes the canonical OCI method or admits real institutional data. The existing `CIVIC_PRODUCT_GO_LIVE = NO_GO`, `runtimeAuthorization.authorized = false` and SAGE external launch `NO_GO` remain effective.
 
@@ -101,7 +101,7 @@ All claims carry explicit evidence states: `DESIGNED`, `IMPLEMENTED`, `LOCAL_PRO
 
 The last recorded SAGE 15-gate assessment: G1–G5 and G8 PASS as repository/local proof, six gates PASS_WITH_CONDITIONS, and G11 accessibility, G12 telemetry/incident, G13 restoration NOT_PROVEN. B-005 staging deployment/data plane remains the prerequisite. These are historical records; fresh deployment verification is necessary. The SAGE page actor-classification defect (missing trusted authentication type in some manually assembled scopes) is a source-confirmed engineering blocker.
 
-Current CIVIC runtime permission is false; no previous expired/revoked synthetic grant is current permission. C1 implementation authorization must explicitly name scope, allowed paths/actions, data boundary and environment; nothing in this document changes it.
+Current CIVIC runtime permission is false; no previous expired/revoked synthetic grant is current permission. Synthetic CIVIC Slice 0 code already includes position/mandate, evidence-source categories, intervention/resource, measure and human-decision primitives; those proof-bounded designs must be inventoried and reused conceptually without interpreting synthetic code as authorization for a live customer domain. C1 implementation authorization must explicitly name scope, allowed paths/actions, data boundary and environment; nothing in this document changes it.
 
 External institutional facts cannot be invented at product design time: actual sponsor and mandate records, jurisdiction-specific legal requirements, PIA/records decisions, procurement process, source-system access, data location/custody acceptance, institutional reviewers and client UAT. Their **capture and validation contracts** are design decisions here; their values remain client-specific.
 
@@ -109,7 +109,7 @@ External institutional facts cannot be invented at product design time: actual s
 
 - **C01:** Existing CIVIC front-door doctrine is explicitly pre-product/feedback-only, while this roadmap seeks an eventual tool presentation and buyer-facing CIVIC software. Separate method-preserving authorization/positioning amendment required.
 - **C02:** SAGE canonical future-state document says no software exists, but implementation in `packages/sage-core` and `apps/platform-admin` is real. Documentation must distinguish historically planned state from current code, deployment and permission.
-- **C03:** OCI method code resides partly in Union Eyes, but commercial work must proceed independently. Single neutral interface contract + parity harness needed before shared-code extraction.
+- **C03:** OCI method code resides partly in Union Eyes, but commercial work must proceed independently. Single neutral interface contract + parity harness needed before shared-code extraction; UE-specific customer authority rules must not be imported as if they governed public institutions.
 - **C04:** OCI pricing scope driver mentions bargaining units/sites; public institutions may require equivalent canonical scope dimensions. No new price or scope-driver amendment without owner decision in sole price table.
 - **C05:** Runtime role checks and client-facing authorization can diverge. Fix actor-classification and prove institutional mandate separate from platform membership/role.
 - **C06:** Existing SAGE evidence references are visibility-gated but not sufficient to prove source authority or disagreements; define attestation and conflict artifacts without AI self-certification.
@@ -122,7 +122,7 @@ L0: approved contract/ceiling, method source map, product information architectu
 
 L1: SAGE runtime correctness, staging migration, identity/route fixes, deployed RLS and service proof.
 
-L2: institution-bound authority, attested provenance, contradiction and challenge model.
+L2: institution-bound authority, attested provenance, contradiction and challenge model as a SAGE-owned domain extension; preserve CIVIC synthetic kernel and UE authority-model semantics as reference contracts, without direct cross-app runtime imports.
 
 L3: CLEAR execution, human adoption, resource/commitment/outcome and executive packages.
 
@@ -151,3 +151,10 @@ Work packages can proceed in parallel after founder acceptance and C1 constituti
 This document is a product ceiling **proposal**, not a record of a new founder signature. Creating it does not amend protected runtime authority, prices or constitutional doctrine, and does not authorize a product rollout. External reviewers provide later validation and amendment requests; internal engineering uses the accepted versioned contract as its stable target.
 
 **Primary source links:** `docs/oci/OCI_METHOD.md`; `docs/oci/CANON.md`; `docs/oci/oci-product-ladder.md`; `docs/oci/OCI_DELIVERY_MODEL.md`; `docs/public-service/clear-method-canonical.md`; `docs/public-service/sage-workspace-canonical.md`; `docs/CIVIC_OCI_ALIGNMENT.md`; `governance/foundations/civic-oci-doctrine.contract.json`; `docs/public-service/operations/three-reality-hardening-report.md`; `docs/public-service/operations/proof-runs/005-sage-operational-launch-evidence/07-gate-reassessment.md`.
+
+## 13. Engineering reuse disposition (additional source verification)
+
+- `apps/civic/src/kernel.ts` already implements a bounded synthetic kernel that separates actor, position, instrument, delegated authority, evidence types, interpretation, intervention, expected/observed measures and human decision. Its `syntheticOnly` and `assertRuntimeAuthorization()` protection are intentional and **must not** be stripped or promoted to production without C1. Treat it as a formal reference for R/D/T behavior and acceptance fixture design, not as a deployed or licensed runtime.
+- `apps/union-eyes/lib/authority/ontology.ts` defines a substantial UE-specific authority model with capacity, mandate, relationship, delegation, recusal and consent. It provides proven design concepts but its `case`, `member` and other union resource policies cannot directly govern CIVIC institutions. No live UE Step 1 changes are part of this plan.
+- **Placement decision:** new institutional production authority/provenance invariants should be SAGE-owned within `packages/sage-core` (additive namespaced modules), consuming only existing neutral platform contracts. Create a new shared generic package *only* if an independently approved extraction demonstrates substantive reuse and UE semantic parity. This resolves the earlier ambiguity between building another authority package and extending SAGE.
+- The existing `packages/institutional-governance-graph` is a read/projection substrate, not a substitute for mutation authority or record attestation. Do not turn it into an uncontrolled write path.
