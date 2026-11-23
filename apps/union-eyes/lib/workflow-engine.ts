@@ -209,6 +209,8 @@ export async function updateClaimStatus(
     }
 
     const currentStatus = claim.status as ClaimStatus;
+    const target = claimTransitionTarget(newStatus);
+    if (!target) return { success: false, error: 'Unknown claim transition target' };
 
     // Detect LRO signals for this case (PR-7 integration)
     const transitionFacts = claimTransitionFacts(claim, notes);
@@ -216,14 +218,12 @@ export async function updateClaimStatus(
 
     // The verified membership role only narrows the FSM; it never authorizes this mutation.
     const userRole = actor.role;
-    if (toLifecycleState('claim', newStatus) === 'closed' || toLifecycleState('claim', currentStatus) === 'closed') {
+    if (toLifecycleState('claim', target) === 'closed' || toLifecycleState('claim', currentStatus) === 'closed') {
       await requireKernelCaseAction(tx, actor, claim.claimId, 'case:close');
     }
 
     // Both live claim mutation entrypoints use the same stored facts and policy.
-    // The assignment alias remains compatible with legacy persisted claim_status.
-    const target = claimTransitionTarget(newStatus);
-    if (!target) return { success: false, error: 'Unknown claim transition target' };
+    // Normalize accepted aliases once; state, history, audit and the durable notice use the same persisted target.
     const validation = validateClaimCaseTransition(claim, userRole, target, notes);
 
     if (!validation.allowed) {
@@ -235,12 +235,12 @@ export async function updateClaimStatus(
 
     // Update claim status and timestamps
     const updateData: Record<string, unknown> = {
-      status: newStatus,
+      status: target,
       updatedAt: new Date(),
     };
 
     // Set closed timestamp
-    if (newStatus === "closed" && !claim.closedAt) {
+    if (target === "closed" && !claim.closedAt) {
       updateData.closedAt = new Date();
     }
 
@@ -255,7 +255,7 @@ export async function updateClaimStatus(
       rejected: 100,
       closed: 100,
     };
-    updateData.progress = progressMap[newStatus];
+    updateData.progress = progressMap[target];
 
     // Perform the update using provided transaction
     const [updatedClaim] = await tx
@@ -265,7 +265,7 @@ export async function updateClaimStatus(
       .returning();
 
     // Create audit trail entry with FSM metadata
-    const auditMessage = `Status changed from '${currentStatus}' to '${newStatus}'`;
+    const auditMessage = `Status changed from '${currentStatus}' to '${target}'`;
 
     await tx.insert(claimUpdates).values({
       claimId: claim.id, // history rows reference the internal primary key (Django FK)
@@ -276,13 +276,13 @@ export async function updateClaimStatus(
       visibilityScope: 'member',
       metadata: {
         previousStatus: currentStatus,
-        newStatus,
+        newStatus: target,
       },
     });
 
     // AUTO-GENERATE DEFENSIBILITY PACK (PR-12 complete integration)
     // When claim is resolved or closed, automatically generate immutable export
-    if (newStatus === 'resolved' || newStatus === 'closed') {
+    if (target === 'resolved' || target === 'closed') {
       if ((await decideCase(tx, {...actor,caseId:claim.claimId,action:'case:export_sealed_evidence'})).effect === 'allow') {
       try {
 // Fetch complete timeline (all claim updates)
@@ -369,7 +369,7 @@ export async function updateClaimStatus(
               title: claim.description?.slice(0, 80) || `Claim ${claim.claimNumber}`,
               memberId: claim.memberId!,
               memberName: await getMemberName(claim.memberId!, tx),
-              currentState: newStatus,
+              currentState: target,
               createdAt: claim.createdAt ?? new Date(),
               lastUpdated: updatedClaim.updatedAt ?? new Date(),
               grievanceType: claim.claimType || 'general',
@@ -429,12 +429,12 @@ export async function updateClaimStatus(
     // commit together. Provider I/O is performed only by the bounded outbox worker.
     await persistAtomicAudit(tx, { organizationId: actor.organizationId, userId: actor.userId,
       action: 'case.transition', resourceType: 'claims', resourceId: claim.claimId,
-      details: { from: currentStatus, to: newStatus, reason: notes ?? null, actorRole: actor.role, fsmValidation: {
+      details: { from: currentStatus, to: target, reason: notes ?? null, actorRole: actor.role, fsmValidation: {
         slaCompliant: validation.metadata?.slaCompliant ?? null, daysInState: validation.metadata?.daysInState ?? null,
         warnings: validation.warnings ?? [], hasUnresolvedCriticalSignals,
         nextDeadline: validation.metadata?.nextDeadline?.toISOString() ?? null } } });
     if (claim.memberId) await queueCaseStatusEmailOrRecordRefusal(tx, { organizationId: actor.organizationId,
-      caseId: claim.claimId, queuedBy: actor.userId, recipientId: claim.memberId, previousStatus: currentStatus, newStatus });
+      caseId: claim.claimId, queuedBy: actor.userId, recipientId: claim.memberId, previousStatus: currentStatus, newStatus: target });
     return { success: true, claim: updatedClaim };
 }
 

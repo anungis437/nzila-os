@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import { createHash, randomUUID } from 'node:crypto'
 import type pg from 'pg'
 import postgres from 'postgres'
-import { sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import * as schema from '../../db/schema'
 import { claims } from '../../db/schema/claims-schema'
@@ -150,6 +150,9 @@ export const failureSummary = (error: unknown, extraMarkers: readonly string[] =
     'CASE_HISTORY_AUDIT_REQUIRED',
     'EXACT_STATE_PROJECTION_REQUIRED',
     'PRIMARY_CASE_HANDLER_REQUIRED',
+    'GUARDED_CASE_ASSIGNMENT_PROJECTION_REQUIRED',
+    'GUARDED_CASE_CANONICAL_TRIAGE_REQUIRED',
+    'GUARDED_CASE_CANONICAL_INVESTIGATION_REQUIRED',
     'NO_ADOPTED_CASE_SCOPE_AMENDMENT_RULE',
     ...extraMarkers,
   ].find((item) => message.startsWith(item))
@@ -720,21 +723,27 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
           holderUserId: party.officer.userId,
         }),
       )
-      const assignmentRelationshipId = await within(party.officer, (_tx, exec) =>
-        assignCase(exec, deps, {
+      const assignmentRelationshipId = await within(party.officer, async (tx, exec) => {
+        const relationshipId = await assignCase(exec, deps, {
           organizationId: party.organizationId,
           issuerUserId: party.officer.userId,
           caseId: claim.claimId,
           assigneeUserId: party.handler.userId,
           effectiveAt: new Date(Date.now() - 60_000),
-        }),
-      )
+        })
+        // The live claims assignment handler couples the governed relationship and its workflow projection in one transaction.
+        const [projected] = await tx.update(claims)
+          .set({ assignedTo: party.handler.userId, assignedAt: new Date(), updatedAt: new Date() })
+          .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, party.organizationId)))
+          .returning({ assignedTo: claims.assignedTo })
+        assert.equal(projected?.assignedTo, party.handler.userId, 'GUARDED_CASE_ASSIGNMENT_PROJECTION_REQUIRED')
+        return relationshipId
+      })
       const transition = await within(party.handler, (tx) =>
         transitionCase(
           claim.claimId,
-          // submitted -> assigned (steward, no minimum time in state): the handler was just
-          // assigned, and 'assigned' -> 'investigation' below is then immediately lawful.
-          // 'under_review' holds a claim for 24h, which a single run cannot satisfy honestly.
+          // Exercise the legacy assignment alias; the source workflow must persist canonical triage (under_review).
+          // Triage -> investigation has no elapsed-time minimum and still requires a real assignment.
           'assigned',
           party.handler.userId,
           'Disposable source workflow qualification',
@@ -742,7 +751,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
         ),
       )
       assert.equal(transition.success, true, transition.error)
-      assert.equal(transition.claim?.status, 'assigned')
+      assert.equal(transition.claim?.status, 'under_review', 'GUARDED_CASE_CANONICAL_TRIAGE_REQUIRED')
       const proposal = await within(party.officer, (_tx, exec) =>
         proposeCaseScope(exec, deps, {
           organizationId: party.organizationId,
@@ -815,12 +824,12 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
             'Disposable rollback qualification',
             tx,
           )
-          assert.equal(change.success, true, change.error)
+          assert.equal(change.success, true, `GUARDED_CASE_CANONICAL_INVESTIGATION_REQUIRED:${change.error ?? 'unknown'}`)
           assert.equal(change.claim?.status, 'investigation')
           const journal = (
             await exec.query<{ id: string }>(
               `SELECT id::text FROM public.claim_status_transitions
-          WHERE claim_id=$1 AND from_status='assigned' AND to_status='investigation' AND transaction_id=txid_current()`,
+          WHERE claim_id=$1 AND from_status='under_review' AND to_status='investigation' AND transaction_id=txid_current()`,
               [claim.id],
             )
           ).rows
@@ -1167,7 +1176,7 @@ async function qualifyGuardedCaseRuntimeSecurityWithKey(
             ? (
                 await within(party.member, (_tx, exec) =>
                   exec.query<{ id: string }>(
-                    "SELECT id::text AS id FROM public.claim_status_transitions WHERE claim_id=$1 AND from_status='submitted' AND to_status='assigned'",
+                    "SELECT id::text AS id FROM public.claim_status_transitions WHERE claim_id=$1 AND from_status='submitted' AND to_status='under_review'",
                     [claim.id],
                   ),
                 )

@@ -162,11 +162,10 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
     'Knowledge & Guidance',
     'Profile & Settings',
   ],
-  // Support Agent shares the staff experience, but has no case-handler Representation destination.
+  // Support Agent shares the staff experience; case-handler Representation and staff-letter Communications remain unavailable.
   staff: [
     'Today',
     'Members & Workplaces',
-    'Communications',
     'Documents & Evidence',
     'Tasks & Deadlines',
     'Knowledge & Guidance',

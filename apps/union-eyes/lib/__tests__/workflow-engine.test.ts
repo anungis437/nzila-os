@@ -313,6 +313,38 @@ describe('workflow-engine', () => {
       progress: 10, closedAt: null, claimType: 'grievance', id: 1,
     };
 
+    it.each([
+      ['filed', 'submitted', 10],
+      ['acknowledged', 'under_review', 25],
+      ['assigned', 'under_review', 25],
+      ['investigating', 'investigation', 50],
+      ['response_due', 'pending_documentation', 60],
+      ['settled', 'resolved', 90],
+      ['denied', 'rejected', 100],
+      ['withdrawn', 'closed', 100],
+    ] as const)('persists %s as %s consistently in state, history, audit and notice intent', async (alias, persisted, progress) => {
+      mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
+      mocks.mockDetectSignals.mockReturnValue([]);
+      mocks.decideCase.mockResolvedValue({ effect: 'deny' });
+      const values = vi.fn();
+      const set = vi.fn((update: Record<string, unknown>) => ({
+        where: () => ({ returning: async () => [{ ...baseClaim, ...update }] }),
+      }));
+      const tx = {
+        select: () => chain([baseClaim]),
+        update: () => ({ set }),
+        insert: () => ({ values }),
+      };
+      const result = await updateClaimStatus('CLM-001', alias as Parameters<typeof updateClaimStatus>[1], 'user1', 'Synthetic alias qualification', tx as unknown as NonNullable<Parameters<typeof updateClaimStatus>[4]>);
+      expect(result.success).toBe(true);
+      expect(result.claim?.status).toBe(persisted);
+      expect(set).toHaveBeenCalledWith(expect.objectContaining({ status: persisted, progress }));
+      expect(values).toHaveBeenCalledWith(expect.objectContaining({ metadata: { previousStatus: 'submitted', newStatus: persisted } }));
+      expect(mocks.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ details: expect.objectContaining({ to: persisted }) }));
+      expect(mocks.queueMail).toHaveBeenCalledWith(tx, expect.objectContaining({ newStatus: persisted }));
+      if (['rejected', 'closed'].includes(persisted)) expect(mocks.requireAction).toHaveBeenCalledWith(tx, expect.anything(), 'uuid-1', 'case:close');
+    });
+
     it('transitions to under_review', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
       mocks.mockDetectSignals.mockReturnValue([]);

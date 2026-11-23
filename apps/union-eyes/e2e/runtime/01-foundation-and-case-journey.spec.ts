@@ -94,6 +94,61 @@ test.describe('foundation: health, authentication, entitlement', () => {
   })
 })
 
+test.describe('landing and navigation by stakeholder, at desktop, tablet and mobile', () => {
+  for (const role of STAKEHOLDER_ORDER) {
+    test(`${role}: reaches the correct landing, sees its navigation, and the page does not overflow`, async ({
+      page,
+    }, testInfo) => {
+      const landing = await gotoDashboardAsRole(page, role)
+      expect(page.url()).toContain(landing)
+      // Below the desktop breakpoint the navigation lives behind a trigger; opening it is part of the journey.
+      const visibleNavSelector = 'nav:visible, [role="navigation"]:visible'
+      const nav = page.locator(visibleNavSelector).first()
+      const trigger = page.getByRole('button', { name: /open navigation/i }).first()
+      // Wait for the page to settle on one of the two layouts, then act: wide layouts show the navigation, narrow ones a trigger.
+      // A breadcrumb is also a <nav>, so the primary navigation is judged by the drawer when a trigger exists.
+      await expect(nav.or(trigger).first()).toBeVisible()
+      if (await trigger.isVisible()) {
+        await trigger.click()
+        await expect(page.locator('#ue-mobile-drawer')).toBeVisible()
+      } else {
+        await expect(nav).toBeVisible()
+      }
+      // The organization selector and the page body must finish loading: a permanent "Loading…" is a defect, not a state.
+      await expect(
+        page.getByText(/^Loading(\.\.\.|…)$/).first(),
+        `${role}: a loading placeholder never resolved`,
+      ).toHaveCount(0, { timeout: 30_000 })
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      )
+      expect(
+        overflow,
+        `${role} on ${testInfo.project.name}: horizontal overflow`,
+      ).toBeLessThanOrEqual(1)
+      await page.screenshot({
+        path: testInfo.outputPath(`${role}-${testInfo.project.name}.png`),
+        fullPage: false,
+      })
+      // Support Agent is an operational role, not a canonical case handler.
+      if (role === 'staff') {
+        await expect(page.locator('a[href$="/dashboard/workbench"], a[href$="/dashboard/grievances"], a[href$="/dashboard/correspondence"]')).toHaveCount(0)
+      }
+      // Navigation labels the information-architecture contract requires are present somewhere on the page.
+      if (testInfo.project.name === 'desktop') {
+        const roleNavigation = page.getByRole('navigation', { name: 'Role execution destinations' })
+        await expect(roleNavigation).toBeVisible()
+        for (const label of REQUIRED_VISIBLE_LABELS[role]) {
+          await expect(
+            roleNavigation.getByRole('link', { name: label, exact: false }).first(),
+            `${role}: "${label}"`,
+          ).toBeVisible()
+        }
+      }
+    })
+  }
+})
+
 test.describe('journey A: member files, authority decides who can see it', () => {
   // Only these steps depend on the filing made by the first step. Persona navigation is independent.
   test.describe.configure({ mode: 'serial' })
@@ -345,57 +400,4 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     expect(timeline).toContain('under_review')
     expect((await member.get(`/api/cases/${seeded}/timeline`)).status()).toBeLessThan(500)
   })
-})
-
-test.describe('landing and navigation by stakeholder, at desktop, tablet and mobile', () => {
-  for (const role of STAKEHOLDER_ORDER) {
-    test(`${role}: reaches the correct landing, sees its navigation, and the page does not overflow`, async ({
-      page,
-    }, testInfo) => {
-      const landing = await gotoDashboardAsRole(page, role)
-      expect(page.url()).toContain(landing)
-      // Below the desktop breakpoint the navigation lives behind a trigger; opening it is part of the journey.
-      const visibleNavSelector = 'nav:visible, [role="navigation"]:visible'
-      const nav = page.locator(visibleNavSelector).first()
-      const trigger = page.getByRole('button', { name: /open navigation/i }).first()
-      // Wait for the page to settle on one of the two layouts, then act: wide layouts show the navigation, narrow ones a trigger.
-      // A breadcrumb is also a <nav>, so the primary navigation is judged by the drawer when a trigger exists.
-      await expect(nav.or(trigger).first()).toBeVisible()
-      if (await trigger.isVisible()) {
-        await trigger.click()
-        await expect(page.locator('#ue-mobile-drawer')).toBeVisible()
-      } else {
-        await expect(nav).toBeVisible()
-      }
-      // The organization selector and the page body must finish loading: a permanent "Loading…" is a defect, not a state.
-      await expect(
-        page.getByText(/^Loading(\.\.\.|…)$/).first(),
-        `${role}: a loading placeholder never resolved`,
-      ).toHaveCount(0, { timeout: 30_000 })
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - window.innerWidth,
-      )
-      expect(
-        overflow,
-        `${role} on ${testInfo.project.name}: horizontal overflow`,
-      ).toBeLessThanOrEqual(1)
-      await page.screenshot({
-        path: testInfo.outputPath(`${role}-${testInfo.project.name}.png`),
-        fullPage: false,
-      })
-      // Support Agent is an operational role, not a canonical case handler.
-      if (role === 'staff') {
-        await expect(page.locator('a[href$="/dashboard/workbench"], a[href$="/dashboard/grievances"]')).toHaveCount(0)
-      }
-      // Navigation labels the information-architecture contract requires are present somewhere on the page.
-      if (testInfo.project.name === 'desktop') {
-        for (const label of REQUIRED_VISIBLE_LABELS[role].slice(0, 3)) {
-          await expect(
-            page.getByText(label, { exact: false }).first(),
-            `${role}: "${label}"`,
-          ).toBeVisible()
-        }
-      }
-    })
-  }
 })
