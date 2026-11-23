@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-staging-function-owner-handoff",
-  "currentRepairRuntimeQualification": "MANAGED_ADMIN_REPAIR_MERGED_HISTORICAL_FUNCTION_OWNER_FAMILY_UNQUALIFIED",
+  "currentRepairBranch": "fix/ue-clerk-correspondence-scope",
+  "currentRepairRuntimeQualification": "COMBINED_SEQUENCE_ACL_AND_CLERK_REPAIR_QUALIFICATION_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -11748,6 +11748,28 @@
     "liveRehearsalStatus": "IN_PROGRESS",
     "applyLaunched": false,
     "fullBasePersonaAcceptance": false,
+    "productionAuthorized": false
+  },
+  "currentManagedCatalogQualificationFailure": {
+    "state": "FAILED_LIVE_REHEARSAL_NO_APPLY",
+    "run": 45108741981,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/actual-managed-catalog-refusal.json",
+    "catalogueRollbackByteExact": true,
+    "businessRowReadbackClaimed": false,
+    "knownComparisonGap": "Exact default owner-only sequence ACL storage differs from NULL; unchanged by current operation and rejected by strict comparison.",
+    "sourceRepairBranch": "fix/ue-staging-sequence-acl-profile",
+    "sourceRepairQualification": "PENDING_FINAL_SOURCE_LOCAL_FIVE_AND_NATIVE_CI",
+    "fullPersonaAndBaseReleaseAcceptance": false
+  },
+  "currentIntegratedRepair": {
+    "pullRequest": 1284,
+    "absorbedOperatorDraft": 1285,
+    "operatorImplementationSource": "fe9c7c1730b92cc7b8f3ceae0204c1b1d6310016",
+    "applicationImplementationSource": "e9fda55556481baa1c3c240dfe78a6ca7c48f4d0",
+    "state": "IMPLEMENTED_COMBINED_SOURCE_NOT_QUALIFIED",
+    "reason": "Qualify both repairs on one integrated commit rather than admit an intermediate application. Prior raw failed checks and live rehearsal remain historical failures.",
+    "previousOperatorLocalFailure": "16 external-reader cases refused because the required owned native template was absent. No test is skipped or treated as passed to resolve this; rebuild the owned template and run the full command on the combined candidate.",
+    "fullBaseStagingAcceptance": false,
     "productionAuthorized": false
   }
 }
