@@ -53,6 +53,51 @@ export const FORWARD_EVENT_CATALOG_QUERY = `SELECT 'event_trigger' AS kind,e.evt
   'event',e.evtevent,'enabled',e.evtenabled,'tags',e.evttags,'function',n.nspname||'.'||p.proname,
   'function_owner',pg_get_userbyid(p.proowner),'owner',pg_get_userbyid(e.evtowner)) AS definition
   FROM pg_event_trigger e JOIN pg_proc p ON p.oid=e.evtfoid JOIN pg_namespace n ON n.oid=p.pronamespace ORDER BY e.evtname`
+
+const operatorQuery = `SELECT current_user::text AS actor,session_user::text AS session,
+  current_database() AS database,current_setting('server_version_num')::int AS version,
+  r.rolsuper,r.rolbypassrls,r.rolcanlogin,r.rolcreatedb,r.rolcreaterole,r.rolreplication,r.rolinherit
+  FROM pg_roles r WHERE r.rolname=session_user`
+
+export interface ForwardOperatorProfile {
+  actor: string
+  session: string
+  database: string
+  version: number
+  rolsuper: boolean
+  rolbypassrls: boolean
+  rolcanlogin: boolean
+  rolcreatedb: boolean
+  rolcreaterole: boolean
+  rolreplication: boolean
+  rolinherit: boolean
+}
+
+export function assertForwardOperator(profile: ForwardOperatorProfile | undefined) {
+  assert(profile, 'UE_UPGRADE_OPERATOR_PROFILE_MISSING')
+  assert.equal(profile.actor, 'uev2admin', 'UE_UPGRADE_OPERATOR_ACTOR_REFUSED')
+  assert.equal(profile.session, 'uev2admin', 'UE_UPGRADE_OPERATOR_LOGIN_REFUSED')
+  assert.equal(profile.database, 'ue_v2_staging', 'UE_UPGRADE_OPERATOR_DATABASE_REFUSED')
+  assert(
+    profile.version >= 160000 && profile.version < 170000,
+    'UE_UPGRADE_OPERATOR_VERSION_REFUSED',
+  )
+  assert.equal(profile.rolsuper, false, 'UE_UPGRADE_OPERATOR_SUPERUSER_REFUSED')
+  // The existing Azure administrator can already have BYPASSRLS. This is the
+  // bounded DDL operator, never an application principal. Do not change its
+  // attributes to manufacture the local fixture's profile. Both profiles are
+  // proved natively; every original attribute is checked again before return.
+  for (const attribute of [
+    'rolbypassrls',
+    'rolcanlogin',
+    'rolcreatedb',
+    'rolcreaterole',
+    'rolreplication',
+    'rolinherit',
+  ] as const)
+    assert.equal(typeof profile[attribute], 'boolean', 'UE_UPGRADE_OPERATOR_ATTRIBUTE_MISSING')
+  return profile
+}
 export function normalizeForwardCatalog(objects: UpgradeObject[]) {
   const result = objects
     .map((o) => canonicalCatalogObject(o))
@@ -251,17 +296,9 @@ export async function executeForwardUpgrade(
   options: { afterStatement?: (index: number) => void | Promise<void> } = {},
 ) {
   assert.equal(bundle.version, 1, 'UE_UPGRADE_BUNDLE_VERSION')
-  const actor = (
-    await client.query(`SELECT current_user::text AS actor,session_user::text AS session,
-    current_database() AS database,current_setting('server_version_num')::int AS version,
-    r.rolsuper,r.rolbypassrls FROM pg_roles r WHERE r.rolname=session_user`)
-  ).rows[0]
-  assert.equal(actor?.actor, 'uev2admin')
-  assert.equal(actor.session, 'uev2admin')
-  assert.equal(actor.database, 'ue_v2_staging')
-  assert(actor.version >= 160000 && actor.version < 170000)
-  assert.equal(actor.rolsuper, false)
-  assert.equal(actor.rolbypassrls, false)
+  const actor = assertForwardOperator(
+    (await client.query<ForwardOperatorProfile>(operatorQuery)).rows[0],
+  )
   await client.query(
     "SELECT pg_advisory_xact_lock(hashtextextended('ue-v2-staging-forward-upgrade',0))",
   )
@@ -439,7 +476,13 @@ export async function executeForwardUpgrade(
       OR (r.rolname='ue_external_read_reader' AND u.rolname='ue_v2_owner'))`)
   ).rows[0].n
   assert.equal(leftover, 0, 'UE_UPGRADE_TEMPORARY_BRIDGE_LEFT_BEHIND')
+  const finalActor = assertForwardOperator(
+    (await client.query<ForwardOperatorProfile>(operatorQuery)).rows[0],
+  )
+  assert.deepEqual(finalActor, actor, 'UE_UPGRADE_OPERATOR_ATTRIBUTES_CHANGED')
   return {
+    operatorProfile: actor,
+    operatorAttributesPreserved: true,
     qualification,
     originalTables: tables.length,
     originalRows: originalRows.reduce((n, t) => n + BigInt(t.rows), 0n).toString(),

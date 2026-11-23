@@ -6,6 +6,61 @@ import {
   splitUpgradeDump,
   type UpgradeObject,
 } from './ue-v2-forward-upgrade'
+import {
+  assertForwardOperator,
+  executeForwardUpgrade,
+  type ForwardOperatorProfile,
+  type ForwardUpgradeBundle,
+} from './ue-v2-forward-upgrade-runtime'
+import type pg from 'pg'
+
+const operator: ForwardOperatorProfile = {
+  actor: 'uev2admin',
+  session: 'uev2admin',
+  database: 'ue_v2_staging',
+  version: 160012,
+  rolsuper: false,
+  rolbypassrls: false,
+  rolcanlogin: true,
+  rolcreatedb: true,
+  rolcreaterole: true,
+  rolreplication: false,
+  rolinherit: true,
+}
+
+test('the existing managed administrator supports both recorded BYPASSRLS profiles without changing either', () => {
+  for (const rolbypassrls of [false, true]) {
+    const profile = { ...operator, rolbypassrls }
+    assert.strictEqual(assertForwardOperator(profile), profile)
+    assert.equal(profile.rolbypassrls, rolbypassrls)
+  }
+})
+
+test('wrong operator identity, database, version and superuser fail before any DDL or privilege bridge', async () => {
+  for (const delta of [
+    { actor: 'union_eyes_runtime' },
+    { session: 'ue_staging_runtime' },
+    { database: 'production' },
+    { version: 150012 },
+    { version: 170000 },
+    { rolsuper: true },
+    { rolbypassrls: undefined },
+  ]) {
+    const queries: string[] = []
+    const client = {
+      query: async (sql: string) => {
+        queries.push(sql)
+        return { rows: [{ ...operator, ...delta }] }
+      },
+    } as unknown as pg.Client
+    await assert.rejects(
+      executeForwardUpgrade(client, { version: 1 } as ForwardUpgradeBundle),
+      /UE_UPGRADE_OPERATOR_/,
+    )
+    assert.equal(queries.length, 1)
+    assert.match(queries[0], /^SELECT current_user/)
+  }
+})
 
 const object = (
   kind: string,
