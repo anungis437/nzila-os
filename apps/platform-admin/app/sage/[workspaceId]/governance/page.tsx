@@ -88,11 +88,9 @@ export default async function SageGovernancePage({
     return <ForbiddenPanel orgId={result.orgId} />
   }
 
-  const scope = {
-    actorId: result.context.actorId,
-    orgId: result.context.orgId,
-    orgRole: result.context.orgRole,
-  }
+  // Preserve the server-verified authentication classification. The SAGE
+  // service fails closed when actor kind cannot be derived from trusted scope.
+  const scope = result.context
 
   const detail = await getSageWorkspaceForScope(scope, workspaceId)
   if (!detail) notFound()
