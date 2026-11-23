@@ -1,6 +1,6 @@
 # CIVIC / CLEAR / SAGE — Parallel Delivery Blueprint (alongside Union Eyes)
 
-**Plan:** CCS-ROADMAP-2026-11-23 · **Companion:** [Ceiling freeze](CIVIC_CLEAR_SAGE_CEILING_FREEZE_2026-11-23.md) · **Status:** design-only, pending founder adoption and C1 authorization · **No implementation initiated by this plan.**
+**Plan:** CCS-ROADMAP-2026-11-23 · **Revision:** 1.1 · **Companion:** [Ceiling freeze](CIVIC_CLEAR_SAGE_CEILING_FREEZE_2026-11-23.md) · **Status:** design-only, pending founder adoption and C1 authorization · **No implementation initiated by this plan.**
 
 ## 1. Delivery invariants
 
@@ -53,9 +53,9 @@ Contracts are design schemas, not claims that these precise fields already exist
 **Exit A:** start-to-finish SAGE workspace creation, source registration, review, decision, export, recipient access, revocation and retention; live DB evidence; exact source SHA; no unclassified actor; no source-to-deployed false claims.
 
 ### Lane B — Institutional authority and provenance
-**Owned paths:** new `packages/institutional-authority` (or carefully named SAGE subdomain) and controlled migrations; one integration owner for shared policy.
+**Owned paths:** additive institutional-authority/provenance modules under `packages/sage-core`, with owned SAGE migrations serialized by the integration owner. Use existing neutral platform contracts; no new cross-product authority package or UE-specific runtime import by default.
 
-**Tasks:** implement K1/K2/K3; institutional position/function model, acting/succession mandates, issuer attestation, source classes, versioning, conflicts, challenges and human resolution; preservation of partial/contested claims.
+**Tasks:** inventory and preserve the already implemented synthetic `apps/civic/src/kernel.ts` contract as a reference (do not unlock its runtime); implement K1/K2/K3 in SAGE; institutional position/function model, acting/succession mandates, issuer attestation, source classes, versioning, conflicts, challenges and human resolution; preservation of partial/contested claims.
 
 **Exit B:** R-GATE PASS: authority and provenance correct across two institution profiles, multiple capacities, conflicting evidence, expired/revoked mandate, legal hold and cross-tenant negative tests.
 
@@ -121,7 +121,7 @@ OCI canon / method contract ──────────┬──────�
                                               Client-specific pilot approval
 ```
 
-**UE collision controls:** no writes to `apps/union-eyes` while its Step 1 integration and remediation are in flight unless owner of the active UE branch merges a neutral method interface change after parity tests; no replacement/reshuffle of shared auth, audit, migrations, dependencies or top-level CI by another agent. New institutional packages expose additive versioned contracts. Each lane uses clean detached worktrees and branch naming compliant with repository policy. Shared DB migrations are serialized, reversible where feasible, checked against drift and privilege bounds. Source commits and test results are recorded per lane before merge; no blind auto-merge.
+**UE collision controls:** no writes to `apps/union-eyes` while its Step 1 integration and remediation are in flight unless owner of the active UE branch merges a neutral method interface change after parity tests; no replacement/reshuffle of shared auth, audit, migrations, dependencies or top-level CI by another agent. SAGE-owned institutional modules expose additive versioned contracts; neutral extraction requires explicit separate approval. Each lane uses clean detached worktrees and branch naming compliant with repository policy. Shared DB migrations are serialized, reversible where feasible, checked against drift and privilege bounds. Source commits and test results are recorded per lane before merge; no blind auto-merge.
 
 ## 6. R/D/T test gates — acceptance matrix
 
@@ -181,3 +181,15 @@ No P5 network, market-wide benchmarking, individual monitoring/profiling, person
 ### Status
 
 This is an execution-ready **plan**, not proof that any lane is complete, nor permission to begin feature implementation. Current recorded SAGE external production decision is NO_GO. Founder approval of this blueprint and separate C1 protected runtime authorization must precede implementation and subsequent claims.
+
+## 11. Verified reuse inventory and ownership correction
+
+**Synthetic CIVIC:** `apps/civic/src/kernel.ts` carries real *synthetic-only* models for positions, actors, instruments, authority, five evidence epistemic categories, institutional interpretations, resource commitments, expected/observed measures and human decisions. It invokes `assertRuntimeAuthorization()` and rejects non-`SYN-` source ids. Use it to seed comparison fixtures and find behavioral invariants; neither copy it into production nor weaken its boundary.
+
+**UE authority:** `apps/union-eyes/lib/authority/ontology.ts` includes authorization concepts already worked through in UE (capacity is eligibility only; mandate/source instrument, time, recusal, scope and revocation). Inherit semantics where generic; explicitly reject importing UE member/case/federation resource policies into SAGE. UE release fixes and canonical OCI implementation remain owned by UE until a controlled neutral API extraction.
+
+**SAGE:** `packages/sage-core` and `apps/platform-admin` are current production-domain ownership points, regardless of outdated preimplementation language in the earlier SAGE architecture document. Extend this domain, rather than generating a third competing source of institutional authority.
+
+**Graph substrate:** existing `packages/institutional-governance-graph` is appropriate for read projections and lineage, not a write/approval authority shortcut. Reuse as read-only where qualified.
+
+**Additional proof obligation:** every authorized action over a synthetic CIVIC fixture must be semantically comparable to the eventual SAGE implementation, with negative tests for a changed source instrument, attacker-provided authority, conflicting source versions, absent observations, revoked mandates and human-only adopted decisions. No parity claim before executing those tests.
