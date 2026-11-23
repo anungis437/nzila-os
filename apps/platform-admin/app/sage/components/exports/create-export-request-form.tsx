@@ -16,7 +16,8 @@ import { useTranslations } from 'next-intl'
 export interface ExportResourceOption {
   id: string
   label: string
-  authorizationLevel: string
+  /** Optional known authorization level; evidence item projection omits it. */
+  authorizationLevel?: string
 }
 
 interface CreateExportRequestFormProps {
@@ -129,7 +130,9 @@ export function CreateExportRequestForm({
             <label key={o.id} className="flex items-center gap-2 text-sm text-gray-800">
               <input type="checkbox" checked={set.has(o.id)} onChange={() => toggle(set, setter, o.id)} />
               <span>{o.label}</span>
-              <span className="text-xs text-gray-400">[{humanize(o.authorizationLevel)}]</span>
+              {o.authorizationLevel && (
+                <span className="text-xs text-gray-400">[{humanize(o.authorizationLevel)}]</span>
+              )}
             </label>
           ))}
         </div>
