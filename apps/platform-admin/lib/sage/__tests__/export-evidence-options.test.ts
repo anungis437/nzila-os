@@ -6,7 +6,7 @@ const base: SageEvidenceItemResponse = {
   id: 'evidence-1234567890',
   sourceId: 'source-sensitive-1',
   lifecycleState: 'linked',
-  confidenceLevel: 'reported',
+  confidenceLevel: 'moderate',
   excludedFromExternalReview: false,
   humanReviewRequired: true,
   createdAt: '2026-11-23T00:00:00.000Z',
@@ -31,7 +31,7 @@ describe('SAGE export evidence option truthfulness', () => {
 
   it('does not infer an authorization class from any lifecycle state', () => {
     const result = buildSageEvidenceExportOptions([
-      { ...base, lifecycleState: 'draft' },
+      { ...base, lifecycleState: 'proposed' },
       { ...base, id: 'evidence-closed', lifecycleState: 'linked' },
     ])
     expect(result).toHaveLength(2)
