@@ -229,7 +229,7 @@ native('local current Django framework role and RLS boundary', () => {
         { encoding: 'utf8' },
       ).trim()
       expect(label).toBe('UE_BOOTSTRAP_V2_FRAMEWORK')
-      execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
+      execFileSync('docker', ['rm', '-f', '-v', container], { stdio: 'pipe' })
     }
   })
 

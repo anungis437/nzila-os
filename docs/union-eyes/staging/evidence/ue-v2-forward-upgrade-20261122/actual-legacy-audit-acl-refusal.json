@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "status": "CONFIRMED_STAGING_REHEARSAL_REFUSAL",
+  "environment": "Azure staging only",
+  "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+  "operatorSourceSha": "c103aa2fd5f90011f6aa4bfb8a45cdf37910f786",
+  "bindingPullRequest": "https://github.com/anungis437/nzila-os/pull/1286",
+  "preparationRun": "https://github.com/anungis437/nzila-os/actions/runs/45137912588",
+  "preparationResult": "FAILED_READINESS_NEW_REVISION_ZERO_OLD_CCC_HEALTHY_100",
+  "rehearsalRun": "https://github.com/anungis437/nzila-os/actions/runs/45140991614",
+  "operation": "rehearse",
+  "failure": "UE_UPGRADE_PACKAGED_ADMISSION_FAILED:audit_security.audit_logs privileges are runtime[SELECT,INSERT] system[]",
+  "changesCommitted": false,
+  "schemaApplyLaunched": false,
+  "ownedJobAndSecretRemoved": true,
+  "fullRollbackProof": false,
+  "postFailureReadOnlyObservation": {
+    "transport": "TLS and private staging database via the serving CCC revision",
+    "readOnly": true,
+    "administratorAttributesUnchanged": true,
+    "table": "audit_security.audit_logs",
+    "owner": "uev2admin",
+    "rowSecurity": true,
+    "forceRowSecurity": true,
+    "runtimeTablePrivileges": [
+      "INSERT",
+      "SELECT"
+    ],
+    "systemTablePrivileges": [],
+    "columnAcls": [],
+    "temporaryPrivilegeBridgesRemaining": 0,
+    "applicationLoginsUnprivileged": true,
+    "metadataReceiptSha256": "e6e7bad75d76ad11c812a3f351d9758fec8d611c329001bc459d6289abf3d426"
+  },
+  "rootCause": "The retained historical audit table is absent from a fresh canonical export and was not represented in the forward preimage/target. The current source contract requires withdrawing its legacy runtime SELECT/INSERT. The disposable fixture did not model this table.",
+  "repairRequirement": "Bind the retained audit ACL and owner to the exact preimage, withdraw only the source-declared legacy runtime SELECT/INSERT, retain data/owner/RLS/other ACLs, and qualify a nonempty historical fixture with injected failure rollback and both existing administrator profiles. Unknown grants, column ACLs or widened authority must refuse.",
+  "reviewer": "Codex engineering/operator review under explicit sole-founder delegation; anungis and anungis437 are the same founder.",
+  "liveDataDeletion": false,
+  "productionDeployment": false,
+  "financeImplementation": false,
+  "stagingAcceptance": false
+}

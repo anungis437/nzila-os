@@ -292,7 +292,7 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
   })
 
   describe('PATCH /api/grievances/[id]/status', () => {
-    it('stores the new status in the caller\'s organization with its event, audited, and stamps closure', async () => {
+    it('stores the new status in the caller\'s organization with its event and audit', async () => {
       const grievance = await newGrievance(ORG_A, officerA, { status: 'filed', unionRepId: undefined })
       allowCase(officerA, grievance, { isPrimaryOwner: true, canViewCase: true })
       await grantCaseAssignment(grievance, officerA)
@@ -304,6 +304,27 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       expect(harness.audits.slice(before).filter((entry) => entry.resourceId === grievance)).toEqual([
         expect.objectContaining({ action: 'grievance.status_change', organizationId: ORG_A, userId: officerA }),
       ])
+    })
+
+    it('closes an explicitly matured synthetic case as its primary handler and refuses closed-to-investigation', async () => {
+      const grievance = await newGrievance(ORG_A, officerA, { status: 'settled' })
+      // Owned disposable fixture only. This tests a stored mature clock, not
+      // nine days of natural elapsed time and never any staging/customer row.
+      await admin.query("UPDATE grievances SET created_at=now()-interval '9 days' WHERE id=$1", [grievance])
+      allowCase(officerA, grievance, { isPrimaryOwner: true, canViewCase: true, canTransition: true, ownerOnly: { canCloseCase: true } })
+      await grantCaseAssignment(grievance, officerA)
+      const response = await run(detail!.GET, asOfficerA, { params: { id: grievance } })
+      expect((await json(response)).data?.allowedStatuses).toContain('closed')
+      const changedOutcome = await run(status!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'withdrawn' }) })
+      expect(changedOutcome.status).toBe(400)
+      expect((await grievanceRow(grievance))?.status).toBe('settled')
+      const closed = await run(status!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'closed' }) })
+      expect(closed.status).toBe(200)
+      expect((await grievanceRow(grievance))?.closed_at).toBeInstanceOf(Date)
+      expect(await eventsOf(grievance)).toEqual(['status_changed'])
+      const bypass = await run(status!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/status`, 'PATCH', { status: 'investigating' }) })
+      expect(bypass.status).toBe(400)
+      expect((await grievanceRow(grievance))?.status).toBe('closed')
     })
 
     it('does not move another organization\'s grievance, and stores nothing when the audit fails', async () => {
@@ -464,8 +485,8 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       await admin.query(`INSERT INTO user_management.organization_users (organization_id,user_id,role,is_active)
         VALUES ($1,$2,'steward',$3)`, [organizationId, userId, active])
       await admin.query(`INSERT INTO organization_members
-        (organization_id,user_id,role,status,is_primary,name,email,created_at,updated_at)
-        VALUES ($1,$2::text,'steward','active',false,$2::text,$3,now(),now())`, [organizationId, userId, `${userId}@example.test`])
+        (organization_id,user_id,role,status,is_primary,exempt_from_per_capita,name,email,created_at,updated_at)
+        VALUES ($1,$2::text,'steward','active',false,false,$2::text,$3,now(),now())`, [organizationId, userId, `${userId}@example.test`])
       return id
     }
 

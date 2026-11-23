@@ -77,7 +77,7 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
   const newMember = async (organizationId: string, department: string) => {
     const memberId = randomUUID()
     await admin.query(
-      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,'member','active')`,
+      `INSERT INTO organization_members (exempt_from_per_capita, id, user_id, organization_id, name, email, role, status) VALUES (false, $1,$2,$3,$4,$5,'member','active')`,
       [memberId, memberId, organizationId, `Member ${tag}`, `member-${memberId}@${tag}.test`],
     )
     await admin.query(
@@ -89,7 +89,7 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
   }
   const newOrgMember = (who: { id: string; organizationId: string; role: string }) =>
     admin.query(
-      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,$6,'active')`,
+      `INSERT INTO organization_members (exempt_from_per_capita, id, user_id, organization_id, name, email, role, status) VALUES (false, $1,$2,$3,$4,$5,$6,'active')`,
       [who.id, who.id, who.organizationId, `Actor ${tag}`, `actor-${who.id}@${tag}.test`, who.role],
     )
   const newStewardAssignment = async (who: { id: string; organizationId: string }, department: string) => {

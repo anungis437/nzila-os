@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * Case detail route — GET returns case with member contact info.
  * "Cases" are claims viewed from the steward workbench perspective.
@@ -90,11 +91,11 @@ const ALLOWED_PATCH_FIELDS: Record<string, keyof typeof claims.$inferInsert> = {
 
 export const PATCH = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     openapi: {
       tags: ['Cases'],
       summary: 'Update case',
-      description: 'Partially update a case (claim). Steward-only.',
+      description: 'Partially update a case with live handler authority.',
     },
   },
   async ({ body: parsedBody, params }) => {

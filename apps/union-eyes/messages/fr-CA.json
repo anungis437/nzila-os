@@ -5736,7 +5736,12 @@
     "assignToMe": "M'assigner",
     "viewFullDetails": "Voir tous les détails",
     "updateStatusLabel": "Mettre à jour le statut…",
+    "statusActionsLoading": "Vérification des changements de statut disponibles…",
+    "statusActionsUnavailable": "Impossible de charger les changements de statut. Fermez puis rouvrez le dossier pour réessayer.",
+    "statusActionsStale": "Ce dossier a changé. Rechargez le poste de travail avant de modifier son statut.",
+    "statusActionsEmpty": "Aucun changement de statut n’est actuellement permis pour ce dossier.",
     "statusOptions": {
+      "submitted": "Soumis",
       "under_review": "En révision",
       "assigned": "Assigné",
       "investigation": "Enquête",

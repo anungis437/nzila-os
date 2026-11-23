@@ -16,6 +16,7 @@ import {
   BUSINESS_SESSION_CATALOG_PREDICATE,
 } from '../../../apps/union-eyes/db/auth/business-session-policy'
 import { canonicalCatalogContract } from '../../../apps/union-eyes/lib/operations/canonical-catalog-admission'
+import { retainedAuditTarget, retainedAuditRetirement } from './ue-v2-retained-audit-acl'
 
 export interface UpgradeObject {
   kind: string
@@ -122,6 +123,14 @@ export function retainedForwardProfile(
   dump: string,
 ) {
   const target = structuredClone(fresh)
+  for (const retained of before.filter((object) => object.kind === 'retained_audit_acl')) {
+    const approved = canonicalCatalogContract().payload.nonPublic.find(
+      (entry: { schema: string; table: string }) =>
+        `${entry.schema}.${entry.table}` === retained.id,
+    )
+    assert(approved, 'UE_UPGRADE_LEGACY_AUDIT_CONTRACT_REQUIRED')
+    target.push(retainedAuditTarget(retained, approved))
+  }
   const old = new Map(before.map((o) => [key(o), o]))
   const freshKeys = new Set(fresh.map(key))
   const prefix: UpgradeStatement[] = [],
@@ -428,6 +437,12 @@ export async function planCanonicalForwardUpgrade(input: {
   assert.equal(old.size, before.length, 'UE_UPGRADE_DUPLICATE_PREIMAGE')
   assert.equal(target.size, after.length, 'UE_UPGRADE_DUPLICATE_TARGET')
   const result: UpgradeStatement[] = []
+  for (const retained of before.filter((object) => object.kind === 'retained_audit_acl')) {
+    const next = target.get(key(retained))
+    assert(next, 'UE_UPGRADE_LEGACY_AUDIT_TARGET_REQUIRED')
+    const retirement = retainedAuditRetirement(retained, next)
+    if (retirement) result.push(retirement)
+  }
   const add = (phase: string, object: string, sql: string) => result.push({ phase, object, sql })
   for (const o of after.filter(
     (o) =>

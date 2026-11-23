@@ -17260,7 +17260,7 @@
           "method": "PATCH",
           "route": "/api/cases/[caseId]/transition",
           "boundary": "GUARDED_SESSION",
-          "routeTestFiles": 1
+          "routeTestFiles": 2
         }
       ],
       "v2BrowserChecks": [

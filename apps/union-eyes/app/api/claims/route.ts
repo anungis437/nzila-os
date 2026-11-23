@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * CRUD collection route for claims
  *
@@ -89,7 +90,7 @@ export { GET }
  */
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     openapi: {
       tags: ['Claims'],
       summary: 'Create claim',

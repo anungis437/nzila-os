@@ -1,8 +1,10 @@
 import { canPerformAction, type CUPEAction, type CUPERole, type ActionContext } from '@/lib/action-enforcer'
+import { CASE_HANDLER_ROLES } from './case-role-access'
 
 /** Case policy aliases; unknown organizational roles never acquire a member fallback. */
 const aliases: Record<string, CUPERole> = {
   member: 'member', steward: 'steward', chief_steward: 'chief_steward',
+  health_safety_rep: 'steward', bargaining_committee: 'steward',
   business_agent: 'business_agent', officer: 'officer', admin: 'admin',
   president: 'officer', vice_president: 'officer', secretary_treasurer: 'officer',
   national_officer: 'officer', union_rep: 'steward', staff_rep: 'steward',
@@ -11,7 +13,7 @@ const aliases: Record<string, CUPERole> = {
 }
 
 export function casePolicyRole(role: string): CUPERole | null {
-  return aliases[role] ?? null
+  return Object.hasOwn(aliases, role) ? aliases[role]! : null
 }
 
 export function caseActionAllowed(action: CUPEAction, role: CUPERole, context?: ActionContext): boolean {
@@ -19,8 +21,4 @@ export function caseActionAllowed(action: CUPEAction, role: CUPERole, context?: 
 }
 
 /** Canonical membership names only: no public-role metadata or platform-admin flag promotion. */
-export const CASE_ASSIGNEE_MEMBERSHIP_ROLES = [
-  'steward', 'chief_steward', 'officer', 'admin',
-  'president', 'vice_president', 'secretary_treasurer', 'national_officer',
-  'union_rep', 'staff_rep', 'executive', 'ceo', 'governance',
-] as const
+export const CASE_ASSIGNEE_MEMBERSHIP_ROLES = CASE_HANDLER_ROLES

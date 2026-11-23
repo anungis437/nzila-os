@@ -60,7 +60,7 @@ jobs:
         run: |
           node tooling/scripts/generate-ue-v2-staging-candidate.mjs --check
           node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
-          pnpm exec tsx --test tooling/scripts/lib/ue-v2-forward-upgrade.test.ts tooling/scripts/lib/ue-v2-navigation-source.test.ts
+          pnpm exec tsx --test tooling/scripts/lib/ue-v2-forward-upgrade.test.ts tooling/scripts/lib/ue-v2-retained-audit-acl.test.ts tooling/scripts/lib/ue-v2-navigation-source.test.ts
           python3 -m unittest discover -s tooling/scripts -p test_run_ue_v2_forward_upgrade_job.py -v
           pnpm exec tsc --project tooling/scripts/ue-v2-forward-upgrade.tsconfig.json
       - name: Hash-locked interpreter wheelhouse

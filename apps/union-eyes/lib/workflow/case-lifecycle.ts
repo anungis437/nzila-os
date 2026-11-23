@@ -111,7 +111,7 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
     to: ['triage', 'closed'],
     minRole: {
       triage: 'steward',
-      closed: 'admin', // Reject at intake requires admin
+      closed: 'steward', // Actual closure also requires the kernel's primary-handler authority
     },
     defaultMinRole: 'steward',
     minTimeMs: 0,
@@ -121,7 +121,7 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
     to: ['investigation', 'closed'],
     minRole: {
       investigation: 'steward',
-      closed: 'admin',
+      closed: 'steward',
     },
     defaultMinRole: 'steward',
     minTimeMs: 0,
@@ -141,7 +141,7 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
       mediation: 'officer',
       arbitration: 'officer',
       resolved: 'steward',
-      closed: 'admin',
+      closed: 'steward',
     },
     defaultMinRole: 'steward',
     minTimeMs: 3 * 24 * 60 * 60 * 1000, // 3 days minimum investigation
@@ -158,8 +158,8 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
     minRole: {
       investigation: 'steward',
       triage: 'steward',
-      resolved: 'admin',
-      closed: 'admin',
+      resolved: 'steward',
+      closed: 'steward',
     },
     defaultMinRole: 'steward',
     minTimeMs: 0,
@@ -172,7 +172,7 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
       mediation: 'officer',
       arbitration: 'officer',
       resolved: 'steward',
-      closed: 'admin',
+      closed: 'steward',
     },
     defaultMinRole: 'steward',
     minTimeMs: 0,
@@ -184,7 +184,7 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
       negotiation: 'officer',
       arbitration: 'officer',
       resolved: 'officer',
-      closed: 'admin',
+      closed: 'steward',
     },
     defaultMinRole: 'officer',
     minTimeMs: 0,
@@ -194,7 +194,7 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
     to: ['resolved', 'closed'],
     minRole: {
       resolved: 'officer',
-      closed: 'admin',
+      closed: 'steward',
     },
     defaultMinRole: 'officer',
     minTimeMs: 0,
@@ -203,9 +203,9 @@ const TRANSITIONS: Record<LifecycleState, TransitionRule> = {
   resolved: {
     to: ['closed'],
     minRole: {
-      closed: 'admin',
+      closed: 'steward',
     },
-    defaultMinRole: 'admin',
+    defaultMinRole: 'steward',
     minTimeMs: 7 * 24 * 60 * 60 * 1000, // 7-day cooling-off / appeal period
     guard: (ctx) => {
       if (ctx.hasUnresolvedCriticalSignals) {

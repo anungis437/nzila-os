@@ -6,6 +6,7 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import pg from 'pg'
+import { RETAINED_AUDIT_CATALOG_QUERY } from './lib/ue-v2-retained-audit-acl'
 import { inspectCatalog, catalogDigest } from '../../apps/union-eyes/scripts/bootstrap-v2/installer'
 import { FORWARD_EVENT_CATALOG_QUERY } from './lib/ue-v2-forward-upgrade-runtime'
 
@@ -78,7 +79,7 @@ async function main() {
         ? { rows: [{ version: '160012' }] }
         : (queries.push(sql), { rows: [] }),
   } as unknown as pg.Client)
-  queries.push(FORWARD_EVENT_CATALOG_QUERY)
+  queries.push(FORWARD_EVENT_CATALOG_QUERY, RETAINED_AUDIT_CATALOG_QUERY)
   assert(queries.every((sql) => /^\s*SELECT\s/i.test(sql)))
   fs.mkdirSync(out, { recursive: true })
   for (const file of ['schema.sql', 'expected-catalog.json', 'export-qualification.json'])

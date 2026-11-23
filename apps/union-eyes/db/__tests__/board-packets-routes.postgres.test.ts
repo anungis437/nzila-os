@@ -117,8 +117,8 @@ describe.skipIf(!URL)('the board packet routes on the combined schema, as the re
     )
   const newMember = (userId: string, organizationId: string, name: string, address: string, status = 'active', deleted = false) =>
     admin.query(
-      `INSERT INTO organization_members (user_id, organization_id, role, status, is_primary, name, email, joined_at, deleted_at, created_at, updated_at)
-       VALUES ($1,$2,'member',$3,false,$4,$5,now(), ${deleted ? 'now()' : 'NULL'}, now(), now())`,
+      `INSERT INTO organization_members (exempt_from_per_capita, user_id, organization_id, role, status, is_primary, name, email, joined_at, deleted_at, created_at, updated_at)
+       VALUES (false, $1,$2,'member',$3,false,$4,$5,now(), ${deleted ? 'now()' : 'NULL'}, now(), now())`,
       [userId, organizationId, status, name, address],
     )
 

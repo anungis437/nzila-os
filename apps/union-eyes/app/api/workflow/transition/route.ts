@@ -15,8 +15,8 @@ import {
   getCaseActor,
 } from '@/lib/cases/case-authorization'
 import { updateClaimStatus } from '@/lib/workflow-engine'
-import { getAllowedTransitions } from '@/lib/workflow/case-lifecycle'
-import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
+import { allowedClaimCaseTransitions, claimTransitionTarget, validateClaimCaseTransition } from '@/lib/workflow/claim-transition-policy'
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access'
 
 // Local alias for DB claim status values — decoupled from deprecated FSM module
 type ClaimStatus =
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await requireApiAuth({
       orgScoped: true,
-      roles: ['steward', 'admin'],
+      roles: [...CASE_HANDLER_ROLES],
     })
 
     if (!userId) {
@@ -114,12 +114,16 @@ export async function POST(request: NextRequest) {
 
       const currentStatus = claim.status as ClaimStatus
 
-      // Pre-flight FSM guard via canonical lifecycle bridge
-      const currentLifecycle = toLifecycleState('claim', currentStatus) ?? 'submitted'
-      const allowedLifecycle = getAllowedTransitions(currentLifecycle, 'steward')
-      const allowed = [...new Set(allowedLifecycle.map(toLegacyClaimStatus))]
-      const targetLifecycle=toLifecycleState('claim',targetStatus);
-      if (!targetLifecycle || !allowedLifecycle.includes(targetLifecycle)) {
+      // Evaluate the actual actor and stored facts; the downstream mutation
+      // repeats this validation and kernel admission in the same transaction.
+      const target = claimTransitionTarget(targetStatus)
+      const validation = target && validateClaimCaseTransition(claim, actor.role, target, notes)
+      if (!validation || !validation.allowed) {
+        const mayClose = await findReadableCase(tx, actor, claimNumber, true, 'case:close')
+          .catch(error => { if (error?.code === 'FORBIDDEN') return null; throw error })
+        const allowed = allowedClaimCaseTransitions(claim, actor.role, {
+          canTransition: true, canClose: Boolean(mayClose),
+        }, notes)
         recordUnionEyesWorkflowTransitionFailure(
           organizationId || claim.organizationId,
           claim.claimId,

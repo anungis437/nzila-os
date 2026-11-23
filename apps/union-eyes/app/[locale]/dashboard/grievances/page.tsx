@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
+import { requireUser } from '@/lib/api-auth-guard';
+import { isCaseHandlerRole } from '@/lib/cases/case-role-access';
 import { GrievancesConsole } from '@/components/grievances/grievances-console';
 
 type PageProps = {
@@ -20,14 +21,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function GrievancesPage() {
+  let currentUser;
   try {
-    await requireUser();
+    currentUser = await requireUser();
   } catch {
     redirect('/login');
   }
 
-  const hasAccess = await hasMinRole('steward');
-  if (!hasAccess) {
+  const handlerRole = currentUser.roles.find(isCaseHandlerRole);
+  if (!handlerRole) {
     redirect('/dashboard');
   }
 

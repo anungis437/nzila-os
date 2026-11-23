@@ -33,6 +33,8 @@ describe('workbench inline case access', () => {
       const method = init?.method ?? 'GET';
       calls.push({ url, method });
       if (url.startsWith('/api/workbench/assigned')) return { ok: true, json: async () => ({ data: { claims: routes.claims ?? [ownedClaim] } }) };
+      if (url === '/api/cases/owned-case/transition' && method === 'PATCH') return {ok:true,json:async()=>({success:true})};
+      if (url === '/api/cases/owned-case/next-actions') return { ok: true, json: async () => ({ caseId: 'owned-case', currentStatus: routes.claims?.[0]?.status ?? 'assigned', allowedTransitions: ['closed'] }) };
       if (url === '/api/cases/owned-case/notes' && method === 'POST') return { ok: routes.addNote?.().ok ?? true, json: async () => ({}) };
       if (url === '/api/cases/owned-case/notes') {
         const answer = routes.notes?.() ?? { ok: true, body: { caseId: 'owned-case', notes: [
@@ -222,6 +224,15 @@ describe('workbench inline case access', () => {
     expect(screen.queryByRole('textbox', { name: 'workbench.addNotePlaceholder' })).toBeNull();
     expect(screen.queryByRole('combobox', { name: 'workbench.updateStatusLabel' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'workbench.escalateToGrievance' })).toBeNull();
+  });
+
+  it('keeps server-permitted closure reachable after a case is resolved', async () => {
+    const calls = serve({ claims: [{ ...ownedClaim, status: 'resolved' }] });
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', {name:'workbench.expand CASE-01'}));
+    const status = await screen.findByRole('combobox', {name:'workbench.updateStatusLabel'});
+    await userEvent.selectOptions(status, 'closed');
+    await waitFor(() => expect(calls).toContainEqual({url:'/api/cases/owned-case/transition',method:'PATCH'}));
   });
 
 });

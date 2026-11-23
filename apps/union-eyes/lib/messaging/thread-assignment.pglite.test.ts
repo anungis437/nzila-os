@@ -18,7 +18,10 @@ import { createMemberThread, findReadableThread, listThreadMessages, listThreads
 const org = '11111111-1111-4111-8111-111111111111'
 const foreignOrg = '22222222-2222-4222-8222-222222222222'
 const DAY = 86_400_000
-const NOW = new Date('2026-10-24T12:00:00.000Z')
+// createMemberThread intentionally uses the live clock when notifying current
+// designation holders. Anchor fixtures to that same clock; an absolute date
+// silently turns this positive notification proof into expired designations.
+const NOW = new Date()
 const later = (days: number) => new Date(NOW.getTime() + days * DAY)
 
 const MIGRATION = readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0014_message_thread_triage.sql'), 'utf8')
