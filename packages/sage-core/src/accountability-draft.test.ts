@@ -214,6 +214,15 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
       .toThrow(/not bound/)
   })
 
+  it('rejects malformed or impossible review timestamps', () => {
+    expect(() => buildSageAccountabilityDraft(payload(), input({
+      reviewDueAt: '2026-02-30T12:00:00.000Z',
+    }))).toThrow(/reviewDueAt/)
+    expect(() => buildSageAccountabilityDraft(payload(), input({
+      reviewDueAt: '2026-12-01',
+    }))).toThrow(/reviewDueAt/)
+  })
+
   it('denies fabricated acceptance, invalid commitment, nonfinite observations and mismatched spend currency', () => {
     expect(() => buildSageAccountabilityDraft(payload(), input({
       execution: { receivedDeliverables: 3, acceptedDeliverables: 2, evidence: ref(delivery) },
