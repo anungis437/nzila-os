@@ -1,13 +1,15 @@
 # G13 — Restore and continuity (engineering package)
 
 **Gate status:** Azure PITR / staging restore remains `NOT_PROVEN`.  
-Local harness: `pnpm sage:b005:restore` → `RESTORE_HARNESS_PASS` proves fictional
-bootstrap dump/restore + revoked-holding non-resurrection in PGlite only.
+Local harness: `node tooling/scripts/sage-b005-restore-harness.mjs` →
+`RESTORE_HARNESS_PASS` proves fictional bootstrap dump/restore + revoked-holding
+non-resurrection in PGlite only.
 
 ## Local harness (achievable without Azure)
 
 ```bash
-pnpm sage:b005:restore -- --receipt reports/proof-runs/sage-b005-restore.json
+node tooling/scripts/sage-b005-restore-harness.mjs \
+  --receipt reports/proof-runs/sage-b005-restore.json
 ```
 
 Pass criteria (local only):

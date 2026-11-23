@@ -70,9 +70,9 @@ Root migrations (authoritative for SAGE):
 Offline checksum + apply tooling (does **not** close B-005):
 
 ```bash
-pnpm sage:b005:migrations verify
-pnpm sage:b005:migrations apply --url "$SAGE_PG_TEST_URL"
-pnpm sage:b005:migrations receipt --out reports/proof-runs/sage-b005-migration.json
+node tooling/scripts/sage-b005-migration-preflight.mjs verify
+node tooling/scripts/sage-b005-migration-preflight.mjs apply --url "$SAGE_PG_TEST_URL"
+node tooling/scripts/sage-b005-migration-preflight.mjs receipt --out reports/proof-runs/sage-b005-migration.json
 ```
 
 Before apply, record local checksums for the exact SHA being deployed:
@@ -84,7 +84,10 @@ node -e "import('./tooling/scripts/lib/sage-migration-chain.mjs').then(m=>consol
   | tee /tmp/sage-migration-checksums.json
 ```
 
-Apply with the project’s approved migration executor for the target DB (`pnpm sage:b005:migrations apply` for isolated Postgres). If the shared staging DB has no applier for root `migrations/*.sql`, provision an isolated Postgres and document the applier command used.
+Apply with the project’s approved migration executor for the target DB
+(`node tooling/scripts/sage-b005-migration-preflight.mjs apply` for isolated
+Postgres). If the shared staging DB has no applier for root `migrations/*.sql`,
+provision an isolated Postgres and document the applier command used.
 
 After apply:
 
@@ -163,7 +166,8 @@ node tooling/scripts/sage-staging-http-preflight.mjs \
 export SAGE_B005_BASE_URL=https://staging-admin.nzilaventures.com/
 export SAGE_B005_SESSION_COOKIE='…'
 export SAGE_B005_EXPECTED_SHA=<40-char-sha>
-pnpm sage:b005:auth-smoke -- --receipt reports/proof-runs/sage-b005-auth-smoke.json
+node tooling/scripts/sage-b005-authenticated-http-smoke.mjs \
+  --receipt reports/proof-runs/sage-b005-auth-smoke.json
 ```
 
 3. Create draft workspace in staging (human)
@@ -174,7 +178,7 @@ pnpm sage:b005:auth-smoke -- --receipt reports/proof-runs/sage-b005-auth-smoke.j
 Compose the machine-readable qualification receipt (still `b005Closure: NOT_PROVEN` until staging proofs complete):
 
 ```bash
-pnpm sage:b005:receipt -- \
+node tooling/scripts/sage-b005-qualification-receipt.mjs \
   --git-sha <40-char-sha> \
   --out reports/proof-runs/sage-b005-qualification.json \
   --migration-receipt reports/proof-runs/sage-b005-migration.json \
@@ -186,7 +190,8 @@ pnpm sage:b005:receipt -- \
 Full **G12/G13/G11 manual** remain separate blockers (B-001…B-004). Local restore harness:
 
 ```bash
-pnpm sage:b005:restore -- --receipt reports/proof-runs/sage-b005-restore.json
+node tooling/scripts/sage-b005-restore-harness.mjs \
+  --receipt reports/proof-runs/sage-b005-restore.json
 ```
 
 ## G. Evidence to file when closing B-005

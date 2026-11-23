@@ -18,11 +18,11 @@
 | Pattern A | Decision + institutional action + outbox under mandate | `LOCAL_TESTED` | `decision-mandate-ratification.pglite.test.ts` + platform-admin governance routes (HTTP capacity fail-closed until durable store) |
 | P01 HTTP | `resource.commit` under mandate (SQL capacity store; absent attestation still fail-closed) | `SOURCE_IMPLEMENTED` / capacity `LOCAL_TESTED` | migration `0051`, `institutional-capacity-store.pglite.test.ts`, HTTP wires `SqlSageInstitutionalCapacityStore` in-transaction (staging HTTP still `NOT_PROVEN`) |
 | C1 | Protected CIVIC synthetic client runtime | `NO_GO` / package `SOURCE_IMPLEMENTED` | `CIVIC_RUNTIME_C1_READINESS_PACKAGE.md`; guard refuses; packet `AWAITING_OWNER_GRANT` |
-| B-005 offline package | Migration checksums, fixtures, auth smoke harness, restore harness, qualification receipt | `LOCAL_TESTED` (closure still `NOT_PROVEN`) | `pnpm sage:b005:test`; fixtures under `fixtures/sage-b005-institutional/` |
+| B-005 offline package | Migration checksums, fixtures, auth smoke harness, restore harness, qualification receipt | `LOCAL_TESTED` (closure still `NOT_PROVEN`) | `pnpm sage:b005:test` (composite); `node tooling/scripts/sage-b005-*.mjs`; fixtures under `fixtures/sage-b005-institutional/` |
 | B-005 staging | Isolated SAGE staging deploy + authenticated proofs | `NOT_PROVEN` | Requires Azure write + staging session credentials |
 | G11 | Automated axe + manual checklist | Automated `LOCAL_TESTED`; manual `NOT_PROVEN` | `G11_MANUAL_A11Y_CHECKLIST.md` |
 | G12 | Telemetry / incident | Contract `LOCAL_TESTED`; live drill `NOT_PROVEN` | `G12_INCIDENT_PROCEDURE.md`, `sage-g12-telemetry-contract.test.mjs` |
-| G13 | Restore / continuity | Local harness `LOCAL_TESTED`; Azure PITR `NOT_PROVEN` | `G13_RESTORE_CONTINUITY.md`, `pnpm sage:b005:restore` |
+| G13 | Restore / continuity | Local harness `LOCAL_TESTED`; Azure PITR `NOT_PROVEN` | `G13_RESTORE_CONTINUITY.md`, `node tooling/scripts/sage-b005-restore-harness.mjs` |
 | GO_LIVE | Product activation | `NO_GO` | Unchanged constitutional posture |
 
 ## External blockers

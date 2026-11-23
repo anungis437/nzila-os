@@ -282,10 +282,19 @@ describe('scoped 0019 deadline_reassignment_convergence', () => {
       const text = readFileSync(resolve(REPO_ROOT, relativePath), 'utf8');
       expect(text, relativePath).not.toContain('0049_union_eyes_deadline_convergence_tasks');
     }
+    // Root migrations continue past 0049 (SAGE 0050–0052). Assert 0049 remains
+    // immutably locked in the manifest; do not pin lockedThrough to 0049 forever.
     const manifest = JSON.parse(readFileSync(resolve(REPO_ROOT, 'migrations/migration-manifest.json'), 'utf8')) as {
       lockedThrough: string;
+      migrations: Array<{ file: string; sha256: string }>;
     };
-    expect(manifest.lockedThrough).toBe('0049_union_eyes_deadline_convergence_tasks.sql');
+    const locked0049 = manifest.migrations.find(
+      (entry) => entry.file === '0049_union_eyes_deadline_convergence_tasks.sql',
+    );
+    expect(locked0049?.sha256).toBe(
+      createHash('sha256').update(SQL_0049.replace(/\r\n/g, '\n')).digest('hex'),
+    );
+    expect(manifest.lockedThrough >= '0049_union_eyes_deadline_convergence_tasks.sql').toBe(true);
   });
 
   it('is registered once at journal idx 19', () => {
