@@ -69,7 +69,17 @@
       "failure": "Auth pool SQL expectation omitted the newly added transaction-local timeout settings. Correct the expected complete bound parameter set; retain the one-query and cleared-selector checks."
     },
     "navigationRegressionsOldSourceFailed": 20,
-    "navigationAndAuthPoolFocusedAssertionsPassed": 179
+    "historicalPrecommitNavigationAndAuthPoolFocusedAssertionsPassed": 179,
+    "currentSourceProviderGuardNavigationAndAuthPoolFocusedTestsPassed": 149,
+    "roleMatrixCoverage": "The existing independent domain-role matrix checks both menu and route admission for every role value. Component scenarios use the shared local correspondence-role list; identity-provider detection stays enforced without a new exception.",
+    "previousNavigationDraftSourceSha": "9079730e9446ec48cb6f9cde2885270066390977",
+    "previousNavigationDraftContractSuite": {
+      "passed": 10172,
+      "failed": 1,
+      "failure": "New component test repeated a local occupation identifier in a file outside the declared domain tests. Keep the independent matrix in the existing domain test and consume the shared role list in component scenarios.",
+      "testFast": "INTERRUPTED_AFTER_KNOWN_CONTRACT_FAILURE_NOT_A_PASS",
+      "otherFourRequiredLocalCommands": "NOT_EXECUTED"
+    }
   },
   "fullBaseReleaseAccepted": false,
   "productionDeployment": false,

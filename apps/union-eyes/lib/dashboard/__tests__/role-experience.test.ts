@@ -196,6 +196,7 @@ describe('lib/dashboard/role-experience', () => {
     it.each(Object.values(UserRole))('offers correspondence for %s only when its local letter role permits it', role => {
       const localLetterRoles = ['steward', 'chief_steward', 'officer', 'president', 'vice_president', 'secretary_treasurer', 'admin', 'clerk'];
       expect(getVisibleNavigationForExperience('staff', false, role).some(item => item.href === '/dashboard/correspondence')).toBe(localLetterRoles.includes(role));
+      expect(canAccessDashboardPath('/dashboard/correspondence', getDashboardExperience(role), true, role)).toBe(localLetterRoles.includes(role));
     });
 
     it('lands eligible specialized representatives on their scoped case workbench', () => {

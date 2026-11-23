@@ -2,8 +2,8 @@
 import { act, cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import RoleExperienceGuard from './role-experience-guard';
-import { UserRole } from '@/lib/auth/roles';
-import { canAccessDashboardPath, getDashboardExperience } from '@/lib/dashboard/role-experience';
+import { CORRESPONDENCE_STAFF_ROLES } from '@/lib/correspondence/roles';
+import { canAccessDashboardPath } from '@/lib/dashboard/role-experience';
 
 const navigation = vi.hoisted(() => ({ pathname: '/en-CA/dashboard/workbench', replace: vi.fn() }));
 vi.mock('next/navigation', () => ({ usePathname: () => navigation.pathname, useRouter: () => ({ replace: navigation.replace }) }));
@@ -71,12 +71,7 @@ describe('explicit executive casework standing', () => {
 // The real staging admin page rendered, then the menu guard sent it to its
 // landing before its authorized letter list could load.
 describe('local letter route survives its navigation experience', () => {
-  const localLetterRoles = ['admin', 'clerk', 'steward', 'chief_steward', 'officer', 'president', 'vice_president', 'secretary_treasurer'];
-  it.each(Object.values(UserRole))('keeps the actual letter role boundary for %s', role => {
-    expect(canAccessDashboardPath('/dashboard/correspondence', getDashboardExperience(role), true, role))
-      .toBe(localLetterRoles.includes(role));
-  });
-  it.each(localLetterRoles)('does not redirect an authorized %s away from letters', role => {
+  it.each(CORRESPONDENCE_STAFF_ROLES)('does not redirect an authorized %s away from letters', role => {
     const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher);
     navigation.pathname = '/en-CA/dashboard/correspondence';
     render(<RoleExperienceGuard userRole={role} />);
