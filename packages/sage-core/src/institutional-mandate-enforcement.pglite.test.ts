@@ -91,11 +91,11 @@ function actorFacts(overrides: Partial<Parameters<typeof executeInstitutionalAct
     workspaceId: WS,
     actorId: ACTOR,
     actorKind: 'human' as const,
-    currentPositionId: POSITION,
+    claimedPositionId: POSITION,
     authenticated: true,
     activeWorkspaceMembership: true,
     applicationPermissionGranted: true,
-    conflictOrRecusal: false,
+    conflictOrRecusal: false as boolean | null,
     ...overrides,
   }
 }
@@ -284,6 +284,7 @@ describe('institutional mandate enforcement (PGlite)', () => {
     expect(second.admitted).toBe(true)
     if (!second.admitted) return
     expect(second.reusedExisting).toBe(true)
+    expect(second.authorizationStatus).toBe('HISTORICALLY_RECORDED_NO_NEW_AUTHORIZATION')
     expect(await sumResourceCommitmentsMinor(sql, { orgId: ORG, resourceId: RESOURCE, currency: 'CAD' })).toBe(
       250_000,
     )
@@ -391,5 +392,79 @@ describe('institutional mandate enforcement (PGlite)', () => {
         result.actionId,
       ]),
     ).rejects.toThrow(/append-only/i)
+  })
+
+  it('fails closed when conflict/recusal data is unavailable (no default clear)', async () => {
+    const mandate = await seedMandate()
+    await begin()
+    const denied = await executeInstitutionalActionInTransaction(sql, {
+      actor: actorFacts({ conflictOrRecusal: null }),
+      mandateId: mandate.id,
+      resourceId: RESOURCE,
+      action: 'resource.commit',
+      evaluatedAt: NOW,
+      idempotencyKey: 'conflict-unavailable',
+      requestedCommitMinor: 100_000,
+    })
+    await commit()
+    expect(denied.admitted).toBe(false)
+    if (!denied.admitted) expect(denied.decision.reason).toBe('CONFLICT_DATA_UNAVAILABLE')
+  })
+
+  it('rejects a spoofed position claim that does not match the locked mandate office', async () => {
+    const mandate = await seedMandate()
+    await begin()
+    const denied = await executeInstitutionalActionInTransaction(sql, {
+      actor: actorFacts({ claimedPositionId: 'pos-spoofed-other-office' }),
+      mandateId: mandate.id,
+      resourceId: RESOURCE,
+      action: 'resource.commit',
+      evaluatedAt: NOW,
+      idempotencyKey: 'spoofed-position',
+      requestedCommitMinor: 100_000,
+    })
+    await commit()
+    expect(denied.admitted).toBe(false)
+    if (!denied.admitted) expect(denied.decision.reason).toBe('MANDATE_SCOPE_MISMATCH')
+  })
+
+  it('re-checks authority on idempotent replay and refuses after revocation without disclosing the historic action', async () => {
+    const mandate = await seedMandate()
+    await begin()
+    const first = await executeInstitutionalActionInTransaction(sql, {
+      actor: actorFacts(),
+      mandateId: mandate.id,
+      resourceId: RESOURCE,
+      action: 'resource.commit',
+      evaluatedAt: NOW,
+      idempotencyKey: 'replay-after-revoke',
+      requestedCommitMinor: 100_000,
+    })
+    await commit()
+    expect(first.admitted).toBe(true)
+    if (!first.admitted) return
+    expect(first.authorizationStatus).toBe('NEWLY_ADMITTED')
+
+    await revokeInstitutionalMandate(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      mandateId: mandate.id,
+      revokedAt: '2026-11-23T14:30:00.000Z',
+    })
+
+    await begin()
+    const replay = await executeInstitutionalActionInTransaction(sql, {
+      actor: actorFacts(),
+      mandateId: mandate.id,
+      resourceId: RESOURCE,
+      action: 'resource.commit',
+      evaluatedAt: '2026-11-23T14:35:00.000Z',
+      idempotencyKey: 'replay-after-revoke',
+      requestedCommitMinor: 100_000,
+    })
+    await commit()
+    expect(replay.admitted).toBe(false)
+    if (!replay.admitted) expect(replay.decision.reason).toBe('MANDATE_INACTIVE')
+    expect(replay).not.toHaveProperty('actionId')
   })
 })

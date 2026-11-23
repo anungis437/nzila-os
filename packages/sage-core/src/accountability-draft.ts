@@ -51,7 +51,17 @@ export type SageAccountabilityDraftInput = {
     receivedDeliverables: number
     evidence: SageAccountabilityEvidenceRef
     acceptedDeliverables?: number
-    acceptanceEvidence?: SageAccountabilityEvidenceRef
+    /**
+     * Required to promote accepted deliverables. A delivery/training receipt
+     * alone is never sufficient — attestation must name an independent
+     * acceptance purpose, acceptor, instrument, and distinct evidence/source.
+     */
+    acceptanceAttestation?: {
+      purpose: 'institutional_deliverable_acceptance'
+      acceptorActorId: string
+      instrumentReference: string
+      evidence: SageAccountabilityEvidenceRef
+    }
   }
   expected: SageAccountabilityMeasure
   observed?: SageAccountabilityMeasure
@@ -101,6 +111,7 @@ export type SageAccountabilityDraftOutput = {
     | 'ZERO_RECEIVED'
     | 'RECEIVED_ACCEPTANCE_UNPROVEN'
     | 'PARTIALLY_ACCEPTED'
+    | 'RECEIVED_FULLY_ACCEPTED_CONTRACT_INCOMPLETE'
     | 'FULLY_ACCEPTED'
   openEvidenceTasks: readonly ('deliverable_acceptance' | 'actual_spend' | 'authority_attestation')[]
   outcome: {
@@ -239,17 +250,30 @@ export function buildSageAccountabilityDraft(
   if (input.execution) {
     if (!input.commitment) fail('execution requires a source-bound commitment')
     nonNegativeSafeInt(input.execution.receivedDeliverables, 'received deliverables')
+    assertAuthorized(input.execution.evidence, 'execution')
     if (input.execution.acceptedDeliverables !== undefined) {
       nonNegativeSafeInt(input.execution.acceptedDeliverables, 'accepted deliverables')
-      if (!input.execution.acceptanceEvidence) fail('acceptance evidence required')
+      const attestation = input.execution.acceptanceAttestation
+      if (!attestation) fail('institutional acceptance attestation required')
+      if (attestation.purpose !== 'institutional_deliverable_acceptance') {
+        fail('acceptance attestation purpose invalid')
+      }
+      required(attestation.acceptorActorId, 'acceptance acceptor')
+      required(attestation.instrumentReference, 'acceptance instrument')
       if (input.execution.acceptedDeliverables > input.execution.receivedDeliverables) {
         fail('acceptance cannot exceed received deliverables')
       }
-      assertAuthorized(input.execution.acceptanceEvidence, 'deliverable acceptance')
-    } else if (input.execution.acceptanceEvidence) {
-      fail('acceptance evidence without accepted deliverables')
+      assertAuthorized(attestation.evidence, 'deliverable acceptance')
+      // Delivery/training receipts must not be reused as acceptance evidence.
+      if (
+        attestation.evidence.evidenceItemId === input.execution.evidence.evidenceItemId ||
+        attestation.evidence.sourceId === input.execution.evidence.sourceId
+      ) {
+        fail('acceptance evidence must be independent of delivery receipt evidence/source')
+      }
+    } else if (input.execution.acceptanceAttestation) {
+      fail('acceptance attestation without accepted deliverables')
     }
-    assertAuthorized(input.execution.evidence, 'execution')
   }
   if (input.actualSpend) {
     if (!input.commitment) fail('actual spend requires source-bound commitment')
@@ -295,18 +319,34 @@ export function buildSageAccountabilityDraft(
 
   const received = input.execution?.receivedDeliverables
   const accepted = input.execution?.acceptedDeliverables
+  const expectedDeliverables = input.commitment?.expectedDeliverables
   let executionDisposition: SageAccountabilityDraftOutput['executionDisposition'] = 'MISSING'
   if (input.execution) {
     if (received === 0) executionDisposition = 'ZERO_RECEIVED'
     else if (accepted === undefined) executionDisposition = 'RECEIVED_ACCEPTANCE_UNPROVEN'
     else if (accepted < (received ?? 0)) executionDisposition = 'PARTIALLY_ACCEPTED'
-    else executionDisposition = 'FULLY_ACCEPTED'
+    else if (
+      expectedDeliverables !== undefined &&
+      accepted === received &&
+      received < expectedDeliverables
+    ) {
+      // All received items accepted, but contracted deliverables remain incomplete.
+      executionDisposition = 'RECEIVED_FULLY_ACCEPTED_CONTRACT_INCOMPLETE'
+    } else if (expectedDeliverables !== undefined && accepted >= expectedDeliverables) {
+      executionDisposition = 'FULLY_ACCEPTED'
+    } else {
+      executionDisposition = 'PARTIALLY_ACCEPTED'
+    }
   }
 
   const openEvidenceTasks: SageAccountabilityDraftOutput['openEvidenceTasks'][number][] = [
     'authority_attestation',
   ]
-  if (executionDisposition === 'RECEIVED_ACCEPTANCE_UNPROVEN' || executionDisposition === 'PARTIALLY_ACCEPTED') {
+  if (
+    executionDisposition === 'RECEIVED_ACCEPTANCE_UNPROVEN' ||
+    executionDisposition === 'PARTIALLY_ACCEPTED' ||
+    executionDisposition === 'RECEIVED_FULLY_ACCEPTED_CONTRACT_INCOMPLETE'
+  ) {
     openEvidenceTasks.push('deliverable_acceptance')
   }
   if (!input.actualSpend) openEvidenceTasks.push('actual_spend')
@@ -335,7 +375,9 @@ export function buildSageAccountabilityDraft(
       actualSpendMinor: input.actualSpend?.amountMinor ?? null,
       commitmentEvidence: input.commitment ? { ...input.commitment.evidence } : null,
       executionEvidence: input.execution ? { ...input.execution.evidence } : null,
-      acceptanceEvidence: input.execution?.acceptanceEvidence ? { ...input.execution.acceptanceEvidence } : null,
+      acceptanceEvidence: input.execution?.acceptanceAttestation
+        ? { ...input.execution.acceptanceAttestation.evidence }
+        : null,
       actualSpendEvidence: input.actualSpend ? { ...input.actualSpend.evidence } : null,
     },
     executionDisposition,

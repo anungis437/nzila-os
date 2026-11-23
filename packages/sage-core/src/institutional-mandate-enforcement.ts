@@ -18,6 +18,10 @@ import {
   type SageInstitutionalActionRow,
   type SageResourceCommitmentRow,
 } from './institutional-mandate-store'
+import {
+  resolveInstitutionalCapacityForAdmission,
+  type SageInstitutionalCapacityStore,
+} from './institutional-capacity'
 import { conflict, forbidden, invalidInput } from './service-errors'
 
 export type SageInstitutionalActorFacts = {
@@ -25,11 +29,19 @@ export type SageInstitutionalActorFacts = {
   workspaceId: string
   actorId: string
   actorKind: 'human' | 'service' | 'system'
-  currentPositionId: string
   authenticated: boolean
   activeWorkspaceMembership: boolean
   applicationPermissionGranted: boolean
-  conflictOrRecusal: boolean
+  /**
+   * Optional browser-claimed position. Never authoritative — must match the
+   * locked mandate office after server capacity resolution.
+   */
+  claimedPositionId?: string | null
+  /**
+   * Pre-verified conflict/recusal when no capacity store is supplied.
+   * `null` fails closed. Prefer `capacityStore` for live HTTP paths.
+   */
+  conflictOrRecusal?: boolean | null
 }
 
 export type ExecuteInstitutionalActionInput = {
@@ -43,6 +55,12 @@ export type ExecuteInstitutionalActionInput = {
   /** Client-requested commitment increment for resource.commit only. */
   requestedCommitMinor?: number
   safePayload?: Record<string, unknown>
+  /**
+   * Server capacity/recusal store. When provided, position and conflict are
+   * resolved from it (fail closed if unavailable). When omitted, callers must
+   * pass a non-null `actor.conflictOrRecusal` that was already server-verified.
+   */
+  capacityStore?: SageInstitutionalCapacityStore | null
 }
 
 export type ExecuteInstitutionalActionResult =
@@ -53,6 +71,8 @@ export type ExecuteInstitutionalActionResult =
       commitmentId: string | null
       totalCommittedMinorAfterAction: number | null
       reusedExisting: boolean
+      /** Explicit: replay does not grant fresh authority. */
+      authorizationStatus: 'NEWLY_ADMITTED' | 'HISTORICALLY_RECORDED_NO_NEW_AUTHORIZATION'
     }
   | {
       admitted: false
@@ -109,31 +129,63 @@ export async function executeInstitutionalActionInTransaction(
     action: input.action,
     idempotencyKey,
   })
-  if (existing) {
-    if (existing.mandate_id !== input.mandateId || existing.actor_id !== actor.actorId) {
-      conflict('idempotency key already used for a different institutional action')
-    }
-    return {
-      admitted: true,
-      reusedExisting: true,
-      actionId: existing.id,
-      commitmentId: existing.commitment_id,
-      totalCommittedMinorAfterAction: null,
-      decision: {
-        allowed: true,
-        reason: 'ADMITTED',
-        mandateId: existing.mandate_id,
-        instrumentRef: existing.instrument_ref,
-        instrumentVersion: existing.instrument_version,
-      },
-    }
+  if (existing && (existing.mandate_id !== input.mandateId || existing.actor_id !== actor.actorId)) {
+    conflict('idempotency key already used for a different institutional action')
   }
 
+  // Always lock + re-evaluate current authority — including idempotent replay —
+  // so a revoked/suspended actor cannot retrieve a fresh "admitted" result.
   const mandate = await lockInstitutionalMandateForUpdate(sql, {
     orgId: actor.orgId,
     workspaceId: actor.workspaceId,
     mandateId: input.mandateId,
   })
+
+  let conflictOrRecusal: boolean | null
+  let currentPositionId: string
+
+  if (input.capacityStore !== undefined) {
+    const capacity = await resolveInstitutionalCapacityForAdmission(input.capacityStore, {
+      orgId: actor.orgId,
+      workspaceId: actor.workspaceId,
+      actorId: actor.actorId,
+      resourceId: input.resourceId,
+      action: input.action,
+      mandateId: input.mandateId,
+      mandatePositionId: mandate.positionId,
+      claimedPositionId: actor.claimedPositionId,
+    })
+    if (!capacity.resolved) {
+      const reason =
+        capacity.reason === 'CONFLICT_DATA_UNAVAILABLE' ||
+        capacity.reason === 'CAPACITY_DATA_UNAVAILABLE'
+          ? 'CONFLICT_DATA_UNAVAILABLE'
+          : 'MANDATE_SCOPE_MISMATCH'
+      return { admitted: false, decision: { allowed: false, reason } }
+    }
+    conflictOrRecusal = capacity.conflictOrRecusal
+    currentPositionId = capacity.currentPositionId
+  } else {
+    if (actor.conflictOrRecusal === undefined || actor.conflictOrRecusal === null) {
+      return {
+        admitted: false,
+        decision: { allowed: false, reason: 'CONFLICT_DATA_UNAVAILABLE' },
+      }
+    }
+    if (
+      actor.claimedPositionId != null &&
+      actor.claimedPositionId.trim() !== '' &&
+      actor.claimedPositionId !== mandate.positionId
+    ) {
+      return {
+        admitted: false,
+        decision: { allowed: false, reason: 'MANDATE_SCOPE_MISMATCH' },
+      }
+    }
+    conflictOrRecusal = actor.conflictOrRecusal
+    // Office/position is bound to the locked mandate — never a free browser choice.
+    currentPositionId = mandate.positionId
+  }
 
   let commitment:
     | { currency: string; totalCommittedMinorAfterAction: number }
@@ -173,7 +225,7 @@ export async function executeInstitutionalActionInTransaction(
       orgId: actor.orgId,
       actorId: actor.actorId,
       actorKind: actor.actorKind,
-      currentPositionId: actor.currentPositionId,
+      currentPositionId,
       resourceId: input.resourceId,
       action: input.action,
       mandateId: input.mandateId,
@@ -182,13 +234,26 @@ export async function executeInstitutionalActionInTransaction(
       authenticated: actor.authenticated,
       activeWorkspaceMembership: actor.activeWorkspaceMembership,
       applicationPermissionGranted: actor.applicationPermissionGranted,
-      conflictOrRecusal: actor.conflictOrRecusal,
+      conflictOrRecusal,
     },
     [mandate],
   )
 
   if (!decision.allowed) {
+    // Do not disclose historic action ids to a currently unauthorized actor.
     return { admitted: false, decision }
+  }
+
+  if (existing) {
+    return {
+      admitted: true,
+      reusedExisting: true,
+      authorizationStatus: 'HISTORICALLY_RECORDED_NO_NEW_AUTHORIZATION',
+      actionId: existing.id,
+      commitmentId: existing.commitment_id,
+      totalCommittedMinorAfterAction: null,
+      decision,
+    }
   }
 
   let commitmentId: string | null = null
@@ -236,7 +301,7 @@ export async function executeInstitutionalActionInTransaction(
       input.action,
       input.resourceId,
       actor.actorId,
-      actor.currentPositionId,
+      currentPositionId,
       decision.instrumentRef,
       decision.instrumentVersion,
       idempotencyKey,
@@ -251,6 +316,7 @@ export async function executeInstitutionalActionInTransaction(
   return {
     admitted: true,
     reusedExisting: false,
+    authorizationStatus: 'NEWLY_ADMITTED',
     actionId: actionRows[0]!.id,
     commitmentId,
     totalCommittedMinorAfterAction: commitment?.totalCommittedMinorAfterAction ?? null,

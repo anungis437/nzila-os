@@ -82,6 +82,10 @@ import {
   evaluateSageInstitutionalMandate,
   type SageInstitutionalMandateDecision,
 } from './institutional-authority'
+import {
+  resolveInstitutionalCapacityForAdmission,
+  type SageInstitutionalCapacityStore,
+} from './institutional-capacity'
 import { publicInstitutionalRefusal } from './institutional-mandate-enforcement'
 import {
   buildSageExportPackage,
@@ -1470,11 +1474,15 @@ export async function createSageDecisionRecord(
 /**
  * Ratify a decision under an institutionally attested mandate.
  *
- * Browser may supply only `mandateId` (opaque), `positionId` selection,
- * `resourceId`, and an idempotency key. Verification status, instrument facts
- * and dates are loaded server-side. Admission and the decision write share one
- * Pattern-A SQL statement (mandate lock + decision + institutional action +
- * durable audit outbox).
+ * Browser may supply only `mandateId` (opaque), optional position *claim*,
+ * `resourceId`, and an idempotency key. Verification status, instrument facts,
+ * conflict/recusal and authoritative office are resolved server-side. Admission
+ * and the decision write share one Pattern-A SQL statement (mandate lock +
+ * decision + institutional action + durable audit outbox).
+ *
+ * Live HTTP callers MUST supply `capacityStore` (fail-closed when unavailable).
+ * Synthetic LOCAL_TESTED callers may omit the store and pass an already
+ * server-verified `conflictOrRecusal` boolean; omitting both fails closed.
  */
 export async function ratifySageDecisionUnderMandate(
   deps: SageServiceDeps,
@@ -1482,6 +1490,7 @@ export async function ratifySageDecisionUnderMandate(
   input: {
     workspaceId: string
     mandateId: string
+    /** Browser-claimed office; never authoritative. */
     positionId: string
     resourceId: string
     decision: string
@@ -1491,7 +1500,14 @@ export async function ratifySageDecisionUnderMandate(
     referencedBoundaryFlagIds?: string[]
     requestedAuthorizationLevel?: SageAuthorizationLevel
     idempotencyKey: string
-    conflictOrRecusal?: boolean
+    /**
+     * Pre-verified conflict/recusal for synthetic tests only.
+     * `null` / omitted fails closed unless `capacityStore` resolves it.
+     * Never defaulted to `false`.
+     */
+    conflictOrRecusal?: boolean | null
+    /** Preferred for live HTTP — resolves position + conflict server-side. */
+    capacityStore?: SageInstitutionalCapacityStore | null
   },
 ): Promise<
   | { admitted: true; record: SageDecisionRecord; actionId: string; reusedExisting: boolean }
@@ -1558,12 +1574,81 @@ export async function ratifySageDecisionUnderMandate(
     mandateId: input.mandateId,
   })
   const evaluatedAt = contextNow(ctx)
+
+  let conflictOrRecusal: boolean | null
+  let currentPositionId: string
+
+  if (input.capacityStore !== undefined) {
+    const capacity = await resolveInstitutionalCapacityForAdmission(input.capacityStore, {
+      orgId: ws.orgId,
+      workspaceId: ws.id,
+      actorId: ctx.actor.actorId,
+      resourceId: input.resourceId,
+      action: 'decision.ratify',
+      mandateId: input.mandateId,
+      mandatePositionId: mandate.positionId,
+      claimedPositionId: input.positionId,
+    })
+    if (!capacity.resolved) {
+      const reason =
+        capacity.reason === 'CONFLICT_DATA_UNAVAILABLE' ||
+        capacity.reason === 'CAPACITY_DATA_UNAVAILABLE'
+          ? ('CONFLICT_DATA_UNAVAILABLE' as const)
+          : ('MANDATE_SCOPE_MISMATCH' as const)
+      const denied = { allowed: false as const, reason }
+      await emit(
+        deps,
+        ctx,
+        SAGE_AUDIT_ACTIONS.INSTITUTIONAL_AUTHORITY_DENIED,
+        SAGE_AUDIT_RESOURCES.INSTITUTIONAL_MANDATE,
+        input.mandateId,
+        { reason, action: 'decision.ratify', resourceId: input.resourceId },
+      )
+      return { admitted: false, decision: denied }
+    }
+    conflictOrRecusal = capacity.conflictOrRecusal
+    currentPositionId = capacity.currentPositionId
+  } else {
+    if (input.conflictOrRecusal === undefined || input.conflictOrRecusal === null) {
+      const denied = {
+        allowed: false as const,
+        reason: 'CONFLICT_DATA_UNAVAILABLE' as const,
+      }
+      await emit(
+        deps,
+        ctx,
+        SAGE_AUDIT_ACTIONS.INSTITUTIONAL_AUTHORITY_DENIED,
+        SAGE_AUDIT_RESOURCES.INSTITUTIONAL_MANDATE,
+        input.mandateId,
+        { reason: denied.reason, action: 'decision.ratify', resourceId: input.resourceId },
+      )
+      return { admitted: false, decision: denied }
+    }
+    if (input.positionId !== mandate.positionId) {
+      const denied = {
+        allowed: false as const,
+        reason: 'MANDATE_SCOPE_MISMATCH' as const,
+      }
+      await emit(
+        deps,
+        ctx,
+        SAGE_AUDIT_ACTIONS.INSTITUTIONAL_AUTHORITY_DENIED,
+        SAGE_AUDIT_RESOURCES.INSTITUTIONAL_MANDATE,
+        input.mandateId,
+        { reason: denied.reason, action: 'decision.ratify', resourceId: input.resourceId },
+      )
+      return { admitted: false, decision: denied }
+    }
+    conflictOrRecusal = input.conflictOrRecusal
+    currentPositionId = mandate.positionId
+  }
+
   const admission = evaluateSageInstitutionalMandate(
     {
       orgId: ws.orgId,
       actorId: ctx.actor.actorId,
       actorKind: 'human',
-      currentPositionId: input.positionId,
+      currentPositionId,
       resourceId: input.resourceId,
       action: 'decision.ratify',
       mandateId: input.mandateId,
@@ -1571,7 +1656,7 @@ export async function ratifySageDecisionUnderMandate(
       authenticated: true,
       activeWorkspaceMembership: true,
       applicationPermissionGranted: true,
-      conflictOrRecusal: input.conflictOrRecusal === true,
+      conflictOrRecusal,
     },
     [mandate],
   )
@@ -1610,7 +1695,7 @@ export async function ratifySageDecisionUnderMandate(
       createdAt: evaluatedAt,
     },
     mandateId: input.mandateId,
-    positionId: input.positionId,
+    positionId: currentPositionId,
     resourceId: input.resourceId,
     idempotencyKey: input.idempotencyKey.trim(),
     instrumentRef: admission.instrumentRef,

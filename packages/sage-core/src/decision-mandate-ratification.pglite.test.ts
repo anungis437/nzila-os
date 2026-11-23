@@ -121,6 +121,24 @@ async function seedMandate() {
 }
 
 describe('ratifySageDecisionUnderMandate (PGlite Pattern A)', () => {
+  it('fails closed when conflict/recusal facts are unavailable', async () => {
+    const mandate = await seedMandate()
+    const result = await ratifySageDecisionUnderMandate(deps(), ctx(), {
+      workspaceId: WS,
+      mandateId: mandate.id,
+      positionId: POSITION,
+      resourceId: RESOURCE,
+      decision: 'Must not persist without conflict facts',
+      uncertainty: 'n/a',
+      idempotencyKey: 'ratify-no-conflict-facts',
+    })
+    expect(result.admitted).toBe(false)
+    if (result.admitted) return
+    expect(result.decision.reason).toBe('CONFLICT_DATA_UNAVAILABLE')
+    const decisions = await db.query(`select id from sage_decision_record`)
+    expect(decisions.rows).toHaveLength(0)
+  })
+
   it('admits a decision and writes decision + institutional action + outbox together', async () => {
     const mandate = await seedMandate()
     const result = await ratifySageDecisionUnderMandate(deps(), ctx(), {
@@ -131,6 +149,8 @@ describe('ratifySageDecisionUnderMandate (PGlite Pattern A)', () => {
       decision: 'Proceed with the recommended option',
       uncertainty: 'Evidence coverage is partial for Q4 outcomes',
       idempotencyKey: 'ratify-1',
+      // Synthetic LOCAL_TESTED: server-verified clear conflict (no capacity store).
+      conflictOrRecusal: false,
     })
     expect(result.admitted).toBe(true)
     if (!result.admitted) return
@@ -165,6 +185,7 @@ describe('ratifySageDecisionUnderMandate (PGlite Pattern A)', () => {
       decision: 'Should not persist',
       uncertainty: 'n/a',
       idempotencyKey: 'ratify-revoked',
+      conflictOrRecusal: false,
     })
     expect(result.admitted).toBe(false)
     const decisions = await db.query(`select id from sage_decision_record`)
@@ -181,6 +202,7 @@ describe('ratifySageDecisionUnderMandate (PGlite Pattern A)', () => {
       decision: 'Adopt option B',
       uncertainty: 'Residual delivery risk',
       idempotencyKey: 'same-ratify',
+      conflictOrRecusal: false,
     })
     const second = await ratifySageDecisionUnderMandate(deps(), ctx(), {
       workspaceId: WS,
@@ -190,6 +212,7 @@ describe('ratifySageDecisionUnderMandate (PGlite Pattern A)', () => {
       decision: 'Adopt option B',
       uncertainty: 'Residual delivery risk',
       idempotencyKey: 'same-ratify',
+      conflictOrRecusal: false,
     })
     expect(first.admitted && second.admitted).toBe(true)
     if (!first.admitted || !second.admitted) return

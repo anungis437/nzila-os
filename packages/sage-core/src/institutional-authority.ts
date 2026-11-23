@@ -53,8 +53,12 @@ export interface SageInstitutionalAuthorityRequest {
   authenticated: boolean
   activeWorkspaceMembership: boolean
   applicationPermissionGranted: boolean
-  /** True when the actor is adverse, recused, or prohibited from this action. */
-  conflictOrRecusal: boolean
+  /**
+   * Server-verified conflict/recusal fact. `null` means the capacity/recusal
+   * store could not resolve the fact — admission MUST fail closed rather than
+   * defaulting to clear.
+   */
+  conflictOrRecusal: boolean | null
 }
 
 /** Authoritative mandate facts. Must come from a verified repository adapter. */
@@ -91,6 +95,7 @@ export type SageMandateDecisionReason =
   | 'NO_ACTIVE_MEMBERSHIP'
   | 'APPLICATION_PERMISSION_DENIED'
   | 'CONFLICT_OR_RECUSAL'
+  | 'CONFLICT_DATA_UNAVAILABLE'
   | 'MANDATE_MISSING_OR_AMBIGUOUS'
   | 'MANDATE_SCOPE_MISMATCH'
   | 'UNVERIFIED_INSTRUMENT'
@@ -140,7 +145,8 @@ export function evaluateSageInstitutionalMandate(
   if (request.actorKind !== 'human') return deny('NON_HUMAN')
   if (!request.activeWorkspaceMembership) return deny('NO_ACTIVE_MEMBERSHIP')
   if (!request.applicationPermissionGranted) return deny('APPLICATION_PERMISSION_DENIED')
-  if (request.conflictOrRecusal) return deny('CONFLICT_OR_RECUSAL')
+  if (request.conflictOrRecusal === null) return deny('CONFLICT_DATA_UNAVAILABLE')
+  if (request.conflictOrRecusal === true) return deny('CONFLICT_OR_RECUSAL')
 
   const selected = mandates.filter((mandate) => mandate.id === request.mandateId)
   if (selected.length !== 1 || !request.mandateId.trim()) {

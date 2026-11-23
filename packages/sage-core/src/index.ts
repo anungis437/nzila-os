@@ -45,6 +45,7 @@ export * from './institutional-context'
 export * from './institutional-authority'
 export * from './institutional-mandate-store'
 export * from './institutional-mandate-enforcement'
+export * from './institutional-capacity'
 
 // CLEAR executive accountability draft + explicit human adoption gate.
 export * from './accountability-draft'

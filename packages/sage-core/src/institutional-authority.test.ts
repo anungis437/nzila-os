@@ -79,6 +79,10 @@ describe('SAGE institutional mandate admission: separate identity, app permissio
     expect(reason(request({ actorId: '' }))).toBe('UNAUTHENTICATED')
   })
 
+  it('fails closed when conflict/recusal data is unavailable rather than defaulting to clear', () => {
+    expect(reason(request({ conflictOrRecusal: null }))).toBe('CONFLICT_DATA_UNAVAILABLE')
+  })
+
   it('refuses machine and service actors even with a purported mandate', () => {
     for (const actorKind of ['system', 'service'] as const) {
       expect(reason(request({ actorKind }))).toBe('NON_HUMAN')

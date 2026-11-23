@@ -97,6 +97,8 @@ describe('SAGE governance request schemas', () => {
       { authorizationLevel: 'public' },
       { authorizationBasis: 'workspace_default' },
       { excludedFromExternalReview: false },
+      { conflictOrRecusal: false },
+      { verificationStatus: 'verified' },
     ]) {
       expect(
         CreateDecisionRecordRequest.safeParse({

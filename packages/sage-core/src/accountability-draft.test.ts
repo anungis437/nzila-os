@@ -168,13 +168,18 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     expect(brief.outcome.percentVsExpected).toBeNull()
   })
 
-  it('admits source-matched acceptance and spend as recorded but NEVER as institutionally adopted', () => {
+  it('admits attested acceptance and spend as recorded but NEVER as institutionally adopted', () => {
     const accepted = buildSageAccountabilityDraft(payload(), input({
       execution: {
         receivedDeliverables: 3,
         acceptedDeliverables: 2,
         evidence: ref(delivery),
-        acceptanceEvidence: ref(receipt),
+        acceptanceAttestation: {
+          purpose: 'institutional_deliverable_acceptance',
+          acceptorActorId: 'fictional-acceptance-officer',
+          instrumentReference: 'acceptance-minute-17',
+          evidence: ref(receipt),
+        },
       },
       actualSpend: { amountMinor: 4_500_000, currency: 'CAD', evidence: ref(spend) },
     }))
@@ -187,6 +192,27 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     expect(accepted.executionDisposition).toBe('PARTIALLY_ACCEPTED')
     expect(accepted.openEvidenceTasks).toContain('deliverable_acceptance')
     expect(accepted.humanAdoption).toBe('NOT_ESTABLISHED')
+  })
+
+  it('refuses reusing a delivery/training receipt as acceptance evidence (E04)', () => {
+    expect(() =>
+      buildSageAccountabilityDraft(
+        payload(),
+        input({
+          execution: {
+            receivedDeliverables: 3,
+            acceptedDeliverables: 3,
+            evidence: ref(delivery),
+            acceptanceAttestation: {
+              purpose: 'institutional_deliverable_acceptance',
+              acceptorActorId: 'fictional-acceptance-officer',
+              instrumentReference: 'forged-from-receipt',
+              evidence: ref(delivery),
+            },
+          },
+        }),
+      ),
+    ).toThrow(/independent of delivery receipt/)
   })
 
   it('refuses exact source substitution, sensitivity downgrade, missing and ambiguous evidence', () => {
@@ -242,7 +268,7 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
   it('denies fabricated acceptance, invalid commitment, nonfinite observations and mismatched spend currency', () => {
     expect(() => buildSageAccountabilityDraft(payload(), input({
       execution: { receivedDeliverables: 3, acceptedDeliverables: 2, evidence: ref(delivery) },
-    }))).toThrow(/acceptance evidence required/)
+    }))).toThrow(/acceptance attestation required/)
     expect(() => buildSageAccountabilityDraft(payload(), input({
       commitment: { monetaryCeilingMinor: -1, currency: 'CAD', expectedDeliverables: 4, evidence: ref(money) },
     }))).toThrow(/monetary ceiling/)

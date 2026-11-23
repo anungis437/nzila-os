@@ -4,8 +4,9 @@
  * POST /api/sage/workspaces/[workspaceId]/institutional-actions/resource-commit
  *
  * Pattern-A financial commitment under a server-attested institutional mandate.
- * Browser may supply mandateId, positionId, resourceId and requestedCommitMinor
- * only. Verification labels, currency, instrument authority and ledger totals
+ * Browser may supply mandateId, resourceId, optional claimedPositionId and
+ * requestedCommitMinor only. Verification labels, currency, instrument
+ * authority, ledger totals, conflict/recusal and authoritative office/position
  * are never accepted from the request body.
  */
 import { NextRequest, NextResponse } from 'next/server'

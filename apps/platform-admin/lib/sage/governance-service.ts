@@ -31,6 +31,7 @@ import {
   type SageGovernanceTargetType,
   type SageReviewNoteType,
 } from '@nzila/sage-core'
+import { getSageInstitutionalCapacityStore } from './institutional-capacity-adapter'
 import {
   buildCacheKey,
   hashPayload,
@@ -324,6 +325,8 @@ export async function createSageDecisionRecordForScope(
           referencedBoundaryFlagIds: input.referencedBoundaryFlagIds,
           requestedAuthorizationLevel: input.requestedAuthorizationLevel,
           idempotencyKey: options.idempotencyKey,
+          // Fail closed until a durable capacity/recusal store is attached.
+          capacityStore: getSageInstitutionalCapacityStore(),
         })
         if (!result.admitted) {
           // Governed refusal — do not disclose instrument internals.

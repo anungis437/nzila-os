@@ -4,7 +4,6 @@ import { CreateInstitutionalResourceCommitRequest } from '../institutional-schem
 describe('CreateInstitutionalResourceCommitRequest', () => {
   const valid = {
     mandateId: 'mandate-1',
-    positionId: 'pos-1',
     resourceId: 'procurement.engagement.alpha',
     requestedCommitMinor: 1_500_000,
   }
@@ -13,13 +12,24 @@ describe('CreateInstitutionalResourceCommitRequest', () => {
     expect(CreateInstitutionalResourceCommitRequest.parse(valid)).toEqual(valid)
   })
 
-  it('rejects browser-supplied verification labels and ledger totals', () => {
+  it('admits an optional claimedPositionId without treating it as authority', () => {
+    expect(
+      CreateInstitutionalResourceCommitRequest.parse({
+        ...valid,
+        claimedPositionId: 'pos-1',
+      }),
+    ).toMatchObject({ claimedPositionId: 'pos-1' })
+  })
+
+  it('rejects browser-supplied verification labels, conflict facts and ledger totals', () => {
     const forged = CreateInstitutionalResourceCommitRequest.safeParse({
       ...valid,
       verificationStatus: 'verified',
       currency: 'CAD',
       totalCommittedMinorAfterAction: 1_500_000,
       instrumentAuthority: 'board',
+      conflictOrRecusal: false,
+      positionId: 'pos-authoritative',
     })
     expect(forged.success).toBe(false)
   })

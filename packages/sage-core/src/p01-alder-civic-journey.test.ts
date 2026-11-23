@@ -229,7 +229,7 @@ describe('P01 Alder Civic Services — golden journey', () => {
     expect(brief.causalAttribution).toBe('NOT_ASSESSED')
     expect(brief.humanAdoption).toBe('NOT_ESTABLISHED')
 
-    // Contested / forged source: fabricated training acceptance must not bind.
+    // Contested / forged source: wrong source id must not bind.
     expect(() =>
       buildSageAccountabilityDraft(payload, {
         orgId: ORG,
@@ -249,10 +249,15 @@ describe('P01 Alder Civic Services — golden journey', () => {
           receivedDeliverables: 1,
           acceptedDeliverables: 1,
           evidence: ref(trainingReceipt),
-          acceptanceEvidence: {
-            evidenceItemId: trainingReceipt.evidenceItemId,
-            sourceId: 'src-attacker-forged',
-            authorizationLevel: 'internal',
+          acceptanceAttestation: {
+            purpose: 'institutional_deliverable_acceptance',
+            acceptorActorId: 'officer-alder-1',
+            instrumentReference: 'forged',
+            evidence: {
+              evidenceItemId: trainingReceipt.evidenceItemId,
+              sourceId: 'src-attacker-forged',
+              authorizationLevel: 'internal',
+            },
           },
         },
         expected: {
@@ -263,6 +268,42 @@ describe('P01 Alder Civic Services — golden journey', () => {
         },
       }),
     ).toThrow(/not bound/)
+
+    // P0 regression: the *correct* training delivery receipt reused as acceptance.
+    expect(() =>
+      buildSageAccountabilityDraft(payload, {
+        orgId: ORG,
+        workspaceId: WS,
+        resourceId: RESOURCE,
+        objective: 'Misrepresent training receipt as acceptance',
+        accountableActorId: 'officer-alder-1',
+        intervention: 'x',
+        reviewDueAt: '2026-12-01T00:00:00.000Z',
+        commitment: {
+          monetaryCeilingMinor: 3_000_000,
+          currency: 'CAD',
+          expectedDeliverables: 1,
+          evidence: ref(commitmentEv),
+        },
+        execution: {
+          receivedDeliverables: 1,
+          acceptedDeliverables: 1,
+          evidence: ref(trainingReceipt),
+          acceptanceAttestation: {
+            purpose: 'institutional_deliverable_acceptance',
+            acceptorActorId: 'officer-alder-1',
+            instrumentReference: 'receipt-as-acceptance',
+            evidence: ref(trainingReceipt),
+          },
+        },
+        expected: {
+          value: 10,
+          unit: 'working_days',
+          window: '2026-Q4',
+          evidence: ref(expectedEv),
+        },
+      }),
+    ).toThrow(/independent of delivery receipt/)
   })
 
   it('refuses silent adoption of the P01 draft without an admitted institutional mandate', () => {
