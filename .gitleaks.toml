@@ -82,6 +82,18 @@ regexes = [
 # Custom rules for Nzila-specific secrets
 # ──────────────────────────────────────
 [[rules]]
+id = "generic-api-key"
+# Inherit the complete default detector. Only source-path checksum lines in the
+# generated navigation inventory are exempt; its generator verifies every digest
+# against the declared Git tree. Credentials elsewhere in this file still fail.
+  [[rules.allowlists]]
+  description = "Verified navigation source-file SHA-256 commitments"
+  condition = "AND"
+  paths = ['''^tooling/scripts/lib/ue-v2-navigation-inventory\.json$''']
+  regexTarget = "line"
+  regexes = ['''^\s*"apps/union-eyes/(?:lib/(?:dashboard/role-experience|executive/executive-navigation|auth/(?:roles|org-settings-access)|correspondence/roles|cases/case-role-access)\.ts|app/\[locale\]/dashboard/settings/page\.tsx)": "[0-9a-f]{64}",?\s*$''']
+
+[[rules]]
 id = "nzila-clerk-secret-key"
 description = "Clerk secret key (production)"
 regex = '''sk_live_[A-Za-z0-9]{20,}'''

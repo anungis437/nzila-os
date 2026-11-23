@@ -1,0 +1,239 @@
+{
+  "status": "SOURCE_AND_IMMUTABLE_IMAGE_QUALIFIED_NORMAL_MAIN_ADMISSION_ONLY",
+  "recordedAt": "2026-11-23T16:38:17.935777+00:00",
+  "applicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "mainAdmissionMergeSha": "6becdb0ec6f74c8e507f48de1c20cda67027c452",
+  "pullRequest": 1288,
+  "qualifiedTreeEqualsNormalMainMergeTree": true,
+  "sourcePlanDigest": "6ec71d4631810207ffad4e5b78046be219528d27608a3da13170f3bb96c41161",
+  "localRequiredCommands": [
+    {
+      "name": "lint",
+      "exitCode": 0
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "test-fast",
+      "exitCode": 0
+    },
+    {
+      "name": "validate-docs",
+      "exitCode": 0
+    },
+    {
+      "name": "governance-audit",
+      "exitCode": 0
+    }
+  ],
+  "localAssertionStatuses": {
+    "passed": 41642,
+    "skipped": 1624,
+    "pending": 13
+  },
+  "localRawTestReportSha256": "90825e05e07176c9934228d02234a7ba462e774f9e024887c714bc386a36f1a9",
+  "conditionalSkipsAreUnexecuted": true,
+  "requiredTrustedContexts": 19,
+  "requiredTrustedCheckInstances": 19,
+  "uniqueRequiredContextNames": 16,
+  "requiredCountSemantics": "Nineteen observed successful instances across sixteen enforced names; duplicate instances are not additional gate names.",
+  "requiredTrustedChecks": [
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807596281",
+      "name": "Merge Authority / IaC Security",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807602373",
+      "name": "Merge Authority / Ops Documentation",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807585932",
+      "name": "Merge Authority / Operating Layer",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807573875",
+      "name": "Merge Authority / Hash Chain Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807567673",
+      "name": "Merge Authority / Governance Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807559883",
+      "name": "Merge Authority / Repository Inventory",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807553431",
+      "name": "Merge Authority / Architectural Contracts",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807547623",
+      "name": "Merge Authority / Affected Build",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807542060",
+      "name": "Merge Authority / Migration Chain",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807535722",
+      "name": "Merge Authority / PostgreSQL RLS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807528133",
+      "name": "Merge Authority / Schema Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807521816",
+      "name": "Merge Authority / Unit Tests",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137807514490",
+      "name": "Merge Authority / Lint & Typecheck",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137794427354",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137794422079",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137794415429",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45203003022/job/137791148195",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45203003022/job/137791147699",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45203003022/job/137791148013",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    }
+  ],
+  "registeredCheckConclusions": {
+    "SKIPPED": 13,
+    "SUCCESS": 128
+  },
+  "registeredChecksFinishedWithoutFailure": 141,
+  "nativePreservationRun": 45203002289,
+  "nativePostgresRun": 45203002591,
+  "nativeInvitationAndMailRun": 45203002848,
+  "nativePostgresCombinedSchemaCases": {
+    "postgres15Passed": 1057,
+    "postgres16Passed": 1057,
+    "unexecutedLegacyTopologyCasesEach": 4,
+    "legacyTransitionNotProvenByTheseSkips": true
+  },
+  "nativeCanonicalRuntime": {
+    "runId": 45203002848,
+    "passed": 363,
+    "failed": 0,
+    "skipped": 0,
+    "automaticPullRequestJob": true,
+    "candidateHeadCheckout": true
+  },
+  "nativeKernelPostgres16": {
+    "files": 25,
+    "passed": 470,
+    "failed": 0,
+    "skipped": 0
+  },
+  "nativeMailAndAudit": {
+    "passed": 34,
+    "unexecuted": 0,
+    "actualInbox": false
+  },
+  "nativeInvitationConcurrency": {
+    "passed": 15,
+    "unexecuted": 0
+  },
+  "disposableRuntimeEngineering": {
+    "runId": 45203002865,
+    "authenticationClass": "SYNTHETIC_QA_SESSIONS",
+    "main": {
+      "passed": 97,
+      "skipped": 158,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "restartPreparationCasePassed": 1,
+    "restartPreparationMandatesPassed": 9,
+    "restartPersistencePassed": 3,
+    "eligibleNavigationProfiles": 7,
+    "ineligiblePlatformTitleProfileNavigationSkipped": 2,
+    "realProviderLoginProven": false,
+    "immutableAzureAuditProven": false,
+    "fullPersonaAcceptance": false
+  },
+  "engineeringSecurityReview": {
+    "reviewer": "Codex under existing sole-founder engineering delegation",
+    "sourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+    "artifactSha256": "e6402682f68098d820ffdb97792ddab1f7fc1bec43889106220cea0da853a5f5",
+    "independentHumanReviewerClaimed": false
+  },
+  "retainedLegacyAuditRepair": {
+    "nativeBothManagedOperatorProfilesPassed": true,
+    "historicalRowsAndOriginalReceiptPreserved": true,
+    "canonicalSqlPairsUnchanged": 6326,
+    "liveRehearsalStillRequired": true
+  },
+  "founderModel": "anungis and anungis437 are the same sole founder. No independent human approval or institutional ratification claimed.",
+  "fullScope": {
+    "stakeholderFamilies": 35,
+    "requiredStakeholderFamilies": 26,
+    "deferredStakeholderFamilies": 9,
+    "storedRoles": 39,
+    "requiredRoleBoundaries": 34,
+    "deprecatedRoles": 5,
+    "lifecycleStages": 16,
+    "operatingModels": 4,
+    "variants": 6,
+    "requiredScopeNodes": 654,
+    "sevenProfilesAreSubsetOnly": true
+  },
+  "applicationImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef",
+  "actualStagingAcceptance": false,
+  "liveDataOrTrafficChanged": false,
+  "financeImplementationAuthorized": false,
+  "productionAuthorized": false,
+  "imageBuildQualification": {
+    "runId": 45214964440,
+    "workflowSha": "6becdb0ec6f74c8e507f48de1c20cda67027c452",
+    "sourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+    "conclusion": "SUCCESS_AND_FRESH_ACR_ATTESTATION_VERIFIED",
+    "manifest": "release-manifest-6a60c95c.json",
+    "manifestSha256": "fc3deac028dbd32c551835f10a1226b8f481773bf38c165211ac313a263d798c",
+    "freshRegistryAttestationRequiredBeforeDeploy": true,
+    "registryAttestationSha256": {
+      "app": "3a63a9fb1a435a211eb15cedf291212b805b83fba4a928643a619a8f62676de7",
+      "clamav": "731604e6060a2b5c6efc835554354996061884a846789db5333606fdbe1e5c8d",
+      "cron": "6376602ff9a7d749d499348ada32edd9220d556cca2ac4a0fd72cf8fdc6ba73f"
+    }
+  }
+}

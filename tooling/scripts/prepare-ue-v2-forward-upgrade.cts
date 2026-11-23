@@ -22,7 +22,7 @@ const git = (args: string[]) =>
 async function main() {
   const exported = arg('--export'),
     out = arg('--out')
-  const applicationSourceSha = 'd4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366'
+  const applicationSourceSha = '6a60c95c9de17e9343e0414bb51766afbc190054'
   const operatorSourceSha = git(['rev-parse', 'HEAD'])
   const plan = JSON.parse(
     fs.readFileSync(
@@ -42,7 +42,7 @@ async function main() {
     hash(JSON.stringify(admittedPlan)),
     'UE_UPGRADE_APPLICATION_PLAN_DIFFERS',
   )
-  assert.equal(sourcePlanDigest, '7d010442aee62b7689553f79417849305a53d78fe851c8b17430abe826dfe877')
+  assert.equal(sourcePlanDigest, '6ec71d4631810207ffad4e5b78046be219528d27608a3da13170f3bb96c41161')
   for (const [source, expected] of Object.entries(plan.sourceCommitments) as [string, string][]) {
     if (source.startsWith('python:')) continue
     assert.equal(

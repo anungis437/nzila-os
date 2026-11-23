@@ -1,12 +1,13 @@
 {
-  "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+  "applicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
   "sourceDigests": {
-    "apps/union-eyes/lib/dashboard/role-experience.ts": "c03d663fc9b17643923a59db765f7d0eef14eb65b9714a12668e87c23835e952",
+    "apps/union-eyes/lib/dashboard/role-experience.ts": "a4710973e56688189cc4b37504cb0d05b7a571fcc94c0179b3ee0336b7f1835c",
     "apps/union-eyes/lib/executive/executive-navigation.ts": "1c85199c05fadb90cf5e3bb2dbea949c5c275c2ebd4e676ced40fde373c6a187",
     "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace",
     "apps/union-eyes/lib/auth/org-settings-access.ts": "4a33635c65fea47b9eb294522c7cd9151a2a75f9e47cc8eb7ba7378e99e2de71",
     "apps/union-eyes/app/[locale]/dashboard/settings/page.tsx": "93f4e4425a229d7427690023861ac51b5aeba913ae2dfcec822bfebd9792b040",
-    "apps/union-eyes/lib/correspondence/roles.ts": "89c3f1d6049ae78df7386bc2fa7ec43a525118ffe637557ac62c6691012a6662"
+    "apps/union-eyes/lib/correspondence/roles.ts": "89c3f1d6049ae78df7386bc2fa7ec43a525118ffe637557ac62c6691012a6662",
+    "apps/union-eyes/lib/cases/case-role-access.ts": "78c669f0effcb96b15f1bca88eb8c9dd1989afe32a331ec1748fdcd79d30507b"
   },
   "canonicalEntryCount": 42,
   "uniquePaths": [
@@ -34,6 +35,7 @@
     "/dashboard/continuity-intelligence",
     "/dashboard/workspace",
     "/dashboard/trust",
+    "/dashboard/governance/reviews",
     "/dashboard/intelligence",
     "/dashboard/audits",
     "/dashboard/admin/organizations",
@@ -210,7 +212,7 @@
     {
       "experience": "governance",
       "label": "Governance Continuity Review",
-      "href": "/dashboard/workbench",
+      "href": "/dashboard/governance/reviews",
       "group": "Governance Continuity"
     },
     {
