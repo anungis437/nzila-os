@@ -60,7 +60,7 @@ jobs:
         run: |
           node tooling/scripts/generate-ue-v2-staging-candidate.mjs --check
           node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
-          pnpm exec tsx --test tooling/scripts/lib/ue-v2-forward-upgrade.test.ts
+          pnpm exec tsx --test tooling/scripts/lib/ue-v2-forward-upgrade.test.ts tooling/scripts/lib/ue-v2-navigation-source.test.ts
           python3 -m unittest discover -s tooling/scripts -p test_run_ue_v2_forward_upgrade_job.py -v
           pnpm exec tsc --project tooling/scripts/ue-v2-forward-upgrade.tsconfig.json
       - name: Hash-locked interpreter wheelhouse
@@ -106,6 +106,15 @@ jobs:
           pnpm exec tsx tooling/scripts/export-ue-v2-staging-schema.cts --out "$RUNNER_TEMP/ue-current-export"
           pnpm exec tsx tooling/scripts/prove-ue-v2-forward-upgrade.cts \
             --before "$RUNNER_TEMP/ue-old-export" --after "$RUNNER_TEMP/ue-current-export" --out "$RUNNER_TEMP/ue-upgrade-proof"
+
+      # A PR proves its proposed schema in the disposable database. Live assets
+      # additionally require the admitted application binding, which is checked
+      # by the unchanged producer before a protected manual staging operation.
+      - name: Package the admitted application for a protected staging operation
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
           pnpm exec tsx tooling/scripts/prepare-ue-v2-forward-upgrade.cts \
             --export "$RUNNER_TEMP/ue-current-export" --out "$RUNNER_TEMP/forward-operator/assets"
           pnpm exec esbuild tooling/scripts/ue-v2-staging-forward-upgrade.cts --bundle --platform=node --format=cjs \
@@ -126,6 +135,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: ue-forward-operator-${{ github.run_id }}
           path: ${{ runner.temp }}/forward-operator

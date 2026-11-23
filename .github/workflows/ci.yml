@@ -207,6 +207,15 @@ jobs:
           node --test tooling/scripts/lib/ue-v2-client-assets.test.mjs
           node --test tooling/scripts/lib/ue-v2-staging-log-alerts.test.mjs
           node --test tooling/scripts/lib/ue-v2-staging-identity-contract.test.cjs
+          # This checkout may be shallow. Supply the declared immutable source
+          # object without changing the proposed application's working tree.
+          node - <<'NODE'
+          const fs = require('node:fs'), assert = require('node:assert/strict'), {spawnSync, execFileSync} = require('node:child_process')
+          const source = JSON.parse(fs.readFileSync('tooling/scripts/lib/ue-v2-staging-candidate.json', 'utf8')).applicationSourceSha
+          assert.match(source, /^[a-f0-9]{40}$/)
+          if (spawnSync('git', ['cat-file', '-e', source + '^{commit}']).status !== 0)
+            execFileSync('git', ['fetch', '--no-tags', '--depth=1', 'origin', source], {stdio:'inherit'})
+          NODE
           pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check
           node --test tooling/scripts/lib/ue-guarded-postgres-dump.test.mjs
           node --test tooling/scripts/lib/ue-managed-pg16-catalog.test.mjs

@@ -11770,6 +11770,9 @@
     "reason": "Qualify both repairs on one integrated commit rather than admit an intermediate application. Prior raw failed checks and live rehearsal remain historical failures.",
     "previousOperatorLocalFailure": "16 external-reader cases refused because the required owned native template was absent. No test is skipped or treated as passed to resolve this; rebuild the owned template and run the full command on the combined candidate.",
     "fullBaseStagingAcceptance": false,
-    "productionAuthorized": false
+    "productionAuthorized": false,
+    "sourceBindingRepairEvidence": "evidence/ue-clerk-correspondence-20261123/qualification-source-binding-repair.json",
+    "supersededCiSource": "c9a19eb02f5a0aa256f16d198941b5a76ff82b4f",
+    "sourceBindingRepair": "Native preservation passed before premature live packaging refused; accepted-source navigation now compiles its own Git tree. New-source full checks and CI remain required."
   }
 }
