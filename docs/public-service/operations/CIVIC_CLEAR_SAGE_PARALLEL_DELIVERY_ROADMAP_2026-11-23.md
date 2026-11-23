@@ -1,6 +1,6 @@
 # CIVIC / CLEAR / SAGE — Parallel Delivery Blueprint (alongside Union Eyes)
 
-**Plan:** CCS-ROADMAP-2026-11-23 · **Revision:** 1.1 · **Companion:** [Ceiling freeze](CIVIC_CLEAR_SAGE_CEILING_FREEZE_2026-11-23.md) · **Status:** design-only, pending founder adoption and C1 authorization · **No implementation initiated by this plan.**
+**Plan:** CCS-ROADMAP-2026-11-23 · **Revision:** 1.1 · **Companion:** [Ceiling freeze](CIVIC_CLEAR_SAGE_CEILING_FREEZE_2026-11-23.md) · **Status:** C0 founder-approved 2026-11-23; scoped engineering initiated in separate PRs; C1 protected CIVIC runtime remains closed · **No production authorization.**
 
 ## 1. Delivery invariants
 
@@ -153,7 +153,7 @@ These are engineering acceptance targets, **not contractual SLAs or current perf
 
 ## 8. Sequencing, without unnecessary dependencies
 
-**Before any code:** accept ceiling C0; record exact protected runtime permission path and owner C1; approve K1–K8 versions; enumerate affected migrations and interfaces; designate shared integration owner; do a fresh source/deployed inventory.
+**C0 is accepted.** Before protected CIVIC runtime code: record C1 scoped grant, enumerate affected migrations/interfaces, designate shared integration owner, and verify source/deployed inventory. SAGE-owned, non-deployment remediation and pure contract engineering may proceed under owner acceptance without changing CIVIC's protected runtime.
 
 **Can begin independently after C1:** A through G work on disjoint surfaces. B and C develop against mocked K contracts until A stable; D uses typed mocked APIs and fictional data until backend acceptance; E adapters against contract fixtures; F on dedicated staging not UE's. None claim ready based on mocks.
 
@@ -180,7 +180,7 @@ No P5 network, market-wide benchmarking, individual monitoring/profiling, person
 
 ### Status
 
-This is an execution-ready **plan**, not proof that any lane is complete, nor permission to begin feature implementation. Current recorded SAGE external production decision is NO_GO. Founder approval of this blueprint and separate C1 protected runtime authorization must precede implementation and subsequent claims.
+This is the founder-accepted **execution plan**, not proof that any lane is complete or that protected CIVIC runtime is authorized. Current recorded SAGE external production decision is NO_GO. Founder approval of this blueprint and separate C1 protected runtime authorization must precede implementation and subsequent claims.
 
 ## 11. Verified reuse inventory and ownership correction
 
