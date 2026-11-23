@@ -96,7 +96,9 @@ function utcInstant(value: string | null): number | null {
     return null
   }
   const ms = Date.parse(value)
-  return Number.isFinite(ms) ? ms : null
+  if (!Number.isFinite(ms)) return null
+  const canonical = value.includes('.') ? value : value.replace('Z', '.000Z')
+  return new Date(ms).toISOString() === canonical ? ms : null
 }
 
 function deny(
@@ -176,7 +178,6 @@ export function evaluateSageInstitutionalMandate(
     now >= expires ||
     attested > now ||
     accepted > now ||
-    accepted < effective ||
     expires <= effective
   ) {
     return deny('MANDATE_NOT_EFFECTIVE')
