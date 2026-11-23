@@ -4,10 +4,12 @@ import {
   assertStoredShapePreserved,
   planCanonicalForwardUpgrade,
   splitUpgradeDump,
+  canonicalFunctionOwnerHandoff,
   type UpgradeObject,
 } from './ue-v2-forward-upgrade'
 import {
   assertForwardOperator,
+  assertCanonicalFunctionOwnerStatement,
   executeForwardUpgrade,
   type ForwardOperatorProfile,
   type ForwardUpgradeBundle,
@@ -70,6 +72,78 @@ const object = (
 const roles = [object('role', 'ue_v2_owner'), object('role', 'union_eyes_runtime')]
 const section = (type: string, name: string, sql: string) =>
   `-- Name: ${name}; Type: ${type}; Schema: public; Owner: ue_v2_owner\n--\n${sql}\n`
+
+test('historical administrator ownership is handed off before source function replacement', async () => {
+  const before = [...roles, object('function', 'guard()', { owner: 'uev2admin' })]
+  const after = [...roles, object('function', 'guard()', { owner: 'ue_v2_owner' })]
+  const plan = await planCanonicalForwardUpgrade({
+    before,
+    after,
+    dump: section(
+      'FUNCTION',
+      'guard()',
+      'CREATE FUNCTION public.guard() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$; ALTER FUNCTION public.guard() OWNER TO ue_v2_owner;',
+    ),
+  })
+  const index = plan.findIndex((s) => s.phase === 'canonical-function-owner')
+  assert(index >= 0)
+  assert.deepEqual(plan[index], {
+    phase: 'canonical-function-owner',
+    object: 'guard()',
+    sql: 'ALTER FUNCTION public.guard() OWNER TO ue_v2_owner',
+    role: 'uev2admin',
+  })
+  assert.match(plan[index + 1].sql, /(?:^|\n)CREATE OR REPLACE FUNCTION/)
+  assert.equal(plan[index + 1].role, undefined)
+  assert(!plan.some((s) => /DROP FUNCTION|DROP TRIGGER/.test(s.sql)))
+})
+
+test('a function handoff cannot admit a provider owner, change schema or widen canonical ownership', () => {
+  for (const [id, from, to] of [
+    ['guard()', 'azuresu', 'ue_v2_owner'],
+    ['guard()', 'uev2admin', 'union_eyes_runtime'],
+    ['unreviewed.guard()', 'uev2admin', 'ue_v2_owner'],
+    ['guard(text)', 'uev2admin', 'ue_v2_owner'],
+    ['guard();DROP TABLE claims', 'uev2admin', 'ue_v2_owner'],
+  ])
+    assert.throws(
+      () =>
+        canonicalFunctionOwnerHandoff(
+          object('function', id, { owner: from }),
+          object('function', id, { owner: to }),
+        ),
+      /UE_UPGRADE_FUNCTION_OWNER_/,
+    )
+  assert.throws(
+    () =>
+      canonicalFunctionOwnerHandoff(
+        object('function', 'original()', { owner: 'uev2admin' }),
+        object('function', 'other()', { owner: 'ue_v2_owner' }),
+      ),
+    /IDENTITY_REFUSED/,
+  )
+})
+
+test('executor ownership capability refuses injected SQL, wrong actor, wrong phase and missing preimage', () => {
+  const before = [object('function', 'guard()', { owner: 'uev2admin' })]
+  const target = [object('function', 'guard()', { owner: 'ue_v2_owner' })]
+  const statement = canonicalFunctionOwnerHandoff(before[0], target[0])!
+  assert.doesNotThrow(() => assertCanonicalFunctionOwnerStatement(statement, { before, target }))
+  for (const delta of [
+    { sql: statement.sql + '; DROP TABLE public.claims' },
+    { role: 'ue_v2_owner' },
+    { phase: 'function' },
+    { object: 'unrelated()' },
+  ])
+    assert.throws(
+      () => assertCanonicalFunctionOwnerStatement({ ...statement, ...delta }, { before, target }),
+      /UE_UPGRADE_FUNCTION_OWNER_/,
+    )
+  assert.throws(
+    () => assertCanonicalFunctionOwnerStatement(statement, { before: [], target }),
+    /PREIMAGE_REQUIRED/,
+  )
+})
 
 test('a removal or conversion of an existing stored column cannot become an upgrade', () => {
   const before = [
