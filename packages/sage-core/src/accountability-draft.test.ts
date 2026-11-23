@@ -123,6 +123,14 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     expect(brief.humanAdoption).toBe('NOT_ESTABLISHED')
     expect(brief.causalAttribution).toBe('NOT_ASSESSED')
     expect(brief.differingInterpretations).toHaveLength(2)
+    // Every displayed institutional claim retains a visible, authorized
+    // reference chain rather than an unattributed executive narrative.
+    expect(brief.authority.evidence).toEqual(ref(mandate))
+    expect(brief.commitment.commitmentEvidence).toEqual(ref(money))
+    expect(brief.commitment.executionEvidence).toEqual(ref(delivery))
+    expect(brief.commitment.acceptanceEvidence).toBeNull()
+    expect(brief.commitment.actualSpendEvidence).toBeNull()
+    expect(brief.differingInterpretations[0]?.evidence).toEqual([ref(competingA)])
     expect(brief.differingInterpretations.every((x) => x.disposition === 'UNRESOLVED')).toBe(true)
   })
 
@@ -168,6 +176,8 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     }))
     expect(accepted.commitment.actualSpendMinor).toBe(4_500_000)
     expect(accepted.commitment.acceptedDeliverables).toBe(2)
+    expect(accepted.commitment.acceptanceEvidence).toEqual(ref(receipt))
+    expect(accepted.commitment.actualSpendEvidence).toEqual(ref(spend))
     expect(accepted.missing).not.toContain('deliverable_acceptance')
     expect(accepted.missing).not.toContain('actual_spend')
     expect(accepted.humanAdoption).toBe('NOT_ESTABLISHED')
