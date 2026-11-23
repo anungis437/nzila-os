@@ -51,3 +51,4 @@ export * from './institutional-capacity-store'
 // CLEAR executive accountability draft + explicit human adoption gate.
 export * from './accountability-draft'
 export * from './accountability-adoption'
+export * from './accountability-adoption-persist'

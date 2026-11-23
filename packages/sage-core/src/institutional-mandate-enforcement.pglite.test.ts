@@ -72,6 +72,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await db.exec(`
+    truncate table sage_accountability_adoption cascade;
     truncate table sage_institutional_action cascade;
     truncate table sage_resource_commitment cascade;
     truncate table sage_institutional_mandate cascade;

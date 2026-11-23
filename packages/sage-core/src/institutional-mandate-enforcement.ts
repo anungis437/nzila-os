@@ -67,6 +67,8 @@ export type ExecuteInstitutionalActionResult =
   | {
       admitted: true
       decision: Extract<SageInstitutionalMandateDecision, { allowed: true }>
+      /** Server-resolved office used for admission (never browser-authoritative). */
+      positionId: string
       actionId: string
       commitmentId: string | null
       totalCommittedMinorAfterAction: number | null
@@ -249,6 +251,7 @@ export async function executeInstitutionalActionInTransaction(
       admitted: true,
       reusedExisting: true,
       authorizationStatus: 'HISTORICALLY_RECORDED_NO_NEW_AUTHORIZATION',
+      positionId: currentPositionId,
       actionId: existing.id,
       commitmentId: existing.commitment_id,
       totalCommittedMinorAfterAction: null,
@@ -317,6 +320,7 @@ export async function executeInstitutionalActionInTransaction(
     admitted: true,
     reusedExisting: false,
     authorizationStatus: 'NEWLY_ADMITTED',
+    positionId: currentPositionId,
     actionId: actionRows[0]!.id,
     commitmentId,
     totalCommittedMinorAfterAction: commitment?.totalCommittedMinorAfterAction ?? null,
