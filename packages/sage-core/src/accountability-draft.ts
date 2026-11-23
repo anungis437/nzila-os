@@ -78,7 +78,7 @@ export type SageAccountabilityDraftOutput = {
   intervention: string
   reviewDueAt: string
   /** Source reference is visible; institutional authority NOT attested here. */
-  authority: { status: 'UNATTESTED'; instrumentReference: string | null }
+  authority: { status: 'UNATTESTED'; instrumentReference: string | null; evidence: SageAccountabilityEvidenceRef | null }
   commitment: {
     status: 'RECORDED_UNVERIFIED' | 'MISSING'
     monetaryCeilingMinor: number | null
@@ -87,6 +87,10 @@ export type SageAccountabilityDraftOutput = {
     receivedDeliverables: number | null
     acceptedDeliverables: number | null
     actualSpendMinor: number | null
+    commitmentEvidence: SageAccountabilityEvidenceRef | null
+    executionEvidence: SageAccountabilityEvidenceRef | null
+    acceptanceEvidence: SageAccountabilityEvidenceRef | null
+    actualSpendEvidence: SageAccountabilityEvidenceRef | null
   }
   outcome: {
     expected: SageAccountabilityMeasure
@@ -99,6 +103,7 @@ export type SageAccountabilityDraftOutput = {
     id: string
     statement: string
     disposition: 'UNRESOLVED'
+    evidence: readonly SageAccountabilityEvidenceRef[]
   }[]
   nextDecisionOwnerActorId: string | null
   /** Explicit missing values rather than inferred spend/acceptance/outcomes. */
@@ -289,6 +294,7 @@ export function buildSageAccountabilityDraft(
     authority: {
       status: 'UNATTESTED',
       instrumentReference: input.authority?.instrumentReference ?? null,
+      evidence: input.authority ? { ...input.authority.evidence } : null,
     },
     commitment: {
       status: input.commitment ? 'RECORDED_UNVERIFIED' : 'MISSING',
@@ -298,6 +304,10 @@ export function buildSageAccountabilityDraft(
       receivedDeliverables: input.execution?.receivedDeliverables ?? null,
       acceptedDeliverables: input.execution?.acceptedDeliverables ?? null,
       actualSpendMinor: input.actualSpend?.amountMinor ?? null,
+      commitmentEvidence: input.commitment ? { ...input.commitment.evidence } : null,
+      executionEvidence: input.execution ? { ...input.execution.evidence } : null,
+      acceptanceEvidence: input.execution?.acceptanceEvidence ? { ...input.execution.acceptanceEvidence } : null,
+      actualSpendEvidence: input.actualSpend ? { ...input.actualSpend.evidence } : null,
     },
     outcome: {
       expected: structuredClone(input.expected),
@@ -314,6 +324,7 @@ export function buildSageAccountabilityDraft(
       id: d.id,
       statement: d.statement,
       disposition: 'UNRESOLVED' as const,
+      evidence: d.evidence.map((e) => ({ ...e })),
     })),
     nextDecisionOwnerActorId: input.nextDecisionOwnerActorId?.trim() || null,
     missing,
