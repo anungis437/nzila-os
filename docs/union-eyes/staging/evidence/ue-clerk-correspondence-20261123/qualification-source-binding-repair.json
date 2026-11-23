@@ -110,5 +110,34 @@
       "skipped": 0,
       "runtimeAcceptanceInferred": false
     }
+  },
+  "subsequentDependentTraceFailure": {
+    "sourceSha": "9f1cc921d58e8a06fe7c232f4c507a355f1c9091",
+    "runUrl": "https://github.com/anungis437/nzila-os/actions/runs/45122423497",
+    "passedAssertions": 27227,
+    "failedAssertions": 1,
+    "unexecuted": 36,
+    "failure": "step1-evidence-trace.test.ts exact source comparison: four routeTestFiles counts still describe the pre-census state.",
+    "sourceFamily": [
+      "apps/union-eyes/scripts/reality/transitive-authority-census.ts",
+      "apps/union-eyes/scripts/reality/step1-evidence-trace.ts"
+    ],
+    "generatedFamily": [
+      "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/transitive-authority-census-v1.json",
+      "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/s1-a02-a05-a06-evidence-trace-v1.json"
+    ],
+    "permanentPreflight": ".github/workflows/ue-full-regression.yml checks both generators before the unchanged whole application suite.",
+    "localRun": "Lint/typecheck passed; fast suite terminated after actualCI identified dependent-trace failure. No full-fast or five-command pass claimed.",
+    "newSourceFullQualification": "PENDING",
+    "stagingAcceptance": false,
+    "targetedWorkingTreeChecks": {
+      "realityFiles": 11,
+      "passed": 124,
+      "failed": 0,
+      "skipped": 0,
+      "officialGeneratorCliChecksPassed": 2,
+      "unchangedFullApplicationSuiteVerified": true,
+      "runtimeAcceptanceInferred": false
+    }
   }
 }

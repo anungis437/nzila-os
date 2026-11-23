@@ -11810,6 +11810,36 @@
         },
         "runtimeAcceptanceInferred": false
       }
+    },
+    "generatedEvidenceFamilySynchronization": {
+      "supersededSourceSha": "9f1cc921d58e8a06fe7c232f4c507a355f1c9091",
+      "wholeApplicationCiRun": 45122423497,
+      "wholeApplication": {
+        "passed": 27227,
+        "failed": 1,
+        "unexecuted": 36
+      },
+      "failure": "The generated Step1 action evidence trace consumes authority-census route-test counts; refreshing only the census left four dependent trace counts stale.",
+      "localCommands": {
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "testFast": "TERMINATED_SUPERSEDED_NOT_QUALIFIED",
+        "validateDocs": "UNRUN",
+        "governanceAudit": "UNRUN"
+      },
+      "repair": "Refresh both deterministic generated records together and check both before the existing full application CI suite. All11reality test files are checked together locally; full five and freshCI still required.",
+      "appPackageSchemaInputsChanged": false,
+      "newFullSourceQualification": "PENDING",
+      "fullBaseStagingAcceptance": false,
+      "targetedWorkingTreeChecks": {
+        "realityFiles": 11,
+        "passed": 124,
+        "failed": 0,
+        "skipped": 0,
+        "officialGeneratorCliChecksPassed": 2,
+        "unchangedFullApplicationSuiteVerified": true,
+        "runtimeAcceptanceInferred": false
+      }
     }
   }
 }
