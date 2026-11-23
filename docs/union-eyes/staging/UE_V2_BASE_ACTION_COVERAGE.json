@@ -5095,7 +5095,7 @@
       "action": "Correspondence approval and dispatch",
       "state": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
       "evidenceSummary": "Dedicated draft/revision/submit/approve/sign/dispatch routes exist; navigation is not execution proof.",
-      "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit.",
+      "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit. Clerk (SA11) source policy mismatch on aa545415 is recorded: generic rank normalization maps Clerk to Member despite declared letter permissions. Explicit local-staff letter gates and page/service/API regressions are under local validation; no deployed repair, actual provider or inbox acceptance is claimed.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -11710,5 +11710,20 @@
     "reason": "Repository policy excludes the default codex/ prefix; republished under allowed fix/ prefix. Original failure retained.",
     "checkBypassed": false,
     "fiveLocalPassesClaimedForSupersededSource": false
+  },
+  "clerkCorrespondenceRemediation": {
+    "recordedAt": "2026-11-23T03:42:54.558829+00:00",
+    "observedSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "stakeholderFamily": "SA11",
+    "action": "C16",
+    "role": "clerk",
+    "sourceFinding": "SOURCE_CONFIRMED_ROLE_POLICY_MISMATCH",
+    "evidence": "evidence/ue-clerk-correspondence-20261123/source-role-policy-mismatch-aa.json",
+    "repair": "Explicit canonical role allow-list for local correspondence preparation/read/dispatch; shared page/service policy; existing approval/signing and case resource checks retained.",
+    "localValidation": "FOCUSED_WORKING_TREE_VALIDATION_ONLY; FIVE_REPOSITORY_COMMANDS_AND_CI_PENDING",
+    "deployedRepairVerified": false,
+    "fullPersonaOrActionAcceptanceClaimed": false,
+    "financeFeaturesInScope": false,
+    "productionAuthorized": false
   }
 }

@@ -1,3 +1,4 @@
+import { CORRESPONDENCE_STAFF_ROLES } from "@/lib/correspondence/roles";
 /**
  * POST /api/correspondence/[id]/dispatch — Dispatch signed correspondence
  */
@@ -22,7 +23,7 @@ const dispatchSchema = z.object({
 export const POST = withApi(
   {
     rlsOrgContext: true,
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     body: dispatchSchema,
     openapi: { tags: ["Correspondence"], summary: "Dispatch correspondence" },
   },

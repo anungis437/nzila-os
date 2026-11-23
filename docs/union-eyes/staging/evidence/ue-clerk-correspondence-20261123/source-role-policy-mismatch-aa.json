@@ -1,0 +1,49 @@
+{
+  "status": "SOURCE_CONFIRMED_ROLE_POLICY_MISMATCH",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "actorRole": "clerk",
+  "stakeholderFamily": "SA11",
+  "actions": [
+    "C13",
+    "C16",
+    "C17",
+    "C21",
+    "C22"
+  ],
+  "observed": {
+    "canonicalClerkLevel": 70,
+    "normalizedClerk": "member",
+    "effectiveApiLevel": 20,
+    "requiredCorrespondenceApiLevel": 50,
+    "canonicalClerkDeclared": "clerk"
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/union-eyes/lib/api-auth-guard.ts",
+      "sha256": "d6b8e0c3f4fb2906677846fb198920dc110679cef3f0474e5353ed838f2c47a1"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/roles.ts",
+      "sha256": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/with-api.ts",
+      "sha256": "068d6e7d0e1c7c9451d249bcfc3080422518abe226893112dc3bc931ab050ae6"
+    },
+    {
+      "path": "apps/union-eyes/app/api/correspondence/route.ts",
+      "sha256": "e8895ff9d925594d8b86bcbe5a6642ee4a75c62395a8324582560b09d5de608b"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/correspondence/page.tsx",
+      "sha256": "ab34e24cfba492940765319fde9ea40e80f0a11a5d99cbd3ef4e5056cba999d4"
+    }
+  ],
+  "reproduction": "Executed source AST declarations for normalization, hierarchy and canonical role levels in a local VM; inspected real correspondence guards. Full withApi/auth/database/HTTP were not executed.",
+  "actualStagingFailureClaimed": false,
+  "appFilesChanged": false,
+  "globalHierarchyWideningProposed": false,
+  "repairStillRequired": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

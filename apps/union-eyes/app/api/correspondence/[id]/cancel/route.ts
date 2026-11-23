@@ -1,3 +1,4 @@
+import { CORRESPONDENCE_STAFF_ROLES } from "@/lib/correspondence/roles";
 /**
  * POST /api/correspondence/[id]/cancel — Cancel correspondence
  */
@@ -19,7 +20,7 @@ export const POST = withApi(
   {
     // The organization-ownership read and the cancellation are both tenant work: they run in the caller's own tenant transaction.
     rlsOrgContext: true,
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     body: cancelSchema,
     openapi: { tags: ["Correspondence"], summary: "Cancel correspondence" },
   },

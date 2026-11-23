@@ -12,6 +12,8 @@ Application `aa545415cfe4b172733000cfc6510712d4de0cba` has qualified source and 
 
 The [read-only failure diagnosis](evidence/ue-v2-forward-upgrade-20261122/actual-managed-admin-refusal.json) found that the existing managed database administrator has BYPASSRLS, whereas the operator and its disposable fixture required NOBYPASSRLS. Both application principals remain unprivileged. The current repair must prove both pre-existing administrator profiles, preserve the original attributes and data, and obtain a new successful live rehearsal before apply. Neither this diagnosis nor prior CI establishes base-release staging acceptance. Finance implementation and production deployment remain excluded.
 
+The full role review also found a Clerk correspondence defect in application `aa545415`: the generic guard normalizes `clerk` to `member`, blocking the declared letter workflow. The [source reproduction](evidence/ue-clerk-correspondence-20261123/source-role-policy-mismatch-aa.json) executes the actual normalization/catalogue declarations; it does not claim a staging failure. The repair uses explicit local letter-role checks and a shared page/service boundary. Full repository checks, exact-source CI, deployed Clerk access, approval/signing refusals and actual mail delivery remain required. Other Clerk responsibilities are not closed by this repair.
+
 The older dated sections below retain their original candidate scope and are historical evidence.
 
 ## November 16 runtime qualification delta

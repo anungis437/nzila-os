@@ -5,14 +5,12 @@ import { decideCase } from '@/lib/authority/store/route-adapter'
 import { ApiError } from '@/lib/api/errors'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { canonicalMembershipRole } from '@/lib/auth/canonical-membership-role'
-import { TENANT_LOCAL_ROLES, getRoleLevel, UserRole } from '@/lib/auth/roles'
-
-const STAFF = new Set(TENANT_LOCAL_ROLES.filter(role => getRoleLevel(role) >= getRoleLevel(UserRole.STEWARD)))
+import { isCorrespondenceStaffRole } from './roles'
 
 /** Platform operations titles confer no access to tenant letters. */
 export function correspondencePrincipal(organizationId: string, actorUserId?: string) {
   const principal = canonicalTenantPrincipal()
-  if (!principal || principal.organizationId !== organizationId || !STAFF.has(canonicalMembershipRole(principal.role,principal.isSystemAdmin === true))
+  if (!principal || principal.organizationId !== organizationId || !isCorrespondenceStaffRole(canonicalMembershipRole(principal.role,principal.isSystemAdmin === true))
     || (actorUserId && actorUserId !== principal.userId)) throw ApiError.forbidden('A live local staff membership is required.')
   return principal
 }

@@ -8,6 +8,15 @@ import {mayReadCorrespondence,requireCorrespondenceWrite,requireCorrespondenceDi
 const letter={organizationId:'org-a',grievanceId:'case-a'}
 beforeEach(()=>{h.principal={userId:'staff-a',organizationId:'org-a',role:'steward',isSystemAdmin:false};h.decide.mockReset();h.decide.mockResolvedValue({effect:'deny'})})
 describe('case-specific correspondence authority',()=>{
+  it('allows Clerk to prepare an ordinary letter and still requires case-specific drafting and disclosure authority',async()=>{
+    h.principal!.role='clerk'
+    await expect(requireCorrespondenceWrite(h.tx as never,{...letter,grievanceId:null},'staff-a')).resolves.toBeUndefined()
+    expect(h.decide).not.toHaveBeenCalled()
+    await expect(requireCorrespondenceWrite(h.tx as never,letter,'staff-a')).rejects.toMatchObject({code:'NOT_FOUND'})
+    h.decide.mockImplementation(async (_tx,request)=>({effect:request.action==='case:draft_action'?'allow':'deny'}))
+    await expect(requireCorrespondenceWrite(h.tx as never,letter,'staff-a')).resolves.toBeUndefined()
+    await expect(requireCorrespondenceDisclosure(h.tx as never,letter,'staff-a')).rejects.toMatchObject({code:'FORBIDDEN'})
+  })
   it('requires the existing case kernel for internal reads and drafting actions',async()=>{
     expect(await mayReadCorrespondence(h.tx as never,letter)).toBe(false)
     expect(h.decide).toHaveBeenLastCalledWith(h.tx,{userId:'staff-a',organizationId:'org-a',caseId:'case-a',action:'case:read_internal'})

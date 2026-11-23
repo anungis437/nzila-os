@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { CorrespondenceDashboard } from "./correspondence-dashboard";
+import { isCorrespondenceStaffRole } from "@/lib/correspondence/roles";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -23,7 +24,7 @@ export default async function CorrespondencePage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "correspondencePage" });
   const user = await requireUser();
-  const hasAccess = await hasMinRole("steward");
+  const hasAccess = user.roles.some(isCorrespondenceStaffRole);
   if (!hasAccess) redirect("/dashboard");
 
   const canSign = await hasMinRole("officer");

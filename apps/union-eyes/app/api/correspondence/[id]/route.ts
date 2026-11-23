@@ -1,3 +1,4 @@
+import { CORRESPONDENCE_STAFF_ROLES } from "@/lib/correspondence/roles";
 /**
  * GET    /api/correspondence/[id] — Get correspondence details
  * PATCH  /api/correspondence/[id] — Update draft correspondence
@@ -26,7 +27,7 @@ const updateSchema = z.object({
 export const GET = withApi(
   {
     rlsOrgContext: true,
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     openapi: { tags: ["Correspondence"], summary: "Get correspondence details" },
   },
   async ({ params, organizationId }) => {
@@ -46,7 +47,7 @@ export const PATCH = withApi(
   {
     // The organization-ownership read and the edit are both tenant work: they run in the caller's own tenant transaction.
     rlsOrgContext: true,
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     body: updateSchema,
     openapi: { tags: ["Correspondence"], summary: "Update draft correspondence" },
   },

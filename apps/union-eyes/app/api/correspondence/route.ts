@@ -1,3 +1,4 @@
+import { CORRESPONDENCE_STAFF_ROLES } from "@/lib/correspondence/roles";
 /**
  * GET /api/correspondence — List correspondence for the org
  * POST /api/correspondence — Create new correspondence (draft)
@@ -44,7 +45,7 @@ const createSchema = z.object({
 export const GET = withApi(
   {
     rlsOrgContext: true,
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     openapi: { tags: ["Correspondence"], summary: "List correspondence" },
   },
   async ({ organizationId, userId: _userId, request }) => {
@@ -84,7 +85,7 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     body: createSchema,
     openapi: { tags: ["Correspondence"], summary: "Create new correspondence" },
   },
