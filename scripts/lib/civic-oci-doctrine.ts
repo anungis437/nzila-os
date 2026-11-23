@@ -10,6 +10,8 @@ export const CIVIC_SLICE1_REVIEW_PACKET =
   'docs/public-service/operations/CIVIC_RUNTIME_SLICE_1_AUTHORIZATION_PACKET.md'
 export const CIVIC_SLICE2_REVIEW_PACKET =
   'docs/public-service/operations/CIVIC_RUNTIME_SLICE_2_AUTHORIZATION_PACKET.md'
+export const CIVIC_C1_REVIEW_PACKET =
+  'docs/public-service/operations/CIVIC_RUNTIME_C1_AUTHORIZATION_PACKET.md'
 export const CIVIC_HUMAN_VALIDATION_PLAN =
   'docs/public-service/operations/CIVIC_CONTROLLED_HUMAN_VALIDATION_PLAN.md'
 const HUMAN_VALIDATION_PLAN_SHA256 =
@@ -211,6 +213,8 @@ interface DoctrineContract {
     slice0?: unknown
     slice1?: unknown
     slice2?: unknown
+    /** Narrow synthetic C1 client grant or closed pending placeholder. */
+    c1?: unknown
   }
   historicalScope: {
     excluded: string[]
@@ -1126,6 +1130,7 @@ function slice0Allowed(
           'slice0',
           'slice1',
           'slice2',
+          'c1',
         ].includes(key),
     ) ||
     stable(grant) !== stable(CIVIC_SLICE0_APPROVAL)
@@ -1527,6 +1532,7 @@ function humanValidationDocumentationReviewAllowed(
     'slice0',
     'slice1',
     'slice2',
+    'c1',
   ]
   if (
     contract.runtimeAuthorization.authorized !== false ||
@@ -1535,7 +1541,8 @@ function humanValidationDocumentationReviewAllowed(
     stable(contract.runtimeAuthorization.slice0) !== stable(CIVIC_SLICE0_APPROVAL) ||
     stable(contract.runtimeAuthorization.slice1) !== stable(CIVIC_SLICE1_APPROVAL) ||
     stable(contract.runtimeAuthorization.slice2) !==
-      stable({ ...CIVIC_SLICE2_APPROVAL, revokedAt: CIVIC_SLICE2_TERMINATED_AT })
+      stable({ ...CIVIC_SLICE2_APPROVAL, revokedAt: CIVIC_SLICE2_TERMINATED_AT }) ||
+    stable(contract.runtimeAuthorization.c1) !== stable(CIVIC_C1_PENDING)
   )
     return deny(
       'closed grants required; no additional runtime, session, outreach or data authority',
@@ -2111,6 +2118,155 @@ export const CIVIC_SLICE2_APPROVAL = {
   sharedReuse: [...CIVIC_SLICE0_APPROVAL.sharedReuse],
 } as const
 export const CIVIC_SLICE2_TERMINATED_AT: string | null = '2026-10-12T20:28:37.5704126+00:00'
+
+/**
+ * Closed C1 placeholder recorded in the doctrine contract until the owner
+ * supplies an exact bounded synthetic grant. Never executable. Historical
+ * Slice 0/1/2 grants remain terminated and are not reopened by this descriptor.
+ */
+export const CIVIC_C1_PENDING = {
+  enabled: false,
+  status: 'AWAITING_OWNER_GRANT',
+  scope: 'synthetic-client-c1',
+  decisionArtifact: CIVIC_C1_REVIEW_PACKET,
+  dataBoundary: 'SYNTHETIC_ONLY',
+  production: false,
+  deployment: false,
+  realInstitutionalData: false,
+  runtimeAlias: false,
+  unionEyesModification: false,
+  proofOwner: 'Aubert Nungisa',
+  startingSha: null,
+  branch: null,
+  worktree: null,
+  effectiveAt: null,
+  expiresAt: null,
+  revokedAt: null,
+  writablePaths: [
+    'apps/civic/src/c1',
+    'apps/civic/tests/c1',
+    'apps/civic/c1.tsconfig.json',
+    'apps/civic/c1.vitest.config.ts',
+    CIVIC_C1_REVIEW_PACKET,
+    'docs/public-service/operations/CIVIC_RUNTIME_C1_PROOF.md',
+    CIVIC_OCI_CONTRACT_PATH,
+    'scripts/lib/civic-oci-doctrine.ts',
+    'tooling/contract-tests/civic-oci-doctrine-integrity.test.ts',
+    ARCHIVAL_AUTHORITY,
+  ],
+} as const
+
+function c1Allowed(
+  root: string,
+  contract: DoctrineContract,
+  findings: DoctrineFinding[],
+  context?: CivicDoctrineValidationContext,
+  execution = true,
+): boolean {
+  const grant = contract.runtimeAuthorization.c1
+  const deny = (observed: unknown) => {
+    findings.push(
+      finding(
+        'CIVIC_C1_AUTHORIZATION_INVALID',
+        CIVIC_OCI_CONTRACT_PATH,
+        CIVIC_C1_REVIEW_PACKET,
+        'exact, current, human-approved isolated synthetic C1 grant',
+        observed,
+      ),
+    )
+    return false
+  }
+  if (grant === undefined) return deny('c1 descriptor missing')
+  if (execution && process.env.NODE_ENV === 'production')
+    return deny('production execution prohibited')
+  if (
+    contract.schemaVersion !== 2 ||
+    contract.runtimeAuthorization.authorized !== false ||
+    contract.runtimeAuthorization.applicationRoot !== 'apps/civic'
+  )
+    return deny('general runtime must remain unauthorized; root must stay apps/civic')
+  // Closed placeholder is never an executable grant.
+  if (stable(grant) === stable(CIVIC_C1_PENDING)) return deny('awaiting owner grant')
+  const g = grant as Record<string, unknown>
+  if (
+    g.enabled !== true ||
+    g.status !== 'AUTHORIZED_WITH_CONDITIONS' ||
+    g.scope !== 'synthetic-client-c1' ||
+    g.dataBoundary !== 'SYNTHETIC_ONLY' ||
+    g.production !== false ||
+    g.deployment !== false ||
+    g.realInstitutionalData !== false ||
+    g.runtimeAlias !== false ||
+    g.unionEyesModification !== false ||
+    typeof g.startingSha !== 'string' ||
+    typeof g.branch !== 'string' ||
+    typeof g.worktree !== 'string' ||
+    typeof g.effectiveAt !== 'string' ||
+    typeof g.expiresAt !== 'string' ||
+    g.revokedAt != null
+  )
+    return deny('grant shape/value mismatch or revocation')
+  const decision = readText(root, CIVIC_C1_REVIEW_PACKET)?.replace(/\r/g, '')
+  const decisionBlock = decision?.split('## MAINTAINER DECISION\n')[1]
+  const required = [
+    '**Decision:** `AUTHORIZE_WITH_CONDITIONS`',
+    '**Maintainer:** Aubert Nungisa',
+    `**Authorized starting SHA:** \`${g.startingSha}\``,
+    `**Authorized branch/worktree:** \`${g.branch}\` /`,
+    `\`${g.worktree}\``,
+    `**Effective:** \`${g.effectiveAt}\``,
+    `**Expires:** \`${g.expiresAt}\``,
+    '**Data boundary:** `SYNTHETIC_ONLY`',
+    '**Production:** `NOT_AUTHORIZED`',
+    '**Deployment:** `NOT_AUTHORIZED`',
+    '**Real institutional data:** `NOT_AUTHORIZED`',
+  ]
+  if (!decisionBlock || required.some((text) => !decisionBlock.includes(text)))
+    return deny('human decision missing, pending or inconsistent')
+  if (decisionBlock.includes('PENDING') || decisionBlock.includes('AWAITING_OWNER_GRANT'))
+    return deny('decision still pending owner grant')
+  const now = context?.now ?? new Date()
+  if (now < new Date(g.effectiveAt as string) || now >= new Date(g.expiresAt as string))
+    return deny('grant outside effective window')
+  if (context) {
+    if (context.branch !== g.branch || context.worktree !== g.worktree)
+      return deny('branch/worktree mismatch')
+    const outside = context.changedPaths.filter((path) => {
+      const allowed = Array.isArray(g.writablePaths) ? (g.writablePaths as string[]) : []
+      return !allowed.some(
+        (prefix) => path === prefix || path.startsWith(prefix.endsWith('/') ? prefix : `${prefix}/`),
+      )
+    })
+    if (outside.length) return deny({ unauthorizedChangedPaths: outside })
+  }
+  return true
+}
+
+/**
+ * Fail-closed C1 runtime gate. Throws unless an exact owner-authorized
+ * synthetic C1 grant is present, current, and in-window. The recorded
+ * `CIVIC_C1_PENDING` placeholder never admits execution.
+ */
+export function assertCivicC1Authorized(
+  root: string,
+  context?: CivicDoctrineValidationContext,
+): void {
+  const findings: DoctrineFinding[] = []
+  const contract = loadContract(root, findings)
+  if (!contract || !c1Allowed(root, contract, findings, context, true)) {
+    throw new Error(
+      `CIVIC_RUNTIME_C1_STOP_REQUIRED: ${findings.map(formatDoctrineFinding).join('\n') || 'no scoped grant'}`,
+    )
+  }
+}
+
+/** True when the contract records only the closed C1 pending placeholder. */
+export function isCivicC1AwaitingOwnerGrant(root: string): boolean {
+  const findings: DoctrineFinding[] = []
+  const contract = loadContract(root, findings)
+  if (!contract) return false
+  return stable(contract.runtimeAuthorization.c1) === stable(CIVIC_C1_PENDING)
+}
 
 function slice2Surface(artifact: string): boolean {
   return /^(apps\/civic\/src\/slice2\/[a-z0-9-]+\.ts|apps\/civic\/tests\/slice2\/[a-z0-9-]+\.test\.ts|apps\/civic\/slice2\.(tsconfig\.json|vitest\.config\.ts))$/.test(
@@ -2830,7 +2986,7 @@ export const CIVIC_ARCHIVE_PATH_MANIFEST =
   'docs/public-service/operations/civic-archive/CIVIC_PORTFOLIO_PATH_MANIFEST.json'
 // Packaging fingerprint only. It grants neither runtime nor human admission.
 const ARCHIVE_PATH_MANIFEST_SHA256 =
-  'b94a05c7852c131f6e9d42a724762a4bdcc87d669fd89035e2db0a8a25d8d02f'
+  'a900a6edf1c9e19f4cdf81fe6ad8ab3b1df3f8efc6204f751082647f90be01f2'
 
 /**
  * Portable review of terminated proofs. Execution and human research continue

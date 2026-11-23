@@ -35,6 +35,7 @@ import { ExportRequestList } from '../../components/exports/export-request-list'
 import { ExportPackageList } from '../../components/exports/export-package-list'
 import { RecordsLifecyclePanel } from '../../components/exports/records-lifecycle-panel'
 import { listDestructionRequestsForScope } from '../../../../lib/sage/records-service'
+import { buildSageEvidenceExportOptions } from '../../../../lib/sage/export-evidence-options'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -76,9 +77,9 @@ export default async function SageExportsPage({
 
   const destructionRequests = await listDestructionRequestsForScope(ctx, { workspaceId })
 
-  const evidenceOptions: ExportResourceOption[] = (items?.items ?? [])
-    .filter((i) => !i.excludedFromExternalReview)
-    .map((i) => ({ id: i.id, label: `Evidence ${i.id.slice(0, 8)} (${i.lifecycleState})`, authorizationLevel: i.lifecycleState }))
+  // Evidence item response intentionally omits source authorizationLevel:
+  // display lifecycle in the label, never as a false confidentiality badge.
+  const evidenceOptions: ExportResourceOption[] = buildSageEvidenceExportOptions(items?.items ?? [])
   const flagOptions: ExportResourceOption[] = (flags?.flags ?? [])
     .filter((f) => f.authorizationLevel !== 'excluded')
     .map((f) => ({ id: f.id, label: `Flag ${f.flagType} ${f.id.slice(0, 8)}`, authorizationLevel: f.authorizationLevel }))

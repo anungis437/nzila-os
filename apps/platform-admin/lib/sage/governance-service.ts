@@ -23,6 +23,7 @@ import {
   listSageBoundaryFlags,
   listSageDecisionRecords,
   listSageReviewNotes,
+  ratifySageDecisionUnderMandate,
   resolveSageBoundaryFlag,
   type SageAuthorizationLevel,
   type SageBoundaryFlagType,
@@ -30,6 +31,8 @@ import {
   type SageGovernanceTargetType,
   type SageReviewNoteType,
 } from '@nzila/sage-core'
+import { createSageInstitutionalCapacityStore } from './institutional-capacity-adapter'
+import { createSagePlatformSqlClient } from './sql-adapter'
 import {
   buildCacheKey,
   hashPayload,
@@ -274,6 +277,10 @@ export interface CreateDecisionRecordInput {
   referencedEvidenceItemIds?: string[]
   referencedBoundaryFlagIds?: string[]
   requestedAuthorizationLevel?: SageAuthorizationLevel
+  /** Opaque institutional mandate id — triggers Pattern-A ratification when set. */
+  mandateId?: string
+  positionId?: string
+  resourceId?: string
 }
 
 export async function createSageDecisionRecordForScope(
@@ -282,6 +289,11 @@ export async function createSageDecisionRecordForScope(
   input: CreateDecisionRecordInput,
   options: MutationOptions,
 ): Promise<{ response: SageDecisionRecordResponse; replayed: boolean }> {
+  const usesMandate =
+    Boolean(input.mandateId?.trim()) &&
+    Boolean(input.positionId?.trim()) &&
+    Boolean(input.resourceId?.trim())
+
   return withGovernanceIdempotency(
     scope,
     `/api/sage/workspaces/${workspaceId}/decisions`,
@@ -292,12 +304,44 @@ export async function createSageDecisionRecordForScope(
       referencedEvidenceItemIds: input.referencedEvidenceItemIds ?? [],
       referencedBoundaryFlagIds: input.referencedBoundaryFlagIds ?? [],
       requestedAuthorizationLevel: input.requestedAuthorizationLevel ?? null,
+      mandateId: input.mandateId ?? null,
+      positionId: input.positionId ?? null,
+      resourceId: input.resourceId ?? null,
     },
     options,
     201,
     async () => {
       const deps = createSageRuntime(scope)
       const ctx = createSageServiceContext(scope)
+      if (usesMandate) {
+        const evaluatedAt = new Date().toISOString()
+        const sql = createSagePlatformSqlClient()
+        // Session-scoped tenant GUC — capacity reads are not yet inside Pattern-A.
+        await sql.query(`select set_config('app.tenant_id', $1, false)`, [scope.orgId])
+        const result = await ratifySageDecisionUnderMandate(deps, ctx, {
+          workspaceId,
+          mandateId: input.mandateId!.trim(),
+          positionId: input.positionId!.trim(),
+          resourceId: input.resourceId!.trim(),
+          decision: input.decision,
+          rationale: input.rationale,
+          uncertainty: input.uncertainty,
+          referencedEvidenceItemIds: input.referencedEvidenceItemIds,
+          referencedBoundaryFlagIds: input.referencedBoundaryFlagIds,
+          requestedAuthorizationLevel: input.requestedAuthorizationLevel,
+          idempotencyKey: options.idempotencyKey,
+          // SQL-backed capacity; still fails closed when attestations are absent.
+          capacityStore: createSageInstitutionalCapacityStore(sql, evaluatedAt),
+        })
+        if (!result.admitted) {
+          // Governed refusal — do not disclose instrument internals.
+          throw new SageServiceError(
+            'FORBIDDEN',
+            'Institutional authority refused for this decision',
+          )
+        }
+        return toDecisionRecordResponse(result.record)
+      }
       const record = await createSageDecisionRecord(deps, ctx, { workspaceId, ...input })
       return toDecisionRecordResponse(record)
     },

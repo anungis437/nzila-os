@@ -158,6 +158,37 @@
       "apps/civic/README.md",
       "docs/CIVIC_OCI_ALIGNMENT.md"
     ],
+    "c1": {
+      "enabled": false,
+      "status": "AWAITING_OWNER_GRANT",
+      "scope": "synthetic-client-c1",
+      "decisionArtifact": "docs/public-service/operations/CIVIC_RUNTIME_C1_AUTHORIZATION_PACKET.md",
+      "dataBoundary": "SYNTHETIC_ONLY",
+      "production": false,
+      "deployment": false,
+      "realInstitutionalData": false,
+      "runtimeAlias": false,
+      "unionEyesModification": false,
+      "proofOwner": "Aubert Nungisa",
+      "startingSha": null,
+      "branch": null,
+      "worktree": null,
+      "effectiveAt": null,
+      "expiresAt": null,
+      "revokedAt": null,
+      "writablePaths": [
+        "apps/civic/src/c1",
+        "apps/civic/tests/c1",
+        "apps/civic/c1.tsconfig.json",
+        "apps/civic/c1.vitest.config.ts",
+        "docs/public-service/operations/CIVIC_RUNTIME_C1_AUTHORIZATION_PACKET.md",
+        "docs/public-service/operations/CIVIC_RUNTIME_C1_PROOF.md",
+        "governance/foundations/civic-oci-doctrine.contract.json",
+        "scripts/lib/civic-oci-doctrine.ts",
+        "tooling/contract-tests/civic-oci-doctrine-integrity.test.ts",
+        "docs/oci/CIVIC_OCI_DOCTRINE_INTEGRITY.md"
+      ]
+    },
     "slice2": {
       "enabled": true,
       "scope": "synthetic-local-runtime-slice-2",

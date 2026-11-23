@@ -202,6 +202,7 @@
     "validate:claims": "tsx packages/platform-validation/src/claim-verification.ts",
     "validate:docs": "tsx packages/platform-validation/src/doc-consistency.ts",
     "verify:migrations": "tsx tooling/db/migration-manifest.ts verify",
+    "sage:b005:test": "node --test tooling/scripts/sage-b005-*.test.mjs tooling/scripts/sage-staging-http-preflight.test.mjs tooling/scripts/sage-g12-telemetry-contract.test.mjs tooling/scripts/sage-b005-build-provenance.test.mjs",
     "verify:deadline-engine-schema": "tsx scripts/wave1a/verify-deadline-engine-schema.ts",
     "reality:inventory": "tsx tooling/reality/capability-inventory.ts",
     "reality:anti-theatre": "tsx tooling/reality/anti-theatre-scan.ts",

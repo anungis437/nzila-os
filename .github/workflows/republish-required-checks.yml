@@ -24,6 +24,10 @@ jobs:
     if: github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    permissions:
+      contents: read
+      checks: write
+      actions: read
     steps:
       - uses: actions/checkout@v5
         with:
@@ -34,7 +38,7 @@ jobs:
           node-version: 22
       - name: Republish required checks for this frozen head
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}

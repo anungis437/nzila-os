@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "SAGE_B005_TEST_IDENTITIES",
+  "boundary": "FICTIONAL_ONLY",
+  "note": "Expected permission outcomes for authenticated HTTP smoke. Credentials are never stored here.",
+  "identities": [
+    {
+      "id": "p01-authorized",
+      "orgId": "org-alder-civic",
+      "actorId": "officer-alder-1",
+      "workspaceId": "11111111-1111-4111-8111-111111111101",
+      "expect": {
+        "GET /sage": "200",
+        "GET /api/sage/workspaces": "200",
+        "resource.commit under current mandate": "admit",
+        "resource.commit cumulative over 30k": "refuse",
+        "wrong-tenant org-regulator-alpha": "refuse"
+      }
+    },
+    {
+      "id": "p01-recused",
+      "orgId": "org-alder-civic",
+      "actorId": "officer-alder-conflicted",
+      "workspaceId": "11111111-1111-4111-8111-111111111101",
+      "expect": {
+        "resource.commit": "refuse_recusal"
+      }
+    },
+    {
+      "id": "r01-alpha",
+      "orgId": "org-regulator-alpha",
+      "actorId": "reg-alpha-officer",
+      "expect": {
+        "cross-tenant beta resource": "refuse"
+      }
+    },
+    {
+      "id": "s01-predecessor",
+      "orgId": "org-secretariat-north",
+      "actorId": "sec-predecessor",
+      "expect": {
+        "new consequential act": "refuse_expired",
+        "historical decision inspect": "admit_read"
+      }
+    },
+    {
+      "id": "s01-successor",
+      "orgId": "org-secretariat-north",
+      "actorId": "sec-successor",
+      "expect": {
+        "new consequential act under successor mandate": "admit"
+      }
+    },
+    {
+      "id": "t01-executive",
+      "orgId": "org-exec-accountability",
+      "actorId": "exec-accountability-1",
+      "expect": {
+        "accountability draft create": "admit",
+        "silent draft→adoption": "refuse",
+        "explicit adoption": "admit_with_attestation"
+      }
+    }
+  ]
+}

@@ -46,6 +46,10 @@ import {
   validateCivicSlice2Admission,
   assertCivicSlice2Authorized,
   CIVIC_SLICE2_TERMINATED_AT,
+  CIVIC_C1_PENDING,
+  CIVIC_C1_REVIEW_PACKET,
+  assertCivicC1Authorized,
+  isCivicC1AwaitingOwnerGrant,
   CIVIC_HUMAN_VALIDATION_PLAN,
   CIVIC_HUMAN_ROUND1_AUTHORIZATION,
   CIVIC_HUMAN_ROUND1_MATERIALS,
@@ -65,6 +69,7 @@ const ROOT = join(__dirname, '..', '..')
 const FIXTURE_PATHS = [
   CIVIC_OCI_CONTRACT_PATH,
   'docs/public-service/operations/CIVIC_RUNTIME_SLICE_0_AUTHORIZATION_PACKET.md',
+  CIVIC_C1_REVIEW_PACKET,
   'apps/civic',
   'apps/union-eyes/lib/oci/frameworks/index.ts',
   'docs/CIVIC_OCI_ALIGNMENT.md',
@@ -2062,5 +2067,77 @@ describe('CIVIC / OCI doctrine integrity', () => {
     expect(validate(root, SLICE1_CONTEXT).map((x) => x.id)).toContain(
       'CIVIC_SLICE0_ARCHIVE_INVALID',
     )
+  })
+})
+
+describe('CIVIC C1 fail-closed synthetic client gate', () => {
+  it('records only the closed pending descriptor on the live contract', () => {
+    expect(isCivicC1AwaitingOwnerGrant(ROOT)).toBe(true)
+    const contract = JSON.parse(readFileSync(join(ROOT, CIVIC_OCI_CONTRACT_PATH), 'utf8'))
+    expect(contract.runtimeAuthorization.authorized).toBe(false)
+    expect(contract.runtimeAuthorization.c1).toEqual(CIVIC_C1_PENDING)
+  })
+
+  it('refuses assertCivicC1Authorized while awaiting owner grant', () => {
+    expect(() => assertCivicC1Authorized(ROOT)).toThrow(/CIVIC_RUNTIME_C1_STOP_REQUIRED/)
+    expect(() => assertCivicC1Authorized(ROOT)).toThrow(/awaiting owner grant/)
+  })
+
+  it('refuses a forged enabled c1 grant without maintainer decision', () => {
+    const root = createFixture()
+    mutateContract(root, (contract) => {
+      contract.runtimeAuthorization.c1 = {
+        ...CIVIC_C1_PENDING,
+        enabled: true,
+        status: 'AUTHORIZED_WITH_CONDITIONS',
+        startingSha: 'deadbeef',
+        branch: 'forged/branch',
+        worktree: '/forged',
+        effectiveAt: '2026-11-23T00:00:00Z',
+        expiresAt: '2026-12-23T00:00:00Z',
+        revokedAt: null,
+      }
+    })
+    expect(() =>
+      assertCivicC1Authorized(root, {
+        now: new Date('2026-11-24T00:00:00Z'),
+        branch: 'forged/branch',
+        worktree: '/forged',
+        descendsFromApprovedSha: true,
+        changedPaths: [],
+      }),
+    ).toThrow(/CIVIC_C1_AUTHORIZATION_INVALID|human decision|PENDING|awaiting/)
+  })
+
+  it('refuses production NODE_ENV even if a forged grant is planted', () => {
+    const root = createFixture()
+    const previous = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    try {
+      mutateContract(root, (contract) => {
+        contract.runtimeAuthorization.c1 = {
+          ...CIVIC_C1_PENDING,
+          enabled: true,
+          status: 'AUTHORIZED_WITH_CONDITIONS',
+          startingSha: 'deadbeef',
+          branch: 'forged/branch',
+          worktree: '/forged',
+          effectiveAt: '2026-11-23T00:00:00Z',
+          expiresAt: '2026-12-23T00:00:00Z',
+          revokedAt: null,
+        }
+      })
+      expect(() => assertCivicC1Authorized(root)).toThrow(/production/)
+    } finally {
+      process.env.NODE_ENV = previous
+    }
+  })
+
+  it('keeps general production runtime flag false while c1 pending is present', () => {
+    const contract = JSON.parse(readFileSync(join(ROOT, CIVIC_OCI_CONTRACT_PATH), 'utf8'))
+    expect(contract.runtimeAuthorization.authorized).toBe(false)
+    expect(contract.runtimeAuthorization.c1.enabled).toBe(false)
+    expect(contract.runtimeAuthorization.c1.status).toBe('AWAITING_OWNER_GRANT')
+    expect(() => assertCivicC1Authorized(ROOT)).toThrow(/CIVIC_RUNTIME_C1_STOP_REQUIRED/)
   })
 })

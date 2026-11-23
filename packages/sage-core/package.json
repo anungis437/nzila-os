@@ -23,7 +23,12 @@
     "./postgres-repository": "./src/postgres-repository.ts",
     "./synthesis-context": "./src/synthesis-context.ts",
     "./claim-chain": "./src/claim-chain.ts",
-    "./institutional-context": "./src/institutional-context.ts"
+    "./institutional-context": "./src/institutional-context.ts",
+    "./institutional-authority": "./src/institutional-authority.ts",
+    "./institutional-mandate-store": "./src/institutional-mandate-store.ts",
+    "./institutional-mandate-enforcement": "./src/institutional-mandate-enforcement.ts",
+    "./accountability-draft": "./src/accountability-draft.ts",
+    "./accountability-adoption": "./src/accountability-adoption.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

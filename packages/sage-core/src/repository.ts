@@ -141,6 +141,35 @@ export interface SageRepository {
   ): Promise<SageReviewNote[]>
 
   createDecisionRecord(input: Omit<SageDecisionRecord, 'id'>): Promise<SageDecisionRecord>
+  /** Server-only institutional mandate load (never browser-supplied facts). */
+  loadInstitutionalMandate?(input: {
+    orgId: string
+    workspaceId: string
+    mandateId: string
+  }): Promise<import('./institutional-authority').SageVerifiedInstitutionalMandate>
+  /**
+   * Atomically lock a verified mandate, insert a decision record, append an
+   * institutional action, and enqueue durable audit outbox intent. Returns
+   * undefined when the mandate fails the SQL re-check (revoked/expired/mismatch).
+   */
+  createDecisionRecordUnderMandate?(input: {
+    decision: Omit<SageDecisionRecord, 'id'>
+    mandateId: string
+    positionId: string
+    resourceId: string
+    idempotencyKey: string
+    instrumentRef: string
+    instrumentVersion: string
+    evaluatedAt: string
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    | {
+        decision: SageDecisionRecord
+        actionId: string
+        reusedExisting: boolean
+      }
+    | undefined
+  >
   listDecisionRecords(workspaceId: string, orgId: string): Promise<SageDecisionRecord[]>
   getDecisionRecord(
     decisionId: string,

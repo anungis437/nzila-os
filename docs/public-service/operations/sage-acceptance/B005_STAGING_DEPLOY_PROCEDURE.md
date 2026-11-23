@@ -60,10 +60,47 @@ Root migrations (authoritative for SAGE):
 
 - `migrations/0032_sage_phase_1_access_domain_lock.sql` … through …
 - `migrations/0044_sage_phase_8b_destruction_attempts.sql`
+- Later Union Eyes root migrations may occupy `0045`–`0049` on the same track
+  (not `*_sage_*`; the SAGE applier skips them by filename).
+- **Required institutional tail for B-005:**
+  - `0050_sage_institutional_mandate_authority.sql` — mandate / commitment / action ledger
+  - `0051_sage_institutional_capacity_recusal.sql` — office holdings + conflict attestations
+  - `0052_sage_accountability_adoption.sql` — CLEAR adoption ledger + fingerprint
 
-Apply with the project’s approved migration executor for the target DB (do **not** invent a new path). If the shared staging DB has no applier for root `migrations/*.sql`, provision an isolated Postgres and document the applier command used.
+Offline checksum + apply tooling (does **not** close B-005):
 
-After apply, re-run the `sage_%` inventory; expect tables present.
+```bash
+node tooling/scripts/sage-b005-build-provenance.mjs \
+  --git-sha "$(git rev-parse HEAD)" \
+  --out reports/proof-runs/sage-b005-build-provenance.json \
+  [--expected-image-digest sha256:…]
+node tooling/scripts/sage-b005-migration-preflight.mjs verify
+node tooling/scripts/sage-b005-migration-preflight.mjs apply --url "$SAGE_PG_TEST_URL"
+node tooling/scripts/sage-b005-migration-preflight.mjs receipt --out reports/proof-runs/sage-b005-migration.json
+```
+
+Before apply, record local checksums for the exact SHA being deployed:
+
+```bash
+git rev-parse HEAD
+pnpm verify:migrations
+node -e "import('./tooling/scripts/lib/sage-migration-chain.mjs').then(m=>console.log(JSON.stringify(m.verifySageMigrationChain(),null,2)))" \
+  | tee /tmp/sage-migration-checksums.json
+```
+
+Apply with the project’s approved migration executor for the target DB
+(`node tooling/scripts/sage-b005-migration-preflight.mjs apply` for isolated
+Postgres). If the shared staging DB has no applier for root `migrations/*.sql`,
+provision an isolated Postgres and document the applier command used.
+
+After apply:
+
+1. Re-run the `sage_%` inventory; expect tables present including
+   `sage_institutional_mandate`, `sage_institutional_office_holding`,
+   `sage_institutional_conflict_attestation`, `sage_accountability_adoption`.
+2. Apply `fixtures/sage-b005-institutional/rls-roles.sql` then `bootstrap.sql`
+   (fictional identities only).
+3. Env/secrets name inventory: `B005_ENV_SECRETS_INVENTORY.md`.
 
 ## D. Deploy platform-admin with SAGE composition
 
@@ -118,12 +155,48 @@ az containerapp show \
 
 After B-005 deploy only:
 
-1. Create draft workspace in staging (human)
-2. Register one **fictional** internal evidence source
-3. Confirm incoming-style principal without sensitive grant cannot read sensitive fixture
-4. Confirm audit event emitted for material action
+1. Anonymous preflight (read-only; never closes B-005):
 
-Full **G12/G13/G11 manual** remain separate blockers (B-001…B-004).
+```bash
+node tooling/scripts/sage-staging-http-preflight.mjs \
+  --base https://staging-admin.nzilaventures.com/ \
+  --expected-sha <40-char-sha> \
+  --receipt reports/proof-runs/sage-b005-http-preflight.json
+```
+
+2. Authenticated HTTP smoke (requires staging session cookie for a **fictional** identity):
+
+```bash
+export SAGE_B005_BASE_URL=https://staging-admin.nzilaventures.com/
+export SAGE_B005_SESSION_COOKIE='…'
+export SAGE_B005_EXPECTED_SHA=<40-char-sha>
+node tooling/scripts/sage-b005-authenticated-http-smoke.mjs \
+  --receipt reports/proof-runs/sage-b005-auth-smoke.json
+```
+
+3. Create draft workspace in staging (human)
+4. Register one **fictional** internal evidence source
+5. Confirm incoming-style principal without sensitive grant cannot read sensitive fixture
+6. Confirm audit event emitted for material action
+
+Compose the machine-readable qualification receipt (still `b005Closure: NOT_PROVEN` until staging proofs complete):
+
+```bash
+node tooling/scripts/sage-b005-qualification-receipt.mjs \
+  --git-sha <40-char-sha> \
+  --out reports/proof-runs/sage-b005-qualification.json \
+  --migration-receipt reports/proof-runs/sage-b005-migration.json \
+  --http-preflight reports/proof-runs/sage-b005-http-preflight.json \
+  --auth-smoke reports/proof-runs/sage-b005-auth-smoke.json \
+  --restore-harness reports/proof-runs/sage-b005-restore.json
+```
+
+Full **G12/G13/G11 manual** remain separate blockers (B-001…B-004). Local restore harness:
+
+```bash
+node tooling/scripts/sage-b005-restore-harness.mjs \
+  --receipt reports/proof-runs/sage-b005-restore.json
+```
 
 ## G. Evidence to file when closing B-005
 
@@ -131,6 +204,7 @@ Full **G12/G13/G11 manual** remain separate blockers (B-001…B-004).
 - Image digest / revision name
 - `/api/health` JSON (`buildInfo.commit`)
 - `sage_%` table list (names only)
+- Migration preflight + authenticated smoke + qualification receipts
 - Statement that prod RG was not modified
 
 Then update / open proof-run evidence (e.g. 006) — do not silently edit 005 history.
@@ -138,4 +212,6 @@ Then update / open proof-run evidence (e.g. 006) — do not silently edit 005 hi
 ## Explicit non-claims
 
 - Running this checklist in a laptop without Azure auth does **not** close B-005.
+- Anonymous HTTP preflight does **not** prove authenticated institutional routes.
 - Union Eyes deploy success ≠ platform-admin SAGE deploy.
+- `b005Closure` remains `NOT_PROVEN` until every staging acceptance criterion in the Wave 2 mandate is evidenced.

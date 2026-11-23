@@ -19,7 +19,7 @@ const MIGRATIONS_DIR = resolve(__dirname, '../../../migrations')
 /** All SAGE root migrations in lexical (numeric) order, 0032 → latest. */
 function sageMigrationFiles(): string[] {
   return readdirSync(MIGRATIONS_DIR)
-    .filter((f) => /^00(3[2-9]|4\d)_sage_.*\.sql$/.test(f))
+    .filter((f) => /^00(3[2-9]|4\d|5\d)_sage_.*\.sql$/.test(f))
     .sort()
 }
 

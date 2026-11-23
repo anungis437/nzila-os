@@ -9,6 +9,11 @@
  * status never substitutes. The named human reviewer is the authenticated actor
  * (derived server-side). Referenced evidence must be accessible; referenced
  * boundary flags must belong to the workspace. Decision records are immutable.
+ *
+ * When mandateId + positionId + resourceId are supplied together, the write
+ * uses Pattern-A institutional mandate ratification (server-loaded instrument
+ * attestation, same-transaction admission + decision + audit). Browser-supplied
+ * verification labels are rejected by the strict schema.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { withOrgScope, withOrgWrite } from '@/lib/org-scope-guard'
