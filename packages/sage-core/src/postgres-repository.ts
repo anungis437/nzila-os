@@ -16,6 +16,7 @@
 
 import type { SageRepository } from './repository'
 import type { SageSqlClient } from './sql-client'
+import { loadVerifiedInstitutionalMandate } from './institutional-mandate-store'
 import type {
   SageAuthorizationLevel,
   SageAuditOutboxEvent,
@@ -663,6 +664,152 @@ export class PostgresSageRepository implements SageRepository {
       ],
     )
     return mapDecisionRecord(rows[0])
+  }
+
+  async loadInstitutionalMandate(input: {
+    orgId: string
+    workspaceId: string
+    mandateId: string
+  }) {
+    return loadVerifiedInstitutionalMandate(this.sql, input)
+  }
+
+  async createDecisionRecordUnderMandate(input: {
+    decision: Omit<SageDecisionRecord, 'id'>
+    mandateId: string
+    positionId: string
+    resourceId: string
+    idempotencyKey: string
+    instrumentRef: string
+    instrumentVersion: string
+    evaluatedAt: string
+    auditEvent: SageAuditOutboxIntent
+  }): Promise<
+    | {
+        decision: SageDecisionRecord
+        actionId: string
+        reusedExisting: boolean
+      }
+    | undefined
+  > {
+    const d = input.decision
+    // Idempotent replay: if the institutional action already exists for this key,
+    // return the linked decision without inserting again.
+    const existing = await this.sql.query<{
+      action_id: string
+      decision_id: string | null
+    }>(
+      `select a.id as action_id,
+              (a.safe_payload_json->>'decisionId') as decision_id
+         from sage_institutional_action a
+        where a.org_id = $1
+          and a.resource_id = $2
+          and a.action = 'decision.ratify'::sage_institutional_action_kind
+          and a.idempotency_key = $3`,
+      [d.orgId, input.resourceId, input.idempotencyKey],
+    )
+    if (existing.rows[0]?.decision_id) {
+      const prior = await this.getDecisionRecord(existing.rows[0].decision_id, d.workspaceId, d.orgId)
+      if (prior) {
+        return { decision: prior, actionId: existing.rows[0].action_id, reusedExisting: true }
+      }
+    }
+
+    // Pattern A: lock mandate + decision + institutional action + outbox in one statement.
+    // SQL re-checks active/verified/principal/position/resource/time so a revocation race
+    // between TypeScript admission and commit cannot succeed.
+    const { rows } = await this.sql.query<SageDecisionRecordRow & { action_id: string }>(
+      `with locked as (
+         select *
+           from sage_institutional_mandate
+          where id = $14
+            and org_id = $2
+            and workspace_id = $1
+            and principal_actor_id = $6
+            and position_id = $15
+            and resource_id = $16
+            and status = 'active'
+            and verification_status = 'verified'
+            and revoked_at is null
+            and accepted_at is not null
+            and effective_at <= $13::timestamptz
+            and expires_at > $13::timestamptz
+          for update
+       ),
+       decision as (
+         insert into sage_decision_record
+           (workspace_id, org_id, decision, rationale, uncertainty, human_reviewer_id,
+            referenced_evidence_item_ids, referenced_boundary_flag_ids,
+            authorization_level, authorization_basis, excluded_from_external_review,
+            created_by, created_at)
+         select $1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10, $11, $12, $13
+           from locked
+         returning *
+       ),
+       action as (
+         insert into sage_institutional_action
+           (org_id, workspace_id, mandate_id, action, resource_id, actor_id, position_id,
+            instrument_ref, instrument_version, idempotency_key, decision_reason,
+            safe_payload_json, occurred_at)
+         select $2, $1, locked.id, 'decision.ratify'::sage_institutional_action_kind, $16, $6, $15,
+                $17, $18, $19, 'ADMITTED',
+                jsonb_build_object('decisionId', decision.id), $13::timestamptz
+           from locked, decision
+         returning id
+       ),
+       outbox as (
+         insert into sage_audit_outbox
+           (event_id, org_id, workspace_id, actor_id, action, resource_type,
+            resource_id, safe_payload_json, status, attempt_count, created_at)
+         select $20, $2, $1, $21, $22, $23, decision.id,
+                ($24::jsonb || jsonb_build_object(
+                   'mandateId', $14,
+                   'instrumentRef', $17,
+                   'instrumentVersion', $18,
+                   'actionId', action.id
+                 )),
+                'pending', 0, $13
+           from decision, action
+         on conflict (event_id) do nothing
+         returning event_id
+       )
+       select decision.*, action.id as action_id
+         from decision, action`,
+      [
+        d.workspaceId,
+        d.orgId,
+        d.decision,
+        d.rationale ?? null,
+        d.uncertainty ?? null,
+        d.humanReviewerId,
+        JSON.stringify(d.referencedEvidenceItemIds ?? []),
+        JSON.stringify(d.referencedBoundaryFlagIds ?? []),
+        d.authorizationLevel,
+        d.authorizationBasis ?? null,
+        d.excludedFromExternalReview,
+        d.createdBy,
+        d.createdAt,
+        input.mandateId,
+        input.positionId,
+        input.resourceId,
+        input.instrumentRef,
+        input.instrumentVersion,
+        input.idempotencyKey,
+        input.auditEvent.eventId,
+        input.auditEvent.actorId,
+        input.auditEvent.action,
+        input.auditEvent.resourceType,
+        JSON.stringify(input.auditEvent.safePayload),
+      ],
+    )
+    const row = firstOrUndefined(rows)
+    if (!row) return undefined
+    const { action_id: actionId, ...decisionRow } = row
+    return {
+      decision: mapDecisionRecord(decisionRow as SageDecisionRecordRow),
+      actionId: String(actionId),
+      reusedExisting: false,
+    }
   }
 
   async listDecisionRecords(

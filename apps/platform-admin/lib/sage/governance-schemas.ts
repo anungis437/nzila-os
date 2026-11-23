@@ -104,6 +104,11 @@ export type CreateReviewNoteRequest = z.infer<typeof CreateReviewNoteRequest>
  * Create a named-human decision record. The reviewer identity is NOT accepted
  * here — it is derived from the authenticated session. Every field below is
  * explicitly human-authored; there is no automated/generated field.
+ *
+ * Institutional mandate ratification (Pattern A) is opt-in via the three opaque
+ * identifiers below. When any is present, all three are required. Browser must
+ * never supply verification labels, instrument authority, or amount totals —
+ * those are loaded server-side from the institutional instrument repository.
  */
 export const CreateDecisionRecordRequest = z
   .object({
@@ -117,8 +122,24 @@ export const CreateDecisionRecordRequest = z
     referencedEvidenceItemIds: z.array(z.string().trim().pipe(z.guid())).max(500).optional(),
     referencedBoundaryFlagIds: z.array(z.string().trim().pipe(z.guid())).max(500).optional(),
     requestedAuthorizationLevel: requestedAuthorizationLevelField,
+    mandateId: z.string().trim().min(1).max(128).optional(),
+    positionId: z.string().trim().min(1).max(128).optional(),
+    resourceId: z.string().trim().min(1).max(128).optional(),
   })
   .strict()
+  .superRefine((value, ctx) => {
+    const present = [value.mandateId, value.positionId, value.resourceId].filter(
+      (v) => v !== undefined && v !== '',
+    )
+    if (present.length > 0 && present.length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'mandateId, positionId and resourceId are required together for institutional ratification',
+        path: ['mandateId'],
+      })
+    }
+  })
 export type CreateDecisionRecordRequest = z.infer<typeof CreateDecisionRecordRequest>
 
 // ─── Responses (browser-safe projections) ────────────────────────────────────

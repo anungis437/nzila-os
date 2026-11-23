@@ -239,6 +239,37 @@ describe('SAGE governance routes — review notes + decisions', () => {
     )
     expect(res.status).toBe(400)
   })
+
+  it('rejects partial institutional mandate fields (all three required together)', async () => {
+    const ws = await createWorkspace()
+    const res = await decisionsRoute.POST(
+      req(`/api/sage/workspaces/${ws}/decisions`, 'POST', {
+        decision: 'proceed',
+        uncertainty: 'limited sample',
+        mandateId: 'mandate-1',
+        // missing positionId + resourceId
+      }),
+      { params: Promise.resolve({ workspaceId: ws }) },
+    )
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects browser-supplied verification labels on decision create (strict schema)', async () => {
+    const ws = await createWorkspace()
+    const res = await decisionsRoute.POST(
+      req(`/api/sage/workspaces/${ws}/decisions`, 'POST', {
+        decision: 'proceed',
+        uncertainty: 'limited sample',
+        mandateId: 'mandate-1',
+        positionId: 'pos-1',
+        resourceId: 'res-1',
+        verificationStatus: 'verified',
+        instrumentAuthority: 'board-resolution',
+      }),
+      { params: Promise.resolve({ workspaceId: ws }) },
+    )
+    expect(res.status).toBe(400)
+  })
 })
 
 describe('SAGE governance routes — derivative-data authorization envelope', () => {

@@ -79,6 +79,11 @@ import {
 } from './institutional-context'
 import type { SageClaimChainEntry } from './claim-chain'
 import {
+  evaluateSageInstitutionalMandate,
+  type SageInstitutionalMandateDecision,
+} from './institutional-authority'
+import { publicInstitutionalRefusal } from './institutional-mandate-enforcement'
+import {
   buildSageExportPackage,
   verifySageExportPackageBytes,
   type SageExportPackageResource,
@@ -1461,6 +1466,203 @@ export async function createSageDecisionRecord(
   )
   return record
 }
+
+/**
+ * Ratify a decision under an institutionally attested mandate.
+ *
+ * Browser may supply only `mandateId` (opaque), `positionId` selection,
+ * `resourceId`, and an idempotency key. Verification status, instrument facts
+ * and dates are loaded server-side. Admission and the decision write share one
+ * Pattern-A SQL statement (mandate lock + decision + institutional action +
+ * durable audit outbox).
+ */
+export async function ratifySageDecisionUnderMandate(
+  deps: SageServiceDeps,
+  ctx: SageServiceContext,
+  input: {
+    workspaceId: string
+    mandateId: string
+    positionId: string
+    resourceId: string
+    decision: string
+    rationale?: string
+    uncertainty: string
+    referencedEvidenceItemIds?: string[]
+    referencedBoundaryFlagIds?: string[]
+    requestedAuthorizationLevel?: SageAuthorizationLevel
+    idempotencyKey: string
+    conflictOrRecusal?: boolean
+  },
+): Promise<
+  | { admitted: true; record: SageDecisionRecord; actionId: string; reusedExisting: boolean }
+  | { admitted: false; decision: Extract<SageInstitutionalMandateDecision, { allowed: false }> }
+> {
+  if (!deps.repo.createDecisionRecordUnderMandate) {
+    integrityError('mandate-ratified decisions require a SQL-backed repository')
+  }
+  if (!input.idempotencyKey.trim()) invalidInput('idempotency key required')
+  if (!input.mandateId.trim() || !input.positionId.trim() || !input.resourceId.trim()) {
+    invalidInput('mandateId, positionId and resourceId are required')
+  }
+
+  const ws = await authorizeSageWorkspaceAccess(deps, ctx, {
+    workspaceId: input.workspaceId,
+    requiredPermission: SAGE_PERMISSIONS.DECISION_RECORD,
+  })
+  if (!input.decision || !input.decision.trim()) invalidInput('a decision statement is required')
+  if (!input.uncertainty || !input.uncertainty.trim()) {
+    invalidInput('an uncertainty / limitations statement is required')
+  }
+  assertActorIsHuman(ctx)
+  const humanReviewerId = ctx.actor.actorId
+  assertDecisionRecordHasNamedHumanReviewer({ humanReviewerId })
+  assertNamedHumanReviewer(humanReviewerId)
+
+  const access = await loadSageAccessContext(deps, ctx, ws.id)
+  const evidenceRefs = input.referencedEvidenceItemIds ?? []
+  let floor: SageAuthorizationLevel = SAGE_GOVERNANCE_AUTHORIZATION_FLOOR
+  let excludedFromExternalReview = false
+  for (const itemId of evidenceRefs) {
+    const item = await deps.repo.getEvidenceItem(itemId, ws.id, ws.orgId)
+    if (!item) notFound('referenced evidence item')
+    const src = await deps.repo.getEvidenceSource(item.sourceId, ws.id, ws.orgId)
+    if (!src || !canAccessEvidenceLevel(access, src.authorizationLevel)) {
+      forbidden('referenced evidence is not accessible to the reviewer')
+    }
+    floor = mostRestrictiveAuthorization(floor, src.authorizationLevel)
+    if (item.excludedFromExternalReview || src.authorizationLevel === 'excluded') {
+      excludedFromExternalReview = true
+    }
+  }
+  const flagRefs = input.referencedBoundaryFlagIds ?? []
+  for (const flagId of flagRefs) {
+    const flag = await deps.repo.getBoundaryFlag(flagId, ws.id, ws.orgId)
+    if (!flag) notFound('referenced boundary flag')
+    floor = mostRestrictiveAuthorization(floor, flag.authorizationLevel)
+  }
+  const floorBasis: SageGovernanceAuthorizationBasis =
+    evidenceRefs.length > 0 || flagRefs.length > 0 ? 'evidence_inherited' : 'workspace_default'
+  const { authorizationLevel, authorizationBasis } = applyRequestedAuthorization(
+    floor,
+    floorBasis,
+    input.requestedAuthorizationLevel,
+  )
+
+  // Server-only mandate load — never trust browser verification labels.
+  if (!deps.repo.loadInstitutionalMandate) {
+    integrityError('mandate ratification requires a SQL-backed mandate loader')
+  }
+  const mandate = await deps.repo.loadInstitutionalMandate({
+    orgId: ws.orgId,
+    workspaceId: ws.id,
+    mandateId: input.mandateId,
+  })
+  const evaluatedAt = contextNow(ctx)
+  const admission = evaluateSageInstitutionalMandate(
+    {
+      orgId: ws.orgId,
+      actorId: ctx.actor.actorId,
+      actorKind: 'human',
+      currentPositionId: input.positionId,
+      resourceId: input.resourceId,
+      action: 'decision.ratify',
+      mandateId: input.mandateId,
+      evaluatedAt,
+      authenticated: true,
+      activeWorkspaceMembership: true,
+      applicationPermissionGranted: true,
+      conflictOrRecusal: input.conflictOrRecusal === true,
+    },
+    [mandate],
+  )
+  if (!admission.allowed) {
+    await emit(
+      deps,
+      ctx,
+      SAGE_AUDIT_ACTIONS.INSTITUTIONAL_AUTHORITY_DENIED,
+      SAGE_AUDIT_RESOURCES.INSTITUTIONAL_MANDATE,
+      input.mandateId,
+      { reason: admission.reason, action: 'decision.ratify', resourceId: input.resourceId },
+    )
+    return { admitted: false, decision: admission }
+  }
+
+  const eventId = exportAuditEventId(
+    SAGE_AUDIT_ACTIONS.DECISION_RATIFIED_UNDER_MANDATE,
+    input.idempotencyKey,
+    ws.id,
+    ctx.actor.actorId,
+  )
+  const committed = await deps.repo.createDecisionRecordUnderMandate!({
+    decision: {
+      workspaceId: ws.id,
+      orgId: ws.orgId,
+      decision: input.decision,
+      rationale: input.rationale ?? null,
+      uncertainty: input.uncertainty,
+      humanReviewerId,
+      referencedEvidenceItemIds: [...evidenceRefs],
+      referencedBoundaryFlagIds: [...flagRefs],
+      authorizationLevel,
+      authorizationBasis,
+      excludedFromExternalReview,
+      createdBy: ctx.actor.actorId,
+      createdAt: evaluatedAt,
+    },
+    mandateId: input.mandateId,
+    positionId: input.positionId,
+    resourceId: input.resourceId,
+    idempotencyKey: input.idempotencyKey.trim(),
+    instrumentRef: admission.instrumentRef,
+    instrumentVersion: admission.instrumentVersion,
+    evaluatedAt,
+    auditEvent: {
+      eventId,
+      actorId: ctx.actor.actorId,
+      action: SAGE_AUDIT_ACTIONS.DECISION_RATIFIED_UNDER_MANDATE,
+      resourceType: SAGE_AUDIT_RESOURCES.DECISION_RECORD,
+      safePayload: {
+        mandateId: input.mandateId,
+        instrumentRef: admission.instrumentRef,
+        instrumentVersion: admission.instrumentVersion,
+        authorizationLevel,
+      },
+    },
+  })
+  if (!committed) {
+    // Revocation/expiry race between TypeScript admission and SQL lock.
+    const denied = {
+      allowed: false as const,
+      reason: 'MANDATE_INACTIVE' as const,
+    }
+    return { admitted: false, decision: denied }
+  }
+
+  await dispatchOutboxEvent(deps, {
+    eventId,
+    actorId: ctx.actor.actorId,
+    orgId: ws.orgId,
+    action: SAGE_AUDIT_ACTIONS.DECISION_RATIFIED_UNDER_MANDATE,
+    resource: SAGE_AUDIT_RESOURCES.DECISION_RECORD,
+    resourceId: committed.decision.id,
+    payload: {
+      mandateId: input.mandateId,
+      actionId: committed.actionId,
+      instrumentRef: admission.instrumentRef,
+    },
+    at: evaluatedAt,
+  })
+
+  return {
+    admitted: true,
+    record: committed.decision,
+    actionId: committed.actionId,
+    reusedExisting: committed.reusedExisting,
+  }
+}
+
+/** Re-export for route layers that need the stable public refusal shape. */
+export { publicInstitutionalRefusal }
 
 // ─── Governance read models (authorization-filtered) ─────────────────────────
 
