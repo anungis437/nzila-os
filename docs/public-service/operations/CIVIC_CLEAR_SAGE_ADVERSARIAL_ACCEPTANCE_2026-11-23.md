@@ -1,6 +1,6 @@
 # CIVIC / CLEAR / SAGE — Adversarial Product-Ceiling Acceptance Contract
 
-**Record:** CCS-ADV-2026-11-23 · **Status:** completed design review / acceptance tests NOT executed · **Companion:** [Ceiling](CIVIC_CLEAR_SAGE_CEILING_FREEZE_2026-11-23.md) and [Parallel roadmap](CIVIC_CLEAR_SAGE_PARALLEL_DELIVERY_ROADMAP_2026-11-23.md). **Release/production:** NO_GO unchanged.
+**Record:** CCS-ADV-2026-11-23 · **Status:** C0 owner-accepted design review / acceptance tests NOT executed · **Companion:** [Ceiling](CIVIC_CLEAR_SAGE_CEILING_FREEZE_2026-11-23.md) and [Parallel roadmap](CIVIC_CLEAR_SAGE_PARALLEL_DELIVERY_ROADMAP_2026-11-23.md). **Release/production:** NO_GO unchanged.
 
 The purpose of this record is to expose missing product decisions **before** implementation and turn them into deterministic cross-persona scenarios. Methodological external critique occurs after presentation of the functioning fictional tool; client permissions and legal/records approval are still required before use of genuine data.
 
@@ -131,7 +131,7 @@ The October 29 workbook contains a proposed qualitative feedback register, which
 
 ## 9. Decision/acceptance disposition
 
-**Architecture questions:** resolved into the D01–D34 choices and explicit special-case semantics above, pending founder acceptance.
+**Architecture questions:** resolved into D01–D34 and accepted by founder 2026-11-23; test outcomes remain unproven until execution.
 
 **Source proof:** preexisting SAGE and synthetic CIVIC code identified; no source change by this review.
 
