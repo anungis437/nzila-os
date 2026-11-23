@@ -20,6 +20,7 @@ import type { SageSqlClient } from '@nzila/sage-core'
 // with `$1`-style placeholders and resolves to an array of row objects.
 type PostgresUnsafe = {
   unsafe: (query: string, params?: readonly unknown[]) => Promise<unknown[]>
+  begin?: <T>(fn: (tx: PostgresUnsafe) => Promise<T>) => Promise<T>
 }
 
 function getUnsafeClient(): PostgresUnsafe {
@@ -30,18 +31,36 @@ function getUnsafeClient(): PostgresUnsafe {
   return client
 }
 
-/**
- * Create a `SageSqlClient` bound to the platform database connection.
- * Parameters are always passed positionally ($1, $2, …) — no interpolation.
- */
-export function createSagePlatformSqlClient(): SageSqlClient {
+function asSageSqlClient(client: PostgresUnsafe): SageSqlClient {
   return {
     async query<T = unknown>(
       text: string,
       params: readonly unknown[] = [],
     ): Promise<{ rows: T[] }> {
-      const rows = await getUnsafeClient().unsafe(text, params)
+      const rows = await client.unsafe(text, params)
       return { rows: rows as T[] }
     },
   }
+}
+
+/**
+ * Create a `SageSqlClient` bound to the platform database connection.
+ * Parameters are always passed positionally ($1, $2, …) — no interpolation.
+ */
+export function createSagePlatformSqlClient(): SageSqlClient {
+  return asSageSqlClient(getUnsafeClient())
+}
+
+/**
+ * Run `fn` inside a single postgres.js transaction so mandate FOR UPDATE locks,
+ * ledger reads and institutional action inserts share one atomic boundary.
+ */
+export async function withSagePlatformTransaction<T>(
+  fn: (sql: SageSqlClient) => Promise<T>,
+): Promise<T> {
+  const client = getUnsafeClient()
+  if (typeof client.begin !== 'function') {
+    throw new Error('SAGE SQL client: transactional begin() is unavailable')
+  }
+  return client.begin(async (tx) => fn(asSageSqlClient(tx)))
 }
