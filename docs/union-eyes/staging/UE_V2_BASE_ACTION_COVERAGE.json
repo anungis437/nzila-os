@@ -5,7 +5,7 @@
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
   "currentRepairBranch": "fix/ue-staging-forward-upgrade-20261122",
-  "currentRepairRuntimeQualification": "EXACT_HEAD_ENGINEERING_QUALIFIED_IMAGE_BUILT_LIVE_FORWARD_UPGRADE_PENDING_FULL_BASE_UNQUALIFIED",
+  "currentRepairRuntimeQualification": "APPLICATION_SOURCE_AND_IMAGE_QUALIFIED_OPERATOR_REQUALIFICATION_AND_LIVE_BASE_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -11174,7 +11174,7 @@
     "latestEngineeringObservation": {
       "recordedAt": "2026-11-22T23:53:03.825818+00:00",
       "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
-      "state": "NORMAL_APP_ADMISSION_AND_EXACT_IMAGE_COMPLETE_FINAL_OPERATOR_ADMISSION_AND_LIVE_UPGRADE_PENDING",
+      "state": "APPLICATION_ADMISSION_AND_IMAGE_COMPLETE_SHARED_OPERATOR_BINDING_REQUALIFICATION_OPEN",
       "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json",
       "stagingAcceptanceInferred": false
     },
@@ -11670,11 +11670,20 @@
     }
   ],
   "currentDeployedWorkflowProvenance": "Prior live application rollout workflow SHA not inferred from the later failed rollout; failed candidate rollout used 6bba9465f9c99ca7559a24c19f5a11c9e41c353c.",
-  "lastReconciledAt": "2026-11-23T00:04:37.265930+00:00",
+  "lastReconciledAt": "2026-11-23T00:31:21.325189+00:00",
   "currentCandidateStagingDecision": {
     "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
     "decision": "STAGING_NO_GO_FULL_BASE_QUALIFICATION_OPEN",
     "previousAcceptedSubsetDecisionRemainsHistorical": true,
     "noAcceptedPriorEvidenceInherited": true
+  },
+  "currentOperatorQualification": {
+    "state": "SOURCE_REPAIR_REQUALIFICATION_REQUIRED",
+    "supersededHead": "d0c641e16f437c8e3dfb388641b81cf211006818",
+    "nativePreservationCiOnSupersededHead": 45086966180,
+    "failedSharedCoverageJob": 137407797189,
+    "repairEvidence": "evidence/ue-v2-forward-upgrade-20261122/shared-candidate-gate-repair.json",
+    "finalLocalFiveAndCiOpen": true,
+    "stagingExecuted": false
   }
 }

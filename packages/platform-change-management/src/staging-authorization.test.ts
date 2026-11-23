@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { evaluateChangeRequirements, hasFounderOperatedStagingApproval, hasStagingMissionAuthorization } from './approvals'
 import { isInFreezePeriod, loadCalendarPolicy } from './calendar'
@@ -76,6 +78,10 @@ function founderStaging(): ChangeRecord {
 }
 
 describe('solo-founder Union Eyes V2 staging (CHG-2026-0114)', () => {
+  it('keeps the typed projection bound to the same reviewed candidate as the portable gate', () => {
+    const generator = new URL('../../../tooling/scripts/generate-ue-v2-staging-candidate.mjs', import.meta.url)
+    expect(() => execFileSync(process.execPath, [fileURLToPath(generator), '--check'], { stdio: 'pipe' })).not.toThrow()
+  })
   it('accepts the real owner-directed staging record without claiming a second reviewer', () => {
     const change = founderStaging()
     expect(change.approved_by).toEqual(['anungis437'])

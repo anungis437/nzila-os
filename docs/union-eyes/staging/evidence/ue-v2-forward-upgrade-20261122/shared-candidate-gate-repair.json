@@ -1,0 +1,103 @@
+{
+  "evidenceClass": "LOCAL_RELEASE_GUARD_REPAIR_NOT_STAGING_ACCEPTANCE",
+  "recordedAt": "2026-11-23T00:31:21.301178+00:00",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "qualificationBaseSha": "d0c641e16f437c8e3dfb388641b81cf211006818",
+  "sourceEditsUncommittedAtExecution": true,
+  "observedFailure": {
+    "check": "Unit coverage (shared)",
+    "runId": 45086966298,
+    "jobId": 137407797189,
+    "jobUrl": "https://github.com/anungis437/nzila-os/actions/runs/45086966298/job/137407797189",
+    "failedSuite": "union-eyes-v2-staging-release.test.mjs",
+    "passed": 16,
+    "failed": 1,
+    "cause": "The portable release gate and fixture pinned577 while the real record and typed approval engine pinnedAA. Coverage thresholds did not fail."
+  },
+  "correction": {
+    "reviewedCandidateSource": "tooling/scripts/lib/ue-v2-staging-candidate.json",
+    "typedProjection": "packages/platform-change-management/src/ue-v2-staging-candidate.ts",
+    "projectionGenerator": "tooling/scripts/generate-ue-v2-staging-candidate.mjs",
+    "bothRuntimeGatesUseSameReviewedSource": true,
+    "forwardWorkflowUsesCompleteChangeRecordCli": true,
+    "noProductionOrTechnicalGateException": true
+  },
+  "sourceInputsSha256": {
+    ".github/workflows/ue-v2-staging-forward-upgrade.yml": "124cd8c8c19affb913e7729f438b6a064323af4b64f241ecbeb02db4fb89629e",
+    "packages/platform-change-management/src/approvals.ts": "6e1856661dbf87bda9b98597c9919179f9dc2a2a0e4164fe4334f092f2b16df2",
+    "packages/platform-change-management/src/staging-authorization.test.ts": "f550880702bbad3a6e1c7bfeaeca22522780597850c644b8f2e547b5f690ab88",
+    "packages/platform-change-management/src/ue-v2-staging-candidate.ts": "3392cd52184b5e81524a6509e7d20bb47fd432669b7165bcfecec2126cde6342",
+    "tooling/scripts/generate-ue-v2-staging-candidate.mjs": "f973fafc0f6ce377afcf11435a60d3ef6fe11991c833b3af6f0d53f582826e02",
+    "tooling/scripts/lib/ue-v2-staging-candidate.json": "fda1d87877c73e44f801d5b47ebf549c86daafe2100ff40a2ba4fc5f98498ad0",
+    "tooling/scripts/lib/union-eyes-v2-staging-release.mjs": "3e6387835ece29a4714c13a79dd8c5eaad3cc76e2a7236122560f67aa13f94d0",
+    "tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs": "70c23797f460089b71144fe64cdc5c11fa4a305dc778e8ec80c353a912fb9f76"
+  },
+  "localChecks": {
+    "nodeReleaseGateTests": {
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "resultSha256": "35a818265c86b3e215a327e86e5095178379ca006bf34bbfbdf0b185fe1dcb11"
+    },
+    "typedApprovalTests": {
+      "passed": 100,
+      "failed": 0,
+      "skipped": 0,
+      "resultSha256": "8f81a7d95f1037f3e68a4097959219ccc152eb1b296e0f89b8986a523d25ff78"
+    },
+    "packageSemanticCheckExit": 0,
+    "actualWorkflowGuardBlock": {
+      "evidenceClass": "ACTUAL_WORKFLOW_AUTHORITY_BLOCK_LOCAL_ONLY_NO_AZURE",
+      "workflowSha256": "124cd8c8c19affb913e7729f438b6a064323af4b64f241ecbeb02db4fb89629e",
+      "runBlockSha256": "2d745390ff7cdb246b1936ddff9495c7bfa13cff3062b8559acff66a013a1721",
+      "cases": [
+        {
+          "id": "rehearsal_current_binding",
+          "expectedAccepted": true,
+          "actualExit": 0,
+          "postGuardSentinelReached": true
+        },
+        {
+          "id": "old_candidate_refused",
+          "expectedAccepted": false,
+          "actualExit": 1,
+          "postGuardSentinelReached": false
+        },
+        {
+          "id": "held_f3_refused",
+          "expectedAccepted": false,
+          "actualExit": 1,
+          "postGuardSentinelReached": false
+        },
+        {
+          "id": "apply_without_rehearsal_digests_refused",
+          "expectedAccepted": false,
+          "actualExit": 1,
+          "postGuardSentinelReached": false
+        }
+      ],
+      "appendedSentinelForEarlyFailureProof": true,
+      "azureOperationsExecuted": 0,
+      "stagingAcceptanceClaimed": false
+    }
+  },
+  "negativeControls": [
+    "Superseded577/F3/A9 and arbitrary candidates remain refused even when included in linked_commits.",
+    "A workflow-style portable gate copy acceptsAA and refuses a superseded candidate.",
+    "Stale generated projection check fails without rewriting; explicit regeneration is deterministic.",
+    "The actual workflow authority/input block accepts the current rehearsal binding, refuses stale sources and refuses apply without rehearsal digests before reaching a later sentinel."
+  ],
+  "d0NativePreservationRun": {
+    "runId": 45086966180,
+    "status": "SUCCESS_ON_D0_ONLY_NOT_FINAL_SOURCE"
+  },
+  "d0RequiredLocalChecks": {
+    "lint": 0,
+    "typecheck": 0,
+    "testFast": "INTERRUPTED_FOR_NECESSARY_SOURCE_REPAIR",
+    "fiveChecksPassed": false
+  },
+  "finalSourceLocalFiveAndCiRequired": true,
+  "stagingMutations": 0,
+  "productionAuthorized": false
+}

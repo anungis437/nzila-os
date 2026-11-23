@@ -300,9 +300,14 @@ test('CLI fails closed on a missing change record and a tag manifest', () => {
 
 test('CHG-2026-0114 founder direction accepts only the exact candidate and preserves staging boundaries', () => {
   const approved = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
-  const sha = '57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3'
+  const sha = 'aa545415cfe4b172733000cfc6510712d4de0cba'
   const opts = { changeId: 'CHG-2026-0114', sourceSha: sha, nowMs: Date.parse('2026-11-10T12:00:00Z') }
   assert.deepEqual(changeRecordDefects(approved, opts), [])
+  for (const candidate of ['57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3', 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c', 'a9c47099242c13e23efc72562ca63f3a6cabcc8b', 'f'.repeat(40)]) {
+    const changed = { ...approved, linked_commits: [...approved.linked_commits, candidate],
+      founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: candidate } }
+    assert.ok(changeRecordDefects(changed, { ...opts, sourceSha: candidate }).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  }
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: 'cccfc8c311a1017f80241bf089c00ef0c6828751' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '41dba402dd53fec280091f11f46a99077dd91465' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '7d939bf5399ef768cc71a837730a6ff143d079d1' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
@@ -355,4 +360,54 @@ test('registry attestation selects the single linux/amd64 image manifest from an
   assert.notEqual(run(index([{ ...amd64, digest: 'sha256:short' }])).status, 0)
   assert.notEqual(run({ schemaVersion: 2 }).status, 0)
   fs.rmSync(dir, { recursive: true, force: true })
+})
+
+
+test('candidate projection check refuses stale output without rewriting it, and regeneration is deterministic', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-reviewed-candidate-'))
+  try {
+    const script = 'tooling/scripts/generate-ue-v2-staging-candidate.mjs'
+    const binding = 'tooling/scripts/lib/ue-v2-staging-candidate.json'
+    const projection = 'packages/platform-change-management/src/ue-v2-staging-candidate.ts'
+    for (const name of [script, binding, projection]) {
+      fs.mkdirSync(path.dirname(path.join(directory, name)), { recursive: true })
+      fs.copyFileSync(path.join(REPO, name), path.join(directory, name))
+    }
+    const target = path.join(directory, projection)
+    fs.writeFileSync(target, 'stale candidate projection\n')
+    const run = mode => spawnSync(process.execPath, [path.join(directory, script), mode], { encoding: 'utf8' })
+    assert.notEqual(run('--check').status, 0)
+    assert.equal(fs.readFileSync(target, 'utf8'), 'stale candidate projection\n')
+    assert.equal(run('--write').status, 0)
+    assert.equal(fs.readFileSync(target, 'utf8'), fs.readFileSync(path.join(REPO, projection), 'utf8'))
+    assert.equal(run('--check').status, 0)
+    const before = fs.readFileSync(target, 'utf8')
+    assert.equal(run('--write').status, 0)
+    assert.equal(fs.readFileSync(target, 'utf8'), before)
+  } finally { fs.rmSync(directory, { recursive: true, force: true }) }
+})
+
+test('the workflow-style portable gate copy keeps its reviewed candidate after the application source changes', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-portable-candidate-'))
+  try {
+    fs.cpSync(path.join(REPO, 'tooling/scripts'), path.join(directory, 'scripts'), { recursive: true })
+    const changes = path.join(directory, 'changes')
+    fs.mkdirSync(changes)
+    const record = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
+    const file = path.join(changes, 'CHG-2026-0114.json')
+    fs.writeFileSync(file, JSON.stringify(record))
+    const cli = path.join(directory, 'scripts/union-eyes-v2-staging-gate-cli.mjs')
+    const run = source => spawnSync(process.execPath, [cli, '--gate', 'change-record', '--change-id', 'CHG-2026-0114',
+      '--source-sha', source, '--change-dir', changes, '--now', '2026-11-23T00:00:00Z'], { cwd: directory, encoding: 'utf8' })
+    const admitted = run('aa545415cfe4b172733000cfc6510712d4de0cba')
+    assert.equal(admitted.status, 0, admitted.stdout + admitted.stderr)
+    assert.deepEqual(JSON.parse(admitted.stdout).defects, [])
+    const stale = 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c'
+    record.linked_commits.push(stale)
+    record.founder_staging_authorization.candidate_sha = stale
+    fs.writeFileSync(file, JSON.stringify(record))
+    const refused = run(stale)
+    assert.equal(refused.status, 1)
+    assert.ok(JSON.parse(refused.stdout).defects.includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  } finally { fs.rmSync(directory, { recursive: true, force: true }) }
 })

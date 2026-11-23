@@ -12,6 +12,7 @@
  * fresh synthetic-data staging database and is not invoked here.
  */
 import crypto from 'node:crypto'
+import reviewedCandidate from './ue-v2-staging-candidate.json' with { type: 'json' }
 import { assembleAcrAttestation, canonicalJson } from './union-eyes-deployment-safety.mjs'
 
 export { assembleAcrAttestation }
@@ -46,6 +47,14 @@ const ALLOWED_CHANGE_TYPES = new Set(['Create', 'Modify', 'NoChange', 'Ignore', 
 const SHA_RE = /^[0-9a-f]{40}$/
 const DIGEST_RE = /^sha256:[0-9a-f]{64}$/
 const CHANGE_ID_RE = /^CHG-\d{4}-\d{4}$/
+
+// Keep this reviewed binding beside the gate so the workflow's isolated copy
+// retains its policy when the application checkout changes. Capture a primitive.
+const REVIEWED_CANDIDATE_SOURCE_SHA = reviewedCandidate.schemaVersion === 1
+  && reviewedCandidate.changeId === 'CHG-2026-0114'
+  && reviewedCandidate.environment === 'STAGING'
+  && SHA_RE.test(String(reviewedCandidate.applicationSourceSha ?? ''))
+  ? reviewedCandidate.applicationSourceSha : null
 
 function isExactSymbolicRegistryPull(change, registryResourceGroup) {
   if (!registryResourceGroup || change?.changeType !== 'Unsupported') return false
@@ -247,7 +256,7 @@ export function changeRecordDefects(record, { changeId, sourceSha, nowMs }) {
       founder.owner_authorization_ref === 'ops/change-records/CHG-2026-0114.founder-authorization.md' &&
       founder.authority_origin === 'OWNER_DIRECTIVE_IN_CONVERSATION' &&
       founder.subscription_id === NEW_SUBSCRIPTION_ID &&
-      founder.candidate_sha === '57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3' &&
+      founder.candidate_sha === REVIEWED_CANDIDATE_SOURCE_SHA &&
       founder.staging_only === true &&
       founder.production_authorized === false &&
       founder.technical_gates_required === true &&

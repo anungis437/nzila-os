@@ -58,6 +58,8 @@ jobs:
         env:
           TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
         run: |
+          node tooling/scripts/generate-ue-v2-staging-candidate.mjs --check
+          node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
           pnpm exec tsx --test tooling/scripts/lib/ue-v2-forward-upgrade.test.ts
           python3 -m unittest discover -s tooling/scripts -p test_run_ue_v2_forward_upgrade_job.py -v
           pnpm exec tsc --project tooling/scripts/ue-v2-forward-upgrade.tsconfig.json
@@ -207,12 +209,11 @@ jobs:
           EXPECTED_BEFORE: ${{ inputs.expected_before_digest }}
           REHEARSAL_RUN_ID: ${{ inputs.rehearsal_run_id }}
         run: |
+          set -euo pipefail
+          node tooling/scripts/union-eyes-v2-staging-gate-cli.mjs --gate change-record \
+            --change-id CHG-2026-0114 --source-sha "$APPLICATION_SOURCE" --change-dir ops/change-records
           node - <<'NODE'
-          const fs = require('node:fs'), assert = require('node:assert/strict')
-          const c = JSON.parse(fs.readFileSync('ops/change-records/CHG-2026-0114.json'))
-          assert.equal(c.change_id, 'CHG-2026-0114'); assert.equal(c.environment, 'STAGING')
-          assert.equal(c.approval_status, 'APPROVED')
-          assert(Date.now() >= Date.parse(c.implementation_window_start) && Date.now() < Date.parse(c.implementation_window_end))
+          const assert = require('node:assert/strict')
           assert(['preflight','rehearse','apply'].includes(process.env.OPERATION))
           if (process.env.OPERATION === 'apply') {
             for (const n of ['EXPECTED_PLAN','EXPECTED_BEFORE']) assert(/^[a-f0-9]{64}$/.test(process.env[n] || ''))
