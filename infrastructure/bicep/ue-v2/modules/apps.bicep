@@ -20,7 +20,6 @@ param publicHostName string
 param siteUrl string
 param emailFrom string
 param emailReplyTo string
-param resendReceiptReadSecretName string = ''
 param entraClientId string = ''
 param entraTenantId string = ''
 param minReplicas int = 2
@@ -64,10 +63,6 @@ var secretNames = [
   'resend-api-key'
   'storage-account-key'
 ]
-var receiptReadSecretNames = deploymentEnvironment == 'staging' && !empty(resendReceiptReadSecretName) ? [resendReceiptReadSecretName] : []
-var receiptReadEnvironment = deploymentEnvironment == 'staging' && !empty(resendReceiptReadSecretName) ? [
-  { name: 'RESEND_RECEIPT_READ_API_KEY', secretRef: resendReceiptReadSecretName }
-] : []
 var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url', 'nar-signing-secret', 'evidence-seal-key'] : []
 var authSystemEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-system-database-url' }
@@ -97,7 +92,7 @@ var entraEnv = entraConfigured ? concat([
   { name: 'AZURE_AD_STAGING_SINGLE_TENANT', value: 'true' }
   { name: 'AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS', value: '900' }
 ] : []) : []
-var secrets = [for n in concat(secretNames, stagingAuthSystemSecretNames, stripeSecretNames, entraSecretNames, receiptReadSecretNames): {
+var secrets = [for n in concat(secretNames, stagingAuthSystemSecretNames, stripeSecretNames, entraSecretNames): {
   name: n
   keyVaultUrl: '${kvBase}secrets/${n}'
   identity: identityId
@@ -242,7 +237,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_URL', secretRef: 'redis-url' }
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
             { name: 'AZURE_STORAGE_ACCOUNT_KEY', secretRef: 'storage-account-key' }
-          ], stripeEnv, entraEnv, authSystemEnvironment, stagingEnvironment, receiptReadEnvironment)
+          ], stripeEnv, entraEnv, authSystemEnvironment, stagingEnvironment)
         }
       ]
       scale: {

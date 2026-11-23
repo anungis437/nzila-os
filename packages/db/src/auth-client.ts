@@ -70,7 +70,8 @@ export async function executeAuthContext<T>(
     // query per setting. Role/principal validation and the inviter lock stay
     // on this same transaction.
     await tx.execute(sql`SELECT ${sql.join(
-      Object.entries(settings).map(([key, value]) => sql`set_config(${key}, ${value}, true)`),
+      Object.entries({ ...settings, lock_timeout: '5s', statement_timeout: '15s' })
+        .map(([key, value]) => sql`set_config(${key}, ${value}, true)`),
       sql`, `,
     )}`)
     const inviter = inviterAuthorityLockUserId(context)
