@@ -13,6 +13,7 @@
 | R01 / S01 | No automatic succession inheritance; historical inspectability | `LOCAL_TESTED` | `packages/sage-core/src/institutional-succession.test.ts` |
 | T01 | Honest variance; missing spend; draft ≠ adoption | `LOCAL_TESTED` | `accountability-draft.test.ts`, `accountability-adoption.test.ts` |
 | Pattern A | Decision + institutional action + outbox under mandate | `LOCAL_TESTED` | `decision-mandate-ratification.pglite.test.ts` + platform-admin governance routes |
+| P01 HTTP | `resource.commit` under mandate (schema fail-closed) | `SOURCE_IMPLEMENTED` / schema `LOCAL_TESTED` | `institutional-actions/resource-commit` + `institutional-schemas.test.ts` (live Postgres HTTP path awaits staging) |
 | C1 | Protected CIVIC synthetic client runtime | `NOT_PROVEN` (fail-closed scaffold only) | `CIVIC_C1_PENDING`, `assertCivicC1Authorized` refuses; packet `AWAITING_OWNER_GRANT` |
 | B-005 | Isolated SAGE staging deploy + authenticated proofs | `NOT_PROVEN` | Staging health commit `c2e3c61c` pre-dates SAGE; `az` unavailable here |
 | GO_LIVE | Product activation | `NO_GO` | Unchanged constitutional posture |
