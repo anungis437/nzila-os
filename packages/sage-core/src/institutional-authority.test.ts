@@ -161,6 +161,84 @@ describe('SAGE institutional mandate admission: separate identity, app permissio
     )
   })
 
+  it('keeps P01 historic approval distinct from a new monetary extension', () => {
+    const original = mandate({
+      id: 'historic-approval',
+      resourceId: 'original-procurement',
+      permittedActions: ['resource.commit'],
+      monetaryLimitMinor: 4_000_000, // CAD 40,000 historic authorization
+      currency: 'CAD',
+      effectiveAt: '2026-01-01T00:00:00.000Z',
+      expiresAt: '2026-06-01T00:00:00.000Z',
+      acceptedAt: '2026-01-01T00:00:00.000Z',
+      attestedAt: '2026-01-01T00:00:00.000Z',
+    })
+    const historicRequest = request({
+      mandateId: 'historic-approval',
+      resourceId: 'original-procurement',
+      action: 'resource.commit',
+      evaluatedAt: '2026-05-01T00:00:00.000Z',
+      commitment: { currency: 'CAD', totalCommittedMinorAfterAction: 4_000_000 },
+    })
+    expect(reason(historicRequest, [original])).toBe('ADMITTED')
+
+    // The same old instrument cannot authorize a fresh extension in November.
+    expect(reason({
+      ...historicRequest,
+      resourceId: 'extension-request',
+      evaluatedAt: at,
+      commitment: { currency: 'CAD', totalCommittedMinorAfterAction: 1_500_000 },
+    }, [original])).toBe('MANDATE_SCOPE_MISMATCH')
+
+    const current = mandate({
+      id: 'current-extension',
+      resourceId: 'extension-request',
+      permittedActions: ['resource.commit'],
+      monetaryLimitMinor: 3_000_000, // CAD 30,000 current delegation limit
+      currency: 'CAD',
+    })
+    const newRequest = request({
+      mandateId: 'current-extension',
+      resourceId: 'extension-request',
+      action: 'resource.commit',
+      commitment: { currency: 'CAD', totalCommittedMinorAfterAction: 5_500_000 },
+    })
+    // The authoritative ledger's total after action (40k + 15k) breaches 30k.
+    expect(reason(newRequest, [current])).toBe('MONETARY_LIMIT_EXCEEDED')
+    expect(reason({
+      ...newRequest,
+      commitment: { currency: 'CAD', totalCommittedMinorAfterAction: 3_000_000 },
+    }, [current])).toBe('ADMITTED')
+  })
+
+  it('refuses missing, inconsistent, cross-currency or unsafe monetary authority', () => {
+    const financial = mandate({
+      permittedActions: ['resource.commit'],
+      currency: 'CAD',
+      monetaryLimitMinor: 3_000_000,
+    })
+    const baseline = request({
+      action: 'resource.commit',
+      commitment: { currency: 'CAD', totalCommittedMinorAfterAction: 1_500_000 },
+    })
+    expect(reason(baseline, [financial])).toBe('ADMITTED')
+    expect(reason(request({ action: 'resource.commit' }), [financial])).toBe(
+      'FINANCIAL_SCOPE_INVALID',
+    )
+    expect(reason({ ...baseline, commitment: { currency: 'USD', totalCommittedMinorAfterAction: 1_500_000 } }, [financial])).toBe(
+      'FINANCIAL_SCOPE_INVALID',
+    )
+    expect(reason(baseline, [mandate({ permittedActions: ['resource.commit'] })])).toBe(
+      'FINANCIAL_SCOPE_INVALID',
+    )
+    expect(reason({ ...baseline, commitment: { currency: 'CAD', totalCommittedMinorAfterAction: -1 } }, [financial])).toBe(
+      'FINANCIAL_SCOPE_INVALID',
+    )
+    expect(reason({ ...baseline, commitment: { currency: 'CAD', totalCommittedMinorAfterAction: Number.MAX_SAFE_INTEGER + 1 } }, [financial])).toBe(
+      'FINANCIAL_SCOPE_INVALID',
+    )
+  })
+
   it('cannot use an old valid approval as present authorization for a new resource', () => {
     expect(reason(request({ resourceId: 'new-extension-18' }))).toBe('MANDATE_SCOPE_MISMATCH')
   })
