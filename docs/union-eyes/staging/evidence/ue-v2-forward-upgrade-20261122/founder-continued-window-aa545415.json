@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-11-22T23:53:03.825818+00:00",
+  "changeId": "CHG-2026-0114",
+  "authorityBasis": "Standing founder instruction as supplied in this chat, followed by the current explicit instruction to continue qualified staging execution.",
+  "standingFounderWords": "extend longer, no need to block ourselves",
+  "currentFounderDirective": "Keep going from Claude\u2019s merged work. Fix staging startup without deleting live data, finish the persona and base-release checks, and reconcile the release ledger. Keep finance out of scope and do not deploy to production.",
+  "previousRecordedEnd": "2026-11-23T03:00:00Z",
+  "operatorResolvedEnd": "2026-11-24T03:00:00Z",
+  "founderProvidedThisExactEnd": false,
+  "operatorSelectedBoundedExtensionHours": 24,
+  "newFounderApprovalTimestampClaimed": false,
+  "stagingOnly": true,
+  "technicalGatesRemainRequired": true,
+  "productionAuthorized": false,
+  "liveDataResetOrDeletionAuthorized": false,
+  "financeFeatureImplementationAuthorized": false,
+  "independentHumanApprovalClaimed": false,
+  "previousAuthorizationTextSha256": "69683fd3760ecf28b518c06ec08aee61cea28989954e63333435044ce8fb3cea"
+}

@@ -14,13 +14,13 @@ SUBSCRIPTION = "d562ba7f-d891-4504-a489-10917c0ebaaf"
 GROUP = "nzila-canada-staging-rg"
 ENVIRONMENT = "nzila-ue-v2-staging-env"
 IDENTITY = f"/subscriptions/{SUBSCRIPTION}/resourceGroups/{GROUP}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-ue-v2-staging-id"
-APPLICATION_SOURCE = "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c"
+APPLICATION_SOURCE = "aa545415cfe4b172733000cfc6510712d4de0cba"
 STAGING_LOG_WORKSPACE = "ce2ff61f-0059-46eb-b18b-a9be8162d009"
 ADMIN_SECRET_NAME = "operator-password"
 APP_NAME = "nzila-ue-v2-staging-app"
 TARGET_REVISION = APP_NAME + "--rel" + APPLICATION_SOURCE[:10]
 PRIOR_REVISION = APP_NAME + "--relcccfc8c311"
-APPLICATION_IMAGE = "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:39bad81ecdbda6618d238dd9c308c3672bc19568bf3ec3d022550131f4fdb1ee"
+APPLICATION_IMAGE = "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af5f9cfc79f5c09f0197bab2b5f1488bd92c5f7af2ee2d92fccab1357b899e82"
 STAGING_DOMAIN = "whitemoss-055b7430.canadacentral.azurecontainerapps.io"
 
 

@@ -34,12 +34,12 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  APPLICATION_SOURCE: f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c
+  APPLICATION_SOURCE: aa545415cfe4b172733000cfc6510712d4de0cba
   SUBSCRIPTION: d562ba7f-d891-4504-a489-10917c0ebaaf
   STAGING_RG: nzila-canada-staging-rg
   REGISTRY: nzilaventuresacr
   IMAGE_REPOSITORY: nzila-os-union-eyes-v2
-  QUALIFIED_APPLICATION_IMAGE: nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:39bad81ecdbda6618d238dd9c308c3672bc19568bf3ec3d022550131f4fdb1ee
+  QUALIFIED_APPLICATION_IMAGE: nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af5f9cfc79f5c09f0197bab2b5f1488bd92c5f7af2ee2d92fccab1357b899e82
   NODE_OPTIONS: --max-old-space-size=3072
 
 jobs:

@@ -1,0 +1,96 @@
+{
+  "evidenceClass": "DISPOSABLE_LOCAL_ENGINEERING_PROOF_NOT_STAGING",
+  "recordedAt": "2026-11-22T23:59:10.373449+00:00",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "qualificationBaseSourceSha": "da764686a1e0c15473140d4b12bbfa0539c2a176",
+  "operatorBindingEditsUncommittedAtExecution": true,
+  "schemaPlanBytesEqualAdmittedApplication": true,
+  "schemaExport": {
+    "applicationSourceSha": "da764686a1e0c15473140d4b12bbfa0539c2a176",
+    "exporterSourceDigest": "a659f354275e29e906e4b02efd1d5769ae73d3ce746194827731fb7058ca95ad",
+    "sourcePlanDigest": "b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4",
+    "catalogNormalization": "PG16_DUMP_EQUIVALENCE_V1",
+    "extensions": [],
+    "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+    "tables": 783,
+    "statements": 6326,
+    "catalogObjects": 24885,
+    "catalogDigest": "2a3e8e0a440ac7225254a34bdff51445601257dd312183fffd32bbb6d9a4ff7f",
+    "installation": "CREATED",
+    "repeat": "NOOP",
+    "restoredDump": "PASS",
+    "restoredRepeat": "NOOP",
+    "privilegeStatus": "PASS_PUBLIC_AND_AUTH_NATIVE_PRIVILEGES",
+    "privilegeMismatches": [],
+    "files": {
+      "schema.sql": {
+        "bytes": 3432573,
+        "sha256": "63b3782e07d55c27b3aabceb3394b90bc3ba1d41f0e35ae07aa0e8265cc23a97"
+      },
+      "receipt.sql": {
+        "bytes": 1000,
+        "sha256": "b8976a8c65b6bcbe0c4f5fb5a5b7d4c2cca308743b402efb2dbb1003602f53ff"
+      },
+      "roles.sql": {
+        "bytes": 3502,
+        "sha256": "37ada0fd164da0506cb15c66ffea19e457478bd4831c5cd958080a1de0f6e8d8"
+      },
+      "schema-restore.sql": {
+        "bytes": 3434608,
+        "sha256": "a78d82af451144dcae80781faa8efb313db20176a02a6efdf5e7aff7bd4476af"
+      },
+      "receipt-restore.sql": {
+        "bytes": 1022,
+        "sha256": "bdf6c09daae5fc7b28556e83723890c6f20cd8ef088207b7cb9d10c71580b49a"
+      }
+    },
+    "localOnly": true,
+    "stagingAcceptance": false
+  },
+  "managedPreservationReceipt": {
+    "status": "PASS_DISPOSABLE_MANAGED_FORWARD_UPGRADE",
+    "qualificationSourceSha": "da764686a1e0c15473140d4b12bbfa0539c2a176",
+    "toolSources": {
+      "tooling/scripts/prove-ue-v2-forward-upgrade.cts": "0dc734944f4a438e91815d04d693ef890e14e9e276c58b1e8dac72f5583bd981",
+      "tooling/scripts/lib/ue-v2-forward-upgrade.ts": "352d90252e980b9f22daff7717b1208ea5ed5ee5a2912f6d4c9429fb1bf648a8",
+      "tooling/scripts/lib/ue-v2-forward-upgrade-runtime.ts": "7e98963889bd0b4882c79f45975f9418578b06f56a71733c0cad1bea5af2428f"
+    },
+    "image": "pgvector/pgvector:0.8.1-pg16@sha256:417eabe00c71238357315d66d024607c6b9a414be3a3ea401d442c5bcbf0c00d",
+    "source": "da764686a1e0c15473140d4b12bbfa0539c2a176",
+    "originalSource": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+    "injectedFailureRollback": true,
+    "originalBootstrapReceiptPreserved": true,
+    "packagedAdmission": {
+      "ok": true,
+      "violations": []
+    },
+    "qualification": {
+      "phase": "RESTORE_OPEN",
+      "objects": 24928,
+      "retainedObjects": 7,
+      "referenceDigest": "26d822a3defe448c9fd8a1c9688217b11a5426c5c171dedc066bfbf840822406",
+      "actualDigest": "de1ac4299c0851cb6d9c77dd63d50ff5427c3cb9a0ff7bb6f42bde26b01370cd"
+    },
+    "originalTables": 779,
+    "originalRows": "6",
+    "originalDataDigest": "3a20a1347c9daf4778108f7c041563cd2960eec2f2c16b017b18cdb730b65e98",
+    "sequences": 20,
+    "sequenceDigest": "42024d3035c1da19be84ac90d0fe42bde18b72fac5d8ed7447307fa7d4cca3cc",
+    "statements": 8547,
+    "planDigest": "8a926aeefed838cf9e393c63212ca75b5a4998844b1dbc4e664a5069a27df8e0",
+    "temporaryPrivilegesRemoved": true,
+    "liveDataDeleted": false,
+    "finalQualification": {
+      "phase": "FINAL",
+      "objects": 24927,
+      "retainedObjects": 7,
+      "referenceDigest": "26d822a3defe448c9fd8a1c9688217b11a5426c5c171dedc066bfbf840822406",
+      "actualDigest": "020542b99a9641d6b8718c5bc3f43beefefeeff79e189ba8872ebaa487a93b8f"
+    },
+    "stagingAcceptance": false
+  },
+  "allFixtureRowsSynthetic": true,
+  "actualStagingAcceptance": false,
+  "productionAuthorized": false,
+  "finalPublishedOperatorHeadNativeCIStillRequired": true
+}

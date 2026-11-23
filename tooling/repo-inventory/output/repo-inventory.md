@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-22 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-23 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 

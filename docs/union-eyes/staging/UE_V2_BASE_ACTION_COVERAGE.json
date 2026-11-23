@@ -5,7 +5,7 @@
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
   "currentRepairBranch": "fix/ue-staging-forward-upgrade-20261122",
-  "currentRepairRuntimeQualification": "EXACT_HEAD_ENGINEERING_QUALIFIED_NEW_IMAGE_AND_LIVE_FORWARD_UPGRADE_PENDING_FULL_BASE_UNQUALIFIED",
+  "currentRepairRuntimeQualification": "EXACT_HEAD_ENGINEERING_QUALIFIED_IMAGE_BUILT_LIVE_FORWARD_UPGRADE_PENDING_FULL_BASE_UNQUALIFIED",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -1805,7 +1805,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -1820,7 +1820,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 351,
-              "testTitle": "a delegation dies with the delegator’s identity under the v2 reader too, but the DELEGATOR’s own session state is irrelevant"
+              "testTitle": "a delegation dies with the delegator\u2019s identity under the v2 reader too, but the DELEGATOR\u2019s own session state is irrelevant"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -1892,7 +1892,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -3066,7 +3066,7 @@
       "id": "C10",
       "action": "Senior representative supervision",
       "state": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
-      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01–SR22 are not all certified.",
+      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
       "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -3480,7 +3480,7 @@
       ],
       "historicalActionObservation": {
         "state": "PARTIAL_STAGED",
-        "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01–SR22 are not all certified.",
+        "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
         "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
@@ -3575,7 +3575,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 374,
-              "testTitle": "succession ends the outgoing holder’s office and delegations and installs the successor atomically"
+              "testTitle": "succession ends the outgoing holder\u2019s office and delegations and installs the successor atomically"
             },
             {
               "path": "apps/union-eyes/lib/deadline-engine/__tests__/assignment-sync.test.ts",
@@ -3601,12 +3601,12 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 55,
-              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain’s rule"
+              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain\u2019s rule"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 100,
-              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule’s approval"
+              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule\u2019s approval"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
@@ -3621,7 +3621,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 168,
-              "testTitle": "office installation needs independent approval and the holder’s acceptance"
+              "testTitle": "office installation needs independent approval and the holder\u2019s acceptance"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
@@ -3647,12 +3647,12 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 55,
-              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain’s rule"
+              "testTitle": "a database bypass is refused: no rule, a draft rule, or another domain\u2019s rule"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
               "line": 100,
-              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule’s approval"
+              "testTitle": "an activator cannot name approvers who did not approve, nor activate on another rule\u2019s approval"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
@@ -4881,7 +4881,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 125,
-              "testTitle": "allows a linked document under the kernel’s case:process_ocr, and only with a live case relationship"
+              "testTitle": "allows a linked document under the kernel\u2019s case:process_ocr, and only with a live case relationship"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -4922,7 +4922,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 88,
-              "testTitle": "denies a document’s own uploader until the institution adopts a member policy"
+              "testTitle": "denies a document\u2019s own uploader until the institution adopts a member policy"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -4947,7 +4947,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 156,
-              "testTitle": "does not reveal another organization’s document, and refuses a malformed identifier"
+              "testTitle": "does not reveal another organization\u2019s document, and refuses a malformed identifier"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -4957,7 +4957,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 182,
-              "testTitle": "refuses to extract from bytes that are not the version’s recorded content"
+              "testTitle": "refuses to extract from bytes that are not the version\u2019s recorded content"
             }
           ],
           "state": "NOT_EXECUTED_AT_FINAL_INTEGRATED_CANDIDATE",
@@ -4968,7 +4968,7 @@
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
               "line": 156,
-              "testTitle": "does not reveal another organization’s document, and refuses a malformed identifier"
+              "testTitle": "does not reveal another organization\u2019s document, and refuses a malformed identifier"
             },
             {
               "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.canonical.pglite.test.ts",
@@ -5493,7 +5493,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
               "line": 68,
-              "testTitle": "shows the figures the loader returned, read for the caller’s own organization"
+              "testTitle": "shows the figures the loader returned, read for the caller\u2019s own organization"
             },
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
@@ -5518,7 +5518,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/list-pages.test.tsx",
               "line": 191,
-              "testTitle": "shows — for an audience nothing counted and for every delivery counter the row does not record, never 0"
+              "testTitle": "shows \u2014 for an audience nothing counted and for every delivery counter the row does not record, never 0"
             },
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/list-pages.test.tsx",
@@ -5574,7 +5574,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/list-pages.test.tsx",
               "line": 150,
-              "testTitle": "shows the error and \"—\" in place of the figures when the route refuses"
+              "testTitle": "shows the error and \"\u2014\" in place of the figures when the route refuses"
             }
           ],
           "state": "NOT_EXECUTED_AT_FINAL_INTEGRATED_CANDIDATE",
@@ -5585,7 +5585,7 @@
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
               "line": 68,
-              "testTitle": "shows the figures the loader returned, read for the caller’s own organization"
+              "testTitle": "shows the figures the loader returned, read for the caller\u2019s own organization"
             },
             {
               "path": "apps/union-eyes/app/[locale]/dashboard/communications/__tests__/hub-page.test.tsx",
@@ -5833,7 +5833,7 @@
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
               "line": 64,
-              "testTitle": "another tenant and a platform identity see none of the primary organization’s cases"
+              "testTitle": "another tenant and a platform identity see none of the primary organization\u2019s cases"
             },
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
@@ -5859,7 +5859,7 @@
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
               "line": 64,
-              "testTitle": "another tenant and a platform identity see none of the primary organization’s cases"
+              "testTitle": "another tenant and a platform identity see none of the primary organization\u2019s cases"
             },
             {
               "path": "apps/union-eyes/e2e/runtime/07-dashboard-stats-scope.spec.ts",
@@ -7091,7 +7091,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -7106,7 +7106,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 351,
-              "testTitle": "a delegation dies with the delegator’s identity under the v2 reader too, but the DELEGATOR’s own session state is irrelevant"
+              "testTitle": "a delegation dies with the delegator\u2019s identity under the v2 reader too, but the DELEGATOR\u2019s own session state is irrelevant"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -7143,7 +7143,7 @@
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
               "line": 180,
-              "testTitle": "the decided principal must be the transaction’s authenticated principal (a revoked holder cannot be impersonated by a live one)"
+              "testTitle": "the decided principal must be the transaction\u2019s authenticated principal (a revoked holder cannot be impersonated by a live one)"
             },
             {
               "path": "apps/union-eyes/db/__tests__/authority-kernel-revocation.pglite.test.ts",
@@ -10023,20 +10023,15 @@
     "Federation roll-ups and cross-union analytics",
     "Automatic legal filing-date calculation and intake deadline email reminders remain absent, distinct from implemented staff deadline management"
   ],
-  "nextExecution": [
-    "Qualify and admit the data-preserving forward upgrade; rehearse with rollback on staging before exact-plan-bound apply.",
-    "Prove original data and sequences preserved, temporary privileges removed, packaged catalog admission and exact application startup.",
-    "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
-    "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
-  ],
-  "proposedCandidateSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+  "nextExecution": "The exact-AA digest-attested image is built. Qualify and normally admit the rebound preserving upgrade, then execute protected zero-traffic preparation, full rollback rehearsal, same-plan/preimage apply, data-preservation/readiness/version-gated staging cutover, and the full persona/base-action matrix. Keep every existing current action state unqualified until its own exact-candidate evidence is reconciled.",
+  "proposedCandidateSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
   "sourceAdmission": {
-    "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
-    "pullRequest": 1279,
-    "normalMergeSha": "2b630d4876ddf5ab76753a98556ac29b89f43d01",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "pullRequest": 1280,
+    "normalMergeSha": "8bc84aa0a1c7be5ac2524b0265836ff429c3c063",
     "requiredTrustedChecksPassed": 19,
-    "registeredCheckRunsFinishedWithoutFailure": 133,
-    "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+    "registeredCheckRunsFinishedWithoutFailure": 134,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json",
     "deployedAcceptance": "PENDING_NOT_INFERRED"
   },
   "currentDeployedSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
@@ -10085,6 +10080,20 @@
         "newSourceRuntimeQualification": "BLOCKED_ON_PRESERVING_LIVE_SCHEMA_UPGRADE_NOT_FULL_BASE_ACCEPTANCE"
       },
       "retainedWhenBindingApplicationSource": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c"
+    },
+    {
+      "retainedWhenBindingApplicationSource": "aa545415cfe4b172733000cfc6510712d4de0cba",
+      "admission": {
+        "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+        "pullRequest": 1279,
+        "normalMergeSha": "2b630d4876ddf5ab76753a98556ac29b89f43d01",
+        "requiredTrustedChecksPassed": 19,
+        "registeredCheckRunsFinishedWithoutFailure": 133,
+        "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+        "deployedAcceptance": "PENDING_NOT_INFERRED"
+      },
+      "currentDisposition": "HELD_AFTER_NEW_NATIVE_FAILURES_FIXED_IN_AA",
+      "evidence": "evidence/ue-v2-forward-upgrade-20261122/candidate-transition-aa545415.json"
     }
   ],
   "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
@@ -10095,7 +10104,7 @@
     "scopeInput": "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
     "semanticReview": "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_SEMANTIC_REVIEW_20261117.json",
     "executionBoundary": {
-      "currentMandate": "2026-11-17 owner execution mandate, sections1–2,5–10: engineering remediation and qualification within Step1; no staging/production promotion, no Step2 and no live data mutation.",
+      "currentMandate": "2026-11-17 owner execution mandate, sections1\u20132,5\u201310: engineering remediation and qualification within Step1; no staging/production promotion, no Step2 and no live data mutation.",
       "precedence": "The older scopeFreeze sentence that postponed technical completeness is superseded by the same scope branch semantic review step1ExecutionContinuation and the current explicit execution mandate. Historical owner decisions and adoption states remain unchanged.",
       "step1": [
         "Source discovery and permanent remediation",
@@ -11163,10 +11172,11 @@
     "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117",
     "sourceProofNeverInheritsPriorRuntimeAcceptance": true,
     "latestEngineeringObservation": {
-      "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
-      "state": "REQUIRED_LOCAL_AND_EXACT_HEAD_CI_COMMANDS_PASSED_DEPLOYED_QUALIFICATION_OPEN",
-      "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
-      "fullBaseGo": false
+      "recordedAt": "2026-11-22T23:53:03.825818+00:00",
+      "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+      "state": "NORMAL_APP_ADMISSION_AND_EXACT_IMAGE_COMPLETE_FINAL_OPERATOR_ADMISSION_AND_LIVE_UPGRADE_PENDING",
+      "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json",
+      "stagingAcceptanceInferred": false
     },
     "readonlyStagingPreflight": {
       "evidence": "evidence/ue-v2-step1-qualification-20261117/readonly-staging-authority-preflight-v3.json",
@@ -11316,6 +11326,12 @@
           "Complete seven-persona and all 22 functional plus 15 operational family contracts on the exact deployed image, with success, denials, durability, audit and recovery evidence.",
           "Reconcile each ledger row from actual evidence; component qualification and historical acceptance do not imply full STAGING GO."
         ]
+      },
+      {
+        "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+        "state": "REQUIRED_LOCAL_AND_EXACT_HEAD_CI_COMMANDS_PASSED_DEPLOYED_QUALIFICATION_OPEN",
+        "evidence": "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+        "fullBaseGo": false
       }
     ],
     "step1ClosureRegister": {
@@ -11615,7 +11631,7 @@
     },
     "latestOwnerStagingExecutionDirection": {
       "recordedDate": "2026-11-22",
-      "instruction": "Keep going from Claude’s merged work. Fix staging startup without deleting live data, finish the persona and base-release checks, and reconcile the release ledger. Keep finance out of scope and do not deploy to production.",
+      "instruction": "Keep going from Claude\u2019s merged work. Fix staging startup without deleting live data, finish the persona and base-release checks, and reconcile the release ledger. Keep finance out of scope and do not deploy to production.",
       "scope": "Qualified staging engineering, real controlled persona/base checks and ledger reconciliation under CHG-2026-0114. Prior Step2 holds do not create a staging engineering prohibition; customer/institutional adoption and production remain held.",
       "liveDataResetAuthorized": false,
       "productionAuthorized": false
@@ -11627,13 +11643,14 @@
       "directCoreEvidence": [
         "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.ts",
         "apps/union-eyes/lib/__tests__/i18n-bilingual-completeness.test.ts",
-        "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json"
+        "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-f3aad7ff.json",
+        "evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-aa545415.json"
       ],
       "limits": "Current CI scans WCAG 2.0/2.1 A/AA and exercised EN/FR core browser states; full named WCAG 2.2 AA and fresh deployed base-state qualification are not inferred.",
       "status": "DIRECT_SOURCE_COMPONENT_TRACE_RECORDED_QUALIFICATION_OPEN"
     }
   },
-  "currentMergedApplicationSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+  "currentMergedApplicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
   "observedStagingAt20261122": {
     "applicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
     "trafficPercent": 100,
@@ -11653,9 +11670,9 @@
     }
   ],
   "currentDeployedWorkflowProvenance": "Prior live application rollout workflow SHA not inferred from the later failed rollout; failed candidate rollout used 6bba9465f9c99ca7559a24c19f5a11c9e41c353c.",
-  "lastReconciledAt": "2026-11-22T20:02:49.387835+00:00",
+  "lastReconciledAt": "2026-11-23T00:04:37.265930+00:00",
   "currentCandidateStagingDecision": {
-    "applicationSourceSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
     "decision": "STAGING_NO_GO_FULL_BASE_QUALIFICATION_OPEN",
     "previousAcceptedSubsetDecisionRemainsHistorical": true,
     "noAcceptedPriorEvidenceInherited": true

@@ -1,0 +1,529 @@
+{
+  "recordedAt": "2026-11-22T23:53:03.825818+00:00",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "mainAdmissionMergeSha": "8bc84aa0a1c7be5ac2524b0265836ff429c3c063",
+  "pullRequest": 1280,
+  "pullRequestUrl": "https://github.com/anungis437/nzila-os/pull/1280",
+  "requiredTrustedContexts": 19,
+  "requiredTrustedChecks": [
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400391491",
+      "name": "Merge Authority / IaC Security",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400393692",
+      "name": "Merge Authority / Ops Documentation",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400389773",
+      "name": "Merge Authority / Operating Layer",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400385745",
+      "name": "Merge Authority / Governance Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400387783",
+      "name": "Merge Authority / Hash Chain Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400381190",
+      "name": "Merge Authority / Architectural Contracts",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400383146",
+      "name": "Merge Authority / Repository Inventory",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400377350",
+      "name": "Merge Authority / Migration Chain",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400379237",
+      "name": "Merge Authority / Affected Build",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400375444",
+      "name": "Merge Authority / PostgreSQL RLS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400373382",
+      "name": "Merge Authority / Schema Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400368632",
+      "name": "Merge Authority / Lint & Typecheck",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137400371184",
+      "name": "Merge Authority / Unit Tests",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137393515560",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137393517508",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137393513446",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45082347286/job/137393094762",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45082347286/job/137393094862",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45082347286/job/137393094605",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    }
+  ],
+  "registeredChecks": {
+    "total": 134,
+    "byConclusion": {
+      "SKIPPED": 12,
+      "SUCCESS": 122
+    }
+  },
+  "localRequiredCommands": {
+    "status": "PASS",
+    "commands": [
+      "pnpm lint",
+      "pnpm typecheck",
+      "pnpm test:fast",
+      "pnpm validate:docs",
+      "pnpm governance:audit"
+    ],
+    "assertionStatuses": {
+      "passed": 41238,
+      "skipped": 1622,
+      "pending": 13
+    },
+    "rawVitestSha256": "dc0220f34174022d03de289d875238ee86b7fa8a2f2b27962a1c7b143542a094",
+    "conditionalSkipsAreNotPasses": true,
+    "fixtureSourcePlanDigest": "4a6f7127801d1dd1eb1e57ea370805326ff6764978c97c9de277dceda9c4f908",
+    "currentPlanDigest": "b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4",
+    "fixtureSqlIdenticalToCurrentPlan": true
+  },
+  "componentQualification": {
+    "sourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "recordedAt": "2026-11-22T23:38:19.789865+00:00",
+    "nativeKernel": {
+      "files": 25,
+      "passed": 470,
+      "failed": 0,
+      "skipped": 0,
+      "postgresMajor": 16
+    },
+    "nativeGeneral": [
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/results.json",
+        "sha256": "70d786748dbf72d82dc3bddc3eb783f763a065ffb54fa995f188d3a2a0dcf1b4",
+        "passed": 1056,
+        "failed": 0,
+        "skippedOrPending": 4,
+        "kernel": false
+      },
+      {
+        "file": "native-postgres/ue-native-pg-15-aa545415cfe4b172733000cfc6510712d4de0cba/results.json",
+        "sha256": "b7652096a1726359aec6c7201513a2cf61579067ea98784848bea3395fc3df53",
+        "passed": 1056,
+        "failed": 0,
+        "skippedOrPending": 4,
+        "kernel": false
+      }
+    ],
+    "nativeRawFiles": [
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-kernel-claims.json",
+        "sha256": "caf00e54e7eb320ffe4fd8551f95713fb605369cbde6c488ca24134a941bb2bd",
+        "passed": 23,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-revocation.json",
+        "sha256": "6320f160dd59c713cc10d0d07039b7869c27dced59b1f9d6ec62a707a20df1e2",
+        "passed": 110,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-resources.json",
+        "sha256": "4585f4f5beb616cbba0bb3e6ee42d804fc0c2c5a6eb52feb5f6782ac96272e15",
+        "passed": 41,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-workaid-union-side.json",
+        "sha256": "a6643d50949359b945cfbe6c1ff72f7634ec80b57d58992f35b673128539dc54",
+        "passed": 33,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-identity.json",
+        "sha256": "4006df7b80961f46ab77306a45f440268283978935a3c6709111f11c658ec2e1",
+        "passed": 22,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-case-primary-domain-guards.json",
+        "sha256": "1e0874daf212fc23c54139b7cd450d1e1f48d125ccb4ce50d4ddf9c4c7421764",
+        "passed": 17,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-case-projection.json",
+        "sha256": "a41a5b53194a10277398a1806b37ea50afdb92972d32fefdf2ef473a0e205bd7",
+        "passed": 10,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-review-intake.json",
+        "sha256": "9141d2f719d04cd90c983f75dfd91ebbba06ab1dea348888869a83a413a0726d",
+        "passed": 6,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-lifecycle.json",
+        "sha256": "be84363b9cf72166e0b30656f05e77d033543424701668c5105a64e3eb9d14bc",
+        "passed": 28,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-case-sources.json",
+        "sha256": "69be2cb85ca37d43aead59347a8473873d0b0cbaa1fd2c19486292306e96dfc7",
+        "passed": 13,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-organization-admin.json",
+        "sha256": "595f1eebdc4f2257fc60dda3f56560162e114297e8497fadc94b9e9935f62f02",
+        "passed": 3,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-storage.json",
+        "sha256": "08c0d37658462fa635c1084e1796de943903032545f5d1e344b8a83e7eb136a8",
+        "passed": 24,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-review-visibility.json",
+        "sha256": "1f5c0919a5cb9be20db1dd0e9be838fdc47b5133dd1c9b5e8e49631ccf019cf3",
+        "passed": 21,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/results.json",
+        "sha256": "70d786748dbf72d82dc3bddc3eb783f763a065ffb54fa995f188d3a2a0dcf1b4",
+        "passed": 1056,
+        "failed": 0,
+        "skippedOrPending": 4,
+        "kernel": false
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-finance-sources.json",
+        "sha256": "58d8bd63adc427b16e9c5f36ee72f43c850affa9da1bf2af0fb8730e12af12b3",
+        "passed": 2,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-counsel.json",
+        "sha256": "ec23ceb34914a87a34c0dd2a15de21933325cc478b0a383fb2f14741fb0f288b",
+        "passed": 15,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-assignment-profiles.json",
+        "sha256": "fb011a6466bdb7e9625439e491722e74694b06405b7f31d14477013458d48659",
+        "passed": 4,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-finance-duties.json",
+        "sha256": "3b3af4a983d174f939bafe19ecf0535c1806370460e54685a7e6102d23af1a13",
+        "passed": 5,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-automatic-assignment.json",
+        "sha256": "f772b62fdfc9cc7f8e1aada58678dc24f7488f6d7dd3af40c1f40eb12058f02c",
+        "passed": 9,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-case-read-batch.json",
+        "sha256": "ff19162efab603f14f0501ab38c1b451899ae081fe0b46a8df0ad8cf1f0064aa",
+        "passed": 4,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-actor.json",
+        "sha256": "13e0ee25c2afc04a6364a29000e5e57801659b4b6c40f2d955310b3d11a43e47",
+        "passed": 22,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-case-access-service.json",
+        "sha256": "ba1e606992bf284b5b7da4f3247cdc47db8614273f18f4f68c450ad449408404",
+        "passed": 22,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-message-authority-issuance.json",
+        "sha256": "5dc1dbf1bcc87714009c6933e37cde85c8a3adf53f6611cafb7eac312451b139",
+        "passed": 4,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-physical-guards.json",
+        "sha256": "b40a22961c375a5ec9c816f33b0410e20996346127b6e170aa7db5807eddf787",
+        "passed": 7,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-case-backfill.json",
+        "sha256": "6156a4a07dd1c7972637ab5e1ad94fa8cda5da14290be77a12a792ce0f76bec0",
+        "passed": 9,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-16-aa545415cfe4b172733000cfc6510712d4de0cba/kernel-native-authority-kernel-audit.json",
+        "sha256": "294ef9463eceae2a114003e6ff3b4153172f6f9465d9c70f7cac2464300c2c50",
+        "passed": 16,
+        "failed": 0,
+        "skippedOrPending": 0,
+        "kernel": true
+      },
+      {
+        "file": "native-postgres/ue-native-pg-15-aa545415cfe4b172733000cfc6510712d4de0cba/results.json",
+        "sha256": "b7652096a1726359aec6c7201513a2cf61579067ea98784848bea3395fc3df53",
+        "passed": 1056,
+        "failed": 0,
+        "skippedOrPending": 4,
+        "kernel": false
+      }
+    ],
+    "browser": {
+      "profiles": [
+        {
+          "id": "desktop-en",
+          "passed": 11
+        },
+        {
+          "id": "desktop-fr",
+          "passed": 11
+        },
+        {
+          "id": "mobile-en",
+          "passed": 11
+        },
+        {
+          "id": "mobile-fr",
+          "passed": 11
+        }
+      ],
+      "accessibilityScans": 20,
+      "standards": "WCAG2.0/2.1 A/AA automated only; no WCAG2.2/full manual claim"
+    },
+    "load": {
+      "unchangedProfile": {
+        "warmupSeconds": 10,
+        "warmupRequestsPerSecond": 5,
+        "stages": [
+          {
+            "concurrency": 1,
+            "durationSeconds": 60,
+            "requestsPerSecond": 5
+          },
+          {
+            "concurrency": 5,
+            "durationSeconds": 180,
+            "requestsPerSecond": 20
+          }
+        ],
+        "minimumScheduledThroughputRatio": 0.95,
+        "p95Ms": 500,
+        "p99Ms": 1500,
+        "errorRate": 0,
+        "maxRequests": 10000
+      },
+      "stageResults": [
+        {
+          "concurrency": 1,
+          "durationSeconds": 60,
+          "requestsPerSecond": 5,
+          "scheduledRequests": 300,
+          "requests": 300,
+          "skipped": 0,
+          "errors": 0,
+          "p50Ms": 84.37667300004978,
+          "p90Ms": 90.59759599994868,
+          "p95Ms": 92.84844700002577,
+          "p99Ms": 105.88045399996918,
+          "maxMs": 146.99729799997294,
+          "latencyBuckets": {
+            "<=100ms": 294,
+            "101-500ms": 6,
+            "501-1500ms": 0,
+            ">1500ms": 0
+          },
+          "errorRate": 0,
+          "scheduledThroughputRatio": 1,
+          "passed": true,
+          "actualDurationSeconds": 59.88802156600001,
+          "sampleSha256": "8b239db3e69847fc602f9f94eb697e42d6aa8a03a162cc735c5f5723ee55b248",
+          "failureMetadata": []
+        },
+        {
+          "concurrency": 5,
+          "durationSeconds": 180,
+          "requestsPerSecond": 20,
+          "scheduledRequests": 3600,
+          "requests": 3591,
+          "skipped": 9,
+          "errors": 0,
+          "p50Ms": 125.74857299996074,
+          "p90Ms": 145.56953199999407,
+          "p95Ms": 156.82945000001928,
+          "p99Ms": 182.56581100000767,
+          "maxMs": 357.58042799995746,
+          "latencyBuckets": {
+            "<=100ms": 2,
+            "101-500ms": 3589,
+            "501-1500ms": 0,
+            ">1500ms": 0
+          },
+          "errorRate": 0,
+          "scheduledThroughputRatio": 0.9975,
+          "passed": true,
+          "actualDurationSeconds": 180.07274273400003,
+          "sampleSha256": "7ddf49f1c8449cebb86505069a58a6c5d2a72f5fdb87e2d30e5d40ec6246e8b4",
+          "failureMetadata": []
+        }
+      ],
+      "status": "PASS"
+    },
+    "rawCliExitCode": 1,
+    "globalAcceptanceStatus": "HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN",
+    "stagingAcceptanceClaimed": false,
+    "productionAuthorized": false
+  },
+  "nativeMailAudit": {
+    "runId": 45082347451,
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0
+  },
+  "nativeInvitationRaces": {
+    "runId": 45082347451,
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0
+  },
+  "runtimeSecurityMatrix": {
+    "runId": 45082502018,
+    "passed": 363,
+    "failed": 0,
+    "skipped": 0
+  },
+  "readProjectionQueries": {
+    "cases": 3,
+    "independent": 42,
+    "batched": 18,
+    "thresholdRelaxed": false
+  },
+  "schemaSqlStatements": 6326,
+  "schemaSqlUnchangedByRepair": true,
+  "schemaPlanDigest": "b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4",
+  "reviewAttribution": "Codex engineering/security review under existing sole-founder delegation; anungis/anungis437 are the same person. No independent human reviewer or institutional ratification claimed.",
+  "sourceReviewArtifactSha256": "5074fd41ebe119273d29fb7d2ff5decf6057614953be2b01d582a9cf02668960",
+  "imageBuild": {
+    "runId": 45085485035,
+    "url": "https://github.com/anungis437/nzila-os/actions/runs/45085485035",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "workflowSourceSha": "8bc84aa0a1c7be5ac2524b0265836ff429c3c063",
+    "status": "SUCCESS",
+    "releaseManifest": "release-manifest-aa545415.json",
+    "releaseManifestSha256": "6d11512c71b00fe33fd7851f76523c2ea6e1ef157dde73651071da1dd498989a",
+    "appImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af5f9cfc79f5c09f0197bab2b5f1488bd92c5f7af2ee2d92fccab1357b899e82",
+    "createdAt": "2026-11-23T00:03:36.138Z",
+    "bindingRecordedAt": "2026-11-23T00:04:37.260688+00:00"
+  },
+  "liveServingSourceAtThisRecord": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "stagingDataUpgradeExecuted": false,
+  "fullPersonaAcceptance": false,
+  "fullBaseReleaseAcceptance": false,
+  "productionAuthorized": false
+}
