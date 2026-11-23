@@ -39,6 +39,8 @@ vi.mock('@/lib/logger', () => ({
 import { withApi } from '../with-api'
 import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding'
 import { normalizeRole, PLATFORM_ELEVATED_ROLES } from '@/lib/api-auth-guard'
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access'
+import { UserRole } from '@/lib/auth/roles'
 import { CORRESPONDENCE_STAFF_ROLES } from '@/lib/correspondence/roles'
 
 describe('opt-in canonical API authority', () => {
@@ -134,6 +136,19 @@ describe('opt-in canonical API authority', () => {
     expect(handler).not.toHaveBeenCalled()
     expect(mocks.legacyRole).not.toHaveBeenCalled()
   })
+
+  it.each([...Object.values(UserRole), 'unknown_role', '__proto__'])(
+    'admits the canonical case-handler surface for %s only through explicit eligibility', async role => {
+      mocks.user.mockResolvedValue({ ...user, role })
+      const handler = vi.fn(async () => ({ surface: true }))
+      const response = await withApi({ auth: { required: true, roles: CASE_HANDLER_ROLES } }, handler)(request())
+      const eligible = (CASE_HANDLER_ROLES as readonly string[]).includes(role)
+      expect(response.status).toBe(eligible ? 200 : 403)
+      expect(handler).toHaveBeenCalledTimes(eligible ? 1 : 0)
+      expect(mocks.legacyRole).not.toHaveBeenCalled()
+      expect(mocks.legacyOrganization).not.toHaveBeenCalled()
+    },
+  )
 
   it('denies organization administrators on platform-only routes', async () => {
     mocks.user.mockResolvedValueOnce({ ...user, role: 'admin' })

@@ -1319,7 +1319,7 @@
       "route": "/api/cases/[caseId]/transition",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/cases/[caseId]",

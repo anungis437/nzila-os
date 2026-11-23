@@ -44,9 +44,9 @@ const state = vi.hoisted(() => ({
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
 vi.mock('@/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
-vi.mock('@/db/tenant-context-storage', async () => {
+vi.mock('@/db/tenant-context-storage', async (importOriginal) => {
   const { ambientDb } = await import('./native-route-harness')
-  return { getActiveTenantDb: () => ambientDb }
+  return { ...(await importOriginal<typeof import('@/db/tenant-context-storage')>()), getActiveTenantDb: () => ambientDb }
 })
 vi.mock('@/lib/db/with-rls-context', async () => {
   const { rlsContextModule, harness, RUNTIME_ROLE } = await import('./native-route-harness')
@@ -619,7 +619,7 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
         routeParams({ id: grievance }),
       )
 
-    it('leaves nothing behind when the grant row of an upload cannot be written (the document, its version, its link and its grant are one unit)', async () => {
+    it('refuses an external upload before the write and leaves no document or release audit', async () => {
       state.session = external()
       const blobPath = `documents/${ORG_A}/external-${randomUUID()}.pdf`
       state.storage.set(blobPath, Buffer.from('from counsel'))
@@ -635,26 +635,26 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
       expect(harness.audits.slice(before).filter((entry) => entry.action === 'document.external_upload')).toEqual([])
     })
 
-    // KNOWN DEFECT (reported to the lead, needs a policy migration): the INSERT policy of external_document_access_grants
-    // (ue_external_document_grants_insert_self) requires granted_by = app.current_user_id, i.e. the representative themselves. The upload route records the
-    // grant as the matter grant's issuer made it (deriveExternalUploadGrant refuses a self-issued one, so granted_by is a member of staff), which that policy
-    // rejects. The upload therefore cannot succeed on the real runtime role, whoever the wrapper is. The unit tests replace the database and never saw it.
-    // When the policy admits a grant derived from the representative's own active matter grant, this test starts failing: drop `.fails` then.
-    it.fails('stores an upload in the matter\'s organization with its grant and its record, and refuses a file another record holds', async () => {
+    it('refuses repeated external uploads and a foreign blob without writing any part of the document graph', async () => {
       state.session = external()
-      const blobPath = `documents/${ORG_A}/external-${randomUUID()}.pdf`
-      state.storage.set(blobPath, Buffer.from('from counsel'))
-      const response = await uploadAs(blobPath)
-      expect(response.status).toBe(201)
-      const created = ((await json(response)).data as { id: string }).id
-      const stored = await admin.query(`SELECT organization_id, uploaded_by FROM documents WHERE id = $1`, [created])
-      expect(stored.rows).toEqual([{ organization_id: ORG_A, uploaded_by: representative }])
-      const link = await admin.query(`SELECT linked_entity_id FROM document_links WHERE document_id = $1`, [created])
-      expect(link.rows).toEqual([{ linked_entity_id: grievance }])
-      const grant = await admin.query(`SELECT user_id, document_version_no FROM external_document_access_grants WHERE document_id = $1`, [created])
-      expect(grant.rows).toEqual([{ user_id: representative, document_version_no: 1 }])
-      expect(auditsFor('document.external_upload', ORG_A).map((entry) => entry.resourceId)).toContain(created)
-      expect((await uploadAs(blobPath)).status).toBe(409)
+      const counts = async () => {
+        const { rows } = await admin.query(`SELECT
+          (SELECT count(*)::int FROM documents) AS documents,
+          (SELECT count(*)::int FROM document_versions) AS versions,
+          (SELECT count(*)::int FROM document_links) AS links,
+          (SELECT count(*)::int FROM external_document_access_grants) AS grants`)
+        return rows[0]
+      }
+      const before = await counts()
+      const auditStart = harness.audits.length
+      const ownBlob = `documents/${ORG_A}/external-${randomUUID()}.pdf`
+      const foreignBlob = `documents/${ORG_B}/external-${randomUUID()}.pdf`
+      for (const blobPath of [ownBlob, ownBlob, foreignBlob]) {
+        state.storage.set(blobPath, Buffer.from('from counsel'))
+        expect((await uploadAs(blobPath)).status).toBe(403)
+        expect(await counts()).toEqual(before)
+      }
+      expect(harness.audits.slice(auditStart).filter(entry => entry.action === 'document.external_upload')).toEqual([])
     })
   })
 

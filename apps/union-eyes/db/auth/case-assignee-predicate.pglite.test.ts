@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { UserRole } from '@/lib/auth/roles'
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access'
 import { PGlite } from '@electric-sql/pglite'
 import {
   compileAuthOrgBindingSql,
@@ -73,6 +75,15 @@ async function allowed(
 }
 
 describe('bounded canonical case assignee predicate', () => {
+  it.each(Object.values(UserRole))('uses the exact canonical handler eligibility for %s', async role => {
+    const target = 'synthetic-role-' + role
+    await pg.query("INSERT INTO user_management.users VALUES ($1,true,'active')", [target])
+    await pg.query('INSERT INTO user_management.organization_users VALUES ($1,$2,$3,true)', [target,org,role])
+    expect(await allowed(target)).toBe((CASE_HANDLER_ROLES as readonly string[]).includes(role))
+    // Eligibility never substitutes for the caller's own organization/session.
+    expect(await allowed(target, { bearer: 'wrong-bearer' })).toBe(false)
+    expect(await allowed(target, { org: foreign })).toBe(false)
+  })
   it.each([false, true])(
     'rejects raw/parent session expiry during the same SQL statement (parent=%s)',
     async (parent) => {

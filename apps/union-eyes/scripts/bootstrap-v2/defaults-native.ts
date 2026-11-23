@@ -206,7 +206,7 @@ export async function proveCurrentCallerDefaults(wheelhouse: string) {
         'label=nzila.mission=UE_BOOTSTRAP_V2_DEFAULTS',
       ])
       if (!residual) throw new Error('UE_V2_DEFAULT_PROOF_CONTAINER_OWNERSHIP_LOST')
-      docker(['rm', '-f', residual])
+      docker(['rm', '-f', '-v', residual])
       if (
         docker([
           'ps',

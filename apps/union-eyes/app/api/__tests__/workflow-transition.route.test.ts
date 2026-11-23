@@ -43,7 +43,6 @@ vi.mock('@/lib/cases/case-authorization', async (original) => ({
   findReadableCase: m.findReadableCase,
 }));
 vi.mock('@/lib/workflow-engine', () => ({ updateClaimStatus: m.updateClaimStatus }));
-vi.mock('@/lib/workflow/case-lifecycle', () => ({ getAllowedTransitions: m.getAllowedTransitions }));
 
 vi.mock('@/lib/schema-error', () => ({ wrapSchemaQuery: m.wrapSchemaQuery }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
@@ -104,7 +103,6 @@ describe('workflow/transition route', () => {
       success: true,
       data: { claimNumber: 'CLM-1', targetStatus: 'resolved', notes: 'done' },
     });
-    m.getAllowedTransitions.mockReturnValue(['resolved']);
     m.updateClaimStatus.mockResolvedValue({ success: true, claim: { id: 'claim_1', status: 'resolved' } });
     m.wrapSchemaQuery.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.withRLSContext.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
@@ -114,10 +112,12 @@ describe('workflow/transition route', () => {
     m.state.claimRows = [{
       claimId: 'claim_1',
       claimNumber: 'CLM-1',
-      status: 'submitted',
+      status: 'investigation', priority: 'medium', assignedTo: 'user_1',
+      description: 'Recorded synthetic investigation outcome for this case.',
       organizationId: 'org_1',
-      createdAt: new Date('2026-01-01T00:00:00.000Z'),
-      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date(Date.now() - 9 * 86400000),
+      statusChangedAt: new Date(Date.now() - 9 * 86400000),
+      updatedAt: new Date(),
     }];
     m.state.countRows = [{ value: 1 }];
     m.recordUnionEyesCaseAcknowledged.mockResolvedValue(undefined);
@@ -166,7 +166,7 @@ describe('workflow/transition route', () => {
 
   it('returns 422 when target transition is not allowed', async () => {
     const { POST } = await loadRoute();
-    m.getAllowedTransitions.mockReturnValueOnce(['triage']);
+    (m.state.claimRows[0] as {status: string}).status = 'submitted';
     m.transitionSchemaSafeParse.mockReturnValueOnce({
       success: true,
       data: { claimNumber: 'CLM-1', targetStatus: 'resolved' },

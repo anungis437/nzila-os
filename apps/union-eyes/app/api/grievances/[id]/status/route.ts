@@ -9,30 +9,22 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { grievanceEvents } from "@/db/schema/domains/claims/grievance-lifecycle";
 import { withApi, ApiError, zUUID } from '@/lib/api/framework';
-import { hasMinRole } from "@/lib/api-auth-guard";
-import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { getCaseActor, requireKernelCaseAction } from '@/lib/cases/case-authorization';
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
   validateTransition,
-  type ActorRole,
 } from "@/lib/workflow/case-lifecycle";
+import { grievanceTransitionContext } from '@/lib/workflow/grievance-transition-policy';
 import { toLifecycleState } from "@/lib/workflow/state-bridge";
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
-import { eq, and } from "drizzle-orm";
-
-// Map UE roles to unified FSM actor roles
-function mapToActorRole(hasAdmin: boolean, hasStaff: boolean): ActorRole {
-  if (hasAdmin) return "admin";
-  if (hasStaff) return "steward";
-  return "member";
-}
+import { eq, and, desc, inArray } from "drizzle-orm";
 
 const statusSchema = z.object({
   status: z.enum([
@@ -88,9 +80,19 @@ export const PATCH = withApi(
       if (unifiedTarget === 'closed' || unifiedCurrent === 'closed') {
         await requireKernelCaseAction(tx, { userId, organizationId }, grievanceId, 'case:close');
       }
-      const actorRole = mapToActorRole(await hasMinRole("admin"), await hasMinRole("steward"));
-      const result = validateTransition({ actorRole, caseId: grievanceId,
-        currentState: unifiedCurrent, targetState: unifiedTarget, assignedTo: grievance.unionRepId });
+      const actor = await getCaseActor();
+      if (actor.userId !== userId || actor.organizationId !== organizationId) {
+        throw ApiError.forbidden('The case actor must match the current organization session');
+      }
+      // Read the status clock from immutable state events. Editing the case or
+      // adding a document must not restart or disable its waiting period.
+      const lastStateEvents = await tx.select({ eventType: grievanceEvents.eventType, createdAt: grievanceEvents.createdAt })
+        .from(grievanceEvents).where(and(eq(grievanceEvents.grievanceId, grievanceId),
+          inArray(grievanceEvents.eventType, ['status_changed', 'converted_to_case', 'closed'])))
+        .orderBy(desc(grievanceEvents.createdAt)).limit(1);
+      const context = grievanceTransitionContext(grievance, lastStateEvents, actor.role, newStatus, notes);
+      if (!context) return { response: standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Unsupported case workflow transition') };
+      const result = validateTransition(context);
       if (!result.allowed) return { response: standardErrorResponse(ErrorCode.VALIDATION_ERROR, result.reason ?? "Invalid transition") };
 
       const rows = await tx.update(grievances).set({ status: newStatus, updatedAt: new Date(),

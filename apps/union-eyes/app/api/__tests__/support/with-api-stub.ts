@@ -4,7 +4,7 @@
  * It does what a handler's tests depend on the wrapper for:
  *   - the handler receives the resolved caller (`userId`, `organizationId`, `params`) from `caller`, which a test sets;
  *   - a route that requires authentication answers 401 when the test sets `caller.userId` to null, as the wrapper does for an unauthenticated request;
- *   - the role floor and the organization requirement the route declares are enforced against that caller, answering as the wrapper does;
+ *   - the explicit role list, role floor and the organization requirement the route declares are enforced against that caller, answering as the wrapper does;
  *   - an error the handler throws is answered as the wrapper answers it (ApiError -> its status, anything else -> 500);
  *   - the options each route declared are recorded in `declared`, so a test can state what a route asks of the wrapper: its role floor, its
  *     entitlement and whether it runs in a tenant transaction.
@@ -70,6 +70,9 @@ export function withApiStub<TContext extends Record<string, unknown>>(
     const params = nextContext?.params ? await nextContext.params : caller.params;
     if (options.auth?.required !== false && !options.auth?.cron && !caller.userId) {
       return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
+    }
+    if (options.auth?.roles && !options.auth.roles.includes(caller.role)) {
+      return standardErrorResponse(ErrorCode.INSUFFICIENT_PERMISSIONS, 'Role is not eligible for this route');
     }
     const floor = options.auth?.minRole;
     if (floor && rankOf(caller.role) < rankOf(floor)) {

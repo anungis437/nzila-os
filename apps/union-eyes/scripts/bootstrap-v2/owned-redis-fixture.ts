@@ -50,7 +50,7 @@ export async function openOwnedRedisFixture() {
     assert.equal(inspection[0].Name, `/${name}`)
     assert.equal(inspection[0].Config.Labels['nzila.mission'], OWNED_REDIS_MISSION)
     assert.equal(inspection[0].Config.Labels['nzila.qualification-owner'], ownership)
-    execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
+    execFileSync('docker', ['rm', '-f', '-v', container], { stdio: 'pipe' })
     const remaining = execFileSync('docker', ['ps', '-aq', '--filter', `id=${container}`], { encoding: 'utf8' }).trim()
     container = undefined
     return { ownedRedisRemoved: remaining === '', keysObservedBeforeRemoval }

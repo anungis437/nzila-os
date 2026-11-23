@@ -54,7 +54,7 @@ export async function openNativeRuntimeFixture(plan: V2Plan, options: { auth?: b
         assert.equal(inspection[0].Name, `/${name}`)
         assert.equal(inspection[0].Config.Labels['nzila.mission'], 'UE_BOOTSTRAP_V2_RUNTIME')
         assert.equal(inspection[0].Config.Labels['nzila.qualification-owner'], ownership)
-        execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
+        execFileSync('docker', ['rm', '-f', '-v', container], { stdio: 'pipe' })
         container = undefined
       }
     }

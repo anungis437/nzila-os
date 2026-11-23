@@ -11,6 +11,7 @@
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
 import { randomUUID } from 'node:crypto'
+import catalogDecisions from '../../lib/operations/catalog-v2-decisions.json'
 import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
@@ -392,8 +393,17 @@ describe.skipIf(!URL)('the CBA intelligence pipeline on the combined schema, as 
   describe('the closed relation', () => {
     it('keeps cba_intel_freshness_log closed to the runtime role, because nothing calls the code that writes it', async () => {
       await expect(freshness!.logFreshnessCheck(state.sourceId)).rejects.toThrow('Failed to log freshness check')
-      expect(logged.errors.at(-1)?.cause).toMatch(/permission denied/i)
-      expect(await count('cba_intel_freshness_log')).toBe(0)
+      const decision = catalogDecisions.entries.find(entry => entry.table === 'cba_intel_freshness_log')
+      expect(decision).toMatchObject({ classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [] })
+      const { rows } = await admin.query("SELECT to_regclass('public.cba_intel_freshness_log')::text AS relation")
+      if (rows[0].relation === null) {
+        // Canonical exports intentionally exclude this unwired legacy table; absence must be the exact failure.
+        expect(logged.errors.at(-1)?.cause).toMatch(/^42P01 relation "cba_intel_freshness_log" does not exist$/)
+      } else {
+        // Combined historical schemas retain it, with no runtime privilege and no new rows.
+        expect(logged.errors.at(-1)?.cause).toMatch(/^42501 .*permission denied/i)
+        expect(await count('cba_intel_freshness_log')).toBe(0)
+      }
     })
   })
 })

@@ -1,5 +1,6 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
 import { isCorrespondenceStaffRole } from '../correspondence/roles';
+import { isCaseHandlerRole } from '../cases/case-role-access';
 import {
   EXECUTIVE_ALLOWED_PREFIXES,
   EXECUTIVE_HOME_HREF,
@@ -192,7 +193,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'Governance Continuity Overview', href: '/dashboard/governance', group: 'Governance Continuity' },
       { label: 'Governance Trust & Explainability', href: '/dashboard/trust', group: 'Governance Continuity' },
-      { label: 'Governance Continuity Review', href: '/dashboard/workbench', group: 'Governance Continuity' },
+      { label: 'Governance Continuity Review', href: '/dashboard/governance/reviews', group: 'Governance Continuity' },
       { label: 'OCRA Continuity Signals', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
       { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
       { label: 'Governance Audit & Evidence', href: '/dashboard/audits', group: 'Governance Continuity' },
@@ -362,6 +363,9 @@ export function canonicalPageGuardRoleLevel(role: string): number {
 }
 
 function meetsDestinationRole(pathname: string, role: string, experience: DashboardExperience): boolean {
+  if (pathname === '/dashboard/workbench' || pathname === '/dashboard/grievances') {
+    return isCaseHandlerRole(role) && (experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role));
+  }
   if (pathname === '/dashboard/correspondence' && !isCorrespondenceStaffRole(role)) return false;
   const min = DESTINATION_MIN_ROLE[pathname];
   if (min && canonicalPageGuardRoleLevel(role) < getRoleLevel(min)) return false;

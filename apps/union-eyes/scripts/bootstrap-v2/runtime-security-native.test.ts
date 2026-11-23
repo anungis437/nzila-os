@@ -279,7 +279,7 @@ native('current tenant positive writes with genuine restricted execution', () =>
             { encoding: 'utf8' },
           ).trim(),
         ).toBe('UE_BOOTSTRAP_V2_RUNTIME')
-        execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
+        execFileSync('docker', ['rm', '-f', '-v', container], { stdio: 'pipe' })
       }
     }
     if (cleanupFailures.length)

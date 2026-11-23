@@ -679,7 +679,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
         ) as Record<string, string>
         assert.equal(labels['nzila.mission'], 'UE_BOOTSTRAP_V2_CLEANROOM')
         assert.equal(labels['nzila.qualification-owner'], ownership)
-        docker(['rm', '-f', containerId])
+        docker(['rm', '-f', '-v', containerId])
         evidence.cleanRoomContainerRemoved = true
       } catch (error) {
         cleanupFailures.push(String(error))

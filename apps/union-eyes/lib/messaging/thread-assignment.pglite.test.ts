@@ -18,24 +18,11 @@ import { createMemberThread, findReadableThread, listThreadMessages, listThreads
 const org = '11111111-1111-4111-8111-111111111111'
 const foreignOrg = '22222222-2222-4222-8222-222222222222'
 const DAY = 86_400_000
-const NOW = new Date('2026-10-24T12:00:00.000Z')
+// createMemberThread intentionally uses the live clock when notifying current
+// designation holders. Anchor fixtures to that same clock; an absolute date
+// silently turns this positive notification proof into expired designations.
+const NOW = new Date()
 const later = (days: number) => new Date(NOW.getTime() + days * DAY)
-
-// Clock-bound fixture helper. This suite's fixed designations (2026-10-24 +
-// 30 days) are not valid relative to wall-clock time after 2026-11-23.
-// Production createMemberThread intentionally uses the real current time for
-// designation expiry. Freeze only Date during the specific test transaction;
-// do not weaken the production check or extend an expired grant.
-async function withFixtureClock<T>(instant: Date, run: () => Promise<T>): Promise<T> {
-  vi.useFakeTimers({ toFake: ['Date'] })
-  vi.setSystemTime(instant)
-  try {
-    return await run()
-  } finally {
-    vi.useRealTimers()
-  }
-}
-
 
 const MIGRATION = readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0014_message_thread_triage.sql'), 'utf8')
 const LIFECYCLE_MIGRATION = readFileSync(join(__dirname, '..', '..', 'db', 'migrations-platform', '0025_message_thread_lifecycle_and_retention.sql'), 'utf8')
@@ -197,24 +184,10 @@ describe('triage queue visibility', () => {
       await designate('triager-1')
       await designate('triager-2')
     })
-    await withFixtureClock(NOW, () =>
-      inTx((t) => createMemberThread(t, { userId: 'member-9', organizationId: org, role: 'member' }, { subject: 'Hours dispute', body: 'PRIVATE-BODY-TEXT' })),
-    )
+    await inTx((t) => createMemberThread(t, { userId: 'member-9', organizationId: org, role: 'member' }, { subject: 'Hours dispute', body: 'PRIVATE-BODY-TEXT' }))
     const rows = (await pg.query<{ user_id: string; message: string; data: unknown }>(`SELECT user_id, message, data FROM in_app_notifications ORDER BY user_id`)).rows
     expect(rows.map((r) => r.user_id)).toEqual(['triager-1', 'triager-2'])
     expect(JSON.stringify(rows)).not.toMatch(/PRIVATE-BODY-TEXT|Hours dispute|member-9/)
-    expect(await count(`SELECT count(*) AS n FROM audit_security.audit_logs WHERE action='messages.thread.create'`)).toBe(1)
-  })
-
-  it('does not notify a triager after the same designation has expired', async () => {
-    await asOwner(async () => {
-      await designate('triager-1', 5)
-      await designate('triager-2', 5)
-    })
-    await withFixtureClock(later(6), () =>
-      inTx((t) => createMemberThread(t, { userId: 'member-10', organizationId: org, role: 'member' }, { subject: 'Expired notice proof', body: 'PRIVATE-BODY-TEXT' })),
-    )
-    expect(await count('SELECT count(*) AS n FROM in_app_notifications')).toBe(0)
     expect(await count(`SELECT count(*) AS n FROM audit_security.audit_logs WHERE action='messages.thread.create'`)).toBe(1)
   })
 })

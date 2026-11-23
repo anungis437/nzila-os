@@ -30,6 +30,7 @@ const detail = (overrides: Record<string, unknown> = {}) => ({
   grievanceNumber: 'GR-2026-014',
   type: 'discipline',
   status: 'filed',
+  allowedStatuses: overrides.status === 'closed' ? [] : overrides.status === 'acknowledged' ? ['investigating'] : ['acknowledged'],
   priority: 'high',
   title: 'Unjust suspension',
   description: 'The member was suspended without notice.',
@@ -183,6 +184,20 @@ describe('GrievanceDetailConsole: the status', () => {
     expect(statusButtons()).toEqual(['Move to Acknowledged']);
     // The older screen offered statuses the database does not have, which the route refuses every time.
     expect(document.body.textContent).not.toMatch(/→ (triage|investigation|negotiation|resolved)/);
+  });
+
+  it('does not infer actions when the server projection is missing', async () => {
+    current = detail({ allowedStatuses: undefined });
+    renderConsole();
+    await loaded();
+    expect(statusButtons()).toEqual([]);
+  });
+
+  it('offers closure only when the server advertises it for the current case', async () => {
+    current = detail({ status: 'settled', allowedStatuses: ['closed'] });
+    renderConsole();
+    await loaded();
+    expect(statusButtons()).toEqual(['Move to Closed']);
   });
 
   it('sends the chosen status with the note, reads the grievance again, and clears the note', async () => {

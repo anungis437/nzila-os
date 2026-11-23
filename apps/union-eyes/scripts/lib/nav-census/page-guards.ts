@@ -73,3 +73,42 @@ export function redirectingGuards(source: string, fileName = 'page.tsx'): string
   visit(tree)
   return [...new Set(roles)]
 }
+
+/** Recognize the shared explicit case-handler policy when its denial leaves
+ * the page. A presentation-only role filter is not an entry guard. */
+export function redirectsWithoutCaseHandlerRole(source: string, fileName = 'page.tsx'): boolean {
+  const tree = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const predicates = new Set<string>()
+  for (const node of tree.statements) {
+    if (!ts.isImportDeclaration(node) || !ts.isStringLiteral(node.moduleSpecifier) ||
+      !node.moduleSpecifier.text.endsWith('/cases/case-role-access')) continue
+    const bindings = node.importClause?.namedBindings
+    if (bindings && ts.isNamedImports(bindings)) for (const item of bindings.elements) {
+      if ((item.propertyName ?? item.name).text === 'isCaseHandlerRole') predicates.add(item.name.text)
+    }
+  }
+  const bound = new Map<string, string>()
+  const filter = (node: ts.Expression): boolean => {
+    const call = unwrap(node)
+    if (!ts.isCallExpression(call) || !ts.isPropertyAccessExpression(call.expression) ||
+      !['find', 'some'].includes(call.expression.name.text)) return false
+    const receiver = call.expression.expression
+    const predicate = call.arguments[0]
+    return ts.isPropertyAccessExpression(receiver) && receiver.name.text === 'roles' &&
+      !!predicate && ts.isIdentifier(predicate) && predicates.has(predicate.text)
+  }
+  let found = false
+  const visit = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer && filter(node.initializer)) {
+      bound.set(node.name.text, 'case handler')
+    }
+    if (ts.isIfStatement(node) && leaves(node.thenStatement)) {
+      if (denialRoles(node.expression, bound).includes('case handler')) found = true
+      const condition = unwrap(node.expression)
+      if (ts.isPrefixUnaryExpression(condition) && condition.operator === ts.SyntaxKind.ExclamationToken && filter(condition.operand)) found = true
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(tree)
+  return found
+}

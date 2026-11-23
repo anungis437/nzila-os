@@ -2,6 +2,7 @@
 
 import { CaseDeadlines } from '@/components/claims/case-deadlines';
 import { CaseEvidenceExport } from '@/components/claims/case-evidence-export';
+import { CaseStatusActions } from './case-status-actions';
 
 import React from 'react';
 /**
@@ -91,6 +92,7 @@ interface Case {
   title: string;
   description: string;
   status: CaseStatus;
+  sourceStatus: string;
   priority: CasePriority;
   category: string;
   submittedDate: string;
@@ -168,6 +170,7 @@ const mapDbClaimToCase = (claim: DbClaim, t: (key: string) => string): Case => (
   canTransition: claim.canTransition === true,
   canClose: claim.canClose === true,
   canExportSealedEvidence: claim.canExportSealedEvidence === true,
+  sourceStatus: claim.status,
   title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
   description: claim.description ?? '',
   status: mapDbStatusToUi(claim.status),
@@ -265,6 +268,7 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
   const [canAssign, setCanAssign] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [caseNotes, setCaseNotes] = useState<Record<string, CaseNotes>>({});
+  const [statusActionRevision, setStatusActionRevision] = useState(0);
 
   const priorityConfig: Record<CasePriority, { label: string; color: string; icon: React.ReactElement }> = {
     low: { label: t('workbench.priorities.low'), color: "text-gray-600 bg-gray-100", icon: <Flag className="w-3 h-3" /> },
@@ -449,14 +453,16 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
       });
       if (res.ok) {
         setActionError(null);
-        await refetchCases();
       } else {
         setActionError(t('workbench.actionFailed'));
       }
     } catch {
       setActionError(t('workbench.actionFailed'));
     } finally {
+      // A lost response may have committed. Refresh reads; never replay the write.
+      await refetchCases();
       setActionLoading(null);
+      setStatusActionRevision(value => value + 1);
     }
   };
 
@@ -995,26 +1001,14 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
                                     {locale.startsWith('fr') ? 'Attribuer selon l’expertise et la charge' : 'Match expertise and assign'}
                                   </button>
                                 )}
-                                {caseItem.canTransition && caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
-                                  <select
-                                    aria-label={t('workbench.updateStatusLabel')}
-                                    onChange={(e) => {
-                                      if (e.target.value) handleUpdateStatus(caseItem, e.target.value);
-                                    }}
-                                    disabled={actionLoading === caseItem.id}
-                                    value=""
-                                    className="flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border border-gray-200 cursor-pointer"
-                                  >
-                                    <option value="">{t('workbench.updateStatusLabel')}</option>
-                                    <option value="under_review">{t('workbench.statusOptions.under_review')}</option>
-                                    <option value="assigned">{t('workbench.statusOptions.assigned')}</option>
-                                    <option value="investigation">{t('workbench.statusOptions.investigation')}</option>
-                                    <option value="pending_documentation">{t('workbench.statusOptions.pending_documentation')}</option>
-                                    {caseItem.canClose && <option value="resolved">{t('workbench.statusOptions.resolved')}</option>}
-                                    {caseItem.canClose && <option value="rejected">{t('workbench.statusOptions.rejected')}</option>}
-                                    {caseItem.canClose && <option value="closed">{t('workbench.statusOptions.closed')}</option>}
-                                  </select>
-                                )}
+                                {!caseItem.triage && caseItem.canTransition && <CaseStatusActions
+                                  caseId={caseItem.claimId}
+                                  sourceStatus={caseItem.sourceStatus}
+                                  canClose={caseItem.canClose}
+                                  disabled={actionLoading === caseItem.id}
+                                  revision={statusActionRevision}
+                                  onTransition={target => void handleUpdateStatus(caseItem, target)}
+                                />}
                                 {/* Escalate to formal grievance — only for active grievance-type claims */}
                                 {caseItem.canTransition && caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
                                   <button

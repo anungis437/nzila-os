@@ -324,7 +324,7 @@ exec(compile(open("/workspace/repo/apps/union-eyes/scripts/bootstrap-v2/"+sys.ar
         `UE_V2_COLLECTOR_CLEANUP_INSPECTION_FAILED:${residual.error ?? residual.stderr}`,
       )
     if (residual.stdout.trim()) {
-      const cleanup = spawnSync('docker', ['rm', '-f', residual.stdout.trim()], {
+      const cleanup = spawnSync('docker', ['rm', '-f', '-v', residual.stdout.trim()], {
         encoding: 'utf8',
         timeout: 30000,
       })
@@ -736,6 +736,8 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/lib/external-resource-read/qualification.ts',
     'apps/union-eyes/lib/external-resource-read/reader.ts',
     'apps/union-eyes/db/auth/case-assignee-predicate.ts',
+    'apps/union-eyes/lib/cases/case-permissions.ts',
+    'apps/union-eyes/lib/cases/case-role-access.ts',
     'apps/union-eyes/db/auth/conversation-assignee-predicate.ts',
     'apps/union-eyes/lib/authority/capacity.ts',
     'apps/union-eyes/lib/authority/common.ts',

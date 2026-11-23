@@ -5736,7 +5736,12 @@
     "assignToMe": "Assign to Me",
     "viewFullDetails": "View Full Details",
     "updateStatusLabel": "Update Status…",
+    "statusActionsLoading": "Checking available status changes…",
+    "statusActionsUnavailable": "Status changes could not be loaded. Close and reopen the case to try again.",
+    "statusActionsStale": "This case has changed. Reload the workbench before updating its status.",
+    "statusActionsEmpty": "No status changes are currently permitted for this case.",
     "statusOptions": {
+      "submitted": "Submitted",
       "under_review": "Under Review",
       "assigned": "Assigned",
       "investigation": "Investigation",

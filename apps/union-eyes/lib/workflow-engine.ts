@@ -21,13 +21,13 @@ import { claims, claimUpdates } from "../db/schema/claims-schema";
 import { organizationMembers } from "../db/schema/organization-members-schema";
 import { eq, and } from "drizzle-orm";
 import { 
-  validateClaimTransition, 
   getAllowedClaimTransitions,
   type ClaimStatus,
   type ClaimPriority 
 } from './services/claim-workflow-fsm';
-import { detectAllSignals, type CaseForSignals } from './services/lro-signals';
-import { toLegacyCaseState, toLifecycleState } from './workflow/state-bridge';
+import { toLifecycleState } from './workflow/state-bridge';
+import { claimTransitionFacts } from './workflow/claim-transition-facts';
+import { claimTransitionTarget, validateClaimCaseTransition } from './workflow/claim-transition-policy';
 import { 
   generateDefensibilityPack,
   type TimelineEvent,
@@ -209,54 +209,22 @@ export async function updateClaimStatus(
     }
 
     const currentStatus = claim.status as ClaimStatus;
-    const priority = (claim.priority as ClaimPriority) || 'medium';
+    const target = claimTransitionTarget(newStatus);
+    if (!target) return { success: false, error: 'Unknown claim transition target' };
 
     // Detect LRO signals for this case (PR-7 integration)
-    const claimCreatedAt = claim.createdAt ?? new Date();
-    const signalCase: CaseForSignals = {
-      id: claim.claimId,
-      title: claim.description?.slice(0, 120) ?? claim.claimNumber ?? claim.claimId,
-      memberId: claim.memberId ?? '',
-      memberName: claim.memberId ?? '',
-      currentState: toLegacyCaseState(toLifecycleState('claim', currentStatus) ?? 'submitted'),
-      priority: priority as CaseForSignals['priority'],
-      createdAt: claimCreatedAt,
-      lastUpdated: claim.updatedAt ?? claimCreatedAt,
-      // A claim carries its submission instant; later milestones are not recorded on the claim row itself.
-      timeline: [{ type: 'submitted', timestamp: claimCreatedAt }],
-      assignedOfficerId: claim.assignedTo || undefined,
-    };
-    const signals = await detectAllSignals([signalCase]);
-
-    const hasUnresolvedCriticalSignals = signals.some(
-      signal => signal.severity === 'critical' && signal.actionable
-    );
-
-    const hasRequiredDocumentation = Boolean(
-      (claim.description && claim.description.length > 20) ||
-      (notes && notes.length > 20)
-    );
+    const transitionFacts = claimTransitionFacts(claim, notes);
+    const { hasUnresolvedCriticalSignals } = transitionFacts;
 
     // The verified membership role only narrows the FSM; it never authorizes this mutation.
     const userRole = actor.role;
-    if (toLifecycleState('claim', newStatus) === 'closed' || toLifecycleState('claim', currentStatus) === 'closed') {
+    if (toLifecycleState('claim', target) === 'closed' || toLifecycleState('claim', currentStatus) === 'closed') {
       await requireKernelCaseAction(tx, actor, claim.claimId, 'case:close');
     }
 
-    // FSM VALIDATION (PR-11 ENFORCEMENT LAYER)
-    // This makes bad practice IMPOSSIBLE
-    const validation = validateClaimTransition({
-      claimId: claim.claimId,
-      currentStatus,
-      targetStatus: newStatus,
-      userId,
-      userRole,
-      priority,
-      statusChangedAt: slaClockStart(claim, new Date()).startedAt,
-      hasUnresolvedCriticalSignals,
-      hasRequiredDocumentation,
-      notes,
-    });
+    // Both live claim mutation entrypoints use the same stored facts and policy.
+    // Normalize accepted aliases once; state, history, audit and the durable notice use the same persisted target.
+    const validation = validateClaimCaseTransition(claim, userRole, target, notes);
 
     if (!validation.allowed) {
       return {
@@ -267,12 +235,12 @@ export async function updateClaimStatus(
 
     // Update claim status and timestamps
     const updateData: Record<string, unknown> = {
-      status: newStatus,
+      status: target,
       updatedAt: new Date(),
     };
 
     // Set closed timestamp
-    if (newStatus === "closed" && !claim.closedAt) {
+    if (target === "closed" && !claim.closedAt) {
       updateData.closedAt = new Date();
     }
 
@@ -287,7 +255,7 @@ export async function updateClaimStatus(
       rejected: 100,
       closed: 100,
     };
-    updateData.progress = progressMap[newStatus];
+    updateData.progress = progressMap[target];
 
     // Perform the update using provided transaction
     const [updatedClaim] = await tx
@@ -297,7 +265,7 @@ export async function updateClaimStatus(
       .returning();
 
     // Create audit trail entry with FSM metadata
-    const auditMessage = `Status changed from '${currentStatus}' to '${newStatus}'`;
+    const auditMessage = `Status changed from '${currentStatus}' to '${target}'`;
 
     await tx.insert(claimUpdates).values({
       claimId: claim.id, // history rows reference the internal primary key (Django FK)
@@ -308,13 +276,13 @@ export async function updateClaimStatus(
       visibilityScope: 'member',
       metadata: {
         previousStatus: currentStatus,
-        newStatus,
+        newStatus: target,
       },
     });
 
     // AUTO-GENERATE DEFENSIBILITY PACK (PR-12 complete integration)
     // When claim is resolved or closed, automatically generate immutable export
-    if (newStatus === 'resolved' || newStatus === 'closed') {
+    if (target === 'resolved' || target === 'closed') {
       if ((await decideCase(tx, {...actor,caseId:claim.claimId,action:'case:export_sealed_evidence'})).effect === 'allow') {
       try {
 // Fetch complete timeline (all claim updates)
@@ -401,7 +369,7 @@ export async function updateClaimStatus(
               title: claim.description?.slice(0, 80) || `Claim ${claim.claimNumber}`,
               memberId: claim.memberId!,
               memberName: await getMemberName(claim.memberId!, tx),
-              currentState: newStatus,
+              currentState: target,
               createdAt: claim.createdAt ?? new Date(),
               lastUpdated: updatedClaim.updatedAt ?? new Date(),
               grievanceType: claim.claimType || 'general',
@@ -461,12 +429,12 @@ export async function updateClaimStatus(
     // commit together. Provider I/O is performed only by the bounded outbox worker.
     await persistAtomicAudit(tx, { organizationId: actor.organizationId, userId: actor.userId,
       action: 'case.transition', resourceType: 'claims', resourceId: claim.claimId,
-      details: { from: currentStatus, to: newStatus, reason: notes ?? null, actorRole: actor.role, fsmValidation: {
+      details: { from: currentStatus, to: target, reason: notes ?? null, actorRole: actor.role, fsmValidation: {
         slaCompliant: validation.metadata?.slaCompliant ?? null, daysInState: validation.metadata?.daysInState ?? null,
         warnings: validation.warnings ?? [], hasUnresolvedCriticalSignals,
         nextDeadline: validation.metadata?.nextDeadline?.toISOString() ?? null } } });
     if (claim.memberId) await queueCaseStatusEmailOrRecordRefusal(tx, { organizationId: actor.organizationId,
-      caseId: claim.claimId, queuedBy: actor.userId, recipientId: claim.memberId, previousStatus: currentStatus, newStatus });
+      caseId: claim.claimId, queuedBy: actor.userId, recipientId: claim.memberId, previousStatus: currentStatus, newStatus: target });
     return { success: true, claim: updatedClaim };
 }
 

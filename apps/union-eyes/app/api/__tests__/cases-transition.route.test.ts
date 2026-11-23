@@ -39,15 +39,16 @@ vi.mock('@/lib/organization-utils', () => ({
   getUserRoleInOrganization: m.getUserRoleInOrganization,
 }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/workflow/case-lifecycle', () => ({
+vi.mock('@/lib/workflow/case-lifecycle', async original => ({
+  ...(await original<typeof import('@/lib/workflow/case-lifecycle')>()),
   validateTransition: m.validateTransition,
   getAllowedTransitions: m.getAllowedTransitions,
 }));
-vi.mock('@/lib/workflow/state-bridge', () => ({ toLifecycleState: m.toLifecycleState }));
 vi.mock('@/lib/schema-error', () => ({ wrapSchemaQuery: m.wrapSchemaQuery }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/audit-logger', () => ({ auditLog: vi.fn().mockResolvedValue(undefined), AuditEventType: { AUTH_FAILED: 'AUTH_FAILED' }, AuditSeverity: { HIGH: 'HIGH' } }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
+vi.mock('@/lib/authority/store/route-adapter', () => ({ decideCaseCapabilitiesBatch: async (_tx: unknown, input: {caseIds:string[]}) => new Map(input.caseIds.map(id=>[id,{'case:transition':{effect:'allow'},'case:close':{effect:'deny'}}])) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
 function makeRequest(body: unknown) {
@@ -62,7 +63,7 @@ function makeTx(claimRows: unknown[]) {
   const selectChain = {
     from: vi.fn(() => selectChain),
     where: vi.fn(() => selectChain),
-    limit: vi.fn(() => selectChain),
+    limit: vi.fn(async () => claimRows),
     for: vi.fn(async () => claimRows),
   };
 

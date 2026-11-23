@@ -8,8 +8,10 @@
  */
 
 import { NextResponse } from 'next/server'
-import { getAllowedTransitions, type ActorRole } from '@/lib/workflow/case-lifecycle'
-import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
+import { toLifecycleState } from '@/lib/workflow/state-bridge'
+import { allowedClaimCaseTransitions } from '@/lib/workflow/claim-transition-policy'
+import { loadClaimTransitionSource } from '@/lib/cases/claim-transition-source'
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { logger } from '@/lib/logger'
 import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
@@ -24,9 +26,23 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
 
     const actor = await getCaseActor()
     await requireEntitlement(actor.organizationId, 'grievance_case_suite')
-    const claim = await withRLSContext(tx => findReadableCase(tx, actor, caseId))
+    const result = await withRLSContext(async tx => {
+      const claim = await findReadableCase(tx, actor, caseId)
+      if (!claim) return null
+      const projections = await decideCaseCapabilitiesBatch(tx, {
+        userId: actor.userId, organizationId: actor.organizationId, caseIds: [claim.claimId],
+      })
+      const powers = projections.get(claim.claimId)
+      const canTransition = powers?.['case:transition'].effect === 'allow'
+      const canClose = powers?.['case:close'].effect === 'allow'
+      if (!canTransition) return { claim, allowedTransitions: [] }
+      const stored = await loadClaimTransitionSource(tx, actor.organizationId, claim.claimId)
+      if (!stored) return null
+      const allowedTransitions = allowedClaimCaseTransitions(stored, actor.role, { canTransition, canClose })
+      return { claim: stored, allowedTransitions }
+    })
 
-    if (!claim) {
+    if (!result) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: `Case '${caseId}' not found.` },
         { status: 404 },
@@ -34,21 +50,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
     }
 
     // Map DB status to canonical LifecycleState, then get allowed transitions
-    const lifecycleState = toLifecycleState('claim', claim.status) ?? 'submitted'
-
-    // Resolve actor role from org membership
-    const actorRole = normalizeActorRole(actor.role)
-
-    const allowedLifecycle = getAllowedTransitions(lifecycleState, actorRole)
-    // Convert back to legacy ClaimStatus values for backward-compat consumers
-    const allowedTransitions = [...new Set(allowedLifecycle.map(toLegacyClaimStatus))]
+    const lifecycleState = toLifecycleState('claim', result.claim.status)
 
     return NextResponse.json(
       {
-        caseId,
-        currentStatus: claim.status,
+        caseId: result.claim.claimId,
+        currentStatus: result.claim.status,
         currentLifecycleState: lifecycleState,
-        allowedTransitions,
+        allowedTransitions: result.allowedTransitions,
       },
       {
         headers: { 'Cache-Control': 'no-store' },
@@ -63,20 +72,4 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       { status: 500 },
     )
   }
-}
-
-function normalizeActorRole(role: string | null | undefined): ActorRole {
-  const map: Record<string, ActorRole> = {
-    platform_admin: 'system_admin',
-    system_admin: 'system_admin',
-    admin: 'admin',
-    union_admin: 'admin',
-    officer: 'officer',
-    chief_steward: 'chief_steward',
-    business_agent: 'chief_steward',
-    steward: 'steward',
-    union_staff: 'steward',
-    member: 'member',
-  }
-  return map[role ?? ''] ?? 'member'
 }
