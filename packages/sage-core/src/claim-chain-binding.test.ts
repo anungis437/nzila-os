@@ -54,6 +54,7 @@ describe('SAGE claim-chain authorized source binding', () => {
     expect(found).toHaveLength(1)
     expect(found[0]?.provenance.sourceId).toBe('source-verified-1')
     expect(found[0]?.authorizationLevel).toBe('sensitive')
+    expect(found[0]?.attestationStatus).toBe('unverified_annotation')
   })
 
   it('denies source substitution even when the evidence item id is visible', () => {
