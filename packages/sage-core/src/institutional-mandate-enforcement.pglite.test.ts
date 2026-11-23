@@ -67,6 +67,7 @@ beforeAll(async () => {
   }
   sql = pgliteClient(db)
   expect(sageMigrationFiles()).toContain('0050_sage_institutional_mandate_authority.sql')
+  expect(sageMigrationFiles()).toContain('0051_sage_institutional_capacity_recusal.sql')
 }, 60_000)
 
 beforeEach(async () => {
@@ -74,6 +75,8 @@ beforeEach(async () => {
     truncate table sage_institutional_action cascade;
     truncate table sage_resource_commitment cascade;
     truncate table sage_institutional_mandate cascade;
+    truncate table sage_institutional_conflict_attestation cascade;
+    truncate table sage_institutional_office_holding cascade;
     truncate table sage_workspace cascade;
   `)
   await setTenant(ORG)

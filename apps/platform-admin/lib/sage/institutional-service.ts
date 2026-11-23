@@ -27,7 +27,7 @@ import {
 import { createSageRuntime, createSageServiceContext, type SageActorScope } from './runtime'
 import { withSagePlatformTransaction } from './sql-adapter'
 import { getSageIdempotencyCache } from './idempotency'
-import { getSageInstitutionalCapacityStore } from './institutional-capacity-adapter'
+import { createSageInstitutionalCapacityStore } from './institutional-capacity-adapter'
 import type { CreateInstitutionalResourceCommitRequest } from './institutional-schemas'
 
 export interface InstitutionalCommitResponse {
@@ -112,6 +112,7 @@ export async function commitSageResourceUnderMandateForScope(
 
       const result = await withSagePlatformTransaction(async (sql: SageSqlClient) => {
         await sql.query(`select set_config('app.tenant_id', $1, true)`, [scope.orgId])
+        const evaluatedAt = new Date().toISOString()
         return executeInstitutionalActionInTransaction(sql, {
           actor: {
             orgId: scope.orgId,
@@ -126,11 +127,11 @@ export async function commitSageResourceUnderMandateForScope(
           mandateId: input.mandateId,
           resourceId: input.resourceId,
           action: 'resource.commit',
-          evaluatedAt: new Date().toISOString(),
+          evaluatedAt,
           idempotencyKey: options.idempotencyKey,
           requestedCommitMinor: input.requestedCommitMinor,
-          // Fail closed until a durable capacity/recusal store is attached.
-          capacityStore: getSageInstitutionalCapacityStore(),
+          // Same transactional client as mandate FOR UPDATE — never browser facts.
+          capacityStore: createSageInstitutionalCapacityStore(sql, evaluatedAt),
         })
       })
 

@@ -31,7 +31,8 @@ import {
   type SageGovernanceTargetType,
   type SageReviewNoteType,
 } from '@nzila/sage-core'
-import { getSageInstitutionalCapacityStore } from './institutional-capacity-adapter'
+import { createSageInstitutionalCapacityStore } from './institutional-capacity-adapter'
+import { createSagePlatformSqlClient } from './sql-adapter'
 import {
   buildCacheKey,
   hashPayload,
@@ -313,6 +314,10 @@ export async function createSageDecisionRecordForScope(
       const deps = createSageRuntime(scope)
       const ctx = createSageServiceContext(scope)
       if (usesMandate) {
+        const evaluatedAt = new Date().toISOString()
+        const sql = createSagePlatformSqlClient()
+        // Session-scoped tenant GUC — capacity reads are not yet inside Pattern-A.
+        await sql.query(`select set_config('app.tenant_id', $1, false)`, [scope.orgId])
         const result = await ratifySageDecisionUnderMandate(deps, ctx, {
           workspaceId,
           mandateId: input.mandateId!.trim(),
@@ -325,8 +330,8 @@ export async function createSageDecisionRecordForScope(
           referencedBoundaryFlagIds: input.referencedBoundaryFlagIds,
           requestedAuthorizationLevel: input.requestedAuthorizationLevel,
           idempotencyKey: options.idempotencyKey,
-          // Fail closed until a durable capacity/recusal store is attached.
-          capacityStore: getSageInstitutionalCapacityStore(),
+          // SQL-backed capacity; still fails closed when attestations are absent.
+          capacityStore: createSageInstitutionalCapacityStore(sql, evaluatedAt),
         })
         if (!result.admitted) {
           // Governed refusal — do not disclose instrument internals.
