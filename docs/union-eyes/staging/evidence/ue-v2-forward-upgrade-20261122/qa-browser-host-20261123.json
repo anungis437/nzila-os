@@ -1,0 +1,28 @@
+{
+  "classification": "ACTUAL_PROTECTED_QA_SETUP_FAILURE_AND_SCOPED_RUNNER_REPAIR_PENDING_VALIDATION",
+  "recordedAt": "2026-11-23T18:53:38.707049+00:00",
+  "applicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "deployedInfrastructureAndOperatorWorkflowSha": "8b2583405b5265f78d5b627fafa79fe508f33b02",
+  "successfulPreservingApplyRunId": 45238707739,
+  "failedRealSessionRunId": 45241159949,
+  "failedStep": "Install required browser and operating system dependencies",
+  "observedHost": "ubuntu26.04-x64",
+  "observedPlaywrightVersion": "1.59.1",
+  "observedFailure": "Playwright does not support chromium on ubuntu26.04-x64",
+  "applicationJourneysExecutedByFailedRun": 0,
+  "membershipRevocationPerformedByFailedRun": false,
+  "controlledInvitationOrLetterSent": false,
+  "completeFamilyRepair": [
+    ".github/workflows/ue-v2-staging-real-session.yml",
+    ".github/workflows/ue-v2-staging-real-navigation.yml"
+  ],
+  "qualifiedExistingBrowserWorkflowReferences": [
+    ".github/workflows/e2e.yml",
+    ".github/workflows/ue-http-runtime.yml"
+  ],
+  "applicationCodeOrImageChanged": false,
+  "databaseMigrationOrLiveDataResetRequired": false,
+  "validation": "PENDING_EXACT_QA_REPAIR_HEAD_LOCAL_AND_CI_CHECKS",
+  "baseReleaseAcceptance": false,
+  "productionDeployment": false
+}

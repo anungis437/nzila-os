@@ -24,7 +24,7 @@ concurrency:
 jobs:
   real-entra-baseline:
     if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Match the qualified browser jobs and locked Playwright host support.
     environment: ue-staging
     timeout-minutes: 25
     steps:
