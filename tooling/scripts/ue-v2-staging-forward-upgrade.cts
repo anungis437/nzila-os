@@ -16,6 +16,7 @@ import {
   normalizeForwardCatalog,
   verifyForwardTarget,
   FORWARD_EVENT_CATALOG_QUERY,
+  forwardUpgradeFailure,
   type ForwardUpgradeBundle,
 } from './lib/ue-v2-forward-upgrade-runtime'
 
@@ -250,7 +251,6 @@ async function main() {
   }
 }
 main().catch((error) => {
-  const message = error instanceof Error ? error.message : 'UE_UPGRADE_UNKNOWN_FAILURE'
   console.error(
     'UE_UPGRADE_RECEIPT ' +
       JSON.stringify({
@@ -261,9 +261,7 @@ main().catch((error) => {
         applicationSourceSha: APPLICATION_SOURCE,
         executionRunId: process.env.UE_UPGRADE_RUN_ID,
         executionJobName: process.env.UE_UPGRADE_JOB_NAME,
-        failure: message.startsWith('UE_UPGRADE_')
-          ? message.split('\n')[0].slice(0, 500)
-          : 'UE_UPGRADE_EXECUTION_REFUSED',
+        failure: forwardUpgradeFailure(error),
         failureStage,
         changesQualified: false,
         changesCommitted: commitAcknowledged ? true : commitAttempted ? null : false,

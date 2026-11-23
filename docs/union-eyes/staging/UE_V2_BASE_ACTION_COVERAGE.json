@@ -11714,5 +11714,16 @@
     "reason": "Repository policy excludes the default codex/ prefix; republished under allowed fix/ prefix. Original failure retained.",
     "checkBypassed": false,
     "fiveLocalPassesClaimedForSupersededSource": false
+  },
+  "currentManagedCatalogQualificationFailure": {
+    "state": "FAILED_LIVE_REHEARSAL_NO_APPLY",
+    "run": 45108741981,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/actual-managed-catalog-refusal.json",
+    "catalogueRollbackByteExact": true,
+    "businessRowReadbackClaimed": false,
+    "knownComparisonGap": "Exact default owner-only sequence ACL storage differs from NULL; unchanged by current operation and rejected by strict comparison.",
+    "sourceRepairBranch": "fix/ue-staging-sequence-acl-profile",
+    "sourceRepairQualification": "PENDING_FINAL_SOURCE_LOCAL_FIVE_AND_NATIVE_CI",
+    "fullPersonaAndBaseReleaseAcceptance": false
   }
 }

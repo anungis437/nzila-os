@@ -11,6 +11,8 @@ import {
   assertForwardOperator,
   assertCanonicalFunctionOwnerStatement,
   executeForwardUpgrade,
+  normalizeForwardCatalog,
+  forwardUpgradeFailure,
   type ForwardOperatorProfile,
   type ForwardUpgradeBundle,
 } from './ue-v2-forward-upgrade-runtime'
@@ -72,6 +74,32 @@ const object = (
 const roles = [object('role', 'ue_v2_owner'), object('role', 'union_eyes_runtime')]
 const section = (type: string, name: string, sql: string) =>
   `-- Name: ${name}; Type: ${type}; Schema: public; Owner: ue_v2_owner\n--\n${sql}\n`
+
+test('only the exact default owner-only sequence ACL equals NULL permission storage', () => {
+  const sequence = (acl: string | null) => object('relation', 'public.original_sequence', {
+    kind: 'S', owner: 'ue_v2_owner', acl,
+  })
+  const implicit = normalizeForwardCatalog([sequence(null)])
+  assert.deepEqual(normalizeForwardCatalog([sequence('{ue_v2_owner=rwU/ue_v2_owner}')]), implicit)
+  for (const acl of [
+    '{ue_v2_owner=r/ue_v2_owner}',
+    '{ue_v2_owner=rwU/uev2admin}',
+    '{ue_v2_owner=rwU/ue_v2_owner,=U/ue_v2_owner}',
+    '{ue_v2_owner=rwU/ue_v2_owner,union_eyes_runtime=U/ue_v2_owner}',
+  ]) assert.notDeepEqual(normalizeForwardCatalog([sequence(acl)]), implicit)
+  assert.notDeepEqual(
+    normalizeForwardCatalog([object('function', 'guard()', { owner: 'ue_v2_owner', acl: '{ue_v2_owner=X/ue_v2_owner}' })]),
+    normalizeForwardCatalog([object('function', 'guard()', { owner: 'ue_v2_owner', acl: null })]),
+  )
+})
+
+test('managed-catalog failure receipts retain the reason and omit assertion data and unclassified errors', () => {
+  const reason = 'MANAGED_CATALOG_DEFINITION_DRIFT:relation:public.original_sequence'
+  assert.equal(forwardUpgradeFailure(new Error(reason + '\nprivate assertion diff')), reason)
+  assert.equal(forwardUpgradeFailure(new Error('database connection password=private')), 'UE_UPGRADE_EXECUTION_REFUSED')
+  assert.equal(forwardUpgradeFailure(new Error('UE_UPGRADE_ORIGINAL_ROWS_CHANGED\nprivate row data')), 'UE_UPGRADE_ORIGINAL_ROWS_CHANGED')
+  assert.equal(forwardUpgradeFailure(null), 'UE_UPGRADE_UNKNOWN_FAILURE')
+})
 
 test('historical administrator ownership is handed off before source function replacement', async () => {
   const before = [...roles, object('function', 'guard()', { owner: 'uev2admin' })]
