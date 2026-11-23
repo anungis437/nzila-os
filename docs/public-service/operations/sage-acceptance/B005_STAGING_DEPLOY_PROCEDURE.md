@@ -17,6 +17,21 @@ Close **B-005**: deploy a SAGE-enabled `platform-admin` revision to an **isolate
 
 ## A. Record current live state (before)
 
+Preferred machine receipt (read-only; `b005Closure` stays `NOT_PROVEN`):
+
+```bash
+# Requires Azure CLI + `az login` to the Nzila subscription (staging-scoped).
+# If `az` is missing, install via Microsoft's package feed (Azure MCP
+# `extension_cli_install` / aka.ms/InstallAzureCLIDeb) before continuing.
+node tooling/scripts/sage-b005-azure-revision-inspect.mjs \
+  --out reports/proof-runs/sage-b005-azure-revision-before.json \
+  --resource-group nzila-canada-staging-rg \
+  --app-name nzila-os-platform-admin \
+  --include-system-logs
+```
+
+Equivalent manual control-plane queries (same fields the script records):
+
 ```bash
 # Identity
 az account show --query '{name:name,id:id}' -o json
@@ -25,21 +40,25 @@ az account show --query '{name:name,id:id}' -o json
 az containerapp show \
   -g nzila-canada-staging-rg \
   -n nzila-os-platform-admin \
-  --query '{fqdn:properties.configuration.ingress.fqdn,image:properties.template.containers[0].image,revisions:properties.latestRevisionName}' -o json
+  --query '{fqdn:properties.configuration.ingress.fqdn,image:properties.template.containers[0].image,latestRevisionName:properties.latestRevisionName,targetPort:properties.configuration.ingress.targetPort}' -o json
 
 # Optional: list revisions
 az containerapp revision list -g nzila-canada-staging-rg -n nzila-os-platform-admin -o table
+
+# Optional: system logs when image pull / revision creation fails
+az containerapp logs show -g nzila-canada-staging-rg -n nzila-os-platform-admin --type system --tail 50
 ```
 
 Probe health (expect JSON with `buildInfo.commit` when healthy):
 
 ```bash
 curl -sS "https://staging-admin.nzilaventures.com/api/health" | jq .
-# fallback FQDN from az output:
+# fallback FQDN from az / inspect receipt:
 # curl -sS "https://<fqdn>/api/health" | jq .
 ```
 
-Record `BEFORE_IMAGE` and `BEFORE_COMMIT` in the proof-run notes.
+Record `BEFORE_IMAGE`, `BEFORE_REVISION`, and `BEFORE_COMMIT` in the proof-run notes.
+A data-plane health timeout alone is **not** a control-plane outage attestation.
 
 ## B. Database inventory (before)
 
