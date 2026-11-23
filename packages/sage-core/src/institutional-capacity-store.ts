@@ -63,7 +63,10 @@ export class SqlSageInstitutionalCapacityStore implements SageInstitutionalCapac
     const resourceId = requireNonEmpty(input.resourceId, 'resourceId')
     const action = requireNonEmpty(input.action, 'action')
 
-    // Prefer exact action scope; fall back to resource-wide '*'.
+    // Load every active exact-action and resource-wide attestation. An active
+    // conflict/recusal always blocks; an exact-action "clear" never silently
+    // overrides a broader active conflict. Contradictory clears+conflicts with
+    // no revocation fail closed (null ⇒ CONFLICT_DATA_UNAVAILABLE).
     const { rows } = await this.sql.query<{ conflicted: boolean; action_scope: string }>(
       `select conflicted, action_scope
          from sage_institutional_conflict_attestation
@@ -74,13 +77,15 @@ export class SqlSageInstitutionalCapacityStore implements SageInstitutionalCapac
           and action_scope in ($5, '*')
           and revoked_at is null
           and effective_at <= $6::timestamptz
-          and expires_at > $6::timestamptz
-        order by case when action_scope = $5 then 0 else 1 end, attested_at desc
-        limit 1`,
+          and expires_at > $6::timestamptz`,
       [orgId, workspaceId, actorId, resourceId, action, this.evaluatedAt],
     )
     if (rows.length === 0) return null
-    return rows[0]!.conflicted === true
+    // Any active conflict/recusal blocks. Exact-action "clear" never overrides
+    // a broader active conflict; only revocation of that conflict can clear it.
+    if (rows.some((r) => r.conflicted === true)) return true
+    if (rows.some((r) => r.conflicted === false)) return false
+    return null
   }
 }
 

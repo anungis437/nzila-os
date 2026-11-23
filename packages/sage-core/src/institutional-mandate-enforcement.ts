@@ -22,6 +22,10 @@ import {
   resolveInstitutionalCapacityForAdmission,
   type SageInstitutionalCapacityStore,
 } from './institutional-capacity'
+import {
+  institutionalActionPayloadFingerprint,
+  readStoredPayloadFingerprint,
+} from './institutional-action-fingerprint'
 import { conflict, forbidden, invalidInput } from './service-errors'
 
 export type SageInstitutionalActorFacts = {
@@ -133,6 +137,38 @@ export async function executeInstitutionalActionInTransaction(
   })
   if (existing && (existing.mandate_id !== input.mandateId || existing.actor_id !== actor.actorId)) {
     conflict('idempotency key already used for a different institutional action')
+  }
+
+  const durablePayload = { ...(input.safePayload ?? {}) }
+  delete (durablePayload as { payloadFingerprint?: unknown }).payloadFingerprint
+  const requestFingerprint = institutionalActionPayloadFingerprint({
+    action: input.action,
+    mandateId: input.mandateId,
+    resourceId: input.resourceId,
+    requestedCommitMinor: input.requestedCommitMinor ?? null,
+    durablePayload,
+  })
+
+  if (existing) {
+    const storedFingerprint = readStoredPayloadFingerprint(existing.safe_payload_json)
+    if (!storedFingerprint || storedFingerprint !== requestFingerprint) {
+      conflict('idempotency key replay payload does not match the original institutional action')
+    }
+    if (input.action === 'resource.commit' && existing.commitment_id) {
+      const { rows: commitmentRows } = await sql.query<{ amount_minor: string | number }>(
+        `select amount_minor from sage_resource_commitment where id = $1 and org_id = $2`,
+        [existing.commitment_id, actor.orgId],
+      )
+      const priorAmount = commitmentRows[0]
+        ? Number(commitmentRows[0].amount_minor)
+        : NaN
+      if (
+        !Number.isSafeInteger(priorAmount) ||
+        priorAmount !== input.requestedCommitMinor
+      ) {
+        conflict('idempotency key replay commitment amount does not match the original action')
+      }
+    }
   }
 
   // Always lock + re-evaluate current authority — including idempotent replay —
@@ -310,7 +346,7 @@ export async function executeInstitutionalActionInTransaction(
       idempotencyKey,
       decision.reason,
       commitmentId,
-      JSON.stringify(input.safePayload ?? {}),
+      JSON.stringify({ ...durablePayload, payloadFingerprint: requestFingerprint }),
       input.evaluatedAt,
     ],
   )

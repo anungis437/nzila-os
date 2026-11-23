@@ -213,6 +213,71 @@ describe('SqlSageInstitutionalCapacityStore (PGlite)', () => {
     if (capacity.resolved) expect(capacity.conflictOrRecusal).toBe(true)
   })
 
+  it('blocks when a broad active conflict coexists with an exact-action clear', async () => {
+    await insertInstitutionalOfficeHolding(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      positionId: POSITION,
+      instrumentRef: 'BOARD-HOLDING-1',
+      instrumentVersion: 'v1',
+      effectiveAt: '2026-01-01T00:00:00.000Z',
+      expiresAt: '2027-01-01T00:00:00.000Z',
+      createdBy: 'issuer',
+    })
+    await insertInstitutionalConflictAttestation(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      resourceId: RESOURCE,
+      actionScope: '*',
+      conflicted: true,
+      instrumentRef: 'RECUSAL-BROAD',
+      instrumentVersion: 'v1',
+      attestedBy: 'ethics-officer',
+      attestedAt: NOW,
+      effectiveAt: '2026-01-01T00:00:00.000Z',
+      expiresAt: '2027-01-01T00:00:00.000Z',
+    })
+    await insertInstitutionalConflictAttestation(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      resourceId: RESOURCE,
+      actionScope: 'resource.commit',
+      conflicted: false,
+      instrumentRef: 'CLEAR-EXACT',
+      instrumentVersion: 'v1',
+      attestedBy: 'ethics-officer',
+      attestedAt: NOW,
+      effectiveAt: '2026-01-01T00:00:00.000Z',
+      expiresAt: '2027-01-01T00:00:00.000Z',
+    })
+
+    const store = new SqlSageInstitutionalCapacityStore(sql, NOW)
+    await expect(
+      store.resolveConflictOrRecusal({
+        orgId: ORG,
+        workspaceId: WS,
+        actorId: ACTOR,
+        resourceId: RESOURCE,
+        action: 'resource.commit',
+      }),
+    ).resolves.toBe(true)
+
+    const capacity = await resolveInstitutionalCapacityForAdmission(store, {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      resourceId: RESOURCE,
+      action: 'resource.commit',
+      mandateId: 'm1',
+      mandatePositionId: POSITION,
+    })
+    expect(capacity.resolved).toBe(true)
+    if (capacity.resolved) expect(capacity.conflictOrRecusal).toBe(true)
+  })
+
   it('fails closed on spoofed position claim against a verified holding', async () => {
     await insertInstitutionalOfficeHolding(sql, {
       orgId: ORG,

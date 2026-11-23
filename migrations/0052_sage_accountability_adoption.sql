@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS sage_accountability_adoption (
                                CHECK (preserves_draft_facts = true),
   draft_snapshot_json        jsonb NOT NULL,
   adopted_at                 timestamptz NOT NULL,
+  /** Durable request fingerprint — replay must match or CONFLICT. */
+  request_fingerprint        text NOT NULL,
   created_at                 timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT sage_accountability_adoption_idempotency_uq
     UNIQUE (org_id, resource_id, mandate_id, adopting_actor_id, adopted_at)

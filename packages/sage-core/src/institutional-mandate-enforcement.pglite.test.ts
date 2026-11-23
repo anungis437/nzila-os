@@ -432,6 +432,53 @@ describe('institutional mandate enforcement (PGlite)', () => {
     if (!denied.admitted) expect(denied.decision.reason).toBe('MANDATE_SCOPE_MISMATCH')
   })
 
+  it('rejects idempotent replay when the commitment amount or durable payload differs', async () => {
+    const mandate = await seedMandate()
+    await begin()
+    const first = await executeInstitutionalActionInTransaction(sql, {
+      actor: actorFacts(),
+      mandateId: mandate.id,
+      resourceId: RESOURCE,
+      action: 'resource.commit',
+      evaluatedAt: NOW,
+      idempotencyKey: 'payload-strict-1',
+      requestedCommitMinor: 100_000,
+      safePayload: { note: 'original' },
+    })
+    await commit()
+    expect(first.admitted).toBe(true)
+
+    await begin()
+    await expect(
+      executeInstitutionalActionInTransaction(sql, {
+        actor: actorFacts(),
+        mandateId: mandate.id,
+        resourceId: RESOURCE,
+        action: 'resource.commit',
+        evaluatedAt: NOW,
+        idempotencyKey: 'payload-strict-1',
+        requestedCommitMinor: 200_000,
+        safePayload: { note: 'original' },
+      }),
+    ).rejects.toThrow(/payload does not match|commitment amount/)
+    await rollback()
+
+    await begin()
+    await expect(
+      executeInstitutionalActionInTransaction(sql, {
+        actor: actorFacts(),
+        mandateId: mandate.id,
+        resourceId: RESOURCE,
+        action: 'resource.commit',
+        evaluatedAt: NOW,
+        idempotencyKey: 'payload-strict-1',
+        requestedCommitMinor: 100_000,
+        safePayload: { note: 'mutated' },
+      }),
+    ).rejects.toThrow(/payload does not match/)
+    await rollback()
+  })
+
   it('re-checks authority on idempotent replay and refuses after revocation without disclosing the historic action', async () => {
     const mandate = await seedMandate()
     await begin()

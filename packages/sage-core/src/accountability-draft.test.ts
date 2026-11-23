@@ -3,6 +3,7 @@ import {
   buildSageAccountabilityDraft,
   type SageAccountabilityDraftInput,
   type SageAccountabilityEvidenceRef,
+  type SageVerifiedDeliverableAcceptanceAttestation,
 } from './accountability-draft'
 import {
   buildAuthorizedEvidenceContextPayload,
@@ -168,21 +169,39 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     expect(brief.outcome.percentVsExpected).toBeNull()
   })
 
-  it('admits attested acceptance and spend as recorded but NEVER as institutionally adopted', () => {
-    const accepted = buildSageAccountabilityDraft(payload(), input({
-      execution: {
-        receivedDeliverables: 3,
-        acceptedDeliverables: 2,
-        evidence: ref(delivery),
-        acceptanceAttestation: {
-          purpose: 'institutional_deliverable_acceptance',
-          acceptorActorId: 'fictional-acceptance-officer',
-          instrumentReference: 'acceptance-minute-17',
-          evidence: ref(receipt),
+  function verifiedAcceptance(
+    overrides: Partial<SageVerifiedDeliverableAcceptanceAttestation> = {},
+  ): SageVerifiedDeliverableAcceptanceAttestation {
+    return {
+      attestationId: 'att-accept-1',
+      recordType: 'institutional_deliverable_acceptance',
+      orgId: ORG,
+      workspaceId: WS,
+      resourceId: 'fictional-procurement-review',
+      acceptorActorId: 'fictional-acceptance-officer',
+      instrumentReference: 'acceptance-minute-17',
+      instrumentVersion: 'v1',
+      acceptedDeliverableCount: 2,
+      evidence: ref(receipt),
+      verificationStatus: 'verified',
+      attestedAt: '2026-11-20T00:00:00.000Z',
+      ...overrides,
+    }
+  }
+
+  it('admits server-verified acceptance and spend as recorded but NEVER as institutionally adopted', () => {
+    const accepted = buildSageAccountabilityDraft(
+      payload(),
+      input({
+        execution: {
+          receivedDeliverables: 3,
+          evidence: ref(delivery),
+          acceptanceAttestationId: 'att-accept-1',
         },
-      },
-      actualSpend: { amountMinor: 4_500_000, currency: 'CAD', evidence: ref(spend) },
-    }))
+        actualSpend: { amountMinor: 4_500_000, currency: 'CAD', evidence: ref(spend) },
+      }),
+      { verifiedAcceptanceAttestations: [verifiedAcceptance()] },
+    )
     expect(accepted.commitment.actualSpendMinor).toBe(4_500_000)
     expect(accepted.commitment.acceptedDeliverables).toBe(2)
     expect(accepted.commitment.acceptanceEvidence).toEqual(ref(receipt))
@@ -201,18 +220,57 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
         input({
           execution: {
             receivedDeliverables: 3,
-            acceptedDeliverables: 3,
             evidence: ref(delivery),
-            acceptanceAttestation: {
-              purpose: 'institutional_deliverable_acceptance',
-              acceptorActorId: 'fictional-acceptance-officer',
-              instrumentReference: 'forged-from-receipt',
-              evidence: ref(delivery),
-            },
+            acceptanceAttestationId: 'att-reuse-delivery',
           },
         }),
+        {
+          verifiedAcceptanceAttestations: [
+            verifiedAcceptance({
+              attestationId: 'att-reuse-delivery',
+              acceptedDeliverableCount: 3,
+              evidence: ref(delivery),
+            }),
+          ],
+        },
       ),
     ).toThrow(/independent of delivery receipt/)
+  })
+
+  it('does not promote a readable non-acceptance source + forged attestor metadata to FULLY_ACCEPTED', () => {
+    // Caller invents an attestation id that is not in the institution-owned registry.
+    // A perfectly readable memo (receipt) remains accessible but is NOT acceptance.
+    const forged = buildSageAccountabilityDraft(
+      payload(),
+      input({
+        execution: {
+          receivedDeliverables: 3,
+          evidence: ref(delivery),
+          // No acceptanceAttestationId — readable unrelated docs cannot invent acceptance.
+        },
+      }),
+      {
+        // Registry empty / unrelated — even if a memo is readable in the payload.
+        verifiedAcceptanceAttestations: [],
+      },
+    )
+    expect(forged.executionDisposition).toBe('RECEIVED_ACCEPTANCE_UNPROVEN')
+    expect(forged.commitment.acceptedDeliverables).toBeNull()
+    expect(forged.missing).toContain('deliverable_acceptance')
+
+    expect(() =>
+      buildSageAccountabilityDraft(
+        payload(),
+        input({
+          execution: {
+            receivedDeliverables: 3,
+            evidence: ref(delivery),
+            acceptanceAttestationId: 'forged-caller-asserted-id',
+          },
+        }),
+        { verifiedAcceptanceAttestations: [] },
+      ),
+    ).toThrow(/acceptance attestation not found/)
   })
 
   it('refuses exact source substitution, sensitivity downgrade, missing and ambiguous evidence', () => {
@@ -266,9 +324,19 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
   })
 
   it('denies fabricated acceptance, invalid commitment, nonfinite observations and mismatched spend currency', () => {
-    expect(() => buildSageAccountabilityDraft(payload(), input({
-      execution: { receivedDeliverables: 3, acceptedDeliverables: 2, evidence: ref(delivery) },
-    }))).toThrow(/acceptance attestation required/)
+    expect(() =>
+      buildSageAccountabilityDraft(
+        payload(),
+        input({
+          execution: {
+            receivedDeliverables: 3,
+            evidence: ref(delivery),
+            acceptanceAttestationId: 'missing-attestation',
+          },
+        }),
+        { verifiedAcceptanceAttestations: [] },
+      ),
+    ).toThrow(/acceptance attestation not found/)
     expect(() => buildSageAccountabilityDraft(payload(), input({
       commitment: { monetaryCeilingMinor: -1, currency: 'CAD', expectedDeliverables: 4, evidence: ref(money) },
     }))).toThrow(/monetary ceiling/)

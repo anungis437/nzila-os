@@ -310,4 +310,137 @@ describe('persistSageAccountabilityAdoptionInTransaction (PGlite)', () => {
     expect(rows.rows[0]?.status).toBe('ADOPTED')
     expect(rows.rows[0]?.draft_snapshot_json.commitment.actualSpendMinor).toBeNull()
   })
+
+  it('returns the persisted original on true replay and CONFLICTS on altered choice/rationale', async () => {
+    await insertInstitutionalOfficeHolding(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      positionId: POSITION,
+      instrumentRef: 'HOLD-1',
+      instrumentVersion: 'v1',
+      effectiveAt: '2026-01-01T00:00:00.000Z',
+      expiresAt: '2027-01-01T00:00:00.000Z',
+      createdBy: 'issuer',
+    })
+    await insertInstitutionalConflictAttestation(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      resourceId: RESOURCE,
+      actionScope: 'decision.ratify',
+      conflicted: false,
+      instrumentRef: 'CLEAR-1',
+      instrumentVersion: 'v1',
+      attestedBy: 'ethics',
+      attestedAt: NOW,
+      effectiveAt: '2026-01-01T00:00:00.000Z',
+      expiresAt: '2027-01-01T00:00:00.000Z',
+    })
+    const mandate = await insertInstitutionalMandate(sql, {
+      orgId: ORG,
+      workspaceId: WS,
+      principalActorId: ACTOR,
+      positionId: POSITION,
+      resourceId: RESOURCE,
+      permittedActions: ['decision.ratify'],
+      instrumentRef: 'ADOPT-MANDATE-1',
+      instrumentVersion: 'v1',
+      issuerActorId: 'board',
+      verificationStatus: 'verified',
+      attestedAt: '2026-01-01T00:00:00.000Z',
+      acceptedAt: '2026-01-02T00:00:00.000Z',
+      effectiveAt: '2026-01-03T00:00:00.000Z',
+      expiresAt: '2027-01-01T00:00:00.000Z',
+      status: 'active',
+      createdBy: 'attestor',
+    })
+    const draft = buildSageAccountabilityDraft(
+      buildAuthorizedEvidenceContextPayload(principal, authorized),
+      {
+        orgId: ORG,
+        workspaceId: WS,
+        resourceId: RESOURCE,
+        objective: 'Close T01 engagement honestly',
+        accountableActorId: ACTOR,
+        intervention: 'Handover',
+        reviewDueAt: '2026-12-01T00:00:00.000Z',
+        expected: {
+          value: 10,
+          unit: 'working_days',
+          window: 'engagement',
+          evidence: ref(expectedEv),
+        },
+        observed: {
+          value: 14,
+          unit: 'working_days',
+          window: 'engagement',
+          evidence: ref(observedEv),
+        },
+      },
+    )
+    const actor = {
+      orgId: ORG,
+      workspaceId: WS,
+      actorId: ACTOR,
+      actorKind: 'human' as const,
+      authenticated: true,
+      activeWorkspaceMembership: true,
+      applicationPermissionGranted: true,
+      claimedPositionId: POSITION,
+    }
+    const capacityStore = new SqlSageInstitutionalCapacityStore(sql, NOW)
+
+    await db.exec('begin')
+    const first = await persistSageAccountabilityAdoptionInTransaction({
+      sql,
+      actor,
+      mandateId: mandate.id,
+      draft,
+      choice: 'adopt',
+      rationale: 'Adopt the incomplete record as the institutional baseline',
+      adoptedAt: NOW,
+      idempotencyKey: 'adopt-replay-1',
+      capacityStore,
+    })
+    await db.exec('commit')
+    expect(first.admitted).toBe(true)
+    if (!first.admitted) return
+
+    await db.exec('begin')
+    const replay = await persistSageAccountabilityAdoptionInTransaction({
+      sql,
+      actor,
+      mandateId: mandate.id,
+      draft,
+      choice: 'adopt',
+      rationale: 'Adopt the incomplete record as the institutional baseline',
+      adoptedAt: NOW,
+      idempotencyKey: 'adopt-replay-1',
+      capacityStore,
+    })
+    await db.exec('commit')
+    expect(replay.admitted).toBe(true)
+    if (!replay.admitted) return
+    expect(replay.reusedExisting).toBe(true)
+    expect(replay.adoption.status).toBe('ADOPTED')
+    expect(replay.adoption.choice).toBe('adopt')
+    expect(replay.adoptionId).toBe(first.adoptionId)
+
+    await db.exec('begin')
+    await expect(
+      persistSageAccountabilityAdoptionInTransaction({
+        sql,
+        actor,
+        mandateId: mandate.id,
+        draft,
+        choice: 'decline',
+        rationale: 'Mutated choice under the same idempotency key',
+        adoptedAt: NOW,
+        idempotencyKey: 'adopt-replay-1',
+        capacityStore,
+      }),
+    ).rejects.toThrow(/payload does not match/)
+    await db.exec('rollback')
+  })
 })

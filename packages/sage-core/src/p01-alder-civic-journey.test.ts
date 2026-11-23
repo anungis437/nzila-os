@@ -247,18 +247,8 @@ describe('P01 Alder Civic Services — golden journey', () => {
         },
         execution: {
           receivedDeliverables: 1,
-          acceptedDeliverables: 1,
           evidence: ref(trainingReceipt),
-          acceptanceAttestation: {
-            purpose: 'institutional_deliverable_acceptance',
-            acceptorActorId: 'officer-alder-1',
-            instrumentReference: 'forged',
-            evidence: {
-              evidenceItemId: trainingReceipt.evidenceItemId,
-              sourceId: 'src-attacker-forged',
-              authorizationLevel: 'internal',
-            },
-          },
+          acceptanceAttestationId: 'forged-attestation',
         },
         expected: {
           value: 10,
@@ -267,42 +257,57 @@ describe('P01 Alder Civic Services — golden journey', () => {
           evidence: ref(expectedEv),
         },
       }),
-    ).toThrow(/not bound/)
+    ).toThrow(/acceptance attestation not found/)
 
     // P0 regression: the *correct* training delivery receipt reused as acceptance.
     expect(() =>
-      buildSageAccountabilityDraft(payload, {
-        orgId: ORG,
-        workspaceId: WS,
-        resourceId: RESOURCE,
-        objective: 'Misrepresent training receipt as acceptance',
-        accountableActorId: 'officer-alder-1',
-        intervention: 'x',
-        reviewDueAt: '2026-12-01T00:00:00.000Z',
-        commitment: {
-          monetaryCeilingMinor: 3_000_000,
-          currency: 'CAD',
-          expectedDeliverables: 1,
-          evidence: ref(commitmentEv),
-        },
-        execution: {
-          receivedDeliverables: 1,
-          acceptedDeliverables: 1,
-          evidence: ref(trainingReceipt),
-          acceptanceAttestation: {
-            purpose: 'institutional_deliverable_acceptance',
-            acceptorActorId: 'officer-alder-1',
-            instrumentReference: 'receipt-as-acceptance',
+      buildSageAccountabilityDraft(
+        payload,
+        {
+          orgId: ORG,
+          workspaceId: WS,
+          resourceId: RESOURCE,
+          objective: 'Misrepresent training receipt as acceptance',
+          accountableActorId: 'officer-alder-1',
+          intervention: 'x',
+          reviewDueAt: '2026-12-01T00:00:00.000Z',
+          commitment: {
+            monetaryCeilingMinor: 3_000_000,
+            currency: 'CAD',
+            expectedDeliverables: 1,
+            evidence: ref(commitmentEv),
+          },
+          execution: {
+            receivedDeliverables: 1,
             evidence: ref(trainingReceipt),
+            acceptanceAttestationId: 'att-reuse-receipt',
+          },
+          expected: {
+            value: 10,
+            unit: 'working_days',
+            window: '2026-Q4',
+            evidence: ref(expectedEv),
           },
         },
-        expected: {
-          value: 10,
-          unit: 'working_days',
-          window: '2026-Q4',
-          evidence: ref(expectedEv),
+        {
+          verifiedAcceptanceAttestations: [
+            {
+              attestationId: 'att-reuse-receipt',
+              recordType: 'institutional_deliverable_acceptance',
+              orgId: ORG,
+              workspaceId: WS,
+              resourceId: RESOURCE,
+              acceptorActorId: 'officer-alder-1',
+              instrumentReference: 'receipt-as-acceptance',
+              instrumentVersion: 'v1',
+              acceptedDeliverableCount: 1,
+              evidence: ref(trainingReceipt),
+              verificationStatus: 'verified',
+              attestedAt: '2026-11-20T00:00:00.000Z',
+            },
+          ],
         },
-      }),
+      ),
     ).toThrow(/independent of delivery receipt/)
   })
 

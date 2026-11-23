@@ -8,11 +8,12 @@ const SQL = readFileSync(
 )
 
 describe('migration 0052 — accountability adoption ledger', () => {
-  it('creates an append-only adoption table with RLS', () => {
+  it('creates an append-only adoption table with RLS and request fingerprint', () => {
     expect(SQL).toMatch(/CREATE TABLE IF NOT EXISTS sage_accountability_adoption/i)
     expect(SQL).toMatch(/sage_forbid_accountability_adoption_mutation/i)
     expect(SQL).toMatch(/ENABLE ROW LEVEL SECURITY/i)
     expect(SQL).toMatch(/preserves_draft_facts\s+boolean NOT NULL DEFAULT true/i)
     expect(SQL).toMatch(/draft_status_preserved.*= 'DRAFT_REQUIRES_HUMAN_ADOPTION'/i)
+    expect(SQL).toMatch(/request_fingerprint\s+text NOT NULL/i)
   })
 })

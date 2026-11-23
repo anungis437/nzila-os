@@ -28,6 +28,34 @@ export type SageAccountabilityMeasure = {
   evidence: SageAccountabilityEvidenceRef
 }
 
+/**
+ * Institution-owned deliverable acceptance attestation. Loaded from a trusted
+ * server-side registry — never constructed from browser-supplied purpose,
+ * acceptor, instrument, or "this source is an acceptance" labels.
+ */
+export type SageVerifiedDeliverableAcceptanceAttestation = {
+  attestationId: string
+  recordType: 'institutional_deliverable_acceptance'
+  orgId: string
+  workspaceId: string
+  resourceId: string
+  acceptorActorId: string
+  instrumentReference: string
+  instrumentVersion: string
+  acceptedDeliverableCount: number
+  evidence: SageAccountabilityEvidenceRef
+  verificationStatus: 'verified'
+  attestedAt: string
+}
+
+export type SageAccountabilityTrustedFacts = {
+  /**
+   * Server-loaded acceptance attestations for this org/workspace/resource.
+   * Absence means acceptance remains unproven even when evidence is readable.
+   */
+  verifiedAcceptanceAttestations?: readonly SageVerifiedDeliverableAcceptanceAttestation[]
+}
+
 export type SageAccountabilityDraftInput = {
   orgId: string
   workspaceId: string
@@ -50,18 +78,11 @@ export type SageAccountabilityDraftInput = {
   execution?: {
     receivedDeliverables: number
     evidence: SageAccountabilityEvidenceRef
-    acceptedDeliverables?: number
     /**
-     * Required to promote accepted deliverables. A delivery/training receipt
-     * alone is never sufficient — attestation must name an independent
-     * acceptance purpose, acceptor, instrument, and distinct evidence/source.
+     * Opaque id of a server-verified acceptance attestation. Caller metadata
+     * (purpose / acceptor / instrument) is never trusted from this input.
      */
-    acceptanceAttestation?: {
-      purpose: 'institutional_deliverable_acceptance'
-      acceptorActorId: string
-      instrumentReference: string
-      evidence: SageAccountabilityEvidenceRef
-    }
+    acceptanceAttestationId?: string
   }
   expected: SageAccountabilityMeasure
   observed?: SageAccountabilityMeasure
@@ -189,6 +210,7 @@ function validateMeasure(measure: SageAccountabilityMeasure, name: string): void
 export function buildSageAccountabilityDraft(
   payload: SageAuthorizedEvidenceContextPayload,
   input: SageAccountabilityDraftInput,
+  trusted: SageAccountabilityTrustedFacts = {},
 ): SageAccountabilityDraftOutput {
   if (
     payload.authorizedContextOnly !== true ||
@@ -247,20 +269,36 @@ export function buildSageAccountabilityDraft(
     required(input.commitment.currency, 'commitment currency')
     assertAuthorized(input.commitment.evidence, 'commitment')
   }
+
+  let boundAcceptance: SageVerifiedDeliverableAcceptanceAttestation | null = null
   if (input.execution) {
     if (!input.commitment) fail('execution requires a source-bound commitment')
     nonNegativeSafeInt(input.execution.receivedDeliverables, 'received deliverables')
     assertAuthorized(input.execution.evidence, 'execution')
-    if (input.execution.acceptedDeliverables !== undefined) {
-      nonNegativeSafeInt(input.execution.acceptedDeliverables, 'accepted deliverables')
-      const attestation = input.execution.acceptanceAttestation
-      if (!attestation) fail('institutional acceptance attestation required')
-      if (attestation.purpose !== 'institutional_deliverable_acceptance') {
-        fail('acceptance attestation purpose invalid')
+    if (input.execution.acceptanceAttestationId !== undefined) {
+      required(input.execution.acceptanceAttestationId, 'acceptance attestation id')
+      const matches = (trusted.verifiedAcceptanceAttestations ?? []).filter(
+        (a) => a.attestationId === input.execution!.acceptanceAttestationId,
+      )
+      if (matches.length !== 1) {
+        fail('institutional acceptance attestation not found or ambiguous')
+      }
+      const attestation = matches[0]!
+      if (
+        attestation.recordType !== 'institutional_deliverable_acceptance' ||
+        attestation.verificationStatus !== 'verified' ||
+        attestation.orgId !== input.orgId ||
+        attestation.workspaceId !== input.workspaceId ||
+        attestation.resourceId !== input.resourceId
+      ) {
+        fail('acceptance attestation is not a verified institutional acceptance for this resource')
       }
       required(attestation.acceptorActorId, 'acceptance acceptor')
       required(attestation.instrumentReference, 'acceptance instrument')
-      if (input.execution.acceptedDeliverables > input.execution.receivedDeliverables) {
+      required(attestation.instrumentVersion, 'acceptance instrument version')
+      validUtcInstant(attestation.attestedAt, 'acceptance attestedAt')
+      nonNegativeSafeInt(attestation.acceptedDeliverableCount, 'accepted deliverable count')
+      if (attestation.acceptedDeliverableCount > input.execution.receivedDeliverables) {
         fail('acceptance cannot exceed received deliverables')
       }
       assertAuthorized(attestation.evidence, 'deliverable acceptance')
@@ -271,8 +309,7 @@ export function buildSageAccountabilityDraft(
       ) {
         fail('acceptance evidence must be independent of delivery receipt evidence/source')
       }
-    } else if (input.execution.acceptanceAttestation) {
-      fail('acceptance attestation without accepted deliverables')
+      boundAcceptance = attestation
     }
   }
   if (input.actualSpend) {
@@ -308,17 +345,18 @@ export function buildSageAccountabilityDraft(
       ? (delta / input.expected.value) * 100
       : null
 
+  const accepted = boundAcceptance?.acceptedDeliverableCount
+
   const missing: SageAccountabilityDraftOutput['missing'][number][] = ['authority_attestation']
   if (!input.commitment) missing.push('commitment')
   if (!input.execution) missing.push('execution')
-  if (input.execution?.acceptedDeliverables === undefined) missing.push('deliverable_acceptance')
+  if (accepted === undefined) missing.push('deliverable_acceptance')
   if (!observed) missing.push('observation')
   if (!input.actualSpend) missing.push('actual_spend')
   if (!input.nextDecisionOwnerActorId?.trim()) missing.push('next_decision_owner')
   missing.push('human_adoption')
 
   const received = input.execution?.receivedDeliverables
-  const accepted = input.execution?.acceptedDeliverables
   const expectedDeliverables = input.commitment?.expectedDeliverables
   let executionDisposition: SageAccountabilityDraftOutput['executionDisposition'] = 'MISSING'
   if (input.execution) {
@@ -371,13 +409,11 @@ export function buildSageAccountabilityDraft(
       currency: input.commitment?.currency ?? null,
       expectedDeliverables: input.commitment?.expectedDeliverables ?? null,
       receivedDeliverables: input.execution?.receivedDeliverables ?? null,
-      acceptedDeliverables: input.execution?.acceptedDeliverables ?? null,
+      acceptedDeliverables: accepted ?? null,
       actualSpendMinor: input.actualSpend?.amountMinor ?? null,
       commitmentEvidence: input.commitment ? { ...input.commitment.evidence } : null,
       executionEvidence: input.execution ? { ...input.execution.evidence } : null,
-      acceptanceEvidence: input.execution?.acceptanceAttestation
-        ? { ...input.execution.acceptanceAttestation.evidence }
-        : null,
+      acceptanceEvidence: boundAcceptance ? { ...boundAcceptance.evidence } : null,
       actualSpendEvidence: input.actualSpend ? { ...input.actualSpend.evidence } : null,
     },
     executionDisposition,

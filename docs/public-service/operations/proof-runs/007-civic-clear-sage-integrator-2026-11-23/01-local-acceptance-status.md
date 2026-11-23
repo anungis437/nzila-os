@@ -10,7 +10,7 @@
 | ID | Claim | Verdict | Evidence |
 |---|---|---|---|
 | P01 | Historic CAD 40k vs current CAD 30k; cumulative refusal; E04 training receipt≠acceptance; contested source; unresolved delay explanations | `LOCAL_TESTED` | `p01-alder-civic-journey.test.ts`, `institutional-mandate-enforcement.pglite.test.ts`, `institutional-authority.test.ts`, `accountability-draft.ts` (`RECEIVED_ACCEPTANCE_UNPROVEN` + `acceptanceAttestation`) |
-| P0 review | Acceptance attestation distinct from receipt; capacity/recusal fail-closed; idempotent replay re-auth | `LOCAL_TESTED` | `accountability-draft.test.ts`, `institutional-capacity.test.ts`, `institutional-mandate-enforcement.pglite.test.ts`, `decision-mandate-ratification.pglite.test.ts` |
+| P0 review | Institution-owned acceptance binding; payload-strict idempotent replay; broad recusal not overridden by exact clear | `LOCAL_TESTED` | `accountability-draft.test.ts` (forged non-acceptance source), `accountability-adoption-persist.pglite.test.ts`, `institutional-mandate-enforcement.pglite.test.ts`, `institutional-capacity-store.pglite.test.ts` |
 | R01 / S01 | No automatic succession inheritance; historical inspectability | `LOCAL_TESTED` | `packages/sage-core/src/institutional-succession.test.ts` |
 | T01 | Honest variance; missing spend; draft ≠ adoption | `LOCAL_TESTED` | `accountability-draft.test.ts`, `accountability-adoption.test.ts`, `accountability-adoption-persist.pglite.test.ts` (migration `0052`) |
 | Pattern A | Decision + institutional action + outbox under mandate | `LOCAL_TESTED` | `decision-mandate-ratification.pglite.test.ts` + platform-admin governance routes (HTTP capacity fail-closed until durable store) |

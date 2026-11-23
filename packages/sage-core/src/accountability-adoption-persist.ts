@@ -3,6 +3,8 @@
 // Persists an explicit human adoption decision in the same transaction as
 // institutional mandate admission. Never invents spend, acceptance, or cause.
 // Never promotes a draft to an institutional conclusion without admission.
+// Idempotent replay returns the persisted original or CONFLICT — never a
+// reconstructed decision from a mutated request.
 
 import type { SageSqlClient } from './sql-client'
 import {
@@ -17,6 +19,7 @@ import {
   type SageInstitutionalActorFacts,
 } from './institutional-mandate-enforcement'
 import type { SageInstitutionalCapacityStore } from './institutional-capacity'
+import { institutionalActionPayloadFingerprint } from './institutional-action-fingerprint'
 import { conflict, invalidInput } from './service-errors'
 
 export type PersistAccountabilityAdoptionInput = {
@@ -47,25 +50,95 @@ export type PersistAccountabilityAdoptionResult =
       decision: Extract<ExecuteInstitutionalActionResult, { admitted: false }>['decision']
     }
 
-async function findExistingAdoption(
+type AdoptionRow = {
+  id: string
+  org_id: string
+  workspace_id: string
+  resource_id: string
+  status: SageAccountabilityAdoptionRecord['status']
+  choice: SageAccountabilityAdoptionChoice
+  draft_status_preserved: 'DRAFT_REQUIRES_HUMAN_ADOPTION'
+  adopting_actor_id: string
+  adopting_position_id: string
+  rationale: string
+  mandate_id: string
+  instrument_ref: string
+  instrument_version: string
+  institutional_action_id: string
+  next_decision_owner_actor_id: string | null
+  preserves_draft_facts: boolean
+  draft_snapshot_json: unknown
+  adopted_at: string | Date
+  request_fingerprint: string | null
+}
+
+function draftFingerprint(draft: SageAccountabilityDraftOutput): string {
+  return institutionalActionPayloadFingerprint({
+    action: 'accountability.draft',
+    mandateId: 'n/a',
+    resourceId: draft.resourceId,
+    requestedCommitMinor: null,
+    durablePayload: {
+      status: draft.status,
+      orgId: draft.orgId,
+      workspaceId: draft.workspaceId,
+      executionDisposition: draft.executionDisposition,
+      openEvidenceTasks: draft.openEvidenceTasks,
+      commitment: draft.commitment,
+      outcome: draft.outcome,
+      differingInterpretations: draft.differingInterpretations,
+      nextDecisionOwnerActorId: draft.nextDecisionOwnerActorId,
+    },
+  })
+}
+
+function adoptionDurablePayload(input: {
+  choice: SageAccountabilityAdoptionChoice
+  rationale: string
+  draft: SageAccountabilityDraftOutput
+  nextDecisionOwnerActorId?: string
+}): Record<string, unknown> {
+  return {
+    accountabilityAdoption: true,
+    choice: input.choice,
+    rationale: input.rationale.trim(),
+    draftFingerprint: draftFingerprint(input.draft),
+    nextDecisionOwnerActorId: input.nextDecisionOwnerActorId?.trim() || null,
+  }
+}
+
+function mapAdoptionRow(row: AdoptionRow): SageAccountabilityAdoptionRecord {
+  const adoptedAt =
+    row.adopted_at instanceof Date ? row.adopted_at.toISOString() : String(row.adopted_at)
+  return {
+    status: row.status,
+    orgId: row.org_id,
+    workspaceId: row.workspace_id,
+    resourceId: row.resource_id,
+    draftStatusPreserved: 'DRAFT_REQUIRES_HUMAN_ADOPTION',
+    choice: row.choice,
+    adoptedAt: adoptedAt.includes('.') ? adoptedAt : adoptedAt.replace('Z', '.000Z'),
+    adoptingActorId: row.adopting_actor_id,
+    adoptingPositionId: row.adopting_position_id,
+    rationale: row.rationale,
+    mandateId: row.mandate_id,
+    instrumentRef: row.instrument_ref,
+    instrumentVersion: row.instrument_version,
+    nextDecisionOwnerActorId: row.next_decision_owner_actor_id,
+    preservesDraftFacts: true,
+  }
+}
+
+async function loadAdoptionByActionId(
   sql: SageSqlClient,
-  input: {
-    orgId: string
-    resourceId: string
-    mandateId: string
-    actorId: string
-    adoptedAt: string
-  },
-): Promise<{ id: string; institutional_action_id: string } | undefined> {
-  const { rows } = await sql.query<{ id: string; institutional_action_id: string }>(
-    `select id, institutional_action_id
+  input: { orgId: string; actionId: string },
+): Promise<AdoptionRow | undefined> {
+  const { rows } = await sql.query<AdoptionRow>(
+    `select *
        from sage_accountability_adoption
       where org_id = $1
-        and resource_id = $2
-        and mandate_id = $3::uuid
-        and adopting_actor_id = $4
-        and adopted_at = $5::timestamptz`,
-    [input.orgId, input.resourceId, input.mandateId, input.actorId, input.adoptedAt],
+        and institutional_action_id = $2::uuid`,
+    [input.orgId, input.actionId],
   )
   return rows[0]
 }
@@ -84,6 +157,20 @@ export async function persistSageAccountabilityAdoptionInTransaction(
   }
   if (!draft.resourceId.trim()) invalidInput('draft resource required')
 
+  const durablePayload = adoptionDurablePayload({
+    choice: input.choice,
+    rationale: input.rationale,
+    draft,
+    nextDecisionOwnerActorId: input.nextDecisionOwnerActorId,
+  })
+  const requestFingerprint = institutionalActionPayloadFingerprint({
+    action: 'decision.ratify',
+    mandateId: input.mandateId,
+    resourceId: draft.resourceId,
+    requestedCommitMinor: null,
+    durablePayload,
+  })
+
   const actionResult = await executeInstitutionalActionInTransaction(input.sql, {
     actor,
     mandateId: input.mandateId,
@@ -92,14 +179,36 @@ export async function persistSageAccountabilityAdoptionInTransaction(
     evaluatedAt: input.adoptedAt,
     idempotencyKey: input.idempotencyKey,
     capacityStore: input.capacityStore,
-    safePayload: {
-      accountabilityAdoption: true,
-      choice: input.choice,
-    },
+    safePayload: durablePayload,
   })
 
   if (!actionResult.admitted) {
     return { admitted: false, decision: actionResult.decision }
+  }
+
+  if (actionResult.reusedExisting) {
+    const existing = await loadAdoptionByActionId(input.sql, {
+      orgId: actor.orgId,
+      actionId: actionResult.actionId,
+    })
+    if (!existing) {
+      conflict('idempotent adoption replay requires an existing adoption row')
+    }
+    if (
+      existing.request_fingerprint &&
+      existing.request_fingerprint !== requestFingerprint
+    ) {
+      conflict('idempotency key replay payload does not match the original adoption')
+    }
+    // Always return the persisted original — never a reconstructed mutated request.
+    return {
+      admitted: true,
+      adoption: mapAdoptionRow(existing),
+      actionId: actionResult.actionId,
+      adoptionId: existing.id,
+      reusedExisting: true,
+      authorizationStatus: 'HISTORICALLY_RECORDED_NO_NEW_AUTHORIZATION',
+    }
   }
 
   const adoption = adoptSageAccountabilityDraft({
@@ -113,38 +222,19 @@ export async function persistSageAccountabilityAdoptionInTransaction(
     nextDecisionOwnerActorId: input.nextDecisionOwnerActorId,
   })
 
-  if (actionResult.reusedExisting) {
-    const existing = await findExistingAdoption(input.sql, {
-      orgId: actor.orgId,
-      resourceId: draft.resourceId,
-      mandateId: input.mandateId,
-      actorId: actor.actorId,
-      adoptedAt: input.adoptedAt,
-    })
-    if (!existing) {
-      conflict('idempotent adoption replay requires an existing adoption row')
-    }
-    return {
-      admitted: true,
-      adoption,
-      actionId: actionResult.actionId,
-      adoptionId: existing.id,
-      reusedExisting: true,
-      authorizationStatus: 'HISTORICALLY_RECORDED_NO_NEW_AUTHORIZATION',
-    }
-  }
-
   const { rows } = await input.sql.query<{ id: string }>(
     `insert into sage_accountability_adoption (
        org_id, workspace_id, resource_id, status, choice, draft_status_preserved,
        adopting_actor_id, adopting_position_id, rationale,
        mandate_id, instrument_ref, instrument_version, institutional_action_id,
-       next_decision_owner_actor_id, preserves_draft_facts, draft_snapshot_json, adopted_at
+       next_decision_owner_actor_id, preserves_draft_facts, draft_snapshot_json,
+       adopted_at, request_fingerprint
      ) values (
        $1, $2::uuid, $3, $4, $5, $6,
        $7, $8, $9,
        $10::uuid, $11, $12, $13::uuid,
-       $14, true, $15::jsonb, $16::timestamptz
+       $14, true, $15::jsonb,
+       $16::timestamptz, $17
      )
      returning id`,
     [
@@ -171,6 +261,7 @@ export async function persistSageAccountabilityAdoptionInTransaction(
         differingInterpretations: draft.differingInterpretations,
       }),
       adoption.adoptedAt,
+      requestFingerprint,
     ],
   )
   if (rows.length !== 1) conflict('failed to persist accountability adoption')
