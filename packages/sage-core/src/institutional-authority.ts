@@ -208,8 +208,8 @@ export function evaluateSageInstitutionalMandate(
       commit.currency !== mandate.currency ||
       !Number.isSafeInteger(commit.totalCommittedMinorAfterAction) ||
       commit.totalCommittedMinorAfterAction < 0 ||
-      !Number.isSafeInteger(ceiling) ||
       ceiling === undefined ||
+      !Number.isSafeInteger(ceiling) ||
       ceiling < 0
     ) {
       return deny('FINANCIAL_SCOPE_INVALID')
