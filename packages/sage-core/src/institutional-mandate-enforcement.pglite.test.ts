@@ -21,7 +21,7 @@ const MIGRATIONS_DIR = resolve(__dirname, '../../../migrations')
 
 function sageMigrationFiles(): string[] {
   return readdirSync(MIGRATIONS_DIR)
-    .filter((f) => /^00(3[2-9]|4\d)_sage_.*\.sql$/.test(f))
+    .filter((f) => /^00(3[2-9]|4\d|5\d)_sage_.*\.sql$/.test(f))
     .sort()
 }
 
@@ -66,7 +66,7 @@ beforeAll(async () => {
     await db.exec(readFileSync(join(MIGRATIONS_DIR, file), 'utf-8'))
   }
   sql = pgliteClient(db)
-  expect(sageMigrationFiles()).toContain('0046_sage_institutional_mandate_authority.sql')
+  expect(sageMigrationFiles()).toContain('0050_sage_institutional_mandate_authority.sql')
 }, 60_000)
 
 beforeEach(async () => {

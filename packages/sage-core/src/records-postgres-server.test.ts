@@ -28,7 +28,7 @@ const suite = PG_URL ? describe : describe.skip
 const MIGRATIONS_DIR = resolve(__dirname, '../../../migrations')
 function sageMigrationFiles(): string[] {
   return readdirSync(MIGRATIONS_DIR)
-    .filter((f) => /^00(3[2-9]|4\d)_sage_.*\.sql$/.test(f))
+    .filter((f) => /^00(3[2-9]|4\d|5\d)_sage_.*\.sql$/.test(f))
     .sort()
 }
 

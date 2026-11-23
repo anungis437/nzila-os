@@ -1,6 +1,6 @@
 {
   "description": "SHA-256 lock for released root migrations. A released migration may only change with an explicit `override` entry documenting why (see 0040).",
-  "lockedThrough": "0049_union_eyes_deadline_convergence_tasks.sql",
+  "lockedThrough": "0050_sage_institutional_mandate_authority.sql",
   "migrations": [
     {
       "file": "0023_trustcore_risk_register.sql",
@@ -90,6 +90,10 @@
     {
       "file": "0049_union_eyes_deadline_convergence_tasks.sql",
       "sha256": "adbdd1b05265c4f3b71a10c1a76eab695f29fefa2db3306dadc7088f7beaf453"
+    },
+    {
+      "file": "0050_sage_institutional_mandate_authority.sql",
+      "sha256": "73f9730437b05c29448e8cb90daf3048d13e181ba22b3c67264c402b6ec63027"
     }
   ]
 }

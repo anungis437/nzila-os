@@ -60,6 +60,25 @@ Root migrations (authoritative for SAGE):
 
 - `migrations/0032_sage_phase_1_access_domain_lock.sql` … through …
 - `migrations/0044_sage_phase_8b_destruction_attempts.sql`
+- Later Union Eyes root migrations may occupy `0045`–`0049` on the same track.
+  SAGE institutional mandate authority is
+  `migrations/0050_sage_institutional_mandate_authority.sql` (mandate store,
+  commitments, append-only actions, RLS) — **required** for Pattern-A mandate
+  ratification proofs on staging. Do not reuse a colliding `0046_*` number.
+
+Before apply, record local checksums for the exact SHA being deployed:
+
+```bash
+git rev-parse HEAD
+sha256sum migrations/0032_sage_*.sql migrations/0033_sage_*.sql \
+  migrations/0034_sage_*.sql migrations/0035_sage_*.sql \
+  migrations/0036_sage_*.sql migrations/0037_sage_*.sql \
+  migrations/0038_sage_*.sql migrations/0039_sage_*.sql \
+  migrations/0040_sage_*.sql migrations/0041_sage_*.sql \
+  migrations/0042_sage_*.sql migrations/0043_sage_*.sql \
+  migrations/0044_sage_*.sql migrations/0050_sage_*.sql \
+  2>/dev/null | tee /tmp/sage-migration-checksums.txt
+```
 
 Apply with the project’s approved migration executor for the target DB (do **not** invent a new path). If the shared staging DB has no applier for root `migrations/*.sql`, provision an isolated Postgres and document the applier command used.
 

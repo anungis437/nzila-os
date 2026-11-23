@@ -1,15 +1,15 @@
-// Structural assertions for migration 0046 — institutional mandate authority.
+// Structural assertions for migration 0050 — institutional mandate authority.
 
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const SQL = readFileSync(
-  join(__dirname, '..', '..', '..', 'migrations', '0046_sage_institutional_mandate_authority.sql'),
+  join(__dirname, '..', '..', '..', 'migrations', '0050_sage_institutional_mandate_authority.sql'),
   'utf-8',
 )
 
-describe('migration 0046 — institutional mandate authority', () => {
+describe('migration 0050 — institutional mandate authority', () => {
   it('creates mandate, commitment ledger and append-only action tables', () => {
     expect(SQL).toMatch(/CREATE TABLE IF NOT EXISTS sage_institutional_mandate/i)
     expect(SQL).toMatch(/CREATE TABLE IF NOT EXISTS sage_resource_commitment/i)
