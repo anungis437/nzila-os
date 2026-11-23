@@ -40,6 +40,9 @@ export type SageClaimChainEntry = {
 }
 
 export type SageAuthorizedClaimChainAnswer = {
+  /** A matching repository source is not verification of client-supplied narrative,
+   * occurrence date or authority actor. This marker MUST accompany the claim. */
+  attestationStatus: 'unverified_annotation'
   claimId: string
   claim: string
   evidenceItemId: string
@@ -91,6 +94,7 @@ export function filterClaimRegisterToAuthorizedContext(
     if (entry.sourceId !== bound.sourceId) continue
     if (entry.authorizationLevel !== bound.authorizationLevel) continue
     answers.push({
+      attestationStatus: 'unverified_annotation',
       claimId: entry.claimId,
       claim: entry.claim,
       evidenceItemId: entry.evidenceItemId,
