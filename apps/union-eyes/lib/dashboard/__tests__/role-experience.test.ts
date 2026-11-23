@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { UserRole } from '../../auth/roles';
 
 import {
   canAccessDashboardPath,
@@ -174,10 +175,25 @@ describe('lib/dashboard/role-experience', () => {
       }
       for (const role of ['steward', 'support_agent', 'chief_steward']) {
         const hrefs = getVisibleNavigationForExperience('staff', false, role).map(item => item.href);
-        for (const offered of ['/dashboard/workbench', '/dashboard/members', '/dashboard/correspondence', '/dashboard/clause-library']) {
+        for (const offered of ['/dashboard/workbench', '/dashboard/members', '/dashboard/clause-library']) {
           expect(hrefs, `${role} may open ${offered}`).toContain(offered);
         }
       }
+    });
+
+    it('lands Clerk away from the canonical numeric guard refusal while offering its explicit letter destination', () => {
+      const hrefs = getVisibleNavigationForExperience('staff', false, 'clerk').map(item => item.href);
+      expect(getRoleLandingPath('clerk')).toBe('/dashboard/inbox');
+      expect(getDualNavHomes('clerk').roleHomeHref).toBe('/dashboard/inbox');
+      expect(hrefs).toContain('/dashboard/correspondence');
+      for (const refused of ['/dashboard/workbench', '/dashboard/members', '/dashboard/clause-library']) {
+        expect(hrefs).not.toContain(refused);
+      }
+    });
+
+    it.each(Object.values(UserRole))('offers correspondence for %s only when its local letter role permits it', role => {
+      const localLetterRoles = ['steward', 'chief_steward', 'officer', 'president', 'vice_president', 'secretary_treasurer', 'admin', 'clerk'];
+      expect(getVisibleNavigationForExperience('staff', false, role).some(item => item.href === '/dashboard/correspondence')).toBe(localLetterRoles.includes(role));
     });
 
     it('lands a staff role below steward on the first destination it may open: the workbench would send it back to the root, which sends it to the workbench', () => {

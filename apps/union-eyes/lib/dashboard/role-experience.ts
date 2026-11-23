@@ -1,4 +1,5 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
+import { isCorrespondenceStaffRole } from '../correspondence/roles';
 import {
   EXECUTIVE_ALLOWED_PREFIXES,
   EXECUTIVE_HOME_HREF,
@@ -349,15 +350,21 @@ export const DESTINATION_MIN_ROLE: Readonly<Record<string, UserRole>> = {
   '/dashboard/admin/members': UserRole.ADMIN,
   '/dashboard/workbench': UserRole.STEWARD,
   '/dashboard/members': UserRole.STEWARD,
-  '/dashboard/correspondence': UserRole.STEWARD,
   // The clause library page redirects below steward; do not advertise it to those roles.
   '/dashboard/clause-library': UserRole.STEWARD,
   '/dashboard/audits': UserRole.ADMIN,
 };
 
+/** Canonical V2 numeric page guards normalize the unlisted Clerk role to Member.
+ * Explicit correspondence roles use their own policy; this grants no authority. */
+export function canonicalPageGuardRoleLevel(role: string): number {
+  return getRoleLevel((role === UserRole.CLERK ? UserRole.MEMBER : role) as UserRole);
+}
+
 function meetsDestinationRole(pathname: string, role: string, experience: DashboardExperience): boolean {
+  if (pathname === '/dashboard/correspondence' && !isCorrespondenceStaffRole(role)) return false;
   const min = DESTINATION_MIN_ROLE[pathname];
-  if (min && getRoleLevel(role as UserRole) < getRoleLevel(min)) return false;
+  if (min && canonicalPageGuardRoleLevel(role) < getRoleLevel(min)) return false;
   // The executive table states the executive menu's own requirement for a href that other experiences list under their own guard.
   return experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role);
 }

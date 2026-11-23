@@ -49,6 +49,8 @@ const UNION_ROLE_FILES = new Set([
   'apps/union-eyes/lib/api/with-api.ts',
   'apps/union-eyes/lib/correspondence/access.test.ts',
   'apps/union-eyes/lib/correspondence/roles.ts',
+  'apps/union-eyes/lib/dashboard/__tests__/role-experience.test.ts',
+  'apps/union-eyes/lib/__tests__/api-auth-guard-canonical.test.ts',
   'apps/union-eyes/lib/reality/capability-registry.ts',
 ])
 const PROVIDER_PATTERNS = [

@@ -20,6 +20,8 @@ The full role review also found a Clerk correspondence defect in application `aa
 
 The [Clerk packaging and native controls](evidence/ue-clerk-correspondence-20261123/local-packaging-and-native-controls.json) passed 28 disposable PostgreSQL cases and 389 focused contracts in the working tree. The official generators refreshed the changed guard commitment and 252 statement source digests; all 6,326 SQL statements are unchanged. Identity-provider checks still reject SDKs, vendor variables and provider usage in the union-role files. The earlier CI source-record and scanner failures remain recorded. Final-source repository checks, CI and staging actions remain pending; no provider delivery or inbox acceptance is inferred.
 
+The [canonical navigation proof](evidence/ue-clerk-correspondence-20261123/canonical-navigation-and-role-boundaries.json) distinguishes the V2 and legacy page-guard branches. Direct V2 guard tests confirm Clerk is refused by the numeric workbench guard despite catalogue level 70. The corrected menu uses an accessible Inbox landing and keeps explicit correspondence access; platform/national/federation titles are not offered the local letter page. The focused set passed 167 checks, including all 34 required role values against four real numeric guard thresholds and all 39 stored values for letter navigation; 389 contracts and five provider-residual checks also passed. This is working-tree proof only. Exact-source CI and real staging journeys remain required.
+
 The older dated sections below retain their original candidate scope and are historical evidence.
 
 ## November 16 runtime qualification delta
