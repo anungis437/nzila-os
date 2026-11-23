@@ -237,3 +237,17 @@ test('advisory ids are recorded as the canonical string the policy binds to the 
   assert.equal(flat['1120680'].id, '1120680')
   assert.equal(flat['1120680'].package, 'esbuild')
 })
+
+
+test('malformed snapshot indentation cannot conceal installed vulnerable packages', () => {
+  for (const malformed of [
+    ' undici@7.29.1:',
+    '   undici@7.29.1:',
+    '\tundici@7.29.1:',
+  ]) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  safe@1.0.0:\n' + malformed + '\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Malformed snapshot indentation/, JSON.stringify(malformed)))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  safe@1.0.0:\n    dependencies:\n      undici: 7.29.1\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['safe']))
+})
