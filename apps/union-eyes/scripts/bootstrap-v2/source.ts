@@ -324,7 +324,7 @@ exec(compile(open("/workspace/repo/apps/union-eyes/scripts/bootstrap-v2/"+sys.ar
         `UE_V2_COLLECTOR_CLEANUP_INSPECTION_FAILED:${residual.error ?? residual.stderr}`,
       )
     if (residual.stdout.trim()) {
-      const cleanup = spawnSync('docker', ['rm', '-f', residual.stdout.trim()], {
+      const cleanup = spawnSync('docker', ['rm', '-f', '-v', residual.stdout.trim()], {
         encoding: 'utf8',
         timeout: 30000,
       })

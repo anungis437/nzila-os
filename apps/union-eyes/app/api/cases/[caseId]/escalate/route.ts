@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * POST /api/cases/[caseId]/escalate
  *
@@ -59,7 +60,7 @@ const escalateSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     entitlement: 'grievance_case_suite',
     openapi: {
       tags: ['Cases'],

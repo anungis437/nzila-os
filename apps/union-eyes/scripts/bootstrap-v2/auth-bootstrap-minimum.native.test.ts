@@ -289,7 +289,7 @@ describe.skipIf(process.env.UE_V2_NATIVE_MANIFEST !== '1')(
           expect(
             docker(['inspect', '--format', '{{index .Config.Labels "nzila.mission"}}', container]),
           ).toBe(mission)
-          docker(['rm', '-f', container])
+          docker(['rm', '-f', '-v', container])
         }
       }
     }, 120000)

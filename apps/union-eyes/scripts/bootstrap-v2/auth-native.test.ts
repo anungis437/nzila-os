@@ -183,7 +183,7 @@ native('local native PostgreSQL auth execution boundary', () => {
         if (value === undefined) delete process.env[key]
         else process.env[key] = value
       }
-      if (created) execFileSync('docker', ['rm', '--force', name], { stdio: 'pipe' })
+      if (created) execFileSync('docker', ['rm', '--force', '--volumes', name], { stdio: 'pipe' })
     }
   })
 

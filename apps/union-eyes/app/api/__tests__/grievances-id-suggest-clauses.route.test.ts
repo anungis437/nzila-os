@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
@@ -59,10 +60,10 @@ describe('grievances/[id]/suggest-clauses route', () => {
     m.db.select = vi.fn(() => createSelectChain());
   });
 
-  it('declares what it asks of the wrapper: a steward, the case-suite entitlement and a tenant transaction', async () => {
+  it('declares handler eligibility, case-suite entitlement and a tenant transaction', async () => {
     await loadRoute();
     const config = declared.find((entry) => entry.openapi?.summary === 'Suggest or link collective-agreement clauses for a grievance');
-    expect(config?.auth).toEqual({ required: true, minRole: 'steward' });
+    expect(config?.auth).toEqual({ required: true, roles: [...CASE_HANDLER_ROLES] });
     expect(config?.entitlement).toBe('grievance_case_suite');
     expect(config?.rlsOrgContext).toBe(true);
   });

@@ -516,7 +516,7 @@ async function main() {
     passed = true
   } finally {
     for (const c of clients) await c.end().catch(() => {})
-    if (passed) docker(['rm', '-f', container])
+    if (passed) docker(['rm', '-f', '-v', container])
     else console.log('PROOF failed; owned disposable container retained for diagnosis:', container)
   }
 }

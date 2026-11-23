@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * Steward Workload Snapshot
  *
@@ -16,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export const GET = withApi(
   {
     rlsOrgContext: true,
-    auth: { minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     entitlement: 'grievance_case_suite',
     openapi: { tags: ['Grievances'], summary: 'Steward workload stats' },
   },

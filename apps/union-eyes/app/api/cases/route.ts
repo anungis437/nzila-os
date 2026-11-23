@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * Cases collection route — list and create cases (claims).
  * "Cases" are claims viewed from the steward workbench perspective.
@@ -136,12 +137,12 @@ export const GET = withApi(
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     openapi: {
       tags: ['Cases'],
-      summary: 'Create a new case (steward+ only)',
+      summary: 'Create a new case (case-handler capacity required)',
       description:
-        'Creates a new claim/case record. Requires steward role or above. ' +
+        'Creates a new claim/case record. Requires live case-handler capacity. ' +
         'Members must submit intakes via POST /api/grievances instead.',
     },
   },

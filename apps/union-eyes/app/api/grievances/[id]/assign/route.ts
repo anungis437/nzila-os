@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * Grievance Assignment API
  *
@@ -31,7 +32,7 @@ const assignSchema = z.union([z.object({ stewardId: z.guid() }).strict(), z.obje
 
 export const PATCH = withApi(
   {
-    auth: { required: true, minRole: 'officer' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     entitlement: 'grievance_case_suite',
     // The assignment must commit before the convergence step runs as the system role, which cannot see an uncommitted task. The wrapper would hold the
     // whole handler in one transaction (always in the canonical state, for a route that requires an organization), so this route opens its own

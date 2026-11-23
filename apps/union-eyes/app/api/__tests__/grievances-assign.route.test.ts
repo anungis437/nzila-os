@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
@@ -57,6 +58,7 @@ describe('grievances/[id]/assign route', () => {
     vi.clearAllMocks();
     resetCaller();
     caller.role = 'officer';
+    caller.role = 'officer';
     caller.params = { id: GRIEVANCE };
     m.requireKernelCaseAction.mockResolvedValue(undefined);
     m.automaticallyAssignRepresentative.mockResolvedValue({ assigneeId: NEW_STEWARD, stewardProfileId: NEW_STEWARD_PROFILE, kernel: { previousUserId: null }, matching: { specialization: 'safety', maxCaseload: 5 } });
@@ -96,10 +98,10 @@ describe('grievances/[id]/assign route', () => {
     });
   }
 
-  it('declares what it asks of the wrapper: an officer, the case-suite entitlement, and its own transactions', async () => {
+  it('declares handler eligibility, case-suite entitlement and its own transactions; assignment still requires live case authority', async () => {
     await loadRoute();
     const config = declared.find((entry) => entry.openapi?.summary === 'Assign a steward to a grievance');
-    expect(config?.auth).toEqual({ required: true, minRole: 'officer' });
+    expect(config?.auth).toEqual({ required: true, roles: [...CASE_HANDLER_ROLES] });
     expect(config?.entitlement).toBe('grievance_case_suite');
     // The assignment must commit before the system-role convergence step, so the wrapper must not hold one transaction around the handler.
     expect(config?.requireOrg).toBe(false);
@@ -121,7 +123,7 @@ describe('grievances/[id]/assign route', () => {
     expect(m.withRLSContext).not.toHaveBeenCalled();
   });
 
-  it('returns 403 for a caller below officer role', async () => {
+  it('returns 403 for a caller without case-handler eligibility', async () => {
     caller.role = 'member';
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
