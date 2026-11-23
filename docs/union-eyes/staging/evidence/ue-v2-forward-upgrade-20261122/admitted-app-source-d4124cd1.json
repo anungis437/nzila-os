@@ -1,0 +1,189 @@
+{
+  "status": "SOURCE_QUALIFIED_NORMAL_MAIN_ADMISSION_ONLY",
+  "recordedAt": "2026-11-23T07:16:42.770070+00:00",
+  "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+  "mainAdmissionMergeSha": "a82dfa0788a4cdbb6063ea3fe6c284fe4619f10f",
+  "pullRequest": 1284,
+  "incorporatedOperatorPullRequest": 1285,
+  "qualifiedTreeEqualsNormalMainMergeTree": true,
+  "sourcePlanDigest": "7d010442aee62b7689553f79417849305a53d78fe851c8b17430abe826dfe877",
+  "localRequiredCommands": [
+    {
+      "name": "lint",
+      "exitCode": 0
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "test-fast",
+      "exitCode": 0
+    },
+    {
+      "name": "validate-docs",
+      "exitCode": 0
+    },
+    {
+      "name": "governance-audit",
+      "exitCode": 0
+    }
+  ],
+  "localAssertionStatuses": {
+    "passed": 41364,
+    "skipped": 1623,
+    "pending": 13
+  },
+  "localRawTestReportSha256": "01a7af67e652757877a33a33fc91e69569fb618bc587e1677b7efa699b21e15d",
+  "conditionalSkipsAreUnexecuted": true,
+  "requiredTrustedContexts": 19,
+  "requiredTrustedChecks": [
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539350551",
+      "name": "Merge Authority / Ops Documentation",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539348006",
+      "name": "Merge Authority / IaC Security",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539343138",
+      "name": "Merge Authority / Hash Chain Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539345500",
+      "name": "Merge Authority / Operating Layer",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539340823",
+      "name": "Merge Authority / Governance Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539337785",
+      "name": "Merge Authority / Repository Inventory",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539335106",
+      "name": "Merge Authority / Architectural Contracts",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539332115",
+      "name": "Merge Authority / Affected Build",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539329349",
+      "name": "Merge Authority / Migration Chain",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539324524",
+      "name": "Merge Authority / Schema Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539326684",
+      "name": "Merge Authority / PostgreSQL RLS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539319789",
+      "name": "Merge Authority / Lint & Typecheck",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137539322454",
+      "name": "Merge Authority / Unit Tests",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137527250643",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137527247955",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/runs/137527244765",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45124855046/job/137526750473",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45124855046/job/137526750220",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/45124855046/job/137526750429",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    }
+  ],
+  "registeredCheckConclusions": {
+    "SKIPPED": 13,
+    "SUCCESS": 126
+  },
+  "registeredChecksFinishedWithoutFailure": 139,
+  "nativePreservationRun": 45124855069,
+  "nativePostgresRun": 45124854786,
+  "nativeInvitationAndMailRun": 45124854836,
+  "nativePostgresCanonicalCases": {
+    "postgres15Passed": 1056,
+    "postgres16Passed": 1056,
+    "unexecutedLegacyTopologyCasesEach": 4
+  },
+  "nativeMailAndAudit": {
+    "passed": 34,
+    "unexecuted": 0,
+    "actualInbox": false
+  },
+  "nativeInvitationConcurrency": {
+    "passed": 15,
+    "unexecuted": 0
+  },
+  "disposableRuntimeEngineering": "Production build, actual login,4browser profiles and unchanged load job passed; global/raw final acceptance remains unproven.",
+  "founderModel": "anungis and anungis437 are the same founder; Codex review under explicit standing delegation; no independent human or security team claimed.",
+  "fullScope": {
+    "stakeholderFamilies": 35,
+    "requiredStakeholderFamilies": 26,
+    "deferredStakeholderFamilies": 9,
+    "storedRoles": 39,
+    "requiredRoleBoundaries": 34,
+    "deprecatedRoles": 5,
+    "lifecycleStages": 16,
+    "operatingModels": 4,
+    "variants": 6,
+    "requiredScopeNodes": 654,
+    "sevenProfilesAreSubsetOnly": true
+  },
+  "applicationImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:c25666f05287b43887c2a5afb23ea89768062610767ac2cb0a1570f13619eef0",
+  "actualStagingAcceptance": false,
+  "liveDataOrTrafficChanged": false,
+  "financeImplementationAuthorized": false,
+  "productionAuthorized": false,
+  "imageBuildQualification": {
+    "runId": 45129434713,
+    "workflowSha": "a82dfa0788a4cdbb6063ea3fe6c284fe4619f10f",
+    "sourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+    "conclusion": "SUCCESS",
+    "manifestSha256": "b7ef8b808681cbf2f4ef230bb60ef016c6ad1d2f530dea2e5150e0d3a4aeb1fe",
+    "manifest": "release-manifest-d4124cd1.json",
+    "observedAt": "2026-11-23T07:29:36.787586+00:00",
+    "freshRegistryAttestationRequiredBeforeDeploy": true
+  }
+}
