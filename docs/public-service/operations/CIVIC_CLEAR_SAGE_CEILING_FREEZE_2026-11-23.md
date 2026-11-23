@@ -22,7 +22,7 @@ This is a design-only decision instrument. It neither authorizes CIVIC runtime n
 6. `governance/foundations/civic-oci-doctrine.contract.json` is the machine authority for CIVIC runtime permission. Historical synthetic grants expired or were revoked; none are reused.
 7. Source-of-truth conflicts must be reconciled in owner-authorized amendments. This document cannot override any of these by implication.
 
-## 3. Decisions proposed to lock
+## 3. Decisions accepted in C0 product freeze
 
 | ID | Domain | Exact design choice and invariant |
 |---|---|---|
@@ -116,7 +116,7 @@ External institutional facts cannot be invented at product design time: actual s
 - **C07:** Historic launch proof is not a live deployment state; re-check migrations, telemetry, restore, accessibility and client experience.
 - **C08:** Historical manual kit/blueprint states are not operational evidence; update source-to-reality index, not doctrine ad hoc.
 
-## 10. Work packages — implementation intentionally NOT begun
+## 10. Work packages — bounded source implementation in progress
 
 L0: owner-accepted contract/ceiling, method source map, product information architecture, R/D/T and persona-action test specification.
 
@@ -134,7 +134,7 @@ L6: operational release gates, telemetry, incident, restore, notification, reten
 
 L7: fictional tool demonstration, contractual client pilot boundary, UAT, service model and genuine client acceptance.
 
-Work packages can proceed in parallel after founder acceptance and C1 constitutional authorization. One owner integrates shared schema, identity, audit and method API changes; UE has priority ownership over currently active UE Step 1 paths. No branch collision, retroactive deployment claim or speculative connector required to qualify the first release.
+SAGE-owned source remediation and pure, unwired contract work may proceed in parallel under the accepted C0 founder design decision. Protected CIVIC runtime work must await a distinct, narrowly scoped C1 constitutional authorization. One integration owner coordinates shared schema, identity, audit and method API changes; UE has priority ownership over currently active UE Step 1 paths. No branch collision, retroactive deployment claim or speculative connector required to qualify the first release.
 
 ## 11. Gate sequence
 
