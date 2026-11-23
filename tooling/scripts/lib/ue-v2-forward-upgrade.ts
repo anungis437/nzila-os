@@ -35,6 +35,38 @@ export interface UpgradeStatement {
   sql: string
   role?: string
 }
+
+/** Historical migrations left zero-argument guard functions with the original
+ * administrator. Transfer only an existing, target-declared function to its
+ * qualified canonical owner before replacing its body as that owner. No
+ * application code is ever executed as the administrator by this handoff. */
+export function canonicalFunctionOwnerHandoff(
+  previous: UpgradeObject,
+  target: UpgradeObject,
+): UpgradeStatement | undefined {
+  assert(
+    previous.kind === 'function' && target.kind === 'function' && previous.id === target.id,
+    'UE_UPGRADE_FUNCTION_OWNER_IDENTITY_REFUSED',
+  )
+  if (previous.definition.owner === target.definition.owner) return undefined
+  assert(
+    previous.definition.owner === 'uev2admin' && target.definition.owner === 'ue_v2_owner',
+    'UE_UPGRADE_FUNCTION_OWNER_TRANSITION_REFUSED',
+  )
+  assert(
+    /^(?:(?:public|user_management)\.)?[a-z_][a-z0-9_]*\(\)$/.test(previous.id),
+    'UE_UPGRADE_FUNCTION_OWNER_SIGNATURE_REFUSED',
+  )
+  const identity = /^(public|user_management)\./.test(previous.id)
+    ? previous.id
+    : `public.${previous.id}`
+  return {
+    phase: 'canonical-function-owner',
+    object: previous.id,
+    sql: `ALTER FUNCTION ${identity} OWNER TO ue_v2_owner`,
+    role: 'uev2admin',
+  }
+}
 const ident = /^[a-z_][a-z0-9_]{0,62}$/
 export const quoteUpgradeIdentifier = (s: string) => {
   assert(ident.test(s), 'UE_UPGRADE_IDENTIFIER_REFUSED')
@@ -483,6 +515,10 @@ export async function planCanonicalForwardUpgrade(input: {
     }
     if (previous && changed && kind === 'index')
       assert.fail(`UE_UPGRADE_INDEX_REPLACEMENT_REFUSED:${id}`)
+    if (previous && changed && kind === 'function') {
+      const handoff = canonicalFunctionOwnerHandoff(previous, wanted!)
+      if (handoff) result.push(handoff)
+    }
     for (const [i, node] of parsed.statements.entries()) {
       let sql = parsed.texts[i]
       const tag = Object.keys(node)[0]

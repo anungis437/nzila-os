@@ -13,7 +13,11 @@ import {
   canonicalCatalogContract,
   inspectCanonicalAuthCatalog,
 } from '../../../apps/union-eyes/lib/operations/canonical-catalog-admission'
-import type { UpgradeObject, UpgradeStatement } from './ue-v2-forward-upgrade'
+import {
+  canonicalFunctionOwnerHandoff,
+  type UpgradeObject,
+  type UpgradeStatement,
+} from './ue-v2-forward-upgrade'
 
 export interface ForwardUpgradeBundle {
   version: 1
@@ -39,6 +43,27 @@ export const forwardDigest = (v: unknown) =>
   createHash('sha256')
     .update(JSON.stringify(stable(v)) ?? 'undefined')
     .digest('hex')
+export function assertCanonicalFunctionOwnerStatement(
+  statement: UpgradeStatement,
+  bundle: Pick<ForwardUpgradeBundle, 'before' | 'target'>,
+) {
+  assert.equal(
+    statement.phase,
+    'canonical-function-owner',
+    'UE_UPGRADE_FUNCTION_OWNER_PHASE_REFUSED',
+  )
+  const previous = bundle.before.find((o) => o.kind === 'function' && o.id === statement.object)
+  const target = bundle.target.find((o) => o.kind === 'function' && o.id === statement.object)
+  assert(previous && target, 'UE_UPGRADE_FUNCTION_OWNER_PREIMAGE_REQUIRED')
+  const expected = canonicalFunctionOwnerHandoff(previous, target)
+  assert(expected, 'UE_UPGRADE_FUNCTION_OWNER_HANDOFF_NOT_REQUIRED')
+  assert.equal(
+    forwardDigest(statement),
+    forwardDigest(expected),
+    'UE_UPGRADE_FUNCTION_OWNER_STATEMENT_REFUSED',
+  )
+}
+
 const q = (s: string) => {
   assert(s && !s.includes('\0'), 'UE_UPGRADE_EMPTY_IDENTIFIER')
   return '"' + s.replaceAll('"', '""') + '"'
@@ -415,6 +440,11 @@ export async function executeForwardUpgrade(
   await client.query('SET LOCAL check_function_bodies=false')
   for (const [index, statement] of bundle.statements.entries()) {
     const role = statement.role ?? 'ue_v2_owner'
+    let canonicalOwnerHandoff = false
+    if (statement.phase === 'canonical-function-owner') {
+      assertCanonicalFunctionOwnerStatement(statement, bundle)
+      canonicalOwnerHandoff = true
+    }
     const retainedFunctionOwner =
       bundle.before.some(
         (o) => o.kind === 'function' && o.id === statement.object && o.definition.owner === role,
@@ -431,7 +461,8 @@ export async function executeForwardUpgrade(
       bundle.before.some(
         (o) => o.kind === 'relation' && o.id === relationId && o.definition.owner === role,
       )
-    const retainedOwner = role === 'uev2admin' && (retainedFunctionOwner || retainedTableOwner)
+    const retainedOwner =
+      role === 'uev2admin' && (retainedFunctionOwner || retainedTableOwner || canonicalOwnerHandoff)
     assert(
       retainedOwner || bundle.target.some((o) => o.kind === 'role' && o.id === role),
       'UE_UPGRADE_EXECUTOR_ROLE_REFUSED',
