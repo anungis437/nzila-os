@@ -9,7 +9,7 @@
 
 | ID | Claim | Verdict | Evidence |
 |---|---|---|---|
-| P01 | Historic CAD 40k vs current CAD 30k; cumulative refusal; unverified/recusal | `LOCAL_TESTED` | `packages/sage-core/src/institutional-mandate-enforcement.pglite.test.ts`, `institutional-authority.test.ts` |
+| P01 | Historic CAD 40k vs current CAD 30k; cumulative refusal; E04 training receipt≠acceptance; contested source; unresolved delay explanations | `LOCAL_TESTED` | `p01-alder-civic-journey.test.ts`, `institutional-mandate-enforcement.pglite.test.ts`, `institutional-authority.test.ts`, `accountability-draft.ts` (`RECEIVED_ACCEPTANCE_UNPROVEN`) |
 | R01 / S01 | No automatic succession inheritance; historical inspectability | `LOCAL_TESTED` | `packages/sage-core/src/institutional-succession.test.ts` |
 | T01 | Honest variance; missing spend; draft ≠ adoption | `LOCAL_TESTED` | `accountability-draft.test.ts`, `accountability-adoption.test.ts` |
 | Pattern A | Decision + institutional action + outbox under mandate | `LOCAL_TESTED` | `decision-mandate-ratification.pglite.test.ts` + platform-admin governance routes |

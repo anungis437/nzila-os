@@ -92,6 +92,17 @@ export type SageAccountabilityDraftOutput = {
     acceptanceEvidence: SageAccountabilityEvidenceRef | null
     actualSpendEvidence: SageAccountabilityEvidenceRef | null
   }
+  /**
+   * E04 / P01 training-style disposition: receipt of delivery is never treated
+   * as institutional acceptance. Open evidence tasks stay explicit.
+   */
+  executionDisposition:
+    | 'MISSING'
+    | 'ZERO_RECEIVED'
+    | 'RECEIVED_ACCEPTANCE_UNPROVEN'
+    | 'PARTIALLY_ACCEPTED'
+    | 'FULLY_ACCEPTED'
+  openEvidenceTasks: readonly ('deliverable_acceptance' | 'actual_spend' | 'authority_attestation')[]
   outcome: {
     expected: SageAccountabilityMeasure
     observed: SageAccountabilityMeasure | null
@@ -282,6 +293,24 @@ export function buildSageAccountabilityDraft(
   if (!input.nextDecisionOwnerActorId?.trim()) missing.push('next_decision_owner')
   missing.push('human_adoption')
 
+  const received = input.execution?.receivedDeliverables
+  const accepted = input.execution?.acceptedDeliverables
+  let executionDisposition: SageAccountabilityDraftOutput['executionDisposition'] = 'MISSING'
+  if (input.execution) {
+    if (received === 0) executionDisposition = 'ZERO_RECEIVED'
+    else if (accepted === undefined) executionDisposition = 'RECEIVED_ACCEPTANCE_UNPROVEN'
+    else if (accepted < (received ?? 0)) executionDisposition = 'PARTIALLY_ACCEPTED'
+    else executionDisposition = 'FULLY_ACCEPTED'
+  }
+
+  const openEvidenceTasks: SageAccountabilityDraftOutput['openEvidenceTasks'][number][] = [
+    'authority_attestation',
+  ]
+  if (executionDisposition === 'RECEIVED_ACCEPTANCE_UNPROVEN' || executionDisposition === 'PARTIALLY_ACCEPTED') {
+    openEvidenceTasks.push('deliverable_acceptance')
+  }
+  if (!input.actualSpend) openEvidenceTasks.push('actual_spend')
+
   return {
     status: 'DRAFT_REQUIRES_HUMAN_ADOPTION',
     orgId: input.orgId,
@@ -309,6 +338,8 @@ export function buildSageAccountabilityDraft(
       acceptanceEvidence: input.execution?.acceptanceEvidence ? { ...input.execution.acceptanceEvidence } : null,
       actualSpendEvidence: input.actualSpend ? { ...input.actualSpend.evidence } : null,
     },
+    executionDisposition,
+    openEvidenceTasks,
     outcome: {
       expected: structuredClone(input.expected),
       observed: observed ? structuredClone(observed) : null,

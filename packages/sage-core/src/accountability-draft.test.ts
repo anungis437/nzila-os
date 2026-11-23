@@ -120,6 +120,10 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     expect(brief.missing).toContain('deliverable_acceptance')
     expect(brief.missing).toContain('authority_attestation')
     expect(brief.missing).toContain('human_adoption')
+    expect(brief.executionDisposition).toBe('RECEIVED_ACCEPTANCE_UNPROVEN')
+    expect(brief.openEvidenceTasks).toEqual(
+      expect.arrayContaining(['deliverable_acceptance', 'actual_spend', 'authority_attestation']),
+    )
     expect(brief.humanAdoption).toBe('NOT_ESTABLISHED')
     expect(brief.causalAttribution).toBe('NOT_ASSESSED')
     expect(brief.differingInterpretations).toHaveLength(2)
@@ -180,6 +184,8 @@ describe('SAGE source-bound executive accountability draft (synthetic, no instit
     expect(accepted.commitment.actualSpendEvidence).toEqual(ref(spend))
     expect(accepted.missing).not.toContain('deliverable_acceptance')
     expect(accepted.missing).not.toContain('actual_spend')
+    expect(accepted.executionDisposition).toBe('PARTIALLY_ACCEPTED')
+    expect(accepted.openEvidenceTasks).toContain('deliverable_acceptance')
     expect(accepted.humanAdoption).toBe('NOT_ESTABLISHED')
   })
 
