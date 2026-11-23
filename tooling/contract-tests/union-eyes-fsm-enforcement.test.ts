@@ -23,8 +23,31 @@ describe('UE-FSM-001: Union Eyes route-level FSM enforcement', () => {
     expect(src).toContain("'assignedTo' in body || 'status' in body")
     expect(src).toContain("throw ApiError.badRequest('Use the case assignment or transition endpoint for this change')")
     const transition = read('apps/union-eyes/app/api/cases/[caseId]/transition/route.ts')
-    expect(transition).toContain('validateTransition(')
+    // Follow the actual shared validator, rather than requiring each route to
+    // duplicate its stored-fact hydration and lifecycle mapping.
+    expect(transition).toContain('loadClaimTransitionSource(tx, orgId, claim.claimId)')
+    expect(transition).toContain('validateClaimCaseTransition(stored, actor.role, targetStatus, reason)')
     expect(transition).toContain('if (!validation.allowed)')
+    const policy = read('apps/union-eyes/lib/workflow/claim-transition-policy.ts')
+    const tree = ts.createSourceFile('claim-transition-policy.ts', policy, ts.ScriptTarget.Latest, true)
+    const lifecycleImport = tree.statements.find(statement => ts.isImportDeclaration(statement)
+      && ts.isStringLiteral(statement.moduleSpecifier) && statement.moduleSpecifier.text === './case-lifecycle')
+    expect(lifecycleImport && ts.isImportDeclaration(lifecycleImport)
+      && lifecycleImport.importClause?.namedBindings?.getText(tree)).toContain('validateTransition')
+    const validator = tree.statements.find(statement => ts.isFunctionDeclaration(statement)
+      && statement.name?.text === 'validateClaimCaseTransition')
+    expect(validator && ts.isFunctionDeclaration(validator) && validator.body).toBeTruthy()
+    const lifecycleCalls: ts.CallExpression[] = []
+    const visit = (node: ts.Node) => {
+      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)
+          && node.expression.text === 'validateTransition') lifecycleCalls.push(node)
+      ts.forEachChild(node, visit)
+    }
+    if (!validator) throw new Error('The shared claim validator must exist')
+    visit(validator)
+    expect(lifecycleCalls).toHaveLength(1)
+    expect(lifecycleCalls[0]!.arguments[0]?.getText(tree)).toContain('...claimTransitionFacts(claim, notes)')
+    expect(transition.indexOf('if (!validation.allowed)')).toBeLessThan(transition.indexOf('.update(claims)'))
     expect(src).not.toContain("status: 'status'")
   })
 

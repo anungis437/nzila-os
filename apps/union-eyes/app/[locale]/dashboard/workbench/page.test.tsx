@@ -11,6 +11,11 @@ vi.mock('next-intl/server', () => ({ getTranslations: vi.fn() }));
 vi.mock('@/components/workbench/workbench-console', () => ({ default: () => null }));
 
 import WorkbenchPage from './page';
+import { UserRole } from '@/lib/auth/roles';
+
+const handlerRoles = ['steward', 'chief_steward', 'officer', 'president',
+  'vice_president', 'secretary_treasurer', 'health_safety_rep', 'bargaining_committee'];
+const nonHandlerRoles = Object.values(UserRole).filter(role => !handlerRoles.includes(role));
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -31,7 +36,7 @@ describe('workbench collection entry audience', () => {
     },
   );
 
-  it.each(['admin', 'app_owner', 'member', 'clerk', 'national_officer', 'unknown'])(
+  it.each([...nonHandlerRoles, 'unknown'])(
     'refuses the case staff surface for %s without handler eligibility', async role => {
       auth.requireUser.mockResolvedValue({ roles: [role] });
       await expect(WorkbenchPage()).rejects.toThrow('REDIRECT:/dashboard');
