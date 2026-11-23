@@ -1,0 +1,17 @@
+{
+  "extends": "../../apps/union-eyes/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "target": "ES2022"
+  },
+  "include": [
+    "lib/ue-v2-forward-upgrade.ts",
+    "lib/ue-v2-forward-upgrade-runtime.ts",
+    "lib/ue-v2-forward-upgrade.test.ts",
+    "prepare-ue-v2-forward-upgrade.cts",
+    "prove-ue-v2-forward-upgrade.cts",
+    "ue-v2-staging-forward-upgrade.cts"
+  ],
+  "exclude": ["../../node_modules"]
+}

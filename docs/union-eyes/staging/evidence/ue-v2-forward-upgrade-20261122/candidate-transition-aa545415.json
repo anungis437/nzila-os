@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-11-22T23:53:03.825818+00:00",
+  "currentApplicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "priorSource": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+  "priorSourceDisposition": "HELD_AFTER_NEWLY_EXECUTED_NATIVE_FAILURES_NOT_DEPLOYED",
+  "initialNativeLetters": {
+    "passed": 5,
+    "failed": 16
+  },
+  "repairedFamilies": [
+    "SYSTEM correspondence transport attempted an ungranted direct tenant-table read; preserve grants and use bounded database-minted current context.",
+    "Case numbering used count+1 and collided under concurrent creation; preserve format and old rows, serialize organization/date and allocate greatest numeric suffix plus one.",
+    "Collection reads redundantly reacquired locks; use an unforgeable executor/actor/organization/resource/original-transaction scope and retain facts/kernel/fresh-clock checks.",
+    "Synthetic native fixture setup lacked current adopted assignment rule, authenticated issuer and linked audits; repair fixtures without weakening physical guards."
+  ],
+  "intermediateSource": "a9c47099242c13e23efc72562ca63f3a6cabcc8b",
+  "intermediateDisposition": "HELD_STALE_CURRENT_CATALOG_OVERLAY_AND_LITERAL_CI_FIXTURE_URI",
+  "correctedPackaging": [
+    "Official current-catalog generator changes only source-plan fingerprint; declarations and6326SQL statements unchanged.",
+    "CI constructs synthetic database connection from runtime environment; unchanged secrets contract passes."
+  ],
+  "finalSource": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "earlierFailuresRetained": true,
+  "newSourceAdmission": "admitted-app-source-aa545415.json",
+  "stagingAcceptanceInferred": false,
+  "productionAuthorized": false
+}

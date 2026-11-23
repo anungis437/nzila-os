@@ -1,0 +1,245 @@
+name: Union Eyes V2 staging data-preserving forward upgrade
+
+on:
+  pull_request:
+    paths:
+      - 'tooling/scripts/*ue-v2*forward-upgrade*'
+      - 'tooling/scripts/lib/ue-v2-forward-upgrade*'
+      - 'tooling/scripts/test_run_ue_v2_forward_upgrade_job.py'
+      - 'tooling/docker/ue-v2-forward-upgrade.Dockerfile'
+      - '.github/workflows/ue-v2-staging-forward-upgrade.yml'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Rehearsal rolls back all DDL; apply requires its exact plan and preimage digests
+        type: choice
+        options: [rehearse, apply, preflight]
+        default: rehearse
+        required: true
+      expected_plan_digest:
+        description: Successful staging rehearsal plan digest (apply only)
+        type: string
+      expected_before_digest:
+        description: Successful staging rehearsal preimage digest (apply only)
+        type: string
+      rehearsal_run_id:
+        description: Successful main workflow rehearsal run with rollback and cleanup receipts (apply only)
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-v2-staging-deploy
+  cancel-in-progress: false
+
+env:
+  APPLICATION_SOURCE: aa545415cfe4b172733000cfc6510712d4de0cba
+  SUBSCRIPTION: d562ba7f-d891-4504-a489-10917c0ebaaf
+  STAGING_RG: nzila-canada-staging-rg
+  REGISTRY: nzilaventuresacr
+  IMAGE_REPOSITORY: nzila-os-union-eyes-v2
+  QUALIFIED_APPLICATION_IMAGE: nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af5f9cfc79f5c09f0197bab2b5f1488bd92c5f7af2ee2d92fccab1357b899e82
+  NODE_OPTIONS: --max-old-space-size=3072
+
+jobs:
+  qualify:
+    name: Native managed upgrade and preservation proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Safety controls and semantic check
+        env:
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
+          node tooling/scripts/generate-ue-v2-staging-candidate.mjs --check
+          node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
+          pnpm exec tsx --test tooling/scripts/lib/ue-v2-forward-upgrade.test.ts
+          python3 -m unittest discover -s tooling/scripts -p test_run_ue_v2_forward_upgrade_job.py -v
+          pnpm exec tsc --project tooling/scripts/ue-v2-forward-upgrade.tsconfig.json
+      - name: Hash-locked interpreter wheelhouse
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ue-v2-wheels"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$RUNNER_TEMP/ue-v2-wheels:/wheels" \
+            python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+            --require-hashes --no-deps --only-binary=:all: -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$RUNNER_TEMP/ue-v2-wheels/"*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$RUNNER_TEMP/ue-v2-wheels" >> "$GITHUB_ENV"
+          docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: cccfc8c311a1017f80241bf089c00ef0c6828751
+          path: .ue-previous-source
+          persist-credentials: false
+      - name: Reproduce the original canonical schema without live data
+        env:
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/.ue-previous-source/apps/union-eyes/tsconfig.json
+          UE_V2_WHEELHOUSE: ${{ runner.temp }}/ue-old-wheels
+        run: |
+          set -euo pipefail
+          mkdir -p "$UE_V2_WHEELHOUSE"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/.ue-previous-source/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$UE_V2_WHEELHOUSE:/wheels" \
+            python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+            --require-hashes --no-deps --only-binary=:all: -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' .ue-previous-source/apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$UE_V2_WHEELHOUSE/"*.whl | awk '{print $1}' | sort)
+          pnpm --dir .ue-previous-source install --frozen-lockfile --ignore-scripts
+          pnpm --dir .ue-previous-source exec tsx tooling/scripts/export-ue-v2-staging-schema.cts --out "$RUNNER_TEMP/ue-old-export"
+      - name: Qualify the current schema export and retained managed upgrade
+        env:
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
+          pnpm exec tsx tooling/scripts/export-ue-v2-staging-schema.cts --out "$RUNNER_TEMP/ue-current-export"
+          pnpm exec tsx tooling/scripts/prove-ue-v2-forward-upgrade.cts \
+            --before "$RUNNER_TEMP/ue-old-export" --after "$RUNNER_TEMP/ue-current-export" --out "$RUNNER_TEMP/ue-upgrade-proof"
+          pnpm exec tsx tooling/scripts/prepare-ue-v2-forward-upgrade.cts \
+            --export "$RUNNER_TEMP/ue-current-export" --out "$RUNNER_TEMP/forward-operator/assets"
+          pnpm exec esbuild tooling/scripts/ue-v2-staging-forward-upgrade.cts --bundle --platform=node --format=cjs \
+            --target=node22 --external:pg --external:libpg-query --tsconfig=apps/union-eyes/tsconfig.json \
+            --outfile="$RUNNER_TEMP/forward-operator/main.cjs"
+          OPERATOR_DIR="$RUNNER_TEMP/forward-operator" node - <<'NODE'
+          const fs = require('node:fs'), path = require('node:path')
+          const base = fs.realpathSync('node_modules/libpg-query')
+          const dest = process.env.OPERATOR_DIR
+          fs.cpSync(base, path.join(dest, 'node_modules/libpg-query'), {recursive:true, dereference:true})
+          fs.cpSync(path.join(base, '../@pgsql/types'), path.join(dest, 'node_modules/@pgsql/types'), {recursive:true, dereference:true})
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ue-forward-upgrade-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/ue-upgrade-proof/receipt.json
+          if-no-files-found: warn
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ue-forward-operator-${{ github.run_id }}
+          path: ${{ runner.temp }}/forward-operator
+          retention-days: 7
+
+  build:
+    name: Build the qualified staging operations image
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: qualify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: build
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image: ${{ steps.image.outputs.reference }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ue-forward-operator-${{ github.run_id }}
+          path: ${{ runner.temp }}/operator-context/forward-operator
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Build and push immutable operations image
+        id: image
+        run: |
+          set -euo pipefail
+          test "$(az account show --query id -o tsv)" = "$SUBSCRIPTION"
+          az acr login --name "$REGISTRY" --only-show-errors
+          TAG="$REGISTRY.azurecr.io/$IMAGE_REPOSITORY:forward-upgrade-$GITHUB_SHA"
+          docker build -f tooling/docker/ue-v2-forward-upgrade.Dockerfile \
+            --build-arg "QUALIFIED_APPLICATION_IMAGE=$QUALIFIED_APPLICATION_IMAGE" \
+            --build-arg "OPERATOR_SOURCE_SHA=$GITHUB_SHA" -t "$TAG" "$RUNNER_TEMP/operator-context"
+          # Exercise the actual packaged entrypoint with networking disabled.
+          # Missing runtime modules must fail before publication or staging use.
+          set +e
+          docker run --rm --network none -e UE_UPGRADE_OPERATION=preflight -e UE_ENVIRONMENT=production \
+            "$TAG" > "$RUNNER_TEMP/forward-image-refusal.log" 2>&1
+          REFUSAL_STATUS=$?
+          set -e
+          test "$REFUSAL_STATUS" -eq 1
+          node - <<'NODE'
+          const fs = require('node:fs'), assert = require('node:assert/strict')
+          const lines = fs.readFileSync(process.env.RUNNER_TEMP + '/forward-image-refusal.log','utf8').split('\n')
+          const line = lines.find(s => s.startsWith('UE_UPGRADE_RECEIPT '))
+          assert(line, 'Packaged operator must emit its structured refusal receipt')
+          const receipt = JSON.parse(line.slice('UE_UPGRADE_RECEIPT '.length))
+          assert.equal(receipt.status, 'FAIL'); assert.equal(receipt.failure, 'UE_UPGRADE_STAGING_ONLY')
+          assert.equal(receipt.changesCommitted, false); assert.equal(receipt.productionDeployment, false)
+          NODE
+          docker push "$TAG"
+          DIGEST=$(az acr manifest show-metadata -r "$REGISTRY" -n "$IMAGE_REPOSITORY:forward-upgrade-$GITHUB_SHA" --query digest -o tsv)
+          [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "reference=$REGISTRY.azurecr.io/$IMAGE_REPOSITORY@$DIGEST" >> "$GITHUB_OUTPUT"
+
+  staging:
+    name: Protected staging-only database operation
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: ue-staging
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Verify current staging authority and explicit apply bindings
+        env:
+          OPERATION: ${{ inputs.operation }}
+          EXPECTED_PLAN: ${{ inputs.expected_plan_digest }}
+          EXPECTED_BEFORE: ${{ inputs.expected_before_digest }}
+          REHEARSAL_RUN_ID: ${{ inputs.rehearsal_run_id }}
+        run: |
+          set -euo pipefail
+          node tooling/scripts/union-eyes-v2-staging-gate-cli.mjs --gate change-record \
+            --change-id CHG-2026-0114 --source-sha "$APPLICATION_SOURCE" --change-dir ops/change-records
+          node - <<'NODE'
+          const assert = require('node:assert/strict')
+          assert(['preflight','rehearse','apply'].includes(process.env.OPERATION))
+          if (process.env.OPERATION === 'apply') {
+            for (const n of ['EXPECTED_PLAN','EXPECTED_BEFORE']) assert(/^[a-f0-9]{64}$/.test(process.env[n] || ''))
+            assert(/^[0-9]+$/.test(process.env.REHEARSAL_RUN_ID || ''))
+          }
+          NODE
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Run one owned job inside the existing private staging network
+        env:
+          OPERATOR_IMAGE: ${{ needs.build.outputs.image }}
+          OPERATION: ${{ inputs.operation }}
+          EXPECTED_PLAN: ${{ inputs.expected_plan_digest }}
+          EXPECTED_BEFORE: ${{ inputs.expected_before_digest }}
+          REHEARSAL_RUN_ID: ${{ inputs.rehearsal_run_id }}
+          GH_TOKEN: ${{ github.token }}
+          PG_ADMIN_PASSWORD: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD }}
+        run: |
+          python3 tooling/scripts/run-ue-v2-forward-upgrade-job.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ue-staging-forward-upgrade-${{ inputs.operation }}-${{ github.run_id }}
+          path: artifacts/ue-v2-forward-upgrade/*.json
+          if-no-files-found: warn
+          retention-days: 14
