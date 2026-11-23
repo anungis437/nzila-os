@@ -65,11 +65,18 @@ export function buildSageInstitutionalQaContext(
     payload,
     input.claimRegister ?? [],
   )
-  // Belt-and-suspenders: no claim may reference an evidence id absent from payload.
+  // Belt-and-suspenders: visibility of an item id is insufficient to
+  // authorize a different source ID or a caller-supplied lower classification.
+  // The claim register is a narrative annotation, not an authority oracle.
   for (const c of claims) {
-    if (!payload.evidence.some((e) => e.evidenceItemId === c.evidenceItemId)) {
+    if (!payload.evidence.some(
+      (e) =>
+        e.evidenceItemId === c.evidenceItemId &&
+        e.sourceId === c.sourceId &&
+        e.authorizationLevel === c.authorizationLevel,
+    )) {
       throw new SageInvariantError(
-        `DO_NOT_REGRESS: claim ${c.claimId} references evidence absent from authorized context`,
+        `DO_NOT_REGRESS: claim ${c.claimId} has no exact authorized evidence/source binding`,
       )
     }
   }
