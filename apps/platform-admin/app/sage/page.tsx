@@ -50,11 +50,9 @@ export default async function SageWorkspaceIndexPage({
   }
 
   const { orgId, orgName, orgRole } = result.context
-  const { workspaces } = await listSageWorkspacesForScope({
-    actorId: result.context.actorId,
-    orgId,
-    orgRole,
-  })
+  // Forward the authenticated server context in full. Reconstructing a three-
+  // field scope drops authenticationType and fails SAGE's actor-kind contract.
+  const { workspaces } = await listSageWorkspacesForScope(result.context)
   const writable = canWrite(orgRole)
 
   return (
