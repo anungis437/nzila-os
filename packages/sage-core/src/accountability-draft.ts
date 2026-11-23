@@ -126,6 +126,14 @@ function required(value: string, name: string): void {
   if (typeof value !== 'string' || value.trim().length === 0) fail(name + ' required')
 }
 
+function validUtcInstant(value: string, label: string): void {
+  if (
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) ||
+    !Number.isFinite(Date.parse(value)) ||
+    new Date(Date.parse(value)).toISOString() !== value
+  ) fail(label + ' must be a valid canonical UTC timestamp')
+}
+
 function nonNegativeFinite(value: number, field: string): void {
   if (!Number.isFinite(value) || value < 0) fail(field + ' must be finite and nonnegative')
 }
@@ -169,6 +177,7 @@ export function buildSageAccountabilityDraft(
     intervention: input.intervention,
     reviewDueAt: input.reviewDueAt,
   })) required(value, name)
+  validUtcInstant(input.reviewDueAt, 'reviewDueAt')
 
   // A duplicate item ID is ambiguous even when the duplicate rows agree.
   const permitted = new Map<string, SageAccountabilityEvidenceRef | null>()
