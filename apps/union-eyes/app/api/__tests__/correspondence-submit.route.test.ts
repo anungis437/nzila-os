@@ -1,4 +1,4 @@
-/** Step 1 S1-A06 / C16: submitting correspondence for review is steward-only, tenant-bound, and never touches another organization's letter. */
+/** Step 1 S1-A06 / C16: submitting correspondence for review requires a local correspondence staff role, is tenant-bound, and never touches another organization's letter. */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const m = vi.hoisted(() => ({ withApi: vi.fn(), getCorrespondenceById: vi.fn(), submitForReview: vi.fn() }))
@@ -18,10 +18,10 @@ describe('POST /api/correspondence/[id]/submit authority', () => {
     m.getCorrespondenceById.mockResolvedValue({ id: ID, organizationId: 'org_1' })
     m.submitForReview.mockResolvedValue({ id: ID, status: 'pending_review' })
   })
-  it('requires an authenticated steward inside the caller tenant transaction', async () => {
+  it('requires authenticated local letter staff, including Clerk, inside the caller tenant transaction', async () => {
     await import('../correspondence/[id]/submit/route')
     expect(m.withApi).toHaveBeenCalledWith(
-      expect.objectContaining({ rlsOrgContext: true, auth: expect.objectContaining({ required: true, minRole: 'steward' }) }), expect.any(Function))
+      expect.objectContaining({ rlsOrgContext: true, auth: expect.objectContaining({ required: true, roles: expect.arrayContaining(['clerk', 'steward']) }) }), expect.any(Function))
   })
   it("refuses another organization's correspondence as not found and submits nothing", async () => {
     m.getCorrespondenceById.mockResolvedValue({ id: ID, organizationId: 'org_2' })

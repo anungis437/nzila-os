@@ -68,6 +68,11 @@ describe('the navigation against the guards of the pages it offers', () => {
     expect(runCensus(undefined, dangling).findings.map((finding) => finding.kind)).toEqual(['NAV_PAGE_MISSING'])
   })
 
+  it('finds Clerk redirects using the canonical numeric page guard', () => {
+    const careless: NavOracle = { ...applicationNavigation, roles: ['clerk'], visible: () => [{ href: '/dashboard/workbench' }], landing: () => '/dashboard/workbench' }
+    expect(runCensus(undefined, careless).findings.map(finding => finding.kind).sort()).toEqual(['LANDING_REFUSES_ROLE', 'NAV_PAGE_REFUSES_ROLE'])
+  })
+
   it('takes the layouts above a page into account', () => {
     const finance: NavOracle = { ...applicationNavigation, roles: ['steward'], visible: () => [{ href: '/dashboard/finance' }], landing: () => '/dashboard' }
     const [finding] = runCensus(undefined, finance).findings

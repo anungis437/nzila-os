@@ -59,6 +59,7 @@ import {
   type AuthUser,
   type UserRole,
 } from '@/lib/api-auth-guard';
+import { UserRole as CanonicalUserRole } from '@/lib/auth/roles';
 import {
   checkRateLimit,
   createRateLimitHeaders,
@@ -107,7 +108,7 @@ export interface WithApiOptions<
     /** Set `false` to make the route public (no auth required) */
     required?: boolean;
     /** Require user to have exactly one of these roles */
-    roles?: UserRole[];
+    roles?: readonly (UserRole | CanonicalUserRole)[];
     /** Require user to meet this minimum role level (uses ROLE_HIERARCHY) */
     minRole?: UserRole;
     /** Validate cron secret header instead of user auth */
@@ -494,8 +495,13 @@ export function withApi<
       }
 
       if (user && allowedRoles) {
-        let userRole = normalizeRole(user.role ?? 'member');
-        if (!allowedRoles.includes(userRole) && !currentStateContextEnabled()) {
+        // The canonical binder has already resolved the current membership.
+        // Preserve its exact declared role for an explicit allow-list: legacy
+        // rank normalization maps Clerk to Member and cannot decide this gate.
+        let userRole = currentStateContextEnabled()
+          ? Object.values(CanonicalUserRole).find(role => role === user.role)
+          : normalizeRole(user.role ?? 'member');
+        if ((!userRole || !allowedRoles.includes(userRole)) && !currentStateContextEnabled()) {
           // Resolve from DB before rejecting
           try {
             const { getUserRole } = await import('@/lib/auth/rbac-server');
@@ -507,7 +513,7 @@ export function withApi<
             // DB role resolution failed — keep metadata role
           }
         }
-        if (!allowedRoles.includes(userRole)) {
+        if (!userRole || !allowedRoles.includes(userRole)) {
           return standardErrorResponse(
             ErrorCode.INSUFFICIENT_PERMISSIONS,
             'You do not have the required role for this endpoint',

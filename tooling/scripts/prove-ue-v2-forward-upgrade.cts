@@ -283,8 +283,25 @@ async function main() {
     ]
     for (const identity of historicalFunctionOwners) {
       await provider.query(`ALTER FUNCTION public.${identity} OWNER TO uev2admin`)
-      await provider.query(`GRANT EXECUTE ON FUNCTION public.${identity} TO PUBLIC`)
+      // Provider-only fixture construction reproduces the observed NULL ACL,
+      // whose default includes PUBLIC execution. No live catalogue is edited.
+      const seeded = await provider.query(
+        'UPDATE pg_catalog.pg_proc SET proacl=NULL WHERE oid=$1::regprocedure AND proowner=\'uev2admin\'::regrole RETURNING proacl',
+        [`public.${identity}`],
+      )
+      assert.equal(seeded.rowCount, 1)
+      assert.equal(seeded.rows[0].proacl, null)
     }
+    const historicalDefaultSequenceAcls = [
+      'public.rbac_audit_log_sequence_number_seq',
+      'public.ue_authority_events_event_seq_seq',
+    ]
+    const seededSequenceAcls = await provider.query(
+      "UPDATE pg_catalog.pg_class SET relacl=pg_catalog.acldefault('s',relowner) WHERE oid=ANY($1::regclass[]) AND relowner='ue_v2_owner'::regrole RETURNING relacl::text AS acl",
+      [historicalDefaultSequenceAcls],
+    )
+    assert.equal(seededSequenceAcls.rowCount, 2)
+    assert(seededSequenceAcls.rows.every((row) => row.acl === '{ue_v2_owner=rwU/ue_v2_owner}'))
 
     const oldRuntime = await open(
       'ue_staging_runtime',
@@ -382,7 +399,7 @@ async function main() {
       forwardDigest(normalizeForwardCatalog(actual)),
       'PROOF_NOBYPASS_REHEARSAL_LEFT_CATALOG_CHANGES',
     )
-    await provider.query('ALTER ROLE uev2admin BYPASSRLS')
+    await provider.query('ALTER ROLE uev2admin BYPASSRLS INHERIT')
     await c.query('BEGIN')
     await assert.rejects(
       executeForwardUpgrade(c, bundle, {
@@ -466,6 +483,9 @@ async function main() {
       originalBootstrapReceiptPreserved: true,
       historicalFunctionOwnerHandoffs: historicalFunctionOwners,
       historicalFunctionOwnershipAndAclFamilyQualified: true,
+      historicalFunctionAclStorage: 'NULL_DEFAULT_PUBLIC',
+      historicalDefaultSequenceAcls,
+      historicalDefaultSequenceAclFamilyQualified: true,
       packagedAdmission: { ok: admission.ok, violations: admission.violations },
       ...receipt,
       finalQualification,

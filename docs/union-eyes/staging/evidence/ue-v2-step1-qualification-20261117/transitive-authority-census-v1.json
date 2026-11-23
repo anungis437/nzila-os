@@ -14,8 +14,8 @@
       "SIGNED_OR_SECRET": 1,
       "UNCLASSIFIED": 2
     },
-    "guardedWithRouteTest": 499,
-    "guardedWithoutRouteTest": 104,
+    "guardedWithRouteTest": 500,
+    "guardedWithoutRouteTest": 103,
     "unclassified": [],
     "reviewedUnclassified": [
       "POST /api/icra/telemetry",
@@ -2153,19 +2153,19 @@
       "route": "/api/correspondence/[id]/cancel",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/correspondence/[id]/dispatch",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/correspondence/[id]/email-status",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 0
+      "testFiles": 1
     },
     {
       "route": "/api/correspondence/[id]/revision",
@@ -2183,13 +2183,13 @@
       "route": "/api/correspondence/[id]/submit",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/correspondence/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/correspondence/signatures",
@@ -2201,7 +2201,7 @@
       "route": "/api/correspondence",
       "method": "POST",
       "class": "GUARDED_SESSION",
-      "testFiles": 1
+      "testFiles": 2
     },
     {
       "route": "/api/cron/analytics/daily-metrics",

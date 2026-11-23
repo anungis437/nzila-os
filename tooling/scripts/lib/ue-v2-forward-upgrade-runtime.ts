@@ -125,7 +125,20 @@ export function assertForwardOperator(profile: ForwardOperatorProfile | undefine
 }
 export function normalizeForwardCatalog(objects: UpgradeObject[]) {
   const result = objects
-    .map((o) => canonicalCatalogObject(o))
+    .map((o) => {
+      const normalized = canonicalCatalogObject(o)
+      const definition = normalized.definition as Record<string, unknown>
+      // A sequence's NULL ACL grants its owner SELECT/UPDATE/USAGE and
+      // grants nothing to PUBLIC. Recognize only that exact explicit default;
+      // every other grantee, grantor or privilege remains part of the proof.
+      if (
+        normalized.kind === 'relation' && definition.kind === 'S' &&
+        typeof definition.owner === 'string' && /^[a-z_][a-z0-9_]*$/.test(definition.owner) &&
+        Array.isArray(definition.acl) && definition.acl.length === 1 &&
+        definition.acl[0] === `${definition.owner}=rwU/${definition.owner}`
+      ) return { ...normalized, definition: { ...definition, acl: null } }
+      return normalized
+    })
     .sort((a, b) => uniqueKey(a).localeCompare(uniqueKey(b)))
   assert.equal(
     new Set(result.map(uniqueKey)).size,
@@ -133,6 +146,16 @@ export function normalizeForwardCatalog(objects: UpgradeObject[]) {
     'UE_UPGRADE_DUPLICATE_CATALOG_OBJECT',
   )
   return result
+}
+
+export function forwardUpgradeFailure(error: unknown): string {
+  const message = error instanceof Error ? error.message : 'UE_UPGRADE_UNKNOWN_FAILURE'
+  const firstLine = message.split('\n')[0]
+  // Managed-catalog assertions have static reason/object identifiers. Keep
+  // that first line, never the assertion's actual/expected catalogue diff.
+  return /^(?:UE_UPGRADE_|MANAGED_)/.test(firstLine)
+    ? firstLine.slice(0, 500)
+    : 'UE_UPGRADE_EXECUTION_REFUSED'
 }
 
 export async function readForwardCatalog(
@@ -223,7 +246,7 @@ async function fingerprintSequences(client: pg.Client) {
     const rows = (
       await client.query(`SELECT last_value::text,is_called FROM ${q(seq.schema)}.${q(seq.name)}`)
     ).rows
-    assert.equal(rows.length, 1)
+    assert.equal(rows.length, 1, `UE_UPGRADE_SEQUENCE_FINGERPRINT_MISSING:${seq.schema}.${seq.name}`)
     result.push({ schema: seq.schema, name: seq.name, ...rows[0] })
   }
   return result

@@ -1,3 +1,4 @@
+import { CORRESPONDENCE_STAFF_ROLES } from "@/lib/correspondence/roles";
 /**
  * POST /api/correspondence/[id]/submit — Submit for review
  */
@@ -12,7 +13,7 @@ import {
 export const POST = withApi(
   {
     rlsOrgContext: true,
-    auth: { required: true, minRole: "steward" },
+    auth: { required: true, roles: CORRESPONDENCE_STAFF_ROLES },
     openapi: { tags: ["Correspondence"], summary: "Submit for review" },
   },
   async ({ params, organizationId, userId, user, request }) => {

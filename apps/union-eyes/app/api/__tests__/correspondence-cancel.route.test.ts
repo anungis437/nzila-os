@@ -54,7 +54,7 @@ describe('correspondence/[id]/cancel route', () => {
     vi.resetModules();
     await loadRoute();
     expect(m.withApi).toHaveBeenCalledWith(
-      expect.objectContaining({ rlsOrgContext: true, auth: expect.objectContaining({ minRole: 'steward' }) }),
+      expect.objectContaining({ rlsOrgContext: true, auth: expect.objectContaining({ roles: expect.arrayContaining(['clerk', 'steward']) }) }),
       expect.any(Function),
     );
   });

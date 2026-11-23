@@ -3,7 +3,7 @@
  *
  * The sidebar is built per role (lib/dashboard/role-experience.ts) and every non-member is sent from the dashboard root to its landing, so a destination whose page or layout
  * redirects the role it was offered to is a link that goes nowhere, and a landing that redirects its own role to the root is a loop that never ends. The roles a page refuses are read from
- * the guards in the page and in every layout above it (see lib/nav-census/page-guards.ts for which guards count), compared at the levels lib/auth/roles.ts gives the roles.
+ * the guards in the page and in every layout above it (see lib/nav-census/page-guards.ts for which guards count), compared at the canonical V2 numeric guard levels.
  * A finding is fixed in DESTINATION_MIN_ROLE (or the executive and platform tables) in lib/dashboard/role-experience.ts, so the menu and the guard say the same thing. Read-only: it reads source files and
  * needs no database.
  *
@@ -12,7 +12,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { getDashboardExperience, getRoleLandingPath, getVisibleNavigationForExperience, type DashboardExperience } from '../../lib/dashboard/role-experience'
+import { canonicalPageGuardRoleLevel, getDashboardExperience, getRoleLandingPath, getVisibleNavigationForExperience, type DashboardExperience } from '../../lib/dashboard/role-experience'
 import { UserRole, getRoleLevel } from '../../lib/auth/roles'
 import { redirectingGuards } from '../lib/nav-census/page-guards'
 import { APP_ROOT } from './frontend-api-census'
@@ -51,7 +51,7 @@ export interface NavOracle {
 export const applicationNavigation: NavOracle = {
   // A guest is not signed in to a dashboard: the dashboard layout sends it to the login before any destination is offered.
   roles: (Object.values(UserRole) as string[]).filter((role) => role !== UserRole.GUEST),
-  levelOf: (role) => getRoleLevel(role as UserRole),
+  levelOf: canonicalPageGuardRoleLevel,
   experienceOf: (role) => getDashboardExperience(role),
   visible: (experience, role) => getVisibleNavigationForExperience(experience, false, role),
   landing: (role) => getRoleLandingPath(role),

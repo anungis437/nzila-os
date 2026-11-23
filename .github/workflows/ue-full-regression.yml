@@ -36,6 +36,14 @@ jobs:
           SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
 
+      - name: Check generated authority census and its dependent evidence trace
+        env:
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
+          set -euo pipefail
+          pnpm exec tsx apps/union-eyes/scripts/reality/transitive-authority-census.ts --check
+          pnpm exec tsx apps/union-eyes/scripts/reality/step1-evidence-trace.ts --check
+
       - name: Run the full declared Union Eyes Vitest project, not a directory subset
         shell: bash
         run: |

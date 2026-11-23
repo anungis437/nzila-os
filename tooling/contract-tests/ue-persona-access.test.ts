@@ -20,6 +20,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { UserRole, getRoleLevel } from '../../apps/union-eyes/lib/auth/roles'
+import { CORRESPONDENCE_STAFF_ROLES } from '../../apps/union-eyes/lib/correspondence/roles'
 import { ROOT, walkSync, readContent, relPath, safeJoin, formatViolations, type Violation } from './governance-helpers'
 
 // ── Configuration ───────────────────────────────────────────────────────────
@@ -47,11 +48,14 @@ interface Persona {
   description: string
 }
 
+// A static guard sample; full persona/lifecycle acceptance is governed by the
+// base scope census and requires runtime evidence beyond this contract.
 const PERSONAS: Persona[] = [
   { name: 'Base Member',       role: 'member',                level: ROLE_HIERARCHY.member,               description: 'Regular union member — dues, receipts, basic access' },
   { name: 'H&S Rep',           role: 'health_safety_rep',     level: ROLE_HIERARCHY.health_safety_rep,    description: 'Health & safety representative' },
   { name: 'Bargaining Rep',    role: 'bargaining_committee',  level: ROLE_HIERARCHY.bargaining_committee, description: 'Bargaining committee member — negotiations access' },
   { name: 'Steward',           role: 'steward',               level: ROLE_HIERARCHY.steward,              description: 'Front-line steward — write access to most resources' },
+  { name: 'Clerk',             role: 'clerk',                 level: ROLE_HIERARCHY.clerk,                description: 'Local correspondence preparation; approval and signing remain separate' },
   { name: 'Officer',           role: 'officer',               level: ROLE_HIERARCHY.officer,              description: 'Senior representative — leadership dashboard, pilot' },
   { name: 'Local Admin',       role: 'admin',                 level: ROLE_HIERARCHY.admin,                description: 'Local union executive — full org-level access' },
   { name: 'Platform Lead',     role: 'platform_lead',         level: ROLE_HIERARCHY.platform_lead,        description: 'Nzila Ventures ops — cross-org access' },
@@ -69,6 +73,8 @@ interface PageRule {
   path: string
   /** Minimum role required (or 'public_authed' for no role check) */
   minRole: string
+  /** Explicit local-role boundary, when a numeric rank cannot describe access. */
+  roles?: readonly string[]
   /** Human description */
   description: string
 }
@@ -254,7 +260,7 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'cba-intelligence/page.tsx',                    minRole: 'health_safety_rep',    description: 'CBA intelligence (entitlement-gated, min H&S rep)' },
   { path: 'committees/page.tsx',                          minRole: 'member',               description: 'Committee management' },
   { path: 'committees/[id]/page.tsx',                     minRole: 'steward',              description: 'Committee workspace detail' },
-  { path: 'correspondence/page.tsx',                      minRole: 'steward',              description: 'Correspondence pipeline' },
+  { path: 'correspondence/page.tsx',                      minRole: 'steward', roles: CORRESPONDENCE_STAFF_ROLES, description: 'Local correspondence staff, including Clerk; no platform-title access' },
   { path: 'knowledge-base/page.tsx',                      minRole: 'member',               description: 'Union documents library' },
 
   // ── Officer-level pages (level 60) ─────────────────────────────────────
@@ -373,7 +379,8 @@ function findApiRoute(apiPath: string): string | null {
   return existsSync(routeFile) ? routeFile : null
 }
 
-function personaCanAccess(persona: Persona, requiredRole: string): boolean {
+function personaCanAccess(persona: Persona, requiredRole: string, roles?: readonly string[]): boolean {
+  if (roles) return roles.includes(persona.role)
   const requiredLevel = ROLE_HIERARCHY[requiredRole]
   if (requiredLevel === undefined) return true // unknown role = assume accessible
   return persona.level >= requiredLevel
@@ -439,24 +446,24 @@ describe('PERSONA_ACCESS_001 — Dashboard pages exist and are mapped', () => {
 describe('PERSONA_ACCESS_001 — Persona access matrix correctness', () => {
   for (const persona of PERSONAS) {
     describe(`Persona: ${persona.name} (${persona.role}, level ${persona.level})`, () => {
-      const allowedPages = PAGE_ACCESS_MATRIX.filter(r => personaCanAccess(persona, r.minRole))
-      const deniedPages = PAGE_ACCESS_MATRIX.filter(r => !personaCanAccess(persona, r.minRole))
+      const allowedPages = PAGE_ACCESS_MATRIX.filter(r => personaCanAccess(persona, r.minRole, r.roles))
+      const deniedPages = PAGE_ACCESS_MATRIX.filter(r => !personaCanAccess(persona, r.minRole, r.roles))
 
       it(`can access ${allowedPages.length} pages`, () => {
         // Every page at or below this persona's level should be accessible
         for (const page of allowedPages) {
           expect(
-            personaCanAccess(persona, page.minRole),
+            personaCanAccess(persona, page.minRole, page.roles),
             `${persona.name} should access ${page.path} (requires ${page.minRole}, level ${ROLE_HIERARCHY[page.minRole]})`,
           ).toBe(true)
         }
       })
 
       if (deniedPages.length > 0) {
-        it(`is denied ${deniedPages.length} pages above their role level`, () => {
+        it(`is denied ${deniedPages.length} pages excluded by their access policy`, () => {
           for (const page of deniedPages) {
             expect(
-              personaCanAccess(persona, page.minRole),
+              personaCanAccess(persona, page.minRole, page.roles),
               `${persona.name} (${persona.level}) should NOT access ${page.path} (requires ${page.minRole}, level ${ROLE_HIERARCHY[page.minRole]})`,
             ).toBe(false)
           }
@@ -478,6 +485,15 @@ describe('PERSONA_ACCESS_001 — Server-side page auth guards match matrix', () 
     if (!existsSync(fullPath)) continue
 
     const content = readFileSync(fullPath, 'utf-8')
+    if (rule.roles) {
+      it(`${rule.path} — applies the declared explicit local staff policy`, () => {
+        expect(content).toMatch(/user\.roles\.some\(isCorrespondenceStaffRole\)/)
+        expect(rule.roles).toContain('clerk')
+        expect(rule.roles).not.toContain('member')
+        expect(rule.roles).not.toContain('platform_lead')
+      })
+      continue
+    }
     // Only check server components that have explicit role guards
     const isServerComponent = !content.includes("'use client'") && !content.includes('"use client"')
     const hasRoleGuard = ROLE_GUARD_PATTERNS.some(p => p.test(content))
@@ -685,7 +701,7 @@ describe('PERSONA_ACCESS_001 — Persona access boundary tests', () => {
       const requiredLevel = ROLE_HIERARCHY[page.minRole] ?? 0
       if (requiredLevel <= 95) { // org-level
         expect(
-          personaCanAccess(admin, page.minRole),
+          personaCanAccess(admin, page.minRole, page.roles),
           `Admin should access ${page.path}`,
         ).toBe(true)
       }

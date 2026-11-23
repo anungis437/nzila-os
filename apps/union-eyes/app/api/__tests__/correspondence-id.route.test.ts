@@ -49,7 +49,7 @@ describe('correspondence/[id] route', () => {
     const configs = m.withApi.mock.calls.map((call) => call[0]);
     expect(configs).toHaveLength(2);
     for (const config of configs) {
-      expect(config).toMatchObject({ rlsOrgContext: true, auth: { required: true, minRole: 'steward' } });
+      expect(config).toMatchObject({ rlsOrgContext: true, auth: { required: true, roles: expect.arrayContaining(['clerk', 'steward']) } });
     }
   });
 

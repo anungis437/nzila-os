@@ -1,0 +1,63 @@
+{
+  "observedAt": "2026-11-23T04:30:40.220327+00:00",
+  "environment": "AZURE_STAGING",
+  "change": "CHG-2026-0114",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "operatorQualifiedHead": "6771e3b61053aa0a33f25af839f933ecc78b22fa",
+  "operatorWorkflowSource": "3c011d08098b1341d3791b577d6dceb2fb593f5e",
+  "run": 45108741981,
+  "runUrl": "https://github.com/anungis437/nzila-os/actions/runs/45108741981",
+  "operationReceipt": {
+    "status": "FAIL",
+    "code": "ERR_ASSERTION",
+    "operation": "rehearse",
+    "operatorSourceSha": "3c011d08098b1341d3791b577d6dceb2fb593f5e",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "executionRunId": "45108741981",
+    "executionJobName": "ue-v2-forward-45108741981",
+    "failure": "UE_UPGRADE_EXECUTION_REFUSED",
+    "failureStage": "operator-transaction",
+    "changesQualified": false,
+    "changesCommitted": false,
+    "productionDeployment": false
+  },
+  "ownedJobAndSecretRemoved": true,
+  "afterFailureCatalogue": {
+    "originalObjects": 26449,
+    "byteSha256": "dd8d3343bd5cec2ecb23af9a12a88a7ec0ec564b1ab42f7946960b1e820a48c5",
+    "sameAsOriginalCapture": true,
+    "readOnly": true
+  },
+  "allFourApplicationLoginRolesRestricted": true,
+  "independentBusinessRowReadbackClaimed": false,
+  "offlineCounterexample": {
+    "status": "OFFLINE_SOURCE_COUNTEREXAMPLE_CONFIRMED",
+    "operatorSourceSha": "3c011d08098b1341d3791b577d6dceb2fb593f5e",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "sourcePlanDigest": "b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4",
+    "sourceAssetsHashVerified": true,
+    "actualPreimageCataloguePreservedAfterLiveFailure": true,
+    "sequenceDifferences": [
+      {
+        "id": "public.rbac_audit_log_sequence_number_seq",
+        "owner": "ue_v2_owner",
+        "observedAcl": [
+          "ue_v2_owner=rwU/ue_v2_owner"
+        ],
+        "qualifiedTargetAcl": null
+      }
+    ],
+    "sequencePermissionWrites": 0,
+    "statementCount": 10258,
+    "isolatedAssert": "MANAGED_CATALOG_DEFINITION_DRIFT:relation:public.rbac_audit_log_sequence_number_seq",
+    "constructedBaselineIsNotActualPostUpgradeCatalogue": true,
+    "actualLiveAssertionDetailRecovered": false,
+    "conclusion": "The operator leaves these observed owner-only sequence ACLs unchanged, while strict target qualification expects null ACL storage. At least this catalogue family cannot qualify; no live post-upgrade catalogue or successful staging rehearsal is claimed.",
+    "liveDatabaseMutated": false,
+    "productionAuthorized": false
+  },
+  "repair": "Recognize only exact default owner-only sequence ACL equivalence; retain all other privileges and original sequence values. Reproduce actual NULL function ACLs and explicit default sequence ACLs in the owned native fixture. Preserve static managed-catalog error identifiers while omitting assertion data.",
+  "newNativeOrCIQualificationClaimed": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

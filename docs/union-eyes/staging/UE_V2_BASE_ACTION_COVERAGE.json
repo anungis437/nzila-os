@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-staging-function-owner-handoff",
-  "currentRepairRuntimeQualification": "MANAGED_ADMIN_REPAIR_MERGED_HISTORICAL_FUNCTION_OWNER_FAMILY_UNQUALIFIED",
+  "currentRepairBranch": "fix/ue-clerk-correspondence-scope",
+  "currentRepairRuntimeQualification": "COMBINED_SEQUENCE_ACL_AND_CLERK_REPAIR_QUALIFICATION_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -5095,7 +5095,7 @@
       "action": "Correspondence approval and dispatch",
       "state": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
       "evidenceSummary": "Dedicated draft/revision/submit/approve/sign/dispatch routes exist; navigation is not execution proof.",
-      "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit.",
+      "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit. Clerk (SA11) source policy mismatch on aa545415 is recorded: generic rank normalization maps Clerk to Member despite declared letter permissions. Explicit local-staff letter gates and page/service/API regressions are under local validation; no deployed repair, actual provider or inbox acceptance is claimed.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -11705,7 +11705,8 @@
     "requiredOperatingModelPresets": 4,
     "requiredCrossCuttingVariants": 6,
     "sevenNavigationProfilesAreSubsetOnly": true,
-    "currentCandidateAcceptanceInferred": false
+    "currentCandidateAcceptanceInferred": false,
+    "historicalSevenPersonaRows": "Historical seven-persona receipts and observation-history instructions describe subsets only; current acceptance requires all26required stakeholder families,34required role boundaries,16lifecycle stages,four operating models,six variants and654required scope-node joins."
   },
   "operatorRepairBranchPolicyHistory": {
     "supersededPullRequest": 1281,
@@ -11714,5 +11715,131 @@
     "reason": "Repository policy excludes the default codex/ prefix; republished under allowed fix/ prefix. Original failure retained.",
     "checkBypassed": false,
     "fiveLocalPassesClaimedForSupersededSource": false
+  },
+  "clerkCorrespondenceRemediation": {
+    "recordedAt": "2026-11-23T03:42:54.558829+00:00",
+    "observedSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "stakeholderFamily": "SA11",
+    "action": "C16",
+    "role": "clerk",
+    "sourceFinding": "SOURCE_CONFIRMED_ROLE_POLICY_MISMATCH",
+    "evidence": "evidence/ue-clerk-correspondence-20261123/source-role-policy-mismatch-aa.json",
+    "repair": "Explicit canonical role allow-list for local correspondence preparation/read/dispatch; shared page/service policy; existing approval/signing and case resource checks retained. Canonical V2 menu/census models the actual numeric guard; Clerk avoids a rejected workbench landing and platform titles are not offered local letter access.",
+    "localValidation": "FOCUSED_WORKING_TREE_VALIDATION_ONLY; FIVE_REPOSITORY_COMMANDS_AND_CI_PENDING",
+    "deployedRepairVerified": false,
+    "fullPersonaOrActionAcceptanceClaimed": false,
+    "financeFeaturesInScope": false,
+    "productionAuthorized": false,
+    "localPackagingAndNativeEvidence": "evidence/ue-clerk-correspondence-20261123/local-packaging-and-native-controls.json",
+    "qualification": "TARGETED_TESTED_WORKING_TREE_EXACT_SOURCE_CI_AND_STAGING_PENDING",
+    "canonicalNavigationEvidence": "evidence/ue-clerk-correspondence-20261123/canonical-navigation-and-role-boundaries.json"
+  },
+  "currentFunctionOwnerOperatorAdmission": {
+    "qualifiedHead": "6771e3b61053aa0a33f25af839f933ecc78b22fa",
+    "normalMerge": "3c011d08098b1341d3791b577d6dceb2fb593f5e",
+    "pullRequest": 1283,
+    "localRequiredCommandsPassed": 5,
+    "requiredCIContextsPassed": 19,
+    "registeredOutcomes": {
+      "success": 105,
+      "skipped": 12
+    },
+    "nativeProofRun": 45104591333,
+    "newLiveRehearsalRun": 45108741981,
+    "liveRehearsalStatus": "IN_PROGRESS",
+    "applyLaunched": false,
+    "fullBasePersonaAcceptance": false,
+    "productionAuthorized": false
+  },
+  "currentManagedCatalogQualificationFailure": {
+    "state": "FAILED_LIVE_REHEARSAL_NO_APPLY",
+    "run": 45108741981,
+    "evidence": "evidence/ue-v2-forward-upgrade-20261122/actual-managed-catalog-refusal.json",
+    "catalogueRollbackByteExact": true,
+    "businessRowReadbackClaimed": false,
+    "knownComparisonGap": "Exact default owner-only sequence ACL storage differs from NULL; unchanged by current operation and rejected by strict comparison.",
+    "sourceRepairBranch": "fix/ue-staging-sequence-acl-profile",
+    "sourceRepairQualification": "PENDING_FINAL_SOURCE_LOCAL_FIVE_AND_NATIVE_CI",
+    "fullPersonaAndBaseReleaseAcceptance": false
+  },
+  "currentIntegratedRepair": {
+    "pullRequest": 1284,
+    "absorbedOperatorDraft": 1285,
+    "operatorImplementationSource": "fe9c7c1730b92cc7b8f3ceae0204c1b1d6310016",
+    "applicationImplementationSource": "e9fda55556481baa1c3c240dfe78a6ca7c48f4d0",
+    "state": "IMPLEMENTED_COMBINED_SOURCE_NOT_QUALIFIED",
+    "reason": "Qualify both repairs on one integrated commit rather than admit an intermediate application. Prior raw failed checks and live rehearsal remain historical failures.",
+    "previousOperatorLocalFailure": "16 external-reader cases refused because the required owned native template was absent. No test is skipped or treated as passed to resolve this; rebuild the owned template and run the full command on the combined candidate.",
+    "fullBaseStagingAcceptance": false,
+    "productionAuthorized": false,
+    "sourceBindingRepairEvidence": "evidence/ue-clerk-correspondence-20261123/qualification-source-binding-repair.json",
+    "supersededCiSource": "c9a19eb02f5a0aa256f16d198941b5a76ff82b4f",
+    "sourceBindingRepair": "Native preservation passed before premature live packaging refused; accepted-source navigation now compiles its own Git tree. New-source full checks and CI remain required.",
+    "generatedCensusSynchronization": {
+      "supersededSourceSha": "bf7854e88f7a8a19773c7b81b6d88734bba739a8",
+      "wholeApplicationCiRun": 45119152389,
+      "failure": "Committed authority census omitted six new correspondence test-import counts. All921mutation exports and authority classes are unchanged.",
+      "localResults": {
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "testFast": {
+          "passed": 41363,
+          "failed": 1,
+          "skipped": 1623,
+          "pending": 13
+        },
+        "validateDocs": "UNRUN",
+        "governanceAudit": "UNRUN",
+        "all16ExternalReaderCasesPassed": true
+      },
+      "guardedExportsWithoutRouteTestsBefore": 104,
+      "guardedExportsWithoutRouteTestsAfter": 103,
+      "coverageRatchetUnchanged": true,
+      "replacementFullChecksAndCi": "PENDING",
+      "fullBaseStagingAcceptance": false,
+      "targetedWorkingTreeChecks": {
+        "authorityCensus": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "fullScopeReconciliation": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "runtimeAcceptanceInferred": false
+      }
+    },
+    "generatedEvidenceFamilySynchronization": {
+      "supersededSourceSha": "9f1cc921d58e8a06fe7c232f4c507a355f1c9091",
+      "wholeApplicationCiRun": 45122423497,
+      "wholeApplication": {
+        "passed": 27227,
+        "failed": 1,
+        "unexecuted": 36
+      },
+      "failure": "The generated Step1 action evidence trace consumes authority-census route-test counts; refreshing only the census left four dependent trace counts stale.",
+      "localCommands": {
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "testFast": "TERMINATED_SUPERSEDED_NOT_QUALIFIED",
+        "validateDocs": "UNRUN",
+        "governanceAudit": "UNRUN"
+      },
+      "repair": "Refresh both deterministic generated records together and check both before the existing full application CI suite. All11reality test files are checked together locally; full five and freshCI still required.",
+      "appPackageSchemaInputsChanged": false,
+      "newFullSourceQualification": "PENDING",
+      "fullBaseStagingAcceptance": false,
+      "targetedWorkingTreeChecks": {
+        "realityFiles": 11,
+        "passed": 124,
+        "failed": 0,
+        "skipped": 0,
+        "officialGeneratorCliChecksPassed": 2,
+        "unchangedFullApplicationSuiteVerified": true,
+        "runtimeAcceptanceInferred": false
+      }
+    }
   }
 }
