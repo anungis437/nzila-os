@@ -114,8 +114,8 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
-      # The plan installs into a fresh container per suite. runtime-security-native (378 cases, over ten minutes
-      # locally) is not run here.
+      # Each suite uses a fresh container. The complete 363-case runtime matrix
+      # runs in its own parallel job below, including on relevant pull requests.
       - name: Native SYSTEM mutation, audit chain, launch-defect, organization-selection and manifest proofs
         env:
           UE_V2_NATIVE_MANIFEST: '1'
@@ -163,9 +163,6 @@ jobs:
           ':(exclude)artifacts/ue-v2-local-vault-*.json'
           ':(exclude)artifacts/ue-v2-production-key-authority-*.json'
 
-  # The full native runtime security matrix (runtime-security-native, 363 cases) on a clean runner, bound to
-  # the dispatched SHA. It is too long for every pull request, and a developer machine under memory pressure
-  # swaps the database VM until the per-table 120 s limit trips, so qualification runs here, on demand.
   invitation-concurrency:
     name: Native invitation redemption and revocation races
     runs-on: ubuntu-24.04
@@ -215,14 +212,16 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  # Run the complete matrix alongside the component proofs on every relevant PR.
+  # Check out the candidate head explicitly so the result qualifies those source bytes.
   runtime-security-native:
-    name: Native runtime security matrix (dispatch only)
-    if: github.event_name == 'workflow_dispatch'
+    name: Native runtime security matrix
     runs-on: ubuntu-24.04 # same image as the other native PostgreSQL jobs
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
       - uses: ./.github/actions/setup-monorepo
@@ -264,12 +263,14 @@ jobs:
 
       - name: Every native case ran and passed (none skipped)
         if: always()
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         shell: bash
         run: |
           set -euo pipefail
           node -e '
             const r = require(process.argv[1])
-            const summary = { sha: process.env.GITHUB_SHA, total: r.numTotalTests, passed: r.numPassedTests, failed: r.numFailedTests, pending: r.numPendingTests + (r.numTodoTests || 0) }
+            const summary = { sha: process.env.SOURCE_SHA, total: r.numTotalTests, passed: r.numPassedTests, failed: r.numFailedTests, pending: r.numPendingTests + (r.numTodoTests || 0) }
             console.log(JSON.stringify(summary))
             if (summary.total === 0 || summary.failed !== 0 || summary.pending !== 0 || summary.passed !== summary.total) process.exit(1)
           ' "$RUNNER_TEMP/ue-runtime-security-native/results.json"
@@ -278,7 +279,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ue-runtime-security-native-${{ github.sha }}
+          name: ue-runtime-security-native-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/ue-runtime-security-native/results.json
           retention-days: 90
           if-no-files-found: warn
