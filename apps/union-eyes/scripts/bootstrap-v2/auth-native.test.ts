@@ -814,6 +814,25 @@ native('local native PostgreSQL auth execution boundary', () => {
     expect(stored.rows[0].session_token_hash).not.toBe(cookies.token)
   })
 
+  it('bounds blocked auth work and releases the connection for the next identity request', async () => {
+    const context = { phase: 'identity' as const, userId: 'auth-proof-a' }
+    await clients.owner.query("SELECT pg_advisory_lock(hashtextextended('synthetic:auth-executor-bounded-wait', 0))")
+    try {
+      await expect(executeAuthContext(context, executor => executor.execute(sql`
+        SELECT pg_advisory_xact_lock(hashtextextended('synthetic:auth-executor-bounded-wait', 0))
+      `))).rejects.toMatchObject({ cause: { code: '55P03' } })
+    } finally {
+      await clients.owner.query("SELECT pg_advisory_unlock(hashtextextended('synthetic:auth-executor-bounded-wait', 0))")
+    }
+    await expect(executeAuthContext(context, executor => executor.execute(sql`SELECT pg_sleep(20)`)))
+      .rejects.toMatchObject({ cause: { code: '57014' } })
+    const [recovered] = await executeAuthContext(context, executor => executor.execute(sql`
+      SELECT current_setting('lock_timeout') AS lock_timeout,
+        current_setting('statement_timeout') AS statement_timeout
+    `))
+    expect(recovered).toMatchObject({ lock_timeout: '5s', statement_timeout: '15s' })
+  }, 40_000)
+
   it('shared executor rolls back, clears GUCs, and uses the explicitly separate system credential', async () => {
     await expect(
       executeAuthContext({ phase: 'identity', userId: 'auth-proof-a' }, async (executor) => {

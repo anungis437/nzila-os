@@ -22,9 +22,9 @@ describe('production monitor output consumed by the external alert', () => {
   })
 
   it('fails closed for an empty or incomplete set of measurements', () => {
-    expect(baseOperationalReport({})).toMatchObject({ ok: false, attempted: 11, succeeded: 0 })
+    expect(baseOperationalReport({})).toMatchObject({ ok: false, attempted: 10, succeeded: 0 })
     const checks = healthy(); delete checks.mail
-    expect(baseOperationalReport(checks)).toMatchObject({ ok: false, attempted: 11, succeeded: 10,
+    expect(baseOperationalReport(checks)).toMatchObject({ ok: false, attempted: 10, succeeded: 9,
       failures: [{ scope: 'mail', reason: 'Required operational measurement is missing' }] })
   })
 

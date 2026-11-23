@@ -56,9 +56,11 @@ export async function getCanonicalOrganizationContext(options: AuthOrgBindingOpt
 }
 
 /** Keep one live bridge through a short API request, including its transaction commit. */
-export async function withCanonicalApiContext<T>(operation: () => Promise<T>): Promise<T> {
-  if (currentCanonicalRequest()) return operation()
-  return withCanonicalOrganizationBinding({}, async (binding) => {
+export async function withCanonicalApiContext<T>(
+  operation: () => Promise<T>, options: AuthOrgBindingOptions = {},
+): Promise<T> {
+  if (currentCanonicalRequest(options)) return operation()
+  return withCanonicalOrganizationBinding(options, async (binding) => {
     const profile = await readCanonicalProfile(binding.userId)
     return withCanonicalRequestScope(binding, {
       ...profile,

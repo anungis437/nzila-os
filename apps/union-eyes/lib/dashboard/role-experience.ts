@@ -301,7 +301,12 @@ export function getAllowedPrefixesByExperience(): Record<DashboardExperience, st
   return ALLOWED_PREFIXES_BY_EXPERIENCE;
 }
 
-export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean): boolean {
+export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean, role?: string | null): boolean {
+  // A navigation experience cannot remove a locally authorized letter route or
+  // lend it to a platform title. Match the page and API's explicit role policy.
+  if (role != null && (pathname === '/dashboard/correspondence' || pathname.startsWith('/dashboard/correspondence/'))) {
+    return isCorrespondenceStaffRole(role.toLowerCase());
+  }
   // Every authenticated account can request its own information. The request
   // APIs enforce subject ownership and explicit conversation assignment.
   if (pathname === '/dashboard/privacy') return true;
@@ -392,7 +397,7 @@ export function getVisibleNavigationForExperience(
     const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
     if (platformRoles && !platformRoles.includes(role)) return false;
     if (!meetsDestinationRole(pathname, role, experience)) return false;
-    return canAccessDashboardPath(pathname, experience, isPilotMode);
+    return canAccessDashboardPath(pathname, experience, isPilotMode, role);
   });
 }
 

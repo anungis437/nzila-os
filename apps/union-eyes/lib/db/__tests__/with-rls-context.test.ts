@@ -32,6 +32,7 @@ vi.mock('@nzila/platform-auth/org-binding', () => ({
 
 vi.mock('@/lib/auth/canonical-context', () => ({
   getCanonicalOrganizationContext: mocks.mockCanonicalContext,
+  withCanonicalApiContext: (operation: () => Promise<unknown>) => operation(),
 }))
 vi.mock('@/lib/auth/canonical-organization-selection', () => ({
   withCanonicalOrganizationBinding: mocks.mockOrgBinding,

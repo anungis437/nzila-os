@@ -35,7 +35,7 @@ export default function RoleExperienceGuard({ userRole }: RoleExperienceGuardPro
     const pathWithoutLocale = pathname.startsWith(localePrefix)
       ? pathname.slice(localePrefix.length) || '/'
       : pathname;
-    const allowed = canAccessDashboardPath(pathWithoutLocale, experience, isPilotMode);
+    const allowed = canAccessDashboardPath(pathWithoutLocale, experience, isPilotMode, userRole);
     const localizedLanding = `${localePrefix}${landing}`;
 
     const isDashboardRoot = pathWithoutLocale === '/dashboard' || pathWithoutLocale === '/dashboard/';
@@ -59,7 +59,7 @@ export default function RoleExperienceGuard({ userRole }: RoleExperienceGuardPro
       }
       router.replace(localizedLanding);
     }
-  }, [pathname, locale, experience, isPilotMode, landing, router]);
+  }, [pathname, locale, experience, isPilotMode, landing, router, userRole]);
 
   return null;
 }

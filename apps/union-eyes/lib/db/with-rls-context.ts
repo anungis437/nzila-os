@@ -30,7 +30,7 @@ import { tenantContextStorage } from '@/db/tenant-context-storage'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
-import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
+import { getCanonicalOrganizationContext, withCanonicalApiContext } from '@/lib/auth/canonical-context'
 import { currentCanonicalRequest } from '@/lib/auth/canonical-request-scope'
 import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organization-selection'
 import { sanitizedBindingError } from '@/lib/db/binding-error'
@@ -137,21 +137,24 @@ export async function withRLSContext<T>(
       )
     const nested = await nestedCanonicalTenantScope(userId, explicitOrgId, operation)
     if (nested.nested) return nested.value
-    return withCanonicalOrganizationBinding(
-      { organizationId: explicitOrgId, expectedActorUserId: userId },
-      (binding) =>
-        db.transaction(async (tx) => {
-          // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
-          await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
-          await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
-          try {
-            await tx.execute(authenticatedOrgBindingSql(binding))
-          } catch (error) {
-            throw sanitizedBindingError(error)
-          }
-          return withCanonicalTenantScope(tx, binding, operation)
-        }),
-    )
+    const options = { organizationId: explicitOrgId, expectedActorUserId: userId }
+    // Resolve identity/profile before the runtime transaction can hold the
+    // principal lock. Evidence sealing and nested authorization reuse this
+    // verified scope; a second auth bridge would wait on our own transaction.
+    return withCanonicalApiContext(() => withCanonicalOrganizationBinding(
+      options,
+      (binding) => db.transaction(async (tx) => {
+        // Explicit pg_temp position prevents temporary relations from shadowing canonical tables.
+        await tx.execute(sql`SET LOCAL search_path = pg_catalog, public, pg_temp`)
+        await tx.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
+        try {
+          await tx.execute(authenticatedOrgBindingSql(binding))
+        } catch (error) {
+          throw sanitizedBindingError(error)
+        }
+        return withCanonicalTenantScope(tx, binding, operation)
+      }),
+    ), options)
   }
 
   // Resolve the org context that will actually be applied to the session:

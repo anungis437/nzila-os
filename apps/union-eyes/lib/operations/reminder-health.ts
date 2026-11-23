@@ -14,9 +14,8 @@ export async function readReminderHealth(tx: RLSTx) {
     stalePending: row.stale_pending, expiredClaims: row.expired_claims, recentDeadLetters: row.recent_dead_letters }
 }
 
-/** Reads a provider receipt for an actual persisted reminder without sending a
- * canary email or exposing its recipient/body. A provider delivery event is
- * explicitly not a claim of human inbox receipt. */
+/** Retain actual persisted mail provenance without exposing its recipient/body.
+ * Current sender authentication, delivery and human inbox receipt are distinct. */
 export async function readLatestReminderReceipt(tx: RLSTx) {
   const rows = await tx.execute<{ id: string; sent_at: string }>(sql`
     SELECT provider_message_id AS id, sent_at::text FROM public.deadline_reminders
@@ -28,23 +27,30 @@ export async function readLatestReminderReceipt(tx: RLSTx) {
 export async function probeReminderMailProvider(row: { id: string; sent_at: string } | undefined) {
   const failed = (note: string) => ({ state: 'fail' as const, note })
   const key = process.env.RESEND_API_KEY
-  if (!key || key.trim().length < 16) return failed('The configured email provider credential is unavailable')
-  if (!row || !z.guid().safeParse(row.id).success) return failed('No persisted provider receipt is available for a mail health read')
+  const from = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_FROM
+  if (!key || key.trim().length < 16) return failed('The configured sending credential is unavailable')
+  if (!from || !from.includes('@') || /[\r\n]/.test(from)) return failed('The configured sender is unavailable')
+  if (!row || !z.guid().safeParse(row.id).success) return failed('No persisted provider receipt is available for mail provenance')
   const sentAt = Date.parse(row.sent_at)
   if (!Number.isFinite(sentAt) || sentAt > Date.now() + 5 * 60_000) return failed('Persisted email receipt timestamp is invalid')
   try {
-    const response = await fetch(`https://api.resend.com/emails/${row.id}`, {
-      headers: { Authorization: `Bearer ${key}` }, cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000),
+    // The sending API authenticates before validating recipients. A deliberately
+    // empty recipient array cannot send email. Staging qualification separately
+    // verifies the invalid-key control (401) and this expected rejection (422).
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [], subject: 'Union Eyes provider authentication check',
+        text: 'No recipients supplied; this request must be rejected.' }),
+      cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000),
     })
-    if (!response.ok) return failed('The configured email provider could not verify the persisted receipt')
-    const body = z.object({ id: z.guid(), last_event: z.string() }).parse(await response.json())
-    if (body.id !== row.id) return failed('Email provider receipt identity did not match')
-    const completed = ['delivered', 'opened', 'clicked'].includes(body.last_event)
-    const ageMs = Date.now() - Date.parse(row.sent_at)
-    const pending = ['sent', 'queued'].includes(body.last_event) && ageMs >= -5 * 60_000 && ageMs < 15 * 60_000
-    return completed || pending ? { state: 'ok' as const,
-      note: completed ? 'Configured provider reports delivery for the persisted reminder; human inbox receipt is separate' : 'Configured provider reports a recent accepted reminder; delivery is pending',
-      providerEvent: body.last_event }
-      : failed('The persisted reminder has no timely positive provider delivery event')
-  } catch { return failed('Configured email provider receipt could not be read') }
+    const body = z.object({ name: z.string(), message: z.string() }).passthrough().safeParse(await response.json())
+    if (response.status !== 422 || !body.success || body.data.name !== 'missing_required_field' ||
+        !/\bto\b/i.test(body.data.message) || 'id' in body.data) {
+      return failed('The configured sending credential could not be authenticated without a recipient')
+    }
+    return { state: 'ok' as const,
+      note: 'Sending API authenticated the configured key and rejected an empty recipient list; delivery and inbox receipt remain separate required release proofs',
+      verification: 'sender_api_authentication_only' as const, providerHttpStatus: 422,
+      recipients: 0, emailAccepted: false, deliveryVerified: false, humanInboxVerified: false }
+  } catch { return failed('Configured sending API authentication could not be verified') }
 }

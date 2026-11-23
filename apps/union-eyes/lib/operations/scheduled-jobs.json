@@ -6,13 +6,15 @@
       "path": "/api/cron/deadline-reminders",
       "schedule": "*/5 * * * *",
       "timeoutSeconds": 100,
-      "legacyJobSuffix": "cron-deadlines"
+      "legacyJobSuffix": "cron-deadlines",
+      "baseOperationalCadenceMinutes": 5
     },
     {
       "code": "dlovd",
       "path": "/api/cron/deadline-overdue",
       "schedule": "*/15 * * * *",
-      "timeoutSeconds": 100
+      "timeoutSeconds": 100,
+      "baseOperationalCadenceMinutes": 15
     },
     {
       "code": "edu",
@@ -24,25 +26,29 @@
       "code": "alert",
       "path": "/api/cron/observability-alerts",
       "schedule": "*/10 * * * *",
-      "timeoutSeconds": 100
+      "timeoutSeconds": 100,
+      "baseOperationalCadenceMinutes": 10
     },
     {
       "code": "sla",
       "path": "/api/cron/sla-watchdog",
       "schedule": "*/15 * * * *",
-      "timeoutSeconds": 100
+      "timeoutSeconds": 100,
+      "baseOperationalCadenceMinutes": 15
     },
     {
       "code": "reap",
       "path": "/api/cron/document-intake-reaper",
       "schedule": "*/30 * * * *",
-      "timeoutSeconds": 100
+      "timeoutSeconds": 100,
+      "baseOperationalCadenceMinutes": 30
     },
     {
       "code": "sigexp",
       "path": "/api/cron/signature-expiry",
       "schedule": "*/30 * * * *",
-      "timeoutSeconds": 100
+      "timeoutSeconds": 100,
+      "stagingManualOnly": true
     },
     {
       "code": "xsync",
@@ -73,14 +79,18 @@
       "path": "/api/cron/daily-audit-seal",
       "schedule": "10 * * * *",
       "timeoutSeconds": 300,
-      "environments": ["staging"]
+      "environments": [
+        "staging"
+      ]
     },
     {
       "code": "basops",
       "path": "/api/cron/base-operations-monitor",
       "schedule": "*/5 * * * *",
       "timeoutSeconds": 300,
-      "environments": ["staging"]
+      "environments": [
+        "staging"
+      ]
     }
   ]
 }
