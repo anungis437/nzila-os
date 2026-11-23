@@ -25,6 +25,7 @@ const HOST = 'nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com'
 const sha = (v: string | Buffer) => createHash('sha256').update(v).digest('hex')
 let commitAttempted = false,
   commitAcknowledged = false
+let failureStage = 'configuration'
 
 async function main() {
   const operation = process.env.UE_UPGRADE_OPERATION
@@ -52,6 +53,7 @@ async function main() {
     'UE_UPGRADE_OPERATOR_SOURCE_REQUIRED',
   )
   const root = process.env.UE_UPGRADE_ASSETS ?? '/operator/assets'
+  failureStage = 'qualified-assets'
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'))
   assert.equal(manifest.version, 1)
   assert.equal(manifest.applicationSourceSha, APPLICATION_SOURCE)
@@ -122,17 +124,22 @@ async function main() {
   let transaction = false,
     readerTransaction = false
   try {
+    failureStage = 'runtime-read-only-preflight'
     await reader.connect()
     await reader.query('BEGIN READ ONLY')
     readerTransaction = true
     await reader.query('SET LOCAL search_path=pg_catalog,public')
     const actor = (
-      await reader.query('SELECT current_user::text AS actor,session_user::text AS login')
+      await reader.query(`SELECT current_user::text AS actor,session_user::text AS login,
+        (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user) AS actor_privileged,
+        (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=session_user) AS login_privileged`)
     ).rows[0]
     assert(
       actor.actor === 'union_eyes_runtime' && actor.login === 'ue_staging_runtime',
       'UE_UPGRADE_RUNTIME_PRINCIPAL_MISMATCH',
     )
+    assert.equal(actor.actor_privileged, false, 'UE_UPGRADE_RUNTIME_ROLE_PRIVILEGED')
+    assert.equal(actor.login_privileged, false, 'UE_UPGRADE_RUNTIME_LOGIN_PRIVILEGED')
     const version = Number(
       (await reader.query("SELECT current_setting('server_version_num') AS version")).rows[0]
         .version,
@@ -201,14 +208,17 @@ async function main() {
         'UE_UPGRADE_REHEARSAL_PREIMAGE_CHANGED',
       )
     }
+    failureStage = 'operator-transaction'
     await c.connect()
     await c.query('BEGIN')
     transaction = true
     const result = await executeForwardUpgrade(c, bundle)
+    failureStage = operation === 'apply' ? 'commit' : 'rehearsal-rollback'
     if (operation === 'apply') commitAttempted = true
     await c.query(operation === 'apply' ? 'COMMIT' : 'ROLLBACK')
     transaction = false
     if (operation === 'apply') commitAcknowledged = true
+    failureStage = 'post-transaction-verification'
     await reader.query('BEGIN READ ONLY')
     readerTransaction = true
     await reader.query('SET LOCAL search_path=pg_catalog,public')
@@ -254,6 +264,7 @@ main().catch((error) => {
         failure: message.startsWith('UE_UPGRADE_')
           ? message.split('\n')[0].slice(0, 500)
           : 'UE_UPGRADE_EXECUTION_REFUSED',
+        failureStage,
         changesQualified: false,
         changesCommitted: commitAcknowledged ? true : commitAttempted ? null : false,
         productionDeployment: false,

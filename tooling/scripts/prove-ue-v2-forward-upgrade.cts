@@ -344,8 +344,53 @@ async function main() {
     )
     console.log('PROOF injected DDL failure rolled back without data or role residue')
 
+    // The managed administrator observed in staging has pre-existing BYPASSRLS.
+    // Prove both profiles on this owned disposable server. Only the provider
+    // fixture changes that attribute; the upgrade itself must preserve it.
+    await c.query('BEGIN')
+    const noBypassRehearsal = await executeForwardUpgrade(c, bundle)
+    assert.equal(noBypassRehearsal.operatorProfile.rolbypassrls, false)
+    await c.query('ROLLBACK')
+    assert.equal(
+      forwardDigest(
+        normalizeForwardCatalog([
+          ...(await inspectCatalog(oldRuntime)),
+          ...(await oldRuntime.query(FORWARD_EVENT_CATALOG_QUERY)).rows,
+        ]),
+      ),
+      forwardDigest(normalizeForwardCatalog(actual)),
+      'PROOF_NOBYPASS_REHEARSAL_LEFT_CATALOG_CHANGES',
+    )
+    await provider.query('ALTER ROLE uev2admin BYPASSRLS')
+    await c.query('BEGIN')
+    await assert.rejects(
+      executeForwardUpgrade(c, bundle, {
+        afterStatement: (i) => {
+          if (i === 2) throw new Error('PROOF_INJECTED_PREEXISTING_BYPASS_AFTER_DDL')
+        },
+      }),
+      /PROOF_INJECTED_PREEXISTING_BYPASS_AFTER_DDL/,
+    )
+    await c.query('ROLLBACK')
+    assert.equal(
+      forwardDigest(
+        normalizeForwardCatalog([
+          ...(await inspectCatalog(oldRuntime)),
+          ...(await oldRuntime.query(FORWARD_EVENT_CATALOG_QUERY)).rows,
+        ]),
+      ),
+      forwardDigest(normalizeForwardCatalog(actual)),
+      'PROOF_BYPASS_FAILED_UPGRADE_LEFT_CATALOG_CHANGES',
+    )
+    assert.equal(
+      (await c.query("SELECT rolbypassrls FROM pg_roles WHERE rolname='uev2admin'")).rows[0]
+        .rolbypassrls,
+      true,
+      'PROOF_EXISTING_OPERATOR_BYPASS_CHANGED',
+    )
     await c.query('BEGIN')
     const receipt = await executeForwardUpgrade(c, bundle)
+    assert.equal(receipt.operatorProfile.rolbypassrls, true)
     await c.query('COMMIT')
     assert.equal(
       (await c.query('SELECT payload::text FROM drizzle.original_history')).rows[0].payload,
@@ -382,6 +427,19 @@ async function main() {
       source: after.report.applicationSourceSha,
       originalSource: before.report.applicationSourceSha,
       injectedFailureRollback: true,
+      operatorProfiles: {
+        noBypass: {
+          fullRehearsalRollback: true,
+          originalAttributesPreserved: noBypassRehearsal.operatorAttributesPreserved,
+        },
+        preexistingBypass: {
+          injectedFailureRollback: true,
+          committedUpgrade: true,
+          originalAttributesPreserved: receipt.operatorAttributesPreserved,
+        },
+        applicationPrincipalsRemainUnprivileged: admission.ok,
+        liveAdministratorAttributesChanged: false,
+      },
       originalBootstrapReceiptPreserved: true,
       packagedAdmission: { ok: admission.ok, violations: admission.violations },
       ...receipt,

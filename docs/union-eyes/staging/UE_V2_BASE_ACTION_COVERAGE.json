@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-staging-forward-upgrade-20261122",
-  "currentRepairRuntimeQualification": "APPLICATION_SOURCE_AND_IMAGE_QUALIFIED_OPERATOR_REQUALIFICATION_AND_LIVE_BASE_PENDING",
+  "currentRepairBranch": "fix/ue-staging-managed-admin-profile",
+  "currentRepairRuntimeQualification": "CANDIDATE_PREPARED_ZERO_TRAFFIC_LIVE_DATABASE_REHEARSAL_FAILED_REPAIR_UNQUALIFIED",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -11685,5 +11685,30 @@
     "repairEvidence": "evidence/ue-v2-forward-upgrade-20261122/shared-candidate-gate-repair.json",
     "finalLocalFiveAndCiOpen": true,
     "stagingExecuted": false
+  },
+  "currentStagingFailureEvidence": "evidence/ue-v2-forward-upgrade-20261122/actual-managed-admin-refusal.json",
+  "personaCoverageDenominators": {
+    "source": "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
+    "census": "evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json",
+    "stakeholderFamilies": 35,
+    "requiredStakeholderFamilies": 26,
+    "deferredStakeholderFamilies": 9,
+    "storedRoleValues": 39,
+    "requiredRoleBoundaries": 34,
+    "deprecatedOrExcludedRoleValues": 5,
+    "requiredLifecycleStages": 16,
+    "requiredOperatingModelPresets": 4,
+    "requiredCrossCuttingVariants": 6,
+    "sevenNavigationProfilesAreSubsetOnly": true,
+    "currentCandidateAcceptanceInferred": false
+  },
+  "currentOperatorRepairPullRequest": "https://github.com/anungis437/nzila-os/pull/1282",
+  "operatorRepairBranchPolicyHistory": {
+    "supersededPullRequest": 1281,
+    "sourceSha": "1cdc11fa339e5faf2ebf0b276b80c5523b0253dd",
+    "failedCheck": "branch-policy",
+    "reason": "Repository policy excludes the default codex/ prefix; republished under allowed fix/ prefix. Original failure retained.",
+    "checkBypassed": false,
+    "fiveLocalPassesClaimedForSupersededSource": false
   }
 }

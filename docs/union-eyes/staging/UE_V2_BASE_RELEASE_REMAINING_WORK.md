@@ -4,6 +4,16 @@ The accepted staging record proves the named casework and access journeys on app
 
 Some earlier defect remediation removed misleading controls or changed false success into an honest unavailable response. Those changes repaired the false behavior while leaving the capability unavailable. A source-remediation count is not a count of implemented features.
 
+## November 23 current execution delta
+
+The full persona scope is **35 stakeholder families: 26 required and 9 deferred**, with **39 stored roles: 34 required boundaries and 5 deprecated/excluded values**. It also includes 16 required lifecycle stages, four operating models and six variants. The seven navigation profiles are a subset only. The [source-bound census](evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json) joins this scope to the existing 22 functional and 13 required operational families; none becomes accepted through a navigation pass.
+
+Application `aa545415cfe4b172733000cfc6510712d4de0cba` has qualified source and an immutable image, but its actual staging revision is unhealthy at zero traffic. The previous `cccfc8c311` revision remains healthy at 100%. [Preparation run 45093129058](https://github.com/anungis437/nzila-os/actions/runs/45093129058) failed its readiness check. [Transactional rehearsal 45093321513](https://github.com/anungis437/nzila-os/actions/runs/45093321513) also failed; its owned job and secret were removed and no apply was launched. Its failure is not a verified rollback proof. Actual loopback readiness identifies catalogue admission as the blocker while database connectivity, storage, scanner and decision proof pass.
+
+The [read-only failure diagnosis](evidence/ue-v2-forward-upgrade-20261122/actual-managed-admin-refusal.json) found that the existing managed database administrator has BYPASSRLS, whereas the operator and its disposable fixture required NOBYPASSRLS. Both application principals remain unprivileged. The current repair must prove both pre-existing administrator profiles, preserve the original attributes and data, and obtain a new successful live rehearsal before apply. Neither this diagnosis nor prior CI establishes base-release staging acceptance. Finance implementation and production deployment remain excluded.
+
+The older dated sections below retain their original candidate scope and are historical evidence.
+
 ## November 16 runtime qualification delta
 
 Observed staging is application `7d939bf5399ef768cc71a837730a6ff143d079d1`, workflow `5fae54b471e84d73eab5e44d723aee12a0add797`, build `43870172495`, deployment `43875150222`. Proposed repair source is `41dba402dd53fec280091f11f46a99077dd91465`. Its binding and deployed qualification remain pending. Full base release is **STAGING_NO_GO**; the historical accepted F record has its original narrower scope.

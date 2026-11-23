@@ -1,0 +1,97 @@
+{
+  "evidenceClass": "ACTUAL_STAGING_FAILURE_AND_READ_ONLY_DIAGNOSIS_NOT_ACCEPTANCE",
+  "recordedAt": "2026-11-23T01:53:20.595969+00:00",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "applicationImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af5f9cfc79f5c09f0197bab2b5f1488bd92c5f7af2ee2d92fccab1357b899e82",
+  "workflowSourceSha": "f099dae4561fe1031a0f888e8067728ceceee4a4",
+  "normalPreparation": {
+    "runId": "45093129058",
+    "conclusion": "failure",
+    "reason": "CANDIDATE_READINESS_NOT_ESTABLISHED",
+    "candidateTrafficPercent": 0
+  },
+  "liveRehearsal": {
+    "runId": "45093321513",
+    "conclusion": "failure",
+    "operationReceipt": {
+      "status": "FAIL",
+      "code": "ERR_ASSERTION",
+      "operation": "rehearse",
+      "operatorSourceSha": "f099dae4561fe1031a0f888e8067728ceceee4a4",
+      "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+      "executionRunId": "45093321513",
+      "executionJobName": "ue-v2-forward-45093321513",
+      "failure": "UE_UPGRADE_EXECUTION_REFUSED",
+      "changesQualified": false,
+      "changesCommitted": false,
+      "productionDeployment": false
+    },
+    "jobControl": {
+      "status": "FAIL",
+      "runId": "45093321513",
+      "operatorSourceSha": "f099dae4561fe1031a0f888e8067728ceceee4a4",
+      "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+      "operation": "rehearse",
+      "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:7049d0abf83483e5bab2a44550780ef510019ac62d503b979ad99426d6945841",
+      "job": "ue-v2-forward-45093321513",
+      "productionDeployment": false,
+      "execution": "ue-v2-forward-45093321513-oueqfmz",
+      "executionStatus": "Failed",
+      "failure": "AZURE_JOB_DID_NOT_SUCCEED",
+      "ownedJobAndSecretRemoved": true
+    },
+    "fullRollbackVerified": false,
+    "applyLaunched": false
+  },
+  "readOnlyRoleDiagnosis": {
+    "at": "2026-11-23T01:50:12.451Z",
+    "who": [
+      {
+        "actor": "union_eyes_runtime",
+        "login": "ue_staging_runtime"
+      }
+    ],
+    "roles": [
+      {
+        "rolname": "ue_staging_runtime",
+        "rolsuper": false,
+        "rolbypassrls": false,
+        "rolcanlogin": true,
+        "rolcreatedb": false,
+        "rolcreaterole": false
+      },
+      {
+        "rolname": "ue_v2_owner",
+        "rolsuper": false,
+        "rolbypassrls": false,
+        "rolcanlogin": false,
+        "rolcreatedb": false,
+        "rolcreaterole": false
+      },
+      {
+        "rolname": "uev2admin",
+        "rolsuper": false,
+        "rolbypassrls": true,
+        "rolcanlogin": true,
+        "rolcreatedb": true,
+        "rolcreaterole": true
+      }
+    ],
+    "settings": []
+  },
+  "rootCause": "The operator required uev2admin.rolbypassrls=false, but the actual existing managed administrator is NOSUPERUSER with pre-existing BYPASSRLS. The runtime login and role both remain NOSUPERUSER/NOBYPASSRLS. The old native fixture tested only the absent-BYPASS profile. No business DDL is attempted before this assertion.",
+  "proposedRepair": "Support both pre-existing administrator profiles, preserve every original operator attribute, reject superuser/wrong identity/database/version, explicitly reject privileged application login or role, and prove both profiles natively. Failure receipts gain a fixed phase label without raw error values.",
+  "servingRevisionObservation": {
+    "revision": "nzila-ue-v2-staging-app--relcccfc8c311",
+    "health": "Healthy",
+    "trafficPercent": 100,
+    "candidateRevision": "nzila-ue-v2-staging-app--relaa545415cf",
+    "candidateHealth": "Unhealthy",
+    "candidateRunningState": "ActivationFailed",
+    "candidateTrafficPercent": 0,
+    "ownedRehearsalJobExists": false
+  },
+  "stagingAcceptance": "NOT_PROVEN",
+  "productionDeployment": false,
+  "financeFeatureImplementation": false
+}
