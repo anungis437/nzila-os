@@ -2,6 +2,8 @@
 import { act, cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import RoleExperienceGuard from './role-experience-guard';
+import { UserRole } from '@/lib/auth/roles';
+import { canAccessDashboardPath, getDashboardExperience } from '@/lib/dashboard/role-experience';
 
 const navigation = vi.hoisted(() => ({ pathname: '/en-CA/dashboard/workbench', replace: vi.fn() }));
 vi.mock('next/navigation', () => ({ usePathname: () => navigation.pathname, useRouter: () => ({ replace: navigation.replace }) }));
@@ -63,5 +65,29 @@ describe('explicit executive casework standing', () => {
     navigation.pathname = '/en-CA/dashboard/executive'; view.rerender(<RoleExperienceGuard userRole="secretary_treasurer" />);
     await act(async () => { resolve(Response.json(answer([]))); });
     expect(signal?.aborted).toBe(true); expect(navigation.replace).not.toHaveBeenCalled();
+  });
+});
+
+// The real staging admin page rendered, then the menu guard sent it to its
+// landing before its authorized letter list could load.
+describe('local letter route survives its navigation experience', () => {
+  const localLetterRoles = ['admin', 'clerk', 'steward', 'chief_steward', 'officer', 'president', 'vice_president', 'secretary_treasurer'];
+  it.each(Object.values(UserRole))('keeps the actual letter role boundary for %s', role => {
+    expect(canAccessDashboardPath('/dashboard/correspondence', getDashboardExperience(role), true, role))
+      .toBe(localLetterRoles.includes(role));
+  });
+  it.each(localLetterRoles)('does not redirect an authorized %s away from letters', role => {
+    const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher);
+    navigation.pathname = '/en-CA/dashboard/correspondence';
+    render(<RoleExperienceGuard userRole={role} />);
+    expect(navigation.replace).not.toHaveBeenCalled();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+  it('keeps the French admin letter route without admitting another administrative destination', () => {
+    navigation.pathname = '/fr-CA/dashboard/correspondence';
+    render(<RoleExperienceGuard userRole="admin" />);
+    expect(navigation.replace).not.toHaveBeenCalled();
+    expect(canAccessDashboardPath('/dashboard/security', 'executive', true, 'officer')).toBe(false);
+    expect(canAccessDashboardPath('/dashboard/workbench/administration', 'member', true, 'member')).toBe(false);
   });
 });

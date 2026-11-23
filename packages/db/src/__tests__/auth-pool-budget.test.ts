@@ -36,7 +36,8 @@ it('installs every bound selector, including cleared selectors, before the callb
     // Principal inspection, SET LOCAL ROLE, then one complete settings query.
     expect(tx.execute).toHaveBeenCalledTimes(3)
     const statement = dialect.sqlToQuery(tx.execute.mock.calls[2][0])
-    const expected = Object.entries(authContextSettings(context)).flat()
+    const selectors = Object.entries(authContextSettings(context)).flat()
+    const expected = [...selectors, 'lock_timeout', '5s', 'statement_timeout', '15s']
     expect(statement.params).toEqual(expected)
     expect(statement.sql.match(/set_config\(/g)).toHaveLength(expected.length / 2)
     expect(statement.sql).not.toContain('owned-user')

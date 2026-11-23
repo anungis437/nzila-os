@@ -26,7 +26,8 @@
     "mailSenderAuthentication": "Use the existing send-only RESEND_API_KEY for a deliberately empty-recipient sending API request. Accept only the qualified 422 missing_required_field rejection without a message id. This checks sender API authentication only; delivery and human inbox receipt remain required separate final release proofs.",
     "credentialProvisioning": "Existing staging Key Vault reference retained; direct Azure CLI discovery found no receipt-reading key. No new credential, permission or owner setup required.",
     "requestIdentity": "Bind and read the verified actor profile before opening a canonical tenant transaction; reuse its callback-scoped authority for evidence sealing and nested authorization, retaining actor/organization/role checks and post-return expiry.",
-    "authWaitBounds": "Install transaction-local 5-second lock and 15-second statement limits on the dedicated auth executor, preserving roles and pool sizes."
+    "authWaitBounds": "Install transaction-local 5-second lock and 15-second statement limits on the dedicated auth executor, preserving roles and pool sizes.",
+    "clientRoleBoundary": "Pass the verified role to the client route guard and apply the same explicit local correspondence-role predicate as the page/API. A menu experience neither removes this authorized route nor lends it to a platform title. Other route restrictions and server authority remain in force."
   },
   "ownedTestPrerequisite": {
     "expiredSyntheticModuleAdmissionObserved": true,
@@ -49,8 +50,8 @@
     "deadlockRegressionOldSourceFailed": 5,
     "deadlockRegressionCurrentSourcePassed": 5,
     "currentFocusedReentryAndEnvironmentAssertionsPassed": 20,
-    "fiveRequiredRepositoryCommands": "PENDING_EXACT_COMMIT",
-    "ci": "PENDING_EXACT_COMMIT",
+    "fiveRequiredRepositoryCommands": "PENDING_CORRECTED_EXACT_COMMIT",
+    "ci": "PENDING_CORRECTED_EXACT_COMMIT",
     "qualifiedRollout": "PENDING",
     "actualPostRepairMonitor": "PENDING",
     "nativeAuthBlockedLockAndStatementRecoveryAssertionsPassed": 1,
@@ -58,7 +59,17 @@
     "physicalSqlStatementsUnchanged": 6326,
     "physicalCatalogAuthorityUnchanged": true,
     "sourcePlanMetadataRegenerated": true,
-    "localBicepCompilation": "PASS"
+    "localBicepCompilation": "PASS",
+    "previousIntegratedDraftSourceSha": "289d3c9d956d35da784756863f4af32ea8e7f817",
+    "previousIntegratedDraftFastSuite": {
+      "passed": 41649,
+      "failed": 1,
+      "skipped": 1625,
+      "pending": 13,
+      "failure": "Auth pool SQL expectation omitted the newly added transaction-local timeout settings. Correct the expected complete bound parameter set; retain the one-query and cleared-selector checks."
+    },
+    "navigationRegressionsOldSourceFailed": 20,
+    "navigationAndAuthPoolFocusedAssertionsPassed": 179
   },
   "fullBaseReleaseAccepted": false,
   "productionDeployment": false,
@@ -76,5 +87,16 @@
     "emailAccepted": false,
     "deliveryVerified": false,
     "humanInboxVerified": false
+  },
+  "observedNavigationFailure": {
+    "applicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+    "actor": "Controlled local administrator",
+    "requestedPath": "/en-CA/dashboard/correspondence",
+    "initialHttpStatus": 200,
+    "settledPath": "/en-CA/dashboard/admin/organizations",
+    "memberDirectoryBootstrapStatus": 200,
+    "clientLetterListRequested": false,
+    "cause": "The client experience allowlist redirects a locally authorized letter role even though the existing page and API admit that role.",
+    "officerRenderedLetterList": "PASS_ACTUAL_STAGING_WITHOUT_CREATION_OR_SENDING"
   }
 }
