@@ -92,7 +92,7 @@ export type SageInstitutionalMandateDecision =
   | { allowed: false; reason: Exclude<SageMandateDecisionReason, 'ADMITTED'> }
 
 function utcInstant(value: string | null): number | null {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value)) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) {
     return null
   }
   const ms = Date.parse(value)
