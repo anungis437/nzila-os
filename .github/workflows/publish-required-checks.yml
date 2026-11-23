@@ -16,6 +16,7 @@ on:
 permissions:
   contents: read
   checks: write
+  # Required to list secret-scan.yml / ci.yml workflow runs for this head.
   actions: read
 
 concurrency:
@@ -27,6 +28,12 @@ jobs:
     name: Publish required checks
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    # Job-scoped least privilege — must include actions:read so listWorkflowRuns
+    # against secret-scan.yml does not 403 under the job token.
+    permissions:
+      contents: read
+      checks: write
+      actions: read
     steps:
       - uses: actions/checkout@v5
         with:
@@ -37,7 +44,9 @@ jobs:
           node-version: 22
       - name: Wait for this head, then publish required checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use the job token (permissions above). Do not bind a shadowed
+          # repository secret named GITHUB_TOKEN that may lack actions:read.
+          GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
