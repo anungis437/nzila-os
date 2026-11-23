@@ -44,6 +44,12 @@ export interface SageInstitutionalAuthorityRequest {
   mandateId: string
   /** ISO-8601 UTC evaluation instant from the trusted server clock. */
   evaluatedAt: string
+  /** Required for resource.commit; must be computed from the authoritative
+   * ledger in the same transaction, not from client-supplied amounts. */
+  commitment?: {
+    currency: string
+    totalCommittedMinorAfterAction: number
+  }
   authenticated: boolean
   activeWorkspaceMembership: boolean
   applicationPermissionGranted: boolean
@@ -62,6 +68,10 @@ export interface SageVerifiedInstitutionalMandate {
   instrumentRef: string
   instrumentVersion: string
   issuerActorId: string
+  /** Monetary authority is per selected mandate and currency; never inherited
+   * from a previous officer's mandate or an obsolete delegation schedule. */
+  monetaryLimitMinor?: number
+  currency?: string
   /** Set by trusted institutional verification, never by the request body. */
   verificationStatus: 'verified' | 'unverified' | 'rejected'
   attestedAt: string
@@ -86,6 +96,8 @@ export type SageMandateDecisionReason =
   | 'UNVERIFIED_INSTRUMENT'
   | 'MANDATE_INACTIVE'
   | 'MANDATE_NOT_EFFECTIVE'
+  | 'FINANCIAL_SCOPE_INVALID'
+  | 'MONETARY_LIMIT_EXCEEDED'
 
 export type SageInstitutionalMandateDecision =
   | { allowed: true; reason: 'ADMITTED'; mandateId: string; instrumentRef: string; instrumentVersion: string }
@@ -181,6 +193,30 @@ export function evaluateSageInstitutionalMandate(
     expires <= effective
   ) {
     return deny('MANDATE_NOT_EFFECTIVE')
+  }
+
+  // A monetary commitment is a separate institutional power. The total must
+  // include prior commitments from the same ledger/resource so splitting a
+  // request cannot evade the ceiling. Fail closed if the verified monetary
+  // authority or final committed amount is missing, unsafe or cross-currency.
+  if (request.action === 'resource.commit') {
+    const commit = request.commitment
+    const ceiling = mandate.monetaryLimitMinor
+    if (
+      !commit ||
+      !commit.currency ||
+      commit.currency !== mandate.currency ||
+      !Number.isSafeInteger(commit.totalCommittedMinorAfterAction) ||
+      commit.totalCommittedMinorAfterAction < 0 ||
+      !Number.isSafeInteger(ceiling) ||
+      ceiling === undefined ||
+      ceiling < 0
+    ) {
+      return deny('FINANCIAL_SCOPE_INVALID')
+    }
+    if (commit.totalCommittedMinorAfterAction > ceiling) {
+      return deny('MONETARY_LIMIT_EXCEEDED')
+    }
   }
 
   return {
