@@ -39,11 +39,26 @@ test('registry response is strictly typed and bound to installed packages', () =
   assert.throws(() => normalizeAdvisoryResponse([], packages), /expected package-to-advisory/)
   assert.throws(() => normalizeAdvisoryResponse({ unknown: [] }, packages), /Invalid audit package/)
   assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': {} }, packages), /Invalid audit package/)
-  assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ id: 'bad', severity: 'high', title: 'x' }] }, packages), /Invalid advisory record/)
-  assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ id: 123, severity: 'unknown', title: 'x' }] }, packages), /Invalid advisory record/)
+  assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ id: 'bad', severity: 'high', title: 'x', vulnerable_versions: '<99.0.0' }] }, packages), /Invalid advisory record/)
+  assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ id: 123, severity: 'unknown', title: 'x', vulnerable_versions: '<99.0.0' }] }, packages), /Invalid advisory record/)
   assert.deepEqual(
-    normalizeAdvisoryResponse({ 'node-forge': [{ id: 1244017, severity: 'high', title: 'PEM DoS' }] }, packages),
-    { '1244017': { id: '1244017', severity: 'high', title: 'PEM DoS', package: 'node-forge' } },
+    normalizeAdvisoryResponse({ 'node-forge': [{ id: 1244017, severity: 'high', title: 'PEM DoS', vulnerable_versions: '<99.0.0' }] }, packages),
+    { '1244017': { id: '1244017', severity: 'high', title: 'PEM DoS', vulnerable_versions: '<99.0.0', package: 'node-forge' } },
+  )
+})
+
+test('missing or malformed vulnerable version ranges fail closed', () => {
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  const advisory = { id: 1244017, severity: 'high', title: 'PEM DoS' }
+  for (const vulnerable_versions of [undefined, null, '', '   ', 123, {}]) {
+    assert.throws(
+      () => normalizeAdvisoryResponse({ 'node-forge': [{ ...advisory, vulnerable_versions }] }, packages),
+      /Invalid advisory record/,
+    )
+  }
+  assert.deepEqual(
+    normalizeAdvisoryResponse({ 'node-forge': [{ ...advisory, vulnerable_versions: '<1.4.1' }] }, packages),
+    { '1244017': { ...advisory, vulnerable_versions: '<1.4.1', id: '1244017', package: 'node-forge' } },
   )
 })
 
@@ -51,14 +66,14 @@ test('noncanonical advisory IDs cannot alias valid advisory identities', () => {
   const packages = new Map([['node-forge', new Set(['1.4.0'])]])
   for (const id of ['001244017', ' 1244017', '1e3', '+1244017', '0', 0, -1, 1.5, null]) {
     assert.throws(
-      () => normalizeAdvisoryResponse({ 'node-forge': [{ id, severity: 'high', title: 'Forged ID' }] }, packages),
+      () => normalizeAdvisoryResponse({ 'node-forge': [{ id, severity: 'high', title: 'Forged ID', vulnerable_versions: '<99.0.0' }] }, packages),
       /Invalid advisory record/,
       String(id),
     )
   }
   assert.deepEqual(
-    normalizeAdvisoryResponse({ 'node-forge': [{ id: '1244017', severity: 'high', title: 'Valid ID' }] }, packages),
-    { '1244017': { id: '1244017', severity: 'high', title: 'Valid ID', package: 'node-forge' } },
+    normalizeAdvisoryResponse({ 'node-forge': [{ id: '1244017', severity: 'high', title: 'Valid ID', vulnerable_versions: '<99.0.0' }] }, packages),
+    { '1244017': { id: '1244017', severity: 'high', title: 'Valid ID', vulnerable_versions: '<99.0.0', package: 'node-forge' } },
   )
 })
 
@@ -67,8 +82,8 @@ test('duplicate advisory IDs cannot overwrite or downgrade earlier findings', ()
     ['node-forge', new Set(['1.4.0'])],
     ['follow-redirects', new Set(['1.16.1'])],
   ])
-  const high = { id: 1244017, severity: 'high', title: 'PEM DoS' }
-  const low = { id: 1244017, severity: 'low', title: 'Forged downgrade' }
+  const high = { id: 1244017, severity: 'high', title: 'PEM DoS', vulnerable_versions: '<99.0.0' }
+  const low = { id: 1244017, severity: 'low', title: 'Forged downgrade', vulnerable_versions: '<99.0.0' }
   assert.throws(
     () => normalizeAdvisoryResponse({ 'node-forge': [high, low] }, packages),
     /Duplicate advisory ID/,
@@ -230,7 +245,7 @@ test("the repository's own pnpm-lock.yaml parses completely", () => {
 test('advisory ids are recorded as the canonical string the policy binds to the map key', () => {
   const pkgMap = new Map([['esbuild', new Set(['0.27.3'])]])
   const flat = normalizeAdvisoryResponse(
-    { esbuild: [{ id: 1120680, severity: 'low', title: 'esbuild dev server file read', vulnerable_versions: '>=0.27.3 <0.28.1' }] },
+    { esbuild: [{ id: 1120680, severity: 'low', title: 'esbuild dev server file read', vulnerable_versions: '<99.0.0', vulnerable_versions: '>=0.27.3 <0.28.1' }] },
     pkgMap,
   )
   assert.deepEqual(Object.keys(flat), ['1120680'])
