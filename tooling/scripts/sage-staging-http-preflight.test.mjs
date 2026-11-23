@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {
   assertSageStagingOrigin,
   inspectSageStagingHttp,
-  routeIsProtectedButPresent,
+  anonymousGuardObserved,
 } from './sage-staging-http-preflight.mjs'
 
 const BASE = 'https://staging-admin.nzilaventures.com'
@@ -59,15 +59,15 @@ describe('SAGE staging HTTP preflight — read-only, no production fallback', ()
     }
   })
 
-  it('accepts only anonymous refusal or a local sign-in redirect as route evidence', () => {
-    for (const code of [401, 403]) assert.equal(routeIsProtectedButPresent(code, null), true)
+  it('records only anonymous boundary behavior, not actual route existence', () => {
+    for (const code of [401, 403]) assert.equal(anonymousGuardObserved(code, null), true)
     for (const code of [302, 303, 307, 308]) {
-      assert.equal(routeIsProtectedButPresent(code, '/sign-in'), true)
-      assert.equal(routeIsProtectedButPresent(code, '/en-CA/sign-in'), true)
-      assert.equal(routeIsProtectedButPresent(code, 'https://login.attacker.test'), false)
+      assert.equal(anonymousGuardObserved(code, '/sign-in'), true)
+      assert.equal(anonymousGuardObserved(code, '/en-CA/sign-in'), true)
+      assert.equal(anonymousGuardObserved(code, 'https://login.attacker.test'), false)
     }
     for (const code of [200, 404, 500, null]) {
-      assert.equal(routeIsProtectedButPresent(code, null), false)
+      assert.equal(anonymousGuardObserved(code, null), false)
     }
   })
 
@@ -78,14 +78,15 @@ describe('SAGE staging HTTP preflight — read-only, no production fallback', ()
       fetchImpl: mockFetch(),
       observedAt: '2026-11-23T00:00:00.000Z',
     })
-    assert.equal(receipt.result, 'HTTP_PREFLIGHT_PASS')
+    assert.equal(receipt.result, 'ANONYMOUS_BOUNDARY_PASS')
     assert.equal(receipt.b005Closure, 'NOT_PROVEN')
     assert.equal(receipt.health.commit, SHA)
     assert.equal(receipt.health.db, 'ok')
     assert.equal(receipt.routes.length, 2)
-    assert.ok(receipt.routes.every((r) => r.protected))
+    assert.ok(receipt.routes.every((r) => r.anonymousGuardObserved))
     assert.equal(JSON.stringify(receipt).includes('secret'), false)
-    assert.equal(receipt.unsupportedClaims.length, 5)
+    assert.equal(receipt.unsupportedClaims.length, 6)
+    assert.ok(receipt.routes.every((r) => r.routeExists === 'NOT_PROVEN_ANONYMOUS'))
   })
 
   it('refuses a stale image, missing database or HTML unavailable health', async () => {
@@ -97,7 +98,7 @@ describe('SAGE staging HTTP preflight — read-only, no production fallback', ()
       const receipt = await inspectSageStagingHttp({
         base: BASE, expectedSha: SHA, fetchImpl: mockFetch(overrides),
       })
-      assert.equal(receipt.result, 'HTTP_PREFLIGHT_FAIL')
+      assert.equal(receipt.result, 'ANONYMOUS_BOUNDARY_FAIL')
       assert.equal(receipt.b005Closure, 'NOT_PROVEN')
     }
   })
@@ -107,7 +108,7 @@ describe('SAGE staging HTTP preflight — read-only, no production fallback', ()
       const receipt = await inspectSageStagingHttp({
         base: BASE, expectedSha: SHA, fetchImpl: mockFetch(overrides),
       })
-      assert.equal(receipt.result, 'HTTP_PREFLIGHT_FAIL')
+      assert.equal(receipt.result, 'ANONYMOUS_BOUNDARY_FAIL')
     }
   })
 
@@ -115,7 +116,7 @@ describe('SAGE staging HTTP preflight — read-only, no production fallback', ()
     const failed = await inspectSageStagingHttp({
       base: BASE, expectedSha: SHA, fetchImpl: async () => { throw Error('offline') },
     })
-    assert.equal(failed.result, 'HTTP_PREFLIGHT_FAIL')
+    assert.equal(failed.result, 'ANONYMOUS_BOUNDARY_FAIL')
     assert.equal(failed.health.code, null)
     await assert.rejects(() => inspectSageStagingHttp({
       base: BASE, expectedSha: 'short', fetchImpl: mockFetch(),

@@ -49,11 +49,11 @@ export function assertSageStagingOrigin(raw) {
   return u.origin
 }
 
-export function routeIsProtectedButPresent(status, location) {
+export function anonymousGuardObserved(status, location) {
   if (status === 401 || status === 403) return true
   if (![302, 303, 307, 308].includes(status)) return false
-  // Redirect to a login page is a protective first response, but NEVER
-  // follow it, so a reachable login page cannot disguise a missing SAGE route.
+  // A login redirect proves only an anonymous middleware boundary: a global
+  // auth guard can protect even a nonexistent route. Never claim route existence.
   return typeof location === 'string' && /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?sign-in(?:[/?#]|$)/.test(location)
 }
 
@@ -113,11 +113,12 @@ export async function inspectSageStagingHttp({
       route: route.label,
       code,
       // No response payload saved: avoid accidental disclosing internal data.
-      protected: routeIsProtectedButPresent(code, location),
+      anonymousGuardObserved: anonymousGuardObserved(code, location),
+      routeExists: 'NOT_PROVEN_ANONYMOUS',
       // We do not persist location targets (could contain query state).
     })
   }
-  const httpPreflightPassed = health.passed && routes.every((r) => r.protected)
+  const httpPreflightPassed = health.passed && routes.every((r) => r.anonymousGuardObserved)
 
   return {
     schemaVersion: 1,
@@ -127,11 +128,12 @@ export async function inspectSageStagingHttp({
     expectedSha,
     health,
     routes,
-    result: httpPreflightPassed ? 'HTTP_PREFLIGHT_PASS' : 'HTTP_PREFLIGHT_FAIL',
+    result: httpPreflightPassed ? 'ANONYMOUS_BOUNDARY_PASS' : 'ANONYMOUS_BOUNDARY_FAIL',
     b005Closure: 'NOT_PROVEN',
     unsupportedClaims: [
       'migration and sage table inventory not verified',
       'isolated PostgreSQL RLS not verified',
+      'SAGE route existence not verified by anonymous middleware (must check signed-in navigation)',
       'authenticated route journey not verified',
       'image digest and Azure revision not verified',
       'incident alerts, backup restoration and accessibility not verified',
@@ -166,7 +168,7 @@ export async function runSageStagingHttpPreflight(argv) {
   // Never silently overwrite previous evidence; each execution is a new record.
   await writeFile(receiptPath, JSON.stringify(result, null, 2) + '\n', { flag: 'wx', mode: 0o600 })
   process.stdout.write(result.result + ': receipt ' + receiptPath + '\n')
-  if (result.result !== 'HTTP_PREFLIGHT_PASS') process.exitCode = 1
+  if (result.result !== 'ANONYMOUS_BOUNDARY_PASS') process.exitCode = 1
   return result
 }
 
