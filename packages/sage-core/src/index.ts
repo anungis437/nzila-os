@@ -40,3 +40,6 @@ export * from './records-services'
 export * from './synthesis-context'
 export * from './claim-chain'
 export * from './institutional-context'
+
+// Institutionally verified mandate admission (pure contract; not yet route-wired).
+export * from './institutional-authority'
