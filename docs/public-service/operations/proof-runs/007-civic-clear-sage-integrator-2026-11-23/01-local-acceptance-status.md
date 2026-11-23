@@ -1,8 +1,8 @@
 # 007 — CIVIC/CLEAR/SAGE integrator local acceptance status
 
-**Branch:** `integration/civic-clear-sage-a843` (supersedes non-compliant `cursor/civic-clear-sage-integrate-a843` / PR #1301)  
-**Head (at write):** record via `git rev-parse HEAD` on the integrator PR  
-**PR:** open against `integration/civic-clear-sage-a843` (traceable supersession of [#1301](https://github.com/anungis437/nzila-os/pull/1301))  
+**Branch:** `integration/civic-clear-sage-a843` (policy-compliant; supersedes `cursor/civic-clear-sage-integrate-a843`)  
+**Head (at write):** `5583e93d9`  
+**PR:** [#1302](https://github.com/anungis437/nzila-os/pull/1302) (supersedes closed [#1301](https://github.com/anungis437/nzila-os/pull/1301))  
 **Disposition:** engineering in progress — not a release GO
 
 ## Journey / gate verdicts
