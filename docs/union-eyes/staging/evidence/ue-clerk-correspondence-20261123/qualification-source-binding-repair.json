@@ -85,5 +85,30 @@
       "path": "tooling/scripts/run-ue-v2-forward-upgrade-job.py",
       "sha256": "ef2be75c9c74356e775e233d75ef9ca72645d6725286ce736565ef30d91991fd"
     }
-  ]
+  ],
+  "subsequentGeneratedCensusFailure": {
+    "sourceSha": "bf7854e88f7a8a19773c7b81b6d88734bba739a8",
+    "runUrl": "https://github.com/anungis437/nzila-os/actions/runs/45119152389",
+    "wholeApplicationPassed": 27227,
+    "wholeApplicationFailed": 1,
+    "wholeApplicationUnexecuted": 36,
+    "contractsPassed": 10175,
+    "localPassed": 41363,
+    "localFailed": 1,
+    "localSkipped": 1623,
+    "localPending": 13,
+    "missingNativeTemplateRepaired": true,
+    "all16ExternalReaderCasesActuallyPassed": true,
+    "exactFailure": "transitive-authority-census.test.ts: committed census matches current source exactly",
+    "repair": "Regenerate existing deterministic census using the official source generator. Six added correspondence importer counts; untested guarded mutation exports104to103; all921exports and boundary classes unchanged; threshold remains104.",
+    "newSourceFiveRequiredCommandsAndFreshCi": "PENDING",
+    "stagingAcceptance": false,
+    "targetedWorkingTreeChecks": {
+      "authorityCensus": 6,
+      "fullScopeReconciliation": 6,
+      "failed": 0,
+      "skipped": 0,
+      "runtimeAcceptanceInferred": false
+    }
+  }
 }

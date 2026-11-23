@@ -11705,7 +11705,8 @@
     "requiredOperatingModelPresets": 4,
     "requiredCrossCuttingVariants": 6,
     "sevenNavigationProfilesAreSubsetOnly": true,
-    "currentCandidateAcceptanceInferred": false
+    "currentCandidateAcceptanceInferred": false,
+    "historicalSevenPersonaRows": "Historical seven-persona receipts and observation-history instructions describe subsets only; current acceptance requires all26required stakeholder families,34required role boundaries,16lifecycle stages,four operating models,six variants and654required scope-node joins."
   },
   "operatorRepairBranchPolicyHistory": {
     "supersededPullRequest": 1281,
@@ -11773,6 +11774,42 @@
     "productionAuthorized": false,
     "sourceBindingRepairEvidence": "evidence/ue-clerk-correspondence-20261123/qualification-source-binding-repair.json",
     "supersededCiSource": "c9a19eb02f5a0aa256f16d198941b5a76ff82b4f",
-    "sourceBindingRepair": "Native preservation passed before premature live packaging refused; accepted-source navigation now compiles its own Git tree. New-source full checks and CI remain required."
+    "sourceBindingRepair": "Native preservation passed before premature live packaging refused; accepted-source navigation now compiles its own Git tree. New-source full checks and CI remain required.",
+    "generatedCensusSynchronization": {
+      "supersededSourceSha": "bf7854e88f7a8a19773c7b81b6d88734bba739a8",
+      "wholeApplicationCiRun": 45119152389,
+      "failure": "Committed authority census omitted six new correspondence test-import counts. All921mutation exports and authority classes are unchanged.",
+      "localResults": {
+        "lint": "PASS",
+        "typecheck": "PASS",
+        "testFast": {
+          "passed": 41363,
+          "failed": 1,
+          "skipped": 1623,
+          "pending": 13
+        },
+        "validateDocs": "UNRUN",
+        "governanceAudit": "UNRUN",
+        "all16ExternalReaderCasesPassed": true
+      },
+      "guardedExportsWithoutRouteTestsBefore": 104,
+      "guardedExportsWithoutRouteTestsAfter": 103,
+      "coverageRatchetUnchanged": true,
+      "replacementFullChecksAndCi": "PENDING",
+      "fullBaseStagingAcceptance": false,
+      "targetedWorkingTreeChecks": {
+        "authorityCensus": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "fullScopeReconciliation": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "runtimeAcceptanceInferred": false
+      }
+    }
   }
 }
