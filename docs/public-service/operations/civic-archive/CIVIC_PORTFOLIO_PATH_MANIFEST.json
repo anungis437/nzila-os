@@ -272,7 +272,7 @@
       "path": "governance/foundations/civic-oci-doctrine.contract.json",
       "category": "DURABLE_SOURCE",
       "reason": "Retain bounded proof source and fail-closed governance enforcement; no runtime activation.",
-      "normalizedLfSha256": "c2194ca8f5f00116f96de040f96f4778b37d2adfb8cb61ea0efd43368be7085f"
+      "normalizedLfSha256": "190db8edcfd13980ffed085835a27e70e972a418c14c197a7f0e783651708d27"
     },
     {
       "path": "scripts/lib/civic-oci-doctrine.ts",
