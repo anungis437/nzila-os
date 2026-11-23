@@ -4,8 +4,13 @@
 // evidence item + source ids. Narrative lives here or in CLEAR registers — not
 // as prospect-specific DB columns.
 //
-// DO_NOT_REGRESS: only claims whose evidenceItemId survives
-// buildAuthorizedEvidenceContextPayload may appear in answers/context JSON.
+// DO_NOT_REGRESS: a claim is eligible only when its evidence item AND its exact
+// source id and authorization level match the authorized context. A caller
+// may not re-label an allowed item with a different source or lower sensitivity.
+//
+// Note: matching an authorized source reference is NOT institutional attestation
+// of the actor, the claim or its date. Those require a separate verified
+// institutional source and mandate model.
 
 import type { SageAuthorizationLevel } from './types'
 import type { SageAuthorizedEvidenceContextPayload } from './synthesis-context'
@@ -23,7 +28,7 @@ export type SageClaimChainEntry = {
   sourceId: string
   /** When the underlying event/decision occurred (ISO-8601 date or datetime). */
   occurredAt: string
-  /** Actor id of the authority who owns/attests the claim (human). */
+  /** Claimed human authority actor id; NOT independently verified attestation. */
   authorityActorId: string
   /** Optional institutional role label (not a SageApplicationRole enum). */
   authorityRoleLabel?: string
@@ -61,11 +66,30 @@ export function filterClaimRegisterToAuthorizedContext(
   payload: SageAuthorizedEvidenceContextPayload,
   register: readonly SageClaimChainEntry[],
 ): SageAuthorizedClaimChainAnswer[] {
-  const allowed = new Set(payload.evidence.map((e) => e.evidenceItemId))
+  // A visible item id alone does not authorize arbitrary source or classification
+  // labels. Deny ambiguous duplicate IDs even if they resolve to the same source;
+  // the repository must provide a unique authoritative evidence/source binding.
+  const allowed = new Map<
+    string,
+    { sourceId: string; authorizationLevel: SageAuthorizationLevel } | null
+  >()
+  for (const evidence of payload.evidence) {
+    if (allowed.has(evidence.evidenceItemId)) {
+      allowed.set(evidence.evidenceItemId, null)
+    } else {
+      allowed.set(evidence.evidenceItemId, {
+        sourceId: evidence.sourceId,
+        authorizationLevel: evidence.authorizationLevel,
+      })
+    }
+  }
   const answers: SageAuthorizedClaimChainAnswer[] = []
   for (const entry of register) {
     if (entry.workspaceId !== payload.workspaceId || entry.orgId !== payload.orgId) continue
-    if (!allowed.has(entry.evidenceItemId)) continue
+    const bound = allowed.get(entry.evidenceItemId)
+    if (!bound) continue
+    if (entry.sourceId !== bound.sourceId) continue
+    if (entry.authorizationLevel !== bound.authorizationLevel) continue
     answers.push({
       claimId: entry.claimId,
       claim: entry.claim,
