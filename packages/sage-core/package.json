@@ -27,7 +27,8 @@
     "./institutional-authority": "./src/institutional-authority.ts",
     "./institutional-mandate-store": "./src/institutional-mandate-store.ts",
     "./institutional-mandate-enforcement": "./src/institutional-mandate-enforcement.ts",
-    "./accountability-draft": "./src/accountability-draft.ts"
+    "./accountability-draft": "./src/accountability-draft.ts",
+    "./accountability-adoption": "./src/accountability-adoption.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
