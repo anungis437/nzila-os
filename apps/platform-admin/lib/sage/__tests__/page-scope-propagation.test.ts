@@ -38,6 +38,11 @@ describe('SAGE server page identity propagation', () => {
       expect(source).not.toMatch(
         /const (?:scope|ctx) = \{\s*actorId: result\.context\.actorId,\s*orgId: result\.context\.orgId,\s*orgRole: result\.context\.orgRole,\s*\}/,
       )
+      // The root index previously composed an inline three-field object rather
+      // than a named scope. Enforce forwarding for that variant too.
+      expect(source).not.toMatch(
+        /listSageWorkspacesForScope\(\s*\{\s*actorId: result\.context\.actorId/,
+      )
     })
   }
 })
