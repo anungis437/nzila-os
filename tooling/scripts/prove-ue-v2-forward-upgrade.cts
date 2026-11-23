@@ -342,10 +342,11 @@ async function main() {
     await assert.rejects(
       executeForwardUpgrade(c, bundle, {
         afterStatement: (i) => {
-          if (i === 2) throw new Error('PROOF_INJECTED_AFTER_DDL')
+          if (bundle.statements[i].phase === 'canonical-function-owner')
+            throw new Error('PROOF_INJECTED_AFTER_OWNER_HANDOFF')
         },
       }),
-      /PROOF_INJECTED_AFTER_DDL/,
+      /PROOF_INJECTED_AFTER_OWNER_HANDOFF/,
     )
     await c.query('ROLLBACK')
     assert.equal(
@@ -386,10 +387,11 @@ async function main() {
     await assert.rejects(
       executeForwardUpgrade(c, bundle, {
         afterStatement: (i) => {
-          if (i === 2) throw new Error('PROOF_INJECTED_PREEXISTING_BYPASS_AFTER_DDL')
+          if (bundle.statements[i].phase === 'canonical-function-owner')
+            throw new Error('PROOF_INJECTED_PREEXISTING_BYPASS_AFTER_OWNER_HANDOFF')
         },
       }),
-      /PROOF_INJECTED_PREEXISTING_BYPASS_AFTER_DDL/,
+      /PROOF_INJECTED_PREEXISTING_BYPASS_AFTER_OWNER_HANDOFF/,
     )
     await c.query('ROLLBACK')
     assert.equal(
@@ -447,6 +449,7 @@ async function main() {
       source: after.report.applicationSourceSha,
       originalSource: before.report.applicationSourceSha,
       injectedFailureRollback: true,
+      injectedFailureAfterHistoricalOwnerHandoffRollback: true,
       operatorProfiles: {
         noBypass: {
           fullRehearsalRollback: true,
