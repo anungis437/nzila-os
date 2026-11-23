@@ -17,8 +17,7 @@ import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
   validateTransition,
 } from "@/lib/workflow/case-lifecycle";
-import { caseLifecycleActorRole } from '@/lib/workflow/claim-transition-policy';
-import { storedCaseTransitionFacts } from '@/lib/workflow/claim-transition-facts';
+import { grievanceTransitionContext } from '@/lib/workflow/grievance-transition-policy';
 import { toLifecycleState } from "@/lib/workflow/state-bridge";
 import {
   ErrorCode,
@@ -85,24 +84,15 @@ export const PATCH = withApi(
       if (actor.userId !== userId || actor.organizationId !== organizationId) {
         throw ApiError.forbidden('The case actor must match the current organization session');
       }
-      const actorRole = caseLifecycleActorRole(actor.role);
-      if (!actorRole) throw ApiError.forbidden('Unknown case workflow role');
       // Read the status clock from immutable state events. Editing the case or
       // adding a document must not restart or disable its waiting period.
-      const [lastStateEvent] = await tx.select({ createdAt: grievanceEvents.createdAt })
+      const lastStateEvents = await tx.select({ eventType: grievanceEvents.eventType, createdAt: grievanceEvents.createdAt })
         .from(grievanceEvents).where(and(eq(grievanceEvents.grievanceId, grievanceId),
           inArray(grievanceEvents.eventType, ['status_changed', 'converted_to_case', 'closed'])))
         .orderBy(desc(grievanceEvents.createdAt)).limit(1);
-      const transitionFacts = storedCaseTransitionFacts({
-        claimId: grievanceId, status: currentStatus,
-        description: grievance.description, assignedTo: grievance.unionRepId,
-        memberId: grievance.representedMemberUserId, priority: grievance.priority === 'urgent' ? 'critical' : grievance.priority ?? 'medium',
-        createdAt: grievance.createdAt, updatedAt: grievance.updatedAt,
-        statusChangedAt: lastStateEvent?.createdAt ?? grievance.createdAt,
-      }, unifiedCurrent, notes);
-      const result = validateTransition({ actorRole, caseId: grievanceId,
-        currentState: unifiedCurrent, targetState: unifiedTarget, assignedTo: grievance.unionRepId,
-        ...transitionFacts });
+      const context = grievanceTransitionContext(grievance, lastStateEvents, actor.role, newStatus, notes);
+      if (!context) return { response: standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Unsupported case workflow transition') };
+      const result = validateTransition(context);
       if (!result.allowed) return { response: standardErrorResponse(ErrorCode.VALIDATION_ERROR, result.reason ?? "Invalid transition") };
 
       const rows = await tx.update(grievances).set({ status: newStatus, updatedAt: new Date(),

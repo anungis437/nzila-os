@@ -163,7 +163,13 @@ export const harness = {
           await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [organizationId ?? ''])
           if (binding) await setNativeBusinessContext(client, binding)
           scope.db = tx as unknown as RouteDb
-          return scopes.run(scope, () => work(scope.db))
+          const run = () => scopes.run(scope, () => work(scope.db))
+          if (!binding) return run()
+          // Production installs the verified principal on the transaction after
+          // the database bridge. Exercise that same boundary, rather than making
+          // getCaseActor fall back to an unrelated browser session in native tests.
+          const { withCanonicalTenantScope } = await import('@/lib/db/canonical-transaction-scope')
+          return withCanonicalTenantScope(scope.db as never, binding, run)
         })
         harness.audits.push(...scope.pendingAudits)
         return result
@@ -238,7 +244,7 @@ export async function roleInOrganization(userId: string, organizationId: string)
 }
 
 interface EmulatedConfig {
-  auth?: { required?: boolean; minRole?: string; cron?: boolean }
+  auth?: { required?: boolean; minRole?: string; roles?: readonly string[]; cron?: boolean }
   rlsOrgContext?: boolean
   requireOrg?: boolean
   openapi?: { summary?: string }
@@ -256,6 +262,10 @@ export function emulatedWithApi(config: EmulatedConfig, handler: (ctx: Context) 
   return async (ctx: Context) => {
     const required = config.auth?.minRole
     const held = ctx.userId && ctx.organizationId ? await roleInOrganization(ctx.userId, ctx.organizationId) : null
+    if (config.auth?.roles && (!held || !config.auth.roles.includes(held))) {
+      const { ApiError } = await import('@/lib/api/errors')
+      throw ApiError.forbidden()
+    }
     if (required) {
       const { ROLE_HIERARCHY } = await import('@/lib/api-auth-guard')
       const level = (name: string | null | undefined) => (name ? (ROLE_HIERARCHY as Record<string, number>)[name] ?? 0 : 0)

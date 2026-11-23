@@ -14,7 +14,8 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { canonicalPageGuardRoleLevel, getDashboardExperience, getRoleLandingPath, getVisibleNavigationForExperience, type DashboardExperience } from '../../lib/dashboard/role-experience'
 import { UserRole, getRoleLevel } from '../../lib/auth/roles'
-import { redirectingGuards } from '../lib/nav-census/page-guards'
+import { redirectingGuards, redirectsWithoutCaseHandlerRole } from '../lib/nav-census/page-guards'
+import { isCaseHandlerRole } from '../../lib/cases/case-role-access'
 import { APP_ROOT } from './frontend-api-census'
 
 export type NavGuardKind = 'NAV_PAGE_REFUSES_ROLE' | 'LANDING_REFUSES_ROLE' | 'NAV_PAGE_MISSING'
@@ -82,6 +83,7 @@ function guardingFiles(root: string, pageFile: string): string[] {
 
 export function runCensus(root: string = APP_ROOT, navigation: NavOracle = applicationNavigation): NavGuardReport {
   const guardCache = new Map<string, string[]>()
+  const explicitHandlerGuards = new Map<string, boolean>()
   const guardsOf = (file: string): string[] => {
     if (!guardCache.has(file)) guardCache.set(file, redirectingGuards(readFileSync(file, 'utf8'), file))
     return guardCache.get(file)!
@@ -109,6 +111,13 @@ export function runCensus(root: string = APP_ROOT, navigation: NavOracle = appli
       return
     }
     guarded.add(page)
+    for (const file of guardingFiles(root, page)) {
+      if (!explicitHandlerGuards.has(file)) explicitHandlerGuards.set(file, redirectsWithoutCaseHandlerRole(readFileSync(file, 'utf8'), file))
+      if (explicitHandlerGuards.get(file) && !isCaseHandlerRole(role)) {
+        findings.push({ kind, role, href, guardedBy: `${path.relative(root, file).replace(/\\/g, '/')} requires case handler`, roleLevel: navigation.levelOf(role), guardLevel: 0 })
+        return
+      }
+    }
     const guard = strictest(page)
     const level = navigation.levelOf(role)
     if (guard && guard.level > level) {

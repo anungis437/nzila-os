@@ -4,12 +4,12 @@
  * Validates that invalid FSM transitions are structurally blocked,
  * not just UI-gated. Covers:
  *   - triage → resolved (must go via under_review first)
- *   - closed → investigation (must go via explicit reopen)
+ *   - organization administrator cannot resolve or investigate a case by title alone
  *   - arbitration bypass (member cannot self-advance to arbitration)
  *   - member cannot resolve a case directly
  *   - re-submit a closed case (must be rejected)
  *
- * Acceptance: server returns 409/422 for every invalid transition attempt.
+ * Acceptance: lifecycle refusals and permission refusals are asserted separately.
  *
  * @tags negative-path, fsm, workflow-invariant
  */
@@ -54,20 +54,23 @@ test.describe('UE E2E — negative workflow transitions (FSM invariant)', () => 
     ).toContain(skip.status())
   })
 
-  test('closed → investigation is blocked without explicit reopen (NEG-FSM-CLOSED-NO-INVESTIGATION)', async ({
+  test('organization administration grants no case transition authority (NEG-FSM-ADMIN-NO-CASE-AUTHORITY)', async ({
     request,
   }) => {
     await loginAsTestUser(request, UE_E2E_USERS.admin)
 
-    // Close a case first (may already be closed — 409 is acceptable)
-    await request.post('/api/workflow/transition', {
+    // An administrator has no case-handler capacity. An attempted resolution
+    // must be refused before any case lookup or lifecycle transition occurs.
+    const resolution = await request.post('/api/workflow/transition', {
       data: {
         claimNumber: 'UE-QA-0003',
         targetStatus: 'resolved',
       },
     })
 
-    // Attempt to move directly from resolved/closed to investigation without reopen step
+    expect(resolution.status()).toBe(403)
+    // This is an authorization proof; it does not pretend that the rejected
+    // first request created a resolved/closed case for a state-machine proof.
     const directInvestigation = await request.post('/api/workflow/transition', {
       data: {
         claimNumber: 'UE-QA-0003',
@@ -75,10 +78,7 @@ test.describe('UE E2E — negative workflow transitions (FSM invariant)', () => 
       },
     })
 
-    expect(
-      [400, 409, 422],
-      `Closed→investigation bypass must be rejected; got ${directInvestigation.status()}`,
-    ).toContain(directInvestigation.status())
+    expect(directInvestigation.status()).toBe(403)
   })
 
   test('member cannot self-advance case to arbitration (NEG-FSM-ARBITRATION-BYPASS)', async ({

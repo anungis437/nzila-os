@@ -193,7 +193,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'Governance Continuity Overview', href: '/dashboard/governance', group: 'Governance Continuity' },
       { label: 'Governance Trust & Explainability', href: '/dashboard/trust', group: 'Governance Continuity' },
-      { label: 'Governance Continuity Review', href: '/dashboard/workbench', group: 'Governance Continuity' },
+      { label: 'Governance Continuity Review', href: '/dashboard/governance/reviews', group: 'Governance Continuity' },
       { label: 'OCRA Continuity Signals', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
       { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
       { label: 'Governance Audit & Evidence', href: '/dashboard/audits', group: 'Governance Continuity' },

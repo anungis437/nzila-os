@@ -19,7 +19,8 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { getCaseActor, requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { allowedGrievanceStatuses } from '@/lib/workflow/grievance-transition-policy';
 import { memberGrievanceView, memberGrievanceEvents } from '@/lib/cases/member-grievance-view';
 
 export const GET = withApi(
@@ -143,15 +144,28 @@ export const GET = withApi(
     // The roster shows who holds live kernel relationships to this case; expiry is evaluated by the kernel.
     const collaborators = await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, grievanceId));
     const primaryLroId = collaborators.find((c) => c.relation !== 'collaborator')?.userId ?? null;
+    let allowedStatuses: string[] = [];
+    if (internal && effectiveAccess.canTransition === true) {
+      const actor = await getCaseActor();
+      if (actor.userId !== userId || actor.organizationId !== organizationId) {
+        throw ApiError.forbidden('The case actor must match the current organization session');
+      }
+      allowedStatuses = allowedGrievanceStatuses(grievance, events, actor.role, {
+        canTransition: true, canCloseCase: effectiveAccess.ownerOnly.canCloseCase === true,
+      });
+    }
 
-    return standardSuccessResponse({
+    const response = standardSuccessResponse({
       ...(internal ? grievance : memberGrievanceView(grievance)),
       events: internal ? events : memberGrievanceEvents(events),
       documents: governedDocuments,
       governedDocuments,
       primaryLroId,
+      allowedStatuses,
       collaborators: internal ? collaborators : [],
       effectiveAccess: {...effectiveAccess, canViewCase: true, canViewInternal: internal},
     });
+    response.headers.set('Cache-Control', 'no-store');
+    return response;
   },
 );

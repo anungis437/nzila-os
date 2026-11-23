@@ -22,7 +22,7 @@ function grievance(status = 'acknowledged', unionRepId: string | null = 'primary
   m.db.select.mockReturnValue({ from: () => ({ where: () => ({
     for: vi.fn(async () => [{ id: GRIEVANCE, status, unionRepId, description,
       priority: 'medium', createdAt: oldClock(), updatedAt: new Date() }]),
-    orderBy: () => ({ limit: async () => [{ createdAt: stateClock }] }),
+    orderBy: () => ({ limit: async () => [{ eventType: 'status_changed', createdAt: stateClock }] }),
   }) }) });
 }
 function deny(action: string) {
