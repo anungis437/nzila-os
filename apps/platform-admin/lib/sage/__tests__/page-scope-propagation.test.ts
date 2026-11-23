@@ -15,6 +15,7 @@ const sageApp = resolve(here, '../../../app/sage')
 
 describe('SAGE server page identity propagation', () => {
   const pages = [
+    'page.tsx',
     '[workspaceId]/page.tsx',
     '[workspaceId]/evidence/page.tsx',
     '[workspaceId]/governance/page.tsx',
