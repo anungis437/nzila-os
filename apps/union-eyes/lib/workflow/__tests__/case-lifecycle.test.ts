@@ -245,7 +245,7 @@ describe('case-lifecycle FSM — getAllowedTransitions', () => {
     expect(allowed).toContain('resolved');
     expect(allowed).not.toContain('mediation');
     expect(allowed).not.toContain('arbitration');
-    expect(allowed).not.toContain('closed');
+    expect(allowed).toContain('closed');
   });
 
   it('returns triage as only allowed target from closed for system_admin', () => {

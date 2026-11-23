@@ -1,11 +1,12 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from "next";
-import { requireUser, hasMinRole, getCurrentUser } from "@/lib/api-auth-guard";
+import { requireUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import WorkbenchConsole from "@/components/workbench/workbench-console";
 import { canAccessDashboardPath, getDashboardExperience } from "@/lib/dashboard/role-experience";
+import { isCaseHandlerRole } from '@/lib/cases/case-role-access';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -21,20 +22,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function WorkbenchPage() {
+  let currentUser;
   try {
-    await requireUser();
+    currentUser = await requireUser();
   } catch {
     redirect("/login");
   }
 
-  const hasAccess = await hasMinRole("steward");
-  if (!hasAccess) {
+  const handlerRole = currentUser.roles.find(isCaseHandlerRole);
+  if (!handlerRole) {
     redirect("/dashboard");
   }
 
-  const currentUser = await getCurrentUser();
   const showGrievanceCases = Boolean(currentUser && canAccessDashboardPath(
-    '/dashboard/grievances', getDashboardExperience(currentUser.role), false,
+    '/dashboard/grievances', getDashboardExperience(handlerRole), false,
   ));
   return <WorkbenchConsole showGrievanceCases={showGrievanceCases} />;
 }

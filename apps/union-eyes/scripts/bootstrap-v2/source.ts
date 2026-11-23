@@ -736,6 +736,8 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/lib/external-resource-read/qualification.ts',
     'apps/union-eyes/lib/external-resource-read/reader.ts',
     'apps/union-eyes/db/auth/case-assignee-predicate.ts',
+    'apps/union-eyes/lib/cases/case-permissions.ts',
+    'apps/union-eyes/lib/cases/case-role-access.ts',
     'apps/union-eyes/db/auth/conversation-assignee-predicate.ts',
     'apps/union-eyes/lib/authority/capacity.ts',
     'apps/union-eyes/lib/authority/common.ts',

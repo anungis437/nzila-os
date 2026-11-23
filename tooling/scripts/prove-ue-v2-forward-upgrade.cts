@@ -6,6 +6,7 @@ import assert from 'node:assert/strict'
 import { randomBytes, randomUUID, createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import pg from 'pg'
+import { RETAINED_AUDIT_CATALOG_QUERY } from './lib/ue-v2-retained-audit-acl'
 import { inspectCatalog, catalogDigest } from '../../apps/union-eyes/scripts/bootstrap-v2/installer'
 import { nativePostgres16Image } from '../../apps/union-eyes/scripts/bootstrap-v2/native-postgres-image'
 import { evaluateCatalogAdmission } from '../../apps/union-eyes/lib/operations/catalog-admission'
@@ -55,6 +56,7 @@ async function main() {
     'tooling/scripts/prove-ue-v2-forward-upgrade.cts',
     'tooling/scripts/lib/ue-v2-forward-upgrade.ts',
     'tooling/scripts/lib/ue-v2-forward-upgrade-runtime.ts',
+    'tooling/scripts/lib/ue-v2-retained-audit-acl.ts',
   ]
   const sourceHashes = () =>
     Object.fromEntries(sourceFiles.map((file) => [file, hash(fs.readFileSync(file))]))
@@ -171,6 +173,19 @@ async function main() {
     await c.query('COMMIT')
     console.log('PROOF old canonical managed restore installed')
 
+    // Actual Azure exposed this legacy store, absent from a fresh canonical
+    // export. Its rows remain history; the new contract withdraws runtime reads
+    // and writes. A baseline grant must not disappear from the rehearsal model.
+    await provider.query('CREATE SCHEMA audit_security AUTHORIZATION uev2admin')
+    await provider.query(`CREATE TABLE audit_security.audit_logs (
+      id integer PRIMARY KEY,payload json,note text)`)
+    await provider.query(`INSERT INTO audit_security.audit_logs VALUES
+      (1,' { "original": true, "order" : [2,1] } ','Historique — conservé')`)
+    await provider.query('ALTER TABLE audit_security.audit_logs OWNER TO uev2admin')
+    await provider.query('ALTER TABLE audit_security.audit_logs ENABLE ROW LEVEL SECURITY')
+    await provider.query('ALTER TABLE audit_security.audit_logs FORCE ROW LEVEL SECURITY')
+    await c.query('GRANT SELECT,INSERT ON audit_security.audit_logs TO union_eyes_runtime')
+
     // A nonempty historical schema, sequence, exact JSON spelling, Unicode and
     // array bounds make a reset, data rewrite or sequence reset observable.
     await provider.query('CREATE SCHEMA drizzle AUTHORIZATION uev2admin')
@@ -286,7 +301,7 @@ async function main() {
       // Provider-only fixture construction reproduces the observed NULL ACL,
       // whose default includes PUBLIC execution. No live catalogue is edited.
       const seeded = await provider.query(
-        'UPDATE pg_catalog.pg_proc SET proacl=NULL WHERE oid=$1::regprocedure AND proowner=\'uev2admin\'::regrole RETURNING proacl',
+        "UPDATE pg_catalog.pg_proc SET proacl=NULL WHERE oid=$1::regprocedure AND proowner='uev2admin'::regrole RETURNING proacl",
         [`public.${identity}`],
       )
       assert.equal(seeded.rowCount, 1)
@@ -312,6 +327,7 @@ async function main() {
     const actual = [
       ...(await inspectCatalog(oldRuntime)),
       ...(await oldRuntime.query(FORWARD_EVENT_CATALOG_QUERY)).rows,
+      ...(await oldRuntime.query(RETAINED_AUDIT_CATALOG_QUERY)).rows,
     ]
     const queries: string[] = []
     // Produce the source inspector's fixed PostgreSQL-16 query program. This is
@@ -322,7 +338,7 @@ async function main() {
           ? { rows: [{ version: '160012' }] }
           : (queries.push(sql), { rows: [] }),
     } as unknown as pg.Client)
-    queries.push(FORWARD_EVENT_CATALOG_QUERY)
+    queries.push(FORWARD_EVENT_CATALOG_QUERY, RETAINED_AUDIT_CATALOG_QUERY)
     const profile = retainedForwardProfile(
       actual,
       after.catalog,
@@ -371,6 +387,7 @@ async function main() {
         normalizeForwardCatalog([
           ...(await inspectCatalog(oldRuntime)),
           ...(await oldRuntime.query(FORWARD_EVENT_CATALOG_QUERY)).rows,
+          ...(await oldRuntime.query(RETAINED_AUDIT_CATALOG_QUERY)).rows,
         ]),
       ),
       forwardDigest(normalizeForwardCatalog(actual)),
@@ -394,6 +411,7 @@ async function main() {
         normalizeForwardCatalog([
           ...(await inspectCatalog(oldRuntime)),
           ...(await oldRuntime.query(FORWARD_EVENT_CATALOG_QUERY)).rows,
+          ...(await oldRuntime.query(RETAINED_AUDIT_CATALOG_QUERY)).rows,
         ]),
       ),
       forwardDigest(normalizeForwardCatalog(actual)),
@@ -416,6 +434,7 @@ async function main() {
         normalizeForwardCatalog([
           ...(await inspectCatalog(oldRuntime)),
           ...(await oldRuntime.query(FORWARD_EVENT_CATALOG_QUERY)).rows,
+          ...(await oldRuntime.query(RETAINED_AUDIT_CATALOG_QUERY)).rows,
         ]),
       ),
       forwardDigest(normalizeForwardCatalog(actual)),

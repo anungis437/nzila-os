@@ -167,13 +167,15 @@ describe('lib/dashboard/role-experience', () => {
     it('offers a staff role below steward only the destinations whose pages let it in', () => {
       for (const role of ['bargaining_committee', 'health_safety_rep']) {
         const hrefs = getVisibleNavigationForExperience('staff', false, role).map(item => item.href);
-        for (const refused of ['/dashboard/workbench', '/dashboard/members', '/dashboard/correspondence', '/dashboard/clause-library']) {
+        for (const refused of ['/dashboard/members', '/dashboard/correspondence', '/dashboard/clause-library']) {
           expect(hrefs, `${role} is redirected away from ${refused}`).not.toContain(refused);
         }
+        expect(hrefs, role).toContain('/dashboard/workbench');
+        expect(canAccessDashboardPath('/dashboard/grievances', getDashboardExperience(role), false)).toBe(true);
         expect(hrefs, role).toContain('/dashboard/inbox');
         expect(hrefs, role).toContain('/dashboard/settings');
       }
-      for (const role of ['steward', 'support_agent', 'chief_steward']) {
+      for (const role of ['steward', 'chief_steward']) {
         const hrefs = getVisibleNavigationForExperience('staff', false, role).map(item => item.href);
         for (const offered of ['/dashboard/workbench', '/dashboard/members', '/dashboard/clause-library']) {
           expect(hrefs, `${role} may open ${offered}`).toContain(offered);
@@ -196,13 +198,13 @@ describe('lib/dashboard/role-experience', () => {
       expect(getVisibleNavigationForExperience('staff', false, role).some(item => item.href === '/dashboard/correspondence')).toBe(localLetterRoles.includes(role));
     });
 
-    it('lands a staff role below steward on the first destination it may open: the workbench would send it back to the root, which sends it to the workbench', () => {
+    it('lands eligible specialized representatives on their scoped case workbench', () => {
       for (const role of ['bargaining_committee', 'health_safety_rep']) {
-        expect(getRoleLandingPath(role)).toBe('/dashboard/inbox');
-        expect(getDualNavHomes(role).roleHomeHref).toBe('/dashboard/inbox');
+        expect(getRoleLandingPath(role)).toBe('/dashboard/workbench');
+        expect(getDualNavHomes(role).roleHomeHref).toBe('/dashboard/workbench');
         expect(canAccessDashboardPath(getRoleLandingPath(role), getDashboardExperience(role), false)).toBe(true);
       }
-      for (const role of ['steward', 'support_agent', 'chief_steward']) {
+      for (const role of ['steward', 'chief_steward']) {
         expect(getRoleLandingPath(role)).toBe('/dashboard/workbench');
       }
     });

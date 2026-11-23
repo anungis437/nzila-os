@@ -21,13 +21,13 @@ import { claims, claimUpdates } from "../db/schema/claims-schema";
 import { organizationMembers } from "../db/schema/organization-members-schema";
 import { eq, and } from "drizzle-orm";
 import { 
-  validateClaimTransition, 
   getAllowedClaimTransitions,
   type ClaimStatus,
   type ClaimPriority 
 } from './services/claim-workflow-fsm';
-import { detectAllSignals, type CaseForSignals } from './services/lro-signals';
-import { toLegacyCaseState, toLifecycleState } from './workflow/state-bridge';
+import { toLifecycleState } from './workflow/state-bridge';
+import { claimTransitionFacts } from './workflow/claim-transition-facts';
+import { claimTransitionTarget, validateClaimCaseTransition } from './workflow/claim-transition-policy';
 import { 
   generateDefensibilityPack,
   type TimelineEvent,
@@ -209,33 +209,10 @@ export async function updateClaimStatus(
     }
 
     const currentStatus = claim.status as ClaimStatus;
-    const priority = (claim.priority as ClaimPriority) || 'medium';
 
     // Detect LRO signals for this case (PR-7 integration)
-    const claimCreatedAt = claim.createdAt ?? new Date();
-    const signalCase: CaseForSignals = {
-      id: claim.claimId,
-      title: claim.description?.slice(0, 120) ?? claim.claimNumber ?? claim.claimId,
-      memberId: claim.memberId ?? '',
-      memberName: claim.memberId ?? '',
-      currentState: toLegacyCaseState(toLifecycleState('claim', currentStatus) ?? 'submitted'),
-      priority: priority as CaseForSignals['priority'],
-      createdAt: claimCreatedAt,
-      lastUpdated: claim.updatedAt ?? claimCreatedAt,
-      // A claim carries its submission instant; later milestones are not recorded on the claim row itself.
-      timeline: [{ type: 'submitted', timestamp: claimCreatedAt }],
-      assignedOfficerId: claim.assignedTo || undefined,
-    };
-    const signals = await detectAllSignals([signalCase]);
-
-    const hasUnresolvedCriticalSignals = signals.some(
-      signal => signal.severity === 'critical' && signal.actionable
-    );
-
-    const hasRequiredDocumentation = Boolean(
-      (claim.description && claim.description.length > 20) ||
-      (notes && notes.length > 20)
-    );
+    const transitionFacts = claimTransitionFacts(claim, notes);
+    const { hasUnresolvedCriticalSignals } = transitionFacts;
 
     // The verified membership role only narrows the FSM; it never authorizes this mutation.
     const userRole = actor.role;
@@ -243,20 +220,11 @@ export async function updateClaimStatus(
       await requireKernelCaseAction(tx, actor, claim.claimId, 'case:close');
     }
 
-    // FSM VALIDATION (PR-11 ENFORCEMENT LAYER)
-    // This makes bad practice IMPOSSIBLE
-    const validation = validateClaimTransition({
-      claimId: claim.claimId,
-      currentStatus,
-      targetStatus: newStatus,
-      userId,
-      userRole,
-      priority,
-      statusChangedAt: slaClockStart(claim, new Date()).startedAt,
-      hasUnresolvedCriticalSignals,
-      hasRequiredDocumentation,
-      notes,
-    });
+    // Both live claim mutation entrypoints use the same stored facts and policy.
+    // The assignment alias remains compatible with legacy persisted claim_status.
+    const target = claimTransitionTarget(newStatus);
+    if (!target) return { success: false, error: 'Unknown claim transition target' };
+    const validation = validateClaimCaseTransition(claim, userRole, target, notes);
 
     if (!validation.allowed) {
       return {

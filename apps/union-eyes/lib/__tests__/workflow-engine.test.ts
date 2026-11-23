@@ -68,6 +68,13 @@ vi.mock('@/lib/services/claim-workflow-fsm', () => ({
   validateClaimTransition: (...a: any[]) => mocks.mockValidateTransition(...a),
   getAllowedClaimTransitions: (...a: any[]) => mocks.mockGetAllowedTransitions(...a),
 }));
+// The core mutator now shares the canonical lifecycle policy with the route.
+// Full real-policy guards are covered by claim-transition-policy and the
+// primary-handler/capacity suite; these tests isolate persistence failures.
+vi.mock('@/lib/workflow/claim-transition-policy', async original => ({
+  ...(await original<typeof import('@/lib/workflow/claim-transition-policy')>()),
+  validateClaimCaseTransition: (...args: unknown[]) => mocks.mockValidateTransition(...args),
+}));
 vi.mock('@/lib/services/lro-signals', () => ({
   detectAllSignals: (...a: any[]) => mocks.mockDetectSignals(...a),
 }));
@@ -308,7 +315,7 @@ describe('workflow-engine', () => {
 
     it('transitions to under_review', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
       const updatedClaim = { ...baseClaim, status: 'under_review', progress: 25 };
       const mockTx = {
         select: vi.fn()
@@ -334,7 +341,7 @@ describe('workflow-engine', () => {
 
     it('returns error when FSM rejects transition', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: false, reason: 'Not allowed' });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
       const mockTx = {
         select: vi.fn()
           .mockReturnValueOnce(chain([baseClaim])),
@@ -350,7 +357,7 @@ describe('workflow-engine', () => {
     it('wraps in RLS context when no tx', async () => {
       mocks.mockWithRLS.mockImplementation(async (fn: (...args: any[]) => unknown) => {
         mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-        mocks.mockDetectSignals.mockResolvedValue([]);
+        mocks.mockDetectSignals.mockReturnValue([]);
         const updatedClaim = { ...baseClaim, status: 'under_review' };
         const mockTx = {
           select: vi.fn()
@@ -368,7 +375,7 @@ describe('workflow-engine', () => {
 
     it('generates defensibility pack on resolved', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
       const claim = { ...baseClaim, status: 'under_review', assignedTo: 'steward1' };
       const updatedClaim = { ...claim, status: 'resolved', progress: 90, updatedAt: new Date() };
 
@@ -432,7 +439,7 @@ describe('workflow-engine', () => {
 
     it('delegates to FSM-enforced updateClaimStatus when claimNumber exists', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
 
       const updatedClaim = { ...baseClaim, status: 'under_review', progress: 25 };
       const mockTx = {
@@ -463,13 +470,13 @@ describe('workflow-engine', () => {
       expect(db.update).not.toHaveBeenCalled();expect(mocks.queueMail).not.toHaveBeenCalled();
     });
     it('propagates mandatory audit failure without queue or provider effects', async()=>{
-      const db=tx();mocks.mockDetectSignals.mockResolvedValue([]);mocks.mockValidateTransition.mockReturnValue({allowed:true});
+      const db=tx();mocks.mockDetectSignals.mockReturnValue([]);mocks.mockValidateTransition.mockReturnValue({allowed:true});
       mocks.audit.mockRejectedValue(new Error('audit failed'));
       await expect(updateClaimStatus('CLM-1','under_review','user1','staff-only reason',db as never)).rejects.toThrow('audit failed');
       expect(mocks.queueMail).not.toHaveBeenCalled();expect(mocks.mockSendNotification).not.toHaveBeenCalled();
     });
     it('writes a generic member event and durable state-only notice while auditing the private reason', async()=>{
-      const db=tx();mocks.mockDetectSignals.mockResolvedValue([]);mocks.mockValidateTransition.mockReturnValue({allowed:true});
+      const db=tx();mocks.mockDetectSignals.mockReturnValue([]);mocks.mockValidateTransition.mockReturnValue({allowed:true});
       mocks.mockValidateTransition.mockReturnValue({allowed:true,warnings:['private FSM warning'],metadata:{slaCompliant:false,daysInState:4,nextDeadline:new Date('2026-11-18T00:00:00Z')}});
       await updateClaimStatus('CLM-1','under_review','user1','staff-only reason',db as never);
       expect(storedHistory).toHaveBeenLastCalledWith({claimId:'internal',updateType:'status_change',message:"Status changed from 'submitted' to 'under_review'",createdBy:'user1',isInternal:false,visibilityScope:'member',metadata:{previousStatus:'submitted',newStatus:'under_review'}});

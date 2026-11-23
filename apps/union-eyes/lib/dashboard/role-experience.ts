@@ -1,5 +1,6 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
 import { isCorrespondenceStaffRole } from '../correspondence/roles';
+import { isCaseHandlerRole } from '../cases/case-role-access';
 import {
   EXECUTIVE_ALLOWED_PREFIXES,
   EXECUTIVE_HOME_HREF,
@@ -362,6 +363,9 @@ export function canonicalPageGuardRoleLevel(role: string): number {
 }
 
 function meetsDestinationRole(pathname: string, role: string, experience: DashboardExperience): boolean {
+  if (pathname === '/dashboard/workbench' || pathname === '/dashboard/grievances') {
+    return isCaseHandlerRole(role) && (experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role));
+  }
   if (pathname === '/dashboard/correspondence' && !isCorrespondenceStaffRole(role)) return false;
   const min = DESTINATION_MIN_ROLE[pathname];
   if (min && canonicalPageGuardRoleLevel(role) < getRoleLevel(min)) return false;

@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import type pg from 'pg'
+import { retainedAuditRetirement } from './ue-v2-retained-audit-acl'
 import { canonicalCatalogObject } from '../../../apps/union-eyes/scripts/bootstrap-v2/catalog-normalization'
 import { qualifyManagedPg16Catalog } from './ue-managed-pg16-catalog.mjs'
 import {
@@ -132,11 +133,15 @@ export function normalizeForwardCatalog(objects: UpgradeObject[]) {
       // grants nothing to PUBLIC. Recognize only that exact explicit default;
       // every other grantee, grantor or privilege remains part of the proof.
       if (
-        normalized.kind === 'relation' && definition.kind === 'S' &&
-        typeof definition.owner === 'string' && /^[a-z_][a-z0-9_]*$/.test(definition.owner) &&
-        Array.isArray(definition.acl) && definition.acl.length === 1 &&
+        normalized.kind === 'relation' &&
+        definition.kind === 'S' &&
+        typeof definition.owner === 'string' &&
+        /^[a-z_][a-z0-9_]*$/.test(definition.owner) &&
+        Array.isArray(definition.acl) &&
+        definition.acl.length === 1 &&
         definition.acl[0] === `${definition.owner}=rwU/${definition.owner}`
-      ) return { ...normalized, definition: { ...definition, acl: null } }
+      )
+        return { ...normalized, definition: { ...definition, acl: null } }
       return normalized
     })
     .sort((a, b) => uniqueKey(a).localeCompare(uniqueKey(b)))
@@ -246,7 +251,11 @@ async function fingerprintSequences(client: pg.Client) {
     const rows = (
       await client.query(`SELECT last_value::text,is_called FROM ${q(seq.schema)}.${q(seq.name)}`)
     ).rows
-    assert.equal(rows.length, 1, `UE_UPGRADE_SEQUENCE_FINGERPRINT_MISSING:${seq.schema}.${seq.name}`)
+    assert.equal(
+      rows.length,
+      1,
+      `UE_UPGRADE_SEQUENCE_FINGERPRINT_MISSING:${seq.schema}.${seq.name}`,
+    )
     result.push({ schema: seq.schema, name: seq.name, ...rows[0] })
   }
   return result
@@ -463,6 +472,20 @@ export async function executeForwardUpgrade(
   await client.query('SET LOCAL check_function_bodies=false')
   for (const [index, statement] of bundle.statements.entries()) {
     const role = statement.role ?? 'ue_v2_owner'
+    if (statement.phase === 'retained-audit-acl') {
+      const old = bundle.before.find(
+        (object) => object.kind === 'retained_audit_acl' && object.id === statement.object,
+      )
+      const next = bundle.target.find(
+        (object) => object.kind === 'retained_audit_acl' && object.id === statement.object,
+      )
+      assert(old && next, 'UE_UPGRADE_LEGACY_AUDIT_PREIMAGE_REQUIRED')
+      assert.deepEqual(
+        statement,
+        retainedAuditRetirement(old, next),
+        'UE_UPGRADE_LEGACY_AUDIT_STATEMENT_REFUSED',
+      )
+    }
     let canonicalOwnerHandoff = false
     if (statement.phase === 'canonical-function-owner') {
       assertCanonicalFunctionOwnerStatement(statement, bundle)
@@ -480,9 +503,12 @@ export async function executeForwardUpgrade(
         ? statement.object.split('.').slice(0, 2).join('.')
         : statement.object
     const retainedTableOwner =
-      ['reset-table-acl', 'reset-column-acl'].includes(statement.phase) &&
+      ['reset-table-acl', 'reset-column-acl', 'retained-audit-acl'].includes(statement.phase) &&
       bundle.before.some(
-        (o) => o.kind === 'relation' && o.id === relationId && o.definition.owner === role,
+        (o) =>
+          (o.kind === 'relation' || o.kind === 'retained_audit_acl') &&
+          o.id === relationId &&
+          o.definition.owner === role,
       )
     const retainedOwner =
       role === 'uev2admin' && (retainedFunctionOwner || retainedTableOwner || canonicalOwnerHandoff)

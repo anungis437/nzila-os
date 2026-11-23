@@ -7,13 +7,14 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getCaseActor } from '@/lib/cases/case-authorization';
 import { loadWorkbenchCases } from '@/lib/cases/workbench-queue';
 import { workbenchCapabilities } from '@/lib/cases/workbench-projection';
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
     canonicalRequestScope: true,
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     openapi: {
       tags: ['Workbench'],
       summary: 'GET assigned cases',

@@ -14,33 +14,29 @@ import WorkbenchPage from './page';
 
 beforeEach(() => {
   vi.resetAllMocks();
-  auth.requireUser.mockResolvedValue({});
+  auth.requireUser.mockResolvedValue({ roles: ['steward'] });
   auth.hasMinRole.mockResolvedValue(true);
 });
 
 describe('workbench collection entry audience', () => {
-  it.each(['steward', 'chief_steward'])('shows the scoped collection to canonical %s', async role => {
-    auth.getCurrentUser.mockResolvedValue({ role });
+  it.each(['steward', 'chief_steward', 'health_safety_rep', 'bargaining_committee'])('shows the scoped collection to canonical %s', async role => {
+    auth.requireUser.mockResolvedValue({ roles: [role] });
     expect((await WorkbenchPage()).props.showGrievanceCases).toBe(true);
   });
 
-  it.each(['officer', 'secretary_treasurer', 'admin', 'app_owner', 'member'])(
+  it.each(['officer', 'secretary_treasurer'])(
     'keeps the staff-only entry out of the canonical %s experience', async role => {
-      auth.getCurrentUser.mockResolvedValue({ role });
+      auth.requireUser.mockResolvedValue({ roles: [role] });
       expect((await WorkbenchPage()).props.showGrievanceCases).toBe(false);
     },
   );
 
-  it('defaults to no advertised collection when the current role is unavailable', async () => {
-    auth.getCurrentUser.mockResolvedValue(null);
-    expect((await WorkbenchPage()).props.showGrievanceCases).toBe(false);
-  });
-
-  it('preserves the existing minimum-role gate before resolving the entry audience', async () => {
-    auth.hasMinRole.mockResolvedValue(false);
-    await expect(WorkbenchPage()).rejects.toThrow('REDIRECT:/dashboard');
-    expect(auth.getCurrentUser).not.toHaveBeenCalled();
-  });
+  it.each(['admin', 'app_owner', 'member', 'clerk', 'national_officer', 'unknown'])(
+    'refuses the case staff surface for %s without handler eligibility', async role => {
+      auth.requireUser.mockResolvedValue({ roles: [role] });
+      await expect(WorkbenchPage()).rejects.toThrow('REDIRECT:/dashboard');
+    },
+  );
 
   it('preserves the login redirect before resolving the entry audience', async () => {
     auth.requireUser.mockRejectedValue(new Error('Unauthorized'));
