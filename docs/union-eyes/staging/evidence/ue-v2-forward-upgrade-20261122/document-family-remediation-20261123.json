@@ -342,5 +342,33 @@
     "liveStagingProof": "PENDING",
     "stagingAcceptance": false,
     "productionDeployment": false
+  },
+  "nativeRunnerCiOutputBoundary": {
+    "recordedAt": "2026-11-24T03:21:51.193610+00:00",
+    "observedCandidateSourceSha": "72fbc0b72612f79e75344a28e57fc602cb2233f2",
+    "defect": "CI stores results under nonignored checkout artifacts; strict source snapshot detects its own newly written summary",
+    "counterexample": "Actual runner refuses before the first suite in an isolated synthetic Git checkout matching the CI output layout",
+    "correction": "Use a unique RUNNER_TEMP output directory during the unchanged source-pinning runner; copy owned JSON evidence into the existing artifact after exit, retain partial evidence and propagate failure",
+    "sourceSnapshotWeakened": false,
+    "offlineActualWorkflowControls": {
+      "passed": 3,
+      "nativeTestsExecuted": false,
+      "cases": [
+        "successful mocked result shapes preserve existing primary receipt",
+        "failed suite retains partial receipts and nonzero exit",
+        "real tracked-source tamper still refuses"
+      ]
+    },
+    "priorCandidateExactNative25": {
+      "files": 25,
+      "passed": 472,
+      "failed": 0,
+      "skipped": 0,
+      "outputLocation": "PRIVATE_EXTERNAL_EVIDENCE_DIRECTORY",
+      "doesNotProveCiOutputLayout": true
+    },
+    "priorLocalFullPipeline": "STOPPED_KNOWN_DEFECT; completed phases retained, interrupted whole-app not accepted",
+    "successorFullQualification": "PENDING",
+    "stagingAcceptance": false
   }
 }

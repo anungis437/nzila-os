@@ -167,7 +167,17 @@ jobs:
           UE_AUTHORITY_GUARDS_NATIVE: '1'
           UE_CASE_DOMAIN_NATIVE: '1'
         run: |
-          node apps/union-eyes/scripts/runtime/run-authority-native-preflight.mjs --output artifacts/ue-native-pg
+          set -euo pipefail
+          # Keep generated results outside the source snapshot while the runner
+          # verifies it. Copy the owned results into the existing artifact only
+          # after execution, retaining partial evidence if a suite fails.
+          authority_output="$(mktemp -d "${RUNNER_TEMP}/ue-native-authority.XXXXXX")"
+          authority_exit_code=0
+          node apps/union-eyes/scripts/runtime/run-authority-native-preflight.mjs --output "$authority_output" || authority_exit_code=$?
+          for result in "$authority_output"/*.json; do
+            if [[ -f "$result" ]]; then cp "$result" artifacts/ue-native-pg/; fi
+          done
+          exit "$authority_exit_code"
 
       # The Django models are the ORM contract of every Django view, task and command, so they run against the schema the
       # platform migrations built, not the one Django's migrations alone describe: constraints, defaults and types are real.
