@@ -289,14 +289,19 @@ type CallState =
   | { kind: "idle" }
   | { kind: "running"; label: string }
   | { kind: "done"; status: number; ok: boolean; text: string }
-  | { kind: "failed"; message: string };
+  | { kind: "failed" };
 
 function useEndpointCall() {
-  const [state, setState] = useState<CallState>({ kind: "idle" });
+  const language = failureLanguage(useLocale());
   const run = async (label: string, request: () => Promise<Response>) => {
     setState({ kind: "running", label });
     try {
       const response = await request();
+      if (!response.ok) {
+        const failure = await readApiFailure(response);
+        setState({ kind: "done", status: response.status, ok: false, text: failureDetail(failure, language) ?? "" });
+        return;
+      }
       const raw = await response.text();
       let shown = raw;
       try {
@@ -304,11 +309,12 @@ function useEndpointCall() {
       } catch {
         // Not JSON: the answer is shown exactly as received.
       }
-      setState({ kind: "done", status: response.status, ok: response.ok, text: shown });
-    } catch (error) {
-      setState({ kind: "failed", message: error instanceof Error ? error.message : String(error) });
+      setState({ kind: "done", status: response.status, ok: true, text: shown });
+    } catch {
+      setState({ kind: "failed" });
     }
   };
+  const [state, setState] = useState<CallState>({ kind: "idle" });
   return [state, run] as const;
 }
 
@@ -321,7 +327,7 @@ function ResultPanel({ state }: { state: CallState }) {
   if (state.kind === "failed") {
     return (
       <pre role="alert" className="mt-4 max-h-64 overflow-auto rounded-lg border border-red-200 bg-red-50 p-4 font-mono text-xs">
-        {`${t("ai.networkError")}\n\n${state.message}`}
+        {t("ai.networkError")}
       </pre>
     );
   }

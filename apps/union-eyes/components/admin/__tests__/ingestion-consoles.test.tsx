@@ -53,7 +53,8 @@ describe('DuplicateReviewConsole', () => {
   it('says why the groups could not be loaded, and does not claim there are none', async () => {
     fetchMock.mockResolvedValueOnce(failed(500, 'The duplicate index is unavailable'))
     render(<DuplicateReviewConsole />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('The duplicate index is unavailable')
+    expect(await screen.findByRole('alert')).toHaveTextContent('The duplicate groups could not be loaded.')
+    expect(screen.queryByText(/duplicate index is unavailable/)).toBeNull()
     expect(screen.queryByText('No duplicate groups found')).toBeNull()
   })
 
@@ -119,6 +120,8 @@ describe('MigrationDetailConsole', () => {
     cleanup()
     fetchMock.mockResolvedValueOnce(failed(500, 'The ledger could not be read'))
     render(<MigrationDetailConsole batchId="b2" />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('The ledger could not be read')
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('The batch could not be loaded.')
+    expect(alert).not.toHaveTextContent('The ledger could not be read')
   })
 })

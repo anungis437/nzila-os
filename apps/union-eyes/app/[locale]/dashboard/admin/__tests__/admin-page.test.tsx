@@ -460,7 +460,7 @@ describe('AdminPage: AI endpoint testing', () => {
     expect(JSON.parse(String(call[1]?.body))).toEqual({ query_id: 'query-42', rating: 'bad' });
   });
 
-  it('shows an error answer as an error, with the status and the body as received', async () => {
+  it('shows an error answer as an error, with the status and controlled wording', async () => {
     server.ai = () => new Response('plain text failure', { status: 500 });
     await openTester();
     fireEvent.change(document.getElementById('search-query')!, { target: { value: 'union rights' } });
@@ -469,7 +469,8 @@ describe('AdminPage: AI endpoint testing', () => {
 
     const result = await screen.findByRole('alert');
     expect(result).toHaveTextContent('Error (500)');
-    expect(result).toHaveTextContent('plain text failure');
+    expect(result).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(result).not.toHaveTextContent('plain text failure');
     expect(JSON.parse(String(callsTo('/api/ai/search', 'POST')[0][1]?.body))).toEqual({ query: 'union rights', max_results: 5 });
   });
 
@@ -482,7 +483,9 @@ describe('AdminPage: AI endpoint testing', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Get Feedback' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Network error');
+    expect(alert).not.toHaveTextContent('connection reset');
   });
 });
 
@@ -538,7 +541,7 @@ describe('AdminPage: French', () => {
     expect(await screen.findByText('Connexions actives')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Optimiser la base de données' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('La base de données n’a pas pu être optimisée'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('La base de données n’a pas pu être optimisée: Le service est momentanément indisponible. Réessayez sous peu.'));
   });
   it('words a refused statistics read and a refused removal in French, without the route’s English reason', async () => {
     server.stats = () => standardErrorResponse(ErrorCode.INSUFFICIENT_PERMISSIONS, "Requires at least 'platform_lead' role");

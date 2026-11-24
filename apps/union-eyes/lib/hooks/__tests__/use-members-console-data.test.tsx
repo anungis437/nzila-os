@@ -97,6 +97,34 @@ describe('useMembersConsoleData — stale-scope invalidation', () => {
     expect(result.current.statsError).toBeNull();
   });
 
+  it('an unreadable 200 body is an error, not an empty organization', async () => {
+    routeFetch([
+      ['/api/organizations/org-b/members', () => resp({ json: async () => ({ unexpected: true }) })],
+      ['organizationId=org-b', () => resp({ json: async () => { throw new SyntaxError('Unexpected token < in JSON'); } })],
+    ]);
+    const { result } = renderHook(() => useMembersConsoleData('org-b', ORGS, false));
+    await waitFor(() => expect(result.current.isLoadingMembers).toBe(false));
+    await waitFor(() => expect(result.current.isLoadingStats).toBe(false));
+    expect(result.current.membersError).toMatch(/could not be loaded/);
+    expect(result.current.statsError).toMatch(/could not be loaded/);
+    expect(result.current.statsError).not.toMatch(/token|JSON/i);
+    expect(result.current.stats).toBeNull();
+  });
+
+  it('server and network failures never surface status codes or raw messages', async () => {
+    routeFetch([
+      ['/api/organizations/org-b/members', () => { throw new TypeError('Failed to fetch'); }],
+      ['organizationId=org-b', () => resp({ ok: false, status: 500, json: async () => ({ error: 'relation "members" does not exist' }) })],
+    ]);
+    const { result } = renderHook(() => useMembersConsoleData('org-b', ORGS, false));
+    await waitFor(() => expect(result.current.isLoadingMembers).toBe(false));
+    await waitFor(() => expect(result.current.isLoadingStats).toBe(false));
+    for (const text of [result.current.membersError, result.current.statsError]) {
+      expect(text).toMatch(/could not be loaded/);
+      expect(text).not.toMatch(/relation|Failed to fetch|\(500\)/);
+    }
+  });
+
   it('"All Organizations" with one org failing keeps the successful org\'s members visible alongside a visible error (partial result)', async () => {
     routeFetch([
       ['/api/organizations/org-a/members', () => resp({ json: async () => ({ data: [MEMBER_A] }) })],
