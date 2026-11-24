@@ -124,7 +124,6 @@ export async function getRelatedDocuments(params: {
       name: documents.name,
       privacyLabel: documents.privacyLabel,
       documentType: documents.documentType,
-      fileUrl: documents.fileUrl,
       updatedAt: documents.updatedAt,
       linkedEntityType: documentLinks.linkedEntityType,
       linkedEntityId: documentLinks.linkedEntityId,
@@ -167,6 +166,7 @@ export async function getRelatedDocuments(params: {
     privacyLabel: row.privacyLabel,
     linkedEntityType: row.linkedEntityType,
     linkedEntityId: row.linkedEntityId,
+    uploadedBy: row.uploadedBy,
   }));
 
   const authorizedDocs = await filterAuthorizedDocumentsForActor({
@@ -247,7 +247,6 @@ export async function getRelatedDocuments(params: {
         patternSimilarity: Number(features.patternSimilarity.toFixed(3)),
       },
       documentType: candidate.documentType,
-      fileUrl: candidate.fileUrl,
       linkedEntities: collectLinkedEntities(candidate, currentCase, similarCaseIds),
       updatedAt: candidate.updatedAt.toISOString(),
     } satisfies RelatedDocumentRankResult;

@@ -60,12 +60,12 @@ describe('case-intelligence precedent-matching-service', () => {
         rows: [
           {
             id: 'doc-safe', title: 'Safe precedent', filename: null, name: 'Safe precedent', privacyLabel: 'team_confidential',
-            documentType: 'award', fileUrl: 'https://example.com/safe', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'award', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: linkType, linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
           },
           {
             id: 'doc-hidden', title: 'Hidden precedent', filename: null, name: 'Hidden precedent', privacyLabel: 'privileged',
-            documentType: 'award', fileUrl: 'https://example.com/hidden', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'award', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: linkType, linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
           },
         ],
@@ -101,12 +101,12 @@ describe('case-intelligence precedent-matching-service', () => {
         rows: [
           {
             id: 'doc-low', title: 'Unrelated note', filename: null, name: 'Unrelated note', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/low', updatedAt: new Date('2026-01-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-01-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: [], uploadedBy: 'lro-1',
           },
           {
             id: 'doc-high', title: 'Termination award precedent', filename: null, name: 'Termination award precedent', privacyLabel: 'team_confidential',
-            documentType: 'award', fileUrl: 'https://example.com/high', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'award', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
           },
         ],

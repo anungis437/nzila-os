@@ -86,7 +86,6 @@ export async function findPrecedentDocuments(params: {
       name: documents.name,
       privacyLabel: documents.privacyLabel,
       documentType: documents.documentType,
-      fileUrl: documents.fileUrl,
       updatedAt: documents.updatedAt,
       linkedEntityType: documentLinks.linkedEntityType,
       linkedEntityId: documentLinks.linkedEntityId,
@@ -117,6 +116,7 @@ export async function findPrecedentDocuments(params: {
       privacyLabel: candidate.privacyLabel,
       linkedEntityType: candidate.linkedEntityType,
       linkedEntityId: candidate.linkedEntityId,
+      uploadedBy: candidate.uploadedBy,
     })),
   });
   const authorizedIds = new Set(authorizedDocs.map((doc) => doc.id));
@@ -177,7 +177,6 @@ export async function findPrecedentDocuments(params: {
         patternSimilarity: Number(features.patternSimilarity.toFixed(3)),
       },
       documentType: candidate.documentType,
-      fileUrl: candidate.fileUrl,
       linkedEntities: [
         candidate.linkedEntityId ? `${candidate.linkedEntityType}:${candidate.linkedEntityId}` : null,
         ...(candidate.tags ?? []).map((tag) => `tag:${tag}`),

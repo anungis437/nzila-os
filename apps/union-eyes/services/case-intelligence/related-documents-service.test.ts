@@ -68,12 +68,12 @@ describe('case-intelligence related-documents-service', () => {
         rows: [
           {
             id: 'doc-allowed', title: 'Allowed', filename: null, name: 'Allowed', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/allowed', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: linkType, linkedEntityId: 'case-1', tags: ['termination'], uploadedBy: 'lro-1',
           },
           {
             id: 'doc-blocked', title: 'Blocked', filename: null, name: 'Blocked', privacyLabel: 'privileged',
-            documentType: 'memo', fileUrl: 'https://example.com/blocked', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: linkType, linkedEntityId: 'case-1', tags: ['termination'], uploadedBy: 'lro-1',
           },
         ],
@@ -111,12 +111,12 @@ describe('case-intelligence related-documents-service', () => {
         rows: [
           {
             id: 'doc-b', title: 'Doc B', filename: null, name: 'Doc B', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/b', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-2', tags: ['discipline'], uploadedBy: 'lro-2',
           },
           {
             id: 'doc-a', title: 'Doc A', filename: null, name: 'Doc A', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/a', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-2', tags: ['discipline'], uploadedBy: 'lro-2',
           },
         ],
@@ -150,7 +150,7 @@ describe('case-intelligence related-documents-service', () => {
         rows: [
           {
             id: 'doc-related', title: 'Related', filename: null, name: 'Related', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/related', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['termination'], uploadedBy: 'lro-3',
           },
         ],

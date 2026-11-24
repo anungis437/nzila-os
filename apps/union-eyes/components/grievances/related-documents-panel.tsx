@@ -2,6 +2,7 @@
 
 import { FileText, Link2, Shield } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useAuthorizedDocumentOpen } from '@/lib/hooks/use-authorized-document-open';
 import type { RelatedDocumentRankResult } from '@/services/case-intelligence/types';
 
 export function RelatedDocumentsPanel(props: {
@@ -10,6 +11,7 @@ export function RelatedDocumentsPanel(props: {
 }) {
   const t = useTranslations("relatedDocuments");
   const { documents, loading = false } = props;
+  const { open, opening, notice, copy } = useAuthorizedDocumentOpen();
 
   return (
     <div className="rounded-lg border bg-white p-4">
@@ -19,6 +21,12 @@ export function RelatedDocumentsPanel(props: {
           <p className="text-xs text-gray-500">{t("suggestions", { count: documents.length })}</p>
         </div>
       </div>
+
+      {notice !== null && (
+        <p role="alert" className="mb-2 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">
+          {notice}
+        </p>
+      )}
 
       {loading ? (
         <p className="text-xs text-gray-500">{t("loading")}</p>
@@ -33,14 +41,15 @@ export function RelatedDocumentsPanel(props: {
             <div key={doc.documentId} className="rounded border p-3">
               <div className="flex flex-wrap items-center gap-2">
                 <FileText className="h-4 w-4 text-gray-500" />
-                <a
-                  href={doc.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-blue-700 hover:underline"
+                <button
+                  type="button"
+                  onClick={() => void open(doc.documentId)}
+                  disabled={opening === doc.documentId}
+                  aria-label={`${t("view")}: ${doc.title}`}
+                  className="min-h-11 text-left text-sm font-medium text-blue-700 hover:underline disabled:opacity-50 sm:min-h-0"
                 >
                   {doc.title}
-                </a>
+                </button>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px]">{doc.documentType || t("documentDefault")}</span>
                 <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
                   <Shield className="mr-1 inline h-3 w-3" />
@@ -67,9 +76,15 @@ export function RelatedDocumentsPanel(props: {
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => void open(doc.documentId)}
+                  disabled={opening === doc.documentId}
+                  aria-label={`${copy.download}: ${doc.title}`}
+                  className="min-h-11 text-blue-700 hover:underline disabled:opacity-50 sm:min-h-0"
+                >
                   {t("view")}
-                </a>
+                </button>
                 <a href={`/dashboard/documents`} className="text-blue-700 hover:underline">
                   {t("openRepository")}
                 </a>

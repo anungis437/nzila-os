@@ -483,3 +483,111 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
     expect((await pg.query('SELECT 1 FROM audit_security.audit_logs')).rows).toHaveLength(0);
   });
 });
+
+type CaseShape = { isPrimaryOwner: boolean; canViewCase: boolean; canViewPrivateDocuments: boolean };
+const NO_CASE: CaseShape = { isPrimaryOwner: false, canViewCase: false, canViewPrivateDocuments: false };
+
+/**
+ * The case-document decision table, read through the real route, the real SQL and the real access record. The case shapes are
+ * what the authority kernel answers for each relationship (see case-access-service.pglite.test.ts); seniority is `isStaff` and
+ * is deliberately never an input to a case document.
+ */
+const CASE_LABELS = ['public_internal', 'team_confidential', 'case_restricted', 'lro_confidential', 'privileged', 'highly_sensitive'] as const;
+const CASE_PERSONAS: Array<{ name: string; staff: boolean; access: CaseShape; grant?: boolean; open: readonly string[] }> = [
+  { name: 'the assigned representative', staff: true, access: { isPrimaryOwner: true, canViewCase: true, canViewPrivateDocuments: false }, open: CASE_LABELS },
+  { name: 'a collaborator who may only view the case', staff: true, access: { isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false }, open: ['public_internal', 'team_confidential', 'case_restricted'] },
+  { name: 'a collaborator who may also view restricted material', staff: true, access: { isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: true }, open: ['public_internal', 'team_confidential', 'case_restricted', 'lro_confidential'] },
+  { name: 'a collaborator who also holds an explicit download grant', staff: true, access: { isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: true }, grant: true, open: CASE_LABELS },
+  { name: 'a chief steward, officer or executive with no relationship to the case', staff: true, access: NO_CASE, open: [] },
+  { name: 'a member with no relationship to the case', staff: false, access: NO_CASE, open: [] },
+  { name: 'an explicit grant holder with no relationship to the case', staff: false, access: NO_CASE, grant: true, open: [] },
+];
+
+describe('case-linked documents: who is let in, under each link spelling and label', () => {
+  it.each(CASE_PERSONAS)('$name', async ({ staff, access, grant, open }) => {
+    delete process.env.UE_CANONICAL_BOOTSTRAP_V2;
+    state.steward = staff;
+    state.caseAccess = access;
+    const results: Array<{ link: string; label: string; status: number; documentId: string }> = [];
+    for (const link of ['grievance', 'case']) {
+      for (const label of CASE_LABELS) {
+        const documentId = crypto.randomUUID();
+        await resetRole();
+        await insertDocument(documentId, ORG_A, label);
+        await pg.query(
+          `INSERT INTO document_links (id, organization_id, document_id, linked_entity_type, linked_entity_id) VALUES ($1, $2, $3, $4, $5)`,
+          [crypto.randomUUID(), ORG_A, documentId, link, GRIEVANCE],
+        );
+        if (grant) {
+          await pg.query(
+            `INSERT INTO document_access_grants (id, organization_id, document_id, user_id, status, can_view, can_download, revoked_at, expires_at)
+             VALUES ($1, $2, $3, $4, 'active', true, true, NULL, NULL)`,
+            [crypto.randomUUID(), ORG_A, documentId, 'someone-else-than-uploader'],
+          );
+        }
+        const response = await callDownload(ORG_A, documentId, 'someone-else-than-uploader');
+        results.push({ link, label, status: response.status, documentId });
+        if (response.status === 200) {
+          const url = new URL((await response.json()).data.downloadUrl, 'https://example.test');
+          const lease = verifyDocumentDownloadLease(url.searchParams.get('lease')!, { organizationId: ORG_A, userId: 'someone-else-than-uploader', documentId });
+          expect(lease.documentId).toBe(documentId);
+        } else {
+          expect(JSON.stringify(await response.json())).not.toContain('lease=');
+        }
+      }
+    }
+
+    for (const { link, label, status } of results) {
+      expect({ link, label, status }, `${link}/${label}`).toEqual({ link, label, status: open.includes(label) ? 200 : 403 });
+    }
+    expect(state.sas).not.toHaveBeenCalled();
+
+    // One durable access record per release, none for a refusal, each attributed to the reader.
+    await resetRole();
+    await pg.query(`SELECT set_config('app.current_org', $1, false)`, [ORG_A]);
+    await pg.exec('SET ROLE doc_runtime');
+    const recorded = await pg.query<{ resource_id: string; user_id: string }>(`SELECT resource_id::text, user_id FROM audit_security.audit_logs WHERE action = 'document.download'`);
+    const released = results.filter((result) => result.status === 200).map((result) => result.documentId).sort();
+    expect(recorded.rows.map((row) => row.resource_id).sort()).toEqual(released);
+    expect(new Set(recorded.rows.map((row) => row.user_id))).toEqual(released.length === 0 ? new Set() : new Set(['someone-else-than-uploader']));
+  });
+
+  it('keeps a case document closed to its uploader once the uploader no longer holds the case', async () => {
+    const documentId = crypto.randomUUID();
+    await insertDocument(documentId, ORG_A, 'team_confidential');
+    await pg.query(`INSERT INTO document_links (id, organization_id, document_id, linked_entity_type, linked_entity_id) VALUES ($1, $2, $3, 'grievance', $4)`, [crypto.randomUUID(), ORG_A, documentId, GRIEVANCE]);
+    state.caseAccess = { isPrimaryOwner: true, canViewCase: true, canViewPrivateDocuments: false };
+    expect((await callDownload(ORG_A, documentId)).status).toBe(200);
+    // Reassignment, suspension, revocation and closure all reach the route as the kernel no longer granting the case.
+    state.caseAccess = NO_CASE;
+    state.steward = true;
+    expect((await callDownload(ORG_A, documentId)).status).toBe(403);
+  });
+});
+
+describe('organization-level (unlinked) documents: who is let in', () => {
+  const READER = 'reader-2';
+  const cases: Array<{ name: string; label: string; staff: boolean; reader: string; grant: boolean; status: number }> = [
+    { name: 'the uploader reads their own confidential document', label: 'team_confidential', staff: false, reader: USER, grant: false, status: 200 },
+    { name: 'another member does not read it', label: 'team_confidential', staff: false, reader: READER, grant: false, status: 403 },
+    { name: 'a representative reads organization working documents', label: 'team_confidential', staff: true, reader: READER, grant: false, status: 200 },
+    { name: 'everyone reads a document shared with all members', label: 'public_internal', staff: false, reader: READER, grant: false, status: 200 },
+    { name: 'a grant holder reads a confidential document', label: 'team_confidential', staff: false, reader: READER, grant: true, status: 200 },
+    { name: 'a representative does not read a privileged document without a grant', label: 'privileged', staff: true, reader: READER, grant: false, status: 403 },
+    { name: 'the uploader does not read their privileged document without a grant', label: 'privileged', staff: false, reader: USER, grant: false, status: 403 },
+    { name: 'a grant holder reads a privileged document', label: 'privileged', staff: false, reader: READER, grant: true, status: 200 },
+    { name: 'a representative does not read a highly sensitive document without a grant', label: 'highly_sensitive', staff: true, reader: READER, grant: false, status: 403 },
+  ];
+  it.each(cases)('$name', async ({ label, staff, reader, grant, status }) => {
+    state.steward = staff;
+    await insertDocument(DOC_OPEN, ORG_A, label);
+    if (grant) {
+      await pg.query(
+        `INSERT INTO document_access_grants (id, organization_id, document_id, user_id, status, can_view, can_download, revoked_at, expires_at)
+         VALUES ($1, $2, $3, $4, 'active', true, true, NULL, NULL)`,
+        [crypto.randomUUID(), ORG_A, DOC_OPEN, reader],
+      );
+    }
+    expect((await callDownload(ORG_A, DOC_OPEN, reader)).status).toBe(status);
+  });
+});

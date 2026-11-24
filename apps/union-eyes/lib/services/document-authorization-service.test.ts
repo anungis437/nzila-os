@@ -28,6 +28,7 @@ const dbMock = {
 };
 
 const getEffectiveCaseAccess = vi.fn();
+const hasRoleInOrganization = vi.fn(async () => false);
 
 vi.mock('@/db/db', () => ({
   db: dbMock,
@@ -35,6 +36,10 @@ vi.mock('@/db/db', () => ({
 
 vi.mock('@/lib/services/case-access-service', () => ({
   getEffectiveCaseAccess,
+}));
+
+vi.mock('@/lib/api-auth-guard', () => ({
+  hasRoleInOrganization,
 }));
 
 function queueSelectSteps(steps: SelectStep[]) {
@@ -46,6 +51,8 @@ describe('document-authorization-service', () => {
   beforeEach(() => {
     dbMock.select.mockClear();
     getEffectiveCaseAccess.mockReset();
+    hasRoleInOrganization.mockReset();
+    hasRoleInOrganization.mockResolvedValue(false);
   });
 
   it.each(['case', 'grievance'])('allows privileged %s documents only with both the grant and live case access', async (linkType) => {
@@ -173,4 +180,48 @@ describe('document-authorization-service', () => {
     expect(getEffectiveCaseAccess).not.toHaveBeenCalled();
   });
 
+
+  describe('organization-level documents follow the rule the download applies', () => {
+    const decide = async (document: Record<string, unknown>, options: { staff?: boolean; grant?: boolean; actor?: Record<string, unknown>; lookups?: number } = {}) => {
+      queueSelectSteps([{ rows: options.grant ? [{ documentId: 'doc-1' }] : [] }, ...Array.from({ length: options.lookups ?? 0 }, () => ({ rows: [] }))]);
+      hasRoleInOrganization.mockResolvedValue(Boolean(options.staff));
+      const { authorizeDocumentsForActor } = await import('./document-authorization-service');
+      const [result] = await authorizeDocumentsForActor({
+        organizationId: 'org-1',
+        actor: { userId: 'reader', ...options.actor },
+        documents: [{ id: 'doc-1', linkedEntityType: null, linkedEntityId: null, ...document }],
+      });
+      return result?.allowed;
+    };
+
+    it('keeps another member\'s confidential document from an ordinary member', async () => {
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else' })).toBe(false);
+      expect(await decide({ privacyLabel: 'case_restricted', uploadedBy: 'someone-else' })).toBe(false);
+    });
+
+    it('lets in the uploader, a representative, a grant holder, and everyone for a document shared with all members', async () => {
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'reader' })).toBe(true);
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else' }, { staff: true })).toBe(true);
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else' }, { grant: true })).toBe(true);
+      expect(await decide({ privacyLabel: 'public_internal', uploadedBy: 'someone-else' })).toBe(true);
+    });
+
+    it('does not open a privileged document to a representative without a grant', async () => {
+      expect(await decide({ privacyLabel: 'privileged', uploadedBy: 'someone-else' }, { staff: true })).toBe(false);
+      expect(await decide({ privacyLabel: 'privileged', uploadedBy: 'reader' })).toBe(false);
+      expect(await decide({ privacyLabel: 'privileged', uploadedBy: 'someone-else' }, { grant: true })).toBe(true);
+    });
+
+    it('takes seniority as given by the caller and never looks it up when it is stated', async () => {
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else' }, { actor: { isStaff: true } })).toBe(true);
+      expect(hasRoleInOrganization).not.toHaveBeenCalled();
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else' }, { staff: true, actor: { isStaff: false } })).toBe(false);
+    });
+
+    it('never lets seniority open a case document, and judges a document linked to another record by the same rule', async () => {
+      getEffectiveCaseAccess.mockResolvedValue({ canViewCase: false, canViewPrivateDocuments: false, isPrimaryOwner: false });
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else', linkedEntityType: 'grievance', linkedEntityId: 'case-1' }, { staff: true })).toBe(false);
+      expect(await decide({ privacyLabel: 'team_confidential', uploadedBy: 'someone-else', linkedEntityType: 'member', linkedEntityId: 'member-1' }, { lookups: 2 })).toBe(false);
+    });
+  });
 });

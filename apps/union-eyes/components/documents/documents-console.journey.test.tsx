@@ -132,7 +132,7 @@ describe('documents console canonical journey', () => {
     fetchMock.mockRejectedValueOnce(new Error('private-provider-token'));
     render(<DocumentsConsole />);
     expect(await screen.findByRole('alert')).toHaveTextContent(locale.startsWith('fr')
-      ? "La liste des documents n'a pas pu etre chargee."
+      ? "La liste des documents n’a pas pu être chargée."
       : 'The document list could not be loaded.');
     expect(screen.queryByText('private-provider-token')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('tab', { name: 'tabs.repository' }));
@@ -162,7 +162,7 @@ describe('documents console canonical journey', () => {
     fetchMock.mockRejectedValueOnce(new Error('provider-secret'));
     await userEvent.click(screen.getByRole('button', { name: 'library-preview' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(locale.startsWith('fr')
-      ? "Le document n'a pas pu etre charge."
+      ? "Le document n’a pas pu être chargé."
       : 'The document could not be loaded.');
     expect(screen.queryByTestId('document-detail-loading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('verified-document-versions')).not.toBeInTheDocument();
@@ -266,12 +266,12 @@ describe('documents console canonical journey', () => {
     expect(document.querySelector('.sm\\:flex-row')).toBeTruthy();
     await screen.findByRole('button', { name: 'library-download' });
     await userEvent.click(screen.getByRole('tab', { name: 'tabs.repository' }));
-    expect(await screen.findByRole('button', { name: 'Telecharger' })).toBeVisible();
+    expect(await screen.findByRole('button', { name: 'Télécharger' })).toBeVisible();
     await userEvent.type(screen.getByPlaceholderText('repository.uploadFields.title'), 'Note');
     await userEvent.type(screen.getByPlaceholderText('repository.uploadFields.filename'), 'note.pdf');
     await userEvent.type(screen.getByPlaceholderText('repository.uploadFields.fileUrl'), 'https://files.example/note.pdf');
     await userEvent.click(screen.getByRole('button', { name: 'repository.uploadGoverned' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Le document a change');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Le document a changé avant la fin de la demande.');
   });
 
   it('does not rewrite privacy labels for share', async () => {

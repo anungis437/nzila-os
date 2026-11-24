@@ -6,9 +6,16 @@ import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from '@/lib/services/document-governance-service';
 import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
 import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
+import { hasRoleInOrganization } from '@/lib/api-auth-guard';
 
 export interface DocumentAuthorizationActor {
   userId: string;
+  /**
+   * Representative-level role (steward or above), which makes organization-level working documents eligible. It is resolved from
+   * the actor's live membership when omitted, and is never an input to a case document.
+   */
+  isStaff?: boolean;
 }
 
 export interface AuthorizationCandidateDocument {
@@ -16,6 +23,7 @@ export interface AuthorizationCandidateDocument {
   privacyLabel?: string | null;
   linkedEntityType?: string | null;
   linkedEntityId?: string | null;
+  uploadedBy?: string | null;
 }
 
 export interface AuthorizedDocumentResult<T extends AuthorizationCandidateDocument> {
@@ -89,6 +97,11 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
         linkedEntityType: document.linkedEntityType, linkedEntityId: document.linkedEntityId })
       : null));
   const grievanceIds = resolvedCaseIds.filter((id): id is string => id !== null);
+  // Organization-level documents are decided by the same rule the download route applies, so a list, a search result or a related
+  // document is never visible to someone the document itself would refuse.
+  const isStaff = params.actor.isStaff ?? (params.documents.some((document, index) => resolvedCaseIds[index] === null)
+    ? await hasRoleInOrganization(params.organizationId, 'steward', params.actor.userId)
+    : false);
 
   const caseAccessMap = await getCaseAccessMap({
     organizationId: params.organizationId,
@@ -108,9 +121,16 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
       {
         isOrgMember: true,
         isPrimaryOwner: caseAccess?.isPrimaryOwner ?? false,
-        hasCaseAccess:
-          !linkedCaseId ||
-          Boolean(caseAccess?.canViewCase),
+        hasCaseAccess: hasDocumentContextAccess({
+          isStaff,
+          canViewCase: Boolean(caseAccess?.canViewCase),
+          hasExplicitGrant: explicitGrantIds.has(document.id),
+          linkedEntityType: linkedCaseId ? 'case' : document.linkedEntityType,
+          linkedEntityId: linkedCaseId ?? document.linkedEntityId,
+          privacyLabel: document.privacyLabel,
+          uploadedBy: document.uploadedBy,
+          userId: params.actor.userId,
+        }),
         canViewPrivateDocuments: caseAccess?.canViewPrivateDocuments ?? false,
         hasExplicitDocumentGrant: explicitGrantIds.has(document.id),
       },

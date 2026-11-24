@@ -24,7 +24,6 @@ export interface GovernedDocument {
   id: string;
   title: string | null;
   filename: string | null;
-  fileUrl: string;
   documentType: string;
   privacyLabel: string;
   createdAt: string;
@@ -202,7 +201,6 @@ export function readGrievanceDetail(body: unknown): GrievanceDetail {
       id: mustBeText(document.id, 'a document id'),
       title: text(document.title),
       filename: text(document.filename),
-      fileUrl: mustBeText(document.fileUrl, 'a document address'),
       documentType: text(document.documentType) ?? '',
       privacyLabel: text(document.privacyLabel) ?? '',
       createdAt: mustBeText(document.createdAt, 'a document date'),

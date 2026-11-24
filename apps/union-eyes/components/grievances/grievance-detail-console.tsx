@@ -34,6 +34,7 @@ import {
   type GrievanceDetail,
 } from "@/components/grievances/grievance-detail-model";
 import { failureLanguage, readApiFailure, readUserFailure, userFailureText } from "@/lib/client/api-envelope";
+import { useAuthorizedDocumentOpen } from "@/lib/hooks/use-authorized-document-open";
 
 const EMPTY_UPLOAD = { title: "", filename: "", fileUrl: "", documentType: "evidence", privacyLabel: "team_confidential" };
 
@@ -49,7 +50,8 @@ const ACCESS_STATUSES = new Set(["active", "revoked", "expired"]);
 export function GrievanceDetailConsole() {
   const t = useTranslations("grievanceDetailConsole");
   const format = useFormatter();
-  const language = failureLanguage(useLocale());
+  const locale = useLocale();
+  const language = failureLanguage(locale);
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : (params.id as string);
@@ -71,6 +73,7 @@ export function GrievanceDetailConsole() {
   const [uploadPayload, setUploadPayload] = useState(EMPTY_UPLOAD);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState(false);
+  const { open: openDocument, opening: openingDocument, notice: documentNotice, copy: documentCopy } = useAuthorizedDocumentOpen();
 
   const moment = (value: string) => {
     const date = new Date(value);
@@ -432,23 +435,29 @@ export function GrievanceDetailConsole() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {documentNotice !== null && (
+            <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+              {documentNotice}
+            </p>
+          )}
           {grievance.governedDocuments.length === 0 ? (
             <p className="text-sm text-gray-500">{t("noDocuments")}</p>
           ) : (
             <ul className="space-y-2">
               {grievance.governedDocuments.map((doc) => {
                 const name = doc.title || doc.filename || doc.documentType.replace(/_/g, " ");
-                const href = webUrl(doc.fileUrl);
                 return (
                   <li key={doc.id} className="flex flex-wrap items-center gap-2 text-sm">
                     <FileText className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                    {href ? (
-                      <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {name}
-                      </a>
-                    ) : (
-                      <span>{name}</span>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => void openDocument(doc.id)}
+                      disabled={openingDocument === doc.id}
+                      aria-label={`${documentCopy.download}: ${name}`}
+                      className="min-h-11 text-left text-blue-600 hover:underline disabled:opacity-50 sm:min-h-0"
+                    >
+                      {name}
+                    </button>
                     <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
                       <Lock className="mr-1 inline h-3 w-3" aria-hidden="true" />
                       {labelOf("privacyLabels", PRIVACY, doc.privacyLabel)}

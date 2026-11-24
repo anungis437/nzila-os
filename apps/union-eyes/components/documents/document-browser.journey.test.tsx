@@ -83,7 +83,7 @@ describe('document browser canonical journey', () => {
     fetchMock.mockRejectedValueOnce(new Error('private-provider-token'));
     render(<DocumentBrowser />);
     expect(await screen.findByRole('alert')).toHaveTextContent(locale === 'fr'
-      ? "La liste des documents n'a pas pu etre chargee."
+      ? "La liste des documents n’a pas pu être chargée."
       : 'The document list could not be loaded.');
     expect(screen.queryByText('private-provider-token')).not.toBeInTheDocument();
     expect(screen.queryByText(locale === 'fr' ? 'Chargement...' : 'Loading...')).not.toBeInTheDocument();
@@ -108,10 +108,10 @@ describe('document browser canonical journey', () => {
     render(<DocumentBrowser />);
     await screen.findByText('Case note');
     fetchMock.mockRejectedValueOnce(new Error('provider-secret'));
-    const preview = locale === 'fr' ? 'Apercu' : 'Preview';
+    const preview = locale === 'fr' ? 'Aperçu' : 'Preview';
     await userEvent.click(screen.getAllByRole('button', { name: preview })[0]);
     expect(await screen.findByRole('alert')).toHaveTextContent(locale === 'fr'
-      ? "Le document n'a pas pu etre charge."
+      ? "Le document n’a pas pu être chargé."
       : 'The document could not be loaded.');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -230,8 +230,8 @@ describe('document browser canonical journey', () => {
     render(<DocumentBrowser filterByType={['evidence', 'missing']} />);
     expect(await screen.findByText('Case note')).toBeInTheDocument();
     expect(screen.queryByText('Second note')).not.toBeInTheDocument();
-    expect(screen.queryByText('Aucun document autorise.')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Apercu' }).length).toBeGreaterThan(0);
+    expect(screen.queryByText('Aucun document autorisé.')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Aperçu' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/Le tri et la pagination/)).toBeInTheDocument();
     expect(calls.some((call) => call.includes('documentType='))).toBe(false);
   });

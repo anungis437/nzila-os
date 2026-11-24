@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
   /** The current exploratory graph: label = id unless overridden. */
   nodes: [] as Array<{ id: string; label?: string; category?: string; nodeType?: string }>,
   authorized: true,
+  authorizationInput: [] as Array<Record<string, unknown>>,
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -36,7 +37,10 @@ vi.mock('@/db/db', async () => {
   return { db: lateBoundDb(state) };
 });
 vi.mock('@/lib/services/document-authorization-service', () => ({
-  authorizeDocumentsForActor: async ({ documents }: { documents: Array<{ id: string }> }) => documents.map((d) => ({ id: d.id, allowed: state.authorized })),
+  authorizeDocumentsForActor: async ({ documents }: { documents: Array<{ id: string }> }) => {
+    state.authorizationInput = documents as unknown as Array<Record<string, unknown>>;
+    return documents.map((d) => ({ id: d.id, allowed: state.authorized }));
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('../dependency-propagator', () => ({
@@ -70,7 +74,11 @@ beforeAll(async () => {
     migration('0087_verified_dependency_evidence_binding.sql'),
     `CREATE TABLE documents (
        id uuid primary key, organization_id uuid not null, status text not null default 'active',
-       privacy_label text not null default 'team_confidential', sha256 text, checksum text
+       privacy_label text not null default 'team_confidential', sha256 text, checksum text, uploaded_by text
+     )`,
+    `CREATE TABLE document_links (
+       id uuid primary key default gen_random_uuid(), organization_id uuid not null, document_id uuid not null,
+       linked_entity_type text not null, linked_entity_id text not null
      )`,
     `CREATE TABLE document_versions (
        id uuid primary key default gen_random_uuid(), organization_id uuid not null, document_id uuid not null,
@@ -86,7 +94,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await pg.exec('TRUNCATE ue_verified_dependency_evidence, ue_graph_node_alias, documents, document_versions');
+  await pg.exec('TRUNCATE ue_verified_dependency_evidence, ue_graph_node_alias, documents, document_versions, document_links');
   await pg.query(`INSERT INTO documents (id, organization_id, sha256) VALUES ($1, $2, 'abc123')`, [DOC, ORG_A]);
   await pg.query(`INSERT INTO documents (id, organization_id) VALUES ($1, $2)`, [DOC_NO_HASH, ORG_A]);
   state.nodes = DEFAULT_NODES.map((n) => ({ ...n }));
@@ -257,6 +265,14 @@ describe('document evidence integrity', () => {
     await expect(submitVerifiedDependency(ORG_B, input('a', 'b', { evidenceReferenceType: 'document', evidenceDocumentId: DOC }), 's')).rejects.toThrow(/does not resolve/);
     state.authorized = false;
     await expect(submitVerifiedDependency(ORG_A, input('a', 'b', { evidenceReferenceType: 'document', evidenceDocumentId: DOC }), 's')).rejects.toThrow(/not authorized/);
+  });
+
+  it('judges a case-linked or another member\'s document by its link and uploader, never as an unlinked document', async () => {
+    const { submitVerifiedDependency } = await store();
+    await pg.query(`UPDATE documents SET uploaded_by = 'someone-else' WHERE id = $1`, [DOC]);
+    await pg.query(`INSERT INTO document_links (organization_id, document_id, linked_entity_type, linked_entity_id) VALUES ($1, $2, 'grievance', 'case-1')`, [ORG_A, DOC]);
+    await submitVerifiedDependency(ORG_A, input('a', 'b', { evidenceReferenceType: 'document', evidenceDocumentId: DOC }), 'submitter-1');
+    expect(state.authorizationInput).toEqual([expect.objectContaining({ id: DOC, linkedEntityType: 'grievance', linkedEntityId: 'case-1', uploadedBy: 'someone-else' })]);
   });
 
   it('a new document version makes the record stale until re-verified, and re-verification binds the new content', async () => {

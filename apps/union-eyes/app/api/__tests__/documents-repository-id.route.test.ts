@@ -147,6 +147,22 @@ describe('documents/repository/[id] route', () => {
     expect(json.data.versions).toHaveLength(1);
   });
 
+  it('GET never reads or returns the stored file address; the file comes only through an audited download link', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc' }],
+      [],
+      [],
+    );
+
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
+    const projections = mockTx.select.mock.calls.map(([projection]: [Record<string, unknown> | undefined]) => Object.keys(projection ?? {}));
+
+    expect(response.status).toBe(200);
+    expect(projections.flat()).not.toContain('fileUrl');
+    expect(JSON.stringify(await response.json())).not.toMatch(/fileUrl|blob\.core\.windows|sig=/);
+  });
+
   it('GET names the uploader of the document and of each version for a representative', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push(

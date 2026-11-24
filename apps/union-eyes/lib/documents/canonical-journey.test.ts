@@ -70,7 +70,7 @@ describe('canonical document journey rules', () => {
   it('covers english and french denial copy', () => {
     expect(journeyCopy('en-CA').share_blocked).toMatch(/privacy label/i);
     expect(journeyCopy('fr-CA').share_blocked).toMatch(/partage/i);
-    expect(journeyCopy('fr').download).toBe('Telecharger');
+    expect(journeyCopy('fr').download).toBe('Télécharger');
     expect(journeyCopy('en').download).toBe('Download');
   });
 

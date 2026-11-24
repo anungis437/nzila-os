@@ -14,7 +14,6 @@ export type RelatedDocumentRankResult = {
   reasons: string[];
   scoreBreakdown: Record<string, number>;
   documentType?: string | null;
-  fileUrl?: string;
   linkedEntities?: string[];
   updatedAt?: string;
 };
@@ -53,7 +52,6 @@ export type DocumentCandidate = {
   name: string;
   privacyLabel: string;
   documentType: string | null;
-  fileUrl: string;
   updatedAt: Date;
   linkedEntityType: string | null;
   linkedEntityId: string | null;

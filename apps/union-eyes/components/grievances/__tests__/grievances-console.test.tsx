@@ -404,13 +404,13 @@ describe('GrievancesConsole: advancing a status', () => {
     expect(callsTo('/api/grievances', 'GET')).toHaveLength(1);
   });
 
-  it('says what failed, without a status line, when the refusal gives no reason', async () => {
+  it('says the service is unavailable, without a status line or the raw text, when the refusal gives no reason', async () => {
     server.patch = () => new Response('nope', { status: 500 });
 
     await advance('closed');
 
-    expect(await screen.findByText('The status could not be changed')).toBeInTheDocument();
-    expect(screen.queryByText(/HTTP/)).toBeNull();
+    expect(await screen.findByText('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument();
+    expect(screen.queryByText(/HTTP|nope/)).toBeNull();
   });
 });
 

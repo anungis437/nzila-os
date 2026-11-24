@@ -32,7 +32,7 @@ describe('canonical bulk download', () => {
     expect(bulkOutcomeNotice('en', report)).toBe(
       '1 download URL issued. 2 denied. 0 failed. 0 browser opens attempted. 0 browser opens failed. File transfer is not confirmed.',
     );
-    expect(bulkOutcomeNotice('fr', report)).toMatch(/refuses/);
+    expect(bulkOutcomeNotice('fr', report)).toMatch(/refusés/);
     expect(bulkOutcomeNotice('en', report)).not.toMatch(/downloaded/i);
   });
 
