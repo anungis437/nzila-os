@@ -88,6 +88,7 @@ const STATUS_COPY: Readonly<Record<FailureLanguage, Readonly<Record<number, stri
     409: 'This item changed while you were working. Refresh and try again.',
     413: 'The file or request is too large.',
     429: 'Too many requests. Wait a moment and try again.',
+    500: 'The service is temporarily unavailable. Try again shortly.',
     501: 'This feature is not available yet.',
     502: 'The service is temporarily unavailable. Try again shortly.',
     503: 'The service is temporarily unavailable. Try again shortly.',
@@ -100,6 +101,7 @@ const STATUS_COPY: Readonly<Record<FailureLanguage, Readonly<Record<number, stri
     409: 'Cet élément a changé pendant votre travail. Actualisez, puis réessayez.',
     413: 'Le fichier ou la demande est trop volumineux.',
     429: 'Trop de demandes. Patientez un instant, puis réessayez.',
+    500: 'Le service est momentanément indisponible. Réessayez sous peu.',
     501: 'Cette fonction n’est pas encore disponible.',
     502: 'Le service est momentanément indisponible. Réessayez sous peu.',
     503: 'Le service est momentanément indisponible. Réessayez sous peu.',
@@ -162,6 +164,8 @@ export function userFailureText(error: unknown, fallback: string | null, languag
 
 function statedText(error: unknown, language: FailureLanguage): string {
   if (!(error instanceof ApiFailure)) return '';
+  // Never expose server implementation details carried by 5xx responses, even when a backend includes a message.
+  if (error.status >= 500) return STATUS_COPY[language][error.status] || STATUS_COPY[language][500];
   if (language === 'en') return (error.stated && !BARE_SERVER_MESSAGES.has(error.stated) ? error.stated : STATUS_COPY.en[error.status]) || error.stated || '';
   return FRENCH_SERVER_MESSAGES[error.stated] ?? STATUS_COPY.fr[error.status] ?? '';
 }
