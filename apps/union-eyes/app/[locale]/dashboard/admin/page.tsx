@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { CapabilityUnavailable } from "@/components/system/capability-unavailable";
-import { ApiFailure, ApiShapeError, envelopeData, failureDetail, failureLanguage, isRecord, readApiFailure, type FailureLanguage } from "@/lib/client/api-envelope";
+import { ApiFailure, ApiShapeError, apiErrorMessage, envelopeData, failureDetail, failureLanguage, isRecord, readApiFailure, type FailureLanguage } from "@/lib/client/api-envelope";
 import {
   Users,
   Settings,
@@ -537,7 +537,7 @@ export default function AdminPage() {
         toast.success(language === "en" && message ? message : copy.optimizeDone);
         setHealthReload((n) => n + 1);
       } else {
-        toast.error(`${copy.optimizeFailed}${reasonSuffix(new ApiFailure(response.status, message ?? (isRecord(body) ? text(body.error) : null) ?? ""), language)}`);
+        toast.error(`${copy.optimizeFailed}${reasonSuffix(new ApiFailure(response.status, message ?? apiErrorMessage(body, "")), language)}`);
       }
     } catch {
       toast.error(copy.optimizeFailed);
