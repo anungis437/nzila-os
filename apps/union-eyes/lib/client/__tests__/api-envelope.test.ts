@@ -120,6 +120,23 @@ describe('api-envelope', () => {
       for (const error of [new TypeError('Failed to fetch'), new ApiShapeError('no data'), new Error('HTTP 500'), null]) expect(failureDetail(error, 'en')).toBeNull();
     });
 
+    it('masks server-side technical details in every 5xx response in English and French', async () => {
+      const technical = 'relation ue_authority_mandates does not exist; SELECT * FROM private_table';
+      for (const status of [500, 502, 503, 504, 599]) {
+        const failure = new ApiFailure(status, technical);
+        const english = userFailureText(failure, 'Could not complete the request.', 'en');
+        const french = userFailureText(failure, 'Impossible de terminer la demande.', 'fr');
+        expect(english).not.toContain('ue_authority_mandates');
+        expect(english).not.toContain('SELECT');
+        expect(french).not.toContain('ue_authority_mandates');
+        expect(french).not.toContain('SELECT');
+        expect(english).toMatch(/temporarily unavailable|too long/);
+        expect(french).toMatch(/indisponible|trop de temps/);
+        expect(failureDetail(failure, 'en')).toBe(english);
+      }
+      expect(await readUserFailure(reply(500, { message: technical }), null, 'en')).not.toContain('private_table');
+    });
+
     it('reads a failed response straight to words', async () => {
       expect(await readUserFailure(reply(404, { message: 'Grievance not found' }), 'x', 'fr')).toBe('Cet élément n’est plus disponible.');
       expect(await readUserFailure(reply(404, { message: 'Grievance not found' }), 'x', 'en')).toBe('Grievance not found');
