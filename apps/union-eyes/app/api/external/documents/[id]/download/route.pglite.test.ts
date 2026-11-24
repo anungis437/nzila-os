@@ -63,7 +63,7 @@ const get = async (docId = DOC) => {
 };
 const audit = async () => (await q('SELECT action, user_id, resource_id, metadata FROM audit_security.audit_logs')).rows as Array<{ action: string; user_id: string | null; resource_id: string; metadata: Record<string, unknown> }>;
 
-async function seed(link = true) {
+async function seed(link = true, linkType: 'case' | 'grievance' = 'grievance') {
   await q(`INSERT INTO representation_authorities(id,organization_id,matter_type,matter_id,represented_person_id,representative_user_id,representative_organization_id,
     scope,source,status,effective_at,expires_at,created_by) VALUES($1,$2,'grievance',$3,gen_random_uuid(),$4,$5,ARRAY['view','documents'],'Synthetic existing external authority','active',now()-interval '1 hour',now()+interval '1 hour','staff-1')`, [AUTHORITY, ORG, MATTER, REP, REP_ORG]);
   await q(`INSERT INTO external_matter_access_grants(id,authority_id,organization_id,matter_type,matter_id,user_id,representative_organization_id,can_view_documents,can_download_documents,granted_by,expires_at)
@@ -77,7 +77,7 @@ async function seed(link = true) {
   await q(`INSERT INTO external_document_access_grants(id,authority_id,matter_grant_id,organization_id,matter_type,matter_id,document_id,user_id,representative_organization_id,
     can_view,can_download,document_version_no,granted_by,expires_at) VALUES($1,$2,$3,$4,'grievance',$5,$6,$7,$8,true,true,2,'staff-1',now()+interval '1 hour')`,
   [DOCUMENT_GRANT, AUTHORITY, MATTER_GRANT, ORG, MATTER, DOC, REP, REP_ORG]);
-  if (link) await q(`INSERT INTO document_links (id, organization_id, document_id, linked_entity_type, linked_entity_id, linked_by) VALUES (gen_random_uuid(), $1, $2, 'grievance', $3, 'staff-1')`, [ORG, DOC, MATTER]);
+  if (link) await q(`INSERT INTO document_links (id, organization_id, document_id, linked_entity_type, linked_entity_id, linked_by) VALUES (gen_random_uuid(), $1, $2, $4, $3, 'staff-1')`, [ORG, DOC, MATTER, linkType]);
 }
 
 beforeAll(async () => {
@@ -93,8 +93,8 @@ beforeEach(async () => {
 });
 
 describe('external matter document download', () => {
-  it('records principal, organization, matter, document, version and bytes delivered durably, then serves the file', async () => {
-    await seed();
+  it.each(['case', 'grievance'] as const)('serves exact %s-linked bytes only after durable principal/matter/version audit', async (linkType) => {
+    await seed(true, linkType);
     const response = await get();
     expect(response.status).toBe(200);
     expect(Buffer.from(await response.arrayBuffer()).toString()).toBe('FILE-BYTES-0123');

@@ -76,7 +76,7 @@ export async function verifyImportBatch(batchId: string): Promise<VerificationRe
   const orphans = await db.execute(sql`
     SELECT d.id, d.name, dl.linked_entity_id AS linked_case_id
     FROM documents d
-    LEFT JOIN document_links dl ON dl.document_id = d.id AND dl.linked_entity_type = 'grievance'
+    LEFT JOIN document_links dl ON dl.document_id = d.id AND dl.linked_entity_type IN ('case', 'grievance')
     WHERE d.import_batch_id = ${batchId}::uuid
       AND (
         dl.id IS NULL

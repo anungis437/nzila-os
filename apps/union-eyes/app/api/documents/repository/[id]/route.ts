@@ -21,10 +21,12 @@ import {
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
+import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { loadUploaderNames } from '@/lib/documents/uploader-names';
+import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
 
 const updateLabelSchema = z.object({
   privacyLabel: z.enum([
@@ -57,7 +59,7 @@ export const GET = withApi(
     }
     const documentId = params.id;
 
-    const { row, explicitGrant } = await withRLSContext({ organizationId }, async (tx) => {
+    const { row, explicitGrant, linkedCaseId } = await withRLSContext({ organizationId }, async (tx) => {
       const rowInner = (
         await tx
           .select({
@@ -87,7 +89,7 @@ export const GET = withApi(
       )[0];
 
       if (!rowInner) {
-        return { row: null as typeof rowInner, explicitGrant: null as { id: string } | null };
+        return { row: null as typeof rowInner, explicitGrant: null as { id: string } | null, linkedCaseId: null };
       }
 
       const explicitGrantInner = (
@@ -108,10 +110,13 @@ export const GET = withApi(
           .limit(1)
       )[0];
 
-      return { row: rowInner, explicitGrant: explicitGrantInner ?? null };
+      return { row: rowInner, explicitGrant: explicitGrantInner ?? null,
+        linkedCaseId: isDocumentLinkWellFormed(rowInner.linkedEntityType, rowInner.linkedEntityId)
+          ? await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: rowInner.linkedEntityType, linkedEntityId: rowInner.linkedEntityId }) : null,
+      };
     });
 
-    if (!row) {
+    if (!row || !isDocumentLinkWellFormed(row.linkedEntityType, row.linkedEntityId)) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
     }
 
@@ -123,10 +128,10 @@ export const GET = withApi(
       canViewPrivateDocuments: false,
     };
 
-    if (row.linkedEntityType === 'grievance' && row.linkedEntityId) {
+    if (linkedCaseId) {
       const effective = await getEffectiveCaseAccess({
         organizationId,
-        grievanceId: row.linkedEntityId,
+        grievanceId: linkedCaseId,
         userId,
       });
       caseAccess = {
@@ -145,7 +150,8 @@ export const GET = withApi(
           isStaff,
           canViewCase: caseAccess.canViewCase,
           hasExplicitGrant: Boolean(explicitGrant),
-          linkedEntityId: row.linkedEntityId,
+          linkedEntityType: linkedCaseId ? 'case' : row.linkedEntityType,
+          linkedEntityId: linkedCaseId ?? row.linkedEntityId,
           privacyLabel: row.privacyLabel,
           uploadedBy: row.uploadedBy,
           userId,
@@ -238,13 +244,14 @@ export const PATCH = withApi(
           .for('update', { of: documents })
       )[0];
 
-      if (!before) return { kind: 'not_found' as const };
+      if (!before || !isDocumentLinkWellFormed(before.linkedEntityType, before.linkedEntityId)) return { kind: 'not_found' as const };
 
       // Changing a label alters who can read a case document, so it is a case-management power.
-      if (before.linkedEntityType === 'grievance' && before.linkedEntityId) {
+      const linkedCaseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: before.linkedEntityType, linkedEntityId: before.linkedEntityId });
+      if (linkedCaseId) {
         const relationship = await getEffectiveCaseAccess({
           organizationId,
-          grievanceId: before.linkedEntityId,
+          grievanceId: linkedCaseId,
           userId,
         });
         if (!relationship.isPrimaryOwner) return { kind: 'not_primary_owner' as const };

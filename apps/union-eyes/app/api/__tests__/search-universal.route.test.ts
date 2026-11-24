@@ -94,7 +94,7 @@ describe('search/universal route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'VALIDATION_ERROR' });
   });
 
-  it('returns grouped search results on success', async () => {
+  it.each(['case', 'grievance'])('returns authorized %s-linked documents in grouped search results', async (linkType) => {
     const { GET } = await loadRoute();
     m.hasMinRole.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
 
@@ -105,7 +105,7 @@ describe('search/universal route', () => {
       [
         {
           id: 'doc_1', title: 'Case memo', filename: 'memo.pdf', documentType: 'memo', privacyLabel: 'team_confidential',
-          updatedAt: new Date().toISOString(), linkedEntityType: 'grievance', linkedEntityId: 'case_1',
+          updatedAt: new Date().toISOString(), linkedEntityType: linkType, linkedEntityId: 'case_1',
         },
       ],
       [{ id: 'grant_1' }],
@@ -163,4 +163,13 @@ describe('search/universal route', () => {
     expect(payload.data.groups.documents).toEqual([]);
     expect(payload.data.totals.documents).toBe(0);
   });
+  it.each([['case', null], ['grievance', null], ['unknown', 'case_1'], [null, 'case_1']])('filters malformed %s/%s from search without an organization fallback', async (linkedEntityType, linkedEntityId) => {
+    const {GET} = await loadRoute();
+    m.queueSelect([], [{id: 'broken', title: 'Case memo', privacyLabel: 'public_internal', uploadedBy: TEST_USER_ID, linkedEntityType, linkedEntityId}], [], [], []);
+    const response = await GET(new NextRequest('http://localhost/api/search/universal?q=case'));
+    expect(response.status).toBe(200);
+    expect((await response.json()).data.groups.documents).toEqual([]);
+    expect(m.isDocumentVisibleByPolicy).not.toHaveBeenCalled();
+  });
+
 });

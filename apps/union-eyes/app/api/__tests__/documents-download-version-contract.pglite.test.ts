@@ -5,6 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { createHash } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
+import { NextRequest } from 'next/server';
 import { caller, resetCaller } from './support/with-api-stub';
 
 const ORG_A = '11111111-1111-4111-8111-111111111111';
@@ -16,6 +17,9 @@ const state = vi.hoisted(() => ({
   blobs: new Map<string, Buffer>(),
   sasFailFor: new Set<string>(),
   sas: vi.fn(),
+  read: vi.fn(),
+  readHook: null as null | ((path: string) => void | Promise<void>),
+  transactionDepth: 0,
 }));
 
 vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
@@ -33,12 +37,23 @@ vi.mock('@/db/db', () => ({
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_context: unknown, work: (tx: unknown) => Promise<unknown>) =>
-    (state.db as { transaction: (fn: (tx: unknown) => Promise<unknown>) => Promise<unknown> }).transaction((tx) => work(tx)),
+    (state.db as { transaction: (fn: (tx: unknown) => Promise<unknown>) => Promise<unknown> }).transaction(async (tx) => {
+      state.transactionDepth++;
+      try { return await work(tx); }
+      finally { state.transactionDepth--; }
+    }),
 }));
 vi.mock('@/lib/services/case-access-service', () => ({
   getEffectiveCaseAccess: async () => ({ isPrimaryOwner: false, canViewCase: false, canViewPrivateDocuments: false, canModifyDocuments: false }),
 }));
 vi.mock('@/lib/blob-client', () => ({
+  BlobTooLargeError: class BlobTooLargeError extends Error {
+    constructor(public readonly sizeBytes: number, public readonly maxBytes: number) {
+      super('Synthetic bounded blob read refusal');
+      this.name = 'BlobTooLargeError';
+    }
+  },
+  readBlobBounded: state.read,
   generateSasUrl: async (container: string, path: string) => {
     state.sas(container, path);
     if (state.sasFailFor.has(path)) throw new Error('storage down');
@@ -54,27 +69,39 @@ vi.mock('@/lib/blob-client', () => ({
 
 const { POST: bulkPost } = await import('@/app/api/documents/repository/downloads/route');
 const { GET: download } = await import('@/app/api/documents/[id]/download/route');
+const { GET: content } = await import('@/app/api/documents/[id]/content/route');
 const { POST: appendVersion } = await import('@/app/api/documents/repository/[id]/versions/route');
 const { backfillLegacyDocumentVersions } = await import('@/lib/documents/legacy-storage-backfill');
+const { BlobTooLargeError } = await import('@/lib/blob-client');
+const { verifyDocumentDownloadLease } = await import('@/lib/documents/download-lease');
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const sha = (text: string) => createHash('sha256').update(text).digest('hex');
 const OWN = 'https://uestore.blob.core.windows.net/union-eyes';
+const ORIGINAL_ENV = {
+  AZURE_STORAGE_ACCOUNT_NAME: process.env.AZURE_STORAGE_ACCOUNT_NAME,
+  UE_CANONICAL_BOOTSTRAP_V2: process.env.UE_CANONICAL_BOOTSTRAP_V2,
+  EVIDENCE_SEAL_KEY: process.env.EVIDENCE_SEAL_KEY,
+};
+const SYNTHETIC_SEAL_KEY = 'synthetic-document-download-test-key-only-20261123';
 
 let pg: PGlite;
 const q = (sql: string, params: unknown[] = []) => pg.query(sql, params);
 
-async function addDocument(docId: string, org: string, opts: { label?: string; fileUrl?: string | null; storageKey?: string | null; deleted?: boolean; uploadedBy?: string } = {}) {
+async function addDocument(docId: string, org: string, opts: {
+  label?: string; fileUrl?: string | null; storageKey?: string | null; deleted?: boolean; uploadedBy?: string;
+  contentHash?: string; sizeBytes?: number; documentHash?: string;
+} = {}) {
   await q(
-    `INSERT INTO documents (id, organization_id, title, name, filename, file_url, mime_type, privacy_label, uploaded_by, deleted_at)
-     VALUES ($1, $2, 'T', 'T', 'f.pdf', $3, 'application/pdf', $4, $5, $6)`,
-    [docId, org, opts.fileUrl ?? null, opts.label ?? 'team_confidential', opts.uploadedBy ?? USER, opts.deleted ? new Date().toISOString() : null],
+    `INSERT INTO documents (id, organization_id, title, name, filename, file_url, mime_type, privacy_label, uploaded_by, deleted_at, size_bytes, sha256)
+     VALUES ($1, $2, 'T', 'T', 'f.pdf', $3, 'application/pdf', $4, $5, $6, $7, $8)`,
+    [docId, org, opts.fileUrl ?? null, opts.label ?? 'team_confidential', opts.uploadedBy ?? USER, opts.deleted ? new Date().toISOString() : null, opts.sizeBytes ?? null, opts.documentHash ?? null],
   );
   if (opts.storageKey !== null && opts.storageKey !== undefined) {
     await q(
-      `INSERT INTO document_versions (id, organization_id, document_id, version_no, storage_key, content_hash, uploaded_by)
-       VALUES (gen_random_uuid(), $1, $2, 1, $3, $4, $5)`,
-      [org, docId, opts.storageKey, sha(opts.storageKey), USER],
+      `INSERT INTO document_versions (id, organization_id, document_id, version_no, storage_key, content_hash, uploaded_by, metadata)
+       VALUES (gen_random_uuid(), $1, $2, 1, $3, $4, $5, $6::jsonb)`,
+      [org, docId, opts.storageKey, opts.contentHash ?? sha(opts.storageKey), USER, JSON.stringify(opts.sizeBytes === undefined ? {} : { sizeBytes: opts.sizeBytes })],
     );
   }
 }
@@ -85,32 +112,48 @@ const auditRows = async () =>
   }>;
 
 // The wrapper resolves the caller (organization A's member) and the route params; each call below is that caller's request.
-const asCaller = () => {
+const asCaller = (userId = USER, organizationId = ORG_A) => {
   resetCaller();
-  caller.organizationId = ORG_A;
-  caller.userId = USER;
+  caller.organizationId = organizationId;
+  caller.userId = userId;
   caller.role = 'member';
 };
 const getOne = (docId: string) => {
   asCaller();
-  return download(new Request(`https://t.test/api/documents/${docId}/download`), { params: { id: docId } });
+  return download(new NextRequest(`https://t.test/api/documents/${docId}/download`), { params: { id: docId } });
 };
 const bulk = (documentIds: unknown) => {
   asCaller();
   return bulkPost(
-    new Request('https://t.test/api/documents/repository/downloads', { method: 'POST', body: JSON.stringify({ documentIds }) }),
+    new NextRequest('https://t.test/api/documents/repository/downloads', { method: 'POST', body: JSON.stringify({ documentIds }) }),
   );
 };
 const append = (docId: string, body: Record<string, unknown>) => {
   asCaller();
   return appendVersion(
-    new Request(`https://t.test/api/documents/repository/${docId}/versions`, { method: 'POST', body: JSON.stringify(body) }),
+    new NextRequest(`https://t.test/api/documents/repository/${docId}/versions`, { method: 'POST', body: JSON.stringify(body) }),
     { params: { id: docId } },
   );
+};
+const readContent = (docId: string, url: string, userId = USER, organizationId = ORG_A) => {
+  asCaller(userId, organizationId);
+  return content(new NextRequest(new URL(url, 'https://t.test')), { params: { id: docId } });
+};
+const issuedUrl = async (docId: string) => {
+  const response = await getOne(docId);
+  expect(response.status).toBe(200);
+  const body = await response.json();
+  const url = new URL(body.data.downloadUrl, 'https://t.test');
+  expect(url.origin).toBe('https://t.test');
+  expect(url.pathname).toBe(`/api/documents/${docId}/content`);
+  expect(url.searchParams.get('lease')).toBeTruthy();
+  expect(JSON.stringify(body)).not.toMatch(/blob\.core\.windows\.net|sig=|documents%2F/);
+  return body.data.downloadUrl as string;
 };
 
 beforeAll(async () => {
   process.env.AZURE_STORAGE_ACCOUNT_NAME = 'uestore';
+  process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_SEAL_KEY;
   delete process.env.UE_CANONICAL_BOOTSTRAP_V2;
   pg = new PGlite();
   await pg.exec(`
@@ -128,15 +171,20 @@ beforeAll(async () => {
       archived boolean NOT NULL DEFAULT false, archived_at timestamptz, archived_path text,
       created_at timestamptz DEFAULT now()
     );
+    CREATE TABLE document_test_audit_faults (document_id uuid NOT NULL, action text NOT NULL);
     CREATE FUNCTION audit_security.refuse_marked() RETURNS trigger AS $$
     BEGIN
-      IF NEW.resource_id = '00000000-0000-4000-8000-000000000099' THEN RAISE EXCEPTION 'injected audit fault'; END IF;
+      IF NEW.resource_id = '00000000-0000-4000-8000-000000000099'
+        OR EXISTS (SELECT 1 FROM document_test_audit_faults WHERE document_id=NEW.resource_id AND action=NEW.action)
+      THEN RAISE EXCEPTION 'injected audit fault'; END IF;
       RETURN NEW;
     END $$ LANGUAGE plpgsql;
     CREATE TRIGGER inject_fault BEFORE INSERT ON audit_security.audit_logs FOR EACH ROW EXECUTE FUNCTION audit_security.refuse_marked();
+    CREATE TABLE grievances (id uuid PRIMARY KEY, organization_id uuid NOT NULL);
     CREATE TABLE documents (
       id uuid PRIMARY KEY, organization_id uuid NOT NULL, title text, name text NOT NULL, filename text, file_url text,
       mime_type text, privacy_label text NOT NULL, uploaded_by text, metadata jsonb DEFAULT '{}'::jsonb,
+      size_bytes bigint, file_size integer, sha256 text, checksum text,
       updated_at timestamp NOT NULL DEFAULT now(), deleted_at timestamp
     );
     CREATE TABLE document_links (
@@ -170,25 +218,38 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await q('TRUNCATE grievances');
   state.blobs.clear();
   state.sasFailFor.clear();
   state.sas.mockClear();
-  await pg.exec('TRUNCATE document_versions, document_links, document_access_grants, documents, audit_security.audit_logs CASCADE');
+  state.readHook = null;
+  state.read.mockReset().mockImplementation(async (path: string, maxBytes: number) => {
+    if (state.transactionDepth !== 0) throw new Error('Storage I/O must not hold a database transaction');
+    const stored = state.blobs.get(path);
+    if (!stored) throw new Error('BlobNotFound');
+    const bytes = Buffer.from(stored);
+    await state.readHook?.(path);
+    if (bytes.length > maxBytes) throw new BlobTooLargeError(bytes.length, maxBytes);
+    return bytes;
+  });
+  process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_SEAL_KEY;
+  await pg.exec('TRUNCATE document_versions, document_links, document_access_grants, documents, document_test_audit_faults, audit_security.audit_logs CASCADE');
 });
 
 afterAll(async () => {
   await pg?.close();
+  for (const [name, value] of Object.entries(ORIGINAL_ENV)) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
 });
 
 describe('B2: a stored URL is a pointer to be verified, never a link to be returned', () => {
-  it('re-signs a legacy URL that points into the organization\'s own storage', async () => {
+  it('issues an actor-bound application link for a legacy pointer into the organization\'s own storage', async () => {
     await addDocument(id(1), ORG_A, { fileUrl: `${OWN}/documents/${ORG_A}/legacy.pdf?sig=expired` });
-    const response = await getOne(id(1));
-    expect(response.status).toBe(200);
-    const url = (await response.json()).data.downloadUrl as string;
-    expect(url).toBe(`${OWN}/union-eyes/documents/${ORG_A}/legacy.pdf?sig=test`.replace('/union-eyes/union-eyes', '/union-eyes'));
+    const url = await issuedUrl(id(1));
     expect(url).not.toContain('expired');
-    expect(state.sas).toHaveBeenCalledWith('union-eyes', `documents/${ORG_A}/legacy.pdf`);
+    expect(state.sas).not.toHaveBeenCalled();
     expect(await auditRows()).toHaveLength(1);
   });
 
@@ -240,9 +301,8 @@ describe('B3: a bulk download is N independent downloads with an honest report',
     await addDocument(id(10), ORG_A, { storageKey: `documents/${ORG_A}/ten.pdf` });
     await addDocument(id(11), ORG_A, { label: 'privileged', storageKey: `documents/${ORG_A}/eleven.pdf` });
     await addDocument(id(12), ORG_B, { storageKey: `documents/${ORG_B}/twelve.pdf` });
-    await addDocument(id(13), ORG_A, { storageKey: `documents/${ORG_A}/thirteen.pdf` });
+    await addDocument(id(13), ORG_A, { storageKey: `documents/${ORG_B}/unverified-thirteen.pdf` });
     await addDocument(id(14), ORG_A, { storageKey: `documents/${ORG_A}/fourteen.pdf` });
-    state.sasFailFor.add(`documents/${ORG_A}/thirteen.pdf`);
 
     const response = await bulk([id(10), id(11), id(12), id(13), id(14), id(15)]);
     expect(response.status).toBe(200);
@@ -258,7 +318,7 @@ describe('B3: a bulk download is N independent downloads with an honest report',
       [id(10)]: 'issued',
       [id(11)]: 'denied',
       [id(12)]: 'not_found',
-      [id(13)]: 'storage_unavailable',
+      [id(13)]: 'storage_unverified',
       [id(14)]: 'issued',
       [id(15)]: 'not_found',
     });
@@ -301,6 +361,238 @@ describe('B3: a bulk download is N independent downloads with an honest report',
     expect((await bulk(['not-a-uuid'])).status).toBe(400);
     expect((await bulk(Array.from({ length: 26 }, (_, i) => id(100 + i)))).status).toBe(400);
     expect((await bulk('nope')).status).toBe(400);
+  });
+
+  it('does not call issued links delivered: a later storage failure leaves only the successful byte response served', async () => {
+    const path = `documents/${ORG_A}/bulk-readable.pdf`;
+    state.blobs.set(path, Buffer.from('readable bulk bytes'));
+    await addDocument(id(41), ORG_A, { storageKey: path, contentHash: sha('readable bulk bytes') });
+    await addDocument(id(42), ORG_A, { storageKey: `documents/${ORG_A}/bulk-unavailable.pdf` });
+    const { data } = await (await bulk([id(41), id(42)])).json();
+    expect(data).toMatchObject({ atomic: false, requested: 2, issued: 2, failed: 0 });
+    expect(state.read).not.toHaveBeenCalled();
+    expect((await auditRows()).map(row => row.action)).toEqual(['document.download', 'document.download']);
+    expect((await readContent(id(41), data.items[0].downloadUrl)).status).toBe(200);
+    const unavailable = await readContent(id(42), data.items[1].downloadUrl);
+    expect(unavailable.status).toBe(503);
+    expect(unavailable.headers.get('content-disposition')).toBeNull();
+    expect((await auditRows()).filter(row => row.action === 'document.download_served').map(row => row.resource_id)).toEqual([id(41)]);
+  });
+
+  it('fails closed for every item when the application-link signing key is unavailable', async () => {
+    await addDocument(id(43), ORG_A, { storageKey: `documents/${ORG_A}/forty-three.pdf` });
+    await addDocument(id(44), ORG_A, { storageKey: `documents/${ORG_A}/forty-four.pdf` });
+    delete process.env.EVIDENCE_SEAL_KEY;
+    const { data } = await (await bulk([id(43), id(44)])).json();
+    expect(data).toMatchObject({ atomic: false, status: 'none', requested: 2, issued: 0, failed: 2 });
+    expect(data.items.map((item: { outcome: string }) => item.outcome)).toEqual(['storage_unavailable', 'storage_unavailable']);
+    expect(data.items.every((item: { downloadUrl?: string }) => !item.downloadUrl)).toBe(true);
+    expect(await auditRows()).toHaveLength(0);
+    expect(state.read).not.toHaveBeenCalled();
+  });
+});
+
+describe('private application byte delivery: exact artifact, current authority and committed access audit', () => {
+  const versioned = async (docId: string, text: string, extra: { uploadedBy?: string; label?: string; sizeBytes?: number } = {}) => {
+    const path = `documents/${ORG_A}/${docId}.pdf`;
+    const bytes = Buffer.from(text);
+    state.blobs.set(path, bytes);
+    await addDocument(docId, ORG_A, { storageKey: path, contentHash: sha(text), sizeBytes: bytes.length, ...extra });
+    return { path, bytes };
+  };
+  const grant = async (docId: string) => q(`INSERT INTO document_access_grants
+    (organization_id,document_id,user_id,status,can_view,can_download) VALUES($1,$2,$3,'active',true,true)`, [ORG_A, docId, USER]);
+  const served = async () => (await auditRows()).filter(row => row.action === 'document.download_served');
+
+  it('serves the exact version bytes and records their real digest, size, actor and integrity basis', async () => {
+    const { path, bytes } = await versioned(id(160), 'exact private artifact');
+    const url = await issuedUrl(id(160));
+    expect(state.sas).not.toHaveBeenCalled();
+    expect(state.read).not.toHaveBeenCalled();
+    const response = await readContent(id(160), url);
+    expect(response.status).toBe(200);
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+    expect(response.headers.get('content-length')).toBe(String(bytes.length));
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(response.headers.get('content-disposition')).toContain('attachment;');
+    expect(state.read).toHaveBeenCalledWith(path, 50 * 1024 * 1024);
+    const rows = await served();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ resource_id: id(160), user_id: USER, metadata: {
+      checksumSha256: sha('exact private artifact'), sizeBytes: bytes.length,
+      versionNo: 1, integrityBasis: 'stored_version_hash', delivery: 'application_response_authorized',
+    } });
+  });
+
+  it('delivers bytes with a valid Unicode filename at the former UTF-16 truncation boundary', async () => {
+    const { bytes } = await versioned(id(185), 'Unicode filename content');
+    await q('UPDATE documents SET filename=$1 WHERE id=$2', ['a'.repeat(199) + '😀.pdf', id(185)]);
+    const response = await readContent(id(185), await issuedUrl(id(185)));
+    expect(response.status).toBe(200);
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+    const disposition = response.headers.get('content-disposition');
+    expect(decodeURIComponent(disposition!.split("UTF-8''")[1])).toBe('a'.repeat(199) + '😀');
+    expect(await served()).toHaveLength(1);
+  });
+
+  it.each(['policy_library', 'template_library', 'collective_agreement', 'member', 'other'])('delivers the uploader’s authorized non-case %s document', async linkType => {
+    const { bytes } = await versioned(id(186), 'ordinary organization document');
+    await q('INSERT INTO document_links (organization_id,document_id,linked_entity_type,linked_entity_id) VALUES($1,$2,$3,$4)', [ORG_A, id(186), linkType, id(190)]);
+    const response = await readContent(id(186), await issuedUrl(id(186)));
+    expect(response.status).toBe(200);
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+    expect(await served()).toHaveLength(1);
+  });
+
+  it('does not open a legacy mislabelled case document through non-case scope', async () => {
+    await versioned(id(187), 'case-restricted despite a wrong old link spelling', { label: 'public_internal' });
+    await q('INSERT INTO grievances(id,organization_id) VALUES($1,$2)', [id(191), ORG_A]);
+    await q('INSERT INTO document_links (organization_id,document_id,linked_entity_type,linked_entity_id) VALUES($1,$2,$3,$4)', [ORG_A, id(187), 'policy_library', id(191)]);
+    expect((await getOne(id(187))).status).toBe(403);
+    expect(state.read).not.toHaveBeenCalled();
+    expect(await auditRows()).toHaveLength(0);
+  });
+
+  it('keeps another uploader’s confidential non-case document private', async () => {
+    await versioned(id(188), 'confidential non-case bytes', { uploadedBy: 'someone-else' });
+    await q('INSERT INTO document_links (organization_id,document_id,linked_entity_type,linked_entity_id) VALUES($1,$2,$3,$4)', [ORG_A, id(188), 'policy_library', id(192)]);
+    expect((await getOne(id(188))).status).toBe(403);
+    expect(state.read).not.toHaveBeenCalled();
+    expect(await auditRows()).toHaveLength(0);
+  });
+
+  it('keeps an original link pinned to its old reviewed version after a new version is appended', async () => {
+    const original = await versioned(id(161), 'version one');
+    const oldUrl = await issuedUrl(id(161));
+    const nextPath = `documents/${ORG_A}/version-two.pdf`;
+    state.blobs.set(nextPath, Buffer.from('version two'));
+    const appended = await append(id(161), { blobPath: nextPath, contentHash: sha('version two'), expectedVersionNo: 1 });
+    expect(appended.status).toBe(200);
+    const newUrl = await issuedUrl(id(161));
+    const old = await readContent(id(161), oldUrl);
+    const current = await readContent(id(161), newUrl);
+    expect(old.status).toBe(200);
+    expect(current.status).toBe(200);
+    expect(Buffer.from(await old.arrayBuffer())).toEqual(original.bytes);
+    expect(Buffer.from(await current.arrayBuffer())).toEqual(Buffer.from('version two'));
+    expect((await served()).map(row => row.metadata)).toEqual([
+      expect.objectContaining({ versionNo: 1, checksumSha256: sha('version one') }),
+      expect.objectContaining({ versionNo: 2, checksumSha256: sha('version two') }),
+    ]);
+  });
+
+  it('rejects another actor, tenant or document before private storage is read', async () => {
+    await versioned(id(162), 'publicly shared within this organization', { label: 'public_internal' });
+    const url = await issuedUrl(id(162));
+    for (const [documentId, actor, organization] of [[id(162), 'another-member', ORG_A], [id(162), USER, ORG_B], [id(163), USER, ORG_A]]) {
+      const response = await readContent(documentId, url, actor, organization);
+      expect(response.status).toBe(403);
+      expect(response.headers.get('content-disposition')).toBeNull();
+    }
+    expect(state.read).not.toHaveBeenCalled();
+    expect(await served()).toHaveLength(0);
+  });
+
+  it('rechecks a revoked real SQL grant instead of treating the old link as authority', async () => {
+    await versioned(id(164), 'grant-scoped private bytes', { uploadedBy: 'other-uploader' });
+    await grant(id(164));
+    const url = await issuedUrl(id(164));
+    await q("UPDATE document_access_grants SET status='revoked',revoked_at=now() WHERE document_id=$1", [id(164)]);
+    expect((await readContent(id(164), url)).status).toBe(403);
+    expect(state.read).not.toHaveBeenCalled();
+    expect(await served()).toHaveLength(0);
+  });
+
+  it('withholds already fetched bytes when the grant is revoked while storage is being read', async () => {
+    await versioned(id(165), 'bytes fetched before a revocation', { uploadedBy: 'other-uploader' });
+    await grant(id(165));
+    const url = await issuedUrl(id(165));
+    state.readHook = async () => { await q("UPDATE document_access_grants SET status='revoked',revoked_at=now() WHERE document_id=$1", [id(165)]); };
+    const response = await readContent(id(165), url);
+    expect(response.status).toBe(403);
+    expect(response.headers.get('content-disposition')).toBeNull();
+    expect(state.read).toHaveBeenCalledOnce();
+    expect(await served()).toHaveLength(0);
+  });
+
+  it('withholds bytes if the pinned storage artifact changes during the storage read', async () => {
+    await versioned(id(166), 'approved original bytes');
+    const url = await issuedUrl(id(166));
+    state.readHook = async () => {
+      await q('UPDATE document_versions SET storage_key=$2,content_hash=$3 WHERE document_id=$1', [id(166), `documents/${ORG_A}/replacement.pdf`, sha('replacement')]);
+    };
+    expect((await readContent(id(166), url)).status).toBe(403);
+    expect(state.read).toHaveBeenCalledOnce();
+    expect(await served()).toHaveLength(0);
+  });
+
+  it.each(['bytes differ from the stored hash', 'bytes differ from the stored size'])('releases nothing when %s', async reason => {
+    const { path } = await versioned(id(167), 'approved content');
+    if (reason.includes('hash')) state.blobs.set(path, Buffer.from('substituted content'));
+    else await q('UPDATE document_versions SET metadata=$2::jsonb WHERE document_id=$1', [id(167), JSON.stringify({ sizeBytes: 1 })]);
+    const url = await issuedUrl(id(167));
+    const response = await readContent(id(167), url);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('content-disposition')).toBeNull();
+    expect(await served()).toHaveLength(0);
+  });
+
+  it('checks an oversized stored size before storage and also refuses a bounded-reader overflow', async () => {
+    const { path } = await versioned(id(168), 'small original');
+    await q('UPDATE document_versions SET metadata=$2::jsonb WHERE document_id=$1', [id(168), JSON.stringify({ sizeBytes: 50 * 1024 * 1024 + 1 })]);
+    const oversized = await issuedUrl(id(168));
+    expect((await readContent(id(168), oversized)).status).toBe(413);
+    expect(state.read).not.toHaveBeenCalled();
+    await q('UPDATE document_versions SET metadata=$2::jsonb WHERE document_id=$1', [id(168), JSON.stringify({ sizeBytes: state.blobs.get(path)!.length })]);
+    const current = await issuedUrl(id(168));
+    state.read.mockRejectedValueOnce(new BlobTooLargeError(50 * 1024 * 1024 + 1, 50 * 1024 * 1024));
+    expect((await readContent(id(168), current)).status).toBe(413);
+    expect(await served()).toHaveLength(0);
+  });
+
+  it('keeps the original capsule expiry before and after a slow storage read', async () => {
+    await versioned(id(169), 'expiring private bytes');
+    const url = await issuedUrl(id(169));
+    const token = new URL(url, 'https://t.test').searchParams.get('lease')!;
+    const lease = verifyDocumentDownloadLease(token, { organizationId: ORG_A, userId: USER, documentId: id(169) });
+    const originalNow = Date.now();
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(lease.expiresAt);
+    try {
+      expect((await readContent(id(169), url)).status).toBe(403);
+      expect(state.read).not.toHaveBeenCalled();
+      clock.mockReturnValue(originalNow);
+      state.readHook = () => { clock.mockReturnValue(lease.expiresAt); };
+      expect((await readContent(id(169), url)).status).toBe(403);
+      expect(state.read).toHaveBeenCalledOnce();
+      expect(await served()).toHaveLength(0);
+    } finally { clock.mockRestore(); }
+  });
+
+  it('releases no bytes when the actual served-access audit insert fails, preserving the original issuance record', async () => {
+    await versioned(id(170), 'never release unaudited bytes');
+    const url = await issuedUrl(id(170));
+    await q('INSERT INTO document_test_audit_faults(document_id,action) VALUES($1,$2)', [id(170), 'document.download_served']);
+    const response = await readContent(id(170), url);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('content-disposition')).toBeNull();
+    expect(state.read).toHaveBeenCalledOnce();
+    expect(await served()).toHaveLength(0);
+    expect((await auditRows()).map(row => row.action)).toEqual(['document.download']);
+  });
+
+  it.each([
+    { label: 'legacy reference only', storedHash: false, integrityBasis: 'verified_legacy_storage_reference' },
+    { label: 'legacy document with a stored hash', storedHash: true, integrityBasis: 'stored_document_hash' },
+  ])('preserves truthful compatibility for $label without claiming a version hash', async ({ storedHash, integrityBasis }) => {
+    const path = `documents/${ORG_A}/legacy-content.pdf`, bytes = Buffer.from('legacy private bytes');
+    state.blobs.set(path, bytes);
+    await addDocument(id(171), ORG_A, { fileUrl: `${OWN}/${path}?sig=expired`, ...(storedHash ? { documentHash: sha('legacy private bytes') } : {}) });
+    const url = await issuedUrl(id(171));
+    const response = await readContent(id(171), url);
+    expect(response.status).toBe(200);
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(bytes);
+    expect((await served())[0].metadata).toMatchObject({ versionId: null, versionNo: null, integrityBasis, checksumSha256: sha('legacy private bytes') });
   });
 });
 

@@ -1,3 +1,4 @@
+import { isCaseDocumentLinkType } from '@/lib/documents/case-link';
 import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -219,7 +220,7 @@ export async function getRelatedDocuments(params: {
     .limit(300);
 
   const directCaseRows = baseRows.filter(
-    (row) => row.linkedEntityType === 'grievance' && row.linkedEntityId === params.caseId,
+    (row) => isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId === params.caseId,
   );
 
   const similarCaseRows = caseRow.grievantId || caseRow.employerId || caseRow.cbaId
@@ -255,7 +256,7 @@ export async function getRelatedDocuments(params: {
   for (const row of baseRows) {
     const candidate = getOrCreateCandidate(candidateMap, row);
 
-    if (row.linkedEntityType === 'grievance' && row.linkedEntityId === params.caseId) {
+    if (isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId === params.caseId) {
       candidate.sourceSignals.add('same_case');
       candidate.linkedEntities.add(`case:${params.caseId}`);
     }
@@ -294,7 +295,7 @@ export async function getRelatedDocuments(params: {
       candidate.linkedEntities.add(`lro:${row.uploadedBy}`);
     }
 
-    if (row.linkedEntityType === 'grievance' && row.linkedEntityId && similarCaseIds.has(row.linkedEntityId)) {
+    if (isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId && similarCaseIds.has(row.linkedEntityId)) {
       candidate.sourceSignals.add('similar_case');
       candidate.linkedEntities.add(`case:${row.linkedEntityId}`);
     }

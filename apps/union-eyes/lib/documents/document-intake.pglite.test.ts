@@ -21,6 +21,11 @@ const state = vi.hoisted(() => ({
   putFails: false,
   removeFails: false,
   readBounds: [] as number[],
+  afterStorageRead: null as null | ((key: string) => void | Promise<void>),
+  kernelReads: [] as Array<{caseId: string; canViewCase: boolean; canModifyDocuments: boolean; canUploadDocuments: boolean}>,
+  afterKernelRead: null as null | (() => void),
+  caseOverrides: new Map<string, Partial<{isPrimaryOwner: boolean; canViewCase: boolean; canViewPrivateDocuments: boolean; canModifyDocuments: boolean; canUploadDocuments: boolean}>>(),
+  caseAuthority: { isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canModifyDocuments: false, canUploadDocuments: false },
   storage: null as unknown as {
     put: (key: string, bytes: Buffer, type: string) => Promise<void>;
     read: (key: string, maxBytes: number) => Promise<Buffer>;
@@ -39,6 +44,7 @@ state.storage = {
     const blob = state.blobs.get(key);
     if (!blob) throw new Error('BlobNotFound');
     if (blob.length > maxBytes) throw Object.assign(new Error('too large'), { name: 'BlobTooLargeError' });
+    await state.afterStorageRead?.(key);
     return blob;
   },
   remove: async (key) => {
@@ -68,7 +74,12 @@ vi.mock('@/lib/db/with-rls-context', () => {
   };
 });
 vi.mock('@/lib/services/case-access-service', () => ({
-  getEffectiveCaseAccess: async () => ({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canModifyDocuments: false, canUploadDocuments: false }),
+  getEffectiveCaseAccess: async ({ grievanceId }: {grievanceId: string}) => {
+    const decision = {...state.caseAuthority, ...state.caseOverrides.get(grievanceId)};
+    state.kernelReads.push({caseId: grievanceId, canViewCase: decision.canViewCase, canModifyDocuments: decision.canModifyDocuments, canUploadDocuments: decision.canUploadDocuments});
+    state.afterKernelRead?.();
+    return decision;
+  },
 }));
 vi.mock('@/lib/documents/intake-storage', () => ({ blobIntakeStorage: state.storage }));
 vi.mock('@/lib/blob-client', () => ({
@@ -82,7 +93,8 @@ vi.mock('@/lib/blob-client', () => ({
 }));
 
 const lifecycle = await import('@/lib/documents/intake-lifecycle');
-const { POST: createDocument } = await import('@/app/api/documents/repository/route');
+const { POST: createDocument, GET: listDocuments } = await import('@/app/api/documents/repository/route');
+const { GET: readDocument, PATCH: changeLabel } = await import('@/app/api/documents/repository/[id]/route');
 const { POST: appendVersion } = await import('@/app/api/documents/repository/[id]/versions/route');
 const { createDocumentDatabase, resetDocumentDatabase } = await import('@/lib/documents/test-support/pglite-document-database');
 const stub = await import('@/app/api/__tests__/support/with-api-stub');
@@ -168,6 +180,11 @@ beforeEach(async () => {
   state.removed.length = 0;
   state.putFails = false;
   state.removeFails = false;
+  state.afterStorageRead = null;
+  state.kernelReads.length = 0;
+  state.afterKernelRead = null;
+  state.caseOverrides.clear();
+  state.caseAuthority = { isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canModifyDocuments: false, canUploadDocuments: false };
 });
 
 describe('intake open', () => {
@@ -635,4 +652,174 @@ describe('version append from an intake', () => {
     expect(again).toMatchObject({ id: first.id, replay: true });
     expect((await q(`SELECT 1 FROM document_versions`)).rows).toHaveLength(1);
   });
+});
+
+
+describe('case-link aliases retain case authority throughout repository acceptance and reads', () => {
+  it('lists and opens both stored aliases under the same case filter, without another case leaking in', async () => {
+    state.caseAuthority = { ...state.caseAuthority, canUploadDocuments: true, canModifyDocuments: true };
+    const created: string[] = [];
+    for (const linkedEntityType of ['case', 'grievance']) {
+      const intake = await openOk(`evidence-${linkedEntityType}`);
+      const response = await post(createBody(intake.view.intakeId, { linkedEntityType, linkedEntityId: id(70) }));
+      expect(response.status, linkedEntityType).toBe(200);
+      const docId = (await response.json()).data.id;
+      created.push(docId);
+      const detail = await readDocument(new Request(`https://t.test/api/documents/repository/${docId}`), { params: { id: docId } });
+      expect(detail.status, linkedEntityType).toBe(200);
+      expect((await detail.json()).data).toMatchObject({ linkedEntityType, linkedEntityId: id(70), versions: [expect.objectContaining({ versionNo: 1 })] });
+    }
+    await addDocument(id(71));
+    await q(`INSERT INTO document_links(organization_id,document_id,linked_entity_type,linked_entity_id,linked_by) VALUES($1,$2,'case',$3,$4)`, [ORG_A, id(71), id(72), USER]);
+    asMember(USER);
+    const result = await listDocuments(new Request(`https://t.test/api/documents/repository?linkedCase=${id(70)}`));
+    expect(result.status).toBe(200);
+    expect((await result.json()).data.map((row: {id: string}) => row.id).sort()).toEqual(created.sort());
+
+    state.caseAuthority = { ...state.caseAuthority, canViewCase: false, canModifyDocuments: false, canUploadDocuments: false };
+    for (const docId of created) {
+      expect((await readDocument(new Request(`https://t.test/api/documents/repository/${docId}`), { params: { id: docId } })).status).toBe(403);
+    }
+    expect((await (await listDocuments(new Request(`https://t.test/api/documents/repository?linkedCase=${id(70)}`))).json()).data).toEqual([]);
+  });
+
+  it.each(['case', 'grievance'])('cannot replay a committed version intake or change a label after %s authority is lost', async (linkedEntityType) => {
+    state.caseAuthority = { ...state.caseAuthority, canUploadDocuments: true, canModifyDocuments: true };
+    const intake = await openOk(`first-${linkedEntityType}`);
+    const doc = (await (await post(createBody(intake.view.intakeId, { linkedEntityType, linkedEntityId: id(70) }))).json()).data;
+    const next = await openOk('second', { operation: 'append_version', targetDocumentId: doc.id });
+    expect((await append(doc.id, { intakeId: next.view.intakeId, expectedVersionNo: 1 })).status).toBe(200);
+    expect((await append(doc.id, { intakeId: next.view.intakeId, expectedVersionNo: 1 })).status).toBe(200);
+    const before = await auditActions();
+    state.caseAuthority = { ...state.caseAuthority, canViewCase: false, canModifyDocuments: false, canUploadDocuments: false };
+    expect((await append(doc.id, { intakeId: next.view.intakeId, expectedVersionNo: 1 })).status).toBe(404);
+    asMember(USER); stub.caller.role = 'steward';
+    expect((await changeLabel(new Request(`https://t.test/api/documents/repository/${doc.id}`, { method: 'PATCH', body: JSON.stringify({privacyLabel: 'public_internal'}) }), {params: {id: doc.id}})).status).toBe(403);
+    expect(await auditActions()).toEqual(before);
+    expect((await q('SELECT version_no FROM document_versions WHERE document_id=$1 ORDER BY version_no', [doc.id])).rows).toEqual([{version_no: 1}, {version_no: 2}]);
+    expect((await q('SELECT privacy_label FROM documents WHERE id=$1', [doc.id])).rows).toEqual([{privacy_label: 'team_confidential'}]);
+  });
+
+  it.each([{linkedEntityType: 'case'}, {linkedEntityType: 'grievance'}, {linkedEntityId: id(70)}, {linkedEntityType: 'unknown', linkedEntityId: id(70)}])('rejects a malformed upload link before consuming its intake: %j', async (link) => {
+    const intake = await openOk('unconsumed');
+    expect((await post(createBody(intake.view.intakeId, link))).status).toBe(400);
+    expect(await intakeRow(intake.view.intakeId)).toMatchObject({status: 'open'});
+    expect((await q('SELECT id FROM documents')).rows).toHaveLength(0);
+  });
+});
+
+
+describe('storage waits and acceptance replay cannot retain a lost case grant', () => {
+  const losses = ['canViewCase', 'actionPower'] as const;
+  const combinations = (['case', 'grievance'] as const).flatMap(linkedEntityType => losses.map(loss => ({linkedEntityType, loss})));
+  const allowCaseDocuments = () => { state.caseAuthority = {...state.caseAuthority, canViewCase: true, canUploadDocuments: true, canModifyDocuments: true}; };
+
+  it.each(combinations)('refuses create after $linkedEntityType $loss is revoked while the intake bytes are checked', async ({linkedEntityType, loss}) => {
+    allowCaseDocuments();
+    const intake = await openOk('new case evidence');
+    const beforeAudits = await auditActions();
+    state.afterStorageRead = () => { state.caseAuthority = {...state.caseAuthority, [loss === 'canViewCase' ? 'canViewCase' : 'canUploadDocuments']: false}; };
+    expect((await post(createBody(intake.view.intakeId, {linkedEntityType, linkedEntityId: id(70)}))).status).toBe(404);
+    expect(state.kernelReads[0]).toMatchObject({caseId: id(70), canViewCase: true, canUploadDocuments: true});
+    expect(state.kernelReads.at(-1)?.[loss === 'canViewCase' ? 'canViewCase' : 'canUploadDocuments']).toBe(false);
+    expect((await q('SELECT id FROM documents')).rows).toEqual([]);
+    expect((await q('SELECT id FROM document_versions')).rows).toEqual([]);
+    expect((await q('SELECT id FROM document_links')).rows).toEqual([]);
+    expect(await intakeRow(intake.view.intakeId)).toMatchObject({status: 'open', accepted_document_id: null, accepted_version_id: null});
+    expect(await auditActions()).toEqual(beforeAudits);
+    expect(state.blobs.has(intake.key)).toBe(true);
+  });
+
+  it.each(combinations)('refuses version acceptance after $linkedEntityType $loss is revoked while storage is checked', async ({linkedEntityType, loss}) => {
+    allowCaseDocuments();
+    const first = await openOk('original');
+    const doc = (await (await post(createBody(first.view.intakeId, {linkedEntityType, linkedEntityId: id(70)}))).json()).data;
+    const next = await openOk('replacement', {operation: 'append_version', targetDocumentId: doc.id});
+    const beforeDoc = (await q('SELECT * FROM documents WHERE id=$1', [doc.id])).rows;
+    const beforeVersions = (await q('SELECT * FROM document_versions WHERE document_id=$1 ORDER BY version_no', [doc.id])).rows;
+    const beforeAudits = await auditActions();
+    state.kernelReads.length = 0;
+    state.afterStorageRead = () => { state.caseAuthority = {...state.caseAuthority, [loss === 'canViewCase' ? 'canViewCase' : 'canModifyDocuments']: false}; };
+    expect((await append(doc.id, {intakeId: next.view.intakeId, expectedVersionNo: 1})).status).toBe(404);
+    expect(state.kernelReads[0]).toMatchObject({caseId: id(70), canViewCase: true, canModifyDocuments: true});
+    expect(state.kernelReads.at(-1)?.[loss === 'canViewCase' ? 'canViewCase' : 'canModifyDocuments']).toBe(false);
+    expect((await q('SELECT * FROM documents WHERE id=$1', [doc.id])).rows).toEqual(beforeDoc);
+    expect((await q('SELECT * FROM document_versions WHERE document_id=$1 ORDER BY version_no', [doc.id])).rows).toEqual(beforeVersions);
+    expect(await intakeRow(next.view.intakeId)).toMatchObject({status: 'open', accepted_document_id: null, accepted_version_id: null});
+    expect(await auditActions()).toEqual(beforeAudits);
+  });
+
+  it.each(['case', 'grievance'])('does not let a create-intake replay omit its committed %s case link after revocation', async (linkedEntityType) => {
+    allowCaseDocuments();
+    const intake = await openOk('committed original');
+    const original = (await (await post(createBody(intake.view.intakeId, {linkedEntityType, linkedEntityId: id(70)}))).json()).data;
+    // An unchanged grant still permits an idempotent answer, even when the caller drops the link payload.
+    const validReplay = await post(createBody(intake.view.intakeId));
+    expect(validReplay.status).toBe(200);
+    expect((await validReplay.json()).data).toMatchObject({id: original.id, replay: true});
+    const before = {audit: await auditActions(), intake: await intakeRow(intake.view.intakeId), documents: (await q('SELECT * FROM documents')).rows, versions: (await q('SELECT * FROM document_versions')).rows, links: (await q('SELECT * FROM document_links')).rows};
+    state.caseAuthority = {...state.caseAuthority, canViewCase: false, canUploadDocuments: false, canModifyDocuments: false};
+    const replay = await post(createBody(intake.view.intakeId));
+    expect(replay.status).toBe(404);
+    expect(JSON.stringify(await replay.json())).not.toContain(original.id);
+    expect(await auditActions()).toEqual(before.audit);
+    expect(await intakeRow(intake.view.intakeId)).toEqual(before.intake);
+    expect((await q('SELECT * FROM documents')).rows).toEqual(before.documents);
+    expect((await q('SELECT * FROM document_versions')).rows).toEqual(before.versions);
+    expect((await q('SELECT * FROM document_links')).rows).toEqual(before.links);
+  });
+
+  it.each(['case', 'grievance'])('denies an accepted %s version replay when visibility ends but the stale modification bit remains true', async (linkedEntityType) => {
+    allowCaseDocuments();
+    const first = await openOk('original');
+    const doc = (await (await post(createBody(first.view.intakeId, {linkedEntityType, linkedEntityId: id(70)}))).json()).data;
+    const next = await openOk('replacement', {operation: 'append_version', targetDocumentId: doc.id});
+    expect((await append(doc.id, {intakeId: next.view.intakeId, expectedVersionNo: 1})).status).toBe(200);
+    const before = {audit: await auditActions(), intake: await intakeRow(next.view.intakeId), versions: (await q('SELECT * FROM document_versions ORDER BY version_no')).rows};
+    state.caseAuthority = {...state.caseAuthority, canViewCase: false, canModifyDocuments: true};
+    const response = await append(doc.id, {intakeId: next.view.intakeId, expectedVersionNo: 1});
+    expect(response.status).toBe(404);
+    expect(await auditActions()).toEqual(before.audit);
+    expect(await intakeRow(next.view.intakeId)).toEqual(before.intake);
+    expect((await q('SELECT * FROM document_versions ORDER BY version_no')).rows).toEqual(before.versions);
+  });
+  it.each(['case', 'grievance'])('cannot replace the committed %s case payload with another authorized case on create replay', async (linkedEntityType) => {
+    allowCaseDocuments();
+    const intake = await openOk('original case only');
+    const original = (await (await post(createBody(intake.view.intakeId, {linkedEntityType, linkedEntityId: id(70)}))).json()).data;
+    const beforeAudits = await auditActions();
+    const beforeIntake = await intakeRow(intake.view.intakeId);
+    state.caseOverrides.set(id(70), {canViewCase: false, canUploadDocuments: false, canModifyDocuments: false});
+    state.kernelReads.length = 0;
+    const response = await post(createBody(intake.view.intakeId, {linkedEntityType, linkedEntityId: id(71)}));
+    expect(response.status).toBe(404);
+    expect(state.kernelReads.map(read => read.caseId)).toEqual([id(71), id(70)]);
+    expect(state.kernelReads[0]).toMatchObject({canViewCase: true, canUploadDocuments: true});
+    expect(state.kernelReads.at(-1)).toMatchObject({canViewCase: false, canUploadDocuments: false});
+    expect((await q('SELECT document_id, linked_entity_type, linked_entity_id FROM document_links')).rows).toEqual([{document_id: original.id, linked_entity_type: linkedEntityType, linked_entity_id: id(70)}]);
+    expect(await intakeRow(intake.view.intakeId)).toEqual(beforeIntake);
+    expect(await auditActions()).toEqual(beforeAudits);
+    expect((await q('SELECT id FROM documents')).rows).toEqual([{id: original.id}]);
+  });
+
+  it.each(['case', 'grievance'])('rechecks %s authority inside accepted-version replay after its preliminary grant expires', async (linkedEntityType) => {
+    allowCaseDocuments();
+    const first = await openOk('first version');
+    const doc = (await (await post(createBody(first.view.intakeId, {linkedEntityType, linkedEntityId: id(70)}))).json()).data;
+    const next = await openOk('second version', {operation: 'append_version', targetDocumentId: doc.id});
+    expect((await append(doc.id, {intakeId: next.view.intakeId, expectedVersionNo: 1})).status).toBe(200);
+    const before = {audit: await auditActions(), intake: await intakeRow(next.view.intakeId), versions: (await q('SELECT * FROM document_versions ORDER BY version_no')).rows};
+    state.kernelReads.length = 0;
+    state.afterKernelRead = () => {
+      if (state.kernelReads.length === 1) state.caseAuthority = {...state.caseAuthority, canViewCase: false, canModifyDocuments: false};
+    };
+    expect((await append(doc.id, {intakeId: next.view.intakeId, expectedVersionNo: 1})).status).toBe(404);
+    expect(state.kernelReads[0]).toMatchObject({canViewCase: true, canModifyDocuments: true});
+    expect(state.kernelReads.at(-1)).toMatchObject({canViewCase: false, canModifyDocuments: false});
+    expect(state.kernelReads.length).toBeGreaterThanOrEqual(2);
+    expect(await auditActions()).toEqual(before.audit);
+    expect(await intakeRow(next.view.intakeId)).toEqual(before.intake);
+    expect((await q('SELECT * FROM document_versions ORDER BY version_no')).rows).toEqual(before.versions);
+  });
+
 });

@@ -49,7 +49,7 @@ describe('case-related-documents-service', () => {
     filterAuthorizedDocumentsForActor.mockReset();
   });
 
-  it('returns deterministic order for tied scores and always includes reasons', async () => {
+  it.each(['case', 'grievance'])('returns deterministic order for tied scores and always includes reasons under %s links', async (linkType) => {
     queueSelectSteps([
       {
         rows: [
@@ -76,7 +76,7 @@ describe('case-related-documents-service', () => {
             documentType: 'memo',
             fileUrl: 'https://example.com/doc-b',
             updatedAt: new Date('2026-02-01T00:00:00.000Z'),
-            linkedEntityType: 'grievance',
+            linkedEntityType: linkType,
             linkedEntityId: 'case-1',
             tags: ['alpha'],
             uploadedBy: 'lro-1',
@@ -90,7 +90,7 @@ describe('case-related-documents-service', () => {
             documentType: 'memo',
             fileUrl: 'https://example.com/doc-a',
             updatedAt: new Date('2026-02-01T00:00:00.000Z'),
-            linkedEntityType: 'grievance',
+            linkedEntityType: linkType,
             linkedEntityId: 'case-1',
             tags: ['alpha'],
             uploadedBy: 'lro-1',
@@ -116,6 +116,7 @@ describe('case-related-documents-service', () => {
 
     expect(result.map((doc) => doc.documentId)).toEqual(['doc-a', 'doc-b']);
     expect(result.every((doc) => doc.reasons.length > 0)).toBe(true);
+    expect(result.every((doc) => doc.linkedEntities.includes('case:case-1'))).toBe(true);
   });
 
   it('ranks direct case links above same-member-only links', async () => {

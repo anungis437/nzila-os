@@ -8221,7 +8221,7 @@
   ],
   "currentSecurity": {
     "contractVersion": "1",
-    "sourcePlanDigest": "211ec1f8dfcfaef367231576611379245356e9b93255789bb7ef2cfa0834c9fb",
+    "sourcePlanDigest": "5d3e5c78604b312d3dfcd52a755e34b73b6c68c8c2ce94fe068df5cd7faaaf92",
     "currentFunctions": [
       {
         "schema": "public",
@@ -10394,7 +10394,7 @@
         "name": "ue_external_sources_match",
         "signature": "public.ue_external_sources_match(jsonb)",
         "owner": "ue_external_read_reader",
-        "bodyDigest": "239f29c517cee6146a30894b0ed3f27181b5648c9329039683d5427a952ece9f",
+        "bodyDigest": "5e6606a8d0bcdcf714d8b4fad90ecdb0e1608f66026203104399724536322862",
         "language": "plpgsql",
         "volatility": "v",
         "definer": true,

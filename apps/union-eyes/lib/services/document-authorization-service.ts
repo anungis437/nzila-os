@@ -4,6 +4,8 @@ import type { Document } from '@/db/schema/documents-schema';
 import { documentAccessGrants } from '@/db/schema/documents-schema';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from '@/lib/services/document-governance-service';
+import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
+import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
 
 export interface DocumentAuthorizationActor {
   userId: string;
@@ -81,9 +83,12 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
     documentIds: docIds,
   });
 
-  const grievanceIds = params.documents
-    .filter((doc) => doc.linkedEntityType === 'grievance' && doc.linkedEntityId)
-    .map((doc) => doc.linkedEntityId as string);
+  const resolvedCaseIds = await Promise.all(params.documents.map(document =>
+    isDocumentLinkWellFormed(document.linkedEntityType, document.linkedEntityId)
+      ? resolveDocumentCaseId(db, { organizationId: params.organizationId,
+        linkedEntityType: document.linkedEntityType, linkedEntityId: document.linkedEntityId })
+      : null));
+  const grievanceIds = resolvedCaseIds.filter((id): id is string => id !== null);
 
   const caseAccessMap = await getCaseAccessMap({
     organizationId: params.organizationId,
@@ -91,11 +96,12 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
     grievanceIds,
   });
 
-  return params.documents.map((document): AuthorizedDocumentResult<T> => {
-    const caseAccess =
-      document.linkedEntityType === 'grievance' && document.linkedEntityId
-        ? caseAccessMap.get(document.linkedEntityId)
-        : null;
+  return params.documents.map((document, index): AuthorizedDocumentResult<T> => {
+    if (!isDocumentLinkWellFormed(document.linkedEntityType, document.linkedEntityId)) {
+      return { document, allowed: false, reason: 'document_not_authorized' };
+    }
+    const linkedCaseId = resolvedCaseIds[index];
+    const caseAccess = linkedCaseId ? caseAccessMap.get(linkedCaseId) : null;
 
     const allowed = isDocumentVisibleByPolicy(
       toGovernanceLabel({ privacyLabel: document.privacyLabel } as Partial<Document>),
@@ -103,7 +109,7 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
         isOrgMember: true,
         isPrimaryOwner: caseAccess?.isPrimaryOwner ?? false,
         hasCaseAccess:
-          document.linkedEntityType !== 'grievance' ||
+          !linkedCaseId ||
           Boolean(caseAccess?.canViewCase),
         canViewPrivateDocuments: caseAccess?.canViewPrivateDocuments ?? false,
         hasExplicitDocumentGrant: explicitGrantIds.has(document.id),

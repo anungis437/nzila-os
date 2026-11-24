@@ -109,7 +109,7 @@ export const POST = withApi(
     }
 
     const issued = items.filter((item) => item.outcome === 'issued').length;
-    return standardSuccessResponse({
+    const response = standardSuccessResponse({
       atomic: false,
       status: issued === items.length ? 'complete' : issued === 0 ? 'none' : 'partial',
       requested: items.length,
@@ -117,5 +117,8 @@ export const POST = withApi(
       failed: items.length - issued,
       items,
     });
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('Pragma', 'no-cache');
+    return response;
   },
 );

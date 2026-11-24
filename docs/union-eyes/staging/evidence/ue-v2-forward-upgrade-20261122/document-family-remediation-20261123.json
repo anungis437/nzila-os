@@ -1,0 +1,113 @@
+{
+  "schema": "UE_DOCUMENT_FAMILY_SOURCE_REMEDIATION_V1",
+  "recordedAt": "2026-11-24T00:09:18.686668+00:00",
+  "observedMergedApplicationSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
+  "currentlyServingApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "originalStagingUpgradeRunId": 45238707739,
+  "sourceState": "WORKING_TREE_PRECOMMIT_QUALIFICATION_PENDING",
+  "defectFamily": [
+    "Supported case links were accepted by creation but not interpreted uniformly by document read, search, version replay, OCR, kernel facts and protected external SQL",
+    "Internal clients received raw private-storage URLs instead of an authenticated application byte response",
+    "A storage size hint did not bound actual streamed bytes after metadata changed"
+  ],
+  "corrections": [
+    "Treat both supported case spellings as the same governed kernel resource; malformed link pairs deny without organization-scope fallback",
+    "Reauthorize version replay and every byte read; pin actor, tenant, document, artifact fingerprint and original one-hour expiry",
+    "Read private storage outside database transactions; recheck live authority, lock the mutable parent and commit canonical audit before response bytes",
+    "Bound actual stream bytes independently of storage metadata; retain truthful legacy-reference integrity basis when historical hashes are absent",
+    "Retain append-only/read-only child-table privileges; lock only the mutable document parent and re-enter the canonical case authority in the final transaction",
+    "Distinguish recognized non-case documents while resolving legacy wrong-spelling case IDs to their real case authority; normalize newly filed case references",
+    "Reauthorize create/version acceptance after storage I/O and authorize intake replay against the committed document link",
+    "Normalize malformed UTF-16 and truncate filenames by Unicode code point before encoding attachment headers"
+  ],
+  "workingTreeFocusedValidation": {
+    "finalChangedAppFiles": {
+      "passed": 401,
+      "failed": 0,
+      "pending": 0,
+      "files": 20,
+      "environment": "DISPOSABLE_PGLITE_AND_UNIT_SEAMS_WORKING_TREE_ONLY"
+    },
+    "bootstrapHelperProvenanceRegression": {
+      "passed": 49,
+      "failed": 0
+    },
+    "secondIncrementProducerOfflineControls": {
+      "passed": 12,
+      "failed": 0,
+      "actualNativeExecution": false
+    },
+    "trackedQaInterfaceControls": {
+      "passed": 9,
+      "failed": 0
+    },
+    "priorWorkingTreeObservations": {
+      "aliasFamily": {
+        "passed": 307,
+        "files": 23
+      },
+      "documentAndStream": {
+        "passed": 62,
+        "files": 2
+      },
+      "signedDownloadLease": {
+        "passed": 27,
+        "files": 1
+      },
+      "applicationTypecheckPreflight": "PASS_UNCOMMITTED_WORKING_TREE_ONLY",
+      "secondIncrementProducerOfflineControls": 12,
+      "newMatureClaimClosureHttpTest": "PREPARED_NOT_YET_EXECUTED",
+      "commitBoundFullFive": "PENDING",
+      "freshNativeAndHttpCi": "PENDING",
+      "bootstrapHelperProvenanceRegression": {
+        "passed": 49,
+        "failed": 0,
+        "files": 1
+      },
+      "trackedQaInterfaceControls": {
+        "passed": 9,
+        "failed": 0
+      }
+    },
+    "currentSourceFullFive": "PENDING",
+    "restrictedNativeDocumentRoutes": "PREPARED_UNEXECUTED",
+    "matureClaimClosureHttp": "PREPARED_UNEXECUTED",
+    "stagingAcceptance": "UNEXECUTED"
+  },
+  "physicalChange": {
+    "canonicalStatementCount": 6326,
+    "canonicalStatementSqlUnchanged": true,
+    "compiledFunctionName": "public.ue_external_sources_match(jsonb)",
+    "compiledFunctionBodyDigestBefore": "239f29c517cee6146a30894b0ed3f27181b5648c9329039683d5427a952ece9f",
+    "compiledFunctionBodyDigestAfter": "5e6606a8d0bcdcf714d8b4fad90ecdb0e1608f66026203104399724536322862",
+    "preservingFunctionDeltaRequired": true,
+    "otherCatalogAuthorityChanged": false,
+    "newLiveDdlApplied": false,
+    "originalBootstrapAndUpgradeReceiptsPreserved": true,
+    "sourcePlanDigestAfter": "5d3e5c78604b312d3dfcd52a755e34b73b6c68c8c2ce94fe068df5cd7faaaf92",
+    "sourceCommitmentCount": 884
+  },
+  "existingSecretOnly": "EVIDENCE_SEAL_KEY; no additional key or permission authority introduced",
+  "workingTreeFileSha256": {
+    "apps/union-eyes/lib/documents/case-link.ts": "a6f33a87239ee8daa95a6d6cd7e4ed66fad7df16d7d72be320aa9f433d511b13",
+    "apps/union-eyes/lib/documents/download-lease.ts": "d515927c229b77cf13d5d4a86c452331fa952b19b196dabbb3040be18aed16e9",
+    "apps/union-eyes/lib/documents/download-issuance.ts": "dedef32bee01880c3ed41226c531789e155ae2f3ce87015b0a39943cf476f1eb",
+    "apps/union-eyes/lib/blob-client.ts": "0ca42b6b45e410d62a4341c04fc30578e360a52dc3f01c8bc0070ab9058538b6",
+    "apps/union-eyes/app/api/documents/[id]/content/route.ts": "8a52ff018629c3730cae19857d7f8cdbe232a856680370d573c45cc92fe8a0c6",
+    "apps/union-eyes/lib/external-resource-read/source.ts": "cfd5a7eeca7125c9adba2a9e2517b729b403f29eb32fa354b05db2a6e095c8a4",
+    "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts": "ddc25f3a6c83a28ccfeddaef04bf6c4412428028d6f9fbad7e2a46529064a25c",
+    "tooling/scripts/prove-ue-v2-second-increment.cts": "3d8ed271c430f79e0ee73916fcb43178f3d7b3723158650bddb21ed3356d9ebd",
+    "apps/union-eyes/lib/documents/transcripts.ts": "f554f1fe4c256f4aa2fc67bff7f7ff005f45493f06bb55c8e2591f45554af150",
+    "apps/union-eyes/app/api/documents/repository/route.ts": "94eb554e15647718449989ae8e6f0175aedbc022339307dea723d32938072d19",
+    "apps/union-eyes/app/api/external/documents/[id]/download/route.ts": "63f12e542beb18d8ec10e42fe4bd412bb0009fcda942fb49631b3457ecc6ae4d",
+    "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts": "85b8b8412d2f33075970fbe7b58aab7e26c44f196bd5222fbfafdd33241552d3",
+    "apps/union-eyes/lib/documents/ocr-authority.ts": "d17a1a98d9bd3586d9cf22565e2d2edd477246fa2b08a217bad416c2c2bd8a6a",
+    "apps/union-eyes/lib/services/document-member-scope.ts": "ddc7d65910ee95b6727792d00cd0943795350e2725f6efaa9367b2f7ae18d1ab",
+    "apps/union-eyes/lib/documents/attachment-name.ts": "4f91f19e1322781695c826467620c7d42bdaab487002db4146e6291efd24cad2",
+    "apps/union-eyes/lib/documents/document-link-authority.ts": "7c1e2a04d1f1a5558d4e7eefeb7ae559e5db95a9dd4ea3c7f161745b700333d9"
+  },
+  "stagingAcceptance": false,
+  "globalSaasReadinessChanged": false,
+  "productionDeployment": false,
+  "financeFeatureImplementation": false
+}

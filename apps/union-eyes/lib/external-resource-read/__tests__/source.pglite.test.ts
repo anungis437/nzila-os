@@ -26,8 +26,8 @@ describe('protected external consent/qualification/source reader actual SQL', ()
     }
   }, 60000)
 
-  it('runs the exact member-consent, primary-source bind, matter/document read and terminal revocation chain', async () => {
-    const f = active = await externalReaderFixture()
+  it.each(['case', 'grievance'] as const)('runs the exact consent/bind/read/revoke SQL chain with the %s document-link alias', async (documentLinkType) => {
+    const f = active = await externalReaderFixture({ documentLinkType })
     await expect(f.read()).rejects.toMatchObject({ code: '42501' })
     const consent = await f.consent()
     await f.qualify(consent)

@@ -44,14 +44,27 @@ async function loadRoute() {
 }
 
 describe('documents/repository/[id]/versions route', () => {
-  // Select order: the authorizing read, then inside the transaction the row lock, the latest version, the blob-in-use check.
+  // Resolve by projection rather than by query position: authority reads occur before storage,
+  // again in the write/replay transaction, and must each see the current document/link.
   const selectDocument = (row: Record<string, unknown>, opts: { latest?: number; inUse?: boolean; locked?: boolean } = {}) => {
-    m.db.select
-      .mockReset()
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ leftJoin: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => [row]) })) })) })) }))
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ for: vi.fn(async () => (opts.locked === false ? [] : [{ metadata: {} }])) })) })) }))
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ orderBy: vi.fn(() => ({ limit: vi.fn(async () => [{ versionNo: opts.latest ?? 1 }]) })) })) })) }))
-      .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(async () => (opts.inUse ? [{ id: 'other' }] : [])) })) })) }));
+    m.db.select.mockReset().mockImplementation((projection: Record<string, unknown>) => {
+      const rows = (locked = false) => {
+        if (locked) return opts.locked === false ? [] : [{ metadata: row.metadata ?? {} }];
+        if ('uploadedBy' in projection) return [row];
+        if ('versionNo' in projection) return [{ versionNo: opts.latest ?? 1 }];
+        if ('id' in projection) return opts.inUse ? [{ id: 'other' }] : [];
+        throw new Error('Unconfigured document projection: ' + Object.keys(projection).join(','));
+      };
+      const chain = {
+        from: vi.fn(() => chain),
+        leftJoin: vi.fn(() => chain),
+        where: vi.fn(() => chain),
+        orderBy: vi.fn(() => chain),
+        limit: vi.fn(async () => rows()),
+        for: vi.fn(async () => rows(true)),
+      };
+      return chain;
+    });
   };
   const post = async (body: Record<string, unknown> = { blobPath: 'blob-1' }, id: string = DOC) => {
     const { POST } = await loadRoute();
@@ -73,8 +86,8 @@ describe('documents/repository/[id]/versions route', () => {
     caller.role = 'member';
     m.withRLSContext.mockImplementation(async (_context: unknown, fn: (tx: unknown) => unknown) => fn(m.db));
     m.persistAtomicAudit.mockResolvedValue(undefined);
-    m.getEffectiveCaseAccess.mockResolvedValue({ canModifyDocuments: false });
-    m.resolveStoredBlob.mockResolvedValue({ blobPath: 'blob-1', contentHash: 'hash-1', fileUrl: 'https://example.com/file.pdf' });
+    m.getEffectiveCaseAccess.mockReset().mockResolvedValue({ canViewCase: false, canModifyDocuments: false });
+    m.resolveStoredBlob.mockReset().mockResolvedValue({ blobPath: 'blob-1', contentHash: 'hash-1', fileUrl: 'https://example.com/file.pdf' });
     m.getDocumentMutabilityBlockReason.mockReturnValue(null);
     selectDocument({ id: 'doc_1', metadata: {}, uploadedBy: 'u1', linkedEntityType: null, linkedEntityId: null });
     m.db.insert.mockReturnValue({ values: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'ver_2' }]) })) });
@@ -112,17 +125,17 @@ describe('documents/repository/[id]/versions route', () => {
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
-  it('lets someone the kernel allows to modify documents on the linked grievance append a version', async () => {
-    selectDocument({ id: 'doc_1', metadata: {}, uploadedBy: 'someone-else', linkedEntityType: 'grievance', linkedEntityId: 'g1' });
-    m.getEffectiveCaseAccess.mockResolvedValueOnce({ canModifyDocuments: true });
+  it.each(['case', 'grievance'])('lets the kernel permit version append under the %s alias', async (linkType) => {
+    selectDocument({ id: 'doc_1', metadata: {}, uploadedBy: 'someone-else', linkedEntityType: linkType, linkedEntityId: 'g1' });
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canModifyDocuments: true });
     const response = await post();
     expect(response.status).toBe(200);
     expect(m.getEffectiveCaseAccess).toHaveBeenCalledWith({ organizationId: 'org_1', grievanceId: 'g1', userId: 'u1' });
   });
 
-  it('answers 404 and writes nothing for a linked grievance document even to its uploader when the kernel denies modification', async () => {
-    selectDocument({ id: 'doc_1', metadata: {}, uploadedBy: 'u1', linkedEntityType: 'grievance', linkedEntityId: 'g1' });
-    m.getEffectiveCaseAccess.mockResolvedValueOnce({ canModifyDocuments: false });
+  it.each(['case', 'grievance'])('denies the uploader version append under the %s alias when the live kernel denies', async (linkType) => {
+    selectDocument({ id: 'doc_1', metadata: {}, uploadedBy: 'u1', linkedEntityType: linkType, linkedEntityId: 'g1' });
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canModifyDocuments: false });
     const response = await post();
     expect(response.status).toBe(404);
     expect(m.db.insert).not.toHaveBeenCalled();
@@ -185,4 +198,55 @@ describe('documents/repository/[id]/versions route', () => {
       expect(m.db.insert).not.toHaveBeenCalled();
     });
   });
+  it.each([['case', null], ['grievance', null], ['unknown', 'g1'], [null, 'g1']])('denies malformed %s/%s before touching storage, including the uploader', async (linkedEntityType, linkedEntityId) => {
+    selectDocument({id: DOC, metadata: {}, uploadedBy: 'u1', linkedEntityType, linkedEntityId});
+    expect((await post()).status).toBe(404);
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it.each(['case', 'grievance'])('reauthorizes %s document modification after storage, refusing revoked grants before any write', async (linkType) => {
+    selectDocument({ id: DOC, metadata: {}, uploadedBy: 'u1', linkedEntityType: linkType, linkedEntityId: 'g1' });
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canModifyDocuments: true });
+    m.resolveStoredBlob.mockImplementationOnce(async () => {
+      m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canModifyDocuments: false });
+      return { blobPath: 'new-blob', contentHash: 'verified-hash', fileUrl: 'https://example.com/new.pdf' };
+    });
+    expect((await post()).status).toBe(404);
+    expect(m.resolveStoredBlob).toHaveBeenCalledOnce();
+    expect(m.getEffectiveCaseAccess.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it.each(['case', 'grievance'])('requires live %s case visibility even if a stale modification power remains true', async (linkType) => {
+    selectDocument({ id: DOC, metadata: {}, uploadedBy: 'u1', linkedEntityType: linkType, linkedEntityId: 'g1' });
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canModifyDocuments: true });
+    m.resolveStoredBlob.mockImplementationOnce(async () => {
+      m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: false, canModifyDocuments: true });
+      return { blobPath: 'new-blob', contentHash: 'verified-hash', fileUrl: 'https://example.com/new.pdf' };
+    });
+    expect((await post()).status).toBe(404);
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it.each(['case', 'grievance'])('rereads the actual %s document link after storage instead of reusing the first case grant', async (linkType) => {
+    const row = { id: DOC, metadata: {}, uploadedBy: 'u1', linkedEntityType: linkType, linkedEntityId: 'first-case' };
+    selectDocument(row);
+    m.getEffectiveCaseAccess.mockImplementation(async ({ grievanceId }: {grievanceId: string}) => ({ canViewCase: grievanceId === 'first-case', canModifyDocuments: grievanceId === 'first-case' }));
+    m.resolveStoredBlob.mockImplementationOnce(async () => {
+      row.linkedEntityId = 'different-case';
+      return { blobPath: 'new-blob', contentHash: 'verified-hash', fileUrl: 'https://example.com/new.pdf' };
+    });
+    expect((await post()).status).toBe(404);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledWith({organizationId: 'org_1', grievanceId: 'different-case', userId: 'u1'});
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
 });

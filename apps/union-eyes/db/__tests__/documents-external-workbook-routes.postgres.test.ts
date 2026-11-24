@@ -23,6 +23,7 @@ import type pg from 'pg'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
+const ORIGINAL_DOCUMENT_SEAL_KEY = process.env.EVIDENCE_SEAL_KEY
 
 const state = vi.hoisted(() => ({
   // Who the route's caller is, for the role lookups the routes make themselves.
@@ -170,6 +171,7 @@ const repositoryList = URL ? await import('@/app/api/documents/repository/route'
 const repositoryOne = URL ? await import('@/app/api/documents/repository/[id]/route') : null
 const versions = URL ? await import('@/app/api/documents/repository/[id]/versions/route') : null
 const downloadOne = URL ? await import('@/app/api/documents/[id]/download/route') : null
+const contentDownload = URL ? await import('@/app/api/documents/[id]/content/route') : null
 const downloadMany = URL ? await import('@/app/api/documents/repository/downloads/route') : null
 const ocr = URL ? await import('@/app/api/documents/[id]/ocr/route') : null
 const externalMatter = URL ? await import('@/app/api/external/grievances/[id]/route') : null
@@ -259,6 +261,7 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
   const auditsFor = (action: string, organizationId?: string) => harness.audits.filter((entry) => entry.action === action && (!organizationId || entry.organizationId === organizationId))
 
   beforeAll(async () => {
+    process.env.EVIDENCE_SEAL_KEY = 'synthetic-native-document-download-key-only-20261123'
     admin = await harness.start(URL!)
     await newOrganization(ORG_A, `Documents A ${tag}`)
     await newOrganization(ORG_B, `Documents B ${tag}`)
@@ -276,6 +279,8 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
   afterAll(async () => {
     await admin?.end()
     await harness.stop()
+    if (ORIGINAL_DOCUMENT_SEAL_KEY === undefined) delete process.env.EVIDENCE_SEAL_KEY
+    else process.env.EVIDENCE_SEAL_KEY = ORIGINAL_DOCUMENT_SEAL_KEY
   })
 
   beforeEach(() => {
@@ -296,6 +301,7 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
         ['Append a version to a document', undefined, false],
         ['Issue audited download links for a batch of documents (independent, not atomic)', 'member', false],
         ['Issue a time-limited, audited download link for a document', 'member', false],
+        ['Download the exact authorized document through private storage', 'member', false],
         ['Extract text from the latest version of a document (machine OCR, human review required)', 'member', false],
       ]
       for (const [summary, floor, wrapperContext] of declared) {
@@ -436,11 +442,70 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
   })
 
   describe('downloads: GET /api/documents/[id]/download and POST /api/documents/repository/downloads', () => {
+    it('keeps child tables append-only/read-only: former child row locks fail42501, but the mutable document parent can be locked', async () => {
+      const { sql } = await import('drizzle-orm')
+      const id = await newDocument(ORG_A, `Native lock privilege ${tag}`)
+      const grants = (await admin.query(`SELECT name,
+        has_table_privilege('union_eyes_runtime','public.'||name,'UPDATE') AS table_update,
+        has_any_column_privilege('union_eyes_runtime','public.'||name,'UPDATE') AS column_update
+        FROM unnest(ARRAY['document_links','document_versions','document_access_grants']) AS t(name) ORDER BY name`)).rows
+      expect(grants).toEqual([
+        { name: 'document_access_grants', table_update: false, column_update: false },
+        { name: 'document_links', table_update: false, column_update: false },
+        { name: 'document_versions', table_update: false, column_update: false },
+      ])
+      for (const table of ['document_links', 'document_versions', 'document_access_grants']) {
+        const failure = await rejection(harness.tenant(RUNTIME_ROLE, ORG_A, memberA, tx =>
+          tx.execute(sql`SELECT id FROM ${sql.identifier(table)}
+            WHERE organization_id=${ORG_A}::uuid AND document_id=${id}::uuid FOR SHARE`))) as {
+              code?: string; cause?: { code?: string }
+            } | null
+        expect(failure?.code ?? failure?.cause?.code, table).toBe('42501')
+      }
+      const locked = await harness.tenant(RUNTIME_ROLE, ORG_A, memberA, tx =>
+        tx.execute(sql`SELECT id::text FROM public.documents
+          WHERE organization_id=${ORG_A}::uuid AND id=${id}::uuid FOR SHARE`))
+      expect(locked.rows).toEqual([{ id }])
+    })
+
+    it('serves the exact application-link bytes and commits their canonical audit as the restricted runtime role without child UPDATE grants', async () => {
+      const title = `Native byte delivery ${tag}`
+      const id = await newDocument(ORG_A, title)
+      const issued = await run(downloadOne!.GET, asMemberA, {
+        request: request(`/api/documents/${id}/download`, 'GET'), params: { id },
+      })
+      expect(issued.status).toBe(200)
+      const url = ((await json(issued)).data as { downloadUrl: string }).downloadUrl
+      expect(state.transactionsDuringStorageRead).toEqual([])
+      const served = await run(contentDownload!.GET, asMemberA, {
+        request: new Request(new globalThis.URL(url, 'http://localhost')), params: { id },
+      })
+      expect(served.status).toBe(200)
+      const expected = Buffer.from(`${title} v1`)
+      expect(Buffer.from(await served.arrayBuffer())).toEqual(expected)
+      expect(served.headers.get('content-length')).toBe(String(expected.length))
+      expect(served.headers.get('cache-control')).toBe('private, no-store')
+      expect(state.transactionsDuringStorageRead).toEqual([0])
+      const records = (await admin.query(`SELECT user_id,resource_id,details,content_hash FROM public.audit_logs
+        WHERE organization_id=$1 AND action='document.download_served' AND resource_id=$2`, [ORG_A, id])).rows
+      expect(records).toHaveLength(1)
+      expect(records[0]).toMatchObject({ user_id: memberA, resource_id: id, details: {
+        delivery: 'application_response_authorized', checksumSha256: createHash('sha256').update(expected).digest('hex'),
+        sizeBytes: expected.length, versionNo: 1, integrityBasis: 'stored_version_hash',
+      } })
+      expect(records[0].content_hash).toMatch(/^[a-f0-9]{64}$/)
+      expect((await admin.query(`SELECT bool_or(has_any_column_privilege('union_eyes_runtime','public.'||name,'UPDATE')) AS widened
+        FROM unnest(ARRAY['document_links','document_versions','document_access_grants']) AS t(name)`)).rows[0].widened).toBe(false)
+    })
+
     it('issues a link for a document of the caller\'s organization, records the access in it, and answers 404 for another organization', async () => {
       const id = await newDocument(ORG_A, `Download ${tag}`)
       const response = await run(downloadOne!.GET, asMemberA, { request: request(`/api/documents/${id}/download`, 'GET'), params: { id } })
       expect(response.status).toBe(200)
-      expect(((await json(response)).data as { downloadUrl: string }).downloadUrl).toContain('sig=test')
+      const url = ((await json(response)).data as { downloadUrl: string }).downloadUrl
+      expect(new globalThis.URL(url, 'http://localhost').pathname).toBe(`/api/documents/${id}/content`)
+      expect(new globalThis.URL(url, 'http://localhost').searchParams.get('lease')).toBeTruthy()
+      expect(url).not.toMatch(/sig=|storage\.test|blob\.core\.windows\.net/)
       expect(auditsFor('document.download', ORG_A).map((entry) => entry.resourceId)).toContain(id)
       expect((await run(downloadOne!.GET, asMemberB, { request: request(`/api/documents/${id}/download`, 'GET'), params: { id } })).status).toBe(404)
       expect(auditsFor('document.download', ORG_B)).toEqual([])

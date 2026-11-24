@@ -130,8 +130,25 @@ export class BlobTooLargeError extends Error {
  * storage link leaves the server. The size is checked first: a streamed read is bounded, a larger file is refused.
  */
 export async function readBlobBounded(blobPath: string, maxBytes: number, containerName: string = UE_CONTAINER): Promise<Buffer> {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new RangeError('A positive blob read bound is required')
   const client = container(containerName).getBlockBlobClient(blobPath)
   const { contentLength } = await client.getProperties()
   if (typeof contentLength === 'number' && contentLength > maxBytes) throw new BlobTooLargeError(contentLength, maxBytes)
-  return client.downloadToBuffer()
+  const response = await client.download()
+  const stream = response.readableStreamBody
+  if (!stream) throw new Error('Blob download did not provide a readable stream')
+  const chunks: Buffer[] = []
+  let bytes = 0
+  try {
+    for await (const value of stream) {
+      const chunk = Buffer.isBuffer(value) ? value : Buffer.from(value)
+      bytes += chunk.length
+      if (bytes > maxBytes) throw new BlobTooLargeError(bytes, maxBytes)
+      chunks.push(chunk)
+    }
+  } catch (error) {
+    stream.destroy()
+    throw error
+  }
+  return Buffer.concat(chunks, bytes)
 }

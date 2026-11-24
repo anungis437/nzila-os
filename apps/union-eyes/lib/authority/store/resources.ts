@@ -10,7 +10,7 @@
  * Source coverage (see docs/union-eyes/convergence for the full matrix):
  *   case          public.grievances, else public.claims (creator, represented member, classification) + ue_authority_resource_relationships
  *                 (governed assignments) + ue_authority_workaid_matters (counsel control)
- *   document      public.documents + public.document_links (grievance links only)
+ *   document      public.documents + public.document_links (both retained case-link spellings)
  *   financial     public.payments (amount, currency) + ue_authority_financial_steps
  *   review        ue_authority_reviews
  *   workaid       ue_authority_workaid_matters (union-side references only)
@@ -240,12 +240,13 @@ export async function loadDocument(
     )
   ).rows[0]
   if (!doc) return null
-  // Only grievance links are authoritative. A bare 'case' link may refer to the legacy claims model.
+  // Both link spellings refer to the canonical case loader, which resolves the physical domain and rejects ambiguity.
   const links = (
     await exec.query<Row>(
       `SELECT DISTINCT linked_entity_id::text AS id FROM public.document_links
-        WHERE document_id = $1::uuid AND linked_entity_type::text = 'grievance'`,
-      [documentId],
+        WHERE document_id = $1::uuid AND organization_id = $2::uuid
+          AND linked_entity_type::text IN ('case', 'grievance')`,
+      [documentId, organizationId],
     )
   ).rows
   return {

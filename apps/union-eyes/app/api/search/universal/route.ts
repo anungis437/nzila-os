@@ -23,8 +23,10 @@ import {
   toGovernanceLabel,
 } from '@/lib/services/document-governance-service';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
+import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
+import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
 
 function scoreText(value: string | null | undefined, query: string) {
   if (!value) {
@@ -149,16 +151,18 @@ export const GET = withOrganizationAuth(async (request, context) => {
   const documentsResult = (
     await Promise.all(
       docRows.map(async (row) => {
+        if (!isDocumentLinkWellFormed(row.linkedEntityType, row.linkedEntityId)) return null;
         let caseAccess = {
           isPrimaryOwner: false,
           canViewCase: false,
           canViewPrivateDocuments: false,
         };
 
-        if (row.linkedEntityType === 'grievance' && row.linkedEntityId) {
+        const linkedCaseId = await resolveDocumentCaseId(db, { organizationId, linkedEntityType: row.linkedEntityType, linkedEntityId: row.linkedEntityId });
+        if (linkedCaseId) {
           const effective = await getEffectiveCaseAccess({
             organizationId,
-            grievanceId: row.linkedEntityId,
+            grievanceId: linkedCaseId,
             userId,
           });
           caseAccess = {
@@ -195,7 +199,8 @@ export const GET = withOrganizationAuth(async (request, context) => {
               isStaff,
               canViewCase: caseAccess.canViewCase,
               hasExplicitGrant: Boolean(explicitGrant),
-              linkedEntityId: row.linkedEntityId,
+              linkedEntityType: linkedCaseId ? 'case' : row.linkedEntityType,
+              linkedEntityId: linkedCaseId ?? row.linkedEntityId,
               privacyLabel: row.privacyLabel,
               uploadedBy: row.uploadedBy,
               userId,

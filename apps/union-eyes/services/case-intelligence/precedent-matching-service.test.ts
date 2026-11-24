@@ -48,7 +48,7 @@ describe('case-intelligence precedent-matching-service', () => {
     isFeatureEnabled.mockResolvedValue(false);
   });
 
-  it('returns only authorized precedent documents and includes reasons', async () => {
+  it.each(['case', 'grievance'])('returns only authorized precedent documents and includes reasons under %s links', async (linkType) => {
     queueSelectSteps([
       {
         rows: [{
@@ -61,12 +61,12 @@ describe('case-intelligence precedent-matching-service', () => {
           {
             id: 'doc-safe', title: 'Safe precedent', filename: null, name: 'Safe precedent', privacyLabel: 'team_confidential',
             documentType: 'award', fileUrl: 'https://example.com/safe', updatedAt: new Date('2026-02-01T00:00:00Z'),
-            linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
+            linkedEntityType: linkType, linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
           },
           {
             id: 'doc-hidden', title: 'Hidden precedent', filename: null, name: 'Hidden precedent', privacyLabel: 'privileged',
             documentType: 'award', fileUrl: 'https://example.com/hidden', updatedAt: new Date('2026-02-01T00:00:00Z'),
-            linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
+            linkedEntityType: linkType, linkedEntityId: 'case-similar', tags: ['precedent'], uploadedBy: 'lro-1',
           },
         ],
       },
@@ -86,6 +86,7 @@ describe('case-intelligence precedent-matching-service', () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.documentId).toBe('doc-safe');
     expect(result[0]?.reasons.length).toBeGreaterThan(0);
+    expect(result[0]?.scoreBreakdown.patternSimilarity).toBe(0.8);
   });
 
   it('sorts multiple authorized precedents by descending final score', async () => {

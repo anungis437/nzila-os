@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const { safeFailureSummary, fetchWithReadResetRetry } = require('./lib/ue-staging-request-safety.cjs');
+const { parseDocumentLeaseUrl } = require('./lib/ue-staging-document-lease.cjs');
 const { chromium } = require(require.resolve('playwright', { paths: [process.cwd() + '/apps/union-eyes'] }));
 const BASE = 'https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io';
 const TENANT = 'cc15259a-d2bf-421f-8e44-dccf8dc6232a';
@@ -110,7 +111,7 @@ async function main() {
   record({ kind: 'LIVE_SOURCE_IDENTITY', gitSha: identity.gitSha, app: identity.app });
   browser = await chromium.launch({ headless: true });
   await auth('A'); await auth('B');
-  const cases = {};
+  const cases = {}, canonicalActors = {};
   for (const key of ['A', 'B']) {
     stage = 'create-own-case-' + key;
     const response = await request(key, '/api/cases', 'POST', { claimType: 'other', description: 'Synthetic V2 staging qualification case. No real member data.', priority: 'medium', isAnonymous: false }, [200, 201]);
@@ -124,12 +125,16 @@ async function main() {
     const own = payload(await (await request(key, '/api/cases/' + cases[key])).json());
     assert.equal(own.claimId, cases[key]);
     assert.equal(own.organizationId, PEOPLE[key].org);
+    // Canonical platform identity can differ from the Entra object ID. This
+    // non-anonymous case was just filed by the authenticated actor itself.
+    assert.match(own.memberId, /^[A-Za-z0-9][A-Za-z0-9:_-]{0,254}$/);
+    canonicalActors[key] = own.memberId;
     await request(key, '/api/cases/' + cases[other], 'GET', undefined, [403, 404]);
     const list = listPayload(await (await request(key, '/api/cases')).json());
     assert(Array.isArray(list), 'case list response was not an array even after the known envelope unwrap');
     assert(list.some(row => row.claimId === cases[key]), 'own just-created case missing from case list');
     assert(!list.some(row => row.claimId === cases[other]), 'foreign-tenant case leaked into case list');
-    record({ kind: 'OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED', persona: key, ownCase: cases[key], foreignCase: cases[other] });
+    record({ kind: 'OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED', persona: key, ownCase: cases[key], foreignCase: cases[other], canonicalActorId: canonicalActors[key] });
   }
   // The verified officer's visible menu excludes Finance; this fixture has no financial mandate.
   stage = 'localized-executive-navigation';
@@ -181,18 +186,29 @@ async function main() {
   assert.equal(replay.id, documentId);
   await request('B', '/api/documents/' + documentId + '/download', 'GET', undefined, [403, 404]);
   const issued = payload(await (await request('A', '/api/documents/' + documentId + '/download')).json());
-  const link = new URL(issued.downloadUrl);
-  assert.equal(link.protocol, 'https:');
-  assert.equal(link.hostname, 'nzilauev2stagingst.blob.core.windows.net');
-  assert(link.pathname.startsWith('/ue-v2-documents/documents/' + PEOPLE.A.org + '/'));
-  const expiresAt = link.searchParams.get('se');
-  assert(expiresAt && Date.parse(expiresAt) > Date.now());
-  let publicClientStatus;
-  try { publicClientStatus = (await contexts.get('A').request.get(link.href, { timeout: 15000 })).status(); }
-  catch { publicClientStatus = 'NETWORK_BLOCKED'; }
-  assert.notEqual(publicClientStatus, 200);
-  // Only the private staging operator can decrypt the signed lease for the
-  // separate private-network byte and actual-expiry checks. No cookie is saved.
+  const parsedLease = parseDocumentLeaseUrl(issued.downloadUrl, {
+    origin: BASE, organizationId: PEOPLE.A.org, userId: canonicalActors.A, documentId,
+  });
+  const { url: link, expiresAt } = parsedLease;
+  // These exact URLs never pass through request(), which records API paths.
+  // Public app ingress must serve the private bytes for this same real actor.
+  const bytesResponse = await contexts.get('A').request.get(link.href, { timeout: 30000, maxRedirects: 0 });
+  assert.equal(bytesResponse.status(), 200, 'Authenticated app document bytes required');
+  const servedChecksum = crypto.createHash('sha256').update(await bytesResponse.body()).digest('hex');
+  assert.equal(servedChecksum, checksum, 'Authenticated document bytes checksum mismatch');
+  assert.match(bytesResponse.headers()['cache-control'] ?? '', /no-store/);
+  assert.match(bytesResponse.headers()['content-disposition'] ?? '', /^attachment;/);
+  const foreignBytes = await contexts.get('B').request.get(link.href, { timeout: 30000, maxRedirects: 0 });
+  assert([403, 404].includes(foreignBytes.status()), 'Foreign actor must not use the original lease');
+  const anonymous = await browser.newContext({ baseURL: BASE });
+  let anonymousStatus;
+  try {
+    const denied = await anonymous.request.get(link.href, { timeout: 30000, maxRedirects: 0 });
+    anonymousStatus = denied.status();
+    assert([401, 403, 404].includes(anonymousStatus), 'Anonymous app document read must be denied');
+  } finally { await anonymous.close(); }
+  // Only the evidence-key holder can recover this unchanged original URL for
+  // the separate fresh-session byte and actual one-hour expiry checks.
   const publicKey = crypto.createPublicKey(Buffer.from(process.env.EVIDENCE_PUBLIC_KEY_B64, 'base64'));
   assert.equal(publicKey.asymmetricKeyType, 'rsa');
   assert(publicKey.asymmetricKeyDetails.modulusLength >= 3072);
@@ -200,13 +216,16 @@ async function main() {
   const cipher = crypto.createCipheriv('aes-256-gcm', secretKey, iv);
   const aad = Buffer.from(report.sourceSha + ':' + documentId);
   cipher.setAAD(aad);
-  const sealed = Buffer.concat([cipher.update(JSON.stringify({ url: link.href, organizationId: PEOPLE.A.org, expectedChecksum: checksum })), cipher.final()]);
+  const sealed = Buffer.concat([cipher.update(JSON.stringify({ url: link.href, organizationId: PEOPLE.A.org,
+    userId: canonicalActors.A, documentId, expectedChecksum: checksum })), cipher.final()]);
   const envelope = { algorithm: 'RSA-OAEP-SHA256+A256GCM', aad: aad.toString('base64'), iv: iv.toString('base64'),
                      wrappedKey: crypto.publicEncrypt({ key: publicKey, oaepHash: 'sha256' }, secretKey).toString('base64'),
                      ciphertext: sealed.toString('base64'), tag: cipher.getAuthTag().toString('base64') };
   secretKey.fill(0);
   record({ kind: 'API_DOCUMENT_AND_ONE_USE_INTAKE', intakeId, documentId, checksum, replaySameDocument: true,
-           foreignDownloadDenied: true, publicClientStatus, expiresAt,
+           organizationId: PEOPLE.A.org, canonicalActorId: canonicalActors.A, delivery: 'authenticated_app_proxy',
+           foreignDownloadDenied: true, foreignIssuedLeaseStatus: foreignBytes.status(), anonymousStatus,
+           authenticatedBytesStatus: bytesResponse.status(), servedChecksum, originalExpiryProven: false, expiresAt,
            signedUrlSha256: crypto.createHash('sha256').update(link.href).digest('hex'), encryptedPrivateLease: envelope,
            privateBytesAndExpiryNotYetProven: true });
   report.claims = cases;

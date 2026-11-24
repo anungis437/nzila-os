@@ -99,6 +99,18 @@ describe('facts are derived from verified context only', () => {
     expect(ocrFactsFrom(ctx({ linkedEntityType: 'member' }), 'u1').linkedCase).toBeNull();
   });
 
+  it.each(['case', 'grievance'])('retains a closed case boundary for %s when its kernel is absent', (linkedEntityType) => {
+    const derived = ocrFactsFrom(ctx({ linkedEntityType, linkedCaseId: 'c1', grant: {canView: true, canProcessOcr: true}, kernel: null }), 'u1');
+    expect(derived.linkedCase).toMatchObject({canViewCase: false, canProcessOcr: false});
+    expect(decideOcrProcessing(derived)).toEqual({allowed: false, reason: 'no_case_authority'});
+  });
+
+  it('retains a resolved legacy case boundary even when its stored type is non-case and the kernel is absent', () => {
+    const legacy = ctx({ linkedEntityType: 'policy_library', linkedEntityId: 'c1', linkedCaseId: 'c1', grant: {canView: true, canProcessOcr: true} });
+    expect(decideOcrProcessing(ocrFactsFrom(legacy, 'u1'))).toEqual({allowed: false, reason: 'no_case_authority'});
+    expect(decideTranscriptAccess(legacy, 'u1')).toEqual({canRead: false, canWrite: false, canPublish: false});
+  });
+
   it('reads the uploader from the document, and the policy defaults to not adopted', () => {
     expect(ocrFactsFrom(ctx(), 'u1')).toMatchObject({ isUploader: true, memberPolicy: { adopted: false } });
     expect(ocrFactsFrom(ctx(), 'u2').isUploader).toBe(false);
@@ -128,6 +140,13 @@ describe('decideTranscriptAccess — read, write and publish are separate', () =
     const unlinked: DocumentAuthorityContext = { documentId: 'd', privacyLabel: 'team_confidential', uploadedBy: 'u1', linkedEntityType: null, linkedCaseId: null, grant: null, kernel: null };
     expect(decideTranscriptAccess(unlinked, 'u1')).toEqual({ canRead: true, canWrite: true, canPublish: false });
     expect(decideTranscriptAccess(unlinked, 'u2').canWrite).toBe(false);
+  });
+
+  it('lets the uploader read and edit a verified non-case library document without granting case publication', () => {
+    const library: DocumentAuthorityContext = { documentId: 'd', privacyLabel: 'team_confidential', uploadedBy: 'u1',
+      linkedEntityType: 'policy_library', linkedEntityId: 'library-1', linkedCaseId: null, grant: null, kernel: null };
+    expect(decideTranscriptAccess(library, 'u1')).toEqual({canRead: true, canWrite: true, canPublish: false});
+    expect(decideTranscriptAccess(library, 'u2')).toEqual({canRead: false, canWrite: false, canPublish: false});
   });
 
   it('denies everything for an unknown classification', () => {

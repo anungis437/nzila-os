@@ -151,7 +151,7 @@ BEGIN
     SELECT ${selectedColumns('documents')} INTO d FROM public.documents WHERE organization_id=row_org AND id=dg.document_id;
     IF NOT FOUND OR d.status::text<>'active' OR d.deleted_at IS NOT NULL OR d.privacy_label::text<>p->'document'->>'privacyLabel'
       OR d.privacy_label::text IN('privileged','highly_sensitive') OR d.contains_legal_privilege OR d.contains_medical_sensitive OR d.medical_sensitive
-      OR NOT EXISTS(SELECT FROM public.document_links WHERE organization_id=row_org AND document_id=d.id AND linked_entity_type::text='grievance' AND linked_entity_id=case_id) THEN RETURN false; END IF;
+      OR NOT EXISTS(SELECT FROM public.document_links WHERE organization_id=row_org AND document_id=d.id AND linked_entity_type::text IN ('case','grievance') AND linked_entity_id=case_id) THEN RETURN false; END IF;
     SELECT ${selectedColumns('document_versions')} INTO v FROM public.document_versions WHERE organization_id=row_org AND document_id=d.id AND id=(p->'document'->>'versionId')::uuid;
     IF NOT FOUND OR v.version_no<>(p->'document'->>'versionNo')::integer OR v.content_hash<>p->'document'->>'checksumSha256'
       OR encode(sha256(convert_to(v.storage_key,'UTF8')),'hex')<>p->'document'->>'storageKeySha256' THEN RETURN false; END IF;
