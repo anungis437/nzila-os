@@ -32,7 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ApiShapeError, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { ApiShapeError, failureLanguage, isRecord, readApiFailure, userFailureText, type FailureLanguage } from '@/lib/client/api-envelope';
 import {
   Table,
   TableBody,
@@ -227,7 +227,7 @@ function toMultiYearTrends(body: unknown): MultiYearTrendAnalysis {
   return body as unknown as MultiYearTrendAnalysis;
 }
 
-const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+const errorText = (error: unknown, language: FailureLanguage): string => userFailureText(error, null, language);
 
 function LoadFailure({ title, detail, onRetry }: { title: string; detail: string; onRetry: () => void }) {
   const t = useTranslations('clcAnalyticsDashboard');
@@ -253,6 +253,7 @@ export default function CLCAnalyticsDashboard() {
   const t = useTranslations('clcAnalyticsDashboard');
   // CAD in the reader's language: "$1,234.50" in English, "1 234,50 $" in French.
   const locale = useLocale();
+  const language = failureLanguage(locale);
   const cad = (amount: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 }).format(amount);
   // State management
   const [loadingReport, setLoadingReport] = useState(true);
@@ -275,18 +276,18 @@ export default function CLCAnalyticsDashboard() {
       setAnnualReport(null);
       try {
         const response = await fetch(`/api/admin/clc/analytics/annual-report?year=${selectedYear}`, { signal: controller.signal });
-        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        if (!response.ok) throw await readApiFailure(response);
         setAnnualReport(toAnnualReport(await response.json()));
       } catch (error) {
         if (controller.signal.aborted) return;
-        setReportError(errorText(error));
+        setReportError(errorText(error, language));
       } finally {
         if (!controller.signal.aborted) setLoadingReport(false);
       }
     };
     load();
     return () => controller.abort();
-  }, [selectedYear, reportReload]);
+  }, [selectedYear, reportReload, language]);
 
   // Multi-year trends
   useEffect(() => {
@@ -296,16 +297,16 @@ export default function CLCAnalyticsDashboard() {
       setMultiYearTrends(null);
       try {
         const response = await fetch(`/api/admin/clc/analytics/multi-year-trends?years=${trendYears}`, { signal: controller.signal });
-        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        if (!response.ok) throw await readApiFailure(response);
         setMultiYearTrends(toMultiYearTrends(await response.json()));
       } catch (error) {
         if (controller.signal.aborted) return;
-        setTrendsError(errorText(error));
+        setTrendsError(errorText(error, language));
       }
     };
     load();
     return () => controller.abort();
-  }, [trendYears, trendsReload]);
+  }, [trendYears, trendsReload, language]);
 
   // Refresh data
   const handleRefresh = () => {

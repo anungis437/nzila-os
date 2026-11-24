@@ -74,7 +74,7 @@ describe('fetchPrecedentComparison', () => {
   });
 
   it('falls back to the status when the failure carries no message', async () => {
-    await expect(fetchPrecedentComparison(['a'], async () => new Response('', { status: 500 }))).rejects.toThrow('HTTP 500');
+    await expect(fetchPrecedentComparison(['a'], async () => new Response('', { status: 500 }))).rejects.toThrow('The service is temporarily unavailable. Try again shortly.');
   });
 
   it('rejects an answer that has no decision in it, instead of comparing a blank record', async () => {
