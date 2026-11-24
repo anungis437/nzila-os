@@ -32,6 +32,7 @@ committed to the branch cannot name its own commit.
 | 8 | Grievance read, related and precedent suggestions, and the repository detail read returned the stored file address; screens linked to it | The address is no longer selected or returned; each screen opens a document through the audited, time-limited download path (`useAuthorizedDocumentOpen`) and explains a refusal in English or French | `grievance-detail-console.test.tsx`, `document-suggestion-panels.test.tsx`, `documents-repository-id.route.test.ts` (Unit / route) |
 | 9 | Accents missing from French document-journey copy | Corrected in the journey, browser repository, OCR intake, bulk download and portal copy | Updated journey and unit tests (Unit / route) |
 | 10 | The committed V2 source plan and catalog projection no longer matched two changed sources, so bootstrap refused to run | Plan regenerated with the hash-locked wheelhouse (`plan.ts --self-test --check` twice) and the catalog overlay rebound to the new plan digest | Native database build, `current-security-contract` and bootstrap tests (Local native) |
+| 11 | A screen's own log line ("HTTP 503", "Request failed with status 500") or the browser's "Failed to fetch" could be shown as the failure text; the CLC analytics dashboard showed raw shape errors and English text on a French page | `isStatusLine` and plain fallbacks in the shared helpers replace status lines with status wording; bulk operations and the CLC dashboard use the shared bilingual policy | `api-envelope.test.ts`, `clc-analytics-dashboard.test.tsx`, `bulk-operations.test.tsx`, updated jsdom suites (Unit / route) |
 
 ## Local native evidence
 
@@ -40,6 +41,11 @@ A disposable PostgreSQL 16 database was built with `node tooling/scripts/ue-runt
 `documents-external-workbook-routes.postgres.test.ts`, `external-resource-read.postgres.test.ts` and `grievances-routes.postgres.test.ts`
 ran with `vitest.native.config.ts`: 4 files, 76 tests, 0 skipped. This is a subset. The complete native matrix (PostgreSQL 15 and 16) is
 a pull request check and is read from CI, not from this record.
+
+`pnpm test:fast` on the final head: 3158 files passed, 124 skipped (skips pre-date this change), 1 failed. The one failing file is
+`db/__tests__/external-resource-read.postgres.test.ts` (16 tests). It needs an owned native database clone and is unchanged from `main`; run
+through `vitest.native.config.ts` against the native PostgreSQL 16 database above it passes 16 of 16. A plain `pnpm test:fast` without that
+database therefore still fails that file, as it does on `main`.
 
 ## What this record does not prove
 
