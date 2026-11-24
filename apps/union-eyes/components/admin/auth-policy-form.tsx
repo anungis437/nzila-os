@@ -139,12 +139,12 @@ export function AuthPolicyForm() {
         domains: domains.length > 0 ? domains : [],
         roles: policy.mfaRequiredForRoles ?? [],
       };
-      // The server may switch sign-in methods off when single sign-on is required, but it must state the policy it stored,
-      // and the choices that are not derived must be the ones sent.
+      // The server's PUT response is the persisted policy read back by updateOrgAuthPolicy.
+      // All stored settings must match the write, including method toggles whose effective
+      // availability may be overridden by requireSso at sign-in time.
       if (
         !confirmed ||
-        confirmed.requireSso !== policy.requireSso ||
-        confirmed.requireInvite !== policy.requireInvite ||
+        !BOOLEAN_KEYS.every((key) => confirmed[key] === policy[key]) ||
         !sameSet(confirmed.allowedEmailDomains ?? [], sent.domains) ||
         !sameSet(confirmed.mfaRequiredForRoles ?? [], sent.roles)
       ) {
