@@ -10916,7 +10916,9 @@
       "title": "Case Intelligence",
       "description": "Governed relevance, similar cases, precedents, and graph context",
       "filterByReason": "Filter by reason",
-      "allPrivacyLabels": "All privacy labels"
+      "allPrivacyLabels": "All privacy labels",
+      "humanReviewNotice": "Continuity interpretation support only. Use this context for stewardship continuity and governance readability, then escalate final determinations to human review.",
+      "loadFailed": "The case context could not be loaded, so the lists below are not available. This is not the same as there being no related material."
     },
     "clcRemittance": {
       "totalDue": "Total Due",

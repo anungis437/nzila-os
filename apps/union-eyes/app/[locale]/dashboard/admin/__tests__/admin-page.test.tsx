@@ -175,7 +175,7 @@ describe('AdminPage: overview', () => {
     renderPage();
 
     expect(await screen.findByText('The platform statistics could not be loaded')).toBeInTheDocument();
-    expect(screen.getByText('Unexpected API response: incomplete statistics')).toBeInTheDocument();
+    expect(screen.queryByText(/Unexpected API response/)).toBeNull();
   });
 
   it('shows member figures the route does not measure (null, #1118) as not recorded, not as zero or a failure', async () => {
@@ -266,7 +266,7 @@ describe('AdminPage: users', () => {
     open(enCA.admin.sections.userManagement);
     fireEvent.click(await screen.findByRole('button', { name: 'active' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('The status could not be changed: Forbidden'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('The status could not be changed: You do not have permission to do this.'));
     expect(toast.success).not.toHaveBeenCalled();
   });
 
@@ -410,7 +410,7 @@ describe('AdminPage: database', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Optimize Database' }));
 
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('ANALYZE ran but this role owns none of the tables, so no planner statistics were updated'),
+      expect(toast.error).toHaveBeenCalledWith('The database could not be optimized: ANALYZE ran but this role owns none of the tables, so no planner statistics were updated'),
     );
     expect(toast.success).not.toHaveBeenCalled();
   });
@@ -423,7 +423,7 @@ describe('AdminPage: database', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Optimize Database' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Forbidden'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('The database could not be optimized: You do not have permission to do this.'));
   });
 });
 
@@ -538,6 +538,23 @@ describe('AdminPage: French', () => {
     expect(await screen.findByText('Connexions actives')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Optimiser la base de données' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('La base de données n’a pas pu être optimisée (HTTP 500)'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('La base de données n’a pas pu être optimisée'));
+  });
+  it('words a refused statistics read and a refused removal in French, without the route’s English reason', async () => {
+    server.stats = () => standardErrorResponse(ErrorCode.INSUFFICIENT_PERMISSIONS, "Requires at least 'platform_lead' role");
+    server.userDelete = () => Response.json({ error: 'Member not found' }, { status: 404 });
+    renderPage('fr-CA');
+    const failure = await screen.findByText(frCA.adminConsolePage.statsFailed);
+    expect(failure.closest('[role="alert"]')).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
+    expect(failure.closest('[role="alert"]')).not.toHaveTextContent('platform_lead');
+
+    open(frCA.admin.sections.userManagement);
+    await screen.findByText('Alex Worker');
+    fireEvent.click(screen.getByRole('button', { name: frCA.adminConsolePage.removeUser }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledOnce());
+    const shown = String(toast.error.mock.calls[0][0]);
+    expect(shown).toContain(frCA.adminConsolePage.removeFailed);
+    expect(shown).not.toContain('Member not found');
+    expect(toast.success).not.toHaveBeenCalled();
   });
 });

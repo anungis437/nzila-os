@@ -10260,7 +10260,9 @@
       "title": "Inteligência de Casos",
       "description": "Relevância governada, casos semelhantes, precedentes e contexto gráfico",
       "filterByReason": "Filtrar por motivo",
-      "allPrivacyLabels": "Todas as etiquetas de privacidade"
+      "allPrivacyLabels": "Todas as etiquetas de privacidade",
+      "humanReviewNotice": "Apenas apoio à interpretação da continuidade. Use este contexto para a continuidade do acompanhamento e a legibilidade da governação e submeta as decisões finais a revisão humana.",
+      "loadFailed": "Não foi possível carregar o contexto do caso, pelo que as listas abaixo não estão disponíveis. Isso não significa que não exista material relacionado."
     },
     "clcRemittance": {
       "totalDue": "Total Devido",

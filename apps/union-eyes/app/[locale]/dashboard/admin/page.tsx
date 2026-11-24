@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { CapabilityUnavailable } from "@/components/system/capability-unavailable";
-import { ApiShapeError, envelopeData, isRecord, readApiError } from "@/lib/client/api-envelope";
+import { ApiFailure, ApiShapeError, envelopeData, failureDetail, failureLanguage, isRecord, readApiFailure, type FailureLanguage } from "@/lib/client/api-envelope";
 import {
   Users,
   Settings,
@@ -156,7 +156,11 @@ const count = (value: unknown): number | null => {
   const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
   return typeof n === "number" && Number.isFinite(n) ? n : null;
 };
-const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+/** What a person can be told about a failed call: the reason the route states, in the page language where one is held, else nothing. */
+const reasonSuffix = (error: unknown, language: FailureLanguage): string => {
+  const detail = failureDetail(error, language);
+  return detail ? `: ${detail}` : "";
+};
 
 /** The rows of a list route: withApi answers { success, data: rows }. */
 function rowsOf(body: unknown): Record<string, unknown>[] {
@@ -240,7 +244,7 @@ interface Remote<T> {
 }
 
 /** Reads `url` (when there is one) and keeps the outcome: the data, the failure, or neither while it loads. */
-function useRemote<T>(url: string | null, read: (body: unknown) => T, reload: number): Remote<T> {
+function useRemote<T>(url: string | null, read: (body: unknown) => T, reload: number, language: FailureLanguage): Remote<T> {
   const [state, setState] = useState<Remote<T>>({ loading: url !== null, error: null, data: null });
   useEffect(() => {
     if (url === null) return;
@@ -249,16 +253,16 @@ function useRemote<T>(url: string | null, read: (body: unknown) => T, reload: nu
       setState({ loading: true, error: null, data: null });
       try {
         const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        if (!response.ok) throw await readApiFailure(response, `Request failed with status ${response.status}`);
         setState({ loading: false, error: null, data: read(await response.json()) });
       } catch (error) {
         if (controller.signal.aborted) return;
-        setState({ loading: false, error: errorText(error), data: null });
+        setState({ loading: false, error: failureDetail(error, language) ?? "", data: null });
       }
     };
     load();
     return () => controller.abort();
-  }, [url, read, reload]);
+  }, [url, read, reload, language]);
   return state;
 }
 
@@ -269,7 +273,7 @@ function LoadFailure({ title, detail, retryLabel, onRetry }: { title: string; de
         <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
         <div className="space-y-2">
           <p className="font-semibold">{title}</p>
-          <p>{detail}</p>
+          {detail !== "" && <p>{detail}</p>}
           <button onClick={onRetry} className="rounded border border-red-300 bg-white px-3 py-1 font-medium hover:bg-red-100">
             {retryLabel}
           </button>
@@ -302,7 +306,7 @@ function useEndpointCall() {
       }
       setState({ kind: "done", status: response.status, ok: response.ok, text: shown });
     } catch (error) {
-      setState({ kind: "failed", message: errorText(error) });
+      setState({ kind: "failed", message: error instanceof Error ? error.message : String(error) });
     }
   };
   return [state, run] as const;
@@ -463,6 +467,7 @@ export default function AdminPage() {
   const t = useTranslations();
   const locale = useLocale();
   const copy = useCopy();
+  const language = failureLanguage(locale);
   const numberLocale = locale.toLowerCase().startsWith("fr") ? "fr-CA" : "en-CA";
   const [activeSection, setActiveSection] = useState<AdminSection>("overview");
   const [searchQuery, setSearchQuery] = useState("");
@@ -483,21 +488,21 @@ export default function AdminPage() {
   const usersUrl = `/api/admin/users${search.length >= MIN_USER_SEARCH ? `?search=${encodeURIComponent(search)}` : ""}`;
   const localsUrl = `/api/admin/organizations${search ? `?search=${encodeURIComponent(search)}` : ""}`;
 
-  const stats = useRemote(activeSection === "overview" ? "/api/admin/stats/overview" : null, readStats, overviewReload);
-  const users = useRemote(activeSection === "users" ? usersUrl : null, readUsers, usersReload);
-  const locals = useRemote(activeSection === "locals" ? localsUrl : null, readLocals, localsReload);
-  const health = useRemote(activeSection === "database" ? "/api/admin/database/health" : null, readHealth, healthReload);
+  const stats = useRemote(activeSection === "overview" ? "/api/admin/stats/overview" : null, readStats, overviewReload, language);
+  const users = useRemote(activeSection === "users" ? usersUrl : null, readUsers, usersReload, language);
+  const locals = useRemote(activeSection === "locals" ? localsUrl : null, readLocals, localsReload, language);
+  const health = useRemote(activeSection === "database" ? "/api/admin/database/health" : null, readHealth, healthReload, language);
 
   const handleDeleteUser = async (user: SystemUser) => {
     if (!confirm(copy.confirmRemove)) return;
     setBusy(`delete-${user.id}`);
     try {
       const response = await fetch(`/api/admin/users/${user.id}?organizationId=${encodeURIComponent(user.organizationId)}`, { method: "DELETE" });
-      if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+      if (!response.ok) throw await readApiFailure(response);
       toast.success(copy.userRemoved);
       setUsersReload((n) => n + 1);
     } catch (error) {
-      toast.error(`${copy.removeFailed}: ${errorText(error)}`);
+      toast.error(`${copy.removeFailed}${reasonSuffix(error, language)}`);
     } finally {
       setBusy(null);
     }
@@ -511,11 +516,11 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "toggleStatus" }),
       });
-      if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+      if (!response.ok) throw await readApiFailure(response);
       toast.success(copy.statusUpdated);
       setUsersReload((n) => n + 1);
     } catch (error) {
-      toast.error(`${copy.statusFailed}: ${errorText(error)}`);
+      toast.error(`${copy.statusFailed}${reasonSuffix(error, language)}`);
     } finally {
       setBusy(null);
     }
@@ -527,15 +532,15 @@ export default function AdminPage() {
     try {
       const response = await fetch("/api/admin/database/optimize", { method: "POST" });
       const body: unknown = await response.json().catch(() => null);
-      const message = isRecord(body) ? text(body.message) ?? text(body.error) : null;
+      const message = isRecord(body) ? text(body.message) : null;
       if (response.ok && isRecord(body) && body.success === true) {
-        toast.success(message ?? copy.optimizeDone);
+        toast.success(language === "en" && message ? message : copy.optimizeDone);
         setHealthReload((n) => n + 1);
       } else {
-        toast.error(message ?? `${copy.optimizeFailed} (HTTP ${response.status})`);
+        toast.error(`${copy.optimizeFailed}${reasonSuffix(new ApiFailure(response.status, message ?? (isRecord(body) ? text(body.error) : null) ?? ""), language)}`);
       }
-    } catch (error) {
-      toast.error(`${copy.optimizeFailed}: ${errorText(error)}`);
+    } catch {
+      toast.error(copy.optimizeFailed);
     } finally {
       setBusy(null);
     }

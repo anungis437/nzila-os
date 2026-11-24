@@ -10260,7 +10260,9 @@
       "title": "Intelligenza del Caso",
       "description": "Rilevanza governata, casi simili, precedenti e contesto grafico",
       "filterByReason": "Filtra per motivo",
-      "allPrivacyLabels": "Tutte le etichette di privacy"
+      "allPrivacyLabels": "Tutte le etichette di privacy",
+      "humanReviewNotice": "Solo supporto all’interpretazione della continuità. Usa questo contesto per la continuità dell’incarico e la leggibilità della governance, poi sottoponi le decisioni finali a una revisione umana.",
+      "loadFailed": "Il contesto del caso non è stato caricato, quindi gli elenchi sottostanti non sono disponibili. Non significa che non ci sia materiale correlato."
     },
     "clcRemittance": {
       "totalDue": "Totale Dovuto",
