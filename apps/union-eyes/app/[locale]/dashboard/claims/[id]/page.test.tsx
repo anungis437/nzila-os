@@ -81,9 +81,16 @@ describe('ClaimDetailPage', () => {
   })
 
   it('shows the page\'s own message, not HTTP text, when the failure body names nothing', async () => {
-    routes({ claim: { ok: false, status: 502, statusText: 'Bad Gateway', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
+    routes({ claim: { ok: false, status: 500, statusText: 'Internal Server Error', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
     expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(screen.queryByText(/HTTP|Internal Server Error/)).toBeNull()
+  })
+
+  it('words a gateway failure by its status instead of its status line', async () => {
+    routes({ claim: { ok: false, status: 502, statusText: 'Bad Gateway', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument()
     expect(screen.queryByText(/HTTP|Bad Gateway/)).toBeNull()
   })
 

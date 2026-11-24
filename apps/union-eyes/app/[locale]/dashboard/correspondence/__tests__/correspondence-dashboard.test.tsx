@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { NextIntlClientProvider } from 'next-intl';
+import frCA from '../../../../../messages/fr-CA.json'
 import enCA from '../../../../../messages/en-CA.json';
 import { CorrespondenceDashboard } from '../correspondence-dashboard';
 
@@ -33,9 +34,9 @@ const list = (rows: unknown[]) => json(200, { success: true, data: { data: rows,
 
 const OPENED = '0f1e2d3c-4b5a-4968-8776-655443322110';
 
-function mountDashboard(props: { userId?: string; canSign?: boolean } = {}) {
+function mountDashboard(props: { userId?: string; canSign?: boolean; locale?: 'en-CA' | 'fr-CA' } = {}) {
   render(
-    <NextIntlClientProvider locale="en-CA" messages={enCA}>
+    <NextIntlClientProvider locale={props.locale ?? 'en-CA'} messages={props.locale === 'fr-CA' ? frCA : enCA}>
       <CorrespondenceDashboard organizationId="org-1" userId={props.userId ?? 'clerk-1'} userRole="clerk" canSign={props.canSign ?? false} />
     </NextIntlClientProvider>,
   );
@@ -89,6 +90,14 @@ describe('CorrespondenceDashboard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     expect(await screen.findByText('Letter 1')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('says the queue could not be loaded in French without the route\'s English sentence', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(json(500, { code: 'DATABASE_ERROR', message: 'Correspondence is temporarily unavailable' }))));
+    mountDashboard({ locale: 'fr-CA' });
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(frCA.correspondencePage.loadFailed);
+    expect(alert).not.toHaveTextContent('Correspondence is temporarily');
   });
 
   it('refuses an answer that is not a list of letters', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiFailure, ApiShapeError, GENERIC_FAILURE, apiErrorMessage, envelopeData, envelopePages, envelopeRow, envelopeRows, failureLanguage, failureText, readApiError, readApiFailure, readUserFailure, userFailureText } from '../api-envelope';
+import { ApiFailure, ApiShapeError, GENERIC_FAILURE, apiErrorMessage, envelopeData, envelopePages, envelopeRow, envelopeRows, failureDetail, failureLanguage, failureText, readApiError, readApiFailure, readUserFailure, userFailureText } from '../api-envelope';
 
 const reply = (status: number, body: unknown) => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
@@ -109,6 +109,15 @@ describe('api-envelope', () => {
         expect(userFailureText(error, 'Impossible d’enregistrer.', 'fr')).toBe('Impossible d’enregistrer.');
         expect(userFailureText(error, null, 'fr')).toBe(GENERIC_FAILURE.fr);
       }
+    });
+
+    it('offers a detail line only for a refusal that states something a person can use', () => {
+      expect(failureDetail(new ApiFailure(403, 'Insufficient role'), 'en')).toBe('Insufficient role');
+      expect(failureDetail(new ApiFailure(403, 'Insufficient role'), 'fr')).toBe('Vous n’avez pas l’autorisation d’effectuer cette action.');
+      expect(failureDetail(new ApiFailure(500, 'Database unavailable'), 'fr')).toBeNull();
+      expect(failureDetail(new ApiFailure(500, ''), 'en')).toBeNull();
+      expect(failureDetail(new ApiFailure(503, ''), 'en')).toMatch(/temporarily unavailable/);
+      for (const error of [new TypeError('Failed to fetch'), new ApiShapeError('no data'), new Error('HTTP 500'), null]) expect(failureDetail(error, 'en')).toBeNull();
     });
 
     it('reads a failed response straight to words', async () => {

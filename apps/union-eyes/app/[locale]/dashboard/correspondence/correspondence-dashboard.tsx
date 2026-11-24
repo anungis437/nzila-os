@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { FileText, Send, CheckCircle, PenTool, Clock, Plus, Eye, AlertTriangle, XCircle } from "lucide-react";
-import { ApiShapeError, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, failureDetail, failureLanguage, readApiFailure } from "@/lib/client/api-envelope";
 import { NewLetterComposer } from "./new-letter-composer";
 import { CorrespondenceDetailDialog } from "./correspondence-detail-dialog";
 import { readCorrespondenceList, type CorrespondenceListItem, type CorrespondenceStatus } from "./correspondence-readers";
@@ -78,7 +78,7 @@ export function CorrespondenceDashboard({ organizationId: _organizationId, userI
     try {
       const response = await fetch(`/api/correspondence?limit=${LIMIT}`, { cache: "no-store" });
       if (!response.ok) {
-        const message = await readApiError(response, "");
+        const message = failureDetail(await readApiFailure(response), failureLanguage(locale)) ?? "";
         setItems([]);
         setFailure(message ? { reason: "server", message } : { reason: "generic" });
         return;
@@ -90,7 +90,7 @@ export function CorrespondenceDashboard({ organizationId: _organizationId, userI
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     void load();

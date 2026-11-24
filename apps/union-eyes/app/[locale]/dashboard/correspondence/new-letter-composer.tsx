@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale, useTranslations } from "next-intl";
-import { readApiError } from "@/lib/client/api-envelope";
+import { failureLanguage, readApiFailure, userFailureText } from "@/lib/client/api-envelope";
 
 // ── Template Definitions ───────────────────────────────────────────────────
 
@@ -138,7 +138,7 @@ export function NewLetterComposer({ onCreated, onCancel, userId, canSign = false
       });
 
       if (!res.ok) {
-        throw new Error(await readApiError(res, t("composer.aiUnavailable")));
+        throw await readApiFailure(res);
       }
 
       const json = await res.json();
@@ -184,11 +184,11 @@ export function NewLetterComposer({ onCreated, onCancel, userId, canSign = false
           ...(signMyself && canSign && userId ? { assignedSignerId: userId } : {}),
         }),
       });
-      if (!res.ok) throw new Error(await readApiError(res, t("composer.createFailed")));
+      if (!res.ok) throw await readApiFailure(res);
       toast.success(t("composer.created"));
       onCreated();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : t("composer.createFailed"));
+      toast.error(userFailureText(e, t("composer.createFailed"), failureLanguage(locale)));
     } finally {
       setSubmitting(false);
     }

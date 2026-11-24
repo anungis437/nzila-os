@@ -45,7 +45,7 @@ import {
   ExportableMetrics,
 } from '@/components/leadership/leadership-export';
 import { logger } from '@/lib/logger';
-import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { ApiShapeError, envelopeData, failureLanguage, isRecord, readUserFailure } from '@/lib/client/api-envelope';
 import { isLeadershipEmployerTrend } from '@/lib/leadership/dashboard-contract';
 
 // ─── Types ────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ export default function LeadershipPage() {
         setData(toDashboardData(await response.json()));
       } else {
         logger.warn('Leadership dashboard fetch failed', { status: response.status });
-        setError(await readApiError(response, t('errors.dataUnavailable')));
+        setError(await readUserFailure(response, t('errors.dataUnavailable'), failureLanguage(locale)));
       }
     } catch (err) {
       logger.error('Failed to load leadership dashboard', err);
@@ -113,7 +113,7 @@ export default function LeadershipPage() {
     } finally {
       setLoading(false);
     }
-  }, [timeframe, t]);
+  }, [timeframe, t, locale]);
 
   useEffect(() => {
     fetchDashboard();

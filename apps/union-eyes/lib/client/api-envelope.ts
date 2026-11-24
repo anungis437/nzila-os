@@ -157,10 +157,13 @@ export async function readApiFailure(response: Response, loggedMessage?: string)
  * request that got no answer, an ApiShapeError, a thrown string, an `HTTP 500` line) shows the screen's fallback and never its own text.
  */
 export function userFailureText(error: unknown, fallback: string | null, language: FailureLanguage): string {
-  const generic = fallback || GENERIC_FAILURE[language];
-  if (!(error instanceof ApiFailure)) return generic;
-  if (language === 'en') return (error.stated && !BARE_SERVER_MESSAGES.has(error.stated) ? error.stated : STATUS_COPY.en[error.status]) || error.stated || generic;
-  return FRENCH_SERVER_MESSAGES[error.stated] ?? STATUS_COPY.fr[error.status] ?? generic;
+  return statedText(error, language) || fallback || GENERIC_FAILURE[language];
+}
+
+function statedText(error: unknown, language: FailureLanguage): string {
+  if (!(error instanceof ApiFailure)) return '';
+  if (language === 'en') return (error.stated && !BARE_SERVER_MESSAGES.has(error.stated) ? error.stated : STATUS_COPY.en[error.status]) || error.stated || '';
+  return FRENCH_SERVER_MESSAGES[error.stated] ?? STATUS_COPY.fr[error.status] ?? '';
 }
 
 /** The words for a response that was not ok, read once from its body. */
@@ -173,7 +176,5 @@ export async function readUserFailure(response: Response, fallback: string | nul
  * says nothing a person can use (no answer, a body that is not the expected shape, a refusal with no statement and no status wording).
  */
 export function failureDetail(error: unknown, language: FailureLanguage): string | null {
-  if (!(error instanceof ApiFailure)) return null;
-  const text = userFailureText(error, '', language);
-  return text || null;
+  return statedText(error, language) || null;
 }
