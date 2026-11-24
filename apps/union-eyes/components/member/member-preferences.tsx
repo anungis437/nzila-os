@@ -1,15 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
+import { ApiShapeError, envelopeData, failureDetail, failureLanguage, readApiFailure, type FailureLanguage } from '@/lib/client/api-envelope';
 
 type Prefs = { inAppEnabled: boolean; claimUpdates: boolean; saved: boolean };
 type SaveResult = { kind: 'saved' } | { kind: 'failed'; reason: string };
 
-const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+const reasonOf = (error: unknown, language: FailureLanguage): string => failureDetail(error, language) ?? '';
 
 /** GET and PUT answer with the stored (or default) preferences in withApi's envelope; a body that does not hold all three flags is not read as "all off". */
 async function readPrefs(response: Response): Promise<Prefs> {
@@ -23,9 +23,7 @@ async function readPrefs(response: Response): Promise<Prefs> {
   return { inAppEnabled, claimUpdates, saved };
 }
 
-async function refusal(response: Response): Promise<Error> {
-  return new Error(await readApiError(response, `Request failed with status ${response.status}`));
-}
+const refusal = (response: Response) => readApiFailure(response);
 
 async function fetchPrefs(): Promise<Prefs> {
   const response = await fetch('/api/notifications/preferences');
@@ -40,6 +38,7 @@ async function fetchPrefs(): Promise<Prefs> {
  */
 export function MemberPreferences() {
   const t = useTranslations('memberPreferences');
+  const language = failureLanguage(useLocale());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
@@ -54,11 +53,11 @@ export function MemberPreferences() {
         setLoading(false);
       },
       (error: unknown) => {
-        setLoadError(reasonOf(error));
+        setLoadError(reasonOf(error, language));
         setLoading(false);
       },
     );
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     load();
@@ -85,7 +84,7 @@ export function MemberPreferences() {
       setPrefs(await readPrefs(response));
       setResult({ kind: 'saved' });
     } catch (error) {
-      setResult({ kind: 'failed', reason: reasonOf(error) });
+      setResult({ kind: 'failed', reason: reasonOf(error, language) });
     } finally {
       setSaving(false);
     }
@@ -101,7 +100,7 @@ export function MemberPreferences() {
       {!loading && loadError !== null && (
         <div role="alert" className="rounded-lg border border-destructive/40 p-4 text-sm">
           {t('loadError')}
-          <span className="block text-xs text-muted-foreground">{loadError}</span>
+          {loadError && <span className="block text-xs text-muted-foreground">{loadError}</span>}
           <Button variant="outline" size="sm" className="mt-2" onClick={retry}>{t('retry')}</Button>
         </div>
       )}
@@ -139,7 +138,7 @@ export function MemberPreferences() {
             {result?.kind === 'failed' && (
               <p role="alert" className="text-sm text-destructive">
                 {t('saveError')}
-                <span className="block text-xs">{result.reason}</span>
+                {result.reason && <span className="block text-xs">{result.reason}</span>}
               </p>
             )}
           </div>

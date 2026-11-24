@@ -420,16 +420,16 @@ export function DocumentsConsole() {
   const handleBulkDownload = async () => {
     if (selectedLibraryItems.length === 0) {
       setNotice('none_selected');
-      return;
+      return false;
     }
 
     setBulkReport(null);
     const revision = listRevision.current;
     const result = await requestBulkDownload(selectedLibraryItems.map((item) => item.id));
-    if (!mounted.current || activeScope.current !== scope || listRevision.current !== revision) return;
+    if (!mounted.current || activeScope.current !== scope || listRevision.current !== revision) return false;
     if (!result.report) {
       setNotice(result.denial ?? 'bulk_unavailable');
-      return;
+      return false;
     }
     setNotice(null);
     setBulkReport(result.report);
@@ -438,11 +438,13 @@ export function DocumentsConsole() {
         window.open(item.downloadUrl, '_blank', 'noopener,noreferrer');
       }
     }
+    return result.report.items.some((item) => item.outcome === 'issued');
   };
 
   const handleBulkShare = async (_permission: string) => {
     canonicalShareUnavailable();
     setNotice('share_blocked');
+    return false;
   };
 
   const appendVersion = async (documentId: string) => {

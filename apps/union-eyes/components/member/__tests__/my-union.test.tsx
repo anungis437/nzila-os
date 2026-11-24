@@ -159,11 +159,22 @@ describe('MyUnion: when the read fails it does not say the member has no record'
     expect(document.body).not.toHaveTextContent('Invalid Date');
   });
 
+  it('words the refusal in French and shows none of the route\'s English', async () => {
+    answer = failed(500, 'Membership lookup failed');
+    renderUnion('fr-CA');
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(frCA.myUnion.loadError);
+    expect(alert).not.toHaveTextContent('Membership lookup failed');
+  });
+
   it('shows a request that never reached the server as a failure', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
     renderUnion();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent(t.loadError);
+    expect(failure).not.toHaveTextContent('Failed to fetch');
     expect(screen.queryByTestId('membership-missing')).not.toBeInTheDocument();
   });
 });

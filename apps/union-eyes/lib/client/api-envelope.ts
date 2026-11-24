@@ -89,7 +89,9 @@ const STATUS_COPY: Readonly<Record<FailureLanguage, Readonly<Record<number, stri
     413: 'The file or request is too large.',
     429: 'Too many requests. Wait a moment and try again.',
     501: 'This feature is not available yet.',
+    502: 'The service is temporarily unavailable. Try again shortly.',
     503: 'The service is temporarily unavailable. Try again shortly.',
+    504: 'The service took too long to answer. Try again shortly.',
   },
   fr: {
     401: 'Votre session est terminée. Reconnectez-vous pour continuer.',
@@ -99,7 +101,9 @@ const STATUS_COPY: Readonly<Record<FailureLanguage, Readonly<Record<number, stri
     413: 'Le fichier ou la demande est trop volumineux.',
     429: 'Trop de demandes. Patientez un instant, puis réessayez.',
     501: 'Cette fonction n’est pas encore disponible.',
+    502: 'Le service est momentanément indisponible. Réessayez sous peu.',
     503: 'Le service est momentanément indisponible. Réessayez sous peu.',
+    504: 'Le service a mis trop de temps à répondre. Réessayez sous peu.',
   },
 };
 
@@ -126,19 +130,23 @@ const FRENCH_SERVER_MESSAGES: Readonly<Record<string, string>> = {
 export class ApiFailure extends Error {
   readonly status: number;
   readonly code: string | null;
-  constructor(status: number, message: string, code: string | null = null) {
+  /** The reason the server stated, '' when it stated none; `message` may carry a developer-facing wording for callers that only log it. */
+  readonly stated: string;
+  constructor(status: number, stated: string, code: string | null = null, message: string = stated) {
     super(message);
     this.name = 'ApiFailure';
     this.status = status;
     this.code = code;
+    this.stated = stated;
   }
 }
 
 /** The refusal a failed response states. A body that names no message leaves `message` empty, so the screen's fallback or the status wording is shown. */
-export async function readApiFailure(response: Response): Promise<ApiFailure> {
+export async function readApiFailure(response: Response, loggedMessage?: string): Promise<ApiFailure> {
   const body: unknown = await response.json().catch(() => null);
   const code = isRecord(body) && typeof body.code === 'string' ? body.code : null;
-  return new ApiFailure(response.status, apiErrorMessage(body, ''), code);
+  const stated = apiErrorMessage(body, '');
+  return new ApiFailure(response.status, stated, code, stated || loggedMessage || '');
 }
 
 /**
@@ -151,11 +159,21 @@ export async function readApiFailure(response: Response): Promise<ApiFailure> {
 export function userFailureText(error: unknown, fallback: string | null, language: FailureLanguage): string {
   const generic = fallback || GENERIC_FAILURE[language];
   if (!(error instanceof ApiFailure)) return generic;
-  if (language === 'en') return (error.message && !BARE_SERVER_MESSAGES.has(error.message) ? error.message : STATUS_COPY.en[error.status]) || error.message || generic;
-  return FRENCH_SERVER_MESSAGES[error.message] ?? STATUS_COPY.fr[error.status] ?? generic;
+  if (language === 'en') return (error.stated && !BARE_SERVER_MESSAGES.has(error.stated) ? error.stated : STATUS_COPY.en[error.status]) || error.stated || generic;
+  return FRENCH_SERVER_MESSAGES[error.stated] ?? STATUS_COPY.fr[error.status] ?? generic;
 }
 
 /** The words for a response that was not ok, read once from its body. */
 export async function readUserFailure(response: Response, fallback: string | null, language: FailureLanguage): Promise<string> {
   return userFailureText(await readApiFailure(response), fallback, language);
+}
+
+/**
+ * The line a screen may add under its own message: what the server stated about a refusal, in the person's language, or null when the failure
+ * says nothing a person can use (no answer, a body that is not the expected shape, a refusal with no statement and no status wording).
+ */
+export function failureDetail(error: unknown, language: FailureLanguage): string | null {
+  if (!(error instanceof ApiFailure)) return null;
+  const text = userFailureText(error, '', language);
+  return text || null;
 }

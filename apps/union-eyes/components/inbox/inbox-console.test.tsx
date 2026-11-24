@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 import { NextIntlClientProvider } from 'next-intl'
 import enCA from '../../messages/en-CA.json'
+import frCA from '../../messages/fr-CA.json'
 
 const nav = vi.hoisted(() => ({ push: vi.fn() }))
 vi.mock('next/navigation', () => ({
@@ -65,9 +66,9 @@ function stubFetch(router: (url: URL) => Reply) {
   return fetchMock
 }
 
-const renderInbox = () =>
+const renderInbox = (locale: 'en-CA' | 'fr-CA' = 'en-CA') =>
   render(
-    <NextIntlClientProvider locale="en-CA" messages={enCA}>
+    <NextIntlClientProvider locale={locale} messages={locale === 'fr-CA' ? frCA : enCA}>
       <InboxConsole />
     </NextIntlClientProvider>,
   )
@@ -139,6 +140,15 @@ describe('inbox console', () => {
     expect(alert).toHaveTextContent('Notifications are unavailable')
     expect(alert).toHaveTextContent(enCA.errors.loadingError)
     expect(screen.queryByText(enCA.inboxConsole.empty.noSignalsTitle)).not.toBeInTheDocument()
+  })
+
+  it('words an unreadable inbox in French and never in the route\'s English', async () => {
+    stubFetch((url) => (url.pathname === '/api/claims' ? { status: 403, body: failure('FORBIDDEN', 'Claims are restricted to staff') } : { status: 500, body: failure('INTERNAL_ERROR', 'Notifications are unavailable') }))
+    renderInbox('fr-CA')
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.')
+    expect(alert).toHaveTextContent(frCA.errors.loadingError)
+    expect(alert.textContent).not.toMatch(/restricted|unavailable/)
   })
 
   it('says "no signals" only when both sources answered and neither had anything', async () => {

@@ -16,6 +16,7 @@
 "use client";
 
 import * as React from "react";
+import { useLocale } from "next-intl";
 import {
   CheckSquare,
   Download,
@@ -48,6 +49,46 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { failureLanguage, type FailureLanguage } from "@/lib/client/api-envelope";
+
+type Verb = "download" | "delete" | "move" | "copy" | "tag" | "share";
+
+const COPY: Record<FailureLanguage, {
+  selected: (count: number) => string; clear: string; processing: (verb: string) => string; failed: string; notDone: string; dismiss: string;
+  verbs: Record<Verb, string>; titles: Record<Verb, string>; documentsSelected: (count: number) => string;
+  destination: string; chooseFolder: string; addTags: string; tagName: string; add: string; existing: string; chosen: string;
+  permission: string; choosePermission: string; permissions: Record<"view" | "comment" | "edit" | "admin", string>;
+  deleteWarning: (count: number) => string; downloadNote: (count: number) => string; cancel: string; removeTag: string;
+}> = {
+  en: {
+    selected: (count) => `${count} selected`, clear: "Clear selection", processing: (verb) => `Processing: ${verb}…`,
+    failed: "The action could not be completed. Nothing was confirmed; check the documents before trying again.",
+    notDone: "The action was not completed.", dismiss: "Dismiss",
+    verbs: { download: "Download", delete: "Delete", move: "Move", copy: "Copy", tag: "Tag", share: "Share" },
+    titles: { download: "Download documents", delete: "Delete documents", move: "Move documents", copy: "Copy documents", tag: "Add tags", share: "Share documents" },
+    documentsSelected: (count) => `${count} document${count > 1 ? "s" : ""} selected`,
+    destination: "Destination folder", chooseFolder: "Choose a folder…", addTags: "Add tags", tagName: "Enter a tag name…", add: "Add",
+    existing: "Or select from existing:", chosen: "Selected tags:", permission: "Permission level", choosePermission: "Choose a permission…",
+    permissions: { view: "View", comment: "Comment", edit: "Edit", admin: "Admin" },
+    deleteWarning: (count) => `This action cannot be undone. ${count} document${count > 1 ? "s" : ""} will be permanently deleted.`,
+    downloadNote: (count) => `Each of the ${count} document${count > 1 ? "s" : ""} you may download opens as its own download. Documents you may not download are listed in the report.`,
+    cancel: "Cancel", removeTag: "Remove tag",
+  },
+  fr: {
+    selected: (count) => `${count} sélectionné${count > 1 ? "s" : ""}`, clear: "Effacer la sélection", processing: (verb) => `Traitement : ${verb}…`,
+    failed: "L’action n’a pas pu être effectuée. Rien n’a été confirmé; vérifiez les documents avant de réessayer.",
+    notDone: "L’action n’a pas été effectuée.", dismiss: "Fermer",
+    verbs: { download: "Télécharger", delete: "Supprimer", move: "Déplacer", copy: "Copier", tag: "Étiqueter", share: "Partager" },
+    titles: { download: "Télécharger les documents", delete: "Supprimer les documents", move: "Déplacer les documents", copy: "Copier les documents", tag: "Ajouter des étiquettes", share: "Partager les documents" },
+    documentsSelected: (count) => `${count} document${count > 1 ? "s" : ""} sélectionné${count > 1 ? "s" : ""}`,
+    destination: "Dossier de destination", chooseFolder: "Choisir un dossier…", addTags: "Ajouter des étiquettes", tagName: "Saisir le nom d’une étiquette…", add: "Ajouter",
+    existing: "Ou choisir parmi les étiquettes existantes :", chosen: "Étiquettes choisies :", permission: "Niveau d’autorisation", choosePermission: "Choisir une autorisation…",
+    permissions: { view: "Lecture", comment: "Commentaire", edit: "Modification", admin: "Administration" },
+    deleteWarning: (count) => `Cette action est irréversible. ${count} document${count > 1 ? "s seront supprimés" : " sera supprimé"} définitivement.`,
+    downloadNote: (count) => `Chacun des ${count} document${count > 1 ? "s" : ""} que vous pouvez télécharger s’ouvre dans son propre téléchargement. Les documents que vous ne pouvez pas télécharger sont indiqués dans le rapport.`,
+    cancel: "Annuler", removeTag: "Retirer l’étiquette",
+  },
+};
 
 export interface BulkOperation {
   id: string;
@@ -62,12 +103,12 @@ export interface BulkOperation {
 export interface DocumentBulkOperationsProps {
   selectedCount: number;
   onClearSelection: () => void;
-  onBulkDownload?: () => Promise<void>;
-  onBulkDelete?: () => Promise<void>;
-  onBulkMove?: (folderId: string) => Promise<void>;
-  onBulkCopy?: (folderId: string) => Promise<void>;
-  onBulkTag?: (tags: string[]) => Promise<void>;
-  onBulkShare?: (permission: string) => Promise<void>;
+  onBulkDownload?: () => Promise<void | boolean>;
+  onBulkDelete?: () => Promise<void | boolean>;
+  onBulkMove?: (folderId: string) => Promise<void | boolean>;
+  onBulkCopy?: (folderId: string) => Promise<void | boolean>;
+  onBulkTag?: (tags: string[]) => Promise<void | boolean>;
+  onBulkShare?: (permission: string) => Promise<void | boolean>;
   folders?: { id: string; name: string }[];
   availableTags?: string[];
 }
@@ -92,9 +133,12 @@ export function DocumentBulkOperations({
   const [selectedPermission, setSelectedPermission] = React.useState("view");
   const [newTag, setNewTag] = React.useState("");
 
+  const language = failureLanguage(useLocale());
+  const t = COPY[language];
+
   if (selectedCount === 0) return null;
 
-  const handleOperation = async (type: BulkOperation["type"], action: () => Promise<void>) => {
+  const handleOperation = async (type: BulkOperation["type"], action: () => Promise<void | boolean>) => {
     setOperation({
       id: Date.now().toString(),
       type: type,
@@ -105,18 +149,19 @@ export function DocumentBulkOperations({
     });
 
     try {
-      await action();
+      const outcome = await action();
+      if (outcome === false) {
+        // The caller has said why; the selection stays so that nothing looks done.
+        setOperation((prev) => prev && { ...prev, status: "failed", error: t.notDone });
+        return;
+      }
       setOperation((prev) => prev && { ...prev, status: "completed", progress: 100 });
       setTimeout(() => {
         setOperation(null);
         onClearSelection();
       }, 2000);
-    } catch (error) {
-      setOperation((prev) => prev && { 
-        ...prev, 
-        status: "failed",
-        error: error instanceof Error ? error.message : "Operation failed"
-      });
+    } catch {
+      setOperation((prev) => prev && { ...prev, status: "failed", error: t.failed });
     }
   };
 
@@ -182,7 +227,7 @@ export function DocumentBulkOperations({
         <div className="bg-blue-600 text-white rounded-lg shadow-2xl p-4 flex items-center gap-4">
           <div className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5" />
-            <span className="font-medium">{selectedCount} selected</span>
+            <span className="font-medium">{t.selected(selectedCount)}</span>
           </div>
 
           <div className="h-6 w-px bg-white/20" />
@@ -196,7 +241,7 @@ export function DocumentBulkOperations({
                 onClick={() => openDialog("download")}
               >
                 <Download className="h-4 w-4 mr-1" />
-                Download
+                {t.verbs.download}
               </Button>
             )}
 
@@ -208,7 +253,7 @@ export function DocumentBulkOperations({
                 onClick={() => openDialog("move")}
               >
                 <Move className="h-4 w-4 mr-1" />
-                Move
+                {t.verbs.move}
               </Button>
             )}
 
@@ -220,7 +265,7 @@ export function DocumentBulkOperations({
                 onClick={() => openDialog("copy")}
               >
                 <Copy className="h-4 w-4 mr-1" />
-                Copy
+                {t.verbs.copy}
               </Button>
             )}
 
@@ -232,7 +277,7 @@ export function DocumentBulkOperations({
                 onClick={() => openDialog("tag")}
               >
                 <Tag className="h-4 w-4 mr-1" />
-                Tag
+                {t.verbs.tag}
               </Button>
             )}
 
@@ -244,7 +289,7 @@ export function DocumentBulkOperations({
                 onClick={() => openDialog("share")}
               >
                 <Share2 className="h-4 w-4 mr-1" />
-                Share
+                {t.verbs.share}
               </Button>
             )}
 
@@ -256,7 +301,7 @@ export function DocumentBulkOperations({
                 onClick={() => openDialog("delete")}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
-                Delete
+                {t.verbs.delete}
               </Button>
             )}
           </div>
@@ -268,6 +313,7 @@ export function DocumentBulkOperations({
             size="sm"
             className="text-white hover:bg-white/10"
             onClick={onClearSelection}
+            aria-label={t.clear}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -282,10 +328,23 @@ export function DocumentBulkOperations({
             <AlertDescription>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span>Processing {operation.type}...</span>
+                  <span>{t.processing(t.verbs[operation.type])}</span>
                   <span>{operation.current} / {operation.total}</span>
                 </div>
                 <Progress value={operation.progress} />
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {operation && operation.status === "failed" && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-96">
+          <Alert variant="destructive" role="alert">
+            <AlertDescription>
+              <div className="flex items-start justify-between gap-2">
+                <span>{operation.error}</span>
+                <button type="button" className="underline" onClick={() => setOperation(null)}>{t.dismiss}</button>
               </div>
             </AlertDescription>
           </Alert>
@@ -297,25 +356,20 @@ export function DocumentBulkOperations({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {dialogType === "move" && "Move Documents"}
-              {dialogType === "copy" && "Copy Documents"}
-              {dialogType === "tag" && "Add Tags"}
-              {dialogType === "share" && "Share Documents"}
-              {dialogType === "delete" && "Delete Documents"}
-              {dialogType === "download" && "Download Documents"}
+              {dialogType in t.titles && t.titles[dialogType as Verb]}
             </DialogTitle>
             <DialogDescription>
-              {selectedCount} document{selectedCount > 1 ? "s" : ""} selected
+              {t.documentsSelected(selectedCount)}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             {(dialogType === "move" || dialogType === "copy") && (
               <div>
-                <Label>Destination Folder</Label>
+                <Label>{t.destination}</Label>
                 <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a folder..." />
+                    <SelectValue placeholder={t.chooseFolder} />
                   </SelectTrigger>
                   <SelectContent>
                     {folders.map((folder) => (
@@ -331,21 +385,21 @@ export function DocumentBulkOperations({
             {dialogType === "tag" && (
               <div className="space-y-3">
                 <div>
-                  <Label>Add Tags</Label>
+                  <Label>{t.addTags}</Label>
                   <div className="flex gap-2 mt-2">
                     <Input
-                      placeholder="Enter tag name..."
+                      placeholder={t.tagName}
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && addTag()}
                     />
-                    <Button onClick={addTag}>Add</Button>
+                    <Button onClick={addTag}>{t.add}</Button>
                   </div>
                 </div>
 
                 {availableTags.length > 0 && (
                   <div>
-                    <Label className="mb-2 block">Or select from existing:</Label>
+                    <Label className="mb-2 block">{t.existing}</Label>
                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
                       {availableTags.map((tag) => (
                         <Badge
@@ -355,7 +409,7 @@ export function DocumentBulkOperations({
                           onClick={() => {
                             setSelectedTags(
                               selectedTags.includes(tag)
-                                ? selectedTags.filter((t) => t !== tag)
+                                ? selectedTags.filter((name) => name !== tag)
                                 : [...selectedTags, tag]
                             );
                           }}
@@ -369,14 +423,16 @@ export function DocumentBulkOperations({
 
                 {selectedTags.length > 0 && (
                   <div>
-                    <Label className="mb-2 block">Selected Tags:</Label>
+                    <Label className="mb-2 block">{t.chosen}</Label>
                     <div className="flex flex-wrap gap-2">
                       {selectedTags.map((tag) => (
                         <Badge key={tag} variant="secondary">
                           {tag}
                           <button
+                            type="button"
+                            aria-label={`${t.removeTag}: ${tag}`}
                             onClick={() =>
-                              setSelectedTags(selectedTags.filter((t) => t !== tag))
+                              setSelectedTags(selectedTags.filter((name) => name !== tag))
                             }
                             className="ml-1 hover:text-red-600"
                           >
@@ -392,16 +448,16 @@ export function DocumentBulkOperations({
 
             {dialogType === "share" && (
               <div>
-                <Label>Permission Level</Label>
+                <Label>{t.permission}</Label>
                 <Select value={selectedPermission} onValueChange={setSelectedPermission}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose permission..." />
+                    <SelectValue placeholder={t.choosePermission} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="view">View</SelectItem>
-                    <SelectItem value="comment">Comment</SelectItem>
-                    <SelectItem value="edit">Edit</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="view">{t.permissions.view}</SelectItem>
+                    <SelectItem value="comment">{t.permissions.comment}</SelectItem>
+                    <SelectItem value="edit">{t.permissions.edit}</SelectItem>
+                    <SelectItem value="admin">{t.permissions.admin}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -410,8 +466,7 @@ export function DocumentBulkOperations({
             {dialogType === "delete" && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  This action cannot be undone. {selectedCount} document
-                  {selectedCount > 1 ? "s" : ""} will be permanently deleted.
+                  {t.deleteWarning(selectedCount)}
                 </AlertDescription>
               </Alert>
             )}
@@ -419,8 +474,7 @@ export function DocumentBulkOperations({
             {dialogType === "download" && (
               <Alert>
                 <AlertDescription>
-                  {selectedCount} document{selectedCount > 1 ? "s" : ""} will be downloaded as a
-                  ZIP file.
+                  {t.downloadNote(selectedCount)}
                 </AlertDescription>
               </Alert>
             )}
@@ -428,7 +482,7 @@ export function DocumentBulkOperations({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t.cancel}
             </Button>
             <Button
               onClick={handleConfirm}
@@ -438,12 +492,7 @@ export function DocumentBulkOperations({
               }
               variant={dialogType === "delete" ? "destructive" : "default"}
             >
-              {dialogType === "delete" && "Delete"}
-              {dialogType === "move" && "Move"}
-              {dialogType === "copy" && "Copy"}
-              {dialogType === "tag" && "Add Tags"}
-              {dialogType === "share" && "Share"}
-              {dialogType === "download" && "Download"}
+              {dialogType === "tag" ? t.addTags : dialogType in t.verbs && t.verbs[dialogType as Verb]}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -401,10 +401,21 @@ describe('MembersConsole: when the directory cannot be had', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
-  it('says the status when the refusal states no reason', async () => {
+  it('words a refusal that states no reason by its status, never as an HTTP line', async () => {
     answer = () => ({ status: 502, body: {} });
     renderConsole();
-    expect(await screen.findByRole('alert')).toHaveTextContent('The directory could not be loaded (HTTP 502).');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(alert).not.toHaveTextContent(/HTTP/);
+  });
+
+  it('words the refusal in French and shows none of the route\'s English', async () => {
+    intl.locale = 'fr-CA';
+    answer = () => ({ status: 403, body: { error: 'Forbidden', message: 'Member directory access is not part of your current mandate.' } });
+    renderConsole();
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
+    expect(alert).not.toHaveTextContent('mandate');
   });
 
   it.each([
@@ -428,7 +439,9 @@ describe('MembersConsole: when the directory cannot be had', () => {
   it('shows a network failure as an error', async () => {
     answer = () => { throw new Error('offline'); };
     renderConsole();
-    expect(await screen.findByRole('alert')).toHaveTextContent('offline');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('members.errorLoadingMembers');
+    expect(alert).not.toHaveTextContent('offline');
   });
 
   it('shows the loading state while the directory is on its way', async () => {

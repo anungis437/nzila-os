@@ -21,7 +21,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { buildMembersFetchUrl } from "@/lib/members/build-members-fetch-url";
 import { generateCSV, type CSVColumn } from "@/lib/csv-export";
-import { ApiShapeError, envelopeData, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, envelopeData, failureDetail, failureLanguage, readApiFailure } from "@/lib/client/api-envelope";
 import { asRecord, countOrNull, humanize, optionalString, requiredString } from "@/lib/client/row-fields";
 import {
   Users,
@@ -119,7 +119,7 @@ function toMember(value: unknown): DirectoryMember {
 async function loadDirectory(organizationId: string): Promise<Directory> {
   const base = buildMembersFetchUrl(organizationId);
   const response = await fetch(`${base}${base.includes("?") ? "&" : "?"}limit=${PAGE_LIMIT}`);
-  if (!response.ok) throw new Error(await readApiError(response, `The directory could not be loaded (HTTP ${response.status}).`));
+  if (!response.ok) throw await readApiFailure(response);
   const payload = envelopeData(await response.json());
   if (!Array.isArray(payload.members)) throw new ApiShapeError("no members");
   const members = payload.members.map(toMember);
@@ -253,7 +253,7 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
         <div className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('members.errorLoadingMembers')}</h2>
-          <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : ""}</p>
+          <p className="text-gray-600 mb-4">{failureDetail(error, failureLanguage(locale)) ?? ""}</p>
           <button
             type="button"
             onClick={() => { void mutate(); }}

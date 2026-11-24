@@ -4,13 +4,13 @@
  * withApi sends { success, data: { data: rows, pagination: { page, limit, total, totalPages } }, timestamp } and a page holds at most
  * 100 rows. A response that is not that shape is an error here, never an empty list or a count of zero.
  */
-import { ApiShapeError, envelopeData, isRecord, readApiError } from "./api-envelope";
+import { ApiShapeError, envelopeData, isRecord, readApiFailure } from "./api-envelope";
 
 const PAGE_LIMIT = 100;
 
 async function readPage(path: string, page: number): Promise<{ rows: unknown[]; totalPages: number }> {
   const response = await fetch(`${path}?limit=${PAGE_LIMIT}&page=${page}`);
-  if (!response.ok) throw new Error(await readApiError(response, `Request failed with status ${response.status}`));
+  if (!response.ok) throw await readApiFailure(response, `Request failed with status ${response.status}`);
   const payload = envelopeData(await response.json());
   if (!Array.isArray(payload.data)) throw new ApiShapeError("no list");
   const totalPages = isRecord(payload.pagination) ? Number(payload.pagination.totalPages) : Number.NaN;

@@ -29,7 +29,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { envelopeRow, readApiError } from "@/lib/client/api-envelope";
+import { ApiFailure, envelopeRow, failureDetail, failureLanguage, readApiFailure } from "@/lib/client/api-envelope";
 import { ApiShapeError, asRecord, countOrNull, humanize, isRecord, optionalString, requiredDate, requiredString } from "@/lib/client/row-fields";
 
 interface Member {
@@ -91,16 +91,9 @@ function toClaim(raw: unknown): Claim {
   };
 }
 
-class ReadError extends Error {
-  constructor(message: string, readonly status: number) {
-    super(message);
-    this.name = "ReadError";
-  }
-}
-
 async function getJson(url: string): Promise<unknown> {
   const response = await fetch(url);
-  if (!response.ok) throw new ReadError(await readApiError(response, `Request failed with status ${response.status}`), response.status);
+  if (!response.ok) throw await readApiFailure(response);
   return response.json();
 }
 
@@ -188,13 +181,13 @@ export default function MemberDetailPage() {
   }
 
   if (memberError || !member) {
-    const notFound = memberError instanceof ReadError && memberError.status === 404;
+    const notFound = memberError instanceof ApiFailure && memberError.status === 404;
     return (
       <div className="flex items-center justify-center">
         <div role="alert" className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{notFound ? t('notFoundTitle') : t('loadFailedTitle')}</h2>
-          <p className="text-gray-600 mb-4">{notFound ? t('notFoundDescription') : memberError?.message}</p>
+          <p className="text-gray-600 mb-4">{notFound ? t('notFoundDescription') : failureDetail(memberError, failureLanguage(locale)) ?? ''}</p>
           <div className="flex items-center justify-center gap-3">
             {!notFound && (
               <button
@@ -362,7 +355,7 @@ export default function MemberDetailPage() {
                   <div role="alert" className="text-center py-12">
                     <AlertCircle className="w-10 h-10 text-red-600 mx-auto mb-3" />
                     <p className="text-gray-900 font-medium">{t('claimsLoadFailed')}</p>
-                    <p className="text-gray-600 text-sm mb-4">{claimsError.message}</p>
+                    <p className="text-gray-600 text-sm mb-4">{failureDetail(claimsError, failureLanguage(locale)) ?? ""}</p>
                     <button
                       onClick={() => void reloadClaims()}
                       className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"

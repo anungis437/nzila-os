@@ -185,6 +185,19 @@ describe('workbench inline case access', () => {
     expect(screen.queryByText('workbench.empty.noCasesAssignedTitle')).not.toBeInTheDocument();
   });
 
+  it.each(['en-CA', 'fr-CA'])('words a refused or unanswered queue load in %s without status text or the browser\'s wording', async (locale) => {
+    language.locale = locale;
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 502, statusText: 'Bad Gateway', json: async () => { throw new SyntaxError('not json') } }));
+    const first = render(<WorkbenchConsole />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('workbench.errorLoadingCases');
+    expect(screen.getByRole('alert')).not.toHaveTextContent(/Bad Gateway|Failed to fetch|Failed to load/);
+    first.unmount();
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+    render(<WorkbenchConsole />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('workbench.errorLoadingCases');
+    expect(screen.getByRole('alert')).not.toHaveTextContent(/Failed to fetch/);
+  });
+
   it('renders case types and missing-member labels from the French catalog', async () => {
     language.locale = 'fr-CA';
     language.messages = frenchMessages;
