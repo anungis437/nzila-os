@@ -58,6 +58,7 @@ vi.mock('./service', () => ({
 
 import { updateOrgAuthPolicy } from './admin'
 import { getOrgAuthPolicy } from './service'
+import { insertAuthRow } from '../auth-db'
 
 describe('updateOrgAuthPolicy — validation', () => {
   beforeEach(() => {
@@ -171,6 +172,23 @@ describe('updateOrgAuthPolicy — validation', () => {
     expect(r).toMatchObject({ success: false, conflict: true })
     expect(mockUpdate).not.toHaveBeenCalled()
     expect(mockInsert).not.toHaveBeenCalled()
+  })
+
+  it('reports a conflict, and audits nothing, when a concurrent first save wins the insert', async () => {
+    vi.mocked(getOrgAuthPolicy).mockResolvedValueOnce(stored)
+    mockSelect.mockReturnValueOnce(row(vi.fn().mockResolvedValue([])))
+    vi.mocked(insertAuthRow).mockRejectedValueOnce(Object.assign(new Error('duplicate key'), { code: '23505' }))
+    mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) })
+    const r = await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false }, expected })
+    expect(r).toMatchObject({ success: false, conflict: true })
+    expect(insertAuthRow).toHaveBeenCalledTimes(1)
+    expect(mockInsert).not.toHaveBeenCalled()
+  })
+
+  it('does not call any other insert failure a conflict', async () => {
+    mockSelect.mockReturnValueOnce(row(vi.fn().mockResolvedValue([])))
+    vi.mocked(insertAuthRow).mockRejectedValueOnce(Object.assign(new Error('connection lost'), { code: '08006' }))
+    await expect(updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false } })).rejects.toThrow('connection lost')
   })
 
   it.each([

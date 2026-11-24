@@ -102,6 +102,11 @@ function validatePatch(patch: PolicyPatch): string | null {
   return null
 }
 
+function isUniqueViolation(error: unknown): boolean {
+  const code = (error as { code?: unknown; cause?: { code?: unknown } } | null)
+  return code?.code === '23505' || code?.cause?.code === '23505'
+}
+
 export async function updateOrgAuthPolicy(
   input: UpdatePolicyInput,
 ): Promise<UpdatePolicyResult> {
@@ -162,18 +167,26 @@ async function updateWithContext(input: UpdatePolicyInput): Promise<UpdatePolicy
       })
       .where(eq(authOrgPolicies.organizationId, input.organizationId))
   } else {
-    await insertAuthRow(authOrgPolicies, {
-      organizationId: input.organizationId,
-      allowLocalAuth: input.patch.allowLocalAuth ?? true,
-      allowMagicLink: input.patch.allowMagicLink ?? true,
-      allowSso: input.patch.allowSso ?? true,
-      requireSso: input.patch.requireSso ?? false,
-      requireInvite: input.patch.requireInvite ?? false,
-      passwordResetAllowed: input.patch.passwordResetAllowed ?? true,
-      allowedEmailDomains: (input.patch.allowedEmailDomains ?? []) as unknown as object,
-      mfaRequiredForRoles: (input.patch.mfaRequiredForRoles ?? []) as unknown as object,
-      updatedBy: input.actorUserId,
-    })
+    // Two first saves can both find no row to lock; the loser of the key race reports a conflict instead of overwriting.
+    try {
+      await withAuthSavepoint(() => insertAuthRow(authOrgPolicies, {
+        organizationId: input.organizationId,
+        allowLocalAuth: input.patch.allowLocalAuth ?? true,
+        allowMagicLink: input.patch.allowMagicLink ?? true,
+        allowSso: input.patch.allowSso ?? true,
+        requireSso: input.patch.requireSso ?? false,
+        requireInvite: input.patch.requireInvite ?? false,
+        passwordResetAllowed: input.patch.passwordResetAllowed ?? true,
+        allowedEmailDomains: (input.patch.allowedEmailDomains ?? []) as unknown as object,
+        mfaRequiredForRoles: (input.patch.mfaRequiredForRoles ?? []) as unknown as object,
+        updatedBy: input.actorUserId,
+      }))
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        return { success: false, conflict: true, error: 'The sign-in policy changed after it was loaded' }
+      }
+      throw error
+    }
   }
 
   const after = await getOrgAuthPolicy(input.organizationId)

@@ -39,12 +39,15 @@ A change is reported as saved only after an ok response and a read-back of the s
 | False promise | bulk document bar offered a ZIP that is not produced | Copy states what is produced |
 | Technical details returned in server 5xx messages | Shared client failure policy | All 5xx responses use controlled bilingual wording; an explicit regression test rejects SQL/error-text disclosure |
 | Partial sign-in policy read-back | `components/admin/auth-policy-form.tsx` | Save confirmation checks every stored Boolean setting, the email-domain list and MFA-required roles; focused tests cover previously omitted method flags |
+| Sign-in policy save semantics | `components/admin/auth-policy-form.tsx`, sign-in policy route | The browser sends the snapshot it loaded; the route locks the stored row, compares it to the snapshot and answers 409 when it moved (another administrator saved first), writes policy and audit in one transaction, and the form then reads the policy back without cache and compares every stored setting before it says saved. A mismatch, a failed read-back or a lost response is reported as not confirmed, never as saved |
+| Magic-link verification | `app/magic-link/verify/page.tsx` | Second-factor step and bilingual refusals; 429 and 5xx distinguished from a refused link |
+| Operator consoles | `components/admin/members-console.tsx`, `app/[locale]/dashboard/admin/page.tsx` | Failure text comes from the shared policy (5xx masked, 4xx reason or status wording); the AI endpoint tester now shows controlled text for failures instead of raw bodies. Both stay platform-only: routes require `platform_lead` and `requirePlatformStaffAuthority`, asserted by `platform-console-boundary.test.ts` |
+| Private document delivery from case screens | grievance detail, related-document and precedent panels, grievance read, repository detail read | No stored address is returned or linked; each document opens through the audited, time-limited download path (`useAuthorizedDocumentOpen`) and a refusal is explained in English or French |
 | Ambiguous sign-in policy write result | `components/admin/auth-policy-form.tsx` | A lost response cannot prove a rollback; wording requires reloading the authoritative policy before retrying. Missing policy lists cannot be treated as empty confirmation |
 
 ## Deliberate non-changes
 
-- `app/[locale]/dashboard/admin/page.tsx` AI endpoint tester shows the status and body as received. It is a platform operator tool and says so.
-- `components/admin/members-console.tsx` (platform members console) is an English-only operator console; its strings were not localized in this change.
+- `components/admin/members-console.tsx` (platform members console) and the AI endpoint tester are English-only platform operator tools. They are excluded from the French requirement on purpose; their failure text still uses the shared policy and the boundary test proves a non-platform administrator cannot reach their routes.
 - `components/documents/transcript-review.tsx` reads one refusal by matching its English server sentence. The coupling is recorded; the visible
   text is the screen's own.
 - `app/invite/accept/page.tsx` already maps the server reason to French or falls back to its own line.
