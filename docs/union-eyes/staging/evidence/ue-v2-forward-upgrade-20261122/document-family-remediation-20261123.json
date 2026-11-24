@@ -1,6 +1,6 @@
 {
   "schema": "UE_DOCUMENT_FAMILY_SOURCE_REMEDIATION_V1",
-  "recordedAt": "2026-11-24T00:09:18.686668+00:00",
+  "recordedAt": "2026-11-24T00:27:04.236959+00:00",
   "observedMergedApplicationSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
   "currentlyServingApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
   "originalStagingUpgradeRunId": 45238707739,
@@ -104,10 +104,30 @@
     "apps/union-eyes/lib/documents/ocr-authority.ts": "d17a1a98d9bd3586d9cf22565e2d2edd477246fa2b08a217bad416c2c2bd8a6a",
     "apps/union-eyes/lib/services/document-member-scope.ts": "ddc7d65910ee95b6727792d00cd0943795350e2725f6efaa9367b2f7ae18d1ab",
     "apps/union-eyes/lib/documents/attachment-name.ts": "4f91f19e1322781695c826467620c7d42bdaab487002db4146e6291efd24cad2",
-    "apps/union-eyes/lib/documents/document-link-authority.ts": "7c1e2a04d1f1a5558d4e7eefeb7ae559e5db95a9dd4ea3c7f161745b700333d9"
+    "apps/union-eyes/lib/documents/document-link-authority.ts": "7c1e2a04d1f1a5558d4e7eefeb7ae559e5db95a9dd4ea3c7f161745b700333d9",
+    "tooling/scripts/lib/ue-v2-forward-upgrade.ts": "0387e160014ee2096641098030726a9c0da7949840d88115e490e1c01187b52f",
+    "tooling/scripts/lib/ue-v2-forward-upgrade-runtime.ts": "4f4ca2040590ed0fb9e80ff151ac180989512d142c67d09a0a080796395ccadc",
+    "tooling/scripts/lib/ue-v2-forward-upgrade.test.ts": "bb63c06febdb3886d8804fcbc47257e7d28df1ac8d1fa7a8a7f2926a5bc06d07"
   },
   "stagingAcceptance": false,
   "globalSaasReadinessChanged": false,
   "productionDeployment": false,
-  "financeFeatureImplementation": false
+  "financeFeatureImplementation": false,
+  "managedIncrementExecution": {
+    "predecessorSourceSha": "1b618a665a8a275c85684d6ce8dacd33c06862e6",
+    "officialExport": "PASS_FRESH_INSTALL_REPEAT_DUMP_RESTORE_REPEAT_NATIVE_PRIVILEGES",
+    "nativeSecondIncrement": "FAILED_EXISTING_READER_OWNED_FUNCTION_REPLACEMENT_42501",
+    "rootCause": "The executor used the NOINHERIT schema owner instead of selecting the existing canonical function owner through the already-authorized SET bridge",
+    "correction": "Bind same-owner replacement to the exact current and target canonical function identity, definition and unprivileged owner; require actual SET reachability and retain existing membership/attribute cleanup",
+    "newPrivilegesGranted": false,
+    "focusedOfflineControls": {
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0
+    },
+    "workingTreeTypecheck": "PASS_FORWARD_UPGRADE_AND_SECOND_INCREMENT_PRODUCERS",
+    "technicalReview": "STATIC_REVIEW_OF_EXACT_THREE_FILE_DIFF_NO_REMAINING_CONCRETE_BLOCKER_NOT_HUMAN_OR_STAGING_APPROVAL",
+    "freshCommittedSuccessorNativeProof": "PENDING",
+    "liveDdlPerformed": false
+  }
 }
