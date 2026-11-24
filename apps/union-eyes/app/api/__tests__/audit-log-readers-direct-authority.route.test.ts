@@ -14,6 +14,7 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   scopes: [] as unknown[],
   rows: [] as unknown[],
+  transactions: [] as unknown[],
 }));
 
 vi.mock('@/lib/api/framework', async () => {
@@ -42,7 +43,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     const chain: Record<string, unknown> = {};
     for (const name of ['from', 'where', 'orderBy']) chain[name] = () => chain;
     chain.limit = async () => m.rows;
-    return fn({ select: () => chain });
+    const tx = { select: () => chain };
+    m.transactions.push(tx);
+    return fn(tx);
   }),
 }));
 
@@ -59,6 +62,7 @@ describe('audit-log list readers require direct administration of the organizati
     vi.clearAllMocks();
     m.scopes = [];
     m.rows = [];
+    m.transactions = [];
     m.direct = new Map([[ORG, 'admin']]);
     m.resolveOrganizationAccess.mockImplementation(async () => ({ platform: false, direct: m.direct, descendants: new Set() }));
     m.listAuditEntries.mockResolvedValue([]);
@@ -101,5 +105,31 @@ describe('audit-log list readers require direct administration of the organizati
     const GET = await load();
     await expect(GET(ctx({ userId: null }))).rejects.toBeInstanceOf(ApiError);
     expect(m.scopes).toEqual([]);
+  });
+
+  it('the compliance list uses the same store-aware redacted reader as audit history and audits the read on that transaction', async () => {
+    const GET = (await import('../compliance/audit-logs/route')).GET as unknown as Handler;
+    const rows = [{
+      auditId: '22222222-2222-4222-8222-222222222222', action: 'configuration.updated',
+      resourceType: 'organization', resourceId: ORG, userId: 'user_1',
+      severity: null, outcome: null, createdAt: new Date('2026-11-23T12:00:00Z'), source: 'canonical',
+    }];
+    m.listAuditEntries.mockResolvedValue(rows);
+    expect(await GET(ctx())).toEqual(rows);
+    expect(m.listAuditEntries).toHaveBeenCalledWith(m.transactions[0], ORG);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.transactions[0], {
+      organizationId: ORG, userId: 'user_1', action: 'compliance.audit_log.read',
+      resourceType: 'audit_logs', resourceId: ORG, details: { count: 1 },
+    });
+  });
+
+  it('the compliance list fails closed if either the store read or its mandatory read-audit fails', async () => {
+    const GET = (await import('../compliance/audit-logs/route')).GET as unknown as Handler;
+    m.listAuditEntries.mockRejectedValueOnce(new Error('canonical audit store unavailable'));
+    await expect(GET(ctx())).rejects.toThrow('canonical audit store unavailable');
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    m.listAuditEntries.mockResolvedValueOnce([]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('mandatory read audit unavailable'));
+    await expect(GET(ctx())).rejects.toThrow('mandatory read audit unavailable');
   });
 });

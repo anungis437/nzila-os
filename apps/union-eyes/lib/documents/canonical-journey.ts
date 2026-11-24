@@ -19,6 +19,7 @@ export type JourneyDenial =
   | 'share_blocked'
   | 'classification_change_blocked'
   | 'list_unavailable'
+  | 'read_unavailable'
   | 'none_selected'
   | 'reference_rejected'
   | 'bulk_unavailable'
@@ -55,7 +56,7 @@ const ENGLISH: JourneyCopy = {
   saved: 'The document was saved.',
   malformed_id: 'The document identifier is not valid.',
   unauthorized: 'You do not have permission to open this document.',
-  storage_failure: 'The document could not be retrieved from storage. No link was issued.',
+  storage_failure: 'The document could not be loaded. Refresh and check your access before trying again.',
   audit_failure: 'The download stopped because the audit record could not be written.',
   conflict: 'The document changed before this request finished. Refresh and try again.',
   upload_rejected: 'The document was not saved.',
@@ -63,6 +64,7 @@ const ENGLISH: JourneyCopy = {
   classification_change_blocked:
     'Classification and retention rules cannot be changed from this screen.',
   list_unavailable: 'The document list could not be loaded.',
+  read_unavailable: 'The document could not be loaded. Refresh and check your access before trying again.',
   none_selected: 'Select a document before downloading.',
   reference_rejected:
     "The file reference or content hash was rejected. Use a file already stored in your organization's document storage; a hash, if given, must be the file's SHA-256.",
@@ -81,7 +83,7 @@ const FRENCH: JourneyCopy = {
   saved: 'Le document a ete enregistre.',
   malformed_id: "L'identifiant du document n'est pas valide.",
   unauthorized: "Vous n'avez pas l'autorisation d'ouvrir ce document.",
-  storage_failure: "Le document n'a pas pu etre recupere. Aucun lien n'a ete emis.",
+  storage_failure: "Le document n'a pas pu etre charge. Actualisez et verifiez votre acces avant de reessayer.",
   audit_failure: "Le telechargement a ete interrompu parce que l'audit n'a pas pu etre enregistre.",
   conflict: 'Le document a change avant la fin de la demande. Actualisez et reessayez.',
   upload_rejected: "Le document n'a pas ete enregistre.",
@@ -90,6 +92,7 @@ const FRENCH: JourneyCopy = {
   classification_change_blocked:
     'La classification et les regles de conservation ne peuvent pas etre modifiees depuis cet ecran.',
   list_unavailable: "La liste des documents n'a pas pu etre chargee.",
+  read_unavailable: "Le document n'a pas pu etre charge. Actualisez et verifiez votre acces avant de reessayer.",
   none_selected: 'Selectionnez un document avant le telechargement.',
   reference_rejected:
     "La reference du fichier ou l'empreinte a ete refusee. Utilisez un fichier deja stocke dans le stockage de documents de votre organisation; l'empreinte, si fournie, doit etre le SHA-256 du fichier.",

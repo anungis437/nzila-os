@@ -4,7 +4,7 @@
   "observedMergedApplicationSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
   "currentlyServingApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
   "originalStagingUpgradeRunId": 45238707739,
-  "sourceState": "WORKING_TREE_PRECOMMIT_QUALIFICATION_PENDING",
+  "sourceState": "SOURCE_REMEDIATED_IMMUTABLE_SUCCESSOR_QUALIFICATION_PENDING",
   "defectFamily": [
     "Supported case links were accepted by creation but not interpreted uniformly by document read, search, version replay, OCR, kernel facts and protected external SQL",
     "Internal clients received raw private-storage URLs instead of an authenticated application byte response",
@@ -179,5 +179,85 @@
     },
     "freshCommittedFullNativeProof": "PENDING",
     "liveDdlPerformed": false
+  },
+  "latestSourceReviewAt": "2026-11-24T01:52:55.571645+00:00",
+  "latestBoundedRepairWave": {
+    "baselineCommittedSourceSha": "c802713d0d4707c4ce8893cbecf6fd6ba4f5fbcb",
+    "changes": [
+      "Document list, detail and version reads settle rejected transport and malformed payloads with localized recovery; obsolete, unmounted and prior-organization reads cannot replace current results",
+      "The staff document title loads verified canonical detail and versions before opening the panel",
+      "Compliance audit reads use the same canonical or legacy store as the atomic writer, retain direct-organization authority and redaction, and record the read in the same transaction",
+      "Mature claim-closure QA preparation and rollback inspection remain in approved guarded loopback fixture tooling; the real HTTP journey retains every assertion",
+      "The generated route inventory includes the authenticated content route; historical audit and kernel ratchets are unchanged"
+    ],
+    "documentReadRecovery": {
+      "testsPassed": 49,
+      "failed": 0,
+      "files": 4,
+      "targetedTypecheck": "PASS",
+      "lintErrors": 0,
+      "lintWarnings": 6,
+      "lintReview": "Existing stable state setters and fetch effects; no suppression or stale-closure workaround added"
+    },
+    "auditReader": {
+      "unitAndLegacyTestsPassed": 26,
+      "nativeRestrictedCanonicalTestsPassed": 9,
+      "nativeSkipped": 0,
+      "legacySchemaPrivilegeWidened": false,
+      "auditFailureRollsBack": true
+    },
+    "qaBoundary": {
+      "focusedContractsPassed": 332,
+      "qaClockControlsPassed": 10,
+      "playwrightTestsDiscovered": 69,
+      "actualNewHttpJourneyExecuted": false
+    },
+    "combinedCaseAccess": {
+      "passed": 410,
+      "failed": 0
+    },
+    "combinedNativeContext": {
+      "passed": 301,
+      "failed": 0,
+      "fixtureSourceSha": "c802713d0d4707c4ce8893cbecf6fd6ba4f5fbcb",
+      "workingTreeOnly": true
+    },
+    "combinedUiCensus": {
+      "passed": 53,
+      "failed": 0
+    },
+    "combinedFullContracts": {
+      "passed": 10174,
+      "failed": 0,
+      "pending": 0,
+      "files": 309,
+      "workingTreeOnly": true
+    },
+    "immutableSuccessorRequiredFive": "PENDING",
+    "immutableSuccessorNativeAndHttpCi": "PENDING",
+    "stagingAcceptance": false,
+    "productionDeployment": false,
+    "combinedApplicationTypecheck": "PASS_DECLARED_APPLICATION_COMMAND_8192_MIB",
+    "combinedPrecommitStatus": "PASS_CASE_ACCESS_410_NATIVE_CONTEXT_301_UI_CENSUS_53_CONTRACTS_10174_AND_DECLARED_APPLICATION_TYPECHECK"
+  },
+  "committedPredecessorNativeProof": {
+    "sourceSha": "c802713d0d4707c4ce8893cbecf6fd6ba4f5fbcb",
+    "officialExport": "PASS_FRESH_INSTALL_REPEAT_DUMP_RESTORE_REPEAT_NATIVE_PRIVILEGES",
+    "managedSecondIncrement": "PASS_BOTH_MANAGED_OPERATOR_PROFILES_FAULT_ROLLBACK_PRESERVATION_REPEAT_AND_FORGERY_REFUSAL",
+    "sourcePlanDigest": "5d3e5c78604b312d3dfcd52a755e34b73b6c68c8c2ce94fe068df5cd7faaaf92",
+    "disposableTemplate": "PASS_EXACT_SOURCE_CATALOG_AND_RESTRICTED_ADMISSION_CANONICAL_SEARCH_PATH",
+    "helperProfilesPassed": 8,
+    "ownedHelperDatabaseAndRoleCleanupsVerified": 8,
+    "liveAzureSnapshotUsed": false,
+    "liveStagingProof": false,
+    "successorMustQualifyFresh": true
+  },
+  "latestRepairFileSha256": {
+    "apps/union-eyes/app/api/compliance/audit-logs/route.ts": "cb88cb439f1175512aa33450e3db7d4784be75bcfebc6b164362c6e710255f0e",
+    "apps/union-eyes/components/documents/document-browser.tsx": "239a8450d4454f147e95ed31f708d266ff6ac577c437bb2d13f1db6907102a23",
+    "apps/union-eyes/components/documents/documents-console.tsx": "33399054358ab232ca8ef0217250b871c30df2a76255c04720dc5e3862229dae",
+    "apps/union-eyes/lib/documents/canonical-journey.ts": "e5fa3a0011f09e1e9d2babffa63cf70e044dc908dfffff360f049073b3091d1f",
+    "apps/union-eyes/scripts/runtime/db-inspect.ts": "24b2d0a9b67ad49badabaeb9ba5f67cc129a328db715f6f15ab070184eaeb0c4",
+    "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts": "aa0c9b613da53b51167a561589b651c744080fcf632afe2bcaae24686331929f"
   }
 }

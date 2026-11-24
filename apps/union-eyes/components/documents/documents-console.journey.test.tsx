@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { DocumentsConsole } from './documents-console';
 
 const DOC = '11111111-1111-4111-8111-111111111111';
-const language = vi.hoisted(() => ({ locale: 'en' }));
+const language = vi.hoisted(() => ({ locale: 'en', organizationId: 'org-1' }));
 
 vi.mock('next-intl', () => ({
   useLocale: () => language.locale,
@@ -14,7 +14,7 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@/lib/hooks/use-organization', () => ({
-  useOrganizationId: () => 'org-1',
+  useOrganizationId: () => language.organizationId,
 }));
 
 const DOC_2 = '22222222-2222-4222-8222-222222222222';
@@ -23,12 +23,18 @@ vi.mock('@/components/documents/document-library-browser', () => ({
   DocumentLibraryBrowser: ({
     onDownload,
     onSelectionChange,
+    onPreview,
+    items,
   }: {
     onDownload?: (item: { id: string }) => void;
     onSelectionChange?: (items: Array<{ id: string; name: string }>) => void;
+    onPreview?: (item: { id: string }) => void;
+    items: Array<{ id: string; name: string }>;
   }) => (
     <div>
+      {items.map(item => <span key={item.id}>{item.name}</span>)}
       <button type="button" onClick={() => onDownload?.({ id: DOC })}>library-download</button>
+      <button type="button" onClick={() => onPreview?.({ id: DOC })}>library-preview</button>
       <button
         type="button"
         onClick={() => onSelectionChange?.([{ id: DOC, name: 'Case note' }, { id: DOC_2, name: 'Second note' }])}
@@ -64,7 +70,9 @@ vi.mock('@/components/documents/document-retention-policy', () => ({
 }));
 
 vi.mock('@/components/documents/document-version-control', () => ({
-  DocumentVersionControl: () => null,
+  DocumentVersionControl: ({ document, versions }: { document: { name: string }; versions: Array<{ contentHash: string; versionNumber: number }> }) => (
+    <div data-testid="verified-document-versions">{document.name}:{versions.map(version => `${version.versionNumber}:${version.contentHash}`).join(',')}</div>
+  ),
 }));
 vi.mock('@/components/documents/document-template-manager', () => ({
   DocumentTemplateManager: () => null,
@@ -114,9 +122,115 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   language.locale = 'en';
+  language.organizationId = 'org-1';
 });
 
 describe('documents console canonical journey', () => {
+  it.each(['en', 'fr-CA'])('recovers a failed initial %s list read through the real Search control', async (locale) => {
+    language.locale = locale;
+    const fetchMock = installFetch();
+    fetchMock.mockRejectedValueOnce(new Error('private-provider-token'));
+    render(<DocumentsConsole />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(locale.startsWith('fr')
+      ? "La liste des documents n'a pas pu etre chargee."
+      : 'The document list could not be loaded.');
+    expect(screen.queryByText('private-provider-token')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: 'tabs.repository' }));
+    const search = screen.getByRole('button', { name: 'repository.search' });
+    expect(search).toBeEnabled();
+    await userEvent.click(search);
+    expect(await screen.findByRole('button', { name: 'Case note' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('recovers malformed list JSON through Search and never reports it as an empty successful library', async () => {
+    const fetchMock = installFetch();
+    fetchMock.mockResolvedValueOnce(new Response('{broken', { status: 200 }));
+    render(<DocumentsConsole />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('The document list could not be loaded.');
+    await userEvent.click(screen.getByRole('tab', { name: 'tabs.repository' }));
+    expect(screen.queryByText('repository.empty')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'repository.search' }));
+    expect(await screen.findByRole('button', { name: 'Case note' })).toBeInTheDocument();
+  });
+
+  it.each(['en', 'fr-CA'])('loads actual versions only after a successful %s detail read, and retries a failed read', async (locale) => {
+    language.locale = locale;
+    const fetchMock = installFetch();
+    render(<DocumentsConsole />);
+    await screen.findByText('Case note');
+    fetchMock.mockRejectedValueOnce(new Error('provider-secret'));
+    await userEvent.click(screen.getByRole('button', { name: 'library-preview' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(locale.startsWith('fr')
+      ? "Le document n'a pas pu etre charge."
+      : 'The document could not be loaded.');
+    expect(screen.queryByTestId('document-detail-loading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('verified-document-versions')).not.toBeInTheDocument();
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: {
+      ...listBody.data[0], versions: [{ id: 'version-2', versionNo: 2, uploadedAt: '2026-11-23T00:00:00Z', contentHash: 'stored-sha256' }],
+    } }), { status: 200 }));
+    await userEvent.click(screen.getByRole('button', { name: 'library-preview' }));
+    expect(await screen.findByTestId('verified-document-versions')).toHaveTextContent('Case note:2:stored-sha256');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('does not turn a malformed or mismatched detail into a default version panel', async () => {
+    const fetchMock = installFetch();
+    render(<DocumentsConsole />);
+    await screen.findByText('Case note');
+    for (const response of [new Response('{broken'), new Response(JSON.stringify({ data: { id: DOC_2, versions: [] } }))]) {
+      fetchMock.mockResolvedValueOnce(response);
+      await userEvent.click(screen.getByRole('button', { name: 'library-preview' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent('The document could not be loaded.');
+      expect(screen.queryByTestId('verified-document-versions')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('document-detail-loading')).not.toBeInTheDocument();
+    }
+  });
+
+  it('opens a repository row through the real detail read rather than inventing a current version', async () => {
+    const fetchMock = installFetch();
+    render(<DocumentsConsole />);
+    await screen.findByText('Case note');
+    await userEvent.click(screen.getByRole('tab', { name: 'tabs.repository' }));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: {
+      ...listBody.data[0], versions: [{ id: 'actual-version', versionNo: 3, uploadedAt: '2026-11-23T00:00:00Z', contentHash: 'actual-hash' }],
+    } })));
+    await userEvent.click(screen.getByRole('button', { name: 'Case note' }));
+    expect(await screen.findByTestId('verified-document-versions')).toHaveTextContent('Case note:3:actual-hash');
+    expect(fetchMock.mock.calls.some(call => String(call[0]) === `/api/documents/repository/${DOC}`)).toBe(true);
+  });
+
+  it('discards late organization data and detail reads even when transport ignores abort', async () => {
+    const fetchMock = installFetch();
+    const view = render(<DocumentsConsole />);
+    await screen.findByText('Case note');
+    let finishDetail!: (response: Response) => void;
+    fetchMock.mockImplementationOnce(() => new Promise(resolve => { finishDetail = resolve; }));
+    await userEvent.click(screen.getByRole('button', { name: 'library-preview' }));
+    language.organizationId = 'org-2';
+    view.rerender(<DocumentsConsole />);
+    await waitFor(() => expect(fetchMock.mock.calls.filter(call => String(call[0]).includes('/repository?'))).toHaveLength(2));
+    await act(async () => finishDetail(new Response(JSON.stringify({ data: { ...listBody.data[0], title: 'Old organization secret', versions: [] } }))));
+    expect(screen.queryByTestId('verified-document-versions')).not.toBeInTheDocument();
+    expect(screen.queryByText('Old organization secret')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('document-detail-loading')).not.toBeInTheDocument();
+    const detail = fetchMock.mock.calls.find(call => String(call[0]) === `/api/documents/repository/${DOC}`)!;
+    expect((detail[1] as RequestInit).signal?.aborted).toBe(true);
+  });
+
+  it('catches a download transport failure and allows only an explicit retry', async () => {
+    const fetchMock = installFetch();
+    render(<DocumentsConsole />);
+    await screen.findByText('Case note');
+    fetchMock.mockRejectedValueOnce(new Error('private-provider-token'));
+    await userEvent.click(screen.getByRole('button', { name: 'library-download' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('The document could not be loaded.');
+    expect(window.open).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'library-download' }));
+    await waitFor(() => expect(window.open).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
   it('downloads through the audited route and does not open the list file url', async () => {
     const fetchMock = installFetch();
     render(<DocumentsConsole />);

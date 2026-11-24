@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { DocumentBrowser } from './document-browser';
@@ -77,6 +77,90 @@ afterEach(() => {
 });
 
 describe('document browser canonical journey', () => {
+  it.each(['en', 'fr'])('recovers a failed initial read through the %s Search control without leaking provider errors', async (locale) => {
+    language.locale = locale;
+    const { fetchMock } = installFetch();
+    fetchMock.mockRejectedValueOnce(new Error('private-provider-token'));
+    render(<DocumentBrowser />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(locale === 'fr'
+      ? "La liste des documents n'a pas pu etre chargee."
+      : 'The document list could not be loaded.');
+    expect(screen.queryByText('private-provider-token')).not.toBeInTheDocument();
+    expect(screen.queryByText(locale === 'fr' ? 'Chargement...' : 'Loading...')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: locale === 'fr' ? 'Rechercher' : 'Search' }));
+    expect(await screen.findByText('Case note')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('rejects malformed list JSON and recovers without presenting an empty library as success', async () => {
+    const { fetchMock } = installFetch();
+    fetchMock.mockResolvedValueOnce(new Response('{broken', { status: 200 }));
+    render(<DocumentBrowser />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('The document list could not be loaded.');
+    expect(screen.queryByText('No authorized documents.')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Search' }));
+    expect(await screen.findByText('Case note')).toBeInTheDocument();
+  });
+
+  it.each(['en', 'fr'])('recovers a rejected %s preview read by reopening the same authorized row', async (locale) => {
+    language.locale = locale;
+    const { fetchMock } = installFetch();
+    render(<DocumentBrowser />);
+    await screen.findByText('Case note');
+    fetchMock.mockRejectedValueOnce(new Error('provider-secret'));
+    const preview = locale === 'fr' ? 'Apercu' : 'Preview';
+    await userEvent.click(screen.getAllByRole('button', { name: preview })[0]);
+    expect(await screen.findByRole('alert')).toHaveTextContent(locale === 'fr'
+      ? "Le document n'a pas pu etre charge."
+      : 'The document could not be loaded.');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    await userEvent.click(screen.getAllByRole('button', { name: preview })[0]);
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Case note');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('discards an older list response after the organization changes, even if transport ignores abort', async () => {
+    const { fetchMock } = installFetch();
+    let finish!: (response: Response) => void;
+    fetchMock.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const view = render(<DocumentBrowser organizationId="org-old" />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    view.rerender(<DocumentBrowser organizationId="org-new" />);
+    expect(await screen.findByText('Case note')).toBeInTheDocument();
+    await act(async () => finish(new Response(JSON.stringify({ data: [{ ...listRow, title: 'Old organization secret' }] }), { status: 200 })));
+    expect(screen.queryByText('Old organization secret')).not.toBeInTheDocument();
+    expect(screen.getByText('Case note')).toBeInTheDocument();
+    expect((fetchMock.mock.calls[0][1] as RequestInit).signal?.aborted).toBe(true);
+  });
+
+  it('discards a late preview when a newer authorized row was selected', async () => {
+    const { fetchMock } = installFetch();
+    render(<DocumentBrowser />);
+    await screen.findByText('Case note');
+    let finish!: (response: Response) => void;
+    fetchMock.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Preview' })[0]);
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...listRow, id: OTHER, title: 'Second note' } }), { status: 200 }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Preview' })[1]);
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Second note');
+    await act(async () => finish(new Response(JSON.stringify({ data: { ...listRow, title: 'Late preview secret' } }), { status: 200 })));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Second note');
+    expect(screen.queryByText('Late preview secret')).not.toBeInTheDocument();
+  });
+
+  it('catches a download transport failure and permits an explicit retry without opening a stale url', async () => {
+    const { fetchMock } = installFetch();
+    render(<DocumentBrowser />);
+    await screen.findByText('Case note');
+    fetchMock.mockRejectedValueOnce(new Error('private-token'));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Download' })[0]);
+    expect(await screen.findByRole('alert')).toHaveTextContent('The document could not be loaded.');
+    expect(window.open).not.toHaveBeenCalled();
+    await userEvent.click(screen.getAllByRole('button', { name: 'Download' })[0]);
+    await waitFor(() => expect(window.open).toHaveBeenCalledTimes(1));
+  });
+
   it('lists the repository, hides storage urls, and downloads only through the audited route', async () => {
     const { calls } = installFetch();
     render(<DocumentBrowser selectionMode="multiple" />);

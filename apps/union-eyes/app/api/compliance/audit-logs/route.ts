@@ -7,8 +7,7 @@
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { auditLogs } from '@/db/schema/audit-security-schema';
-import { eq, desc } from 'drizzle-orm';
+import { listAuditEntries } from '@/lib/audit/audit-reader';
 import { directRoleIn, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
@@ -23,21 +22,7 @@ export const GET = withApi(
     return withRLSContext({ organizationId, userId }, async (tx) => {
       // The record of who did what and when. The captured values, network address, user agent, session and correlation ids,
       // free-form metadata and error text stay in the store and are not served by this list.
-      const rows = await tx
-        .select({
-          auditId: auditLogs.auditId,
-          action: auditLogs.action,
-          resourceType: auditLogs.resourceType,
-          resourceId: auditLogs.resourceId,
-          userId: auditLogs.userId,
-          severity: auditLogs.severity,
-          outcome: auditLogs.outcome,
-          createdAt: auditLogs.createdAt,
-        })
-        .from(auditLogs)
-        .where(eq(auditLogs.organizationId, organizationId))
-        .orderBy(desc(auditLogs.createdAt))
-        .limit(100);
+      const rows = await listAuditEntries(tx, organizationId);
       await persistAtomicAudit(tx, {
         organizationId,
         userId,
