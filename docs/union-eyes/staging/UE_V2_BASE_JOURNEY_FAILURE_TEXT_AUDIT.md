@@ -38,6 +38,7 @@ A change is reported as saved only after an ok response and a read-back of the s
 | Failure shown as emptiness | case-context panel (a failed read showed empty lists and rejected unhandled) | Failure notice; panels hidden on failure |
 | False promise | bulk document bar offered a ZIP that is not produced | Copy states what is produced |
 | Technical details returned in server 5xx messages | Shared client failure policy | All 5xx responses use controlled bilingual wording; an explicit regression test rejects SQL/error-text disclosure |
+| Partial sign-in policy read-back | `components/admin/auth-policy-form.tsx` | Save confirmation checks every stored Boolean setting, the email-domain list and MFA-required roles; focused tests cover previously omitted method flags |
 
 ## Deliberate non-changes
 
