@@ -13,9 +13,15 @@ import {
   assertOnlyAliasFunctionDelta,
   aliasReplacementIndexes,
   injectAfterActualAlias,
+  PRESERVATION_ACL_QUERY,
+  preservationAclDigest,
+  assertPhysicalKSequenceAcls,
+  type PreservationAclRow,
+  type PreservationGrant,
 } from '../prove-ue-v2-second-increment.cts'
 import type { ForwardUpgradeBundle } from './ue-v2-forward-upgrade-runtime'
 import type { UpgradeObject } from './ue-v2-forward-upgrade'
+import { parseSql } from '../../../apps/union-eyes/scripts/lib/sql-census/parse'
 
 const oldAlias = "linked_entity_type::text='grievance'"
 const newAlias = "linked_entity_type::text IN ('case','grievance')"
@@ -272,4 +278,207 @@ test('actual pg_dump comment prefixes do not hide the function-body injection po
     ),
   ])
   assert.deepEqual(aliasReplacementIndexes(target), [0])
+})
+
+const ownerGrant = (privilege: string): PreservationGrant => ({
+  grantor: 'ue_v2_owner',
+  grantorOid: '17000',
+  grantee: 'ue_v2_owner',
+  granteeOid: '17000',
+  privilege,
+  grantable: false,
+})
+const sequencePrivileges = ['SELECT', 'UPDATE', 'USAGE']
+const tablePrivileges = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'TRUNCATE',
+  'REFERENCES',
+  'TRIGGER',
+]
+const aclRow = (kind = 'r'): PreservationAclRow => ({
+  id: 'public.original',
+  kind,
+  owner: 'ue_v2_owner',
+  ownerOid: '17000',
+  rls: true,
+  force: true,
+  rawAcl: null,
+  grants: (kind === 'S' ? sequencePrivileges : tablePrivileges).map(ownerGrant),
+  columns: [{ number: 1, name: 'id', rawAcl: null, grants: [] }],
+})
+const authoritySequenceGrant: PreservationGrant = {
+  grantor: 'ue_v2_owner',
+  grantorOid: '17000',
+  grantee: 'nzila_auth_org_authority_reader',
+  granteeOid: '17001',
+  privilege: 'USAGE',
+  grantable: false,
+}
+const canonicalKSequences = () => [
+  { ...aclRow('S'), id: 'public.rbac_audit_log_sequence_number_seq' },
+  {
+    ...aclRow('S'),
+    id: 'public.ue_authority_events_event_seq_seq',
+    rawAcl: ['ue_v2_owner=rwU/ue_v2_owner', 'nzila_auth_org_authority_reader=U/ue_v2_owner'],
+    grants: [...sequencePrivileges.map(ownerGrant), authoritySequenceGrant],
+  },
+]
+
+test('raw NULL and explicit owner-default ACL encodings preserve the exact same PostgreSQL-expanded tuples', () => {
+  for (const kind of ['r', 'S']) {
+    const original = aclRow(kind)
+    const explicit = structuredClone(original)
+    explicit.rawAcl = [
+      kind === 'S' ? 'ue_v2_owner=rwU/ue_v2_owner' : 'ue_v2_owner=arwdDxt/ue_v2_owner',
+    ]
+    explicit.grants.reverse()
+    explicit.columns[0].rawAcl = []
+    assert.equal(preservationAclDigest([original]), preservationAclDigest([explicit]))
+    const wrongClass = structuredClone(explicit)
+    wrongClass.grants = (kind === 'S' ? tablePrivileges : sequencePrivileges).map(ownerGrant)
+    assert.notEqual(preservationAclDigest([original]), preservationAclDigest([wrongClass]))
+  }
+})
+
+test('sequence reader-USAGE loss or addition and PUBLIC or unexpected grants cannot normalize away', () => {
+  const row = canonicalKSequences()[1]
+  const lost = structuredClone(row)
+  lost.grants = lost.grants.filter((grant) => grant.grantee !== authoritySequenceGrant.grantee)
+  assert.notEqual(preservationAclDigest([row]), preservationAclDigest([lost]))
+  assert.notEqual(preservationAclDigest([lost]), preservationAclDigest([row]))
+  for (const grant of [
+    { ...authoritySequenceGrant, grantee: 'PUBLIC', granteeOid: '0' },
+    { ...authoritySequenceGrant, grantee: 'unexpected_reader', granteeOid: '17002' },
+    { ...authoritySequenceGrant, grantable: true },
+  ]) {
+    const changed = structuredClone(row)
+    changed.grants.push(grant)
+    assert.notEqual(preservationAclDigest([row]), preservationAclDigest([changed]))
+  }
+})
+
+test('ACL identity includes every grantor, grantee, privilege and grant option', () => {
+  const row = aclRow()
+  for (const delta of [
+    { grantor: 'another_grantor' },
+    { grantorOid: '17004' },
+    { grantee: 'another_grantee' },
+    { granteeOid: '17005' },
+    { privilege: 'USAGE' },
+    { grantable: true },
+  ]) {
+    const changed = structuredClone(row)
+    changed.grants[0] = { ...changed.grants[0], ...delta }
+    assert.notEqual(preservationAclDigest([row]), preservationAclDigest([changed]))
+  }
+})
+
+test('column grants, names and positions remain independent of relation grants', () => {
+  const row = aclRow()
+  for (const mutate of [
+    (changed: PreservationAclRow) => {
+      changed.columns[0].grants = [{ ...authoritySequenceGrant, privilege: 'SELECT' }]
+    },
+    (changed: PreservationAclRow) => {
+      changed.columns[0].name = 'another_column'
+    },
+    (changed: PreservationAclRow) => {
+      changed.columns[0].number = 2
+    },
+    (changed: PreservationAclRow) => {
+      changed.columns.push({ number: 2, name: 'extra', rawAcl: null, grants: [] })
+    },
+  ]) {
+    const changed = structuredClone(row)
+    mutate(changed)
+    assert.notEqual(preservationAclDigest([row]), preservationAclDigest([changed]))
+  }
+  const granted = structuredClone(row)
+  granted.columns[0].grants = [{ ...authoritySequenceGrant, privilege: 'SELECT' }]
+  for (const delta of [
+    { grantor: 'another' },
+    { grantorOid: '17002' },
+    { grantee: 'PUBLIC', granteeOid: '0' },
+    { privilege: 'UPDATE' },
+    { grantable: true },
+  ]) {
+    const changed = structuredClone(granted)
+    changed.columns[0].grants[0] = { ...changed.columns[0].grants[0], ...delta }
+    assert.notEqual(preservationAclDigest([granted]), preservationAclDigest([changed]))
+  }
+})
+
+test('relation identity, kind, owner and RLS flags remain exact; unsupported ACL-bearing classes refuse', () => {
+  const row = aclRow()
+  for (const delta of [
+    { id: 'another.original' },
+    { kind: 'p' },
+    { owner: 'another' },
+    { ownerOid: '17002' },
+    { rls: false },
+    { force: false },
+  ]) {
+    const changed = { ...row, ...delta }
+    assert.notEqual(preservationAclDigest([row]), preservationAclDigest([changed]))
+  }
+  const index = { ...aclRow('i'), grants: [] }
+  assert.equal(typeof preservationAclDigest([index]), 'string')
+  assert.throws(
+    () => preservationAclDigest([{ ...index, rawAcl: ['ue_v2_owner=arwdDxt/ue_v2_owner'] }]),
+    /UNSUPPORTED_RELATION_ACL_KIND/,
+  )
+  assert.throws(() => preservationAclDigest([row, row]), /DUPLICATE_ACL_RELATION/)
+})
+
+test('a physical-K fixture must retain the authority sequence reader USAGE and owner-only RBAC sequence', () => {
+  assert.equal(assertPhysicalKSequenceAcls(canonicalKSequences()).length, 2)
+  for (const mutate of [
+    (rows: PreservationAclRow[]) => {
+      rows[1].grants.pop()
+    },
+    (rows: PreservationAclRow[]) => {
+      rows[0].grants.push(authoritySequenceGrant)
+    },
+    (rows: PreservationAclRow[]) => {
+      rows[1].grants[3] = { ...authoritySequenceGrant, grantable: true }
+    },
+    (rows: PreservationAclRow[]) => {
+      rows[1].grants[3] = { ...authoritySequenceGrant, grantee: 'PUBLIC', granteeOid: '0' }
+    },
+    (rows: PreservationAclRow[]) => {
+      rows[1].grants[3] = { ...authoritySequenceGrant, grantorOid: '17009' }
+    },
+    (rows: PreservationAclRow[]) => {
+      rows[1].owner = 'another'
+    },
+  ]) {
+    const rows = canonicalKSequences()
+    mutate(rows)
+    assert.throws(() => assertPhysicalKSequenceAcls(rows), /SECOND_K_SEQUENCE_/)
+  }
+})
+
+test('the preservation inspector is one read-only PostgreSQL query with distinct relation/sequence/column defaults', async () => {
+  const parsed = await parseSql(PRESERVATION_ACL_QUERY)
+  assert(parsed.ok && parsed.statements.length === 1 && parsed.statements[0].SelectStmt)
+  assert.match(
+    PRESERVATION_ACL_QUERY,
+    /c\.relkind='S' THEN pg_catalog\.acldefault\('s',c\.relowner\)/,
+  )
+  assert.match(
+    PRESERVATION_ACL_QUERY,
+    /c\.relkind IN \('r','p','v','m','f'\) THEN pg_catalog\.acldefault\('r',c\.relowner\)/,
+  )
+  assert.match(
+    PRESERVATION_ACL_QUERY,
+    /COALESCE\(a\.attacl,pg_catalog\.acldefault\('c',c\.relowner\)\)/,
+  )
+  // PostgreSQL refuses aclexplode('{}'::aclitem[]) because it has zero
+  // dimensions; NULL is strict and expands to no grants instead.
+  assert.equal((PRESERVATION_ACL_QUERY.match(/pg_catalog\.aclexplode\(NULLIF\(/g) ?? []).length, 2)
+  for (const key of ['grantorOid', 'granteeOid', 'privilege', 'grantable', 'ownerOid'])
+    assert(PRESERVATION_ACL_QUERY.includes(key))
 })

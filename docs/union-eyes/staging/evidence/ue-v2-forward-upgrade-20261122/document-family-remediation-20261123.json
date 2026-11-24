@@ -1,6 +1,6 @@
 {
   "schema": "UE_DOCUMENT_FAMILY_SOURCE_REMEDIATION_V1",
-  "recordedAt": "2026-11-24T00:27:04.236959+00:00",
+  "recordedAt": "2026-11-24T00:41:59.795884+00:00",
   "observedMergedApplicationSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
   "currentlyServingApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
   "originalStagingUpgradeRunId": 45238707739,
@@ -72,7 +72,13 @@
     "currentSourceFullFive": "PENDING",
     "restrictedNativeDocumentRoutes": "PREPARED_UNEXECUTED",
     "matureClaimClosureHttp": "PREPARED_UNEXECUTED",
-    "stagingAcceptance": "UNEXECUTED"
+    "stagingAcceptance": "UNEXECUTED",
+    "currentAppCohort": {
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "files": 22
+    }
   },
   "physicalChange": {
     "canonicalStatementCount": 6326,
@@ -96,7 +102,7 @@
     "apps/union-eyes/app/api/documents/[id]/content/route.ts": "8a52ff018629c3730cae19857d7f8cdbe232a856680370d573c45cc92fe8a0c6",
     "apps/union-eyes/lib/external-resource-read/source.ts": "cfd5a7eeca7125c9adba2a9e2517b729b403f29eb32fa354b05db2a6e095c8a4",
     "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts": "ddc25f3a6c83a28ccfeddaef04bf6c4412428028d6f9fbad7e2a46529064a25c",
-    "tooling/scripts/prove-ue-v2-second-increment.cts": "3d8ed271c430f79e0ee73916fcb43178f3d7b3723158650bddb21ed3356d9ebd",
+    "tooling/scripts/prove-ue-v2-second-increment.cts": "e60d795fa9987c4800bba3cbb81f911f4aaeeda1523b36bad4a7d92b6b53040e",
     "apps/union-eyes/lib/documents/transcripts.ts": "f554f1fe4c256f4aa2fc67bff7f7ff005f45493f06bb55c8e2591f45554af150",
     "apps/union-eyes/app/api/documents/repository/route.ts": "94eb554e15647718449989ae8e6f0175aedbc022339307dea723d32938072d19",
     "apps/union-eyes/app/api/external/documents/[id]/download/route.ts": "63f12e542beb18d8ec10e42fe4bd412bb0009fcda942fb49631b3457ecc6ae4d",
@@ -104,10 +110,14 @@
     "apps/union-eyes/lib/documents/ocr-authority.ts": "d17a1a98d9bd3586d9cf22565e2d2edd477246fa2b08a217bad416c2c2bd8a6a",
     "apps/union-eyes/lib/services/document-member-scope.ts": "ddc7d65910ee95b6727792d00cd0943795350e2725f6efaa9367b2f7ae18d1ab",
     "apps/union-eyes/lib/documents/attachment-name.ts": "4f91f19e1322781695c826467620c7d42bdaab487002db4146e6291efd24cad2",
-    "apps/union-eyes/lib/documents/document-link-authority.ts": "7c1e2a04d1f1a5558d4e7eefeb7ae559e5db95a9dd4ea3c7f161745b700333d9",
+    "apps/union-eyes/lib/documents/document-link-authority.ts": "44ee033a49757db202b198f3e61b2e6e24380329e82944ecda234d5ee15087e1",
     "tooling/scripts/lib/ue-v2-forward-upgrade.ts": "0387e160014ee2096641098030726a9c0da7949840d88115e490e1c01187b52f",
     "tooling/scripts/lib/ue-v2-forward-upgrade-runtime.ts": "4f4ca2040590ed0fb9e80ff151ac180989512d142c67d09a0a080796395ccadc",
-    "tooling/scripts/lib/ue-v2-forward-upgrade.test.ts": "bb63c06febdb3886d8804fcbc47257e7d28df1ac8d1fa7a8a7f2926a5bc06d07"
+    "tooling/scripts/lib/ue-v2-forward-upgrade.test.ts": "bb63c06febdb3886d8804fcbc47257e7d28df1ac8d1fa7a8a7f2926a5bc06d07",
+    "apps/union-eyes/app/api/__tests__/documents-download-version-contract.pglite.test.ts": "1145f349e2338862310a91a027948d18137971ef8ce1a3aaee159ae728ce0aa6",
+    "apps/union-eyes/lib/documents/document-link-authority.pglite.test.ts": "1d409f5f21f4a06b86424983b2dae2c067854a4d79c09d526d12ef1b98190932",
+    "apps/union-eyes/lib/services/document-authorization-service.test.ts": "fe77ce08446e92eb7096bdcd0d3c612b5e5543e7174a0f39e4f749c5dee929f9",
+    "tooling/scripts/lib/ue-v2-second-increment.test.ts": "1e1828a3a30b3f24722e58219a11bda369b959b52704f35acfd41c1454c8da9a"
   },
   "stagingAcceptance": false,
   "globalSaasReadinessChanged": false,
@@ -128,6 +138,46 @@
     "workingTreeTypecheck": "PASS_FORWARD_UPGRADE_AND_SECOND_INCREMENT_PRODUCERS",
     "technicalReview": "STATIC_REVIEW_OF_EXACT_THREE_FILE_DIFF_NO_REMAINING_CONCRETE_BLOCKER_NOT_HUMAN_OR_STAGING_APPROVAL",
     "freshCommittedSuccessorNativeProof": "PENDING",
+    "liveDdlPerformed": false
+  },
+  "bothCaseModelBoundary": {
+    "canonicalKeys": [
+      "grievances.id",
+      "claims.claim_id"
+    ],
+    "internalClaimRowIdIsNotCanonicalCaseId": true,
+    "legacyNonCaseLabelsResolveWithinTenantBeforeOrganizationScope": true,
+    "workingTreeAppCohort": {
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "files": 22
+    },
+    "freshCurrentSourceStagingProof": "PENDING"
+  },
+  "secondIncrementOracleCorrection": {
+    "predecessorSourceSha": "a3ebfee6356d9a51b11c530d32906df3c7641d86",
+    "officialNativeExport": "PASS",
+    "observedActualFunctionFailureRollback": "PASS",
+    "fullManagedIncrementResult": "FAILED_COMMIT_PRESERVATION_CHECK_NOT_ACCEPTED",
+    "diagnosis": {
+      "relations": 3274,
+      "changedAclRepresentations": 356,
+      "realFixtureGrantMismatch": 1,
+      "realFixtureMismatch": "The test fixture had removed the authority reader USAGE already present on the qualified predecessor sequence; it is now preserved"
+    },
+    "correction": "Compare PostgreSQL-expanded relation/column defaults with exact grantee, grantor, privilege, grant-option, owner, RLS and FORCE identities; retain raw snapshots and fail on real permission differences",
+    "offlineControls": {
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0
+    },
+    "actualReadOnlyInspectorSmoke": {
+      "environment": "OWNED_DISPOSABLE_POSTGRESQL16",
+      "relations": 3274,
+      "status": "PASS_INSPECTOR_ONLY_NOT_FULL_INCREMENT"
+    },
+    "freshCommittedFullNativeProof": "PENDING",
     "liveDdlPerformed": false
   }
 }

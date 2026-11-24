@@ -165,7 +165,7 @@ describe('document-authorization-service', () => {
   });
 
   it('keeps an actual non-case policy-library document in organization scope', async () => {
-    queueSelectSteps([{ rows: [] }, { rows: [] }]);
+    queueSelectSteps([{ rows: [] }, { rows: [] }, { rows: [] }]);
     const { authorizeDocumentsForActor } = await import('./document-authorization-service');
     const result = await authorizeDocumentsForActor({ organizationId: 'org-1', actor: { userId: 'member' },
       documents: [{ id: 'library-doc', privacyLabel: 'public_internal', linkedEntityType: 'policy_library', linkedEntityId: 'library-1' }] });

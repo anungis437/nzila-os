@@ -221,8 +221,133 @@ export function injectAfterActualAlias(
   }
 }
 
+export interface PreservationGrant {
+  grantor: string
+  grantorOid: string
+  grantee: string
+  granteeOid: string
+  privilege: string
+  grantable: boolean
+}
+export interface PreservationAclRow {
+  id: string
+  kind: string
+  owner: string
+  ownerOid: string
+  rls: boolean
+  force: boolean
+  rawAcl: string[] | null
+  grants: PreservationGrant[]
+  columns: {
+    number: number
+    name: string
+    rawAcl: string[] | null
+    grants: PreservationGrant[]
+  }[]
+}
+
+// PostgreSQL supplies the defaults, including sequence ('s') versus table ('r')
+// privileges and empty column ('c') privileges. Index/composite relation kinds
+// have no default relation ACL; a nonnull ACL on one is refused below.
+const expandedGrantsSql = (acl: string) => `COALESCE((SELECT jsonb_agg(jsonb_build_object(
+  'grantor',pg_get_userbyid(x.grantor),'grantorOid',x.grantor::text,
+  'grantee',CASE WHEN x.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(x.grantee) END,
+  'granteeOid',x.grantee::text,'privilege',x.privilege_type,'grantable',x.is_grantable)
+  ORDER BY x.grantor,x.grantee,x.privilege_type,x.is_grantable)
+  FROM pg_catalog.aclexplode(NULLIF(${acl},ARRAY[]::aclitem[])) x),'[]'::jsonb)`
+export const PRESERVATION_ACL_QUERY = `SELECT n.nspname||'.'||c.relname AS id,
+  c.relkind::text AS kind,pg_get_userbyid(c.relowner) AS owner,c.relowner::text AS "ownerOid",
+  c.relrowsecurity AS rls,c.relforcerowsecurity AS force,
+  CASE WHEN c.relacl IS NULL THEN NULL ELSE ARRAY(SELECT v::text FROM unnest(c.relacl) v ORDER BY v::text) END AS "rawAcl",
+  ${expandedGrantsSql(`COALESCE(c.relacl,CASE WHEN c.relkind='S' THEN pg_catalog.acldefault('s',c.relowner)
+    WHEN c.relkind IN ('r','p','v','m','f') THEN pg_catalog.acldefault('r',c.relowner)
+    ELSE ARRAY[]::aclitem[] END)`)} AS grants,
+  COALESCE((SELECT jsonb_agg(jsonb_build_object('number',a.attnum,'name',a.attname,
+    'rawAcl',CASE WHEN a.attacl IS NULL THEN NULL ELSE to_jsonb(ARRAY(SELECT v::text FROM unnest(a.attacl) v ORDER BY v::text)) END,
+    'grants',${expandedGrantsSql("COALESCE(a.attacl,pg_catalog.acldefault('c',c.relowner))")}) ORDER BY a.attnum)
+    FROM pg_attribute a WHERE a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped),'[]'::jsonb) AS columns
+  FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+  WHERE n.nspname !~ '^pg_' AND n.nspname<>'information_schema' ORDER BY 1`
+
+/** Compare every effective ACL tuple, not its NULL/explicit-default encoding.
+ * Relation/column identities, owners, grantors and grant options remain exact. */
+export function preservationAclDigest(rows: PreservationAclRow[]) {
+  const grants = (values: PreservationGrant[]) =>
+    [...values].sort((a, b) => forwardDigest(a).localeCompare(forwardDigest(b)))
+  const normalized = rows.map((row) => {
+    assert(
+      ['r', 'p', 'v', 'm', 'f', 'S'].includes(row.kind) || row.rawAcl === null,
+      `SECOND_UNSUPPORTED_RELATION_ACL_KIND:${row.id}`,
+    )
+    return {
+      id: row.id,
+      kind: row.kind,
+      owner: row.owner,
+      ownerOid: row.ownerOid,
+      rls: row.rls,
+      force: row.force,
+      grants: grants(row.grants),
+      columns: row.columns
+        .map((column) => ({
+          number: column.number,
+          name: column.name,
+          grants: grants(column.grants),
+        }))
+        .sort((a, b) => a.number - b.number),
+    }
+  })
+  assert.equal(
+    new Set(normalized.map((row) => row.id)).size,
+    rows.length,
+    'SECOND_DUPLICATE_ACL_RELATION',
+  )
+  return forwardDigest(normalized.sort((a, b) => a.id.localeCompare(b.id)))
+}
+
+export function assertPhysicalKSequenceAcls(rows: PreservationAclRow[]) {
+  const ids = [
+    'public.rbac_audit_log_sequence_number_seq',
+    'public.ue_authority_events_event_seq_seq',
+  ]
+  for (const [index, id] of ids.entries()) {
+    const row = rows.find((value) => value.id === id)
+    assert(
+      row && row.kind === 'S' && row.owner === 'ue_v2_owner',
+      `SECOND_K_SEQUENCE_REQUIRED:${id}`,
+    )
+    const expected = ['SELECT', 'UPDATE', 'USAGE'].map((privilege) => ({
+      grantor: row.owner,
+      grantee: row.owner,
+      privilege,
+      grantable: false,
+    }))
+    if (index === 1)
+      expected.push({
+        grantor: row.owner,
+        grantee: 'nzila_auth_org_authority_reader',
+        privilege: 'USAGE',
+        grantable: false,
+      })
+    const actual = row.grants.map(
+      ({ grantor, grantorOid, grantee, granteeOid, privilege, grantable }) => {
+        assert.equal(grantorOid, row.ownerOid, `SECOND_K_SEQUENCE_GRANTOR_REQUIRED:${id}`)
+        assert.equal(
+          grantee === row.owner,
+          granteeOid === row.ownerOid,
+          `SECOND_K_SEQUENCE_GRANTEE_REQUIRED:${id}`,
+        )
+        return { grantor, grantee, privilege, grantable }
+      },
+    )
+    const sort = (values: typeof expected) =>
+      values.sort((a, b) => forwardDigest(a).localeCompare(forwardDigest(b)))
+    assert.deepEqual(sort(actual), sort(expected), `SECOND_K_SEQUENCE_ACL_DIFFERS:${id}`)
+  }
+  return ids
+}
+
 /** Provider-only readback observes every stored relation; executor proof still uses the actual managed operator. */
-async function preservationSnapshot(provider: pg.Client) {
+async function preservationSnapshot(provider: pg.Client, rawAclOutput?: string) {
   const quote = (v: string) => '"' + v.replaceAll('"', '""') + '"'
   const tables = (
     await provider.query<{
@@ -255,12 +380,8 @@ async function preservationSnapshot(provider: pg.Client) {
         )
       ).rows[0],
     })
-  const acls = (
-    await provider.query<UpgradeObject>(`SELECT 'relation' AS kind,n.nspname||'.'||c.relname AS id,jsonb_build_object(
-    'kind',c.relkind::text,'owner',pg_get_userbyid(c.relowner),'acl',CASE WHEN c.relacl IS NULL THEN NULL ELSE to_jsonb(ARRAY(SELECT a::text FROM unnest(c.relacl) a ORDER BY a::text)) END,
-    'rls',c.relrowsecurity,'force',c.relforcerowsecurity,'columns',(SELECT jsonb_object_agg(a.attname,CASE WHEN a.attacl IS NULL THEN NULL ELSE to_jsonb(ARRAY(SELECT v::text FROM unnest(a.attacl) v ORDER BY v::text)) END) FROM pg_attribute a WHERE a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped)) AS definition
-    FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname !~ '^pg_' AND n.nspname<>'information_schema' ORDER BY 2`)
-  ).rows
+  const acls = (await provider.query<PreservationAclRow>(PRESERVATION_ACL_QUERY)).rows
+  if (rawAclOutput) fs.writeFileSync(rawAclOutput, JSON.stringify(acls, null, 2))
   const attrs = (
     await provider.query(
       "SELECT rolname,rolsuper,rolbypassrls,rolcanlogin,rolcreatedb,rolcreaterole,rolreplication,rolinherit FROM pg_roles WHERE rolname='uev2admin'",
@@ -273,7 +394,7 @@ async function preservationSnapshot(provider: pg.Client) {
     rowDigest: forwardDigest(rows),
     sequences: sequences.length,
     sequenceDigest: forwardDigest(sequences),
-    aclDigest: forwardDigest(normalizeForwardCatalog(acls)),
+    aclDigest: preservationAclDigest(acls),
     operator: attrs,
     receiptDigest: forwardDigest(receipt),
   }
@@ -652,16 +773,38 @@ async function main() {
 
     // Physical K already has canonical owners and closed ACLs. No historical owner handoff may occur again.
     const historicalFunctionOwners: string[] = []
-    const historicalDefaultSequenceAcls = [
-      'public.rbac_audit_log_sequence_number_seq',
-      'public.ue_authority_events_event_seq_seq',
-    ]
-    const seededSequenceAcls = await provider.query(
-      "UPDATE pg_catalog.pg_class SET relacl=pg_catalog.acldefault('s',relowner) WHERE oid=ANY($1::regclass[]) AND relowner='ue_v2_owner'::regrole RETURNING relacl::text AS acl",
-      [historicalDefaultSequenceAcls],
+    const originalSequenceAcls = (
+      await provider.query<PreservationAclRow>(PRESERVATION_ACL_QUERY)
+    ).rows.filter((row) => row.kind === 'S')
+    assertPhysicalKSequenceAcls(originalSequenceAcls)
+    // K already grants authority-reader USAGE on its event sequence. Preserve
+    // that grant; only the genuinely owner-only RBAC sequence exercises the
+    // equivalent explicit-owner default encoding, through ordinary GRANT.
+    const historicalDefaultSequenceAcls = ['public.rbac_audit_log_sequence_number_seq']
+    await provider.query(
+      'GRANT ALL ON SEQUENCE public.rbac_audit_log_sequence_number_seq TO ue_v2_owner',
     )
-    assert.equal(seededSequenceAcls.rowCount, 2)
-    assert(seededSequenceAcls.rows.every((row) => row.acl === '{ue_v2_owner=rwU/ue_v2_owner}'))
+    const representedSequenceAcls = (
+      await provider.query<PreservationAclRow>(PRESERVATION_ACL_QUERY)
+    ).rows.filter((row) => row.kind === 'S')
+    assertPhysicalKSequenceAcls(representedSequenceAcls)
+    assert.equal(
+      preservationAclDigest(representedSequenceAcls),
+      preservationAclDigest(originalSequenceAcls),
+      'SECOND_SEQUENCE_DEFAULT_REPRESENTATION_CHANGED_PRIVILEGES',
+    )
+    assert.deepEqual(
+      representedSequenceAcls.find((row) => row.id === historicalDefaultSequenceAcls[0])?.rawAcl,
+      ['ue_v2_owner=rwU/ue_v2_owner'],
+    )
+    fs.writeFileSync(
+      path.join(out, 'physical-k-sequence-acls-before.json'),
+      JSON.stringify(originalSequenceAcls, null, 2),
+    )
+    fs.writeFileSync(
+      path.join(out, 'physical-k-sequence-acls-explicit-owner-default.json'),
+      JSON.stringify(representedSequenceAcls, null, 2),
+    )
 
     const oldRuntime = await open(
       'ue_staging_runtime',
@@ -721,7 +864,10 @@ async function main() {
       [...historicalFunctionOwners].sort(),
     )
 
-    const originalSnapshot = await preservationSnapshot(provider)
+    const originalSnapshot = await preservationSnapshot(
+      provider,
+      path.join(out, 'preservation-before-no-bypass-raw-acls.json'),
+    )
     await c.query('BEGIN')
     await assert.rejects(
       executeForwardUpgrade(c, bundle, {
@@ -770,7 +916,10 @@ async function main() {
     )
     await assertRolledBack(provider, originalSnapshot)
     await provider.query('ALTER ROLE uev2admin BYPASSRLS INHERIT')
-    const bypassSnapshot = await preservationSnapshot(provider)
+    const bypassSnapshot = await preservationSnapshot(
+      provider,
+      path.join(out, 'preservation-before-bypass-raw-acls.json'),
+    )
     await c.query('BEGIN')
     await assert.rejects(
       executeForwardUpgrade(c, bundle, {
@@ -833,7 +982,10 @@ async function main() {
       'PROOF_ORIGINAL_BOOTSTRAP_RECEIPT_CHANGED',
     )
     assert.deepEqual(
-      await preservationSnapshot(provider),
+      await preservationSnapshot(
+        provider,
+        path.join(out, 'preservation-after-commit-raw-acls.json'),
+      ),
       bypassSnapshot,
       'SECOND_COMMIT_PRESERVATION_CHANGED',
     )

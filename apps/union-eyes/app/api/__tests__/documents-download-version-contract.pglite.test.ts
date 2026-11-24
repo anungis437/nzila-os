@@ -181,6 +181,7 @@ beforeAll(async () => {
     END $$ LANGUAGE plpgsql;
     CREATE TRIGGER inject_fault BEFORE INSERT ON audit_security.audit_logs FOR EACH ROW EXECUTE FUNCTION audit_security.refuse_marked();
     CREATE TABLE grievances (id uuid PRIMARY KEY, organization_id uuid NOT NULL);
+    CREATE TABLE claims (id uuid PRIMARY KEY, claim_id uuid NOT NULL UNIQUE, organization_id uuid NOT NULL);
     CREATE TABLE documents (
       id uuid PRIMARY KEY, organization_id uuid NOT NULL, title text, name text NOT NULL, filename text, file_url text,
       mime_type text, privacy_label text NOT NULL, uploaded_by text, metadata jsonb DEFAULT '{}'::jsonb,
@@ -218,7 +219,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await q('TRUNCATE grievances');
+  await q('TRUNCATE grievances, claims');
   state.blobs.clear();
   state.sasFailFor.clear();
   state.sas.mockClear();
@@ -452,6 +453,20 @@ describe('private application byte delivery: exact artifact, current authority a
     expect((await getOne(id(187))).status).toBe(403);
     expect(state.read).not.toHaveBeenCalled();
     expect(await auditRows()).toHaveLength(0);
+  });
+
+  it.each(['policy_library', 'template_library', 'collective_agreement', 'member', 'other'])('denies issuance and old-lease byte delivery when a legacy %s link names a claim', async linkType => {
+    await versioned(id(193), 'claim-restricted despite a wrong old link spelling', { label: 'public_internal' });
+    const oldUrl = await issuedUrl(id(193));
+    await q('INSERT INTO claims(id,claim_id,organization_id) VALUES($1,$2,$3)', [id(194), id(195), ORG_A]);
+    await q('INSERT INTO document_links (organization_id,document_id,linked_entity_type,linked_entity_id) VALUES($1,$2,$3,$4)', [ORG_A, id(193), linkType, id(195)]);
+    expect((await getOne(id(193))).status).toBe(403);
+    const response = await readContent(id(193), oldUrl);
+    expect(response.status).toBe(403);
+    expect(await response.text()).not.toContain('claim-restricted');
+    expect(state.read).not.toHaveBeenCalled();
+    expect(await served()).toHaveLength(0);
+    expect(await auditRows()).toHaveLength(1);
   });
 
   it('keeps another uploader’s confidential non-case document private', async () => {
