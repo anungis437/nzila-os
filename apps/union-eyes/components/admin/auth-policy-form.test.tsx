@@ -25,7 +25,7 @@ describe('AuthPolicyForm', () => {
   it('is worded in French for a French page and never shows the server\'s English refusal there', async () => {
     mount('fr-CA', () => answer(400, { error: 'Invalid email domain: bad_domain' }))
     await submit(/Enregistrer la politique/)
-    const alert = await screen.findByText(/n’a pas été enregistrée/)
+    const alert = await screen.findByText(/n’a pas pu être confirmée/)
     expect(alert.textContent).not.toMatch(/Invalid|domain/)
     expect(screen.queryByText(/Policy|Allowed sign-in|Save policy/)).toBeNull()
   })
@@ -39,21 +39,32 @@ describe('AuthPolicyForm', () => {
   it('says a save failed in the page language when the request never got an answer', async () => {
     mount('fr-CA', () => Promise.reject(new TypeError('Failed to fetch')))
     await submit(/Enregistrer la politique/)
-    expect(await screen.findByText(/n’a pas été enregistrée/)).toBeInTheDocument()
+    expect(await screen.findByText(/n’a pas pu être confirmée/)).toBeInTheDocument()
     expect(screen.queryByText(/Failed to fetch/)).toBeNull()
   })
+
+  it.each(['allowedEmailDomains', 'mfaRequiredForRoles'] as const)(
+    'does not claim a saved policy when the response omits required %s',
+    async (key) => {
+      const incomplete: Record<string, unknown> = policy();
+      delete incomplete[key];
+      mount('en-CA', () => answer(200, incomplete))
+      await submit(/Save policy/)
+      expect(await screen.findByText(/did not confirm the requested policy change/)).toBeInTheDocument()
+    },
+  )
 
   it('does not say saved when the server answers 200 without stating the policy', async () => {
     mount('en-CA', () => answer(200, { ok: true }))
     await submit(/Save policy/)
-    expect(await screen.findByText(/did not confirm the policy/)).toBeInTheDocument()
+    expect(await screen.findByText(/did not confirm the requested policy change/)).toBeInTheDocument()
     expect(screen.queryByText(/saved and confirmed/)).toBeNull()
   })
 
   it('does not say saved when the policy it states differs from the choices that were sent', async () => {
     mount('en-CA', () => answer(200, policy({ requireInvite: false })))
     await submit(/Save policy/)
-    expect(await screen.findByText(/did not confirm the policy/)).toBeInTheDocument()
+    expect(await screen.findByText(/did not confirm the requested policy change/)).toBeInTheDocument()
   })
 
   it.each(['allowLocalAuth', 'allowMagicLink', 'allowSso', 'passwordResetAllowed'] as const)(
@@ -61,7 +72,7 @@ describe('AuthPolicyForm', () => {
     async (key) => {
       mount('en-CA', () => answer(200, policy({ [key]: false })))
       await submit(/Save policy/)
-      expect(await screen.findByText(/did not confirm the policy/)).toBeInTheDocument()
+      expect(await screen.findByText(/did not confirm the requested policy change/)).toBeInTheDocument()
       expect(screen.queryByText(/saved and confirmed/)).toBeNull()
     },
   )
