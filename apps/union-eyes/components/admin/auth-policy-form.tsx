@@ -26,8 +26,8 @@ const copy: Record<FailureLanguage, {
 }> = {
   en: {
     loading: 'Loading…', retry: 'Try again', loadFailed: 'The sign-in policy could not be loaded. Refresh and try again.',
-    saveFailed: 'The sign-in policy was not saved. Nothing was changed.',
-    saveUnconfirmed: 'The server did not confirm the policy you saved. Reload to see what is in force before relying on it.',
+    saveFailed: 'The policy change could not be confirmed. Reload to check what is in force before retrying.',
+    saveUnconfirmed: 'The server did not confirm the requested policy change. Reload to see what is in force before relying on it.',
     saved: 'Policy saved and confirmed by the server.', saving: 'Saving…', save: 'Save policy',
     methods: 'Allowed sign-in methods', sso: 'SSO enforcement', ssoLabel: 'Require single sign-on. When enabled, password + magic link are disabled automatically.',
     domains: 'Email domain allowlist', domainsHelp: 'Comma-separated list of domains allowed to sign up / accept invites. Leave empty to allow any domain.',
@@ -40,8 +40,8 @@ const copy: Record<FailureLanguage, {
   },
   fr: {
     loading: 'Chargement…', retry: 'Réessayer', loadFailed: 'La politique de connexion n’a pas pu être chargée. Actualisez, puis réessayez.',
-    saveFailed: 'La politique de connexion n’a pas été enregistrée. Rien n’a été modifié.',
-    saveUnconfirmed: 'Le serveur n’a pas confirmé la politique enregistrée. Rechargez la page pour voir ce qui est en vigueur avant de vous y fier.',
+    saveFailed: 'La modification de la politique n’a pas pu être confirmée. Rechargez la page pour vérifier les paramètres en vigueur avant de réessayer.',
+    saveUnconfirmed: 'Le serveur n’a pas confirmé la modification demandée. Rechargez la page pour voir les paramètres en vigueur avant de vous y fier.',
     saved: 'Politique enregistrée et confirmée par le serveur.', saving: 'Enregistrement…', save: 'Enregistrer la politique',
     methods: 'Méthodes de connexion autorisées', sso: 'Obligation d’authentification unique', ssoLabel: 'Exiger l’authentification unique. Lorsque cette option est activée, le mot de passe et le lien magique sont désactivés automatiquement.',
     domains: 'Liste des domaines de courriel autorisés', domainsHelp: 'Liste de domaines séparés par des virgules autorisés à s’inscrire ou à accepter une invitation. Laissez vide pour autoriser tout domaine.',
@@ -60,7 +60,7 @@ const sameSet = (a: readonly string[], b: readonly string[]) => a.length === b.l
 /** A policy the server stated in full, or null: a body that is not one is never shown as the saved policy. */
 function readPolicy(body: unknown): AuthPolicy | null {
   if (!isRecord(body) || !BOOLEAN_KEYS.every((key) => typeof body[key] === 'boolean')) return null;
-  const list = (value: unknown): string[] | null => (value == null ? [] : Array.isArray(value) && value.every((item) => typeof item === 'string') ? (value as string[]) : null);
+  const list = (value: unknown): string[] | null => (Array.isArray(value) && value.every((item) => typeof item === 'string') ? (value as string[]) : null);
   const domains = list(body.allowedEmailDomains);
   const roles = list(body.mfaRequiredForRoles);
   if (!domains || !roles) return null;
