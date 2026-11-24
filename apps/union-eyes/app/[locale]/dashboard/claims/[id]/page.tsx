@@ -12,7 +12,7 @@ import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
 import { CaseDeadlines } from '@/components/claims/case-deadlines';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
-import { envelopeRow, envelopeRows, readApiError } from '@/lib/client/api-envelope';
+import { envelopeRow, envelopeRows, failureLanguage, readApiFailure, userFailureText } from '@/lib/client/api-envelope';
 import { formatDay } from '@/lib/client/day';
 import type { ClaimAttachmentWire as ClaimAttachment, ClaimDetailWire } from '@/lib/cases/claim-detail-wire';
 import Link from 'next/link';
@@ -112,7 +112,7 @@ export default function ClaimDetailPage() {
         }
         
         if (!response.ok) {
-          throw new Error(await readApiError(response, `HTTP ${response.status} ${response.statusText}`));
+          throw await readApiFailure(response);
         }
         
         // The route answers { success, data: { data: <the case> } }: the framework's envelope around the route's own { data }.
@@ -123,14 +123,14 @@ export default function ClaimDetailPage() {
         // Member-visible case activity from the canonical timeline (visibility-scoped server side)
         try {
           const timelineResponse = await fetch(`/api/cases/${claimData.claimId ?? claimId}/timeline`);
-          if (!timelineResponse.ok) throw new Error(`HTTP ${timelineResponse.status}`);
+          if (!timelineResponse.ok) throw new Error('timeline');
           setActivity(envelopeRows(await timelineResponse.json()) as CaseActivity[]);
         } catch {
           // The case itself loaded; only its activity did not, and the card says so rather than reading as "no activity".
           setActivityFailed(true);
         }
       } catch (err) {
-setError(err instanceof Error ? err.message : 'Failed to load claim');
+setError(userFailureText(err, t('claims.loadDetailFailed'), failureLanguage(locale)));
       } finally {
         setLoading(false);
       }

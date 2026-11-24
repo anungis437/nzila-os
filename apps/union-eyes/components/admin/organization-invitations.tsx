@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { apiErrorMessage, isRecord, ApiShapeError } from '@/lib/client/api-envelope';
+import { failureLanguage, isRecord, readApiFailure, userFailureText, ApiShapeError } from '@/lib/client/api-envelope';
 import RepresentativeMatchingProfiles from './representative-matching-profiles';
 
 interface Invitation {
@@ -43,7 +43,8 @@ const copy = {
 
 export default function OrganizationInvitations() {
   const locale = useLocale();
-  const t = copy[locale.startsWith('fr') ? 'fr' : 'en'];
+  const language = failureLanguage(locale);
+  const t = copy[language];
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('member');
@@ -56,8 +57,8 @@ export default function OrganizationInvitations() {
     setLoading(true);
     try {
       const response = await fetch('/api/auth/invite/manage');
+      if (!response.ok) throw await readApiFailure(response);
       const data: unknown = await response.json();
-      if (!response.ok) throw new Error(apiErrorMessage(data, t.loadFailed));
       if (!isRecord(data) || !Array.isArray(data.invitations)) throw new Error(t.loadFailed);
       const rows = data.invitations.map((row: unknown): Invitation => {
         if (!isRecord(row) || typeof row.id !== 'string' || typeof row.email !== 'string' || typeof row.role !== 'string' || typeof row.expiresAt !== 'string' ||
@@ -79,8 +80,8 @@ export default function OrganizationInvitations() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(action ? { action, inviteId } : { email: email.trim(), role }),
       });
+      if (!response.ok) throw await readApiFailure(response);
       const data: unknown = await response.json();
-      if (!response.ok) throw new Error(apiErrorMessage(data, t.unavailable));
       if (!isRecord(data) || (action === 'revoke'
         ? data.success !== true
         : typeof data.inviteId !== 'string' || !['sent', 'failed'].includes(String(data.delivery)))) throw new Error(t.unavailable);
@@ -89,7 +90,7 @@ export default function OrganizationInvitations() {
       if (!action) { setEmail(''); setRole('member'); }
       await refresh();
     } catch (error) {
-      setProblem(error instanceof Error ? error.message : t.unavailable);
+      setProblem(userFailureText(error, t.unavailable, language));
     } finally { setBusy(false); }
   }
 

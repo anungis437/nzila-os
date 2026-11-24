@@ -152,13 +152,17 @@ describe('GrievanceDetailConsole: loading', () => {
       throw new Error('connection reset');
     }));
     renderConsole();
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const network = await screen.findByRole('alert');
+    expect(network).toHaveTextContent('Something went wrong. Try again.');
+    expect(network).not.toHaveTextContent('connection reset');
     cleanup();
 
     vi.stubGlobal('fetch', fetchMock);
     server.get = () => standardSuccessResponse({ id: GRIEVANCE, grievanceNumber: 'GR-1', status: 'filed' });
     renderConsole();
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unexpected API response');
+    const malformed = await screen.findByRole('alert');
+    expect(malformed).toHaveTextContent('Something went wrong. Try again.');
+    expect(malformed).not.toHaveTextContent('Unexpected API response');
     expect(screen.queryByText('No events yet')).toBeNull();
   });
 
@@ -245,7 +249,9 @@ describe('GrievanceDetailConsole: the status', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Move to Acknowledged' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('The status could not be changed');
+    expect(failure).not.toHaveTextContent('connection reset');
   });
 
   it('offers nothing to someone with no authority over the matter, and says why', async () => {
@@ -393,7 +399,9 @@ describe('GrievanceDetailConsole: adding a document', () => {
 
     submit();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('The document could not be added');
+    expect(failure).not.toHaveTextContent('connection reset');
     expect(screen.queryByRole('status')).toBeNull();
   });
 
@@ -524,8 +532,8 @@ describe('GrievanceDetailConsole: French', () => {
     expect(document.body.textContent).not.toMatch(/Case Details|Governed Documents|Event Timeline|Move to|Current status/);
   });
 
-  it('says a refused document in French, with the server’s reason', async () => {
-    server.documents = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'Permission refusée');
+  it('says a refused document in French, worded by its status and never in the server’s English', async () => {
+    server.documents = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have permission to upload documents to this case');
     renderConsole('fr-CA');
     await screen.findByRole('heading', { name: 'Unjust suspension' });
     fireEvent.change(screen.getByRole('textbox', { name: 'Titre du document' }), { target: { value: 'Lettre' } });
@@ -536,15 +544,18 @@ describe('GrievanceDetailConsole: French', () => {
 
     const failure = await screen.findByRole('alert');
     expect(failure).toHaveTextContent('Le document n’a pas pu être ajouté.');
-    expect(failure).toHaveTextContent('Permission refusée');
+    expect(failure).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
+    expect(failure).not.toHaveTextContent('You do not have permission');
   });
 
   it('says a failed load in French, with a retry', async () => {
-    server.get = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'Interdit');
+    server.get = () => standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Database unavailable');
     renderConsole('fr-CA');
 
     const failure = await screen.findByRole('alert');
     expect(failure).toHaveTextContent('Le grief n’a pas pu être chargé');
+    expect(failure).toHaveTextContent('Une erreur s’est produite. Réessayez.');
+    expect(failure).not.toHaveTextContent(/Database|HTTP/);
     expect(within(failure).getByRole('button', { name: 'Réessayer' })).toBeInTheDocument();
   });
 });

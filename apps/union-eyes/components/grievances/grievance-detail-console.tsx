@@ -13,7 +13,7 @@
 import { CaseDeadlines } from '@/components/claims/case-deadlines';
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { AlertCircle, ArrowLeft, CheckCircle, Clock, FileText, Lock, Scale, Shield, Upload, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CaseIntelligencePanel } from "@/components/grievances/case-intelligence-panel";
@@ -33,9 +33,7 @@ import {
   webUrl,
   type GrievanceDetail,
 } from "@/components/grievances/grievance-detail-model";
-import { readApiError } from "@/lib/client/api-envelope";
-
-const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+import { failureLanguage, readApiFailure, readUserFailure, userFailureText } from "@/lib/client/api-envelope";
 
 const EMPTY_UPLOAD = { title: "", filename: "", fileUrl: "", documentType: "evidence", privacyLabel: "team_confidential" };
 
@@ -51,6 +49,7 @@ const ACCESS_STATUSES = new Set(["active", "revoked", "expired"]);
 export function GrievanceDetailConsole() {
   const t = useTranslations("grievanceDetailConsole");
   const format = useFormatter();
+  const language = failureLanguage(useLocale());
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : (params.id as string);
@@ -86,7 +85,7 @@ export function GrievanceDetailConsole() {
   const load = useCallback(
     async (signal?: AbortSignal) => {
       const response = await fetch(`/api/grievances/${id}`, { signal });
-      if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+      if (!response.ok) throw await readApiFailure(response);
       setGrievance(readGrievanceDetail(await response.json()));
     },
     [id],
@@ -101,14 +100,14 @@ export function GrievanceDetailConsole() {
         await load(controller.signal);
       } catch (error) {
         if (controller.signal.aborted) return;
-        setLoadError(errorText(error));
+        setLoadError(userFailureText(error, null, language));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
     };
     first();
     return () => controller.abort();
-  }, [load, reload]);
+  }, [load, reload, language]);
 
   // After a change the server accepted, the screen is read again; if that read fails, what is shown is said to be out of date.
   const refresh = useCallback(async () => {
@@ -116,9 +115,9 @@ export function GrievanceDetailConsole() {
       await load();
       setRefreshError(null);
     } catch (error) {
-      setRefreshError(errorText(error));
+      setRefreshError(userFailureText(error, null, language));
     }
-  }, [load]);
+  }, [load, language]);
 
   async function advanceStatus(next: string) {
     setUpdating(true);
@@ -130,13 +129,13 @@ export function GrievanceDetailConsole() {
         body: JSON.stringify({ status: next, notes: statusNote.trim() || undefined }),
       });
       if (!response.ok) {
-        setStatusError(await readApiError(response, t("statusFailed")));
+        setStatusError(await readUserFailure(response, t("statusFailed"), language));
         return;
       }
       setStatusNote("");
       await refresh();
     } catch (error) {
-      setStatusError(errorText(error));
+      setStatusError(userFailureText(error, t("statusFailed"), language));
     } finally {
       setUpdating(false);
     }
@@ -163,7 +162,7 @@ export function GrievanceDetailConsole() {
         }),
       });
       if (!response.ok) {
-        setAccessError(await readApiError(response, t("accessGrantFailed")));
+        setAccessError(await readUserFailure(response, t("accessGrantFailed"), language));
         return;
       }
       setCollabUserId("");
@@ -171,7 +170,7 @@ export function GrievanceDetailConsole() {
       setCollabCanViewPrivate(false);
       await refresh();
     } catch (error) {
-      setAccessError(errorText(error));
+      setAccessError(userFailureText(error, t("accessGrantFailed"), language));
     } finally {
       setAccessSaving(false);
     }
@@ -187,12 +186,12 @@ export function GrievanceDetailConsole() {
         body: JSON.stringify({ assignmentId, status: "revoked" }),
       });
       if (!response.ok) {
-        setAccessError(await readApiError(response, t("accessRevokeFailed")));
+        setAccessError(await readUserFailure(response, t("accessRevokeFailed"), language));
         return;
       }
       await refresh();
     } catch (error) {
-      setAccessError(errorText(error));
+      setAccessError(userFailureText(error, t("accessRevokeFailed"), language));
     } finally {
       setAccessSaving(false);
     }
@@ -224,14 +223,14 @@ export function GrievanceDetailConsole() {
       });
       // A document the server did not accept is neither shown as added nor cleared from the form.
       if (!response.ok) {
-        setUploadError(await readApiError(response, t("uploadFailed")));
+        setUploadError(await readUserFailure(response, t("uploadFailed"), language));
         return;
       }
       setUploadPayload(EMPTY_UPLOAD);
       setUploaded(true);
       await refresh();
     } catch (error) {
-      setUploadError(errorText(error));
+      setUploadError(userFailureText(error, t("uploadFailed"), language));
     } finally {
       setUploadingDoc(false);
     }

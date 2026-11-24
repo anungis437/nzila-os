@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiShapeError, apiErrorMessage, envelopeData, envelopePages, envelopeRow, envelopeRows, failureText, readApiError } from '../api-envelope';
+import { ApiFailure, ApiShapeError, GENERIC_FAILURE, apiErrorMessage, envelopeData, envelopePages, envelopeRow, envelopeRows, failureLanguage, failureText, readApiError, readApiFailure, readUserFailure, userFailureText } from '../api-envelope';
 
 const reply = (status: number, body: unknown) => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
@@ -70,5 +70,51 @@ describe('api-envelope', () => {
     expect(failureText(new Error(''), 'fallback')).toBe('fallback');
     expect(failureText(null, 'fallback')).toBe('fallback');
     expect(failureText('text', 'fallback')).toBe('fallback');
+  });
+
+  describe('what a person reads for a failure, in their language', () => {
+    it('picks French for every French locale and English otherwise', () => {
+      expect([failureLanguage('fr'), failureLanguage('fr-CA'), failureLanguage('FR-ca')]).toEqual(['fr', 'fr', 'fr']);
+      expect([failureLanguage('en-CA'), failureLanguage('it'), failureLanguage(undefined), failureLanguage(null)]).toEqual(['en', 'en', 'en', 'en']);
+    });
+
+    it('reads the status, code and stated message of a refusal', async () => {
+      const failure = await readApiFailure(reply(409, { code: 'CONFLICT', message: 'Version changed' }));
+      expect(failure).toBeInstanceOf(ApiFailure);
+      expect([failure.status, failure.code, failure.message]).toEqual([409, 'CONFLICT', 'Version changed']);
+      const bare = await readApiFailure(reply(502, '<html>bad gateway</html>'));
+      expect([bare.status, bare.code, bare.message]).toEqual([502, null, '']);
+    });
+
+    it('shows the server\'s English reason in English, and never in French', () => {
+      const refusal = new ApiFailure(422, 'Member is already assigned to this case');
+      expect(userFailureText(refusal, 'Could not save.', 'en')).toBe('Member is already assigned to this case');
+      const french = userFailureText(refusal, 'Impossible d’enregistrer.', 'fr');
+      expect(french).toBe('Impossible d’enregistrer.');
+      expect(french).not.toMatch(/Member|assigned/);
+    });
+
+    it('words a refusal from its status when it states nothing, in both languages, and ahead of a French fallback', () => {
+      expect(userFailureText(new ApiFailure(403, ''), 'Could not save.', 'en')).toBe('You do not have permission to do this.');
+      expect(userFailureText(new ApiFailure(403, 'Insufficient role'), 'Impossible d’enregistrer.', 'fr')).toBe('Vous n’avez pas l’autorisation d’effectuer cette action.');
+      expect(userFailureText(new ApiFailure(409, 'Stale'), null, 'fr')).toMatch(/Actualisez/);
+      expect(userFailureText(new ApiFailure(500, ''), 'Impossible d’enregistrer.', 'fr')).toBe('Impossible d’enregistrer.');
+      expect(userFailureText(new ApiFailure(500, ''), null, 'fr')).toBe(GENERIC_FAILURE.fr);
+      expect(userFailureText(new ApiFailure(500, 'Internal server error'), 'x', 'fr')).toMatch(/momentanément/);
+    });
+
+    it('never shows exception text, a status line or the browser\'s wording', () => {
+      for (const error of [new TypeError('Failed to fetch'), new ApiShapeError('no data'), new Error('HTTP 500'), new Error('Request failed with status 500'), 'HTTP 502', null, undefined]) {
+        expect(userFailureText(error, 'Could not save.', 'en')).toBe('Could not save.');
+        expect(userFailureText(error, 'Impossible d’enregistrer.', 'fr')).toBe('Impossible d’enregistrer.');
+        expect(userFailureText(error, null, 'fr')).toBe(GENERIC_FAILURE.fr);
+      }
+    });
+
+    it('reads a failed response straight to words', async () => {
+      expect(await readUserFailure(reply(404, { message: 'Grievance not found' }), 'x', 'fr')).toBe('Cet élément n’est plus disponible.');
+      expect(await readUserFailure(reply(404, { message: 'Grievance not found' }), 'x', 'en')).toBe('Grievance not found');
+      expect(await readUserFailure(reply(500, 'not json'), null, 'en')).toBe(GENERIC_FAILURE.en);
+    });
   });
 });

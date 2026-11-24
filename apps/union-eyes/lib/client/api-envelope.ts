@@ -74,3 +74,88 @@ export async function readApiError(response: Response, fallback: string): Promis
 export function failureText(error: unknown, fallback: string): string {
   return error instanceof Error && !(error instanceof TypeError) && error.message ? error.message : fallback;
 }
+
+export type FailureLanguage = 'en' | 'fr';
+
+export const failureLanguage = (locale: string | null | undefined): FailureLanguage =>
+  locale?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+
+const STATUS_COPY: Readonly<Record<FailureLanguage, Readonly<Record<number, string>>>> = {
+  en: {
+    401: 'Your session has ended. Sign in again to continue.',
+    403: 'You do not have permission to do this.',
+    404: 'This item is no longer available.',
+    409: 'This item changed while you were working. Refresh and try again.',
+    413: 'The file or request is too large.',
+    429: 'Too many requests. Wait a moment and try again.',
+    501: 'This feature is not available yet.',
+    503: 'The service is temporarily unavailable. Try again shortly.',
+  },
+  fr: {
+    401: 'Votre session est terminée. Reconnectez-vous pour continuer.',
+    403: 'Vous n’avez pas l’autorisation d’effectuer cette action.',
+    404: 'Cet élément n’est plus disponible.',
+    409: 'Cet élément a changé pendant votre travail. Actualisez, puis réessayez.',
+    413: 'Le fichier ou la demande est trop volumineux.',
+    429: 'Trop de demandes. Patientez un instant, puis réessayez.',
+    501: 'Cette fonction n’est pas encore disponible.',
+    503: 'Le service est momentanément indisponible. Réessayez sous peu.',
+  },
+};
+
+/** What a screen says when nothing more specific is known: never a status line, exception text or the browser's own wording. */
+export const GENERIC_FAILURE: Readonly<Record<FailureLanguage, string>> = {
+  en: 'Something went wrong. Try again.',
+  fr: 'Une erreur s’est produite. Réessayez.',
+};
+
+/**
+ * The server states its refusals in English. A French screen shows one of these only when it is a message we hold a French wording for;
+ * every other refusal is worded from its status, or by the screen's own French fallback.
+ */
+const BARE_SERVER_MESSAGES: ReadonlySet<string> = new Set(['Unauthorized', 'Forbidden', 'Not found', 'Internal server error']);
+
+const FRENCH_SERVER_MESSAGES: Readonly<Record<string, string>> = {
+  'Internal server error': 'Le service est momentanément indisponible. Réessayez sous peu.',
+  'Unauthorized': STATUS_COPY.fr[401],
+  'Forbidden': STATUS_COPY.fr[403],
+  'Not found': STATUS_COPY.fr[404],
+};
+
+/** A request the route answered with a refusal. `message` is what the server stated; it is shown only by `userFailureText`'s rules. */
+export class ApiFailure extends Error {
+  readonly status: number;
+  readonly code: string | null;
+  constructor(status: number, message: string, code: string | null = null) {
+    super(message);
+    this.name = 'ApiFailure';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+/** The refusal a failed response states. A body that names no message leaves `message` empty, so the screen's fallback or the status wording is shown. */
+export async function readApiFailure(response: Response): Promise<ApiFailure> {
+  const body: unknown = await response.json().catch(() => null);
+  const code = isRecord(body) && typeof body.code === 'string' ? body.code : null;
+  return new ApiFailure(response.status, apiErrorMessage(body, ''), code);
+}
+
+/**
+ * The words a person reads for a failure, in their language.
+ *
+ * An `ApiFailure` shows the server's stated reason in English only; in French it shows a held translation, else the wording of its status
+ * (sign-in, permission, missing, changed, too large, busy, not available), else the screen's own fallback. Anything else (a TypeError from a
+ * request that got no answer, an ApiShapeError, a thrown string, an `HTTP 500` line) shows the screen's fallback and never its own text.
+ */
+export function userFailureText(error: unknown, fallback: string | null, language: FailureLanguage): string {
+  const generic = fallback || GENERIC_FAILURE[language];
+  if (!(error instanceof ApiFailure)) return generic;
+  if (language === 'en') return (error.message && !BARE_SERVER_MESSAGES.has(error.message) ? error.message : STATUS_COPY.en[error.status]) || error.message || generic;
+  return FRENCH_SERVER_MESSAGES[error.message] ?? STATUS_COPY.fr[error.status] ?? generic;
+}
+
+/** The words for a response that was not ok, read once from its body. */
+export async function readUserFailure(response: Response, fallback: string | null, language: FailureLanguage): Promise<string> {
+  return userFailureText(await readApiFailure(response), fallback, language);
+}

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { NextIntlClientProvider } from 'next-intl'
+import frCA from '../../messages/fr-CA.json'
 import enCA from '../../messages/en-CA.json'
 import { ClaimsConsole } from './claims-console'
 
@@ -27,9 +28,9 @@ const held = {
 const unassigned = { ...held, claimId: 'c2', claimNumber: 'CLM-20260101-0002', memberName: 'Bo Kim', assignedTo: null, assignedToName: null, incidentDate: null, priority: 'low', status: 'submitted' }
 const queued = { claimId: 'c3', claimNumber: 'CLM-20260101-0003', claimType: 'other', status: 'submitted', priority: 'medium', createdAt: '2026-01-03T15:00:00.000Z', filedDate: null, triageOnly: true }
 
-const renderConsole = (view: 'member' | 'staff') =>
+const renderConsole = (view: 'member' | 'staff', locale: 'en-CA' | 'fr-CA' = 'en-CA') =>
   render(
-    <NextIntlClientProvider locale="en-CA" messages={enCA}>
+    <NextIntlClientProvider locale={locale} messages={locale === 'fr-CA' ? frCA : enCA}>
       <ClaimsConsole view={view} />
     </NextIntlClientProvider>,
   )
@@ -85,10 +86,18 @@ describe('ClaimsConsole', () => {
     expect(screen.queryByText(enCA.claimsPage.staffEmptyTitle)).not.toBeInTheDocument()
   })
 
+  it('words a refusal in French on a French page, never in the route\'s English', async () => {
+    fetchMock.mockResolvedValue(refusal(403, { code: 'FORBIDDEN', message: 'Case access is limited to its parties' }))
+    renderConsole('staff', 'fr-CA')
+    await screen.findByText('Vous n’avez pas l’autorisation d’effectuer cette action.')
+    expect(screen.queryByText(/Case access/)).toBeNull()
+  })
+
   it('reports an answer that is not the case list rather than showing a table of blanks', async () => {
     fetchMock.mockResolvedValue(answer([{ claimNumber: 'CLM-1', status: 'submitted' }]))
     renderConsole('staff')
-    await waitFor(() => expect(screen.getByText(/claimId is missing/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(enCA.claimsPage.loadError)).toBeInTheDocument())
+    expect(screen.queryByText(/claimId/)).toBeNull()
   })
 
   it('shows the empty state when the route lists no case', async () => {

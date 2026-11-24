@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
-const h = vi.hoisted(() => ({ trackCaseViewed: vi.fn() }))
+const h = vi.hoisted(() => ({ locale: 'en-CA', trackCaseViewed: vi.fn() }))
 
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: () => 'en-CA' }))
+vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: () => h.locale }))
 vi.mock('next/navigation', () => ({ useParams: () => ({ id: 'claim-1' }), useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/lib/hooks/use-pilot-tracking', () => ({ usePilotTracking: () => ({ trackCaseViewed: h.trackCaseViewed }) }))
 vi.mock('@/components/file-upload', () => ({ FileUpload: () => null }))
@@ -43,6 +43,7 @@ const zone = process.env.TZ
 beforeEach(() => {
   fetchMock.mockReset()
   h.trackCaseViewed.mockReset()
+  h.locale = 'en-CA'
   vi.stubGlobal('fetch', fetchMock)
 })
 
@@ -71,6 +72,21 @@ describe('ClaimDetailPage', () => {
     expect(screen.queryByText('CASE-2026-0042')).toBeNull()
   })
 
+  it('words a refusal in French and never shows the server\'s English sentence or a status line', async () => {
+    h.locale = 'fr-CA'
+    routes({ claim: failed(500, 'The case store is unavailable'), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(screen.queryByText(/case store|HTTP/)).toBeNull()
+  })
+
+  it('shows the page\'s own message, not HTTP text, when the failure body names nothing', async () => {
+    routes({ claim: { ok: false, status: 502, statusText: 'Bad Gateway', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(screen.queryByText(/HTTP|Bad Gateway/)).toBeNull()
+  })
+
   it('does not tell a missing case from one the user may not read', async () => {
     routes({ claim: failed(404, 'Case not found'), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
@@ -81,7 +97,8 @@ describe('ClaimDetailPage', () => {
   it('treats an answer that is not the case as an error, instead of rendering a blank case', async () => {
     routes({ claim: wrapped(claim), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
-    expect(await screen.findByText(/Unexpected API response/)).toBeInTheDocument()
+    expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(screen.queryByText(/Unexpected API response/)).toBeNull()
     expect(screen.queryByText('CASE-2026-0042')).toBeNull()
   })
 
