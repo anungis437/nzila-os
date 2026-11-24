@@ -32,9 +32,22 @@ describe('REMITTER_THRESHOLDS', () => {
 })
 
 describe('determineRemitterType', () => {
-  it('quarterly for AMWA < $1,000', () => {
-    const result = determineRemitterType(500)
-    expect(result.type).toBe('quarterly')
+  it.each([0, 500, 999.99, 1_000, 2_999.99])('defaults AMWA %s to regular when quarterly eligibility is unknown', (amwa) => {
+    expect(determineRemitterType(amwa).type).toBe('regular')
+    expect(determineRemitterType(amwa, { quarterlyEligibilityConfirmed: false }).type).toBe('regular')
+  })
+
+  it('allows a separately confirmed established quarterly remitter below $3,000', () => {
+    expect(determineRemitterType(2_999.99, { quarterlyEligibilityConfirmed: true }).type).toBe('quarterly')
+  })
+
+  it('does not extend confirmed quarterly status to $3,000 or accelerated AMWA', () => {
+    expect(determineRemitterType(3_000, { quarterlyEligibilityConfirmed: true }).type).toBe('regular')
+    expect(determineRemitterType(25_000, { quarterlyEligibilityConfirmed: true }).type).toBe('accelerated_threshold1')
+  })
+
+  it.each([-1, NaN, Infinity])('rejects invalid AMWA %s rather than selecting a lower remittance frequency', (amwa) => {
+    expect(() => determineRemitterType(amwa)).toThrow(RangeError)
   })
 
   it('regular for AMWA $1,000–$24,999', () => {

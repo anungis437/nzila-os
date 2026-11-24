@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const selectQueue: any[][] = [];
@@ -66,8 +66,13 @@ vi.mock('@/lib/blob-client', () => ({
 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.persistAtomicAudit }));
 
+const previousSealKey = process.env.EVIDENCE_SEAL_KEY;
+const SYNTHETIC_SEAL_KEY = 'synthetic-document-download-lease-key-only-20261124';
+const VERSION_ID = '22222222-2222-4222-8222-222222222222';
+const VERSION = { id: VERSION_ID, versionNo: 1, storageKey: 'documents/org-1/file.pdf', contentHash: 'a'.repeat(64), metadata: { sizeBytes: 1 } };
 const DOCUMENT_ID = '11111111-1111-4111-8111-111111111111';
 
+const { verifyDocumentDownloadLease, DOCUMENT_DOWNLOAD_LEASE_MS } = await import('@/lib/documents/download-lease');
 const { GET: route } = await import('@/app/api/documents/[id]/download/route');
 const { caller, declared, resetCaller } = await import('@/app/api/__tests__/support/with-api-stub');
 
@@ -77,6 +82,11 @@ const GET = (request: Request, context: { organizationId: string; userId: string
   caller.userId = context.userId;
   return route(request, { params });
 };
+
+afterEach(() => {
+  if (previousSealKey === undefined) delete process.env.EVIDENCE_SEAL_KEY;
+  else process.env.EVIDENCE_SEAL_KEY = previousSealKey;
+});
 
 describe('GET /api/documents/[id]/download', () => {
   beforeEach(() => {
@@ -90,7 +100,8 @@ describe('GET /api/documents/[id]/download', () => {
       canViewCase: true,
       canViewPrivateDocuments: false,
     });
-    mocks.generateSasUrl.mockResolvedValue('https://storage/documents/org-1/file.pdf?sig=1');
+    process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_SEAL_KEY;
+    mocks.generateSasUrl.mockImplementation(() => { throw new Error('Storage signing must not be used for application leases'); });
     mocks.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
@@ -117,7 +128,7 @@ describe('GET /api/documents/[id]/download', () => {
         linkedEntityId: 'case-1',
       }],
       [],
-      [{ storageKey: 'documents/org-1/file.pdf' }],
+      [{ ...VERSION }],
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(false);
 
@@ -143,7 +154,7 @@ describe('GET /api/documents/[id]/download', () => {
         linkedEntityId: 'case-1',
       }],
       [{ id: 'grant-1', canDownload: false }],
-      [{ storageKey: 'documents/org-1/file.pdf' }],
+      [{ ...VERSION }],
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
 
@@ -156,7 +167,7 @@ describe('GET /api/documents/[id]/download', () => {
     expect(mocks.generateSasUrl).not.toHaveBeenCalled();
   });
 
-  it('returns signed download url when access is allowed', async () => {
+  it('returns an audited actor-bound application lease when access is allowed', async () => {
     mocks.db._selectQueue.push(
       [{
         id: DOCUMENT_ID,
@@ -170,7 +181,7 @@ describe('GET /api/documents/[id]/download', () => {
         linkedEntityId: null,
       }],
       [],
-      [{ storageKey: 'documents/org-1/file.pdf' }],
+      [{ ...VERSION }],
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
 
@@ -181,7 +192,15 @@ describe('GET /api/documents/[id]/download', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.data.downloadUrl).toContain('https://storage/documents/org-1/file.pdf');
+    const url = new URL(body.data.downloadUrl, 'https://example.com');
+    expect(url.origin).toBe('https://example.com');
+    expect(url.pathname).toBe(`/api/documents/${DOCUMENT_ID}/content`);
+    const lease = verifyDocumentDownloadLease(url.searchParams.get('lease')!, { organizationId: 'org-1', userId: 'user-1', documentId: DOCUMENT_ID });
+    expect(lease.versionId).toBe(VERSION_ID);
+    expect(lease.expiresAt - lease.issuedAt).toBe(DOCUMENT_DOWNLOAD_LEASE_MS);
+    expect(JSON.stringify(body)).not.toContain('https://old');
+    expect(mocks.generateSasUrl).not.toHaveBeenCalled();
+    expect(mocks.persistAtomicAudit).toHaveBeenCalledTimes(1);
     expect(mocks.persistAtomicAudit).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ action: 'document.download', resourceId: DOCUMENT_ID }),
@@ -199,7 +218,7 @@ describe('GET /api/documents/[id]/download', () => {
     expect(mocks.generateSasUrl).not.toHaveBeenCalled();
   });
 
-  it('does not issue a url when storage fails', async () => {
+  it('does not issue a link when signing configuration is unavailable', async () => {
     mocks.db._selectQueue.push(
       [{
         id: DOCUMENT_ID,
@@ -213,10 +232,10 @@ describe('GET /api/documents/[id]/download', () => {
         linkedEntityId: null,
       }],
       [],
-      [{ storageKey: 'documents/org-1/file.pdf' }],
+      [{ ...VERSION }],
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
-    mocks.generateSasUrl.mockRejectedValue(new Error('blob unavailable'));
+    delete process.env.EVIDENCE_SEAL_KEY;
 
     const res = await GET(new Request(`https://example.com/api/documents/${DOCUMENT_ID}/download`), {
       organizationId: 'org-1',
@@ -243,7 +262,7 @@ describe('GET /api/documents/[id]/download', () => {
         linkedEntityId: null,
       }],
       [],
-      [{ storageKey: 'documents/org-1/file.pdf' }],
+      [{ ...VERSION }],
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(true);
     mocks.persistAtomicAudit.mockRejectedValue(new Error('audit down'));
@@ -255,10 +274,10 @@ describe('GET /api/documents/[id]/download', () => {
     const body = await res.json();
 
     expect(res.status).toBe(503);
-    expect(JSON.stringify(body)).not.toContain('https://storage');
+    expect(JSON.stringify(body)).not.toContain('lease=');
   });
 
-  it('records exactly one canonical access record per issued url, and none for a denial', async () => {
+  it('records no canonical access audit for a policy denial', async () => {
     mocks.db._selectQueue.push(
       [{
         id: DOCUMENT_ID,
@@ -272,7 +291,7 @@ describe('GET /api/documents/[id]/download', () => {
         linkedEntityId: null,
       }],
       [],
-      [{ storageKey: 'documents/org-1/file.pdf' }],
+      [{ ...VERSION }],
     );
     mocks.isDocumentVisibleByPolicy.mockReturnValue(false);
 

@@ -1,4 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
+import { verifyDocumentDownloadLease, DOCUMENT_DOWNLOAD_LEASE_MS } from '@/lib/documents/download-lease';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
 import { caller, resetCaller } from '@/app/api/__tests__/support/with-api-stub';
@@ -12,7 +14,7 @@ const state = vi.hoisted(() => ({
     canViewCase: false,
     canViewPrivateDocuments: false,
   },
-  sas: vi.fn(async () => 'https://storage.example/signed.pdf'),
+  sas: vi.fn(async () => { throw new Error('Storage signing must not be used for application leases'); }),
 }));
 
 vi.mock('@/lib/api/framework', async () => (await import('@/app/api/__tests__/support/with-api-stub')).frameworkModule);
@@ -55,6 +57,9 @@ const USER = 'member-1';
 
 let pg: PGlite;
 const previousAuditFlag = process.env.UE_CANONICAL_BOOTSTRAP_V2;
+const previousSealKey = process.env.EVIDENCE_SEAL_KEY;
+const SYNTHETIC_SEAL_KEY = 'synthetic-document-download-lease-key-only-20261124';
+const CONTENT_HASH = createHash('sha256').update('synthetic document fixture').digest('hex');
 
 async function resetRole() {
   await pg.exec('RESET ROLE');
@@ -75,9 +80,9 @@ async function insertDocument(id: string, organizationId: string, privacyLabel: 
   );
   await pg.query(
     `INSERT INTO document_versions
-      (id, organization_id, document_id, version_no, storage_key, content_hash, uploaded_by)
-     VALUES ($1, $2, $3, 1, $4, 'hash', $5)`,
-    [crypto.randomUUID(), organizationId, id, `documents/${organizationId}/${id}.pdf`, USER],
+      (id, organization_id, document_id, version_no, storage_key, content_hash, uploaded_by, metadata)
+     VALUES ($1, $2, $3, 1, $4, $5, $6, '{"sizeBytes":26}'::jsonb)`,
+    [crypto.randomUUID(), organizationId, id, `documents/${organizationId}/${id}.pdf`, CONTENT_HASH, USER],
   );
 }
 
@@ -136,6 +141,11 @@ beforeAll(async () => {
       mime_type text,
       privacy_label text NOT NULL,
       uploaded_by text,
+      size_bytes bigint,
+      file_size bigint,
+      sha256 text,
+      checksum text,
+      updated_at timestamptz NOT NULL DEFAULT now(),
       deleted_at timestamptz
     );
     CREATE TABLE document_links (
@@ -163,6 +173,7 @@ beforeAll(async () => {
       version_no integer NOT NULL,
       storage_key text NOT NULL,
       content_hash text NOT NULL,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
       uploaded_by text NOT NULL
     );
     CREATE TABLE audit_logs (
@@ -230,7 +241,7 @@ beforeEach(async () => {
   state.steward = false;
   state.caseAccess = { isPrimaryOwner: false, canViewCase: false, canViewPrivateDocuments: false };
   state.sas.mockClear();
-  state.sas.mockResolvedValue('https://storage.example/signed.pdf');
+  process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_SEAL_KEY;
   delete process.env.UE_CANONICAL_BOOTSTRAP_V2;
   await resetRole();
   await pg.exec(`
@@ -270,6 +281,8 @@ beforeEach(async () => {
 afterEach(() => {
   if (previousAuditFlag === undefined) delete process.env.UE_CANONICAL_BOOTSTRAP_V2;
   else process.env.UE_CANONICAL_BOOTSTRAP_V2 = previousAuditFlag;
+  if (previousSealKey === undefined) delete process.env.EVIDENCE_SEAL_KEY;
+  else process.env.EVIDENCE_SEAL_KEY = previousSealKey;
 });
 
 afterAll(async () => {
@@ -278,7 +291,7 @@ afterAll(async () => {
 });
 
 describe('GET /api/documents/[id]/download against PostgreSQL', () => {
-  it('issues a signed url for an authorized member and hides the other organization', async () => {
+  it('issues an actor-bound application lease for an authorized member and hides the other organization', async () => {
     await insertDocument(DOC_OPEN, ORG_A, 'team_confidential');
     await insertDocument(DOC_FOREIGN, ORG_B, 'team_confidential');
     await asTenant(ORG_A);
@@ -288,11 +301,23 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
     const allowed = await callDownload(ORG_A, DOC_OPEN);
     expect(allowed.status).toBe(200);
     const body = await allowed.json();
-    expect(body.data.downloadUrl).toBe('https://storage.example/signed.pdf');
+    const url = new URL(body.data.downloadUrl, 'https://example.test');
+    expect(url.origin).toBe('https://example.test');
+    expect(url.pathname).toBe(`/api/documents/${DOC_OPEN}/content`);
+    const token = url.searchParams.get('lease')!;
+    const lease = verifyDocumentDownloadLease(token, { organizationId: ORG_A, userId: USER, documentId: DOC_OPEN });
+    const version = (await pg.query<{ id: string }>('SELECT id::text FROM document_versions WHERE organization_id=$1 AND document_id=$2', [ORG_A, DOC_OPEN])).rows[0];
+    expect(lease.versionId).toBe(version.id);
+    expect(lease.fingerprint).toMatch(/^[a-f0-9]{64}$/);
+    expect(lease.expiresAt - lease.issuedAt).toBe(DOCUMENT_DOWNLOAD_LEASE_MS);
+    expect(() => verifyDocumentDownloadLease(token, { organizationId: ORG_B, userId: USER, documentId: DOC_OPEN })).toThrow();
+    expect(() => verifyDocumentDownloadLease(token, { organizationId: ORG_A, userId: 'other-reader', documentId: DOC_OPEN })).toThrow();
+    expect(JSON.stringify(body)).not.toContain('https://stored.example');
+    expect(allowed.headers.get('cache-control')).toBe('private, no-store');
 
     const foreign = await callDownload(ORG_A, DOC_FOREIGN);
     expect(foreign.status).toBe(404);
-    expect(state.sas).toHaveBeenCalledTimes(1);
+    expect(state.sas).not.toHaveBeenCalled();
   });
 
   it('denies a privileged document to a member and to a steward without a download grant', async () => {
@@ -365,10 +390,10 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
     );
     const allowed = await callDownload(ORG_A, DOC_PRIVILEGED);
     expect(allowed.status).toBe(200);
-    expect(state.sas).toHaveBeenCalledTimes(1);
+    expect(state.sas).not.toHaveBeenCalled();
   });
 
-  it('rejects malformed ids, missing storage, and a failed audit write without returning a url', async () => {
+  it('rejects malformed ids, unverifiable hashes, unavailable signing, and failed audit without returning a link', async () => {
     resetCaller();
     caller.organizationId = ORG_A;
     caller.userId = USER;
@@ -380,10 +405,18 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
     expect(malformed.status).toBe(400);
 
     await insertDocument(DOC_OPEN, ORG_A, 'team_confidential');
-    state.sas.mockRejectedValueOnce(new Error('storage down'));
+    delete process.env.EVIDENCE_SEAL_KEY;
     const storage = await callDownload(ORG_A, DOC_OPEN);
     expect(storage.status).toBe(502);
-    expect(JSON.stringify(await storage.json())).not.toContain('https://storage.example');
+    expect(JSON.stringify(await storage.json())).not.toContain('lease=');
+    process.env.EVIDENCE_SEAL_KEY = SYNTHETIC_SEAL_KEY;
+    await resetRole();
+    await pg.query('UPDATE document_versions SET content_hash=$1 WHERE document_id=$2', ['malformed-hash', DOC_OPEN]);
+    const invalidHash = await callDownload(ORG_A, DOC_OPEN);
+    expect(invalidHash.status).toBe(502);
+    expect(JSON.stringify(await invalidHash.json())).not.toContain('lease=');
+    await resetRole();
+    await pg.query('UPDATE document_versions SET content_hash=$1 WHERE document_id=$2', [CONTENT_HASH, DOC_OPEN]);
 
     process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1';
     await resetRole();
@@ -391,7 +424,7 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
     const audit = await callDownload(ORG_A, DOC_OPEN);
     const auditBody = JSON.stringify(await audit.json());
     expect(audit.status).toBe(503);
-    expect(auditBody).not.toContain('https://storage.example');
+    expect(auditBody).not.toContain('lease=');
   });
 
   it('persists the download audit when canonical v2 is enabled', async () => {
@@ -428,7 +461,7 @@ describe('GET /api/documents/[id]/download against PostgreSQL', () => {
     try {
       const response = await callDownload(ORG_A, DOC_OPEN);
       expect(response.status).toBe(503);
-      expect(JSON.stringify(await response.json())).not.toContain('https://storage.example');
+      expect(JSON.stringify(await response.json())).not.toContain('lease=');
     } finally {
       await resetRole();
       await pg.exec('GRANT SELECT, INSERT ON audit_security.audit_logs TO doc_runtime');

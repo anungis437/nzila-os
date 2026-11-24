@@ -167,6 +167,7 @@ describe('classified document access: the case file, the member\'s own submissio
     internal: newUuid(), publicInternal: newUuid(), restricted: newUuid(), thirdParty: newUuid(), medical: newUuid(), ownPriv: newUuid(), privileged: newUuid(),
     privOwn: newUuid(), privInternal: newUuid(), orphan: newUuid(), two: newUuid(), bare: newUuid(), foreign: newUuid(),
     unlabelled: newUuid(), outsider: newUuid(), lroUpload: newUuid(), memberPii: newUuid(),
+    caseAlias: newUuid(), bothAliases: newUuid(), foreignLink: newUuid(),
   }
   const SCOPED = 'user_scoped_lro' // secondary_lro holding an explicit kernel read_internal grant
   const REVIEWER = 'user_reviewer_noscope' // reviewer without the scope: the label alone is not enough
@@ -201,11 +202,16 @@ describe('classified document access: the case file, the member\'s own submissio
       await ins(D.unlabelled, U.officer, 'not_a_known_label')
       await ins(D.outsider, U.member2, 'team_confidential')
       await ins(D.lroUpload, SCOPED, 'team_confidential')
-      const link = (doc: string, type: string, c: string) => db.query(`INSERT INTO public.document_links (document_id, linked_entity_type, linked_entity_id) VALUES ($1,$2,$3)`, [doc, type, c])
+      for (const d of [D.caseAlias, D.bothAliases, D.foreignLink]) await ins(d, U.member, 'team_confidential')
+      const link = (doc: string, type: string, c: string, org = ORG) => db.query(`INSERT INTO public.document_links (organization_id, document_id, linked_entity_type, linked_entity_id) VALUES ($1,$2,$3,$4)`, [org, doc, type, c])
       for (const d of [D.internal, D.publicInternal, D.restricted, D.thirdParty, D.medical, D.memberPii, DOC_OWN, D.ownPriv, D.privileged, D.unlabelled, D.outsider, D.lroUpload]) await link(d, 'grievance', CASE)
       for (const d of [D.privOwn, D.privInternal]) await link(d, 'grievance', CASE_PRIV)
       await link(D.two, 'grievance', CASE); await link(D.two, 'grievance', CASE_PRIV)
-      await link(D.bare, 'case', CASE)
+      // A retained spelling still needs a real authoritative case record.
+      await link(D.bare, 'case', newUuid())
+      await link(D.caseAlias, 'case', CASE)
+      await link(D.bothAliases, 'case', CASE); await link(D.bothAliases, 'grievance', CASE)
+      await link(D.foreignLink, 'case', CASE, ORG_B)
       const collab = (user: string, role: string, notes: boolean) => db.query(
         `INSERT INTO public.grievance_case_access_assignments (organization_id, grievance_id, user_id, granted_by, access_role, can_edit_case_notes) VALUES ($1,$2,$3,$4,$5::case_access_role,$6)`, [ORG, CASE, user, U.chief, role, notes])
       await collab(SCOPED, 'secondary_lro', true)
@@ -305,10 +311,23 @@ describe('classified document access: the case file, the member\'s own submissio
     expect((await read(SCOPED, D.privInternal)).effect).toBe('allow') // privileged access AND an explicit internal-file grant
   })
 
-  it('a document with no authoritative case link, two links, or only a bare case link has no basis for access', async () => {
+  it('both retained case spellings resolve authority, and two spellings of the same case are one link', async () => {
+    expect((await read(U.member, D.caseAlias)).effect).toBe('allow')
+    expect((await read(U.member, D.bothAliases)).effect).toBe('allow')
+  })
+
+  it('a foreign-organization link cannot supply authority for a document in this organization', async () => {
+    const denied = await read(U.member, D.foreignLink)
+    expect(denied.effect).toBe('deny')
+    expect(codes(denied)).toContain('NO_SOURCE_OF_AUTHORITY')
+  })
+
+  it('a document with no authoritative case link, two distinct links, or an unresolved case link has no basis for access', async () => {
     expect(codes(await read(U.member, D.orphan))).toContain('NO_SOURCE_OF_AUTHORITY')
     expect(codes(await read(U.member, D.two))).toContain('NO_SOURCE_OF_AUTHORITY')
-    expect(codes(await read(U.member, D.bare))).toContain('NO_SOURCE_OF_AUTHORITY')
+    const unresolved = await read(U.member, D.bare)
+    expect(unresolved.effect).toBe('deny')
+    expect(codes(unresolved)).toContain('RESOURCE_FACTS_MISSING')
   })
 
   it('a document in another organization is not found, and a malformed id fails closed', async () => {

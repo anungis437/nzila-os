@@ -28,13 +28,13 @@ describe('calculateInstallments', () => {
     expect(result.totalObligation).toBe(0)
   })
 
-  it('requires installments when prior year exceeds threshold', () => {
+  it('does not require installments when current-year tax is below threshold', () => {
     const result = calculateInstallments(
       { estimatedCurrentYearTax: 2_000, priorYearTax: 10_000 },
       '12-31',
       2025,
     )
-    expect(result.required).toBe(true)
+    expect(result.required).toBe(false)
   })
 
   it('computes monthly for non-CCPC', () => {

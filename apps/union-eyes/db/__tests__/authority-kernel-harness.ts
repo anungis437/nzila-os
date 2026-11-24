@@ -89,7 +89,8 @@ const BUSINESS_FIXTURE_SQL = `
     contains_medical_sensitive boolean DEFAULT false, medical_sensitive boolean DEFAULT false,
     disciplinary_sensitive boolean DEFAULT false, member_pii boolean DEFAULT false);
   CREATE TABLE public.document_links (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), document_id uuid NOT NULL, linked_entity_type text NOT NULL, linked_entity_id uuid NOT NULL);
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, document_id uuid NOT NULL,
+    linked_entity_type text NOT NULL, linked_entity_id uuid NOT NULL);
   CREATE TABLE public.payments (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, member_id varchar(255),
     amount numeric(19,2) NOT NULL, currency varchar(3) NOT NULL DEFAULT 'CAD');

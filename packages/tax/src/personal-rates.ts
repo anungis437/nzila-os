@@ -59,9 +59,9 @@ export const FEDERAL_BRACKETS_2026: TaxBracket[] = [
 /** Federal Basic Personal Amount for 2026 */
 export const FEDERAL_BPA_2026 = 16_452
 
-/** @deprecated Use FEDERAL_BRACKETS_2026 */
+/** @deprecated Compatibility alias to 2026 data, not a historical 2025 schedule. */
 export const FEDERAL_BRACKETS_2025 = FEDERAL_BRACKETS_2026
-/** @deprecated Use FEDERAL_BPA_2026 */
+/** @deprecated Compatibility alias to the 2026 maximum, not the 2025 amount. */
 export const FEDERAL_BPA_2025 = FEDERAL_BPA_2026
 
 // ── Provincial brackets (2026) ──────────────────────────────────────────────
@@ -121,11 +121,13 @@ export const PROVINCIAL_PERSONAL_BRACKETS: Record<Province, { brackets: TaxBrack
     ],
     bpa: 20_381,
   },
+  // Manitoba ITA s.4.1(2): bracket indexation is frozen from 2025.
+  // Provincial law and detailed CRA 2026 tables take priority over CRA's summary.
   MB: {
     brackets: [
-      { from: 0,       to: 47_564,  rate: 0.108 },
-      { from: 47_564,  to: 101_200, rate: 0.1275 },
-      { from: 101_200, to: null,    rate: 0.174 },
+      { from: 0,       to: 47_000,  rate: 0.108 },
+      { from: 47_000,  to: 100_000, rate: 0.1275 },
+      { from: 100_000, to: null,    rate: 0.174 },
     ],
     bpa: 15_780,
   },
@@ -170,7 +172,8 @@ export const PROVINCIAL_PERSONAL_BRACKETS: Record<Province, { brackets: TaxBrack
       { from: 570_638, to: 1_141_275, rate: 0.213 },
       { from: 1_141_275, to: null,  rate: 0.218 },
     ],
-    bpa: 11_188,
+    // Annual 2026 BPA; the July payroll catch-up amount of $15,000 is not annual.
+    bpa: 13_094,
   },
   YT: {
     brackets: [
@@ -258,7 +261,9 @@ export function getProvincialPersonalSchedule(province: Province): PersonalTaxSc
 
 /**
  * Estimate combined federal + provincial personal income tax.
- * Applies basic personal amount as a non-refundable credit (15% federal, lowest provincial rate).
+ * Applies basic personal amount as a non-refundable credit (14% federal, lowest provincial rate).
+ * Limited estimate: uses maximum BPAs without income-dependent phaseouts;
+ * excludes Ontario surtax/health premium and Quebec federal abatement.
  */
 export function estimatePersonalTax(province: Province, taxableIncome: number): PersonalTaxEstimate {
   const fedBrackets = FEDERAL_BRACKETS_2026

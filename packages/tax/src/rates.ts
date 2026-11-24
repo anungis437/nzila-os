@@ -7,7 +7,9 @@
  * - SBD limit: Income Tax Act s.125(2)
  * - CCPC passive income grind: Budget 2018, ITA s.125(5.1)
  *
- * Updated for 2025-2026 tax years. Values are expressed as decimals (e.g. 0.15 = 15%).
+ * Current reference snapshots, not a historical or prorated fiscal-year calculator.
+ * Provincial transitions retain their distinct applicability conditions below.
+ * Values are expressed as decimals (e.g. 0.15 = 15%).
  */
 import type { Province } from './types'
 
@@ -19,7 +21,7 @@ export const FEDERAL_GENERAL_RATE = 0.15
 /** Federal small business rate after SBD (ITA s.125) */
 export const FEDERAL_SMALL_BUSINESS_RATE = 0.09
 
-/** Federal rate reduction — manufacturing & processing (ITA s.125.1) */
+/** M&P deduction percentage (ITA ss.125.1/123.4), not the resulting 15% net tax rate. */
 export const FEDERAL_MP_RATE = 0.13
 
 // ── Small Business Deduction thresholds ─────────────────────────────────────
@@ -30,8 +32,8 @@ export const SBD_BUSINESS_LIMIT = 500_000
 /** Taxable capital threshold where SBD starts to grind (ITA s.125(5.1)) — $10M */
 export const SBD_CAPITAL_GRIND_START = 10_000_000
 
-/** Taxable capital where SBD fully eliminated — $15M */
-export const SBD_CAPITAL_GRIND_END = 15_000_000
+/** Taxable capital where SBD is eliminated — $50M for tax years starting after 2022-04-06. */
+export const SBD_CAPITAL_GRIND_END = 50_000_000
 
 /** CCPC adjusted aggregate investment income (AAII) threshold — $50K (Budget 2018) */
 export const AAII_GRIND_START = 50_000
@@ -48,17 +50,18 @@ export const AAII_GRIND_END = 150_000
  * - Individuals: 50% on first $250K of net gains, 66.67% above
  * - Corporations / trusts: 66.67% on all gains
  *
- * As of June 2025, the increase to 66.67% has been deferred.
- * Current rate remains 50% for all taxpayers pending further legislation.
+ * Budget 2025 confirmed that the government would not proceed with the increase.
+ * The enacted standard rate remains 50% (ITA s.38(a)). The opt-in proposed
+ * scenario below is a historical counterfactual, not current or pending law.
  *
  * Source: ITA s.38(a), Budget 2024 Notice of Ways and Means Motion
  */
 export const CAPITAL_GAINS_INCLUSION_RATE = 0.50
 
-/** Proposed higher inclusion rate for gains above individual threshold */
+/** Historical, canceled Budget 2024 proposal; not an enacted inclusion rate. */
 export const CAPITAL_GAINS_HIGHER_INCLUSION_RATE = 2 / 3
 
-/** Individual threshold before higher rate applies (Budget 2024 proposal, deferred) */
+/** Historical individual threshold in the canceled Budget 2024 proposal. */
 export const CAPITAL_GAINS_INDIVIDUAL_THRESHOLD = 250_000
 
 /**
@@ -66,7 +69,7 @@ export const CAPITAL_GAINS_INDIVIDUAL_THRESHOLD = 250_000
  *
  * @param capitalGain  Total capital gain (or loss — use negative)
  * @param isIndividual Whether the taxpayer is an individual (vs corp/trust)
- * @param useProposedRates Whether to apply the Budget 2024 tiered rates (default: false — deferred)
+ * @param useProposedRates Whether to apply the Budget 2024 tiered rates (default: false; canceled historical proposal only)
  */
 export function calculateTaxableCapitalGain(
   capitalGain: number,
@@ -117,26 +120,31 @@ export interface ProvincialTaxRate {
   sbdLimit: number
   /** Manufacturing & processing rate if different from general */
   mpRate?: number
-  /** Effective for tax years starting on or after */
+  /** Effective date of this current reference snapshot, not a whole-year rate. */
   effectiveFrom: string
+  /** Transition condition; callers must assess the relevant income/fiscal period. */
+  smallBusinessRateCondition?: string
 }
 
 /**
  * Provincial/territorial corporate income tax rates.
  * Source: CRA Schedule 510, provincial budget publications.
- * Current as of 2026.
+ * Current reference values. These do not apply uniformly to every 2026 fiscal year.
+ * CRA requires day weighting for midyear rate changes; Quebec instead bases its
+ * 2026 SBD change on the taxation-year start. Neither rule is calculated here.
+ * Source: https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/corporation-tax-rates.html
  */
 export const PROVINCIAL_RATES: Record<Province, ProvincialTaxRate> = {
-  ON: { province: 'ON', generalRate: 0.115, smallBusinessRate: 0.032, sbdLimit: 500_000, mpRate: 0.10, effectiveFrom: '2020-01-01' },
-  QC: { province: 'QC', generalRate: 0.115, smallBusinessRate: 0.031, sbdLimit: 500_000, effectiveFrom: '2025-01-01' },
+  ON: { province: 'ON', generalRate: 0.115, smallBusinessRate: 0.022, sbdLimit: 500_000, mpRate: 0.10, effectiveFrom: '2026-07-01', smallBusinessRateCondition: '2.2% from 2026-07-01; 3.2% before that date. Prorate a taxation year spanning the change.' },
+  QC: { province: 'QC', generalRate: 0.115, smallBusinessRate: 0.022, sbdLimit: 500_000, effectiveFrom: '2026-04-30', smallBusinessRateCondition: '2.2% only for taxation years beginning after 2026-04-29; 3.2% for earlier starts. Quebec SBD eligibility conditions still apply.' },
   BC: { province: 'BC', generalRate: 0.12, smallBusinessRate: 0.02, sbdLimit: 500_000, effectiveFrom: '2018-01-01' },
   AB: { province: 'AB', generalRate: 0.08, smallBusinessRate: 0.02, sbdLimit: 500_000, effectiveFrom: '2020-07-01' },
-  SK: { province: 'SK', generalRate: 0.12, smallBusinessRate: 0.01, sbdLimit: 600_000, effectiveFrom: '2022-07-01' },
+  SK: { province: 'SK', generalRate: 0.12, smallBusinessRate: 0.01, sbdLimit: 600_000, effectiveFrom: '2023-07-01' },
   MB: { province: 'MB', generalRate: 0.12, smallBusinessRate: 0.00, sbdLimit: 500_000, effectiveFrom: '2019-01-01' },
   NB: { province: 'NB', generalRate: 0.14, smallBusinessRate: 0.025, sbdLimit: 500_000, effectiveFrom: '2021-04-01' },
   NS: { province: 'NS', generalRate: 0.14, smallBusinessRate: 0.015, sbdLimit: 700_000, effectiveFrom: '2025-04-01' },
   PE: { province: 'PE', generalRate: 0.15, smallBusinessRate: 0.01, sbdLimit: 600_000, effectiveFrom: '2025-07-01' },
-  NL: { province: 'NL', generalRate: 0.15, smallBusinessRate: 0.03, sbdLimit: 500_000, effectiveFrom: '2022-01-01' },
+  NL: { province: 'NL', generalRate: 0.15, smallBusinessRate: 0.02, sbdLimit: 500_000, effectiveFrom: '2026-01-01', smallBusinessRateCondition: '2% from 2026-01-01; 2.5% before that date. Prorate a taxation year spanning the change.' },
   YT: { province: 'YT', generalRate: 0.12, smallBusinessRate: 0.00, sbdLimit: 500_000, effectiveFrom: '2021-01-01' },
   NT: { province: 'NT', generalRate: 0.115, smallBusinessRate: 0.02, sbdLimit: 500_000, effectiveFrom: '2021-01-01' },
   NU: { province: 'NU', generalRate: 0.12, smallBusinessRate: 0.03, sbdLimit: 500_000, effectiveFrom: '2021-01-01' },
@@ -156,7 +164,9 @@ export interface CorporateTaxEstimate {
 }
 
 /**
- * Get combined federal + provincial corporate tax rates for a province.
+ * Get the current combined federal + provincial rate snapshot.
+ * This helper has no fiscal-period input: it does not choose historical rates,
+ * prorate transition years, or establish provincial SBD eligibility.
  */
 export function getCombinedCorporateRates(province: Province): CorporateTaxEstimate {
   const prov = PROVINCIAL_RATES[province]
@@ -174,7 +184,8 @@ export function getCombinedCorporateRates(province: Province): CorporateTaxEstim
 
 /**
  * Calculate SBD clawback based on taxable capital.
- * ITA s.125(5.1): SBD grinds linearly from $10M to $15M taxable capital.
+ * ITA s.125(5.1): SBD grinds linearly from $10M to $50M taxable capital
+ * for taxation years starting on or after 2022-04-07.
  * Returns the reduced business limit (0–$500K).
  */
 export function calculateSbdBusinessLimit(taxableCapital: number): number {
@@ -198,8 +209,10 @@ export function calculateAaiiBusinessLimit(adjustedAggregateInvestmentIncome: nu
 
 /**
  * Quick estimate: corporate tax on active business income.
- * Applies SBD up to the business limit, general rate above.
- * Returns federal + provincial combined estimated tax.
+ * Applies the current SBD snapshot up to a combined business limit.
+ * Not a fiscal-year tax calculation: no transition proration or provincial SBD
+ * eligibility assessment, and provincial limits/passive-income rules can differ.
+ * Returns federal + provincial combined estimated tax for that limited scenario.
  */
 export function estimateCorporateTax(
   province: Province,

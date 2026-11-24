@@ -1,0 +1,28 @@
+// The existing CI native authority and primary-handler cohort. No scope or skip change.
+export const AUTHORITY_NATIVE_SUITES = [
+  "db/__tests__/authority-case-projection.pglite.test.ts",
+  "db/__tests__/authority-kernel-actor.pglite.test.ts",
+  "db/__tests__/authority-kernel-audit.pglite.test.ts",
+  "db/__tests__/authority-kernel-case-backfill.pglite.test.ts",
+  "db/__tests__/authority-kernel-case-sources.pglite.test.ts",
+  "db/__tests__/authority-kernel-counsel.pglite.test.ts",
+  "db/__tests__/authority-kernel-finance-sources.pglite.test.ts",
+  "db/__tests__/authority-kernel-identity.pglite.test.ts",
+  "db/__tests__/authority-kernel-lifecycle.pglite.test.ts",
+  "db/__tests__/authority-kernel-resources.pglite.test.ts",
+  "db/__tests__/authority-kernel-revocation.pglite.test.ts",
+  "db/__tests__/authority-kernel-storage.pglite.test.ts",
+  "db/__tests__/review-intake.pglite.test.ts",
+  "db/__tests__/review-visibility.pglite.test.ts",
+  "db/__tests__/workaid-union-side.pglite.test.ts",
+  "lib/db/__tests__/case-read-batch.pglite.test.ts",
+  "lib/finance/finance-duties.pglite.test.ts",
+  "lib/services/case-access-service.pglite.test.ts",
+  "db/auth/authority-physical-guards.pglite.test.ts",
+  "db/auth/case-primary-domain-guards.pglite.test.ts",
+  "db/__tests__/message-authority-issuance.pglite.test.ts",
+  "lib/auth/organization-admin.pglite.test.ts",
+  "lib/cases/assignment-profiles.pglite.test.ts",
+  "lib/cases/automatic-assignment.pglite.test.ts",
+  "lib/cases/kernel-claims.pglite.test.ts"
+]

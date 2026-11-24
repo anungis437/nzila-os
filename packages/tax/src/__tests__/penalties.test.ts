@@ -39,7 +39,7 @@ describe('calculateT2LateFilingPenalty', () => {
   })
 
   it('calculates repeat offender penalty: 10% + 2%/month', () => {
-    const r = calculateT2LateFilingPenalty({ taxOwing: 10_000, monthsLate: 3, isRepeatOffender: true })
+    const r = calculateT2LateFilingPenalty({ taxOwing: 10_000, monthsLate: 3, isRepeatOffender: true, hasFilingDemand: true })
     // 10% = 1000, 2% * 3 = 600 → 1600
     expect(r.penalty).toBe(1_600)
     expect(r.rule).toContain('s.162(2)')
@@ -63,9 +63,9 @@ describe('calculateGstLatePenalty', () => {
     expect(r.penalty).toBe(200)
   })
 
-  it('doubles for repeat offender', () => {
+  it('does not invent generic GST repeat doubling', () => {
     const r = calculateGstLatePenalty({ netTaxOwing: 10_000, monthsLate: 4, isRepeatOffender: true })
-    expect(r.penalty).toBe(400)
+    expect(r.penalty).toBe(200)
   })
 })
 
@@ -75,9 +75,9 @@ describe('calculateInformationReturnPenalty', () => {
     expect(r.penalty).toBe(0)
   })
 
-  it('calculates $25/day per slip', () => {
+  it('uses the flat relieving policy for five or fewer T5 slips', () => {
     const r = calculateInformationReturnPenalty({ returnType: 'T5', numberOfSlips: 1, daysLate: 4 })
-    // $25 * 4 = $100
+    // CRA administrative relief: 1–5 slips is a flat $100.
     expect(r.penalty).toBe(100)
   })
 
@@ -87,8 +87,8 @@ describe('calculateInformationReturnPenalty', () => {
     expect(r.penalty).toBe(100)
   })
 
-  it('enforces maximum of $7500', () => {
+  it('uses the 51–500 slip tier and its 100-day cap', () => {
     const r = calculateInformationReturnPenalty({ returnType: 'T4', numberOfSlips: 100, daysLate: 100 })
-    expect(r.penalty).toBe(7_500)
+    expect(r.penalty).toBe(1_500)
   })
 })

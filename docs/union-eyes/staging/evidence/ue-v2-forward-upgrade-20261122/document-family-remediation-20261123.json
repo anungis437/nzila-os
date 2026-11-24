@@ -259,5 +259,88 @@
     "apps/union-eyes/lib/documents/canonical-journey.ts": "e5fa3a0011f09e1e9d2babffa63cf70e044dc908dfffff360f049073b3091d1f",
     "apps/union-eyes/scripts/runtime/db-inspect.ts": "24b2d0a9b67ad49badabaeb9ba5f67cc129a328db715f6f15ab070184eaeb0c4",
     "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts": "aa0c9b613da53b51167a561589b651c744080fcf632afe2bcaae24686331929f"
+  },
+  "latestGeneratedEvidenceCorrection": {
+    "observedCandidateSourceSha": "72e1199da33b3957cbac5ce3414983a1ea8e4e07",
+    "recordedAt": "2026-11-24T02:24:31.928713+00:00",
+    "ciWholeAppStatus": "FAILED_AUTHORITY_CENSUS_AND_SHARED_FIXTURE_OR_CONTRACT_FAMILIES; FULL_CI_RESULTS_RECONCILED_SEPARATELY",
+    "actualDrift": "Document PATCH route test-file count changed from2 to3; authorization classes and ratchets unchanged",
+    "correction": "Regenerate authority census and check its dependent trace; add read-only qualification:generated-evidence and run it before case-access checks and before expensive private native preparation",
+    "workingTreeGeneratedEvidenceCheck": "PASS",
+    "priorLocalFullSuite": "INTERRUPTED_NO_EXIT_RECEIPT_NOT_ACCEPTED",
+    "nativePredecessorMatrix": {
+      "passed": 363,
+      "failed": 0,
+      "pending": 0
+    },
+    "nativePredecessorAuditComponent": {
+      "passed": 9,
+      "failed": 0,
+      "pending": 0
+    },
+    "remainingCiFamilies": [
+      "Successor exact-source CI and required-five qualification remain unexecuted; source corrections are recorded below"
+    ],
+    "freshSuccessorQualification": "PENDING",
+    "stagingAcceptance": false,
+    "productionDeployment": false
+  },
+  "latestSuccessorPrecommitFamilies": {
+    "recordedAt": "2026-11-24T03:08:37.767722+00:00",
+    "baselineSourceSha": "72e1199da33b3957cbac5ce3414983a1ea8e4e07",
+    "sourceState": "UNCOMMITTED_COMBINED_SUCCESSOR_NOT_STAGING_ACCEPTED",
+    "authorityFixtureFamily": {
+      "correction": "Every document link fixture supplies its real tenant; unresolved case denial replaces the now-valid case alias negative; supported aliases and foreign links retain explicit assertions",
+      "pglitePassed": 76,
+      "nativePassed": 76,
+      "newApplicationPrivileges": false
+    },
+    "nativePreflight": {
+      "correction": "One shared exact-source runner for the unchanged25 CI suites, before canonical database construction; inherited connection aliases removed; source bytes and owned-container cleanup checked",
+      "files": 25,
+      "passed": 472,
+      "failed": 0,
+      "skipped": 0,
+      "workingTreeOnly": true
+    },
+    "downloadAndAuditContractFamily": {
+      "correction": "Fixtures supply governed metadata and real hash shapes; application download leases replace obsolete SAS expectations; audit contracts follow the canonical delegated reader while retaining tenant, direct-admin, redaction and atomic-read assertions",
+      "focusedFiles": 4,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "applicationBehaviorChanged": false
+    },
+    "wholeDeclaredUnionEyesProject": {
+      "files": 2116,
+      "passed": 27725,
+      "failed": 0,
+      "declaredSkips": 36,
+      "todo": 0,
+      "sourceUnchangedDuringRun": true,
+      "workingTreeOnly": true,
+      "skipsAreNotPasses": true
+    },
+    "generatedEvidence": "Official authority census regenerated (document PATCH testFiles2 to3); dependent trace checked; read-only checks run before case-access and private native preparation",
+    "authorizedSharedReferenceMaintenance": {
+      "scope": "Ten existing shared tax reference modules, explicitly authorized by founder; no Union Eyes finance feature implementation",
+      "reviewDateToronto": "2026-11-23",
+      "primarySourcePeriodsAndLimits": "packages/tax/REFERENCE_MAINTENANCE_20261123.md",
+      "freshnessThresholdDaysUnchanged": 90,
+      "actualClockFreshnessTestRetained": true,
+      "integratedTests": {
+        "passed": 354,
+        "failed": 0,
+        "skipped": 0,
+        "packageTypecheck": "PASS",
+        "workingTreeOnly": true,
+        "wholeFinancialFeatureCertification": false
+      }
+    },
+    "successorRequiredFive": "PENDING",
+    "successorCi": "PENDING",
+    "liveStagingProof": "PENDING",
+    "stagingAcceptance": false,
+    "productionDeployment": false
   }
 }

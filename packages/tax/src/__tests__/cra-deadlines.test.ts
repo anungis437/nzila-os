@@ -20,7 +20,7 @@ describe('calculateCorporateDeadlines', () => {
   })
 
   it('generates T2 payment 3 months after FYE for qualifying CCPC', () => {
-    const deadlines = calculateCorporateDeadlines('12-31', 2025, 'ON', { isCcpc: true })
+    const deadlines = calculateCorporateDeadlines('12-31', 2025, 'ON', { isCcpc: true, qualifiesForThreeMonthPayment: true })
     const t2Payment = deadlines.find((d) => d.type === 'federal_payment')
     expect(t2Payment).toBeDefined()
     expect(t2Payment!.dueDate).toBe('2026-03-31')
@@ -65,7 +65,7 @@ describe('calculateCorporateDeadlines', () => {
   })
 
   it('generates T5013 partnership return due March 31', () => {
-    const deadlines = calculateCorporateDeadlines('12-31', 2025, 'ON')
+    const deadlines = calculateCorporateDeadlines('12-31', 2025, 'ON', { partnershipPartnerTypes: 'individuals' })
     const t5013 = deadlines.find((d) => d.label.includes('T5013'))
     expect(t5013).toBeDefined()
     expect(t5013!.dueDate).toBe('2026-03-31')

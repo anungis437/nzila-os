@@ -11,9 +11,11 @@
  * - CRA T2 Corporation Income Tax Guide (T4012): RDTOH, GRIP, LRIP
  * - Provincial dividend tax credits: Provincial tax acts
  *
- * Updated for 2025 tax year.
+ * Simplified estimates are not tax assessments. Full reference verification remains
+ * incomplete; see data-versions.ts for the independently controlled verification date.
  */
 import type { Province } from './types'
+import { CPP_2026 } from './payroll-thresholds'
 
 // ── Dividend gross-up & DTC rates ───────────────────────────────────────────
 
@@ -52,34 +54,39 @@ export interface ProvincialDividendCredit {
 
 /**
  * Provincial dividend tax credit rates (% of grossed-up amount).
- * Source: Provincial income tax acts, CRA Schedule 428.
+ * Source: Provincial income tax acts / CRA Schedule 428.
+ * PE/SK retain the enacted gross-up fractions to avoid premature rate rounding.
+ * Saskatchewan: s.32(h), extended by Saskatchewan Affordability Act s.13;
+ * the scheduled 2026 increase in the earlier 2024 amendment was repealed.
+ * https://docs.legassembly.sk.ca/legdocs/Bills/30L1S/Bill30-1.pdf
  */
 export const PROVINCIAL_DTC: Record<Province, ProvincialDividendCredit> = {
   ON: { eligibleDtcRate: 0.10,    nonEligibleDtcRate: 0.029863 },
-  QC: { eligibleDtcRate: 0.1175,  nonEligibleDtcRate: 0.0342 },
+  QC: { eligibleDtcRate: 0.117,  nonEligibleDtcRate: 0.0342 },
   BC: { eligibleDtcRate: 0.12,    nonEligibleDtcRate: 0.0196 },
   AB: { eligibleDtcRate: 0.0812,  nonEligibleDtcRate: 0.0218 },
-  SK: { eligibleDtcRate: 0.11,    nonEligibleDtcRate: 0.02105 },
+  SK: { eligibleDtcRate: 0.3995 * 0.38 / 1.38, nonEligibleDtcRate: 0.19312 * 0.15 / 1.15 },
   MB: { eligibleDtcRate: 0.08,    nonEligibleDtcRate: 0.007835 },
   NB: { eligibleDtcRate: 0.14,    nonEligibleDtcRate: 0.0275 },
-  NS: { eligibleDtcRate: 0.0885,  nonEligibleDtcRate: 0.0299 },
-  PE: { eligibleDtcRate: 0.105,   nonEligibleDtcRate: 0.027 },
+  NS: { eligibleDtcRate: 0.0885,  nonEligibleDtcRate: 0.015 },
+  PE: { eligibleDtcRate: 0.3813 * 0.38 / 1.38, nonEligibleDtcRate: 0.10 * 0.15 / 1.15 },
   NL: { eligibleDtcRate: 0.063,   nonEligibleDtcRate: 0.032 },
-  YT: { eligibleDtcRate: 0.1512,  nonEligibleDtcRate: 0.0267 },
+  YT: { eligibleDtcRate: 0.1202,  nonEligibleDtcRate: 0.0067 },
   NT: { eligibleDtcRate: 0.115,   nonEligibleDtcRate: 0.06 },
   NU: { eligibleDtcRate: 0.0551,  nonEligibleDtcRate: 0.0261 },
 }
 
 // ── RDTOH ───────────────────────────────────────────────────────────────────
 
-/** RDTOH refund rate: $38.33 per $100 of taxable dividends paid (ITA s.129(1)) */
-export const RDTOH_REFUND_RATE = 38.33 / 100
+/** RDTOH refund ceiling rate: 38⅓%; actual refund is capped by the applicable
+ * ERDTOH/NERDTOH balances. This simplified estimator has no balance inputs. */
+export const RDTOH_REFUND_RATE = 23 / 60
 
 /**
  * Part IV tax rate on portfolio dividends received by a private corp (ITA s.186(1)).
  * 38-1/3% of eligible dividends received.
  */
-export const PART_IV_TAX_RATE = 38.33 / 100
+export const PART_IV_TAX_RATE = 23 / 60
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -100,9 +107,9 @@ export interface DividendTaxResult {
   netTaxAtTopRate: number
   /** Effective personal tax rate on the cash dividend */
   effectiveDividendRate: number
-  /** RDTOH refund to the corporation */
+  /** Potential RDTOH ceiling only; not an actual refund without sufficient applicable pools. */
   rdtohRefund: number
-  /** Combined corp + personal integration cost */
+  /** Simplified personal tax less potential refund ceiling, not an assessed integration cost. */
   integrationCost: number
 }
 
@@ -138,7 +145,7 @@ export function calculateDividendTax(
   const netTax = Math.max(0, Math.round((taxOnGrossedUp - totalCredit) * 100) / 100)
   const effectiveRate = cashDividend > 0 ? Math.round((netTax / cashDividend) * 10000) / 10000 : 0
 
-  // Step 5: RDTOH refund to corporation
+  // Step 5: Potential RDTOH ceiling only. Actual pool eligibility/balances are not established.
   const rdtohRefund = Math.round(cashDividend * RDTOH_REFUND_RATE * 100) / 100
 
   // Step 6: Integration cost = personal tax - RDTOH refund (simplified)
@@ -170,19 +177,19 @@ export function compareSalaryVsDividend(
   personalMarginalRate: number,
   corporateTaxRate: number,
 ): {
+  /** employerCpp is a 2026 CPP1 illustration only (not CPP2 or Quebec QPP). */
   salary: { gross: number; personalTax: number; afterTax: number; employerCpp: number }
   eligibleDividend: { corpTax: number; cashDividend: number; personalTax: number; afterTax: number; rdtohRefund: number }
   nonEligibleDividend: { corpTax: number; cashDividend: number; personalTax: number; afterTax: number; rdtohRefund: number }
 } {
   // ── Salary path ──
-  // CPP employer max contribution (2026): roughly $4,034 at 5.95% up to $71,300
-  const cppMaxEarnings = 71_300
-  const cppRate = 0.0595
-  const cppExemption = 3_500
-  const cppEmployer = Math.min(
-    (Math.min(corporatePreTaxIncome, cppMaxEarnings) - cppExemption) * cppRate,
-    (cppMaxEarnings - cppExemption) * cppRate,
-  )
+  // 2026 CPP base + first additional only. CPP2 is not included here; this
+  // legacy scalar is not a full payroll cost, and Quebec requires QPP instead.
+  // Reuse the existing year-specific table rather than duplicating 2025 YMPE.
+  const cppEmployer = Math.max(0, Math.min(
+    (Math.min(corporatePreTaxIncome, CPP_2026.ympe) - CPP_2026.basicExemption) * CPP_2026.rate,
+    CPP_2026.maxContribution,
+  ))
   const grossSalary = corporatePreTaxIncome // corp deducts full amount
   const personalTaxOnSalary = Math.round(grossSalary * personalMarginalRate * 100) / 100
   const afterTaxSalary = Math.round((grossSalary - personalTaxOnSalary) * 100) / 100

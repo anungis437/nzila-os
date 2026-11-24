@@ -14,8 +14,8 @@
 // ── Remitter type thresholds ────────────────────────────────────────────────
 
 export type RemitterType =
-  | 'quarterly'            // AMWA < $1,000; new employer
-  | 'regular'              // AMWA $1,000 – $24,999.99
+  | 'quarterly'            // Confirmed eligibility; AMWA alone is insufficient
+  | 'regular'              // AMWA $0 – $24,999.99 absent confirmed quarterly eligibility
   | 'accelerated_threshold1' // AMWA $25,000 – $99,999.99
   | 'accelerated_threshold2' // AMWA ≥ $100,000
 
@@ -39,19 +39,19 @@ export const REMITTER_THRESHOLDS: RemitterThreshold[] = [
     type: 'quarterly',
     label: 'Quarterly Remitter',
     amwaMin: 0,
-    amwaMax: 999.99,
+    amwaMax: 2_999.99,
     frequency: 'Quarterly',
     dueDateRule: '15th of the month following the end of each quarter (Apr 15, Jul 15, Oct 15, Jan 15)',
-    rule: 'Reg. 108(1.12): New or small employers with AMWA < $1,000 and perfect compliance history',
+    rule: 'Confirmed quarterly eligibility: new accounts need monthly withholding below $1,000; accounts open at least 12 months need AMWA below $3,000. Both need perfect compliance.',
   },
   {
     type: 'regular',
     label: 'Regular Remitter',
-    amwaMin: 1_000,
+    amwaMin: 0,
     amwaMax: 24_999.99,
     frequency: 'Monthly',
     dueDateRule: '15th of the month following the month deductions were made',
-    rule: 'Reg. 108(1): AMWA between $1,000 and $24,999.99',
+    rule: 'Reg. 108(1): AMWA below $25,000 unless quarterly eligibility is established',
   },
   {
     type: 'accelerated_threshold1',
@@ -68,21 +68,34 @@ export const REMITTER_THRESHOLDS: RemitterThreshold[] = [
     amwaMin: 100_000,
     amwaMax: null,
     frequency: 'Up to 4 times monthly',
-    dueDateRule: 'Due 3rd working day after end of each pay period (weekly for most)',
+    dueDateRule: 'Due 3rd working day after each fixed monthly period: 1st–7th, 8th–14th, 15th–21st, 22nd–month end',
     rule: 'Reg. 108(1.1)(b): AMWA $100,000 or more',
   },
 ]
 
 /**
- * Determine the remitter type based on the Average Monthly Withholding Amount.
+ * Select a conservative remitter frequency from AMWA. Quarterly status requires
+ * separate confirmation of all CRA conditions; this function does not establish
+ * account age, perfect compliance, new-account MWA, or CRA assignment. Without
+ * that confirmation, low AMWA returns regular rather than granting quarterly.
+ * Source: https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions/how-when-remit-due-dates.html
  */
-export function determineRemitterType(amwa: number): RemitterThreshold {
-  for (let i = REMITTER_THRESHOLDS.length - 1; i >= 0; i--) {
+export function determineRemitterType(
+  amwa: number,
+  options: { quarterlyEligibilityConfirmed?: boolean } = {},
+): RemitterThreshold {
+  if (!Number.isFinite(amwa) || amwa < 0) {
+    throw new RangeError('AMWA must be a finite non-negative amount')
+  }
+  if (options.quarterlyEligibilityConfirmed === true && amwa < 3_000) {
+    return REMITTER_THRESHOLDS[0]
+  }
+  for (let i = REMITTER_THRESHOLDS.length - 1; i >= 1; i--) {
     if (amwa >= REMITTER_THRESHOLDS[i].amwaMin) {
       return REMITTER_THRESHOLDS[i]
     }
   }
-  return REMITTER_THRESHOLDS[0]
+  return REMITTER_THRESHOLDS[1]
 }
 
 /**
@@ -105,7 +118,9 @@ export interface PayrollRemittanceDueDate {
 }
 
 /**
- * Generate monthly payroll remittance due dates for a calendar year (regular remitter).
+ * Generate nominal monthly due dates for a regular remitter.
+ * No weekend/public-holiday adjustment: CRA permits receipt on the next business
+ * day when the nominal due date is a Saturday, Sunday, or recognized holiday.
  */
 export function generateMonthlyRemittanceDueDates(year: number): PayrollRemittanceDueDate[] {
   const dueDates: PayrollRemittanceDueDate[] = []
@@ -125,7 +140,8 @@ export function generateMonthlyRemittanceDueDates(year: number): PayrollRemittan
 }
 
 /**
- * Generate quarterly payroll remittance due dates.
+ * Generate nominal quarterly dates for an already-confirmed quarterly remitter.
+ * No weekend/public-holiday adjustment; these dates do not establish eligibility.
  */
 export function generateQuarterlyRemittanceDueDates(year: number): PayrollRemittanceDueDate[] {
   const quarters = [
@@ -162,6 +178,7 @@ export const CPP_2026 = {
   maxCpp2Contribution: 416.00,
 } as const
 
+/** Standard Canada-except-Quebec rates; not QPIP or a reduced employer premium. */
 export const EI_2026 = {
   /** Maximum insurable earnings */
   maxInsurableEarnings: 68_900,
