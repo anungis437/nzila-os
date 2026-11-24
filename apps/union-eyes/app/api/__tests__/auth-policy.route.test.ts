@@ -84,4 +84,34 @@ describe('auth/policy route', () => {
     expect(payload).toMatchObject({ allowMagicLink: false });
     expect(m.updateOrgAuthPolicy).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1', actorUserId: 'u1' }));
   });
+
+  const full = { allowLocalAuth: true, allowMagicLink: true, allowSso: true, requireSso: false, requireInvite: false, passwordResetAllowed: true, allowedEmailDomains: [], mfaRequiredForRoles: [] };
+  const put = (body: unknown) => new NextRequest('http://localhost/api/auth/policy', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+
+  it('PUT passes the policy the caller read to the update, apart from the patch', async () => {
+    const { PUT } = await loadRoute();
+    const response = await PUT(put({ allowMagicLink: false, expected: full }));
+    expect(response.status).toBe(200);
+    expect(m.updateOrgAuthPolicy).toHaveBeenCalledWith(expect.objectContaining({ patch: { allowMagicLink: false }, expected: full }));
+  });
+
+  it('PUT answers 409, not 400, when the stored policy changed after the caller read it', async () => {
+    const { PUT } = await loadRoute();
+    m.updateOrgAuthPolicy.mockResolvedValueOnce({ success: false, conflict: true, error: 'The sign-in policy changed after it was loaded' });
+    const response = await PUT(put({ allowMagicLink: false, expected: full }));
+    expect(response.status).toBe(409);
+  });
+
+  it('PUT refuses an expected policy that is not complete', async () => {
+    const { PUT } = await loadRoute();
+    const response = await PUT(put({ allowMagicLink: false, expected: { allowLocalAuth: true } }));
+    expect(response.status).toBe(400);
+    expect(m.updateOrgAuthPolicy).not.toHaveBeenCalled();
+  });
+
+  it('answers GET and PUT with a policy that no cache may keep', async () => {
+    const { GET, PUT } = await loadRoute();
+    expect((await GET(new NextRequest('http://localhost/api/auth/policy'))).headers.get('cache-control')).toBe('no-store');
+    expect((await PUT(put({ allowMagicLink: false }))).headers.get('cache-control')).toBe('no-store');
+  });
 });

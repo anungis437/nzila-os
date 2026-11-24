@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiErrorMessage } from '@/lib/client/api-envelope';
+import { apiErrorMessageFor } from '@/lib/client/api-envelope';
 
 interface AttachmentMetadata {
   url: string;
@@ -89,7 +89,7 @@ export function FileUpload({
       const data = (await response.json().catch(() => null)) as { data?: { attachment?: AttachmentMetadata } } | null;
 
       if (!response.ok) {
-        throw new Error(apiErrorMessage(data, 'Upload failed'));
+        throw new Error(apiErrorMessageFor(response.status, data, 'Upload failed'));
       }
 
       // The route answers { success, data: { attachment }, timestamp }.
@@ -126,7 +126,7 @@ toast({
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(apiErrorMessage(data, 'Delete failed'));
+        throw new Error(apiErrorMessageFor(response.status, data, 'Delete failed'));
       }
 
       setAttachments(prev => prev.filter(a => a.url !== attachment.url));

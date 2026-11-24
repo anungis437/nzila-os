@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ReviewQueueItem, getReviewQueueCounts } from "@/lib/services/cba-intelligence/review-service";
-import { ApiShapeError, apiErrorMessage, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, apiErrorMessageFor, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
 import { useOperationalHealth } from "./use-operational-health";
 import {
   Card,
@@ -91,7 +91,7 @@ export function ReviewQueue() {
     queryFn: async () => {
       const response = await fetch("/api/cba-intelligence/review?counts=true");
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load the review queue counts"));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, "Failed to load the review queue counts"));
       const queueCounts: QueueCounts = envelopeData(body) as unknown as QueueCounts;
       return queueCounts;
     },
@@ -109,7 +109,7 @@ export function ReviewQueue() {
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/review?${queryParams}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load review queue"));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, "Failed to load review queue"));
       const queue: ReviewQueuePage = envelopeData(body) as unknown as ReviewQueuePage;
       if (!Array.isArray(queue.items)) throw new ApiShapeError("no review queue");
       return queue;

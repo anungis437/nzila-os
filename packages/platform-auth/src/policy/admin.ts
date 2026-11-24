@@ -21,16 +21,57 @@ export interface PolicyPatch {
   mfaRequiredForRoles?: string[]
 }
 
+/** The policy a caller last read. When given, the update applies only if the stored policy is still exactly this one. */
+export type ExpectedPolicy = Omit<OrgAuthPolicy, 'organizationId'>
+
 export interface UpdatePolicyInput {
   organizationId: string
   actorUserId: string
   patch: PolicyPatch
+  expected?: ExpectedPolicy
 }
 
 export interface UpdatePolicyResult {
   success: boolean
   policy?: OrgAuthPolicy
   error?: string
+  /** True when `expected` no longer matches the stored policy: nothing was written. */
+  conflict?: boolean
+}
+
+const BOOLEAN_FIELDS = [
+  'allowLocalAuth',
+  'allowMagicLink',
+  'allowSso',
+  'requireSso',
+  'requireInvite',
+  'passwordResetAllowed',
+] as const
+
+const sameSet = (a: readonly string[], b: readonly string[]) => {
+  const left = new Set(a.map((value) => value.toLowerCase()))
+  const right = new Set(b.map((value) => value.toLowerCase()))
+  return left.size === right.size && [...left].every((value) => right.has(value))
+}
+
+function matchesExpected(current: OrgAuthPolicy, expected: ExpectedPolicy): boolean {
+  return (
+    BOOLEAN_FIELDS.every((key) => current[key] === expected[key]) &&
+    sameSet(current.allowedEmailDomains, expected.allowedEmailDomains) &&
+    sameSet(current.mfaRequiredForRoles, expected.mfaRequiredForRoles)
+  )
+}
+
+/** Domains are stored lower-case, trimmed and without duplicates; roles without duplicates. What is stored is what the caller reads back. */
+function normalizePatch(patch: PolicyPatch): PolicyPatch {
+  const unique = (values: string[]) => [...new Set(values)]
+  return {
+    ...patch,
+    ...(patch.allowedEmailDomains && {
+      allowedEmailDomains: unique(patch.allowedEmailDomains.map((domain) => domain.trim().toLowerCase())),
+    }),
+    ...(patch.mfaRequiredForRoles && { mfaRequiredForRoles: unique(patch.mfaRequiredForRoles) }),
+  }
 }
 
 function validatePatch(patch: PolicyPatch): string | null {
@@ -64,20 +105,29 @@ function validatePatch(patch: PolicyPatch): string | null {
 export async function updateOrgAuthPolicy(
   input: UpdatePolicyInput,
 ): Promise<UpdatePolicyResult> {
-  const err = validatePatch(input.patch)
+  const patch = normalizePatch(input.patch)
+  const err = validatePatch(patch)
   if (err) return { success: false, error: err }
-  return withTenantAuthContext(input.actorUserId, input.organizationId, () => updateWithContext(input))
+  return withTenantAuthContext(input.actorUserId, input.organizationId, () => updateWithContext({ ...input, patch }))
 }
 
 async function updateWithContext(input: UpdatePolicyInput): Promise<UpdatePolicyResult> {
-  const before = await getOrgAuthPolicy(input.organizationId)
-
-  // Upsert. If no row existed, insert with defaults + patch.
+  // The row is locked before it is read, so the policy compared, the diff audited and the policy written are one serialized state.
   const [existing] = await db
     .select({ organizationId: authOrgPolicies.organizationId })
     .from(authOrgPolicies)
     .where(eq(authOrgPolicies.organizationId, input.organizationId))
     .limit(1)
+    .for('update')
+
+  const before = await getOrgAuthPolicy(input.organizationId)
+  if (input.expected && !matchesExpected(before, input.expected)) {
+    return { success: false, conflict: true, error: 'The sign-in policy changed after it was loaded' }
+  }
+  const merged = { ...before, ...input.patch }
+  if (merged.requireSso && !merged.allowSso) {
+    return { success: false, error: 'Cannot require SSO while disabling it' }
+  }
 
   if (existing) {
     await db

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import type { BenchmarkResult } from "@/lib/services/cba-intelligence/benchmark-service";
-import { ApiShapeError, apiErrorMessage, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, apiErrorMessageFor, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
 import {
   Card,
   CardContent,
@@ -104,7 +104,7 @@ export function BenchmarkView({ canSaveSnapshot = false }: { canSaveSnapshot?: b
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/benchmark/${agreementId}?${queryParams}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorLoad")));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, t("errorLoad")));
       const benchmark: BenchmarkResult = envelopeData(body) as unknown as BenchmarkResult;
       return benchmark;
     },
@@ -121,7 +121,7 @@ export function BenchmarkView({ canSaveSnapshot = false }: { canSaveSnapshot?: b
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/benchmark/${agreementId}?history=true`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorHistory")));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, t("errorHistory")));
       const page: BenchmarkHistoryPage = envelopeData(body) as unknown as BenchmarkHistoryPage;
       if (!Array.isArray(page.items)) throw new ApiShapeError("no snapshots");
       return page.items;

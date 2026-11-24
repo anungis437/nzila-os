@@ -282,7 +282,8 @@ describe('GrievanceDetailConsole: the status', () => {
     const notice = await screen.findByRole('alert');
     expect(notice).toHaveTextContent('The grievance could not be refreshed');
     expect(notice).toHaveTextContent('What is shown may be out of date.');
-    expect(notice).toHaveTextContent('Database unavailable');
+    expect(notice).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(notice).not.toHaveTextContent('Database unavailable');
 
     server.get = () => standardSuccessResponse(detail({ status: 'acknowledged' }));
     fireEvent.click(within(notice).getByRole('button', { name: 'Retry' }));
@@ -514,7 +515,9 @@ describe('GrievanceDetailConsole: steward assignment', () => {
 
     server.get = () => standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Database unavailable');
     fireEvent.click(screen.getByRole('button', { name: 'assign steward' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Database unavailable');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(failure).not.toHaveTextContent('Database unavailable');
   });
 });
 
@@ -554,7 +557,7 @@ describe('GrievanceDetailConsole: French', () => {
 
     const failure = await screen.findByRole('alert');
     expect(failure).toHaveTextContent('Le grief n’a pas pu être chargé');
-    expect(failure).toHaveTextContent('Une erreur s’est produite. Réessayez.');
+    expect(failure).toHaveTextContent('Le service est momentanément indisponible. Réessayez sous peu.');
     expect(failure).not.toHaveTextContent(/Database|HTTP/);
     expect(within(failure).getByRole('button', { name: 'Réessayer' })).toBeInTheDocument();
   });

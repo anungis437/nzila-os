@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { apiErrorMessageFor, envelopeData, failureText } from "@/lib/client/api-envelope";
 import { useOperationalHealth } from "./use-operational-health";
 import {
   Card,
@@ -112,7 +112,7 @@ export function FreshnessDashboard() {
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/freshness?${freshnessQuery}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, t("loadError")));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, t("loadError")));
       const freshness: FreshnessOverview = envelopeData(body) as unknown as FreshnessOverview;
       return freshness;
     },

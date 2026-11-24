@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AIBanner } from '@/components/ai';
-import { ApiShapeError, apiErrorMessage, envelopeData, isRecord } from '@/lib/client/api-envelope';
+import { ApiShapeError, apiErrorMessageFor, envelopeData, isRecord } from '@/lib/client/api-envelope';
 
 // ── Types matching the API envelope ─────────────────────────────────────────
 
@@ -79,7 +79,7 @@ export default function FinancialAiInsights() {
       const res = await fetch('/api/ai/finance/analysis?type=comprehensive&timeframe=90d');
       if (!res.ok) {
         // A refusal states its reason: the standard error body's `message`, or the AI feature guard's `reason` when the feature is off.
-        throw new Error(apiErrorMessage(await res.json().catch(() => null), `Request failed (${res.status})`));
+        throw new Error(apiErrorMessageFor(res.status, await res.json().catch(() => null), `Request failed (${res.status})`));
       }
       // The route answers { success, data: AiEnvelope, timestamp }.
       const payload = envelopeData(await res.json());

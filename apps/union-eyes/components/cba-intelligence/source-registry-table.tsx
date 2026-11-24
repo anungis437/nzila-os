@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { ApiShapeError, apiErrorMessageFor, envelopeData, failureText } from "@/lib/client/api-envelope";
 import {
   Card,
   CardContent,
@@ -118,7 +118,7 @@ export function SourceRegistryTable() {
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/sources?${queryParams}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load sources"));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, "Failed to load sources"));
       const sources: SourcePage = envelopeData(body) as unknown as SourcePage;
       if (!Array.isArray(sources.items)) throw new ApiShapeError("no sources");
       return sources;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { ApiShapeError, apiErrorMessageFor, envelopeData, failureText } from "@/lib/client/api-envelope";
 import { useOperationalHealth } from "./use-operational-health";
 import {
   Card,
@@ -118,7 +118,7 @@ export function IngestionMonitor() {
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/ingestion?${queryParams}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load ingestion jobs"));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, "Failed to load ingestion jobs"));
       const jobs: JobPage = envelopeData(body) as unknown as JobPage;
       if (!Array.isArray(jobs.items)) throw new ApiShapeError("no ingestion jobs");
       return jobs;

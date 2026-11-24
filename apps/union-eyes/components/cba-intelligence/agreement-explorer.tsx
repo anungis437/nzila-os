@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import type { CbaIntelAgreement, CbaIntelClause, CbaIntelWageAdjustment } from "@/lib/services/cba-intelligence/extraction-service";
-import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { ApiShapeError, apiErrorMessageFor, envelopeData, failureText } from "@/lib/client/api-envelope";
 import { formatDay } from "@/lib/client/day";
 import {
   Card,
@@ -129,7 +129,7 @@ function AgreementDetailPanel({
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/agreements/${agreementId}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorLoad")));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, t("errorLoad")));
       const detail: AgreementDetail = envelopeData(body) as unknown as AgreementDetail;
       if (!detail.agreement) throw new ApiShapeError("no agreement");
       return detail;
@@ -328,7 +328,7 @@ export function AgreementExplorer({ canCurate = false }: { canCurate?: boolean }
     queryFn: async () => {
       const response = await fetch(`/api/cba-intelligence/agreements?${queryParams}`);
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorLoad")));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, t("errorLoad")));
       const agreements: AgreementPage = envelopeData(body) as unknown as AgreementPage;
       if (!Array.isArray(agreements.items)) throw new ApiShapeError("no agreements");
       return agreements;

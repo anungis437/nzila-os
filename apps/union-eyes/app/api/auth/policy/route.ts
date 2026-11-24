@@ -15,7 +15,19 @@ import { updateOrgAuthPolicy } from '@nzila/platform-auth/policy/admin'
 
 export const runtime = 'nodejs'
 
+const expectedSchema = z.object({
+  allowLocalAuth: z.boolean(),
+  allowMagicLink: z.boolean(),
+  allowSso: z.boolean(),
+  requireSso: z.boolean(),
+  requireInvite: z.boolean(),
+  passwordResetAllowed: z.boolean(),
+  allowedEmailDomains: z.array(z.string()),
+  mfaRequiredForRoles: z.array(z.string()),
+})
+
 const putSchema = z.object({
+  expected: expectedSchema.optional(),
   allowLocalAuth: z.boolean().optional(),
   allowMagicLink: z.boolean().optional(),
   allowSso: z.boolean().optional(),
@@ -32,7 +44,7 @@ export const GET = withOrganizationAuth(async (_request, context) => {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const policy = await getOrgAuthPolicy(context.organizationId)
-  return NextResponse.json(policy)
+  return NextResponse.json(policy, { headers: { 'Cache-Control': 'no-store' } })
 })
 
 export const PUT = withOrganizationAuth(async (request, context) => {
@@ -50,13 +62,15 @@ export const PUT = withOrganizationAuth(async (request, context) => {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   }
+  const { expected, ...patch } = parsed.data
   const result = await updateOrgAuthPolicy({
     organizationId: context.organizationId,
     actorUserId: context.userId,
-    patch: parsed.data,
+    patch,
+    expected,
   })
   if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 400 })
+    return NextResponse.json({ error: result.error }, { status: result.conflict ? 409 : 400 })
   }
-  return NextResponse.json(result.policy)
+  return NextResponse.json(result.policy, { headers: { 'Cache-Control': 'no-store' } })
 })

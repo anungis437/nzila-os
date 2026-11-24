@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/logger";
-import { apiErrorMessage } from "@/lib/client/api-envelope";
+import { apiErrorMessageFor } from "@/lib/client/api-envelope";
 import { SafetyMetricsCard } from "./SafetyMetricsCard";
 import { IncidentTrendChart } from "./IncidentTrendChart";
 import { IncidentListTable } from "./IncidentListTable";
@@ -104,7 +104,7 @@ async function readMetrics(organizationId: string, period: string): Promise<Outc
     const response = await fetch(`/api/health-safety/dashboard?organizationId=${organizationId}&period=${period}`);
     const body: unknown = await response.json();
     if (!response.ok) {
-      return { kind: "error", message: apiErrorMessage(body, "") || null };
+      return { kind: "error", message: apiErrorMessageFor(response.status, body, "") || null };
     }
     // withApi wraps the route's { success, metrics } as { success, data, timestamp }.
     const metrics = (body as { data?: { metrics?: unknown } } | null)?.data?.metrics;

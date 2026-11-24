@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiFailure, ApiShapeError, GENERIC_FAILURE, apiErrorMessage, envelopeData, envelopePages, envelopeRow, envelopeRows, failureDetail, failureLanguage, failureText, readApiError, readApiFailure, readUserFailure, userFailureText } from '../api-envelope';
+import { ApiFailure, ApiShapeError, GENERIC_FAILURE, apiErrorMessage, apiErrorMessageFor, looksTechnical, envelopeData, envelopePages, envelopeRow, envelopeRows, failureDetail, failureLanguage, failureText, readApiError, readApiFailure, readUserFailure, userFailureText } from '../api-envelope';
 
 const reply = (status: number, body: unknown) => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
@@ -28,7 +28,7 @@ describe('api-envelope', () => {
 
   it('reads the message of the standard error body, of a retired route and of a plain error string', async () => {
     expect(await readApiError(reply(403, { code: 'INSUFFICIENT_PERMISSIONS', message: "Requires at least 'steward' role" }), 'fallback')).toBe("Requires at least 'steward' role");
-    expect(await readApiError(reply(501, { error: { code: 'NOT_IMPLEMENTED', message: 'retired' } }), 'fallback')).toBe('retired');
+    expect(await readApiError(reply(501, { error: { code: 'NOT_IMPLEMENTED', message: 'retired' } }), 'fallback')).toBe('fallback');
     expect(await readApiError(reply(400, { error: 'bad input' }), 'fallback')).toBe('bad input');
   });
 
@@ -90,7 +90,7 @@ describe('api-envelope', () => {
       const refusal = new ApiFailure(422, 'Member is already assigned to this case');
       expect(userFailureText(refusal, 'Could not save.', 'en')).toBe('Member is already assigned to this case');
       const french = userFailureText(refusal, 'Impossible d’enregistrer.', 'fr');
-      expect(french).toBe('Impossible d’enregistrer.');
+      expect(french).toBe('Certaines informations ne sont pas valides. Vérifiez-les, puis réessayez.');
       expect(french).not.toMatch(/Member|assigned/);
     });
 
@@ -98,8 +98,8 @@ describe('api-envelope', () => {
       expect(userFailureText(new ApiFailure(403, ''), 'Could not save.', 'en')).toBe('You do not have permission to do this.');
       expect(userFailureText(new ApiFailure(403, 'Insufficient role'), 'Impossible d’enregistrer.', 'fr')).toBe('Vous n’avez pas l’autorisation d’effectuer cette action.');
       expect(userFailureText(new ApiFailure(409, 'Stale'), null, 'fr')).toMatch(/Actualisez/);
-      expect(userFailureText(new ApiFailure(500, ''), 'Impossible d’enregistrer.', 'fr')).toBe('Impossible d’enregistrer.');
-      expect(userFailureText(new ApiFailure(500, ''), null, 'fr')).toBe(GENERIC_FAILURE.fr);
+      expect(userFailureText(new ApiFailure(500, ''), 'Impossible d’enregistrer.', 'fr')).toMatch(/momentanément indisponible/);
+      expect(userFailureText(new ApiFailure(500, ''), null, 'fr')).toMatch(/momentanément indisponible/);
       expect(userFailureText(new ApiFailure(500, 'Internal server error'), 'x', 'fr')).toMatch(/momentanément/);
     });
 
@@ -114,8 +114,8 @@ describe('api-envelope', () => {
     it('offers a detail line only for a refusal that states something a person can use', () => {
       expect(failureDetail(new ApiFailure(403, 'Insufficient role'), 'en')).toBe('Insufficient role');
       expect(failureDetail(new ApiFailure(403, 'Insufficient role'), 'fr')).toBe('Vous n’avez pas l’autorisation d’effectuer cette action.');
-      expect(failureDetail(new ApiFailure(500, 'Database unavailable'), 'fr')).toBeNull();
-      expect(failureDetail(new ApiFailure(500, ''), 'en')).toBeNull();
+      expect(failureDetail(new ApiFailure(500, 'Database unavailable'), 'fr')).toMatch(/momentanément indisponible/);
+      expect(failureDetail(new ApiFailure(400, ''), 'en')).toMatch(/could not be accepted/);
       expect(failureDetail(new ApiFailure(503, ''), 'en')).toMatch(/temporarily unavailable/);
       for (const error of [new TypeError('Failed to fetch'), new ApiShapeError('no data'), new Error('HTTP 500'), null]) expect(failureDetail(error, 'en')).toBeNull();
     });
@@ -140,7 +140,88 @@ describe('api-envelope', () => {
     it('reads a failed response straight to words', async () => {
       expect(await readUserFailure(reply(404, { message: 'Grievance not found' }), 'x', 'fr')).toBe('Cet élément n’est plus disponible.');
       expect(await readUserFailure(reply(404, { message: 'Grievance not found' }), 'x', 'en')).toBe('Grievance not found');
-      expect(await readUserFailure(reply(500, 'not json'), null, 'en')).toBe(GENERIC_FAILURE.en);
+      expect(await readUserFailure(reply(500, 'not json'), null, 'en')).toMatch(/temporarily unavailable/);
     });
+  });
+});
+
+describe('api-envelope: diagnostics never reach a person', () => {
+  const diagnostics = [
+    'relation "ue_authority_mandates" does not exist',
+    'duplicate key value violates unique constraint "members_email_key"',
+    'SELECT id FROM members WHERE organization_id = $1',
+    'TypeError: Cannot read properties of undefined (reading \'id\')',
+    'Error: boom\n    at handler (/app/apps/union-eyes/app/api/x/route.ts:41:9)',
+    'at Object.run (webpack-internal:///(rsc)/./app/api/x/route.ts:12:3)',
+    'connect ECONNREFUSED 10.0.0.5:5432',
+    'password authentication failed for user "union_eyes_runtime"',
+    'postgresql://user:secret@db.internal:5432/ue',
+    'Bearer abcdefghijklmnopqrstuvwxyz012345',
+    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abcdefghij',
+    'sk_live_51HabcdefgHIJ',
+    '/home/ubuntu/work/lib/documents/download-lease.ts failed',
+    'x'.repeat(301),
+  ];
+  const sentences = [
+    'Requires at least \'platform_lead\' role',
+    'A member with that email already exists',
+    'The deadline must be in the future',
+    'You can attach up to 10 files',
+  ];
+
+  it('recognises diagnostics and leaves ordinary sentences alone', () => {
+    for (const text of diagnostics) expect(looksTechnical(text), text).toBe(true);
+    for (const text of sentences) expect(looksTechnical(text), text).toBe(false);
+  });
+
+  it.each([400, 401, 403, 404, 409, 413, 422, 429])('shows no diagnostic for a %s, in either language, through every reader', async (status) => {
+    for (const text of diagnostics) {
+      const failure = new ApiFailure(status, text);
+      for (const language of ['en', 'fr'] as const) {
+        const shown = userFailureText(failure, 'Fallback', language);
+        expect(looksTechnical(shown), shown).toBe(false);
+        expect(shown).not.toContain(text.slice(0, 20));
+      }
+      expect(failureText(failure, 'Fallback')).not.toContain(text.slice(0, 20));
+      expect(apiErrorMessage({ message: text }, 'Fallback')).toBe('Fallback');
+      expect(apiErrorMessage({ error: { message: text } }, 'Fallback')).toBe('Fallback');
+      expect(apiErrorMessage({ error: text }, 'Fallback')).toBe('Fallback');
+      expect(apiErrorMessageFor(status, { message: text }, 'Fallback')).toBe('Fallback');
+      expect(await readApiError(reply(status, { message: text }), 'Fallback')).toBe('Fallback');
+      const read = await readApiFailure(reply(status, { message: text }));
+      expect(userFailureText(read, null, 'en')).not.toContain(text.slice(0, 20));
+    }
+  });
+
+  it.each([500, 501, 502, 503, 504, 507])('shows the screen fallback, never the stated text, from the legacy readers for a %s', async (status) => {
+    expect(await readApiError(reply(status, { message: 'The queue worker is down' }), 'Could not save')).toBe('Could not save');
+    expect(apiErrorMessageFor(status, { message: 'The queue worker is down' }, 'Could not save')).toBe('Could not save');
+    const failure = await readApiFailure(reply(status, { message: 'The queue worker is down' }));
+    expect(failure.stated).toBe('');
+    expect(failureText(failure, 'Could not save')).toMatch(/temporarily unavailable|not available yet|too long/);
+  });
+
+  it('words each client refusal by its status in French, and by the server sentence in English when it is one a person can use', async () => {
+    const expectations: Array<[number, RegExp]> = [
+      [400, /pas pu être acceptées/], [401, /session est terminée/], [403, /autorisation/], [404, /plus disponible/],
+      [409, /a changé/], [413, /trop volumineux/], [422, /ne sont pas valides/], [429, /Trop de demandes/],
+    ];
+    for (const [status, french] of expectations) {
+      const failure = new ApiFailure(status, 'Server wording');
+      expect(userFailureText(failure, 'Écran', 'fr'), String(status)).toMatch(french);
+      expect(userFailureText(failure, 'Screen', 'en')).toBe('Server wording');
+      expect(userFailureText(new ApiFailure(status, ''), 'Screen', 'en')).toMatch(/\S/);
+    }
+  });
+
+  it('shows only controlled wording for a request that got no answer, a body that is not JSON, or an aborted request', async () => {
+    for (const error of [new TypeError('Failed to fetch'), new DOMException('signal timed out', 'TimeoutError'), new DOMException('aborted', 'AbortError'), new SyntaxError('Unexpected token < in JSON'), new ApiShapeError('no data'), 'boom', null]) {
+      expect(userFailureText(error, null, 'en')).toBe(GENERIC_FAILURE.en);
+      expect(userFailureText(error, null, 'fr')).toBe(GENERIC_FAILURE.fr);
+      expect(failureDetail(error, 'en')).toBeNull();
+    }
+    const html = await readApiFailure(reply(502, '<html>nginx 502</html>'));
+    expect(html.stated).toBe('');
+    expect(userFailureText(html, null, 'fr')).toMatch(/indisponible/);
   });
 });

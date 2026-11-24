@@ -16,7 +16,7 @@ import { readClaimRow, type ClaimRow } from '@/components/claims/claim-row';
 import { MemberCaseList } from '@/components/claims/member-case-list';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ApiFailure, apiErrorMessage, envelopeRows, failureLanguage, userFailureText } from '@/lib/client/api-envelope';
+import { ApiFailure, apiErrorMessageFor, envelopeRows, failureLanguage, userFailureText } from '@/lib/client/api-envelope';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
 
 type ClaimsConsoleProps = {
@@ -40,7 +40,7 @@ export function ClaimsConsole({ view = 'staff' }: ClaimsConsoleProps) {
     try {
       const response = await fetch('/api/cases');
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new ApiFailure(response.status, apiErrorMessage(body, ''));
+      if (!response.ok) throw new ApiFailure(response.status, apiErrorMessageFor(response.status, body, ''));
       // The route's { data: rows } is what the framework wraps as { success, data, timestamp }.
       setClaims(envelopeRows(body).map(readClaimRow));
     } catch (failure) {
