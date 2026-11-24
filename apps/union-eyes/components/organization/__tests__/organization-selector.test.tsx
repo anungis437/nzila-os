@@ -153,7 +153,7 @@ describe('OrganizationSelector: an organization the context lacks', () => {
     renderSelector();
 
     const button = await screen.findByRole('button', { name: 'Error loading - Click to retry' });
-    expect(button).toHaveAttribute('title', 'Profile service is down');
+    expect(button).toHaveAttribute('title', 'The service is temporarily unavailable. Try again shortly.');
     expect(screen.queryByRole('button', { name: 'No organization' })).toBeNull();
 
     profileAnswer = profile(home);

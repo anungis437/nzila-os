@@ -388,7 +388,8 @@ describe('campaign detail console', () => {
     detail('5b1f0c52-3d0e-4a39-9a2e-0f6f1d7e8a01')
 
     const alert = await screen.findByRole('alert')
-    expect(within(alert).getByText('The campaign list could not be read')).toBeInTheDocument()
+    expect(within(alert).getByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The campaign list could not be read');
 
     refused = false
     await user.click(within(alert).getByRole('button', { name: 'Retry' }))

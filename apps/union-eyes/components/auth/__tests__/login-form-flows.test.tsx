@@ -114,7 +114,8 @@ describe('LoginForm: password sign-in', () => {
 
     await signIn(user);
 
-    expect(await screen.findByText('Authentication is paused')).toBeInTheDocument();
+    expect(await screen.findByText('Login failed')).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('Authentication is paused');
   });
 
   it('does not take a 200 answer that names no user for a sign-in', async () => {
@@ -208,10 +209,10 @@ describe('LoginForm: canonical organization selection after authentication', () 
     expect(nav.push).not.toHaveBeenCalled();
   });
 
-  it.each([401, 503])('reports failed/expired organization lookup HTTP %s without treating authentication as dashboard access', async (status) => {
+  it.each([[401, en.loginForm.organizationAccessChanged], [503, en.loginForm.organizationLookupFailed]])('reports failed/expired organization lookup HTTP %s without treating authentication as dashboard access', async (status, wording) => {
     organizationAnswer = refused(status, { error: 'Organization authority denied' });
     const user = userEvent.setup(); render(<LoginForm />); await signIn(user);
-    expect(await screen.findByRole('alert')).toHaveTextContent(en.loginForm.organizationAccessChanged);
+    expect(await screen.findByRole('alert')).toHaveTextContent(wording);
     expect(calls.some((call) => call.url === '/api/organizations/switch')).toBe(false);
     expect(nav.push).not.toHaveBeenCalled();
     organizationAnswer = ok(choices());
@@ -372,7 +373,7 @@ describe('LoginForm: the sign-in options for an address', () => {
   });
 
   it.each([
-    ['a refusal', refused(500, { error: 'Internal server error' }), 'Internal server error'],
+    ['a refusal', refused(500, { error: 'Internal server error' }), 'Sign-in options could not be checked'],
     ['an answer that is missing a flag', ok({ password: true }), 'answered in a way this page does not understand'],
     ['an answer with a flag that is not yes or no', ok({ ...METHODS, sso: 'yes' }), 'answered in a way this page does not understand'],
   ])('says the options could not be checked for %s, and keeps the standard ones', async (_what, answer, reason) => {

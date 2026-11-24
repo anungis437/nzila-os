@@ -218,7 +218,8 @@ describe('priorities console', () => {
 
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Priorities could not be loaded. Retry to see their current state.')
-    expect(within(alert).getByText('Overdue deadlines: Deadlines could not be read')).toBeInTheDocument()
+    expect(within(alert).getByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('Overdue deadlines: Deadlines could not be read');
     expect(within(alert).getByText('Upcoming deadlines: Unexpected response from the server')).toBeInTheDocument()
     expect(within(alert).getByText('Grievances: Network error')).toBeInTheDocument()
     expect(screen.queryByText('Nothing urgent right now')).not.toBeInTheDocument()

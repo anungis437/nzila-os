@@ -174,7 +174,8 @@ describe('MemberCertificates: when the list cannot be read it says so', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Your certifications could not be loaded.');
-    expect(alert).toHaveTextContent('Certifications are down');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Certifications are down');
     expect(screen.queryByTestId('stat-total')).not.toBeInTheDocument();
     expect(screen.queryByText(/No certifications/)).not.toBeInTheDocument();
 

@@ -410,7 +410,8 @@ describe('notifications console: an inbox that could not be read (jsdom, mocked 
     const requests = mockServer({ [LIST]: () => answers.shift() ?? { status: 500, body: {} } });
     render(<NotificationsConsole />);
 
-    expect(await screen.findByText('Database unavailable')).toBeInTheDocument();
+    expect(await screen.findByText('notifications.loadFailed')).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('Database unavailable');
     expect(screen.queryByText('0')).not.toBeInTheDocument();
     expect(screen.queryByText('common.total')).not.toBeInTheDocument();
     expect(screen.queryByText('notifications.noNotifications')).not.toBeInTheDocument();

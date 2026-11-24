@@ -136,7 +136,8 @@ describe('EmployerManagement: reading', () => {
     const user = userEvent.setup();
     render(<EmployerManagement organizationId="org-1" />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load employers: Database unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load employers: Database unavailable');
     expect(screen.queryByText('No employers yet')).toBeNull();
     expect(screen.queryByRole('table')).toBeNull();
 

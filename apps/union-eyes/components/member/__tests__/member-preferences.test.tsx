@@ -224,7 +224,8 @@ describe('MemberPreferences: when the read fails it does not show a form of made
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(t.loadError);
-    expect(alert).toHaveTextContent('Preferences are unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Preferences are unavailable');
     expect(screen.queryByRole('button', { name: t.save })).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 

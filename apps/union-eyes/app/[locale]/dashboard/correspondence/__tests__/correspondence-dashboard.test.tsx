@@ -84,7 +84,8 @@ describe('CorrespondenceDashboard', () => {
       .mockResolvedValueOnce(list([row('1')]));
     vi.stubGlobal('fetch', fetchMock);
     mountDashboard();
-    expect(await screen.findByRole('alert')).toHaveTextContent('Correspondence is temporarily unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Correspondence is temporarily unavailable');
     expect(screen.queryByText('No correspondence found')).not.toBeInTheDocument();
     expect(figure('draft')).toHaveTextContent('—');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
@@ -96,7 +97,7 @@ describe('CorrespondenceDashboard', () => {
     vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(json(500, { code: 'DATABASE_ERROR', message: 'Correspondence is temporarily unavailable' }))));
     mountDashboard({ locale: 'fr-CA' });
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent(frCA.correspondencePage.loadFailed);
+    expect(alert).toHaveTextContent('Le service est momentanément indisponible. Réessayez sous peu.');
     expect(alert).not.toHaveTextContent('Correspondence is temporarily');
   });
 

@@ -87,7 +87,8 @@ describe('HealthSafetyDashboard', () => {
       render(<HealthSafetyDashboard organizationId="org-1" />);
       const alert = await screen.findByRole('alert');
       expect(alert).toHaveTextContent('could not be loaded');
-      expect(alert).toHaveTextContent('Failed to load health and safety metrics');
+      expect(alert).toHaveTextContent('The health & safety dashboard could not be loaded.');
+      expect(document.body).not.toHaveTextContent('Failed to load health and safety metrics');
       expect(screen.queryByText('No data available')).toBeNull();
       expect(screen.queryByText('Total Incidents')).toBeNull();
 
@@ -119,7 +120,7 @@ describe('HealthSafetyDashboard', () => {
       await renderLoaded();
       vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 503, json: async () => ({ message: 'down' }) })));
       await user.click(screen.getByRole('button', { name: /refresh/i }));
-      expect(await screen.findByRole('alert')).toHaveTextContent('down');
+      expect(await screen.findByRole('alert')).toHaveTextContent('The health & safety dashboard could not be loaded.');
       expect(toast).not.toHaveBeenCalled();
     });
 

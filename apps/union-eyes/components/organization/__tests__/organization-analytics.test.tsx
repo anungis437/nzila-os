@@ -238,7 +238,8 @@ describe('OrganizationAnalytics: when the figures cannot be shown', () => {
     answer = { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Database unavailable' } };
     renderAnalytics();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Database unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Database unavailable');
   });
 
   it('reads the figures of another organization when the organization changes, and does not show the old ones meanwhile', async () => {

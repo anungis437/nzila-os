@@ -182,7 +182,8 @@ describe('hazards page', () => {
     render(<HazardsPage />);
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('The statistics could not be loaded');
-    expect(alert).toHaveTextContent('Failed to load hazard statistics');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load hazard statistics');
     expect(screen.getAllByText('—')).toHaveLength(4);
     expect(screen.queryByText('0')).toBeNull();
 
@@ -320,7 +321,8 @@ describe('incidents page', () => {
     const user = userEvent.setup();
     routes.set(INCIDENT_STATS, () => refused(500, 'Failed to load incident statistics'));
     render(<IncidentsPage />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load incident statistics');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load incident statistics');
     expect(screen.getAllByText('—')).toHaveLength(4);
     expect(screen.queryByText('0')).toBeNull();
 
@@ -403,7 +405,8 @@ describe('inspections page', () => {
   it('shows failed statistics as dashes with an alert, never as zeros', async () => {
     answerAll({ stats: refused(500, 'Failed to load inspection statistics') });
     render(<InspectionsPage />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load inspection statistics');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load inspection statistics');
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(4);
     expect(screen.queryByText('0')).toBeNull();
   });
@@ -443,7 +446,8 @@ describe('inspections page', () => {
     render(<InspectionsPage />);
     await user.click(await screen.findByRole('tab', { name: /findingsTab/ }));
     const alert = await screen.findByText('The findings could not be loaded.');
-    expect(alert.closest('[role="alert"]')).toHaveTextContent('Failed to load findings');
+    expect(alert.closest('[role="alert"]')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load findings');
     expect(screen.queryByText('noFindingsMessage')).toBeNull();
 
     routes.set(INSPECTION_FINDINGS, () => ok({ findings: [finding] }));

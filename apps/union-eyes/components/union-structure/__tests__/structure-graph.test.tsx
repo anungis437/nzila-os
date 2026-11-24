@@ -91,7 +91,8 @@ describe('StructureGraph', () => {
     const user = userEvent.setup();
     render(<StructureGraph organizationId="org-1" />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load the organizational structure: Database unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load the organizational structure: Database unavailable');
     expect(screen.queryByText('No organizational structure data yet')).toBeNull();
     expect(screen.queryByText(/bargaining unit/)).toBeNull();
 

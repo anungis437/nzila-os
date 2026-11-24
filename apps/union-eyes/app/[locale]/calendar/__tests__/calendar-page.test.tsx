@@ -235,7 +235,8 @@ describe('CalendarPage (jsdom, mocked server)', () => {
   it('says the events could not be loaded rather than showing an empty calendar', async () => {
     mockServer({ [`GET /api/calendars/${CAL}/events`]: () => ({ status: 500, body: { code: 'INTERNAL_ERROR', message: 'Internal error' } }) });
     render(<CalendarPage />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Internal error');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Events could not be loaded.');
+    expect(document.body).not.toHaveTextContent('Internal error');
     expect(screen.queryByRole('button', { name: 'Hearing prep' })).not.toBeInTheDocument();
   });
 

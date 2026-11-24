@@ -217,7 +217,8 @@ describe('MemberLearningPortal: when a read fails it says so and does not show z
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Your courses could not be loaded.');
-    expect(alert).toHaveTextContent('Registrations are down');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Registrations are down');
     expect(screen.getByTestId('stat-active-courses')).toHaveTextContent('—');
     expect(screen.getByTestId('stat-completed')).toHaveTextContent('—');
     expect(screen.queryByText('No registrations yet')).not.toBeInTheDocument();
@@ -235,7 +236,8 @@ describe('MemberLearningPortal: when a read fails it says so and does not show z
     coursePages = [failure(503, 'Courses are down')];
     renderPortal();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Courses are down');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Courses are down');
     expect(screen.queryByTestId('in-progress-course')).not.toBeInTheDocument();
     expect(screen.queryByTestId('upcoming-course')).not.toBeInTheDocument();
     expect(document.body).not.toHaveTextContent('Course details unavailable');
@@ -254,7 +256,8 @@ describe('MemberLearningPortal: when a read fails it says so and does not show z
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Your certifications could not be loaded.');
-    expect(alert).toHaveTextContent('Certifications are down');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Certifications are down');
     expect(screen.queryByText('No valid certificates')).not.toBeInTheDocument();
   });
 

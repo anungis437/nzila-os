@@ -89,15 +89,28 @@ function statedMessage(body: unknown): string {
   return '';
 }
 
+/** A status line a screen composed for its own log ("Request failed with status 500", "HTTP 503", "(status 500)"): not a sentence for a person. */
+const STATUS_LINE = /\bHTTP\s*\d{3}\b|\bstatus(?:\s+code)?\s*[:#]?\s*\d{3}\b|\bhttp error\b/i;
+export const isStatusLine = (message: string): boolean => STATUS_LINE.test(message);
+
+/** The screen's own sentence, or the status wording when what it offered is a status line. */
+function plainFallback(status: number, fallback: string): string {
+  if (fallback !== '' && !isStatusLine(fallback) && !looksTechnical(fallback)) return fallback;
+  return STATUS_COPY.en[status] || (status >= 500 ? STATUS_COPY.en[500] : GENERIC_FAILURE.en);
+}
+
 /** The message a failed response states; the fallback when its body is not JSON or names none. */
 export async function readApiError(response: Response, fallback: string): Promise<string> {
   const body: unknown = await response.json().catch(() => null);
-  return response.status >= 500 ? fallback : apiErrorMessage(body, fallback);
+  return apiErrorMessageFor(response.status, body, fallback);
 }
 
 /** The message a failed answer states, from a body already read: nothing a server error or a diagnostic states is ever returned. */
 export function apiErrorMessageFor(status: number, body: unknown, fallback: string): string {
-  return status >= 500 ? fallback : apiErrorMessage(body, fallback);
+  if (fallback === '') return status >= 500 ? '' : apiErrorMessage(body, '');
+  if (status >= 500) return plainFallback(status, fallback);
+  const stated = apiErrorMessage(body, '');
+  return stated !== '' ? stated : plainFallback(status, fallback);
 }
 
 /**
@@ -106,7 +119,7 @@ export function apiErrorMessageFor(status: number, body: unknown, fallback: stri
  */
 export function failureText(error: unknown, fallback: string): string {
   if (error instanceof ApiFailure) return statedText(error, 'en') || fallback;
-  return error instanceof Error && !looksTechnical(error.message) && !(error instanceof TypeError) && error.message ? error.message : fallback;
+  return error instanceof Error && !looksTechnical(error.message) && !isStatusLine(error.message) && !(error instanceof TypeError) && error.message ? error.message : fallback;
 }
 
 export type FailureLanguage = 'en' | 'fr';
@@ -170,7 +183,7 @@ const FRENCH_SERVER_MESSAGES: Readonly<Record<string, string>> = {
 export class ApiFailure extends Error {
   readonly status: number;
   readonly code: string | null;
-  /** The reason the server stated, '' when it stated none; `message` may carry a developer-facing wording for callers that only log it. */
+  /** The reason the server stated, '' when it stated none; `message` carries the caller's own wording when it is a sentence, else the status wording; it is never a status line, so a screen that shows `message` stays safe. */
   readonly stated: string;
   constructor(status: number, stated: string, code: string | null = null, message: string = stated) {
     super(message);
@@ -186,7 +199,7 @@ export async function readApiFailure(response: Response, loggedMessage?: string)
   const body: unknown = await response.json().catch(() => null);
   const code = isRecord(body) && typeof body.code === 'string' ? body.code : null;
   const stated = apiErrorMessageFor(response.status, body, '');
-  return new ApiFailure(response.status, stated, code, stated || loggedMessage || '');
+  return new ApiFailure(response.status, stated, code, stated || (loggedMessage ? plainFallback(response.status, loggedMessage) : ''));
 }
 
 /**
@@ -197,7 +210,7 @@ export async function readApiFailure(response: Response, loggedMessage?: string)
  * request that got no answer, an ApiShapeError, a thrown string, an `HTTP 500` line) shows the screen's fallback and never its own text.
  */
 export function userFailureText(error: unknown, fallback: string | null, language: FailureLanguage): string {
-  return statedText(error, language) || fallback || GENERIC_FAILURE[language];
+  return statedText(error, language) || (fallback && !isStatusLine(fallback) ? fallback : '') || GENERIC_FAILURE[language];
 }
 
 function statedText(error: unknown, language: FailureLanguage): string {

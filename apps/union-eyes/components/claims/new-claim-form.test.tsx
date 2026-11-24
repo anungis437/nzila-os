@@ -99,7 +99,7 @@ describe('NewClaimForm', () => {
     intakeAnswers(refused(500, {}))
     const second = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
     fillAndSubmit(second.container)
-    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'claims.submitFailed' })))
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'The service is temporarily unavailable. Try again shortly.' })))
   })
 
   it('files the case for the signed-in member and follows the case id found at the top of the answer', async () => {
@@ -142,7 +142,7 @@ describe('NewClaimForm', () => {
     const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
     fillAndSubmit(container)
     await waitFor(() => expect(h.toast).toHaveBeenCalled())
-    expect(h.toast).toHaveBeenCalledWith({ variant: 'destructive', title: 'claims.submitFailedTitle', description: 'claims.submitFailed' })
+    expect(h.toast).toHaveBeenCalledWith({ variant: 'destructive', title: 'claims.submitFailedTitle', description: 'Certaines informations n’ont pas pu être acceptées. Vérifiez-les, puis réessayez.' })
     expect(JSON.stringify(h.toast.mock.calls)).not.toMatch(/Intake validation/)
   })
 

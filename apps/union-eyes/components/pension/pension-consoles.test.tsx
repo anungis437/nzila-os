@@ -274,7 +274,8 @@ describe('pension member console', () => {
     })
     const user = userEvent.setup()
     render(wrap(<PensionMemberConsole />))
-    expect(await screen.findByText('The pension record store is down')).toBeInTheDocument()
+    expect(await screen.findByText('Unable to load pension information. Please try again later.')).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The pension record store is down');
     expect(screen.queryByText('No Pension Plan Enrollment')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Retry' }))
     expect((await screen.findAllByText('Trades Plan')).length).toBeGreaterThan(0)
@@ -286,7 +287,8 @@ describe('pension member console', () => {
     render(wrap(<PensionMemberConsole />))
     await screen.findAllByText('Trades Plan')
     await user.click(screen.getByRole('tab', { name: 'Contributions' }))
-    expect(await screen.findByText('Contribution history is unavailable')).toBeInTheDocument()
+    expect(await screen.findByText('Unable to load pension information. Please try again later.')).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('Contribution history is unavailable');
     expect(screen.queryByText(/No contribution history available/)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('tab', { name: 'Documents' }))

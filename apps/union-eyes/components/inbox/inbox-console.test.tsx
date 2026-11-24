@@ -126,7 +126,8 @@ describe('inbox console', () => {
     })
     const user = userEvent.setup()
     renderInbox()
-    expect(await screen.findByText('The claims register is unavailable')).toBeInTheDocument()
+    expect(await screen.findByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The claims register is unavailable');
     expect(screen.getByText('Conversation assigned')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Retry' }))
     expect(await screen.findByText(/grievance discipline: Suspended without notice/)).toBeInTheDocument()
@@ -137,7 +138,8 @@ describe('inbox console', () => {
     stubFetch((url) => (url.pathname === '/api/claims' ? 'network' : { status: 500, body: failure('INTERNAL_ERROR', 'Notifications are unavailable') }))
     renderInbox()
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent('Notifications are unavailable')
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.')
+    expect(document.body).not.toHaveTextContent('Notifications are unavailable');
     expect(alert).toHaveTextContent(enCA.errors.loadingError)
     expect(screen.queryByText(enCA.inboxConsole.empty.noSignalsTitle)).not.toBeInTheDocument()
   })
@@ -147,7 +149,7 @@ describe('inbox console', () => {
     renderInbox('fr-CA')
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.')
-    expect(alert).toHaveTextContent(frCA.errors.loadingError)
+    expect(alert).toHaveTextContent('Le service est momentanément indisponible. Réessayez sous peu.')
     expect(alert.textContent).not.toMatch(/restricted|unavailable/)
   })
 

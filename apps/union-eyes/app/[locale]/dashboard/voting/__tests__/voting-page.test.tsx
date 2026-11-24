@@ -289,7 +289,8 @@ describe('voting page: failures', () => {
       throw new Error(`unexpected ${url}`)
     })
     renderPage()
-    expect(await screen.findByRole('alert')).toHaveTextContent('The voting service is down')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load data. Please refresh the page.')
+    expect(document.body).not.toHaveTextContent('The voting service is down');
     expect(screen.queryByText(enCA.voting.noActiveVotes)).not.toBeInTheDocument()
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3)
     expect(screen.queryByText('0')).not.toBeInTheDocument()

@@ -125,7 +125,8 @@ describe('CommitteesPage: an organization the context lacks', () => {
     renderPage();
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('Your organization could not be loaded: Profile service is down');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Your organization could not be loaded: Profile service is down');
     expect(screen.queryByText(/Select an organization/)).toBeNull();
 
     profile = ok({ organization: { id: 'org-9', name: 'Local 9', slug: 'local-9', type: 'union' } });

@@ -252,7 +252,8 @@ describe('MemberHome: when a read fails, it says so and does not report an empty
     renderHome();
 
     const alert = await screen.findByText(enCA.memberHome.casesLoadError);
-    expect(alert.closest('[role="alert"]')).toHaveTextContent('Claims are unavailable');
+    expect(alert.closest('[role="alert"]')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Claims are unavailable');
     expect(screen.queryByTestId('home-no-cases')).not.toBeInTheDocument();
 
     claimPages = [claimPage([claimRow({})])];
@@ -268,7 +269,8 @@ describe('MemberHome: when a read fails, it says so and does not report an empty
     renderHome();
 
     const alert = await screen.findByText(enCA.memberHome.notificationsLoadError);
-    expect(alert.closest('[role="alert"]')).toHaveTextContent('Inbox is down');
+    expect(alert.closest('[role="alert"]')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Inbox is down');
     expect(screen.queryByTestId('home-no-notifications')).not.toBeInTheDocument();
 
     inboxAnswer = inbox([noticeRow({})]);

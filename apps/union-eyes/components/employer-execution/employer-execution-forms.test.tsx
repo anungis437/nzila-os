@@ -130,7 +130,8 @@ describe('timesheet batch uploader', () => {
     })
     const user = userEvent.setup()
     render(<TimesheetBatchUploader />)
-    expect(await screen.findByText('The employer registry is down')).toBeInTheDocument()
+    expect(await screen.findByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The employer registry is down');
     expect(screen.getByLabelText('Employer')).toBeDisabled()
     await user.click(screen.getByRole('button', { name: 'Retry' }))
     await waitFor(() => expect(screen.getByLabelText('Employer')).toBeEnabled())

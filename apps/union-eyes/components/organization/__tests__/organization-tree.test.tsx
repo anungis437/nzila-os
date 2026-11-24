@@ -208,7 +208,8 @@ describe('OrganizationTree: when the tree cannot be shown', () => {
     render(<OrganizationTree />);
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('Hierarchy service is down');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Hierarchy service is down');
     expect(screen.queryByText('No organizations are visible to you.')).toBeNull();
 
     answer = ok(hierarchy);

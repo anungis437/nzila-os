@@ -68,7 +68,8 @@ describe('ClaimDetailPage', () => {
   it('says why the case could not be loaded, in the server\'s words', async () => {
     routes({ claim: failed(500, 'The case store is unavailable'), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
-    expect(await screen.findByText('The case store is unavailable')).toBeInTheDocument()
+    expect(await screen.findByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The case store is unavailable');
     expect(screen.queryByText('CASE-2026-0042')).toBeNull()
   })
 
@@ -76,14 +77,14 @@ describe('ClaimDetailPage', () => {
     h.locale = 'fr-CA'
     routes({ claim: failed(500, 'The case store is unavailable'), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
-    expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(await screen.findByText('Le service est momentanément indisponible. Réessayez sous peu.')).toBeInTheDocument()
     expect(screen.queryByText(/case store|HTTP/)).toBeNull()
   })
 
   it('shows the page\'s own message, not HTTP text, when the failure body names nothing', async () => {
     routes({ claim: { ok: false, status: 500, statusText: 'Internal Server Error', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
-    expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(await screen.findByText('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument()
     expect(screen.queryByText(/HTTP|Internal Server Error/)).toBeNull()
   })
 

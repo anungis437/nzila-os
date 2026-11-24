@@ -258,7 +258,8 @@ describe('MemberDetailPage: claims', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Claims could not be loaded');
-    expect(alert).toHaveTextContent('Claims are unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Claims are unavailable');
     expect(screen.queryByText('No claims found for this member')).toBeNull();
     expect(screen.queryByText(/\d+ claims?$/)).toBeNull();
   });
@@ -309,10 +310,10 @@ describe('MemberDetailPage: a member that could not be shown', () => {
   });
 
   it.each([
-    [500, 'Database unavailable'],
-    [403, 'Insufficient permissions'],
-  ])('says the member could not be loaded, with the reason, when the route answers %i, and does not call it not found', async (status, message) => {
-    member = failed(status, message);
+    [500, 'Database unavailable', 'The service is temporarily unavailable. Try again shortly.'],
+    [403, 'Insufficient permissions', 'Insufficient permissions'],
+  ])('says the member could not be loaded, with the reason, when the route answers %i, and does not call it not found', async (status, stated, message) => {
+    member = failed(status, stated);
     renderPage();
 
     const alert = await screen.findByRole('alert');

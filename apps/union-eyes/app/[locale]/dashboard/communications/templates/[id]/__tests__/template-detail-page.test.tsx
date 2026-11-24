@@ -146,7 +146,8 @@ describe('TemplateDetailPage (jsdom, mocked server)', () => {
   it('shows the server’s message when the read is refused, and says it could not be loaded when the server says nothing', async () => {
     mockServer({ 'GET /api/communications/templates/tpl-1': () => ({ status: 500, body: { code: 'INTERNAL_ERROR', message: 'Database unavailable' } }) });
     render(<TemplateDetailPage />);
-    expect(await screen.findByText('Database unavailable')).toBeInTheDocument();
+    expect(await screen.findByText('The template could not be loaded.')).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('Database unavailable');
     cleanup();
 
     mockServer({ 'GET /api/communications/templates/tpl-1': () => ({ status: 500, body: {} }) });

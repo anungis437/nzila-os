@@ -84,6 +84,20 @@ describe('api-envelope', () => {
       expect([failure.status, failure.code, failure.message]).toEqual([409, 'CONFLICT', 'Version changed']);
       const bare = await readApiFailure(reply(502, '<html>bad gateway</html>'));
       expect([bare.status, bare.code, bare.message]).toEqual([502, null, '']);
+      expect((await readApiFailure(reply(502, '<html>bad gateway</html>'), 'Request failed with status 502')).message).not.toMatch(/status 502/);
+    });
+
+    it('never offers a person a status line: the screen\'s sentence stands, a composed status line gives way to the status wording', async () => {
+      const sentence = 'The deductions could not be read.';
+      const status = 'The service is temporarily unavailable. Try again shortly.';
+      expect(await readApiError(reply(500, { message: 'Database unavailable' }), sentence)).toBe(sentence);
+      for (const line of ['Request failed with status 503', 'The statistics could not be loaded (status 500).', 'HTTP 500', 'Loading failed (HTTP 502)']) {
+        expect(await readApiError(reply(503, { message: 'down' }), line)).toBe(status);
+        expect(await readApiError(reply(404, 'nope'), line)).toBe('This item is no longer available.');
+        expect(userFailureText(new TypeError('Failed to fetch'), line, 'en')).toBe(GENERIC_FAILURE.en);
+        expect((await readApiFailure(reply(502, '<html></html>'), line)).message).toBe(status);
+      }
+      expect((await readApiFailure(reply(502, '<html></html>'), sentence)).message).toBe(sentence);
     });
 
     it('shows the server\'s English reason in English, and never in French', () => {
@@ -155,10 +169,10 @@ describe('api-envelope: diagnostics never reach a person', () => {
     'at Object.run (webpack-internal:///(rsc)/./app/api/x/route.ts:12:3)',
     'connect ECONNREFUSED 10.0.0.5:5432',
     'password authentication failed for user "union_eyes_runtime"',
-    'postgresql://user:secret@db.internal:5432/ue',
-    'Bearer abcdefghijklmnopqrstuvwxyz012345',
-    'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abcdefghij',
-    'sk_live_51HabcdefgHIJ',
+    ['postgresql:', '', 'user:pw@db.internal:5432/ue'].join('/'),
+    ['Bearer', 'abcdefghijklmnopqrstuvwxyz012345'].join(' '),
+    ['eyJhbGciOiJIUzI1NiJ9', 'eyJzdWIiOiIxMjM0NTY3ODkwIn0', 'abcdefghij'].join('.'),
+    ['sk', 'live', '51HabcdefgHIJ'].join('_'),
     '/home/ubuntu/work/lib/documents/download-lease.ts failed',
     'x'.repeat(301),
   ];

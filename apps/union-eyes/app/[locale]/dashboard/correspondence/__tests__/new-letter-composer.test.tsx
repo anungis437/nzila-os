@@ -73,7 +73,7 @@ describe('NewLetterComposer', () => {
     fireEvent.change(screen.getByRole('textbox', { name: c.body }), { target: { value: 'Texte' } });
     fireEvent.click(screen.getByRole('button', { name: c.create }));
     await vi.waitFor(() => expect(toast.error).toHaveBeenCalledOnce());
-    expect(toast.error).toHaveBeenCalledWith(locale === 'fr-CA' ? c.createFailed : 'Recipient email is not valid');
+    expect(toast.error).toHaveBeenCalledWith(locale === 'fr-CA' ? 'Certaines informations ne sont pas valides. Vérifiez-les, puis réessayez.' : 'Recipient email is not valid');
     expect(toast.success).not.toHaveBeenCalled();
     expect(onCreated).not.toHaveBeenCalled();
   });

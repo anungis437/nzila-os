@@ -135,7 +135,8 @@ describe('MyUnion: when the read fails it does not say the member has no record'
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(t.loadError);
-    expect(alert).toHaveTextContent('Membership lookup failed');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Membership lookup failed');
     expect(screen.queryByTestId('membership-missing')).not.toBeInTheDocument();
 
     answer = wrapped({ membership: membership() });
