@@ -56,6 +56,16 @@ describe('AuthPolicyForm', () => {
     expect(await screen.findByText(/did not confirm the policy/)).toBeInTheDocument()
   })
 
+  it.each(['allowLocalAuth', 'allowMagicLink', 'allowSso', 'passwordResetAllowed'] as const)(
+    'does not claim success when the persisted %s setting differs from the submitted setting',
+    async (key) => {
+      mount('en-CA', () => answer(200, policy({ [key]: false })))
+      await submit(/Save policy/)
+      expect(await screen.findByText(/did not confirm the policy/)).toBeInTheDocument()
+      expect(screen.queryByText(/saved and confirmed/)).toBeNull()
+    },
+  )
+
   it('says saved only when the server states the policy in force', async () => {
     mount('en-CA', () => answer(200, policy()))
     await submit(/Save policy/)
