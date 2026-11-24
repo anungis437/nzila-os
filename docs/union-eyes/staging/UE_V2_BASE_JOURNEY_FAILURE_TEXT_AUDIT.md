@@ -2,7 +2,7 @@
 
 Scope: the client screens of the V2 base journeys (invitation, sign-in policy, intake, case, documents, correspondence, messaging, member
 home, deadlines, privacy, setup). Source-level audit and repair only. It is not staging evidence, and it does not change the gate ruling
-(`UE_SAAS_OPERATIONAL_READINESS` stays `NO_GO`). PR #1308 stays on hold and staging still serves the older application.
+(`UE_SAAS_OPERATIONAL_READINESS` stays `NO_GO`). PR #1309 stays on hold and staging still serves the older application.
 
 ## Method
 
@@ -19,7 +19,7 @@ Each hit was read in context and classified. The scanner is a triage aid; the cl
 
 `lib/client/api-envelope.ts` holds one policy for failures:
 
-- English shows the reason the server states. A bare generic (`Internal server error`, `Unauthorized`) gets status wording instead.
+- English shows the reason the server states for client-side refusals (4xx). Bare generics (`Unauthorized`, `Forbidden`) get status wording instead. Every 5xx response receives controlled status wording in both languages, regardless of its message; backend diagnostics never appear in the interface.
 - French shows a held translation of the server message, else status wording (sign-in, permission, missing, changed, too large, busy,
   not available), else the screen's own French fallback, else a generic French line.
 - Anything that is not a failed API answer (`TypeError`, a shape error, an `HTTP 500` string) shows only the screen's own fallback.
@@ -37,6 +37,7 @@ A change is reported as saved only after an ok response and a read-back of the s
 | Failure dropped | sign-in policy load (stayed on "Loading" forever), bulk document actions (selection cleared on failure) | Alert with retry; selection kept and failure shown |
 | Failure shown as emptiness | case-context panel (a failed read showed empty lists and rejected unhandled) | Failure notice; panels hidden on failure |
 | False promise | bulk document bar offered a ZIP that is not produced | Copy states what is produced |
+| Technical details returned in server 5xx messages | Shared client failure policy | All 5xx responses use controlled bilingual wording; an explicit regression test rejects SQL/error-text disclosure |
 
 ## Deliberate non-changes
 
