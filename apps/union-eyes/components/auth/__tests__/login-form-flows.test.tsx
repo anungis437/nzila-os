@@ -95,6 +95,27 @@ describe('LoginForm: password sign-in', () => {
     await waitFor(() => expect(nav.push).toHaveBeenCalledWith('/en-CA/dashboard'));
   });
 
+  it.each([
+    ['Invalid email or password', 'invalidCredentials'],
+    ['Account is deactivated. Contact support.', 'accountDeactivated'],
+    ['Account is temporarily locked. Try again later.', 'accountLocked'],
+    ['This account uses social login. Please sign in with your provider.', 'socialLoginOnly'],
+    ['Too many requests. Please try again later.', 'tooManyRequests'],
+    ['For your security, please try again in a few minutes or contact support.', 'softLockout'],
+  ] as const)('shows the refusal "%s" in French on a French page, never the route’s English', async (stated, key) => {
+    nav.pathname = '/fr-CA/sign-in';
+    login = refused(401, { error: stated });
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await signIn(user);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(fr.loginForm[key]);
+    expect(screen.queryByText(stated)).not.toBeInTheDocument();
+    expect(fr.loginForm[key]).not.toBe(en.loginForm[key]);
+    expect(nav.push).not.toHaveBeenCalled();
+  });
+
   it('shows the route’s message when the sign-in is refused, and does not navigate', async () => {
     login = refused(401, { error: 'Invalid email or password' });
     const user = userEvent.setup();
@@ -346,7 +367,7 @@ describe('LoginForm: the sign-in link', () => {
 
     await openMagicLink(user);
 
-    expect(await screen.findByText('Invalid email address')).toBeInTheDocument();
+    expect(await screen.findByText(en.loginForm.invalidEmailAddress)).toBeInTheDocument();
     expect(screen.queryByText(/sign-in link has been sent/)).not.toBeInTheDocument();
   });
 

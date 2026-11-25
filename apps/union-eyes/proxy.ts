@@ -45,7 +45,7 @@
 import { createRouteMatcher } from '@nzila/platform-auth/entra/server';
 import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from './lib/locales';
+import { locales, defaultLocale, localizedAuthEntryPath, preferredLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
 import { cronSecretMatches } from './lib/api/cron-secret';
 import { decideApiLimit, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
@@ -108,20 +108,7 @@ function getClientIp(req: Pick<NextRequest, 'headers'>): string {
 }
 
 function getPreferredLocaleFromRequest(req: Pick<NextRequest, 'headers'>): string {
-  const cookieHeader = req.headers.get('cookie') ?? '';
-  const localeCookie = cookieHeader.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/i)?.[1];
-  const normalizedCookie = localeCookie?.toLowerCase();
-  if (normalizedCookie?.startsWith('fr')) return 'fr-CA';
-  if (normalizedCookie?.startsWith('en')) return 'en-CA';
-
-  const acceptLanguage = req.headers.get('accept-language') ?? '';
-  const firstLang = acceptLanguage
-    .split(',')
-    .map((part) => part.split(';')[0]?.trim().toLowerCase())
-    .find(Boolean);
-  if (firstLang?.startsWith('fr')) return 'fr-CA';
-
-  return defaultLocale;
+  return preferredLocale(req.headers.get('cookie'), req.headers.get('accept-language'));
 }
 
 function buildPublicRedirectLocation(
@@ -130,7 +117,8 @@ function buildPublicRedirectLocation(
 ): string {
   const forwardedHost = req.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
   const host = forwardedHost || req.headers.get('host') || '';
-  const hostWithoutPort = host.replace(/:\d+$/, '');
+  // A loopback host keeps its port: the port is the address of an owned local runtime, not an internal listener behind a public front door.
+  const hostWithoutPort = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host) ? host : host.replace(/:\d+$/, '');
   const forwardedProto = req.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
   const protocol = (forwardedProto || req.nextUrl.protocol.replace(':', '') || 'https').toLowerCase();
 
@@ -528,8 +516,25 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   // Edge middleware's crypto.subtle fails with OpenSSL 3 OperationError
   // on Azure Container Apps; server components use Node.js native crypto.
   
+  // Sign-in, sign-up and login have a locale twin; the unprefixed page has no translation context and cannot render. Server redirects to
+  // `/login` land here, so the reader's language and the query string are kept.
+  const authEntry = localizedAuthEntryPath(req.nextUrl.pathname);
+  if (authEntry && (req.method === 'GET' || req.method === 'HEAD')) {
+    const targetPath = `/${getPreferredLocaleFromRequest(req)}${authEntry}${req.nextUrl.search}`;
+    return withRequestId(new NextResponse(null, {
+      status: 307,
+      headers: { location: buildPublicRedirectLocation(req, targetPath) },
+    }), requestId);
+  }
+
   // Auth paths (/sign-in, /sign-up, /api/auth) must NOT be locale-redirected.
   if (isAuthPath(req)) {
+    // The unprefixed password-recovery pages are served in the reader's language; the root layout reads it from next-intl's request header.
+    if (/^\/(forgot-password|reset-password)(\/|$)/.test(req.nextUrl.pathname)) {
+      const forwarded = new Headers(req.headers);
+      forwarded.set('X-NEXT-INTL-LOCALE', getPreferredLocaleFromRequest(req));
+      return withRequestId(NextResponse.next({ request: { headers: forwarded } }), requestId);
+    }
     return withRequestId(NextResponse.next(), requestId);
   }
 

@@ -3,9 +3,13 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { postJson, UNEXPECTED_MESSAGE } from './auth-client';
+import { useTranslations } from 'next-intl';
+import { postJson } from './auth-client';
+import { useRecoveryMessage } from './recovery-messages';
 
 export function ResetPasswordForm() {
+  const t = useTranslations('passwordRecovery');
+  const localize = useRecoveryMessage();
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
 
@@ -20,26 +24,26 @@ export function ResetPasswordForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('passwordsDoNotMatch'));
       return;
     }
 
     if (!token) {
-      setError('Missing reset token. Please use the link from your email.');
+      setError(t('missingToken'));
       return;
     }
 
     setLoading(true);
 
     try {
-      const answer = await postJson('/api/auth/reset-password', { token, newPassword: password }, 'Failed to reset password');
+      const answer = await postJson('/api/auth/reset-password', { token, newPassword: password }, t('resetFailed'));
       if (!answer.ok) {
-        setError(answer.message);
+        setError(localize(answer.message));
         return;
       }
       // The route confirms with { message: "Password has been reset..." }; an answer without it is not a reset.
       if (typeof answer.data.message !== 'string') {
-        setError(UNEXPECTED_MESSAGE);
+        setError(t('unexpectedError'));
         return;
       }
       setSuccess(true);
@@ -52,9 +56,9 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Password reset!</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('resetDoneTitle')}</h2>
           <p className="mt-2 text-sm text-gray-500">
-            Your password has been updated. You can now sign in with your new password.
+            {t('resetDoneBody')}
           </p>
         </div>
 
@@ -62,7 +66,7 @@ export function ResetPasswordForm() {
           href="/login"
           className="inline-flex w-full justify-center bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all"
         >
-          Sign in
+          {t('signIn')}
         </Link>
       </div>
     );
@@ -72,16 +76,16 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Invalid reset link</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('invalidLinkTitle')}</h2>
           <p className="mt-2 text-sm text-gray-500">
-            This password reset link is invalid or has expired.
+            {t('invalidLinkBody')}
           </p>
         </div>
         <Link
           href="/forgot-password"
           className="inline-block text-sm text-electric hover:text-blue-700 font-medium transition-colors"
         >
-          Request a new reset link
+          {t('requestNewLink')}
         </Link>
       </div>
     );
@@ -90,9 +94,9 @@ export function ResetPasswordForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Set your new password</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('newPasswordTitle')}</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Choose a strong password for your account.
+          {t('newPasswordIntro')}
         </p>
       </div>
 
@@ -105,7 +109,7 @@ export function ResetPasswordForm() {
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            New password
+            {t('newPassword')}
           </label>
           <input
             id="password"
@@ -118,13 +122,13 @@ export function ResetPasswordForm() {
             placeholder="••••••••"
           />
           <p className="mt-1 text-xs text-gray-400">
-            At least 8 characters with uppercase, lowercase, and a digit.
+            {t('passwordRule')}
           </p>
         </div>
 
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            Confirm password
+            {t('confirmPassword')}
           </label>
           <input
             id="confirmPassword"
@@ -143,13 +147,13 @@ export function ResetPasswordForm() {
           disabled={loading}
           className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Resetting…' : 'Reset password'}
+          {loading ? t('resetting') : t('resetPassword')}
         </button>
       </form>
 
       <p className="text-center text-sm text-gray-500">
         <Link href="/login" className="text-electric hover:text-blue-700 font-medium transition-colors">
-          &larr; Back to sign in
+          {t('backToSignIn')}
         </Link>
       </p>
     </div>

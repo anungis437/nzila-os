@@ -11,7 +11,8 @@
  * is applied by the individual API routes, not this layout guard.
  */
 import { ReactNode } from "react";
-import { requireUser } from "@/lib/api-auth-guard";
+import { getUserRole, requireUser } from "@/lib/api-auth-guard";
+import { getDashboardExperience } from "@/lib/dashboard/role-experience";
 import { redirect } from "next/navigation";
 
 export default async function DashboardDocumentsLayout({
@@ -21,8 +22,10 @@ export default async function DashboardDocumentsLayout({
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
+  let isMember: boolean;
   try {
-    await requireUser();
+    const user = await requireUser();
+    isMember = getDashboardExperience(await getUserRole(user.userId, user.organizationId)) === "member";
   } catch {
     redirect("/login");
   }
@@ -34,7 +37,7 @@ export default async function DashboardDocumentsLayout({
     <>
       <nav className="flex flex-col gap-2 px-4 pt-4 text-sm sm:flex-row sm:gap-4" data-testid="document-portal-nav">
         <a className="underline" href={`/${locale}/dashboard/documents`}>
-          {french ? "Bibliotheque du personnel" : "Staff library"}
+          {isMember ? (french ? "Mes documents" : "My documents") : french ? "Bibliothèque du personnel" : "Staff library"}
         </a>
         <a className="underline" href={`/${locale}/dashboard/documents/portal`}>
           {french ? "Documents du portail" : "Portal documents"}

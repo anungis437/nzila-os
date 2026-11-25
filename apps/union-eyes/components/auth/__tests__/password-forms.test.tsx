@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render as renderView, screen, waitFor } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
+import en from '@/messages/en-CA.json';
+import fr from '@/messages/fr-CA.json';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import { installFetch, type Answer, type Call } from '@/components/union-structure/__tests__/fetch-harness';
@@ -16,12 +19,18 @@ vi.mock('next/navigation', () => ({
 }));
 vi.mock('next/link', () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 
+let language: 'en-CA' | 'fr-CA' = 'en-CA';
+function render(children: React.ReactNode) {
+  return renderView(<NextIntlClientProvider locale={language} messages={language === 'fr-CA' ? fr : en} timeZone="America/Toronto">{children}</NextIntlClientProvider>);
+}
+
 const ok = (status: number, body: unknown): Answer => ({ status, body });
 
 let answer: Answer;
 let calls: Call[];
 
 beforeEach(() => {
+  language = 'en-CA';
   nav.push.mockClear();
   nav.pathname = '/signup';
   nav.search = '';
@@ -200,5 +209,54 @@ describe('ResetPasswordForm', () => {
 
     expect(screen.getByText('Invalid reset link')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Request a new reset link' })).toHaveAttribute('href', '/forgot-password');
+  });
+});
+
+describe('password recovery in French', () => {
+  beforeEach(() => { language = 'fr-CA'; });
+
+  it('asks for the link, and confirms it, in French', async () => {
+    answer = ok(200, { message: 'If an account exists with that email, a password reset link will be sent.' });
+    const user = userEvent.setup();
+    render(<ForgotPasswordForm />);
+
+    expect(screen.getByText('Mot de passe oublié?')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Courriel'), 'alex@example.test');
+    await user.click(screen.getByRole('button', { name: 'Envoyer le lien de réinitialisation' }));
+
+    expect(await screen.findByText('Vérifiez vos courriels')).toBeInTheDocument();
+    expect(screen.queryByText('Check your email')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['This reset link has expired. Please request a new one.', 'Ce lien de réinitialisation a expiré. Veuillez en demander un nouveau.'],
+    ['This reset link has already been used', 'Ce lien de réinitialisation a déjà été utilisé. Demandez-en un nouveau.'],
+    ['Invalid or expired reset link', 'Ce lien de réinitialisation est invalide ou a expiré.'],
+    ['Password must contain at least one digit', 'Le mot de passe doit contenir au moins un chiffre.'],
+    ['Too many requests. Please try again later.', 'Trop de demandes. Veuillez réessayer plus tard.'],
+  ])('shows the refusal “%s” in French, and does not say it was reset', async (stated, shown) => {
+    nav.search = 'token=abc123';
+    answer = ok(400, { error: stated });
+    const user = userEvent.setup();
+    render(<ResetPasswordForm />);
+
+    await user.type(screen.getByLabelText('Nouveau mot de passe'), 'NewSecret123');
+    await user.type(screen.getByLabelText('Confirmer le mot de passe'), 'NewSecret123');
+    await user.click(screen.getByRole('button', { name: 'Réinitialiser le mot de passe' }));
+
+    expect(await screen.findByText(shown)).toBeInTheDocument();
+    expect(screen.queryByText(stated)).not.toBeInTheDocument();
+    expect(screen.queryByText('Mot de passe réinitialisé!')).not.toBeInTheDocument();
+  });
+
+  it('says in French that the server could not be reached', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
+    const user = userEvent.setup();
+    render(<ForgotPasswordForm />);
+
+    await user.type(screen.getByLabelText('Courriel'), 'alex@example.test');
+    await user.click(screen.getByRole('button', { name: 'Envoyer le lien de réinitialisation' }));
+
+    expect(await screen.findByText(/Impossible de joindre le serveur/)).toBeInTheDocument();
   });
 });

@@ -181,7 +181,7 @@ export function OnboardingOverlay({
             </div>
             <button
               onClick={handleDismiss}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="-m-2 inline-flex h-8 w-8 items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
               aria-label={t("dismiss")}
             >
               <X size={14} />
