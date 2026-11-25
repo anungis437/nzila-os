@@ -129,6 +129,8 @@ test.describe.configure({ mode: 'serial', timeout: 180_000 })
 
 test.describe('private document delivery: authenticate, authorize, bind, read, revalidate, audit, release', () => {
   test.beforeAll(async () => {
+    // The CI Playwright config caps a hook at 60s. Two scope-case transactions exceed that on a cold runner.
+    test.setTimeout(180_000)
     await container(process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes').createIfNotExists()
     adminScript('restore-fixtures')
     caseOne = await fileCase('Document delivery case one')

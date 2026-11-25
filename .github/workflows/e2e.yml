@@ -173,6 +173,8 @@ jobs:
           console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
           console.log('::add-mask::' + new URL(env.AUTH_DATABASE_URL).password)
           console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
+          if (!/^[a-f0-9]{64}$/.test(env.AUTH_MFA_ENCRYPTION_KEY)) throw new Error('Owned fixture MFA key required')
+          console.log('::add-mask::' + env.AUTH_MFA_ENCRYPTION_KEY)
           const lines = [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'QA_TEST_ENV=true',
@@ -189,6 +191,9 @@ jobs:
             // the operator and the runtime login are refused by executeAuthContext.
             'AUTH_DATABASE_URL=' + env.AUTH_DATABASE_URL,
             'AUTH_SYSTEM_DATABASE_URL=' + env.AUTH_SYSTEM_DATABASE_URL,
+            // The disposable executive journey encrypts its authenticator in this process.
+            // The application was started with the same derived key; a missing key fails closed.
+            'AUTH_MFA_ENCRYPTION_KEY=' + env.AUTH_MFA_ENCRYPTION_KEY,
           ]
           const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
           if (fixture.azurite) {
@@ -487,6 +492,8 @@ jobs:
           console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
           console.log('::add-mask::' + new URL(env.AUTH_DATABASE_URL).password)
           console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
+          if (!/^[a-f0-9]{64}$/.test(env.AUTH_MFA_ENCRYPTION_KEY)) throw new Error('Owned fixture MFA key required')
+          console.log('::add-mask::' + env.AUTH_MFA_ENCRYPTION_KEY)
           const lines = [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'QA_TEST_ENV=true',
@@ -503,6 +510,9 @@ jobs:
             // the operator and the runtime login are refused by executeAuthContext.
             'AUTH_DATABASE_URL=' + env.AUTH_DATABASE_URL,
             'AUTH_SYSTEM_DATABASE_URL=' + env.AUTH_SYSTEM_DATABASE_URL,
+            // The disposable executive journey encrypts its authenticator in this process.
+            // The application was started with the same derived key; a missing key fails closed.
+            'AUTH_MFA_ENCRYPTION_KEY=' + env.AUTH_MFA_ENCRYPTION_KEY,
           ]
           const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
           if (fixture.azurite) {
