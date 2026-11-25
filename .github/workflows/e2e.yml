@@ -164,58 +164,7 @@ jobs:
       - name: Point Playwright at the owned canonical runtime without printing credentials
         if: matrix.app == 'union-eyes'
         run: |
-          node --input-type=module <<'NODE'
-          import { execFileSync } from 'node:child_process'
-          import { appendFileSync, readFileSync } from 'node:fs'
-          import { operatorDatabaseUrl, runtimeEnv, AZURITE_FIXTURE_ACCOUNT, AZURITE_FIXTURE_KEY } from './tooling/scripts/ue-runtime-up.mjs'
-          const operator = operatorDatabaseUrl()
-          const env = runtimeEnv()
-          console.log('::add-mask::' + new URL(operator).password)
-          console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
-          console.log('::add-mask::' + new URL(env.AUTH_DATABASE_URL).password)
-          console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
-          if (!/^[a-f0-9]{64}$/.test(env.AUTH_MFA_ENCRYPTION_KEY)) throw new Error('Owned fixture MFA key required')
-          console.log('::add-mask::' + env.AUTH_MFA_ENCRYPTION_KEY)
-          // The lease-binding test mints an expired token in this process. The server verifies it with the same seal.
-          if (!/^[a-f0-9]{48,}$/.test(env.EVIDENCE_SEAL_KEY)) throw new Error('Owned fixture evidence seal required')
-          console.log('::add-mask::' + env.EVIDENCE_SEAL_KEY)
-          const lines = [
-            'UE_CANONICAL_BOOTSTRAP_V2=1',
-            'QA_TEST_ENV=true',
-            'PLAYWRIGHT_TEST_AUTH=false',
-            'PLAYWRIGHT_BASE_URL=' + env.PLAYWRIGHT_BASE_URL,
-            'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
-            // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
-            'DATABASE_URL=' + operator,
-            // Fixture governance scripts (scripts/runtime/fixture-auth.ts) act through the restricted runtime login and refuse
-            // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
-            'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
-            'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
-            // Issuing a mandate opens a scoped auth transaction. The dedicated gateway logins are required;
-            // the operator and the runtime login are refused by executeAuthContext.
-            'AUTH_DATABASE_URL=' + env.AUTH_DATABASE_URL,
-            'AUTH_SYSTEM_DATABASE_URL=' + env.AUTH_SYSTEM_DATABASE_URL,
-            // The disposable executive journey encrypts its authenticator in this process.
-            // The application was started with the same derived key; a missing key fails closed.
-            'AUTH_MFA_ENCRYPTION_KEY=' + env.AUTH_MFA_ENCRYPTION_KEY,
-            'EVIDENCE_SEAL_KEY=' + env.EVIDENCE_SEAL_KEY,
-          ]
-          const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
-          if (fixture.azurite) {
-            console.log('::add-mask::' + AZURITE_FIXTURE_KEY)
-            lines.push(
-              'AZURE_STORAGE_ACCOUNT_NAME=' + AZURITE_FIXTURE_ACCOUNT,
-              'AZURE_STORAGE_ACCOUNT_KEY=' + AZURITE_FIXTURE_KEY,
-              'AZURE_STORAGE_BLOB_ENDPOINT=' + fixture.azurite.endpoint,
-              'AZURE_BLOB_CONTAINER=' + fixture.azurite.container,
-              'CLAMAV_URL=' + fixture.azurite.clamavUrl,
-            )
-          }
-          const redisBinding = execFileSync('docker', ['port', 'ue-runtime-redis', '6379/tcp'], { encoding: 'utf8' }).trim()
-          if (redisBinding !== '127.0.0.1:56379') throw new Error('Owned loopback Redis required')
-          lines.push('REDIS_URL=redis://127.0.0.1:56379')
-          appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n')
-          NODE
+          node tooling/scripts/ue-e2e-runtime-contract.mjs export
 
       - name: Start app
         if: matrix.app != 'union-eyes'
@@ -267,6 +216,10 @@ jobs:
 
       # Exact-key release of the synthetic document-upload counters, then the 30/31 proof,
       # before Playwright so a counter left by the proof cannot reach the shard.
+      - name: Preflight the Playwright runtime contract
+        if: matrix.app == 'union-eyes'
+        run: node tooling/scripts/ue-e2e-runtime-contract.mjs check
+
       - name: Prove document-upload quota isolation on the owned Redis
         if: matrix.app == 'union-eyes'
         run: pnpm --filter @nzila/union-eyes exec vitest run scripts/runtime/__tests__/document-upload-quota.test.ts --maxWorkers=1
@@ -498,58 +451,11 @@ jobs:
 
       - name: Point Playwright at the owned canonical runtime without printing credentials
         run: |
-          node --input-type=module <<'NODE'
-          import { execFileSync } from 'node:child_process'
-          import { appendFileSync, readFileSync } from 'node:fs'
-          import { operatorDatabaseUrl, runtimeEnv, AZURITE_FIXTURE_ACCOUNT, AZURITE_FIXTURE_KEY } from './tooling/scripts/ue-runtime-up.mjs'
-          const operator = operatorDatabaseUrl()
-          const env = runtimeEnv()
-          console.log('::add-mask::' + new URL(operator).password)
-          console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
-          console.log('::add-mask::' + new URL(env.AUTH_DATABASE_URL).password)
-          console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
-          if (!/^[a-f0-9]{64}$/.test(env.AUTH_MFA_ENCRYPTION_KEY)) throw new Error('Owned fixture MFA key required')
-          console.log('::add-mask::' + env.AUTH_MFA_ENCRYPTION_KEY)
-          // The lease-binding test mints an expired token in this process. The server verifies it with the same seal.
-          if (!/^[a-f0-9]{48,}$/.test(env.EVIDENCE_SEAL_KEY)) throw new Error('Owned fixture evidence seal required')
-          console.log('::add-mask::' + env.EVIDENCE_SEAL_KEY)
-          const lines = [
-            'UE_CANONICAL_BOOTSTRAP_V2=1',
-            'QA_TEST_ENV=true',
-            'PLAYWRIGHT_TEST_AUTH=false',
-            'PLAYWRIGHT_BASE_URL=' + env.PLAYWRIGHT_BASE_URL,
-            'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
-            // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
-            'DATABASE_URL=' + operator,
-            // Fixture governance scripts (scripts/runtime/fixture-auth.ts) act through the restricted runtime login and refuse
-            // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
-            'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
-            'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
-            // Issuing a mandate opens a scoped auth transaction. The dedicated gateway logins are required;
-            // the operator and the runtime login are refused by executeAuthContext.
-            'AUTH_DATABASE_URL=' + env.AUTH_DATABASE_URL,
-            'AUTH_SYSTEM_DATABASE_URL=' + env.AUTH_SYSTEM_DATABASE_URL,
-            // The disposable executive journey encrypts its authenticator in this process.
-            // The application was started with the same derived key; a missing key fails closed.
-            'AUTH_MFA_ENCRYPTION_KEY=' + env.AUTH_MFA_ENCRYPTION_KEY,
-            'EVIDENCE_SEAL_KEY=' + env.EVIDENCE_SEAL_KEY,
-          ]
-          const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
-          if (fixture.azurite) {
-            console.log('::add-mask::' + AZURITE_FIXTURE_KEY)
-            lines.push(
-              'AZURE_STORAGE_ACCOUNT_NAME=' + AZURITE_FIXTURE_ACCOUNT,
-              'AZURE_STORAGE_ACCOUNT_KEY=' + AZURITE_FIXTURE_KEY,
-              'AZURE_STORAGE_BLOB_ENDPOINT=' + fixture.azurite.endpoint,
-              'AZURE_BLOB_CONTAINER=' + fixture.azurite.container,
-              'CLAMAV_URL=' + fixture.azurite.clamavUrl,
-            )
-          }
-          const redisBinding = execFileSync('docker', ['port', 'ue-runtime-redis', '6379/tcp'], { encoding: 'utf8' }).trim()
-          if (redisBinding !== '127.0.0.1:56379') throw new Error('Owned loopback Redis required')
-          lines.push('REDIS_URL=redis://127.0.0.1:56379')
-          appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n')
-          NODE
+          node tooling/scripts/ue-e2e-runtime-contract.mjs export
+
+      - name: Preflight the Playwright runtime contract
+        if: matrix.app == 'union-eyes'
+        run: node tooling/scripts/ue-e2e-runtime-contract.mjs check
 
       - name: Prove document-upload quota isolation on the owned Redis
         if: matrix.app == 'union-eyes'
