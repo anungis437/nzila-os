@@ -171,10 +171,10 @@ export default function PilotFeedbackWidget({ forceShow }: PilotFeedbackWidgetPr
                   </div>
                   <button
                     onClick={dismiss}
-                    className="p-1 rounded hover:bg-gray-100 transition-colors"
+                    className="-m-1 inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100 transition-colors"
                     aria-label={t("dismissLabel")}
                   >
-                    <X size={14} className="text-gray-400" />
+                    <X size={16} className="text-gray-400" />
                   </button>
                 </div>
 

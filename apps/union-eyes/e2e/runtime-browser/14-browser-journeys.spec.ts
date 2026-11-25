@@ -85,14 +85,18 @@ async function touchTargets(page: Page) {
  * WebKit reports a same-origin API fetch that a navigation cancelled as "Fetch API cannot load <url> due to access control checks". The application
  * handles those rejections (organization-selector and breadcrumb both settle on failure); the error is counted in the evidence, not hidden.
  */
-const isWebKitNavigationAbort = (message: string) => /Fetch API cannot load https?:\/\/[^\s]+\/api\/[^\s]+ due to access control checks/.test(message)
+const isWebKitNavigationAbort = (error: Error) => {
+  // WebKit puts only the tail of the URL in error.message ("/127.0.0.1:3002/api/...") and the full "Fetch API cannot load http://..." line in the stack.
+  const text = `${error.message}\n${error.stack ?? ''}`
+  return text.includes('due to access control checks') && text.includes('/api/')
+}
 const abortedFetches = new WeakMap<Page, number>()
 const pageErrors = new WeakMap<Page, string[]>()
 test.beforeEach(({ page }) => {
   const errors: string[] = []
   pageErrors.set(page, errors)
   page.on('pageerror', (error) => {
-    if (isWebKitNavigationAbort(error.message)) {
+    if (isWebKitNavigationAbort(error)) {
       abortedFetches.set(page, (abortedFetches.get(page) ?? 0) + 1)
       return
     }
@@ -180,10 +184,13 @@ for (const locale of LOCALES) {
       expect(rows[0].member_id).toBe(U.memberPrimary.userId)
       expect(rows[0].organization_id).toBe(PRIMARY)
       await page.goto(`/${locale}/dashboard/claims`)
-      const row = page.getByRole('row').filter({ hasText: rows[0].claim_number as string }).first()
-      await expect(row).toBeVisible({ timeout: 60_000 })
+      // Desktop renders a table; below the md breakpoint the same cases are cards, each one link.
+      const claimLink = page.getByRole('link', { name: new RegExp(rows[0].claim_number as string) }).first()
+      await expect(claimLink).toBeVisible({ timeout: 60_000 })
       await noHorizontalOverflow(page)
-      await row.getByRole('link').first().click()
+      const feedback = page.getByRole('button', { name: text.pilotFeedbackWidget.dismissLabel })
+      if (await feedback.isVisible().catch(() => false)) await feedback.click()
+      await claimLink.click()
       await expect(page).toHaveURL(/\/dashboard\/claims\//, { timeout: 60_000 })
       await expect(page.locator('body')).toContainText(rows[0].claim_number as string, { timeout: 60_000 })
       const audit = await sql<{ n: string }>(
