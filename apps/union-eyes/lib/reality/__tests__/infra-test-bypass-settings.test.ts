@@ -38,13 +38,6 @@ const ALLOWED_JOBS: readonly AllowedJob[] = [
       'ephemeral ci_e2e Postgres container; UE_ENVIRONMENT=local. Seeded QA personas need PLAYWRIGHT_TEST_AUTH ' +
       'and UE_E2E_RISK_BYPASS to log in without MFA enrolment; QA_TEST_ENV selects the credential-free seed.',
   },
-  {
-    file: '.github/workflows/e2e.yml',
-    job: 'e2e-canonical',
-    reason:
-      'Same as e2e, run after a push to main: a fresh synthetic ci_e2e Postgres container on the runner (no ' +
-      'staging snapshot, no Azure login), the server on localhost with UE_ENVIRONMENT=local, discarded with the runner.',
-  },
 ];
 
 /**
