@@ -9,7 +9,7 @@ import {
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
-import { documents, documentLinks, documentVersions } from '@/db/schema/documents-schema';
+import { documents, documentVersions } from '@/db/schema/documents-schema';
 import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
 import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
@@ -17,7 +17,7 @@ import { intakeRefusal } from '@/lib/documents/intake-acceptance';
 import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { generateSasUrl } from '@/lib/blob-client';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
-import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
+import { allDocumentLinksWellFormed, readDocumentLinks } from '@/lib/documents/document-links';
 import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 
@@ -65,38 +65,39 @@ export const POST = withApi(
   }
 
   const doc = (
-    await withRLSContext({ organizationId }, (tx) =>
-      tx
-        .select({
-          id: documents.id,
-          metadata: documents.metadata,
-          uploadedBy: documents.uploadedBy,
-          linkedEntityType: documentLinks.linkedEntityType,
-          linkedEntityId: documentLinks.linkedEntityId,
-        })
+    await withRLSContext({ organizationId }, async (tx) => {
+      const [found] = await tx
+        .select({ id: documents.id, metadata: documents.metadata, uploadedBy: documents.uploadedBy })
         .from(documents)
-        .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
         .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
-        .limit(1),
-    )
-  )[0];
+        .limit(1);
+      if (!found) return null;
+      const links = await readDocumentLinks(tx, organizationId, documentId);
+      return allDocumentLinksWellFormed(links) ? found : null;
+    })
+  );
 
-  if (!doc || !isDocumentLinkWellFormed(doc.linkedEntityType, doc.linkedEntityId)) {
+  if (!doc) {
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
   }
 
   const mayVersionInTx = async (tx: RLSTx) => {
-    const [current] = await tx.select({ uploadedBy: documents.uploadedBy,
-      linkedEntityType: documentLinks.linkedEntityType, linkedEntityId: documentLinks.linkedEntityId })
-      .from(documents).leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
+    const [current] = await tx.select({ uploadedBy: documents.uploadedBy })
+      .from(documents)
       .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`)).limit(1);
-    if (!current || !isDocumentLinkWellFormed(current.linkedEntityType, current.linkedEntityId)) return false;
-    const caseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: current.linkedEntityType, linkedEntityId: current.linkedEntityId });
-    if (caseId) {
+    if (!current) return false;
+    const links = await readDocumentLinks(tx, organizationId, documentId);
+    if (!allDocumentLinksWellFormed(links)) return false;
+    // A new version replaces the file every linked case reads, so the actor needs that authority on each case the document is attached to.
+    let attachedToCase = false;
+    for (const link of links) {
+      const caseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId });
+      if (!caseId) continue;
+      attachedToCase = true;
       const access = await getEffectiveCaseAccess({ organizationId, grievanceId: caseId, userId });
-      return access.canViewCase && access.canModifyDocuments;
+      if (!(access.canViewCase && access.canModifyDocuments)) return false;
     }
-    return current.uploadedBy === userId;
+    return attachedToCase || current.uploadedBy === userId;
   };
   if (!await withRLSContext({ organizationId }, mayVersionInTx)) {
     return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');

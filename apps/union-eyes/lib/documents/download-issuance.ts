@@ -16,7 +16,6 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import {
   documentAccessGrants,
-  documentLinks,
   documents,
   documentVersions,
 } from '@/db/schema/documents-schema';
@@ -32,7 +31,7 @@ import {
   verifiedLegacyBlobPath,
 } from '@/lib/services/document-blob-integrity-service';
 import { isDocumentId } from '@/lib/documents/canonical-journey';
-import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
+import { allDocumentLinksWellFormed, readDocumentLinks } from '@/lib/documents/document-links';
 import { issueDocumentDownloadLease } from '@/lib/documents/download-lease';
 
 export const DOCUMENT_DOWNLOAD_MAX_BYTES = 50 * 1024 * 1024;
@@ -118,11 +117,8 @@ export async function locateDocumentDownload(
         sha256: documents.sha256,
         checksum: documents.checksum,
         updatedAt: documents.updatedAt,
-        linkedEntityType: documentLinks.linkedEntityType,
-        linkedEntityId: documentLinks.linkedEntityId,
       })
       .from(documents)
-      .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
       .where(
         and(
           eq(documents.id, documentId),
@@ -134,8 +130,10 @@ export async function locateDocumentDownload(
   )[0];
 
   if (!row) return { kind: 'not_found' };
-  if (!isDocumentLinkWellFormed(row.linkedEntityType, row.linkedEntityId))
-    return { kind: 'denied', reason: 'policy' };
+
+  // A document attached to several cases is decided on all of them, never on whichever row a join returned first.
+  const links = await readDocumentLinks(tx, organizationId, row.id);
+  if (!allDocumentLinksWellFormed(links)) return { kind: 'denied', reason: 'policy' };
 
   const explicitGrant = (
     await tx
@@ -159,45 +157,49 @@ export async function locateDocumentDownload(
   )[0];
 
   // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
-  let caseAccess = {
-    isPrimaryOwner: false,
-    canViewCase: false,
-    canViewPrivateDocuments: false,
-  };
-
-  const linkedCaseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: row.linkedEntityType, linkedEntityId: row.linkedEntityId });
-  if (linkedCaseId) {
-    const effective = await getEffectiveCaseAccess({
-      organizationId,
-      grievanceId: linkedCaseId,
-      userId,
-    });
-    caseAccess = {
-      isPrimaryOwner: effective.isPrimaryOwner,
-      canViewCase: effective.canViewCase,
-      canViewPrivateDocuments: effective.canViewPrivateDocuments,
+  // The document is readable when its policy admits the actor through any one of its links; the decision does not depend on link order.
+  let allowed = false;
+  for (const link of links) {
+    const linkedCaseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId });
+    let caseAccess = {
+      isPrimaryOwner: false,
+      canViewCase: false,
+      canViewPrivateDocuments: false,
     };
-  }
-
-  const allowed = isDocumentVisibleByPolicy(
-    toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
-    {
-      isOrgMember: true,
-      isPrimaryOwner: caseAccess.isPrimaryOwner,
-      hasCaseAccess: hasDocumentContextAccess({
-        isStaff,
-        canViewCase: caseAccess.canViewCase,
-        hasExplicitGrant: Boolean(explicitGrant),
-        linkedEntityType: linkedCaseId ? 'case' : row.linkedEntityType,
-        linkedEntityId: linkedCaseId ?? row.linkedEntityId,
-        privacyLabel: row.privacyLabel,
-        uploadedBy: row.uploadedBy,
+    if (linkedCaseId) {
+      const effective = await getEffectiveCaseAccess({
+        organizationId,
+        grievanceId: linkedCaseId,
         userId,
-      }),
-      canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
-      hasExplicitDocumentGrant: Boolean(explicitGrant),
-    },
-  );
+      });
+      caseAccess = {
+        isPrimaryOwner: effective.isPrimaryOwner,
+        canViewCase: effective.canViewCase,
+        canViewPrivateDocuments: effective.canViewPrivateDocuments,
+      };
+    }
+
+    allowed = isDocumentVisibleByPolicy(
+      toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
+      {
+        isOrgMember: true,
+        isPrimaryOwner: caseAccess.isPrimaryOwner,
+        hasCaseAccess: hasDocumentContextAccess({
+          isStaff,
+          canViewCase: caseAccess.canViewCase,
+          hasExplicitGrant: Boolean(explicitGrant),
+          linkedEntityType: linkedCaseId ? 'case' : link.linkedEntityType,
+          linkedEntityId: linkedCaseId ?? link.linkedEntityId,
+          privacyLabel: row.privacyLabel,
+          uploadedBy: row.uploadedBy,
+          userId,
+        }),
+        canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
+        hasExplicitDocumentGrant: Boolean(explicitGrant),
+      },
+    );
+    if (allowed) break;
+  }
 
   if (!allowed) return { kind: 'denied', reason: 'policy' };
   if (explicitGrant && !explicitGrant.canDownload) return { kind: 'denied', reason: 'download_not_granted' };
@@ -247,7 +249,7 @@ export async function locateDocumentDownload(
 
   const snapshot = {
     documentId, organizationId, privacyLabel: row.privacyLabel,
-    linkedEntityType: row.linkedEntityType, linkedEntityId: row.linkedEntityId,
+    links: links.map((link) => [link.linkedEntityType, link.linkedEntityId]),
     versionId: latestVersion?.id ?? null, versionNo: latestVersion?.versionNo ?? null,
     blobPath, contentHash, sizeBytes,
     // A versioned link keeps its reviewed artifact when a newer version is

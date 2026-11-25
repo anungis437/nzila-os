@@ -10,7 +10,6 @@ import { hasMinRole } from '@/lib/api-auth-guard';
 import {
   documents,
   documentAccessGrants,
-  documentLinks,
   documentVersions,
 } from '@/db/schema/documents-schema';
 import {
@@ -26,7 +25,7 @@ import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retent
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { loadUploaderNames } from '@/lib/documents/uploader-names';
-import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
+import { allDocumentLinksWellFormed, readDocumentLinks, type DocumentLinkFact } from '@/lib/documents/document-links';
 
 const updateLabelSchema = z.object({
   privacyLabel: z.enum([
@@ -59,7 +58,7 @@ export const GET = withApi(
     }
     const documentId = params.id;
 
-    const { row, explicitGrant, linkedCaseId } = await withRLSContext({ organizationId }, async (tx) => {
+    const { row, explicitGrant, links, linkedCaseIds } = await withRLSContext({ organizationId }, async (tx) => {
       const rowInner = (
         await tx
           .select({
@@ -72,11 +71,8 @@ export const GET = withApi(
             uploadedBy: documents.uploadedBy,
             createdAt: documents.createdAt,
             updatedAt: documents.updatedAt,
-            linkedEntityType: documentLinks.linkedEntityType,
-            linkedEntityId: documentLinks.linkedEntityId,
           })
           .from(documents)
-          .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
           .where(
             and(
               eq(documents.id, documentId),
@@ -88,7 +84,7 @@ export const GET = withApi(
       )[0];
 
       if (!rowInner) {
-        return { row: null as typeof rowInner, explicitGrant: null as { id: string } | null, linkedCaseId: null };
+        return { row: null as typeof rowInner, explicitGrant: null as { id: string } | null, links: [] as ReadonlyArray<DocumentLinkFact>, linkedCaseIds: [] as Array<string | null> };
       }
 
       const explicitGrantInner = (
@@ -109,56 +105,66 @@ export const GET = withApi(
           .limit(1)
       )[0];
 
-      return { row: rowInner, explicitGrant: explicitGrantInner ?? null,
-        linkedCaseId: isDocumentLinkWellFormed(rowInner.linkedEntityType, rowInner.linkedEntityId)
-          ? await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: rowInner.linkedEntityType, linkedEntityId: rowInner.linkedEntityId }) : null,
-      };
+      const linksInner = await readDocumentLinks(tx, organizationId, rowInner.id);
+      const casesInner: Array<string | null> = [];
+      if (allDocumentLinksWellFormed(linksInner)) {
+        for (const link of linksInner) {
+          casesInner.push(await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId }));
+        }
+      }
+      return { row: rowInner, explicitGrant: explicitGrantInner ?? null, links: linksInner, linkedCaseIds: casesInner };
     });
 
-    if (!row || !isDocumentLinkWellFormed(row.linkedEntityType, row.linkedEntityId)) {
+    if (!row || !allDocumentLinksWellFormed(links)) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
     }
 
     // Representative-level role: eligibility for organization-level (unlinked) documents only, never case content.
+    // A document attached to several cases is readable through any one of them; the answer never depends on link order.
     const isStaff = await hasMinRole('steward');
-    let caseAccess = {
-      isPrimaryOwner: false,
-      canViewCase: false,
-      canViewPrivateDocuments: false,
-    };
-
-    if (linkedCaseId) {
-      const effective = await getEffectiveCaseAccess({
-        organizationId,
-        grievanceId: linkedCaseId,
-        userId,
-      });
-      caseAccess = {
-        isPrimaryOwner: effective.isPrimaryOwner,
-        canViewCase: effective.canViewCase,
-        canViewPrivateDocuments: effective.canViewPrivateDocuments,
+    let allowed = false;
+    for (const [index, link] of links.entries()) {
+      const linkedCaseId = linkedCaseIds[index] ?? null;
+      let caseAccess = {
+        isPrimaryOwner: false,
+        canViewCase: false,
+        canViewPrivateDocuments: false,
       };
-    }
 
-    const allowed = isDocumentVisibleByPolicy(
-      toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
-      {
-        isOrgMember: true,
-        isPrimaryOwner: caseAccess.isPrimaryOwner,
-        hasCaseAccess: hasDocumentContextAccess({
-          isStaff,
-          canViewCase: caseAccess.canViewCase,
-          hasExplicitGrant: Boolean(explicitGrant),
-          linkedEntityType: linkedCaseId ? 'case' : row.linkedEntityType,
-          linkedEntityId: linkedCaseId ?? row.linkedEntityId,
-          privacyLabel: row.privacyLabel,
-          uploadedBy: row.uploadedBy,
+      if (linkedCaseId) {
+        const effective = await getEffectiveCaseAccess({
+          organizationId,
+          grievanceId: linkedCaseId,
           userId,
-        }),
-        canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
-        hasExplicitDocumentGrant: Boolean(explicitGrant),
-      },
-    );
+        });
+        caseAccess = {
+          isPrimaryOwner: effective.isPrimaryOwner,
+          canViewCase: effective.canViewCase,
+          canViewPrivateDocuments: effective.canViewPrivateDocuments,
+        };
+      }
+
+      allowed = isDocumentVisibleByPolicy(
+        toGovernanceLabel({ privacyLabel: row.privacyLabel ?? undefined }),
+        {
+          isOrgMember: true,
+          isPrimaryOwner: caseAccess.isPrimaryOwner,
+          hasCaseAccess: hasDocumentContextAccess({
+            isStaff,
+            canViewCase: caseAccess.canViewCase,
+            hasExplicitGrant: Boolean(explicitGrant),
+            linkedEntityType: linkedCaseId ? 'case' : link.linkedEntityType,
+            linkedEntityId: linkedCaseId ?? link.linkedEntityId,
+            privacyLabel: row.privacyLabel,
+            uploadedBy: row.uploadedBy,
+            userId,
+          }),
+          canViewPrivateDocuments: caseAccess.canViewPrivateDocuments,
+          hasExplicitDocumentGrant: Boolean(explicitGrant),
+        },
+      );
+      if (allowed) break;
+    }
 
     if (!allowed) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this document');
@@ -182,8 +188,12 @@ export const GET = withApi(
     const nameOf = (uploaderId: string | null | undefined) => (uploaderId ? uploaderNames[uploaderId] : undefined) ?? null;
     const { uploadedBy: uploaderId, ...rowWithoutUploader } = row;
 
+    const linked = links.filter((link) => link.linkedEntityType !== null);
     return standardSuccessResponse({
       ...rowWithoutUploader,
+      linkedEntityType: linked[0]?.linkedEntityType ?? null,
+      linkedEntityId: linked[0]?.linkedEntityId ?? null,
+      links: linked,
       ...(isStaff ? { uploadedBy: uploaderId, uploadedByName: nameOf(uploaderId) } : {}),
       title: normalizeDocumentTitle(row),
       versions: versions.map(({ uploadedBy: versionUploader, ...version }) =>
@@ -227,11 +237,8 @@ export const PATCH = withApi(
             id: documents.id,
             privacyLabel: documents.privacyLabel,
             metadata: documents.metadata,
-            linkedEntityType: documentLinks.linkedEntityType,
-            linkedEntityId: documentLinks.linkedEntityId,
           })
           .from(documents)
-          .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
           .where(
             and(
               eq(documents.id, documentId),
@@ -243,11 +250,14 @@ export const PATCH = withApi(
           .for('update', { of: documents })
       )[0];
 
-      if (!before || !isDocumentLinkWellFormed(before.linkedEntityType, before.linkedEntityId)) return { kind: 'not_found' as const };
+      if (!before) return { kind: 'not_found' as const };
+      const links = await readDocumentLinks(tx, organizationId, documentId);
+      if (!allDocumentLinksWellFormed(links)) return { kind: 'not_found' as const };
 
-      // Changing a label alters who can read a case document, so it is a case-management power.
-      const linkedCaseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: before.linkedEntityType, linkedEntityId: before.linkedEntityId });
-      if (linkedCaseId) {
+      // Changing a label alters who can read a case document, so it is a case-management power: the primary owner of every case it is attached to.
+      for (const link of links) {
+        const linkedCaseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId });
+        if (!linkedCaseId) continue;
         const relationship = await getEffectiveCaseAccess({
           organizationId,
           grievanceId: linkedCaseId,
@@ -277,8 +287,9 @@ export const PATCH = withApi(
         details: {
           previousPrivacyLabel: before.privacyLabel,
           privacyLabel: updated.privacyLabel,
-          ...(before.linkedEntityType && before.linkedEntityId
-            ? { linkedEntityType: before.linkedEntityType, linkedEntityId: before.linkedEntityId }
+          ...(links[0].linkedEntityType && links[0].linkedEntityId
+            ? { linkedEntityType: links[0].linkedEntityType, linkedEntityId: links[0].linkedEntityId,
+                links: links.map((link) => ({ linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId })) }
             : {}),
         },
       });
