@@ -176,6 +176,9 @@ jobs:
           console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
           if (!/^[a-f0-9]{64}$/.test(env.AUTH_MFA_ENCRYPTION_KEY)) throw new Error('Owned fixture MFA key required')
           console.log('::add-mask::' + env.AUTH_MFA_ENCRYPTION_KEY)
+          // The lease-binding test mints an expired token in this process. The server verifies it with the same seal.
+          if (!/^[a-f0-9]{48,}$/.test(env.EVIDENCE_SEAL_KEY)) throw new Error('Owned fixture evidence seal required')
+          console.log('::add-mask::' + env.EVIDENCE_SEAL_KEY)
           const lines = [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'QA_TEST_ENV=true',
@@ -195,6 +198,7 @@ jobs:
             // The disposable executive journey encrypts its authenticator in this process.
             // The application was started with the same derived key; a missing key fails closed.
             'AUTH_MFA_ENCRYPTION_KEY=' + env.AUTH_MFA_ENCRYPTION_KEY,
+            'EVIDENCE_SEAL_KEY=' + env.EVIDENCE_SEAL_KEY,
           ]
           const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
           if (fixture.azurite) {
@@ -506,6 +510,9 @@ jobs:
           console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
           if (!/^[a-f0-9]{64}$/.test(env.AUTH_MFA_ENCRYPTION_KEY)) throw new Error('Owned fixture MFA key required')
           console.log('::add-mask::' + env.AUTH_MFA_ENCRYPTION_KEY)
+          // The lease-binding test mints an expired token in this process. The server verifies it with the same seal.
+          if (!/^[a-f0-9]{48,}$/.test(env.EVIDENCE_SEAL_KEY)) throw new Error('Owned fixture evidence seal required')
+          console.log('::add-mask::' + env.EVIDENCE_SEAL_KEY)
           const lines = [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'QA_TEST_ENV=true',
@@ -525,6 +532,7 @@ jobs:
             // The disposable executive journey encrypts its authenticator in this process.
             // The application was started with the same derived key; a missing key fails closed.
             'AUTH_MFA_ENCRYPTION_KEY=' + env.AUTH_MFA_ENCRYPTION_KEY,
+            'EVIDENCE_SEAL_KEY=' + env.EVIDENCE_SEAL_KEY,
           ]
           const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
           if (fixture.azurite) {

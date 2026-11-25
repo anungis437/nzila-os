@@ -66,6 +66,7 @@ describe('document upload quota contract', () => {
     const workflow = readFileSync(path.resolve(__dirname, '../../../../../.github/workflows/e2e.yml'), 'utf8')
     expect(workflow).toContain('up --prod --fresh --rebuild --redis --azurite')
     expect(workflow).toContain('UE_DOCUMENT_UPLOAD_QUOTA_PROOF')
+    expect(workflow.match(/EVIDENCE_SEAL_KEY=/g)).toHaveLength(2)
     expect(workflow).not.toContain('FLUSHALL')
     expect(workflow).not.toContain('FLUSHDB')
   })
