@@ -418,6 +418,7 @@ test.describe('private document delivery: authenticate, authorize, bind, read, r
       expect(await served(documents.auditFail)).toBe(0)
     } finally {
       await sql(`DROP TRIGGER IF EXISTS ue_doc_audit_failpoint ON public.audit_logs`)
+      await sql(`DROP FUNCTION IF EXISTS public.ue_doc_audit_failpoint()`)
     }
     const recovered = await bytesVia(steward, lease.url!)
     expect(recovered.status).toBe(200)
