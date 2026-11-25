@@ -66,6 +66,7 @@ main().catch((error) => {
   console.error('Owned fixture authority operation failed', {
     name: error?.name,
     code: error?.code,
+    message: error instanceof Error ? error.message : 'unknown',
   })
   process.exitCode = 1
 })

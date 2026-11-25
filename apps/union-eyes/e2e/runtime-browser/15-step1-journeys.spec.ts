@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import { randomBytes } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -21,7 +22,7 @@ const PRIMARY = UE_TEST_ORGS.primary.id
 const U = UE_TEST_USERS
 const STATE_DIR = process.env.UE_RUNTIME_STATE_DIR ?? join(process.cwd(), '..', '..', '.ue-runtime')
 const EVIDENCE: Array<Record<string, unknown>> = []
-const stamp = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+const stamp = () => randomBytes(9).toString('hex')
 
 async function sql<T extends Record<string, unknown>>(text: string, values: unknown[] = []): Promise<T[]> {
   return queryOwnedRuntime<T>(text, values)

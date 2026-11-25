@@ -171,6 +171,8 @@ jobs:
           const env = runtimeEnv()
           console.log('::add-mask::' + new URL(operator).password)
           console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
+          console.log('::add-mask::' + new URL(env.AUTH_DATABASE_URL).password)
+          console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
           const lines = [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'QA_TEST_ENV=true',
@@ -183,6 +185,10 @@ jobs:
             // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
             'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
             'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
+            // Issuing a mandate opens a scoped auth transaction. The dedicated gateway logins are required;
+            // the operator and the runtime login are refused by executeAuthContext.
+            'AUTH_DATABASE_URL=' + env.AUTH_DATABASE_URL,
+            'AUTH_SYSTEM_DATABASE_URL=' + env.AUTH_SYSTEM_DATABASE_URL,
           ]
           const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
           if (fixture.azurite) {
@@ -479,6 +485,8 @@ jobs:
           const env = runtimeEnv()
           console.log('::add-mask::' + new URL(operator).password)
           console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
+          console.log('::add-mask::' + new URL(env.AUTH_DATABASE_URL).password)
+          console.log('::add-mask::' + new URL(env.AUTH_SYSTEM_DATABASE_URL).password)
           const lines = [
             'UE_CANONICAL_BOOTSTRAP_V2=1',
             'QA_TEST_ENV=true',
@@ -491,6 +499,10 @@ jobs:
             // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
             'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
             'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
+            // Issuing a mandate opens a scoped auth transaction. The dedicated gateway logins are required;
+            // the operator and the runtime login are refused by executeAuthContext.
+            'AUTH_DATABASE_URL=' + env.AUTH_DATABASE_URL,
+            'AUTH_SYSTEM_DATABASE_URL=' + env.AUTH_SYSTEM_DATABASE_URL,
           ]
           const fixture = JSON.parse(readFileSync(env.UE_RUNTIME_STATE_DIR + '/runtime-public.json', 'utf8'))
           if (fixture.azurite) {
