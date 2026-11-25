@@ -10,8 +10,19 @@
  * All templates are inline HTML — deliberately small, brand-minimal, and
  * accessible. No external template engine. No marketing copy.
  */
+import { appendFileSync, mkdirSync } from 'node:fs'
+import { join } from 'node:path'
 import { sendEmail } from '@/lib/email-service'
 import { logger } from '@/lib/logger'
+import { isLocalQaRuntime } from '@/lib/runtime/production-guard'
+
+/** The owned QA runtime keeps the bearer the email would have carried, so acceptance can be proven without a mail provider. */
+function recordFixtureInvitation(to: string, token: string): void {
+  const state = process.env.UE_RUNTIME_STATE_DIR
+  if (!state || !isLocalQaRuntime()) return
+  mkdirSync(state, { recursive: true, mode: 0o700 })
+  appendFileSync(join(state, 'invitation-outbox.jsonl'), `${JSON.stringify({ to, token, at: new Date().toISOString() })}\n`, { mode: 0o600 })
+}
 
 function getAppBaseUrl(): string {
   return (
@@ -95,6 +106,7 @@ export async function sendInviteEmail(opts: {
   inviterName?: string
 }): Promise<{ success: boolean; error?: string; messageId?: string }> {
   const acceptUrl = `${getAppBaseUrl()}/invite/accept?token=${encodeURIComponent(opts.token)}`
+  recordFixtureInvitation(opts.to, opts.token)
   const days = Math.max(1, Math.round((opts.expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
   const who = opts.inviterName ? escape(opts.inviterName) : 'A colleague'
   const org = opts.organizationName ? escape(opts.organizationName) : 'their organization'
