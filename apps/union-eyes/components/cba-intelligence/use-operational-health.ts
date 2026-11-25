@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { CbaIntelOperationalHealth } from "@/lib/services/cba-intelligence/health-service";
-import { apiErrorMessage, envelopeData } from "@/lib/client/api-envelope";
+import { apiErrorMessageFor, envelopeData } from "@/lib/client/api-envelope";
 
 /**
  * The operational snapshot of the CBA intelligence pipeline, for every screen that shows a part of it: one query, one cache entry. A refusal (an
@@ -14,7 +14,7 @@ export function useOperationalHealth() {
     queryFn: async () => {
       const response = await fetch("/api/cba-intelligence/health");
       const body: unknown = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load health snapshot."));
+      if (!response.ok) throw new Error(apiErrorMessageFor(response.status, body, "Failed to load health snapshot."));
       const health: CbaIntelOperationalHealth = envelopeData(body) as unknown as CbaIntelOperationalHealth;
       return health;
     },

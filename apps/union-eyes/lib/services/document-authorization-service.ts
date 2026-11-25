@@ -4,9 +4,18 @@ import type { Document } from '@/db/schema/documents-schema';
 import { documentAccessGrants } from '@/db/schema/documents-schema';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { isDocumentVisibleByPolicy, toGovernanceLabel } from '@/lib/services/document-governance-service';
+import { isDocumentLinkWellFormed } from '@/lib/documents/case-link';
+import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
+import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
+import { hasRoleInOrganization } from '@/lib/api-auth-guard';
 
 export interface DocumentAuthorizationActor {
   userId: string;
+  /**
+   * Representative-level role (steward or above), which makes organization-level working documents eligible. It is resolved from
+   * the actor's live membership when omitted, and is never an input to a case document.
+   */
+  isStaff?: boolean;
 }
 
 export interface AuthorizationCandidateDocument {
@@ -14,6 +23,7 @@ export interface AuthorizationCandidateDocument {
   privacyLabel?: string | null;
   linkedEntityType?: string | null;
   linkedEntityId?: string | null;
+  uploadedBy?: string | null;
 }
 
 export interface AuthorizedDocumentResult<T extends AuthorizationCandidateDocument> {
@@ -81,9 +91,17 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
     documentIds: docIds,
   });
 
-  const grievanceIds = params.documents
-    .filter((doc) => doc.linkedEntityType === 'grievance' && doc.linkedEntityId)
-    .map((doc) => doc.linkedEntityId as string);
+  const resolvedCaseIds = await Promise.all(params.documents.map(document =>
+    isDocumentLinkWellFormed(document.linkedEntityType, document.linkedEntityId)
+      ? resolveDocumentCaseId(db, { organizationId: params.organizationId,
+        linkedEntityType: document.linkedEntityType, linkedEntityId: document.linkedEntityId })
+      : null));
+  const grievanceIds = resolvedCaseIds.filter((id): id is string => id !== null);
+  // Organization-level documents are decided by the same rule the download route applies, so a list, a search result or a related
+  // document is never visible to someone the document itself would refuse.
+  const isStaff = params.actor.isStaff ?? (params.documents.some((document, index) => resolvedCaseIds[index] === null)
+    ? await hasRoleInOrganization(params.organizationId, 'steward', params.actor.userId)
+    : false);
 
   const caseAccessMap = await getCaseAccessMap({
     organizationId: params.organizationId,
@@ -91,20 +109,28 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
     grievanceIds,
   });
 
-  return params.documents.map((document): AuthorizedDocumentResult<T> => {
-    const caseAccess =
-      document.linkedEntityType === 'grievance' && document.linkedEntityId
-        ? caseAccessMap.get(document.linkedEntityId)
-        : null;
+  return params.documents.map((document, index): AuthorizedDocumentResult<T> => {
+    if (!isDocumentLinkWellFormed(document.linkedEntityType, document.linkedEntityId)) {
+      return { document, allowed: false, reason: 'document_not_authorized' };
+    }
+    const linkedCaseId = resolvedCaseIds[index];
+    const caseAccess = linkedCaseId ? caseAccessMap.get(linkedCaseId) : null;
 
     const allowed = isDocumentVisibleByPolicy(
       toGovernanceLabel({ privacyLabel: document.privacyLabel } as Partial<Document>),
       {
         isOrgMember: true,
         isPrimaryOwner: caseAccess?.isPrimaryOwner ?? false,
-        hasCaseAccess:
-          document.linkedEntityType !== 'grievance' ||
-          Boolean(caseAccess?.canViewCase),
+        hasCaseAccess: hasDocumentContextAccess({
+          isStaff,
+          canViewCase: Boolean(caseAccess?.canViewCase),
+          hasExplicitGrant: explicitGrantIds.has(document.id),
+          linkedEntityType: linkedCaseId ? 'case' : document.linkedEntityType,
+          linkedEntityId: linkedCaseId ?? document.linkedEntityId,
+          privacyLabel: document.privacyLabel,
+          uploadedBy: document.uploadedBy,
+          userId: params.actor.userId,
+        }),
         canViewPrivateDocuments: caseAccess?.canViewPrivateDocuments ?? false,
         hasExplicitDocumentGrant: explicitGrantIds.has(document.id),
       },

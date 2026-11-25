@@ -159,31 +159,12 @@ jobs:
             exit 1
           fi
           test -z "$(docker ps -aq --filter name='^/ue-runtime-pg$')"
-          node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild
+          node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild --redis --azurite
 
       - name: Point Playwright at the owned canonical runtime without printing credentials
         if: matrix.app == 'union-eyes'
         run: |
-          node --input-type=module <<'NODE'
-          import { appendFileSync } from 'node:fs'
-          import { operatorDatabaseUrl, runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
-          const operator = operatorDatabaseUrl()
-          const env = runtimeEnv()
-          console.log('::add-mask::' + new URL(operator).password)
-          console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
-          appendFileSync(process.env.GITHUB_ENV, [
-            'UE_CANONICAL_BOOTSTRAP_V2=1',
-            'PLAYWRIGHT_TEST_AUTH=false',
-            'PLAYWRIGHT_BASE_URL=' + env.PLAYWRIGHT_BASE_URL,
-            'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
-            // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
-            'DATABASE_URL=' + operator,
-            // Fixture governance scripts (scripts/runtime/fixture-auth.ts) act through the restricted runtime login and refuse
-            // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
-            'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
-            'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
-          ].join('\n') + '\n')
-          NODE
+          node tooling/scripts/ue-e2e-runtime-contract.mjs export
 
       - name: Start app
         if: matrix.app != 'union-eyes'
@@ -233,17 +214,28 @@ jobs:
           CFO_URL: http://localhost:${{ matrix.port }}
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
 
-      # Application performance on a pull request: the real Union Eyes production
-      # build against the synthetic database, public routes only. No token and no
-      # staging target are involved. It runs after Playwright so it cannot skew the
-      # shard, and only on shard 1 so the load is applied once per pull request.
+      # Exact-key release of the synthetic document-upload counters, then the 30/31 proof,
+      # before Playwright so a counter left by the proof cannot reach the shard.
+      - name: Preflight the Playwright runtime contract
+        if: matrix.app == 'union-eyes'
+        run: node tooling/scripts/ue-e2e-runtime-contract.mjs check
 
+      - name: Prove document-upload quota isolation on the owned Redis
+        if: matrix.app == 'union-eyes'
+        run: pnpm --filter @nzila/union-eyes exec vitest run scripts/runtime/__tests__/document-upload-quota.test.ts --maxWorkers=1
+        env:
+          CI: true
+          UE_DOCUMENT_UPLOAD_QUOTA_PROOF: '1'
       - name: Run Playwright tests (canonical Union Eyes runtime, real password and MFA login)
         id: ue-playwright
         if: matrix.app == 'union-eyes'
         run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
+      # Application performance on a pull request: the real Union Eyes production
+      # build against the synthetic database, public routes only. No token and no
+      # staging target are involved. It runs after Playwright so it cannot skew the
+      # shard, and only on shard 1 so the load is applied once per pull request.
       - name: Install k6 (application performance smoke)
         if: matrix.app == 'union-eyes' && matrix.shard == 1
         run: |
@@ -455,31 +447,22 @@ jobs:
             exit 1
           fi
           test -z "$(docker ps -aq --filter name='^/ue-runtime-pg$')"
-          node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild
+          node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild --redis --azurite
 
       - name: Point Playwright at the owned canonical runtime without printing credentials
         run: |
-          node --input-type=module <<'NODE'
-          import { appendFileSync } from 'node:fs'
-          import { operatorDatabaseUrl, runtimeEnv } from './tooling/scripts/ue-runtime-up.mjs'
-          const operator = operatorDatabaseUrl()
-          const env = runtimeEnv()
-          console.log('::add-mask::' + new URL(operator).password)
-          console.log('::add-mask::' + new URL(env.DATABASE_URL).password)
-          appendFileSync(process.env.GITHUB_ENV, [
-            'UE_CANONICAL_BOOTSTRAP_V2=1',
-            'PLAYWRIGHT_TEST_AUTH=false',
-            'PLAYWRIGHT_BASE_URL=' + env.PLAYWRIGHT_BASE_URL,
-            'UE_RUNTIME_STATE_DIR=' + env.UE_RUNTIME_STATE_DIR,
-            // The private fixture credentials are bound to the operator database fingerprint (scripts/runtime/fixture-auth.ts).
-            'DATABASE_URL=' + operator,
-            // Fixture governance scripts (scripts/runtime/fixture-auth.ts) act through the restricted runtime login and refuse
-            // without an explicitly named owned operator; neither is inferred from DATABASE_URL.
-            'UE_RUNTIME_OPERATOR_DATABASE_URL=' + operator,
-            'UE_RUNTIME_DATABASE_URL=' + env.DATABASE_URL,
-          ].join('\n') + '\n')
-          NODE
+          node tooling/scripts/ue-e2e-runtime-contract.mjs export
 
+      - name: Preflight the Playwright runtime contract
+        if: matrix.app == 'union-eyes'
+        run: node tooling/scripts/ue-e2e-runtime-contract.mjs check
+
+      - name: Prove document-upload quota isolation on the owned Redis
+        if: matrix.app == 'union-eyes'
+        run: pnpm --filter @nzila/union-eyes exec vitest run scripts/runtime/__tests__/document-upload-quota.test.ts --maxWorkers=1
+        env:
+          CI: true
+          UE_DOCUMENT_UPLOAD_QUOTA_PROOF: '1'
       - name: Run Playwright tests (canonical Union Eyes runtime, real password and MFA login)
         id: ue-playwright
         run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}

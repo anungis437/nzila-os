@@ -113,6 +113,8 @@ export const authDb = new Proxy({} as Database, {
 /**
  * Drizzle's regular INSERT includes DEFAULT for every schema column, requiring
  * INSERT authority on all of them. Keep operation-specific column grants real.
+ * RETURNING * also demands SELECT on every column, including columns this role
+ * must not read. Return the written columns and the primary key only.
  */
 export async function insertAuthRow<T extends PgTable>(
   table: T, values: Partial<T['$inferInsert']>,
@@ -122,8 +124,18 @@ export async function insertAuthRow<T extends PgTable>(
   for (const [key] of entries) if (!columns[key]) throw new Error(`Unknown auth insert column ${key}`)
   const names = entries.map(([key]) => sql.identifier(columns[key]!.name))
   const parameters = entries.map(([key, value]) => sql`${value === null ? null : columns[key]!.mapToDriverValue(value)}`)
+  const inserted = entries.map(([key]) => columns[key]!)
+  const returning = [
+    ...inserted,
+    ...Object.values(columns).filter((column) => column.primary && !inserted.some((item) => item.name === column.name)),
+  ]
+  if (returning.length === 0) throw new Error('Auth insert needs a column to return')
   const rows = await authDb.execute(sql`INSERT INTO ${table} (${sql.join(names, sql`,`)})
-    VALUES (${sql.join(parameters, sql`,`)}) RETURNING *`)
-  return rows.map(row => Object.fromEntries(Object.entries(columns).map(([key, column]) =>
-    [key, row[column.name] === null ? null : column.mapFromDriverValue(row[column.name])])) as T['$inferSelect'])
+    VALUES (${sql.join(parameters, sql`,`)}) RETURNING ${sql.join(returning.map((column) => sql.identifier(column.name)), sql`, `)}`)
+  const returned = new Set(returning.map((column) => column.name))
+  return rows.map(row => Object.fromEntries(Object.entries(columns).flatMap(([key, column]) => {
+    if (!returned.has(column.name)) return []
+    const value = row[column.name]
+    return [[key, value === null || value === undefined ? null : column.mapFromDriverValue(value)]]
+  })) as T['$inferSelect'])
 }

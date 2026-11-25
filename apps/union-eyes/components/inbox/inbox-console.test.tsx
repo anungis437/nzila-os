@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 import { NextIntlClientProvider } from 'next-intl'
 import enCA from '../../messages/en-CA.json'
+import frCA from '../../messages/fr-CA.json'
 
 const nav = vi.hoisted(() => ({ push: vi.fn() }))
 vi.mock('next/navigation', () => ({
@@ -65,9 +66,9 @@ function stubFetch(router: (url: URL) => Reply) {
   return fetchMock
 }
 
-const renderInbox = () =>
+const renderInbox = (locale: 'en-CA' | 'fr-CA' = 'en-CA') =>
   render(
-    <NextIntlClientProvider locale="en-CA" messages={enCA}>
+    <NextIntlClientProvider locale={locale} messages={locale === 'fr-CA' ? frCA : enCA}>
       <InboxConsole />
     </NextIntlClientProvider>,
   )
@@ -125,7 +126,8 @@ describe('inbox console', () => {
     })
     const user = userEvent.setup()
     renderInbox()
-    expect(await screen.findByText('The claims register is unavailable')).toBeInTheDocument()
+    expect(await screen.findByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The claims register is unavailable');
     expect(screen.getByText('Conversation assigned')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Retry' }))
     expect(await screen.findByText(/grievance discipline: Suspended without notice/)).toBeInTheDocument()
@@ -136,9 +138,19 @@ describe('inbox console', () => {
     stubFetch((url) => (url.pathname === '/api/claims' ? 'network' : { status: 500, body: failure('INTERNAL_ERROR', 'Notifications are unavailable') }))
     renderInbox()
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent('Notifications are unavailable')
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.')
+    expect(document.body).not.toHaveTextContent('Notifications are unavailable');
     expect(alert).toHaveTextContent(enCA.errors.loadingError)
     expect(screen.queryByText(enCA.inboxConsole.empty.noSignalsTitle)).not.toBeInTheDocument()
+  })
+
+  it('words an unreadable inbox in French and never in the route\'s English', async () => {
+    stubFetch((url) => (url.pathname === '/api/claims' ? { status: 403, body: failure('FORBIDDEN', 'Claims are restricted to staff') } : { status: 500, body: failure('INTERNAL_ERROR', 'Notifications are unavailable') }))
+    renderInbox('fr-CA')
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.')
+    expect(alert).toHaveTextContent('Le service est momentanément indisponible. Réessayez sous peu.')
+    expect(alert.textContent).not.toMatch(/restricted|unavailable/)
   })
 
   it('says "no signals" only when both sources answered and neither had anything', async () => {

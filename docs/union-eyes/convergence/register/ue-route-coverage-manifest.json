@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1044,
+  "routes": 1045,
   "mutating": 712,
-  "kernel": 64,
+  "kernel": 65,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 15,
@@ -13,7 +13,7 @@
    "ORG_AUTH": 13,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 239,
-   "ROLE_AUTH": 100,
+   "ROLE_AUTH": 101,
    "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 421,
@@ -5357,6 +5357,18 @@
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
+   "audit": "READ_ONLY"
+  },
+  {
+   "route": "documents/[id]/content/route.ts",
+   "methods": [
+    "GET"
+   ],
+   "mutating": false,
+   "guard": "ROLE_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
    "audit": "READ_ONLY"
   },
   {

@@ -17,7 +17,9 @@ describe('Gate 0B.6 repository list cannot fan out over the entire tenant', () =
 
   it('pushes linkedCase into SQL and refuses a malformed case id', () => {
     expect(route).toContain('z.guid().safeParse(linkedCase).success')
-    expect(route).toContain('conditions.push(eq(documentLinks.linkedEntityId, linkedCase))')
+    expect(route).toContain('inArray(documentLinks.linkedEntityType, [...DOCUMENT_CASE_LINK_TYPES])')
+    expect(route).toContain('eq(documentLinks.linkedEntityId, linkedCase)')
+    expect(route.indexOf('eq(documentLinks.linkedEntityId, linkedCase)')).toBeLessThan(route.indexOf('.limit(limit)'))
     expect(route).not.toContain('row.linkedEntityId !== linkedCase')
   })
 

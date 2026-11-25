@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiErrorMessage } from '@/lib/client/api-envelope';
+import { apiErrorMessageFor } from '@/lib/client/api-envelope';
 
 interface Props {
   workbookId: string;
@@ -41,7 +41,7 @@ export default function ClaimWorkbookClient({ workbookId, token, locale }: Props
               : 'This workbook has already been claimed by another account.',
           );
         } else {
-          setErrorMessage(apiErrorMessage(body, fr ? 'R\u00e9cup\u00e9ration impossible.' : 'Claim failed.'));
+          setErrorMessage(apiErrorMessageFor(res.status, body, fr ? 'R\u00e9cup\u00e9ration impossible.' : 'Claim failed.'));
         }
         return;
       }

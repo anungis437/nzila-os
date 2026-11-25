@@ -1,0 +1,374 @@
+{
+  "schema": "UE_DOCUMENT_FAMILY_SOURCE_REMEDIATION_V1",
+  "recordedAt": "2026-11-24T00:41:59.795884+00:00",
+  "observedMergedApplicationSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
+  "currentlyServingApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "originalStagingUpgradeRunId": 45238707739,
+  "sourceState": "SOURCE_REMEDIATED_IMMUTABLE_SUCCESSOR_QUALIFICATION_PENDING",
+  "defectFamily": [
+    "Supported case links were accepted by creation but not interpreted uniformly by document read, search, version replay, OCR, kernel facts and protected external SQL",
+    "Internal clients received raw private-storage URLs instead of an authenticated application byte response",
+    "A storage size hint did not bound actual streamed bytes after metadata changed"
+  ],
+  "corrections": [
+    "Treat both supported case spellings as the same governed kernel resource; malformed link pairs deny without organization-scope fallback",
+    "Reauthorize version replay and every byte read; pin actor, tenant, document, artifact fingerprint and original one-hour expiry",
+    "Read private storage outside database transactions; recheck live authority, lock the mutable parent and commit canonical audit before response bytes",
+    "Bound actual stream bytes independently of storage metadata; retain truthful legacy-reference integrity basis when historical hashes are absent",
+    "Retain append-only/read-only child-table privileges; lock only the mutable document parent and re-enter the canonical case authority in the final transaction",
+    "Distinguish recognized non-case documents while resolving legacy wrong-spelling case IDs to their real case authority; normalize newly filed case references",
+    "Reauthorize create/version acceptance after storage I/O and authorize intake replay against the committed document link",
+    "Normalize malformed UTF-16 and truncate filenames by Unicode code point before encoding attachment headers"
+  ],
+  "workingTreeFocusedValidation": {
+    "finalChangedAppFiles": {
+      "passed": 401,
+      "failed": 0,
+      "pending": 0,
+      "files": 20,
+      "environment": "DISPOSABLE_PGLITE_AND_UNIT_SEAMS_WORKING_TREE_ONLY"
+    },
+    "bootstrapHelperProvenanceRegression": {
+      "passed": 49,
+      "failed": 0
+    },
+    "secondIncrementProducerOfflineControls": {
+      "passed": 12,
+      "failed": 0,
+      "actualNativeExecution": false
+    },
+    "trackedQaInterfaceControls": {
+      "passed": 9,
+      "failed": 0
+    },
+    "priorWorkingTreeObservations": {
+      "aliasFamily": {
+        "passed": 307,
+        "files": 23
+      },
+      "documentAndStream": {
+        "passed": 62,
+        "files": 2
+      },
+      "signedDownloadLease": {
+        "passed": 27,
+        "files": 1
+      },
+      "applicationTypecheckPreflight": "PASS_UNCOMMITTED_WORKING_TREE_ONLY",
+      "secondIncrementProducerOfflineControls": 12,
+      "newMatureClaimClosureHttpTest": "PREPARED_NOT_YET_EXECUTED",
+      "commitBoundFullFive": "PENDING",
+      "freshNativeAndHttpCi": "PENDING",
+      "bootstrapHelperProvenanceRegression": {
+        "passed": 49,
+        "failed": 0,
+        "files": 1
+      },
+      "trackedQaInterfaceControls": {
+        "passed": 9,
+        "failed": 0
+      }
+    },
+    "currentSourceFullFive": "PENDING",
+    "restrictedNativeDocumentRoutes": "PREPARED_UNEXECUTED",
+    "matureClaimClosureHttp": "PREPARED_UNEXECUTED",
+    "stagingAcceptance": "UNEXECUTED",
+    "currentAppCohort": {
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "files": 22
+    }
+  },
+  "physicalChange": {
+    "canonicalStatementCount": 6326,
+    "canonicalStatementSqlUnchanged": true,
+    "compiledFunctionName": "public.ue_external_sources_match(jsonb)",
+    "compiledFunctionBodyDigestBefore": "239f29c517cee6146a30894b0ed3f27181b5648c9329039683d5427a952ece9f",
+    "compiledFunctionBodyDigestAfter": "5e6606a8d0bcdcf714d8b4fad90ecdb0e1608f66026203104399724536322862",
+    "preservingFunctionDeltaRequired": true,
+    "otherCatalogAuthorityChanged": false,
+    "newLiveDdlApplied": false,
+    "originalBootstrapAndUpgradeReceiptsPreserved": true,
+    "sourcePlanDigestAfter": "5d3e5c78604b312d3dfcd52a755e34b73b6c68c8c2ce94fe068df5cd7faaaf92",
+    "sourceCommitmentCount": 884
+  },
+  "existingSecretOnly": "EVIDENCE_SEAL_KEY; no additional key or permission authority introduced",
+  "workingTreeFileSha256": {
+    "apps/union-eyes/lib/documents/case-link.ts": "a6f33a87239ee8daa95a6d6cd7e4ed66fad7df16d7d72be320aa9f433d511b13",
+    "apps/union-eyes/lib/documents/download-lease.ts": "d515927c229b77cf13d5d4a86c452331fa952b19b196dabbb3040be18aed16e9",
+    "apps/union-eyes/lib/documents/download-issuance.ts": "dedef32bee01880c3ed41226c531789e155ae2f3ce87015b0a39943cf476f1eb",
+    "apps/union-eyes/lib/blob-client.ts": "0ca42b6b45e410d62a4341c04fc30578e360a52dc3f01c8bc0070ab9058538b6",
+    "apps/union-eyes/app/api/documents/[id]/content/route.ts": "8a52ff018629c3730cae19857d7f8cdbe232a856680370d573c45cc92fe8a0c6",
+    "apps/union-eyes/lib/external-resource-read/source.ts": "cfd5a7eeca7125c9adba2a9e2517b729b403f29eb32fa354b05db2a6e095c8a4",
+    "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts": "ddc25f3a6c83a28ccfeddaef04bf6c4412428028d6f9fbad7e2a46529064a25c",
+    "tooling/scripts/prove-ue-v2-second-increment.cts": "e60d795fa9987c4800bba3cbb81f911f4aaeeda1523b36bad4a7d92b6b53040e",
+    "apps/union-eyes/lib/documents/transcripts.ts": "f554f1fe4c256f4aa2fc67bff7f7ff005f45493f06bb55c8e2591f45554af150",
+    "apps/union-eyes/app/api/documents/repository/route.ts": "94eb554e15647718449989ae8e6f0175aedbc022339307dea723d32938072d19",
+    "apps/union-eyes/app/api/external/documents/[id]/download/route.ts": "63f12e542beb18d8ec10e42fe4bd412bb0009fcda942fb49631b3457ecc6ae4d",
+    "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts": "85b8b8412d2f33075970fbe7b58aab7e26c44f196bd5222fbfafdd33241552d3",
+    "apps/union-eyes/lib/documents/ocr-authority.ts": "d17a1a98d9bd3586d9cf22565e2d2edd477246fa2b08a217bad416c2c2bd8a6a",
+    "apps/union-eyes/lib/services/document-member-scope.ts": "ddc7d65910ee95b6727792d00cd0943795350e2725f6efaa9367b2f7ae18d1ab",
+    "apps/union-eyes/lib/documents/attachment-name.ts": "4f91f19e1322781695c826467620c7d42bdaab487002db4146e6291efd24cad2",
+    "apps/union-eyes/lib/documents/document-link-authority.ts": "44ee033a49757db202b198f3e61b2e6e24380329e82944ecda234d5ee15087e1",
+    "tooling/scripts/lib/ue-v2-forward-upgrade.ts": "0387e160014ee2096641098030726a9c0da7949840d88115e490e1c01187b52f",
+    "tooling/scripts/lib/ue-v2-forward-upgrade-runtime.ts": "4f4ca2040590ed0fb9e80ff151ac180989512d142c67d09a0a080796395ccadc",
+    "tooling/scripts/lib/ue-v2-forward-upgrade.test.ts": "bb63c06febdb3886d8804fcbc47257e7d28df1ac8d1fa7a8a7f2926a5bc06d07",
+    "apps/union-eyes/app/api/__tests__/documents-download-version-contract.pglite.test.ts": "1145f349e2338862310a91a027948d18137971ef8ce1a3aaee159ae728ce0aa6",
+    "apps/union-eyes/lib/documents/document-link-authority.pglite.test.ts": "1d409f5f21f4a06b86424983b2dae2c067854a4d79c09d526d12ef1b98190932",
+    "apps/union-eyes/lib/services/document-authorization-service.test.ts": "fe77ce08446e92eb7096bdcd0d3c612b5e5543e7174a0f39e4f749c5dee929f9",
+    "tooling/scripts/lib/ue-v2-second-increment.test.ts": "1e1828a3a30b3f24722e58219a11bda369b959b52704f35acfd41c1454c8da9a"
+  },
+  "stagingAcceptance": false,
+  "globalSaasReadinessChanged": false,
+  "productionDeployment": false,
+  "financeFeatureImplementation": false,
+  "managedIncrementExecution": {
+    "predecessorSourceSha": "1b618a665a8a275c85684d6ce8dacd33c06862e6",
+    "officialExport": "PASS_FRESH_INSTALL_REPEAT_DUMP_RESTORE_REPEAT_NATIVE_PRIVILEGES",
+    "nativeSecondIncrement": "FAILED_EXISTING_READER_OWNED_FUNCTION_REPLACEMENT_42501",
+    "rootCause": "The executor used the NOINHERIT schema owner instead of selecting the existing canonical function owner through the already-authorized SET bridge",
+    "correction": "Bind same-owner replacement to the exact current and target canonical function identity, definition and unprivileged owner; require actual SET reachability and retain existing membership/attribute cleanup",
+    "newPrivilegesGranted": false,
+    "focusedOfflineControls": {
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0
+    },
+    "workingTreeTypecheck": "PASS_FORWARD_UPGRADE_AND_SECOND_INCREMENT_PRODUCERS",
+    "technicalReview": "STATIC_REVIEW_OF_EXACT_THREE_FILE_DIFF_NO_REMAINING_CONCRETE_BLOCKER_NOT_HUMAN_OR_STAGING_APPROVAL",
+    "freshCommittedSuccessorNativeProof": "PENDING",
+    "liveDdlPerformed": false
+  },
+  "bothCaseModelBoundary": {
+    "canonicalKeys": [
+      "grievances.id",
+      "claims.claim_id"
+    ],
+    "internalClaimRowIdIsNotCanonicalCaseId": true,
+    "legacyNonCaseLabelsResolveWithinTenantBeforeOrganizationScope": true,
+    "workingTreeAppCohort": {
+      "passed": 441,
+      "failed": 0,
+      "skipped": 0,
+      "files": 22
+    },
+    "freshCurrentSourceStagingProof": "PENDING"
+  },
+  "secondIncrementOracleCorrection": {
+    "predecessorSourceSha": "a3ebfee6356d9a51b11c530d32906df3c7641d86",
+    "officialNativeExport": "PASS",
+    "observedActualFunctionFailureRollback": "PASS",
+    "fullManagedIncrementResult": "FAILED_COMMIT_PRESERVATION_CHECK_NOT_ACCEPTED",
+    "diagnosis": {
+      "relations": 3274,
+      "changedAclRepresentations": 356,
+      "realFixtureGrantMismatch": 1,
+      "realFixtureMismatch": "The test fixture had removed the authority reader USAGE already present on the qualified predecessor sequence; it is now preserved"
+    },
+    "correction": "Compare PostgreSQL-expanded relation/column defaults with exact grantee, grantor, privilege, grant-option, owner, RLS and FORCE identities; retain raw snapshots and fail on real permission differences",
+    "offlineControls": {
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0
+    },
+    "actualReadOnlyInspectorSmoke": {
+      "environment": "OWNED_DISPOSABLE_POSTGRESQL16",
+      "relations": 3274,
+      "status": "PASS_INSPECTOR_ONLY_NOT_FULL_INCREMENT"
+    },
+    "freshCommittedFullNativeProof": "PENDING",
+    "liveDdlPerformed": false
+  },
+  "latestSourceReviewAt": "2026-11-24T01:52:55.571645+00:00",
+  "latestBoundedRepairWave": {
+    "baselineCommittedSourceSha": "c802713d0d4707c4ce8893cbecf6fd6ba4f5fbcb",
+    "changes": [
+      "Document list, detail and version reads settle rejected transport and malformed payloads with localized recovery; obsolete, unmounted and prior-organization reads cannot replace current results",
+      "The staff document title loads verified canonical detail and versions before opening the panel",
+      "Compliance audit reads use the same canonical or legacy store as the atomic writer, retain direct-organization authority and redaction, and record the read in the same transaction",
+      "Mature claim-closure QA preparation and rollback inspection remain in approved guarded loopback fixture tooling; the real HTTP journey retains every assertion",
+      "The generated route inventory includes the authenticated content route; historical audit and kernel ratchets are unchanged"
+    ],
+    "documentReadRecovery": {
+      "testsPassed": 49,
+      "failed": 0,
+      "files": 4,
+      "targetedTypecheck": "PASS",
+      "lintErrors": 0,
+      "lintWarnings": 6,
+      "lintReview": "Existing stable state setters and fetch effects; no suppression or stale-closure workaround added"
+    },
+    "auditReader": {
+      "unitAndLegacyTestsPassed": 26,
+      "nativeRestrictedCanonicalTestsPassed": 9,
+      "nativeSkipped": 0,
+      "legacySchemaPrivilegeWidened": false,
+      "auditFailureRollsBack": true
+    },
+    "qaBoundary": {
+      "focusedContractsPassed": 332,
+      "qaClockControlsPassed": 10,
+      "playwrightTestsDiscovered": 69,
+      "actualNewHttpJourneyExecuted": false
+    },
+    "combinedCaseAccess": {
+      "passed": 410,
+      "failed": 0
+    },
+    "combinedNativeContext": {
+      "passed": 301,
+      "failed": 0,
+      "fixtureSourceSha": "c802713d0d4707c4ce8893cbecf6fd6ba4f5fbcb",
+      "workingTreeOnly": true
+    },
+    "combinedUiCensus": {
+      "passed": 53,
+      "failed": 0
+    },
+    "combinedFullContracts": {
+      "passed": 10174,
+      "failed": 0,
+      "pending": 0,
+      "files": 309,
+      "workingTreeOnly": true
+    },
+    "immutableSuccessorRequiredFive": "PENDING",
+    "immutableSuccessorNativeAndHttpCi": "PENDING",
+    "stagingAcceptance": false,
+    "productionDeployment": false,
+    "combinedApplicationTypecheck": "PASS_DECLARED_APPLICATION_COMMAND_8192_MIB",
+    "combinedPrecommitStatus": "PASS_CASE_ACCESS_410_NATIVE_CONTEXT_301_UI_CENSUS_53_CONTRACTS_10174_AND_DECLARED_APPLICATION_TYPECHECK"
+  },
+  "committedPredecessorNativeProof": {
+    "sourceSha": "c802713d0d4707c4ce8893cbecf6fd6ba4f5fbcb",
+    "officialExport": "PASS_FRESH_INSTALL_REPEAT_DUMP_RESTORE_REPEAT_NATIVE_PRIVILEGES",
+    "managedSecondIncrement": "PASS_BOTH_MANAGED_OPERATOR_PROFILES_FAULT_ROLLBACK_PRESERVATION_REPEAT_AND_FORGERY_REFUSAL",
+    "sourcePlanDigest": "5d3e5c78604b312d3dfcd52a755e34b73b6c68c8c2ce94fe068df5cd7faaaf92",
+    "disposableTemplate": "PASS_EXACT_SOURCE_CATALOG_AND_RESTRICTED_ADMISSION_CANONICAL_SEARCH_PATH",
+    "helperProfilesPassed": 8,
+    "ownedHelperDatabaseAndRoleCleanupsVerified": 8,
+    "liveAzureSnapshotUsed": false,
+    "liveStagingProof": false,
+    "successorMustQualifyFresh": true
+  },
+  "latestRepairFileSha256": {
+    "apps/union-eyes/app/api/compliance/audit-logs/route.ts": "cb88cb439f1175512aa33450e3db7d4784be75bcfebc6b164362c6e710255f0e",
+    "apps/union-eyes/components/documents/document-browser.tsx": "239a8450d4454f147e95ed31f708d266ff6ac577c437bb2d13f1db6907102a23",
+    "apps/union-eyes/components/documents/documents-console.tsx": "33399054358ab232ca8ef0217250b871c30df2a76255c04720dc5e3862229dae",
+    "apps/union-eyes/lib/documents/canonical-journey.ts": "e5fa3a0011f09e1e9d2babffa63cf70e044dc908dfffff360f049073b3091d1f",
+    "apps/union-eyes/scripts/runtime/db-inspect.ts": "24b2d0a9b67ad49badabaeb9ba5f67cc129a328db715f6f15ab070184eaeb0c4",
+    "apps/union-eyes/e2e/runtime/01-foundation-and-case-journey.spec.ts": "aa0c9b613da53b51167a561589b651c744080fcf632afe2bcaae24686331929f"
+  },
+  "latestGeneratedEvidenceCorrection": {
+    "observedCandidateSourceSha": "72e1199da33b3957cbac5ce3414983a1ea8e4e07",
+    "recordedAt": "2026-11-24T02:24:31.928713+00:00",
+    "ciWholeAppStatus": "FAILED_AUTHORITY_CENSUS_AND_SHARED_FIXTURE_OR_CONTRACT_FAMILIES; FULL_CI_RESULTS_RECONCILED_SEPARATELY",
+    "actualDrift": "Document PATCH route test-file count changed from2 to3; authorization classes and ratchets unchanged",
+    "correction": "Regenerate authority census and check its dependent trace; add read-only qualification:generated-evidence and run it before case-access checks and before expensive private native preparation",
+    "workingTreeGeneratedEvidenceCheck": "PASS",
+    "priorLocalFullSuite": "INTERRUPTED_NO_EXIT_RECEIPT_NOT_ACCEPTED",
+    "nativePredecessorMatrix": {
+      "passed": 363,
+      "failed": 0,
+      "pending": 0
+    },
+    "nativePredecessorAuditComponent": {
+      "passed": 9,
+      "failed": 0,
+      "pending": 0
+    },
+    "remainingCiFamilies": [
+      "Successor exact-source CI and required-five qualification remain unexecuted; source corrections are recorded below"
+    ],
+    "freshSuccessorQualification": "PENDING",
+    "stagingAcceptance": false,
+    "productionDeployment": false
+  },
+  "latestSuccessorPrecommitFamilies": {
+    "recordedAt": "2026-11-24T03:08:37.767722+00:00",
+    "baselineSourceSha": "72e1199da33b3957cbac5ce3414983a1ea8e4e07",
+    "sourceState": "UNCOMMITTED_COMBINED_SUCCESSOR_NOT_STAGING_ACCEPTED",
+    "authorityFixtureFamily": {
+      "correction": "Every document link fixture supplies its real tenant; unresolved case denial replaces the now-valid case alias negative; supported aliases and foreign links retain explicit assertions",
+      "pglitePassed": 76,
+      "nativePassed": 76,
+      "newApplicationPrivileges": false
+    },
+    "nativePreflight": {
+      "correction": "One shared exact-source runner for the unchanged25 CI suites, before canonical database construction; inherited connection aliases removed; source bytes and owned-container cleanup checked",
+      "files": 25,
+      "passed": 472,
+      "failed": 0,
+      "skipped": 0,
+      "workingTreeOnly": true
+    },
+    "downloadAndAuditContractFamily": {
+      "correction": "Fixtures supply governed metadata and real hash shapes; application download leases replace obsolete SAS expectations; audit contracts follow the canonical delegated reader while retaining tenant, direct-admin, redaction and atomic-read assertions",
+      "focusedFiles": 4,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "applicationBehaviorChanged": false
+    },
+    "wholeDeclaredUnionEyesProject": {
+      "files": 2116,
+      "passed": 27725,
+      "failed": 0,
+      "declaredSkips": 36,
+      "todo": 0,
+      "sourceUnchangedDuringRun": true,
+      "workingTreeOnly": true,
+      "skipsAreNotPasses": true
+    },
+    "generatedEvidence": "Official authority census regenerated (document PATCH testFiles2 to3); dependent trace checked; read-only checks run before case-access and private native preparation",
+    "authorizedSharedReferenceMaintenance": {
+      "scope": "Ten existing shared tax reference modules, explicitly authorized by founder; no Union Eyes finance feature implementation",
+      "reviewDateToronto": "2026-11-23",
+      "primarySourcePeriodsAndLimits": "packages/tax/REFERENCE_MAINTENANCE_20261123.md",
+      "freshnessThresholdDaysUnchanged": 90,
+      "actualClockFreshnessTestRetained": true,
+      "integratedTests": {
+        "passed": 354,
+        "failed": 0,
+        "skipped": 0,
+        "packageTypecheck": "PASS",
+        "workingTreeOnly": true,
+        "wholeFinancialFeatureCertification": false
+      }
+    },
+    "successorRequiredFive": "PENDING",
+    "successorCi": "PENDING",
+    "liveStagingProof": "PENDING",
+    "stagingAcceptance": false,
+    "productionDeployment": false
+  },
+  "nativeRunnerCiOutputBoundary": {
+    "recordedAt": "2026-11-24T03:21:51.193610+00:00",
+    "observedCandidateSourceSha": "72fbc0b72612f79e75344a28e57fc602cb2233f2",
+    "defect": "CI stores results under nonignored checkout artifacts; strict source snapshot detects its own newly written summary",
+    "counterexample": "Actual runner refuses before the first suite in an isolated synthetic Git checkout matching the CI output layout",
+    "correction": "Use a unique RUNNER_TEMP output directory during the unchanged source-pinning runner; copy owned JSON evidence into the existing artifact after exit, retain partial evidence and propagate failure",
+    "sourceSnapshotWeakened": false,
+    "offlineActualWorkflowControls": {
+      "passed": 3,
+      "nativeTestsExecuted": false,
+      "cases": [
+        "successful mocked result shapes preserve existing primary receipt",
+        "failed suite retains partial receipts and nonzero exit",
+        "real tracked-source tamper still refuses"
+      ]
+    },
+    "priorCandidateExactNative25": {
+      "files": 25,
+      "passed": 472,
+      "failed": 0,
+      "skipped": 0,
+      "outputLocation": "PRIVATE_EXTERNAL_EVIDENCE_DIRECTORY",
+      "doesNotProveCiOutputLayout": true
+    },
+    "priorLocalFullPipeline": "STOPPED_KNOWN_DEFECT; completed phases retained, interrupted whole-app not accepted",
+    "successorFullQualification": "PENDING",
+    "stagingAcceptance": false
+  }
+}

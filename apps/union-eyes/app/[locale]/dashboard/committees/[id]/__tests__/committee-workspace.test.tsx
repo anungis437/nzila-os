@@ -225,7 +225,8 @@ describe('CommitteeWorkspace: what it does not pretend', () => {
     renderWorkspace();
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('Could not be loaded: Database unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(globalThis.document.body.textContent).not.toContain('Could not be loaded: Database unavailable');
     expect(screen.queryByRole('tablist')).toBeNull();
 
     world.committee = ok(item(bargaining));
@@ -273,7 +274,8 @@ describe('CommitteeWorkspace: what it does not pretend', () => {
     await screen.findByRole('heading', { name: 'Bargaining Committee' });
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('Could not be loaded: Meetings are unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(globalThis.document.body.textContent).not.toContain('Could not be loaded: Meetings are unavailable');
     expect(figure('Meetings')).toBe('—');
 
     world.meetings = ok(plain([meeting()]));
@@ -292,7 +294,8 @@ describe('CommitteeWorkspace: what it does not pretend', () => {
 
     await user.click(screen.getByRole('tab', { name: 'Meetings' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Meetings are unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(globalThis.document.body.textContent).not.toContain('Meetings are unavailable');
     expect(screen.queryByText('No meetings recorded yet.')).toBeNull();
   });
 

@@ -31,6 +31,7 @@ import {
 import { DocumentBulkOperations } from "@/components/documents/document-bulk-operations";
 import { DocumentRetentionPolicy } from "@/components/documents/document-retention-policy";
 import { OCRUpload } from "@/components/documents/ocr-upload";
+import { browserCopy } from "@/lib/documents/browser-repository";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import {
   canonicalShareUnavailable,
@@ -150,6 +151,15 @@ export function DocumentsConsole() {
   const [loading, setLoading] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [versioning, setVersioning] = React.useState(false);
+  const [detailLoading, setDetailLoading] = React.useState(false);
+  const scope = JSON.stringify([organizationId ?? null, locale]);
+  const [loadedScope, setLoadedScope] = React.useState(scope);
+  const activeScope = React.useRef(scope);
+  const mounted = React.useRef(false);
+  const listRead = React.useRef<AbortController | null>(null);
+  const detailRead = React.useRef<AbortController | null>(null);
+  const listRevision = React.useRef(0);
+  const detailRevision = React.useRef(0);
   const [uploadPayload, setUploadPayload] = React.useState({
     title: '',
     filename: '',
@@ -162,8 +172,24 @@ export function DocumentsConsole() {
     linkedEntityId: '',
   });
 
+  React.useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; listRead.current?.abort(); detailRead.current?.abort(); };
+  }, []);
+  React.useEffect(() => {
+    activeScope.current = scope;
+    return () => { listRead.current?.abort(); detailRead.current?.abort(); };
+  }, [scope]);
+
   const loadRepository = React.useCallback(async (nextFilters: SearchFilters = filters) => {
+    if (!mounted.current || activeScope.current !== scope) return;
+    listRead.current?.abort(); detailRead.current?.abort(); detailRevision.current++;
+    const controller = new AbortController(); listRead.current = controller;
+    const revision = ++listRevision.current;
+    const current = () => mounted.current && !controller.signal.aborted && revision === listRevision.current && activeScope.current === scope;
     setLoading(true);
+    setLoadedScope(scope); setRepoDocs([]); setSelectedLibraryItems([]); setSelectionResetSignal(value => value + 1);
+    setSelectedDocumentId(null); setSelectedDocument(null); setSelectedDocumentVersions([]); setDetailLoading(false); setBulkReport(null);
     try {
       const params = new URLSearchParams();
       if (nextFilters.query) params.set('keyword', nextFilters.query);
@@ -172,8 +198,9 @@ export function DocumentsConsole() {
       if (nextFilters.dateFrom) params.set('from', nextFilters.dateFrom.toISOString());
       if (nextFilters.dateTo) params.set('to', nextFilters.dateTo.toISOString());
       if (nextFilters.tags?.length) params.set('label', nextFilters.tags[0] ?? '');
-      const res = await fetch(`/api/documents/repository?${params.toString()}`);
-      const json = await res.json().catch(() => null);
+      const res = await fetch(`/api/documents/repository?${params.toString()}`, { signal: controller.signal });
+      const json = await res.json();
+      if (!current()) return;
       const denial = listDenied(res.status, json);
       if (denial) {
         setRepoDocs([]);
@@ -181,56 +208,73 @@ export function DocumentsConsole() {
         return;
       }
       setRepoDocs(repositoryRows(json) as RepositoryDocumentRow[]);
+      setNotice(value => value === 'list_unavailable' || value === 'read_unavailable' || value === 'unauthorized' ? null : value);
+    } catch {
+      if (current()) { setRepoDocs([]); setNotice('list_unavailable'); }
     } finally {
-      setLoading(false);
+      if (current()) setLoading(false);
     }
-  }, [filters]);
+  }, [filters, scope]);
 
   const loadDocumentDetails = React.useCallback(async (documentId: string) => {
-    setSelectedDocumentId(documentId);
+    if (!mounted.current || activeScope.current !== scope) return;
+    detailRead.current?.abort();
+    const controller = new AbortController(); detailRead.current = controller;
+    const revision = ++detailRevision.current, list = listRevision.current;
+    const current = () => mounted.current && !controller.signal.aborted && revision === detailRevision.current && list === listRevision.current && activeScope.current === scope;
+    setSelectedDocumentId(null); setSelectedDocument(null); setSelectedDocumentVersions([]); setDetailLoading(true);
     try {
-      const res = await fetch(`/api/documents/repository/${documentId}`);
-      const json = await res.json().catch(() => null);
+      const res = await fetch(`/api/documents/repository/${documentId}`, { signal: controller.signal });
+      const json: unknown = await res.json();
+      if (!current()) return;
       if (!res.ok) {
         setSelectedDocument(null);
         setSelectedDocumentVersions([]);
         setNotice(res.status === 401 || res.status === 403 || res.status === 404 ? 'unauthorized' : 'list_unavailable');
         return;
       }
-      const detail = (json && typeof json === 'object' && 'data' in json ? (json as { data: RepositoryDetailResponse }).data : json) as RepositoryDetailResponse;
+      const detail = (json && typeof json === 'object' && 'data' in json ? (json as { data: unknown }).data : json) as RepositoryDetailResponse | null;
+      if (!detail || typeof detail !== 'object' || Array.isArray(detail) || detail.id !== documentId || !Array.isArray(detail.versions)
+        || detail.versions.some(version => !version || typeof version.id !== 'string' || !Number.isSafeInteger(version.versionNo)
+          || version.versionNo < 1 || typeof version.contentHash !== 'string' || !Number.isFinite(new Date(version.uploadedAt).getTime())))
+        throw new Error('DOCUMENT_DETAIL_SHAPE');
+      setSelectedDocumentId(documentId);
       setSelectedDocument(detail);
-      const versions = Array.isArray(detail?.versions) ? detail.versions : [];
+      const versions = detail.versions;
       setSelectedDocumentVersions(
         versions.map((version, index) => toVersionView(version, index === 0)),
       );
       setNotice(null);
       setActiveTab('library');
     } catch {
-      setSelectedDocument(null);
-      setSelectedDocumentVersions([]);
+      if (current()) { setSelectedDocumentId(null); setSelectedDocument(null); setSelectedDocumentVersions([]); setNotice('read_unavailable'); }
+    } finally {
+      if (current()) setDetailLoading(false);
     }
-  }, []);
+  }, [scope]);
+
+  const scopedRepoDocs = loadedScope === scope ? repoDocs : [];
 
   const repositoryItems = React.useMemo<DocumentItem[]>(() => {
-    return repoDocs.map((row) => toRepositoryDocumentItem(row));
-  }, [repoDocs]);
+    return (loadedScope === scope ? repoDocs : []).map((row) => toRepositoryDocumentItem(row));
+  }, [repoDocs, loadedScope, scope]);
 
   const availableTags = React.useMemo(() => {
     return Array.from(
-      new Set(repoDocs.flatMap((row) => [row.documentType, row.privacyLabel].filter(Boolean) as string[])),
+      new Set((loadedScope === scope ? repoDocs : []).flatMap((row) => [row.documentType, row.privacyLabel].filter(Boolean) as string[])),
     ).sort();
-  }, [repoDocs]);
+  }, [repoDocs, loadedScope, scope]);
 
   const availableUsers = React.useMemo(() => {
     const users = new Map<string, string>();
-    for (const row of repoDocs) {
+    for (const row of loadedScope === scope ? repoDocs : []) {
       if (row.uploadedBy && row.uploadedByName) users.set(row.uploadedBy, row.uploadedByName);
     }
     return Array.from(users, ([id, name]) => ({ id, name }));
-  }, [repoDocs]);
+  }, [repoDocs, loadedScope, scope]);
 
   const templateItems = React.useMemo<DocumentTemplate[]>(() => {
-    return repoDocs
+    return (loadedScope === scope ? repoDocs : [])
       .filter((document) => {
         const type = document.documentType?.toLowerCase() ?? '';
         return document.linkedEntityType === 'template_library' || type.includes('template');
@@ -243,10 +287,11 @@ export function DocumentsConsole() {
         createdAt: toDate(document.createdAt),
         updatedAt: toDate(document.updatedAt),
       }));
-  }, [repoDocs]);
+  }, [repoDocs, loadedScope, scope]);
 
   React.useEffect(() => {
     void loadRepository(filters);
+    return () => listRead.current?.abort();
   }, [filters, loadRepository]);
 
   React.useEffect(() => {
@@ -334,13 +379,20 @@ export function DocumentsConsole() {
   };
 
   const openAuthorizedDownload = async (documentId: string) => {
-    const result = await requestAuthorizedDownload(documentId);
-    if (!result.downloadUrl) {
-      setNotice(result.denial ?? 'unauthorized');
-      return;
+    const revision = listRevision.current;
+    const current = () => mounted.current && activeScope.current === scope && listRevision.current === revision;
+    try {
+      const result = await requestAuthorizedDownload(documentId);
+      if (!current()) return;
+      if (!result.downloadUrl) {
+        setNotice(result.denial ?? 'unauthorized');
+        return;
+      }
+      setNotice(null);
+      window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      if (current()) setNotice('read_unavailable');
     }
-    setNotice(null);
-    window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownloadDocument = (item: DocumentItem) => {
@@ -356,27 +408,28 @@ export function DocumentsConsole() {
     setSelectedLibraryItems([]);
   };
 
-  const handleRepositorySearch = async () => {
+  const handleRepositorySearch = () => {
     const nextFilters: SearchFilters = {
       ...filters,
       query,
       tags: label ? [label] : undefined,
     };
     setFilters(nextFilters);
-    await loadRepository(nextFilters);
   };
 
   const handleBulkDownload = async () => {
     if (selectedLibraryItems.length === 0) {
       setNotice('none_selected');
-      return;
+      return false;
     }
 
     setBulkReport(null);
+    const revision = listRevision.current;
     const result = await requestBulkDownload(selectedLibraryItems.map((item) => item.id));
+    if (!mounted.current || activeScope.current !== scope || listRevision.current !== revision) return false;
     if (!result.report) {
       setNotice(result.denial ?? 'bulk_unavailable');
-      return;
+      return false;
     }
     setNotice(null);
     setBulkReport(result.report);
@@ -385,11 +438,13 @@ export function DocumentsConsole() {
         window.open(item.downloadUrl, '_blank', 'noopener,noreferrer');
       }
     }
+    return result.report.items.some((item) => item.outcome === 'issued');
   };
 
   const handleBulkShare = async (_permission: string) => {
     canonicalShareUnavailable();
     setNotice('share_blocked');
+    return false;
   };
 
   const appendVersion = async (documentId: string) => {
@@ -419,7 +474,7 @@ export function DocumentsConsole() {
 
   return (
     <div className="container mx-auto max-w-full py-4 sm:py-8 space-y-6">
-      {notice && (
+      {notice && loadedScope === scope && (
         <p
           role="alert"
           data-testid="document-journey-notice"
@@ -428,7 +483,7 @@ export function DocumentsConsole() {
           {notice === 'saved' ? copy.saved : copy[notice]}
         </p>
       )}
-      {bulkReport && (
+      {bulkReport && loadedScope === scope && (
         <div role="status" data-testid="document-bulk-report" className="rounded-md border px-3 py-2 text-sm">
           <p>{formatBulkSummary(copy, bulkReport)}</p>
           {bulkReport.items.some((item) => item.outcome !== 'issued') && (
@@ -540,9 +595,9 @@ export function DocumentsConsole() {
           </div>
 
           <div className="space-y-2">
-            {repoDocs.map((doc) => (
+            {scopedRepoDocs.map((doc) => (
               <div key={String(doc.id)} className="flex flex-wrap items-center gap-2 rounded border px-3 py-2 text-sm">
-                <button type="button" onClick={() => setSelectedDocumentId(String(doc.id))} className="font-medium text-left text-blue-700 hover:underline">
+                <button type="button" onClick={() => void loadDocumentDetails(String(doc.id))} className="font-medium text-left text-blue-700 hover:underline">
                   {String(doc.title ?? doc.name ?? doc.filename ?? doc.id)}
                 </button>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{String(doc.documentType ?? t('repository.defaults.documentType'))}</span>
@@ -556,7 +611,7 @@ export function DocumentsConsole() {
                 </Button>
               </div>
             ))}
-            {repoDocs.length === 0 && !loading && (
+            {scopedRepoDocs.length === 0 && !loading && !notice && (
               <p className="text-sm text-gray-500">{t('repository.empty')}</p>
             )}
           </div>
@@ -591,7 +646,7 @@ export function DocumentsConsole() {
         <TabsContent value="templates">
           <DocumentTemplateManager
             templates={templateItems}
-            categories={availableTags.map((tag) => ({ id: tag, name: tag, count: repoDocs.filter((doc) => doc.documentType === tag || doc.privacyLabel === tag).length }))}
+            categories={availableTags.map((tag) => ({ id: tag, name: tag, count: scopedRepoDocs.filter((doc) => doc.documentType === tag || doc.privacyLabel === tag).length }))}
             onUseTemplate={(template) => {
               setUploadPayload((prev) => ({
                 ...prev,
@@ -610,7 +665,7 @@ export function DocumentsConsole() {
             legalHolds={null}
             unavailableNotice={copy.retention_unavailable}
             stats={{
-              totalDocuments: repoDocs.length,
+              totalDocuments: scopedRepoDocs.length,
               documentsUnderRetention: null,
               documentsOnHold: null,
               scheduledForArchival: null,
@@ -633,7 +688,8 @@ export function DocumentsConsole() {
       </Tabs>
 
       {/* Document Version Control Modal */}
-      {selectedDocumentId && (
+      {detailLoading && <p role="status" data-testid="document-detail-loading">{browserCopy(locale).loading}</p>}
+      {selectedDocumentId && selectedDocument && loadedScope === scope && (
         <DocumentVersionControl
           document={{
             id: selectedDocumentId,

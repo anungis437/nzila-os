@@ -24,13 +24,25 @@ let _service: BlobServiceClient | null = null
 let _credential: StorageSharedKeyCredential | null = null
 
 /**
- * Optional emulator endpoint (e.g. Azurite). Never honoured in production, so a stray variable
- * cannot redirect real document storage.
+ * A production process may use Azurite only for the owned canonical fixture: loopback HTTP, the public emulator
+ * account, and both fixture flags. Any other endpoint, account, or a production process without those flags is refused,
+ * so a stray variable cannot redirect real document storage.
  */
+function ownedFixtureEmulator(override: string): boolean {
+  if (process.env.QA_TEST_ENV !== 'true' || process.env.UE_CANONICAL_BOOTSTRAP_V2 !== '1') return false
+  if (process.env.AZURE_STORAGE_ACCOUNT_NAME !== 'devstoreaccount1') return false
+  try {
+    const url = new URL(override)
+    return url.protocol === 'http:' && (url.hostname === '127.0.0.1' || url.hostname === 'localhost')
+  } catch {
+    return false
+  }
+}
+
 function blobEndpoint(): string {
   const override = process.env.AZURE_STORAGE_BLOB_ENDPOINT
   if (override) {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && !ownedFixtureEmulator(override)) {
       throw new Error('AZURE_STORAGE_BLOB_ENDPOINT is not permitted in production')
     }
     return override.replace(/\/+$/, '')

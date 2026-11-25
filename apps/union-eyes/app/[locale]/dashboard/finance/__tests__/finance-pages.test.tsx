@@ -140,7 +140,8 @@ describe('finance invoices page', () => {
   it('shows the route\'s message and a retry, never "no invoices", when the list cannot be read', async () => {
     stubFetch(() => reply(failure('INTERNAL_ERROR', 'Failed to fetch invoices'), 500))
     renderPage(<InvoicesPage />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch invoices')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load invoices')
+    expect(document.body).not.toHaveTextContent('Failed to fetch invoices');
     expect(screen.queryByText(enCA.financeInvoicesPage.empty)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: enCA.common.retry })).toBeInTheDocument()
   })
@@ -182,7 +183,8 @@ describe('finance invoice detail page', () => {
     stubFetch((url) => (url.endsWith('/payments') ? reply(failure('INTERNAL_ERROR', 'Failed to fetch payments'), 500) : reply(success(detail))))
     await renderDetail()
     expect(await screen.findByText('INV-2026-0007')).toBeInTheDocument()
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch payments')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load payments')
+    expect(document.body).not.toHaveTextContent('Failed to fetch payments');
     expect(screen.queryByText(enCA.financeInvoiceDetailPage.noPaymentsRecorded)).not.toBeInTheDocument()
   })
 
@@ -247,7 +249,8 @@ describe('finance allocation page', () => {
   it('shows the route\'s message and a retry, not "no rules", when the rules cannot be read', async () => {
     stubFetch(() => reply(failure('INTERNAL_ERROR', 'Failed to fetch allocation rules'), 500))
     renderPage(<AllocationPage />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch allocation rules')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load allocation rules')
+    expect(document.body).not.toHaveTextContent('Failed to fetch allocation rules');
     expect(screen.queryByText(enCA.financeAllocationPage.rules.empty)).not.toBeInTheDocument()
   })
 

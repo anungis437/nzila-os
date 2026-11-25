@@ -1,3 +1,4 @@
+import { isCaseDocumentLinkType } from '@/lib/documents/case-link';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { documents, documentLinks } from '@/db/schema/documents-schema';
@@ -85,7 +86,6 @@ export async function findPrecedentDocuments(params: {
       name: documents.name,
       privacyLabel: documents.privacyLabel,
       documentType: documents.documentType,
-      fileUrl: documents.fileUrl,
       updatedAt: documents.updatedAt,
       linkedEntityType: documentLinks.linkedEntityType,
       linkedEntityId: documentLinks.linkedEntityId,
@@ -101,7 +101,7 @@ export async function findPrecedentDocuments(params: {
   const candidatePool = rawCandidates.filter((candidate) => {
     const tagSet = new Set((candidate.tags ?? []).map((tag) => tag.toLowerCase()));
     return (
-      (candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)) ||
+      (isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)) ||
       (candidate.linkedEntityType === 'collective_agreement' && candidate.linkedEntityId === currentCase.cbaId) ||
       tagSet.has('template') ||
       tagSet.has('precedent')
@@ -116,6 +116,7 @@ export async function findPrecedentDocuments(params: {
       privacyLabel: candidate.privacyLabel,
       linkedEntityType: candidate.linkedEntityType,
       linkedEntityId: candidate.linkedEntityId,
+      uploadedBy: candidate.uploadedBy,
     })),
   });
   const authorizedIds = new Set(authorizedDocs.map((doc) => doc.id));
@@ -136,8 +137,8 @@ export async function findPrecedentDocuments(params: {
         `${currentCase.title} ${currentCase.description} ${currentCase.awardSummary ?? ''}`,
         `${titleForDocument(candidate)} ${(candidate.tags ?? []).join(' ')}`,
       ),
-      patternSimilarity: candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId) ? 0.8 : 0.2,
-      usedInSimilarCase: Boolean(candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)),
+      patternSimilarity: isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId) ? 0.8 : 0.2,
+      usedInSimilarCase: Boolean(isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)),
       isTemplateCandidate: tagSet.has('template') || tagSet.has('precedent'),
     });
 
@@ -176,7 +177,6 @@ export async function findPrecedentDocuments(params: {
         patternSimilarity: Number(features.patternSimilarity.toFixed(3)),
       },
       documentType: candidate.documentType,
-      fileUrl: candidate.fileUrl,
       linkedEntities: [
         candidate.linkedEntityId ? `${candidate.linkedEntityType}:${candidate.linkedEntityId}` : null,
         ...(candidate.tags ?? []).map((tag) => `tag:${tag}`),

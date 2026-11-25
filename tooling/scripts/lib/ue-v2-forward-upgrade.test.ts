@@ -5,11 +5,14 @@ import {
   planCanonicalForwardUpgrade,
   splitUpgradeDump,
   canonicalFunctionOwnerHandoff,
+  canonicalFunctionReplacementRole,
   type UpgradeObject,
 } from './ue-v2-forward-upgrade'
 import {
   assertForwardOperator,
   assertCanonicalFunctionOwnerStatement,
+  assertCanonicalFunctionReplacementStatement,
+  assertCanonicalFunctionReplacementMembership,
   executeForwardUpgrade,
   normalizeForwardCatalog,
   forwardUpgradeFailure,
@@ -76,9 +79,12 @@ const section = (type: string, name: string, sql: string) =>
   `-- Name: ${name}; Type: ${type}; Schema: public; Owner: ue_v2_owner\n--\n${sql}\n`
 
 test('only the exact default owner-only sequence ACL equals NULL permission storage', () => {
-  const sequence = (acl: string | null) => object('relation', 'public.original_sequence', {
-    kind: 'S', owner: 'ue_v2_owner', acl,
-  })
+  const sequence = (acl: string | null) =>
+    object('relation', 'public.original_sequence', {
+      kind: 'S',
+      owner: 'ue_v2_owner',
+      acl,
+    })
   const implicit = normalizeForwardCatalog([sequence(null)])
   assert.deepEqual(normalizeForwardCatalog([sequence('{ue_v2_owner=rwU/ue_v2_owner}')]), implicit)
   for (const acl of [
@@ -86,9 +92,12 @@ test('only the exact default owner-only sequence ACL equals NULL permission stor
     '{ue_v2_owner=rwU/uev2admin}',
     '{ue_v2_owner=rwU/ue_v2_owner,=U/ue_v2_owner}',
     '{ue_v2_owner=rwU/ue_v2_owner,union_eyes_runtime=U/ue_v2_owner}',
-  ]) assert.notDeepEqual(normalizeForwardCatalog([sequence(acl)]), implicit)
+  ])
+    assert.notDeepEqual(normalizeForwardCatalog([sequence(acl)]), implicit)
   assert.notDeepEqual(
-    normalizeForwardCatalog([object('function', 'guard()', { owner: 'ue_v2_owner', acl: '{ue_v2_owner=X/ue_v2_owner}' })]),
+    normalizeForwardCatalog([
+      object('function', 'guard()', { owner: 'ue_v2_owner', acl: '{ue_v2_owner=X/ue_v2_owner}' }),
+    ]),
     normalizeForwardCatalog([object('function', 'guard()', { owner: 'ue_v2_owner', acl: null })]),
   )
 })
@@ -96,8 +105,14 @@ test('only the exact default owner-only sequence ACL equals NULL permission stor
 test('managed-catalog failure receipts retain the reason and omit assertion data and unclassified errors', () => {
   const reason = 'MANAGED_CATALOG_DEFINITION_DRIFT:relation:public.original_sequence'
   assert.equal(forwardUpgradeFailure(new Error(reason + '\nprivate assertion diff')), reason)
-  assert.equal(forwardUpgradeFailure(new Error('database connection password=private')), 'UE_UPGRADE_EXECUTION_REFUSED')
-  assert.equal(forwardUpgradeFailure(new Error('UE_UPGRADE_ORIGINAL_ROWS_CHANGED\nprivate row data')), 'UE_UPGRADE_ORIGINAL_ROWS_CHANGED')
+  assert.equal(
+    forwardUpgradeFailure(new Error('database connection password=private')),
+    'UE_UPGRADE_EXECUTION_REFUSED',
+  )
+  assert.equal(
+    forwardUpgradeFailure(new Error('UE_UPGRADE_ORIGINAL_ROWS_CHANGED\nprivate row data')),
+    'UE_UPGRADE_ORIGINAL_ROWS_CHANGED',
+  )
   assert.equal(forwardUpgradeFailure(null), 'UE_UPGRADE_UNKNOWN_FAILURE')
 })
 
@@ -323,4 +338,198 @@ test('an undeclared obsolete function cannot be dropped as cleanup', async () =>
     }),
     /OBSOLETE_FUNCTION_REFUSED/,
   )
+})
+
+const readerRole = object('role', 'ue_external_read_reader', {
+  superuser: false,
+  bypassrls: false,
+  login: false,
+  createrole: false,
+  createdb: false,
+  inherit: false,
+})
+const readerFunction = (body: string, owner = 'ue_external_read_reader') =>
+  object('function', 'protected(jsonb)', {
+    owner,
+    definer: true,
+    config: ['search_path=pg_catalog'],
+    acl: '{ue_external_read_reader=X/ue_external_read_reader}',
+    definition: `CREATE OR REPLACE FUNCTION public.protected(p jsonb) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path TO pg_catalog AS $function$ BEGIN RETURN ${body}; END; $function$;`,
+  })
+const readerDump = (sql: string) =>
+  section('FUNCTION', 'protected(jsonb)', sql).replace(
+    'Owner: ue_v2_owner',
+    'Owner: ue_external_read_reader',
+  )
+
+test('an existing isolated-reader function is replaced as its unchanged canonical owner through SET authority', async () => {
+  const before = [...roles, readerRole, readerFunction('false')]
+  const after = [...roles, readerRole, readerFunction('true')]
+  const plan = await planCanonicalForwardUpgrade({
+    before,
+    after,
+    dump: readerDump(
+      'CREATE FUNCTION public.protected(p jsonb) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path TO pg_catalog AS $$ BEGIN RETURN true; END; $$; ALTER FUNCTION public.protected(p jsonb) OWNER TO ue_external_read_reader;',
+    ),
+  })
+  const statements = plan.filter((statement) => statement.phase === 'function')
+  assert.equal(statements.length, 2)
+  assert(statements.every((statement) => statement.role === 'ue_external_read_reader'))
+  assert(!plan.some((statement) => statement.phase === 'canonical-function-owner'))
+  for (const statement of statements)
+    await assertCanonicalFunctionReplacementStatement(statement, { before, target: after })
+})
+
+test('new isolated-reader functions retain owner-first creation and deferred owner handoff', async () => {
+  const before = [...roles, readerRole]
+  const after = [...before, readerFunction('true')]
+  const plan = await planCanonicalForwardUpgrade({
+    before,
+    after,
+    dump: readerDump(
+      'CREATE FUNCTION public.protected(p jsonb) RETURNS boolean LANGUAGE plpgsql AS $$ BEGIN RETURN true; END; $$; ALTER FUNCTION public.protected(p jsonb) OWNER TO ue_external_read_reader;',
+    ),
+  })
+  assert(plan.find((statement) => statement.phase === 'function')?.role === undefined)
+  assert.equal(plan.filter((statement) => statement.phase === 'isolated-owner-handoff').length, 1)
+})
+
+test('replacement owner cannot be unknown, changed, undeclared or privileged', () => {
+  for (const owner of ['azuresu', 'arbitrary_reader', 'union_eyes_runtime'])
+    assert.throws(
+      () =>
+        canonicalFunctionReplacementRole(
+          readerFunction('false', owner),
+          readerFunction('true', owner),
+          [...roles, readerRole, object('role', owner)],
+        ),
+      /OWNER_REFUSED/,
+    )
+  assert.throws(
+    () =>
+      canonicalFunctionReplacementRole(
+        readerFunction('false'),
+        readerFunction('true', 'ue_v2_owner'),
+        [...roles, readerRole],
+      ),
+    /OWNER_CHANGED/,
+  )
+  assert.throws(
+    () =>
+      canonicalFunctionReplacementRole(
+        readerFunction('false'),
+        { ...readerFunction('true'), id: 'another(jsonb)' },
+        [...roles, readerRole],
+      ),
+    /IDENTITY_REFUSED/,
+  )
+  assert.throws(
+    () => canonicalFunctionReplacementRole(readerFunction('false'), readerFunction('true'), roles),
+    /ROLE_UNDECLARED/,
+  )
+  for (const attribute of ['superuser', 'bypassrls', 'login', 'createrole', 'createdb', 'inherit'])
+    assert.throws(
+      () =>
+        canonicalFunctionReplacementRole(readerFunction('false'), readerFunction('true'), [
+          ...roles,
+          { ...readerRole, definition: { ...readerRole.definition, [attribute]: true } },
+        ]),
+      /ROLE_PRIVILEGED/,
+    )
+})
+
+test('private-owner statement capability refuses another function, body, attributes, extra SQL or actor', async () => {
+  const before = [...roles, readerRole, readerFunction('false')],
+    target = [...roles, readerRole, readerFunction('true')]
+  const statement = {
+    phase: 'function',
+    object: 'protected(jsonb)',
+    role: 'ue_external_read_reader',
+    sql: String(readerFunction('true').definition.definition),
+  }
+  await assertCanonicalFunctionReplacementStatement(statement, { before, target })
+  for (const delta of [
+    { sql: statement.sql.replace('public.protected', 'public.other') },
+    { sql: statement.sql.replace('RETURN true', 'RETURN false') },
+    { sql: statement.sql.replace('SECURITY DEFINER', 'SECURITY INVOKER') },
+    { sql: statement.sql.replace('TO pg_catalog', 'TO public') },
+    { sql: statement.sql + ' SELECT true;' },
+    { role: 'ue_v2_owner' },
+    { object: 'other(jsonb)' },
+    { phase: 'target-acl' },
+    { sql: 'ALTER FUNCTION public.protected(jsonb) OWNER TO ue_v2_owner' },
+  ])
+    await assert.rejects(
+      assertCanonicalFunctionReplacementStatement({ ...statement, ...delta }, { before, target }),
+      /UE_UPGRADE_FUNCTION_REPLACEMENT_/,
+    )
+})
+
+test('a catalog identity cannot authorize a target definition for a different function or overload', async () => {
+  const before = [...roles, readerRole, readerFunction('false')]
+  for (const definition of [
+    String(readerFunction('true').definition.definition).replace(
+      'public.protected',
+      'public.other',
+    ),
+    String(readerFunction('true').definition.definition).replace('p jsonb', 'p text'),
+  ]) {
+    const target = [
+      ...roles,
+      readerRole,
+      {
+        ...readerFunction('true'),
+        definition: { ...readerFunction('true').definition, definition },
+      },
+    ]
+    await assert.rejects(
+      assertCanonicalFunctionReplacementStatement(
+        {
+          phase: 'function',
+          object: 'protected(jsonb)',
+          role: 'ue_external_read_reader',
+          sql: definition,
+        },
+        { before, target },
+      ),
+      /DEFINITION_IDENTITY_REFUSED/,
+    )
+  }
+})
+
+test('private-owner SET membership must already exist; it is never manufactured on refusal', async () => {
+  for (const allowed of [false, null, undefined]) {
+    const calls: unknown[][] = []
+    const client = {
+      query: async (...args: unknown[]) => {
+        calls.push(args)
+        return { rows: [{ allowed, isolated: true }] }
+      },
+    } as unknown as Pick<pg.Client, 'query'>
+    await assert.rejects(
+      assertCanonicalFunctionReplacementMembership(client, 'ue_external_read_reader'),
+      /MEMBERSHIP_REQUIRED/,
+    )
+    assert.equal(calls.length, 1)
+    assert.match(String(calls[0][0]), /^SELECT pg_has_role/)
+  }
+  for (const isolated of [false, null, undefined]) {
+    const calls: unknown[][] = []
+    const client = {
+      query: async (...args: unknown[]) => {
+        calls.push(args)
+        return { rows: [{ allowed: true, isolated }] }
+      },
+    } as unknown as Pick<pg.Client, 'query'>
+    await assert.rejects(
+      assertCanonicalFunctionReplacementMembership(client, 'ue_external_read_reader'),
+      /ROLE_PRIVILEGED/,
+    )
+    assert.equal(calls.length, 1)
+    assert.match(String(calls[0][0]), /rolreplication OR rolinherit/)
+  }
+  const client = {
+    query: async () => ({ rows: [{ allowed: true, isolated: true }] }),
+  } as unknown as Pick<pg.Client, 'query'>
+  await assertCanonicalFunctionReplacementMembership(client, 'ue_external_read_reader')
 })

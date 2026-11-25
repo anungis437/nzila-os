@@ -1,4 +1,5 @@
 import { appendFileSync, mkdirSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { ownedRuntimeOperatorUrl, runtimeFixtureAuthPath } from './fixture-auth'
 import pg from 'pg'
@@ -16,7 +17,11 @@ export interface FilingEvidence {
     previous_hash: string | null
   }>
   /** V2: the signed decision proofs in the canonical tenant audit chain (canonical-nar-proof.ts). */
-  canonicalProofs: Array<{ proof_storage: string | null; seal_hash: string | null; signature: string | null }>
+  canonicalProofs: Array<{
+    proof_storage: string | null
+    seal_hash: string | null
+    signature: string | null
+  }>
 }
 
 export async function inspectFiling(
@@ -70,6 +75,136 @@ async function withApp<T>(work: (client: pg.Client) => Promise<T>): Promise<T> {
 }
 
 const QA_CASE = /^aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa[12]$/
+
+export interface QaClaimClosureSnapshot {
+  claim: {
+    id: string
+    status: string
+    closed_at: string | null
+    resolved_at: string | null
+    status_changed_at: string | null
+    write_xid: string
+  }
+  transitions: Array<{
+    id: string
+    from_status: string
+    to_status: string
+    changed_by: string
+    transaction_id: string
+    write_xid: string
+  }>
+  history: Array<{
+    id: string
+    transition_id: string
+    created_by: string
+    message: string
+    metadata: Record<string, unknown>
+    is_internal: boolean
+    visibility_scope: string
+    write_xid: string
+  }>
+  audit: Array<{
+    id: string
+    user_id: string
+    details: Record<string, unknown>
+    content_hash: string
+    previous_hash: string | null
+    write_xid: string
+  }>
+}
+
+/** Privileged fixture preparation/readback only, outside application runtime.
+ * Both the exact seeded case and the private loopback database are mandatory.
+ * The HTTP journey still performs every application transition itself. */
+export async function createQaClaimClosureProbe(claimId: string) {
+  if (!QA_CASE.test(claimId)) throw new Error('Exact seeded QA closure case required')
+  const organizationId = '11111111-1111-4111-8111-111111111111'
+  const memberId = 'ue-qa-member-primary'
+  const failpoint = `ue_runtime_closure_audit_${randomUUID().replaceAll('-', '')}`
+  const db = new pg.Client({ connectionString: ownedRuntimeOperatorUrl() })
+  let closed = false
+  const snapshot = async (): Promise<QaClaimClosureSnapshot> => {
+    const claim = (
+      await db.query<QaClaimClosureSnapshot['claim']>(
+        `SELECT id, status, closed_at::text, resolved_at::text, status_changed_at::text, xmin::text AS write_xid
+           FROM public.claims WHERE claim_id=$1 AND organization_id=$2 AND member_id=$3`,
+        [claimId, organizationId, memberId],
+      )
+    ).rows[0]
+    if (!claim) throw new Error('Exact owned QA closure case must exist')
+    const transitions = (
+      await db.query<QaClaimClosureSnapshot['transitions'][number]>(
+        `SELECT id, from_status, to_status, changed_by, transaction_id::text, xmin::text AS write_xid
+           FROM public.claim_status_transitions WHERE claim_id=$1 AND organization_id=$2 ORDER BY id`,
+        [claim.id, organizationId],
+      )
+    ).rows
+    const history = (
+      await db.query<QaClaimClosureSnapshot['history'][number]>(
+        `SELECT id, transition_id, created_by, message, metadata, is_internal, visibility_scope, xmin::text AS write_xid
+           FROM public.claim_updates WHERE claim_id=$1 AND update_type='status_change' ORDER BY id`,
+        [claim.id],
+      )
+    ).rows
+    const audit = (
+      await db.query<QaClaimClosureSnapshot['audit'][number]>(
+        `SELECT id, user_id, details, content_hash, previous_hash, xmin::text AS write_xid
+           FROM public.audit_logs WHERE organization_id=$1 AND resource_id=$2 AND action='case.transition' ORDER BY id`,
+        [organizationId, claimId],
+      )
+    ).rows
+    return { claim, transitions, history, audit }
+  }
+  const removeAuditFailure = async () => {
+    // Exact random fixture-owned identifiers make cleanup idempotent even if a
+    // setup statement committed before its response was lost.
+    await db.query(`DROP TRIGGER IF EXISTS "${failpoint}" ON public.audit_logs`)
+    await db.query(`DROP FUNCTION IF EXISTS public."${failpoint}"()`)
+  }
+  try {
+    await db.connect()
+    await snapshot()
+  } catch (error) {
+    await db.end().catch(() => undefined)
+    throw error
+  }
+  return {
+    snapshot,
+    async installAuditFailure() {
+      await snapshot()
+      await db.query(`CREATE FUNCTION public."${failpoint}"() RETURNS trigger LANGUAGE plpgsql AS $body$
+        BEGIN
+          IF NEW.organization_id='${organizationId}'::uuid AND NEW.resource_id='${claimId}' AND NEW.action='case.transition'
+            AND NEW.details->>'from'='resolved' AND NEW.details->>'to'='closed'
+          THEN RAISE EXCEPTION 'OWNED_QA_CLOSURE_AUDIT_FAILURE'; END IF;
+          RETURN NEW;
+        END $body$`)
+      await db.query(
+        `CREATE TRIGGER "${failpoint}" BEFORE INSERT ON public.audit_logs FOR EACH ROW EXECUTE FUNCTION public."${failpoint}"()`,
+      )
+    },
+    removeAuditFailure,
+    async failureObjects() {
+      return (
+        await db.query<{ triggers: number; functions: number }>(
+          `SELECT (SELECT count(*)::int FROM pg_trigger WHERE tgrelid='public.audit_logs'::regclass AND tgname=$1) AS triggers,
+             (SELECT count(*)::int FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+              WHERE n.nspname='public' AND p.proname=$1 AND p.pronargs=0) AS functions`,
+          [failpoint],
+        )
+      ).rows[0]
+    },
+    async close() {
+      if (closed) return
+      try {
+        await removeAuditFailure()
+      } finally {
+        closed = true
+        await db.end()
+      }
+    },
+  }
+}
 
 /** Returns a seeded QA case to its seeded state so a journey is repeatable. Refuses any case that is not a QA fixture. */
 export async function resetQaCase(claimId: string): Promise<void> {
@@ -266,4 +401,15 @@ export async function testimonialState(
     const row = (await db.query('SELECT visibility FROM testimonials WHERE id = $1', [id])).rows[0]
     return { exists: Boolean(row), visibility: row?.visibility ?? null }
   })
+}
+
+/**
+ * Read or change persisted fixture state through the owned operator. Specs call this instead of importing a database
+ * driver: the operator URL is accepted only for the canonical loopback fixture, and a missing or foreign credential throws.
+ */
+export async function queryOwnedRuntime<T extends pg.QueryResultRow = pg.QueryResultRow>(
+  text: string,
+  values: readonly unknown[] = [],
+): Promise<T[]> {
+  return withApp(async (client) => (await client.query<T>(text, [...values])).rows)
 }

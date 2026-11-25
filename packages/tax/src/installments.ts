@@ -18,13 +18,14 @@ export const INSTALLMENT_THRESHOLD = 3_000
  * Input for installment calculation.
  */
 export interface InstallmentInput {
-  /** Federal + provincial tax for the current tax year (estimate) */
+  /** Current-year tax for one CRA instalment basis. Test federal and provincial
+   * obligations separately; provincial Quebec/Alberta tax is not in the CRA basis. */
   estimatedCurrentYearTax: number
-  /** Federal + provincial tax for the immediately prior tax year */
+  /** Immediately preceding-year tax on that same instalment basis */
   priorYearTax: number
-  /** Federal + provincial tax for 2 years ago */
+  /** Two-years-prior tax on the same separately tested instalment basis */
   priorPriorYearTax?: number
-  /** Months in the tax year (default 12) */
+  /** Full 12-month year only; short-year schedules are not supported. */
   monthsInYear?: number
   /** Whether this is a CCPC qualifying for quarterly installments */
   isSmallCcpc?: boolean
@@ -44,7 +45,8 @@ export interface InstallmentResult {
   frequency: 'monthly' | 'quarterly' | 'none'
   /** Number of installment payments */
   numberOfPayments: number
-  /** Amount per installment (using most favorable method) */
+  /** Scalar illustration: first payment for the recommended method. The reduced
+   * method has uneven later payments that this result does not expose. */
   amountPerPayment: number
   /** Total installment obligation for the year */
   totalObligation: number
@@ -59,7 +61,7 @@ export interface InstallmentResult {
     /** Which method produces the lowest total */
     recommended: 'currentYear' | 'priorYear' | 'reduced'
   }
-  /** Due dates for each installment (last day of each month) */
+  /** Nominal due dates before weekend/public-holiday extensions */
   dueDates: string[]
 }
 
@@ -77,15 +79,16 @@ export function calculateInstallments(
   taxYear: number,
 ): InstallmentResult {
   const months = input.monthsInYear ?? 12
+  if (months !== 12) throw new RangeError('Short-year instalment schedules require a separate verified calculation')
   const isQuarterly = input.isSmallCcpc ?? false
   const frequency = isQuarterly ? 'quarterly' : 'monthly'
   const numPayments = isQuarterly ? 4 : months
 
   // ── Check threshold ──
-  if (input.priorYearTax <= INSTALLMENT_THRESHOLD && input.estimatedCurrentYearTax <= INSTALLMENT_THRESHOLD) {
+  if (input.priorYearTax <= INSTALLMENT_THRESHOLD || input.estimatedCurrentYearTax <= INSTALLMENT_THRESHOLD) {
     return {
       required: false,
-      reason: `Both current estimate ($${input.estimatedCurrentYearTax}) and prior year tax ($${input.priorYearTax}) are at or below the $${INSTALLMENT_THRESHOLD} threshold`,
+      reason: `Current estimate ($${input.estimatedCurrentYearTax}) or prior year tax ($${input.priorYearTax}) is at or below the $${INSTALLMENT_THRESHOLD} threshold`,
       rule: 'ITA s.157(2.1): No installments required if tax ≤ $3,000',
       frequency: 'none',
       numberOfPayments: 0,
@@ -114,13 +117,13 @@ export function calculateInstallments(
     if (isQuarterly) {
       // First payment: prior-prior / 4, remaining 3: (prior - first) / 3
       const first = Math.round((input.priorPriorYearTax / 4) * 100) / 100
-      const rest = Math.round(((input.priorYearTax - first) / 3) * 100) / 100
+      const rest = Math.max(0, Math.round(((input.priorYearTax - first) / 3) * 100) / 100)
       reducedPerPayment = first // show the first payment amount
       reducedTotal = first + rest * 3
     } else {
       // First 2 months: prior-prior / 12, remaining 10: (prior - first 2 total) / 10
       const firstTwo = Math.round((input.priorPriorYearTax / 12) * 100) / 100
-      const remaining = Math.round(((input.priorYearTax - firstTwo * 2) / 10) * 100) / 100
+      const remaining = Math.max(0, Math.round(((input.priorYearTax - firstTwo * 2) / 10) * 100) / 100)
       reducedPerPayment = firstTwo
       reducedTotal = firstTwo * 2 + remaining * 10
     }
@@ -149,17 +152,20 @@ export function calculateInstallments(
         : reducedPerPayment!
 
   // ── Generate due dates ──
-  const [mm, dd] = fiscalYearEnd.split('-').map(Number)
-  const fyeDate = new Date(taxYear, mm - 1, dd)
+  // Nominal dates only, before applicable weekend/public-holiday extensions.
+  // CRA: https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/corporation-payments/paying-instalments/instalment-dates.html
+  const match = /^(?:\d{4}-)?(\d{2})-(\d{2})$/.exec(fiscalYearEnd)
+  if (!match) throw new RangeError('Fiscal year end must be MM-DD or YYYY-MM-DD')
+  const [, mm, dd] = match.map(Number)
+  const fye = new Date(Date.UTC(taxYear, mm - 1, dd))
+  if (fye.getUTCMonth() !== mm - 1 || fye.getUTCDate() !== dd) throw new RangeError('Invalid fiscal year end')
+  const monthEnd = new Date(Date.UTC(taxYear, mm, 0)).getUTCDate() === dd
   const dueDates: string[] = []
-
+  const step = isQuarterly ? 3 : 1
   for (let i = 0; i < numPayments; i++) {
-    const step = isQuarterly ? 3 : 1
-    const d = new Date(fyeDate)
-    d.setMonth(d.getMonth() - (months - 1) + i * step)
-    // Last day of the month
-    const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0)
-    dueDates.push(lastDay.toISOString().split('T')[0])
+    const target = new Date(Date.UTC(taxYear, mm - 1 - (months - step) + i * step + 1, 0))
+    if (!monthEnd) target.setUTCDate(Math.min(dd, target.getUTCDate()))
+    dueDates.push(target.toISOString().split('T')[0])
   }
 
   return {

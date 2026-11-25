@@ -97,7 +97,8 @@ describe('dues payment page', () => {
   it('shows the server\'s message when the transactions cannot be read', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500, json: async () => failure('INTERNAL_ERROR', 'The dues ledger could not be read') })))
     renderPage(<PaymentCheckoutPage />)
-    expect(await screen.findByText('The dues ledger could not be read')).toBeInTheDocument()
+    expect(await screen.findByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The dues ledger could not be read');
   })
 
   it('starts the payment with the body the route accepts and goes to the checkout address the route returns', async () => {
@@ -131,7 +132,8 @@ describe('dues payment page', () => {
     vi.stubGlobal('fetch', fetchMock)
     renderPage(<PaymentCheckoutPage />)
     fireEvent.click(await screen.findByRole('button', { name: new RegExp(enCA.duesPayPage.cardOptionTitle) }))
-    expect(await screen.findByText('Member dues payment is not enabled in this deployment')).toBeInTheDocument()
+    expect(await screen.findByText('Failed to create checkout session')).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('Member dues payment is not enabled in this deployment');
     expect(window.location.href).toBe('https://app.example/en-CA/dashboard/dues/pay/x')
   })
 

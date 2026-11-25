@@ -9,7 +9,7 @@ import {
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
-import { documents, documentLinks, documentVersions } from '@/db/schema/documents-schema';
+import { documents, documentVersions } from '@/db/schema/documents-schema';
 import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
 import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
@@ -17,6 +17,9 @@ import { intakeRefusal } from '@/lib/documents/intake-acceptance';
 import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { generateSasUrl } from '@/lib/blob-client';
 import { getDocumentMutabilityBlockReason } from '@/lib/services/document-retention-guard';
+import { allDocumentLinksWellFormed, readDocumentLinks } from '@/lib/documents/document-links';
+import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 
 // contentHash is a claim, not a fact: when supplied it must equal the SHA-256 the server computes from storage.
 // expectedVersionNo is the version the caller edited from; a newer version makes the request stale.
@@ -61,6 +64,53 @@ export const POST = withApi(
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid version payload', parsed.error.flatten());
   }
 
+  const doc = (
+    await withRLSContext({ organizationId }, async (tx) => {
+      const [found] = await tx
+        .select({ id: documents.id, metadata: documents.metadata, uploadedBy: documents.uploadedBy })
+        .from(documents)
+        .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
+        .limit(1);
+      if (!found) return null;
+      const links = await readDocumentLinks(tx, organizationId, documentId);
+      return allDocumentLinksWellFormed(links) ? found : null;
+    })
+  );
+
+  if (!doc) {
+    return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+  }
+
+  const mayVersionInTx = async (tx: RLSTx) => {
+    const [current] = await tx.select({ uploadedBy: documents.uploadedBy })
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`)).limit(1);
+    if (!current) return false;
+    const links = await readDocumentLinks(tx, organizationId, documentId);
+    if (!allDocumentLinksWellFormed(links)) return false;
+    // A new version replaces the file every linked case reads, so the actor needs that authority on each case the document is attached to.
+    let attachedToCase = false;
+    for (const link of links) {
+      const caseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId });
+      if (!caseId) continue;
+      attachedToCase = true;
+      const access = await getEffectiveCaseAccess({ organizationId, grievanceId: caseId, userId });
+      if (!(access.canViewCase && access.canModifyDocuments)) return false;
+    }
+    return attachedToCase || current.uploadedBy === userId;
+  };
+  if (!await withRLSContext({ organizationId }, mayVersionInTx)) {
+    return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+  }
+
+  const blockedReason = getDocumentMutabilityBlockReason({ metadata: doc.metadata });
+  if (blockedReason) {
+    return standardErrorResponse(
+      ErrorCode.CONFLICT,
+      `Document versioning blocked: ${blockedReason}`,
+    );
+  }
+
   let intakeId: string | null = null;
   let resolvedBlob;
   try {
@@ -72,14 +122,14 @@ export const POST = withApi(
       if (!check.ok) return intakeRefusal(check);
       if (check.replay) {
         const acceptedVersionId = check.intake.acceptedVersionId ?? '';
-        const [existing] = await withRLSContext({ organizationId }, (tx) =>
-          tx
-            .select()
-            .from(documentVersions)
-            .where(and(eq(documentVersions.id, acceptedVersionId), eq(documentVersions.organizationId, organizationId)))
-            .limit(1),
-        );
-        return existing ? standardSuccessResponse({ ...existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
+        const replay = await withRLSContext({ organizationId }, async (tx) => {
+          if (!await mayVersionInTx(tx)) return { kind: 'denied' as const };
+          const [existing] = await tx.select().from(documentVersions)
+            .where(and(eq(documentVersions.id, acceptedVersionId), eq(documentVersions.organizationId, organizationId), eq(documentVersions.documentId, documentId))).limit(1);
+          return { kind: 'allowed' as const, existing };
+        });
+        if (replay.kind === 'denied') return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+        return replay.existing ? standardSuccessResponse({ ...replay.existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
       }
       intakeId = check.intake.id;
       resolvedBlob = {
@@ -103,51 +153,14 @@ export const POST = withApi(
     );
   }
 
-  const doc = (
-    await withRLSContext({ organizationId }, (tx) =>
-      tx
-        .select({
-          id: documents.id,
-          metadata: documents.metadata,
-          uploadedBy: documents.uploadedBy,
-          linkedEntityType: documentLinks.linkedEntityType,
-          linkedEntityId: documentLinks.linkedEntityId,
-        })
-        .from(documents)
-        .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
-        .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`))
-        .limit(1),
-    )
-  )[0];
-
-  if (!doc) {
-    return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
-  }
-
-  // Replacing a document's content is an authority, not a membership: the document's own uploader, or the kernel's
-  // document-modification decision on the grievance it is linked to. Another member's, or another case's, is not.
-  let mayVersion = doc.uploadedBy === userId;
-  if (doc.linkedEntityType === 'grievance' && doc.linkedEntityId) {
-    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: doc.linkedEntityId, userId });
-    mayVersion = access.canModifyDocuments;
-  }
-  if (!mayVersion) {
-    return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
-  }
-
-  const blockedReason = getDocumentMutabilityBlockReason({ metadata: doc.metadata });
-  if (blockedReason) {
-    return standardErrorResponse(
-      ErrorCode.CONFLICT,
-      `Document versioning blocked: ${blockedReason}`,
-    );
-  }
-
   // The new version, the document's current file and the audit record commit together. The document row is locked
   // first, so the stale-base check, the blob-reuse check and the append all judge the same state.
   let outcome;
   try {
   outcome = await withRLSContext({ organizationId }, async (tx) => {
+    // Re-enter the kernel in this same write transaction after all storage I/O.
+    // Kernel authority locks precede the mutable document lock.
+    if (!await mayVersionInTx(tx)) return { kind: 'not_found' as const };
     const [locked] = await tx
       .select({ metadata: documents.metadata })
       .from(documents)

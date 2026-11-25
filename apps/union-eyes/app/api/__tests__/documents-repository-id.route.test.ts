@@ -138,6 +138,7 @@ describe('documents/repository/[id] route', () => {
     m.selectQueue.push(
       [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc' }],
       [],
+      [],
       [{ id: 'v1', versionNo: 2 }],
     );
 
@@ -147,10 +148,28 @@ describe('documents/repository/[id] route', () => {
     expect(json.data.versions).toHaveLength(1);
   });
 
+  it('GET never reads or returns the stored file address; the file comes only through an audited download link', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc' }],
+      [],
+      [],
+      [],
+    );
+
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
+    const projections = mockTx.select.mock.calls.map(([projection]: [Record<string, unknown> | undefined]) => Object.keys(projection ?? {}));
+
+    expect(response.status).toBe(200);
+    expect(projections.flat()).not.toContain('fileUrl');
+    expect(JSON.stringify(await response.json())).not.toMatch(/fileUrl|blob\.core\.windows|sig=/);
+  });
+
   it('GET names the uploader of the document and of each version for a representative', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push(
       [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc', uploadedBy: 'u-doc' }],
+      [],
       [],
       [{ id: 'v2', versionNo: 2, uploadedBy: 'u-v2' }, { id: 'v1', versionNo: 1, uploadedBy: 'u-gone' }],
     );
@@ -173,6 +192,7 @@ describe('documents/repository/[id] route', () => {
     m.selectQueue.push(
       [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc', uploadedBy: 'u-doc' }],
       [],
+      [],
       [{ id: 'v1', versionNo: 1, uploadedBy: 'u-v1' }],
     );
 
@@ -185,12 +205,13 @@ describe('documents/repository/[id] route', () => {
     expect(json.data.versions[0]).not.toHaveProperty('uploadedByName');
   });
 
-  it('GET decides a case-linked document with the case kernel, for the caller of the organization', async () => {
+  it.each(['case', 'grievance'])('GET decides a %s-linked document with the same organization/caller case kernel', async (linkType) => {
     const { GET } = await loadRoute();
     caller.userId = 'u7';
     m.selectQueue.push(
-      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: 'grievance', linkedEntityId: CASE, title: 'Doc' }],
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', title: 'Doc' }],
       [],
+      [{ linkedEntityType: linkType, linkedEntityId: CASE }],
       [],
     );
 
@@ -242,9 +263,12 @@ describe('documents/repository/[id] route', () => {
     expect(mockTx.update).not.toHaveBeenCalled();
   });
 
-  it('PATCH returns 403 when the caller is not the primary owner of the linked case', async () => {
+  it.each(['case', 'grievance'])('PATCH refuses a %s-linked label change without primary case ownership', async (linkType) => {
     const { PATCH } = await loadRoute();
-    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType: 'grievance', linkedEntityId: CASE }]);
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {} }],
+      [{ linkedEntityType: linkType, linkedEntityId: CASE }],
+    );
     m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false });
 
     const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
@@ -267,7 +291,10 @@ describe('documents/repository/[id] route', () => {
 
   it('PATCH updates label and returns the updated document, audited in the same transaction', async () => {
     const { PATCH } = await loadRoute();
-    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType: 'grievance', linkedEntityId: CASE }]);
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {} }],
+      [{ linkedEntityType: 'grievance', linkedEntityId: CASE }],
+    );
     m.updateReturningQueue.push([{ id: DOCUMENT, privacyLabel: 'team_confidential' }]);
 
     const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
@@ -288,4 +315,15 @@ describe('documents/repository/[id] route', () => {
 
     expect(response.status).toBe(500);
   });
+  it.each([['case', null], ['grievance', null], ['unknown', CASE], [null, CASE]])('never treats malformed %s/%s as an unlinked document', async (linkedEntityType, linkedEntityId) => {
+    const { GET, PATCH } = await loadRoute();
+    const row = { id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType, linkedEntityId };
+    m.selectQueue.push([row], [], [{ linkedEntityType, linkedEntityId }], [row], [{ linkedEntityType, linkedEntityId }]);
+    expect((await GET(get(DOCUMENT), params(DOCUMENT))).status).toBe(404);
+    expect((await PATCH(patch(DOCUMENT, {privacyLabel: 'public_internal'}), params(DOCUMENT))).status).toBe(404);
+    expect(mockTx.update).not.toHaveBeenCalled();
+    expect(m.isDocumentVisibleByPolicy).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
 });

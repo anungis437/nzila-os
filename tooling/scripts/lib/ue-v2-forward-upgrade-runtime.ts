@@ -16,9 +16,11 @@ import {
 } from '../../../apps/union-eyes/lib/operations/canonical-catalog-admission'
 import {
   canonicalFunctionOwnerHandoff,
+  canonicalFunctionReplacementRole,
   type UpgradeObject,
   type UpgradeStatement,
 } from './ue-v2-forward-upgrade'
+import { parseSql } from '../../../apps/union-eyes/scripts/lib/sql-census/parse'
 
 export interface ForwardUpgradeBundle {
   version: 1
@@ -63,6 +65,136 @@ export function assertCanonicalFunctionOwnerStatement(
     forwardDigest(expected),
     'UE_UPGRADE_FUNCTION_OWNER_STATEMENT_REFUSED',
   )
+}
+
+/** The additional SET authority is only for the exact existing function and
+ * its qualified owner/body, never arbitrary SQL under a private reader. */
+export async function assertCanonicalFunctionReplacementStatement(
+  statement: UpgradeStatement,
+  bundle: Pick<ForwardUpgradeBundle, 'before' | 'target'>,
+) {
+  assert.equal(statement.phase, 'function', 'UE_UPGRADE_FUNCTION_REPLACEMENT_PHASE_REFUSED')
+  const previous = bundle.before.find(
+    (object) => object.kind === 'function' && object.id === statement.object,
+  )
+  const target = bundle.target.find(
+    (object) => object.kind === 'function' && object.id === statement.object,
+  )
+  assert(previous && target, 'UE_UPGRADE_FUNCTION_REPLACEMENT_PREIMAGE_REQUIRED')
+  const role = canonicalFunctionReplacementRole(previous, target, bundle.target)
+  assert(role && statement.role === role, 'UE_UPGRADE_FUNCTION_REPLACEMENT_ACTOR_REFUSED')
+  const parsed = await parseSql(statement.sql)
+  assert(parsed.ok && parsed.statements.length === 1, 'UE_UPGRADE_FUNCTION_REPLACEMENT_SQL_REFUSED')
+  const node = parsed.statements[0]
+  const identity = /^(public|user_management)\./.test(statement.object)
+    ? statement.object
+    : `public.${statement.object}`
+  assert(
+    /^(?:public|user_management)\.[a-z_][a-z0-9_]*\([^;]*\)$/.test(identity),
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_SIGNATURE_REFUSED',
+  )
+  const identitySql = `ALTER FUNCTION ${identity} OWNER TO "${role}"`
+  const identityParsed = await parseSql(identitySql)
+  assert(
+    identityParsed.ok && identityParsed.statements.length === 1,
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_SIGNATURE_REFUSED',
+  )
+  const identityObject = identityParsed.statements[0].AlterOwnerStmt?.object?.ObjectWithArgs
+  assert(identityObject, 'UE_UPGRADE_FUNCTION_REPLACEMENT_SIGNATURE_REFUSED')
+  const withoutLocations = (value: unknown): unknown =>
+    Array.isArray(value)
+      ? value.map(withoutLocations)
+      : value && typeof value === 'object'
+        ? Object.fromEntries(
+            Object.entries(value)
+              .filter(([key]) => key !== 'location')
+              .map(([key, item]) => [key, withoutLocations(item)]),
+          )
+        : value
+  let expectedSql: string
+  if (node.CreateFunctionStmt) {
+    assert(
+      node.CreateFunctionStmt.replace === true,
+      'UE_UPGRADE_FUNCTION_REPLACEMENT_CREATE_REFUSED',
+    )
+    assert(
+      typeof target.definition.definition === 'string',
+      'UE_UPGRADE_FUNCTION_REPLACEMENT_DEFINITION_REQUIRED',
+    )
+    expectedSql = target.definition.definition
+  } else {
+    assert(node.AlterOwnerStmt, 'UE_UPGRADE_FUNCTION_REPLACEMENT_SQL_KIND_REFUSED')
+    expectedSql = identitySql
+  }
+  const expected = await parseSql(expectedSql)
+  assert(
+    expected.ok && expected.statements.length === 1,
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_TARGET_SQL_REFUSED',
+  )
+  if (node.CreateFunctionStmt) {
+    const create = expected.statements[0].CreateFunctionStmt
+    assert(create, 'UE_UPGRADE_FUNCTION_REPLACEMENT_TARGET_SQL_REFUSED')
+    // A catalog descriptor cannot lend its identity to a definition for a
+    // different function or overload. OUT/TABLE parameters are not identity
+    // arguments; IN/INOUT/VARIADIC parameter names are likewise not identity.
+    const argumentTypes = (create.parameters ?? [])
+      .filter(
+        (parameter: { FunctionParameter?: { mode?: string } }) =>
+          !['FUNC_PARAM_OUT', 'FUNC_PARAM_TABLE'].includes(parameter.FunctionParameter?.mode ?? ''),
+      )
+      .map((parameter: { FunctionParameter?: { argType?: unknown } }) => ({
+        TypeName: parameter.FunctionParameter?.argType,
+      }))
+    assert.equal(
+      forwardDigest(withoutLocations({ name: create.funcname, argumentTypes })),
+      forwardDigest(
+        withoutLocations({
+          name: identityObject.objname,
+          argumentTypes: identityObject.objargs ?? [],
+        }),
+      ),
+      'UE_UPGRADE_FUNCTION_REPLACEMENT_DEFINITION_IDENTITY_REFUSED',
+    )
+  }
+  const semantic = (value: unknown): unknown =>
+    Array.isArray(value)
+      ? value.map(semantic)
+      : value && typeof value === 'object'
+        ? Object.fromEntries(
+            Object.entries(value)
+              .filter(
+                ([key]) => key !== 'location' && !(node.AlterOwnerStmt && key === 'objfuncargs'),
+              )
+              .map(([key, item]) => [key, semantic(item)]),
+          )
+        : value
+  // ALTER OWNER resolves the identity argument types, not their optional names;
+  // objargs retains those types while objfuncargs only repeats them with names.
+  assert.equal(
+    forwardDigest(semantic(node)),
+    forwardDigest(semantic(expected.statements[0])),
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_STATEMENT_REFUSED',
+  )
+}
+
+export async function assertCanonicalFunctionReplacementMembership(
+  client: Pick<pg.Client, 'query'>,
+  role: string,
+) {
+  const rows = (
+    await client.query<{ allowed: boolean; isolated: boolean }>(
+      `SELECT pg_has_role(session_user,$1::text,'SET') AS allowed,
+        NOT (rolsuper OR rolbypassrls OR rolcanlogin OR rolcreatedb OR rolcreaterole
+          OR rolreplication OR rolinherit) AS isolated
+        FROM pg_roles WHERE rolname=$1::text`,
+      [role],
+    )
+  ).rows
+  assert(
+    rows.length === 1 && rows[0].allowed === true,
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_MEMBERSHIP_REQUIRED',
+  )
+  assert(rows[0].isolated === true, 'UE_UPGRADE_FUNCTION_REPLACEMENT_ROLE_PRIVILEGED')
 }
 
 const q = (s: string) => {
@@ -490,6 +622,10 @@ export async function executeForwardUpgrade(
     if (statement.phase === 'canonical-function-owner') {
       assertCanonicalFunctionOwnerStatement(statement, bundle)
       canonicalOwnerHandoff = true
+    }
+    if (statement.phase === 'function' && role !== 'ue_v2_owner') {
+      await assertCanonicalFunctionReplacementStatement(statement, bundle)
+      await assertCanonicalFunctionReplacementMembership(client, role)
     }
     const retainedFunctionOwner =
       bundle.before.some(

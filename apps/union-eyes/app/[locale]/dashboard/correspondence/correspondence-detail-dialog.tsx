@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ApiShapeError, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, failureDetail, failureLanguage, readApiFailure, readUserFailure } from "@/lib/client/api-envelope";
 import { renderTypedSignature } from "@/lib/correspondence/typed-signature";
 import {readCorrespondenceEmailStatus} from '@/lib/correspondence/email-status-client';
 import {
@@ -81,7 +81,7 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
     try {
       const response = await fetch(`/api/correspondence/${encodeURIComponent(letterId)}`, { cache: "no-store" });
       if (!response.ok) {
-        const message = await readApiError(response, "");
+        const message = failureDetail(await readApiFailure(response), failureLanguage(locale)) ?? "";
         setState(message ? { status: "failed", reason: "server", message } : { status: "failed", reason: "generic" });
         return;
       }
@@ -89,7 +89,7 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
     } catch (failure) {
       setState({ status: "failed", reason: failure instanceof ApiShapeError ? "unexpected" : "generic" });
     }
-  }, [letterId]);
+  }, [letterId, locale]);
 
   useEffect(() => {
     void load();
@@ -128,7 +128,7 @@ function LetterView({ letterId, viewer, onChanged, onClose }: { letterId: string
         body: payload === undefined ? undefined : JSON.stringify(payload),
       });
       if (!response.ok) {
-        setError(await readApiError(response, t("actions.failed")));
+        setError(await readUserFailure(response, t("actions.failed"), failureLanguage(locale)));
         return false;
       }
       if (response.status === 202 && path === '/dispatch') {
@@ -507,6 +507,7 @@ function NextStep({ letter, actions, viewer, working, send, onSignatureSaved }: 
 /** The signer's step: sign with a saved signature, or make one from a typed name first. */
 function SignStep({ letterWorking, send, onSignatureSaved }: { letterWorking: boolean; send: NextStepProps["send"]; onSignatureSaved: () => void }) {
   const t = useTranslations("correspondencePage");
+  const locale = useLocale();
   const [signatures, setSignatures] = useState<SavedSignature[] | null>(null);
   const [failure, setFailure] = useState<{ reason: "server"; message: string } | { reason: "unexpected" | "generic" } | null>(null);
   const [chosen, setChosen] = useState("");
@@ -519,7 +520,7 @@ function SignStep({ letterWorking, send, onSignatureSaved }: { letterWorking: bo
     try {
       const response = await fetch("/api/correspondence/signatures", { cache: "no-store" });
       if (!response.ok) {
-        const message = await readApiError(response, "");
+        const message = failureDetail(await readApiFailure(response), failureLanguage(locale)) ?? "";
         setFailure(message ? { reason: "server", message } : { reason: "generic" });
         return;
       }
@@ -529,7 +530,7 @@ function SignStep({ letterWorking, send, onSignatureSaved }: { letterWorking: bo
     } catch (error) {
       setFailure({ reason: error instanceof ApiShapeError ? "unexpected" : "generic" });
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     void loadSignatures();
@@ -546,7 +547,7 @@ function SignStep({ letterWorking, send, onSignatureSaved }: { letterWorking: bo
         body: JSON.stringify({ displayName: name.trim(), displayTitle: title.trim() || undefined, source: "typed", ...image }),
       });
       if (!response.ok) {
-        const message = await readApiError(response, "");
+        const message = failureDetail(await readApiFailure(response), failureLanguage(locale)) ?? "";
         setFailure(message ? { reason: "server", message } : { reason: "generic" });
         return;
       }

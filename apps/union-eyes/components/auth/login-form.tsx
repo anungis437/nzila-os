@@ -30,6 +30,25 @@ const DEFAULT_METHODS: MethodAvailability = {
   inviteRequired: false,
 };
 
+/** The auth routes state their refusals in English; each one we know is shown in the page language. */
+const SERVER_REFUSALS: Readonly<Record<string, 'invalidCredentials' | 'accountDeactivated' | 'accountLocked' | 'socialLoginOnly' | 'tooManyRequests' | 'tooManyMfaAttempts' | 'tooManyLinkAttempts' | 'softLockout' | 'codeRequired' | 'mfaNotEnabled' | 'linkInvalid' | 'challengeExpired' | 'invalidEmailAddress' | 'passwordRequired'>> = {
+  'Invalid email or password': 'invalidCredentials',
+  'Account is deactivated. Contact support.': 'accountDeactivated',
+  'Account is temporarily locked. Try again later.': 'accountLocked',
+  'This account uses social login. Please sign in with your provider.': 'socialLoginOnly',
+  'Too many requests. Please try again later.': 'tooManyRequests',
+  'Too many attempts — request a new sign-in': 'tooManyMfaAttempts',
+  'Too many attempts — request a new link': 'tooManyLinkAttempts',
+  'Invalid or expired challenge': 'challengeExpired',
+  'Invalid email address': 'invalidEmailAddress',
+  'Password is required': 'passwordRequired',
+  'For your security, please try again in a few minutes or contact support.': 'softLockout',
+  'Code or recovery code required': 'codeRequired',
+  'Challenge token missing': 'challengeExpired',
+  'MFA not enabled for this account': 'mfaNotEnabled',
+  'Invalid or expired link': 'linkInvalid',
+};
+
 const METHOD_KEYS = Object.keys(DEFAULT_METHODS) as (keyof MethodAvailability)[];
 
 /** The method answer holds every flag as a yes/no; one that does not is not "all methods off" (or on), it is an answer to report. */
@@ -95,7 +114,8 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
   const localizeMessage = useCallback((message: string) =>
     message === NETWORK_MESSAGE ? t('networkError') : message === UNEXPECTED_MESSAGE ? t('unexpectedError') :
       message === 'Invalid code' ? t('invalidCode') :
-        message === 'Organization authority denied' ? t('organizationAccessChanged') : message, [t]);
+        message === 'Organization authority denied' ? t('organizationAccessChanged') :
+          SERVER_REFUSALS[message] ? t(SERVER_REFUSALS[message]) : message, [t]);
 
   async function bindOrganization(id: string) {
     const answer = await postJson('/api/organizations/switch', { organizationId: id }, t('organizationSelectionFailed'));

@@ -50,6 +50,33 @@ export function envelopePages(body: unknown): number {
  * A body that names none gives the fallback. A screen never reads `body.error` itself: depending on the route it is a string, an object, or not there at all.
  */
 export function apiErrorMessage(body: unknown, fallback: string): string {
+  const stated = statedMessage(body);
+  return stated !== '' && !looksTechnical(stated) ? stated : fallback;
+}
+
+/**
+ * Whether a message reads as an implementation diagnostic rather than a sentence for a person: a stack frame, a source path, SQL or a database
+ * driver message, a connection string or a credential-shaped token, a thrown error class, a network error code, or text too long to be a sentence.
+ * Such text is never shown, whatever the status.
+ */
+export function looksTechnical(message: string): boolean {
+  return (
+    message.length > 300 ||
+    /[\r\n]/.test(message) ||
+    /\bat\s+\S+\s*\(.*:\d+:\d+\)|\bat\s+(?:async\s+)?\S+:\d+:\d+/.test(message) ||
+    /(?:^|[\s("'])(?:\/|[A-Za-z]:\\)(?:[\w.@-]+[\/\\])+[\w.@-]+\.(?:ts|tsx|js|jsx|mjs|cjs|py|sql|json)\b/.test(message) ||
+    /node_modules|webpack-internal|\.next\/|\/usr\/|\/home\/|\/var\/|\/app\//.test(message) ||
+    /\b(?:select\b[\s\S]*\bfrom|insert\s+into|update\s+\S+\s+set|delete\s+from|alter\s+table|create\s+table|drop\s+table)\b/i.test(message) ||
+    /\b(?:relation|column|table|constraint|function|schema|role|database)\s+"[^"]+"|violates\s+\S+\s+constraint|syntax error at or near|duplicate key value|invalid input syntax|permission denied for|row-level security|\bpg_\w+|\bSQLSTATE\b/i.test(message) ||
+    /\b(?:postgres(?:ql)?|mysql|mongodb|redis|amqp|https?):\/\/[^\s]*@|\bpassword authentication failed\b/i.test(message) ||
+    /\beyJ[\w-]{8,}\.[\w-]{8,}\.|\b(?:sk|pk|rk)_(?:live|test)_\w+|\bBearer\s+[\w.-]{12,}|\bAKIA[0-9A-Z]{12,}/.test(message) ||
+    /\b(?:[A-Z]\w*Error|PrismaClient\w*)\b\s*[:(]|\bE(?:CONNREFUSED|CONNRESET|TIMEDOUT|NOTFOUND|AI_AGAIN|PIPE)\b|\[object Object\]|\bundefined\b/.test(message) ||
+    /\bstack trace\b/i.test(message)
+  );
+}
+
+/** The message a response body states, unfiltered; '' when it states none. */
+function statedMessage(body: unknown): string {
   if (isRecord(body)) {
     if (typeof body.message === 'string' && body.message) return body.message;
     if (isRecord(body.error) && typeof body.error.message === 'string' && body.error.message) return body.error.message;
@@ -59,12 +86,31 @@ export function apiErrorMessage(body: unknown, fallback: string): string {
       return typeof body.fallbackAdvice === 'string' && body.fallbackAdvice ? `${body.reason} ${body.fallbackAdvice}` : body.reason;
     }
   }
-  return fallback;
+  return '';
+}
+
+/** A status line a screen composed for its own log ("Request failed with status 500", "HTTP 503", "(status 500)"): not a sentence for a person. */
+const STATUS_LINE = /\bHTTP\s*\d{3}\b|\bstatus(?:\s+code)?\s*[:#]?\s*\d{3}\b|\bhttp error\b/i;
+export const isStatusLine = (message: string): boolean => STATUS_LINE.test(message);
+
+/** The screen's own sentence, or the status wording when what it offered is a status line. */
+function plainFallback(status: number, fallback: string): string {
+  if (fallback !== '' && !isStatusLine(fallback) && !looksTechnical(fallback)) return fallback;
+  return STATUS_COPY.en[status] || (status >= 500 ? STATUS_COPY.en[500] : GENERIC_FAILURE.en);
 }
 
 /** The message a failed response states; the fallback when its body is not JSON or names none. */
 export async function readApiError(response: Response, fallback: string): Promise<string> {
-  return apiErrorMessage(await response.json().catch(() => null), fallback);
+  const body: unknown = await response.json().catch(() => null);
+  return apiErrorMessageFor(response.status, body, fallback);
+}
+
+/** The message a failed answer states, from a body already read: nothing a server error or a diagnostic states is ever returned. */
+export function apiErrorMessageFor(status: number, body: unknown, fallback: string): string {
+  if (fallback === '') return status >= 500 ? '' : apiErrorMessage(body, '');
+  if (status >= 500) return plainFallback(status, fallback);
+  const stated = apiErrorMessage(body, '');
+  return stated !== '' ? stated : plainFallback(status, fallback);
 }
 
 /**
@@ -72,5 +118,119 @@ export async function readApiError(response: Response, fallback: string): Promis
  * and that is shown. A request that never got an answer fails with a TypeError whose text is the browser's own ("Failed to fetch", "Load failed"): the screen's fallback is shown instead.
  */
 export function failureText(error: unknown, fallback: string): string {
-  return error instanceof Error && !(error instanceof TypeError) && error.message ? error.message : fallback;
+  if (error instanceof ApiFailure) return statedText(error, 'en') || fallback;
+  return error instanceof Error && !looksTechnical(error.message) && !isStatusLine(error.message) && !(error instanceof TypeError) && error.message ? error.message : fallback;
+}
+
+export type FailureLanguage = 'en' | 'fr';
+
+export const failureLanguage = (locale: string | null | undefined): FailureLanguage =>
+  locale?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+
+const STATUS_COPY: Readonly<Record<FailureLanguage, Readonly<Record<number, string>>>> = {
+  en: {
+    400: 'Some of the information could not be accepted. Check it and try again.',
+    401: 'Your session has ended. Sign in again to continue.',
+    403: 'You do not have permission to do this.',
+    404: 'This item is no longer available.',
+    409: 'This item changed while you were working. Refresh and try again.',
+    422: 'Some of the information is not valid. Check it and try again.',
+    413: 'The file or request is too large.',
+    429: 'Too many requests. Wait a moment and try again.',
+    500: 'The service is temporarily unavailable. Try again shortly.',
+    501: 'This feature is not available yet.',
+    502: 'The service is temporarily unavailable. Try again shortly.',
+    503: 'The service is temporarily unavailable. Try again shortly.',
+    504: 'The service took too long to answer. Try again shortly.',
+  },
+  fr: {
+    400: 'Certaines informations n’ont pas pu être acceptées. Vérifiez-les, puis réessayez.',
+    401: 'Votre session est terminée. Reconnectez-vous pour continuer.',
+    403: 'Vous n’avez pas l’autorisation d’effectuer cette action.',
+    404: 'Cet élément n’est plus disponible.',
+    409: 'Cet élément a changé pendant votre travail. Actualisez, puis réessayez.',
+    422: 'Certaines informations ne sont pas valides. Vérifiez-les, puis réessayez.',
+    413: 'Le fichier ou la demande est trop volumineux.',
+    429: 'Trop de demandes. Patientez un instant, puis réessayez.',
+    500: 'Le service est momentanément indisponible. Réessayez sous peu.',
+    501: 'Cette fonction n’est pas encore disponible.',
+    502: 'Le service est momentanément indisponible. Réessayez sous peu.',
+    503: 'Le service est momentanément indisponible. Réessayez sous peu.',
+    504: 'Le service a mis trop de temps à répondre. Réessayez sous peu.',
+  },
+};
+
+/** What a screen says when nothing more specific is known: never a status line, exception text or the browser's own wording. */
+export const GENERIC_FAILURE: Readonly<Record<FailureLanguage, string>> = {
+  en: 'Something went wrong. Try again.',
+  fr: 'Une erreur s’est produite. Réessayez.',
+};
+
+/**
+ * The server states its refusals in English. A French screen shows one of these only when it is a message we hold a French wording for;
+ * every other refusal is worded from its status, or by the screen's own French fallback.
+ */
+const BARE_SERVER_MESSAGES: ReadonlySet<string> = new Set(['Unauthorized', 'Forbidden', 'Not found', 'Internal server error']);
+
+const FRENCH_SERVER_MESSAGES: Readonly<Record<string, string>> = {
+  'Internal server error': 'Le service est momentanément indisponible. Réessayez sous peu.',
+  'Unauthorized': STATUS_COPY.fr[401],
+  'Forbidden': STATUS_COPY.fr[403],
+  'Not found': STATUS_COPY.fr[404],
+};
+
+/** A request the route answered with a refusal. `message` is what the server stated; it is shown only by `userFailureText`'s rules. */
+export class ApiFailure extends Error {
+  readonly status: number;
+  readonly code: string | null;
+  /** The reason the server stated, '' when it stated none; `message` carries the caller's own wording when it is a sentence, else the status wording; it is never a status line, so a screen that shows `message` stays safe. */
+  readonly stated: string;
+  constructor(status: number, stated: string, code: string | null = null, message: string = stated) {
+    super(message);
+    this.name = 'ApiFailure';
+    this.status = status;
+    this.code = code;
+    this.stated = stated;
+  }
+}
+
+/** The refusal a failed response states. A body that names no message leaves `message` empty, so the screen's fallback or the status wording is shown. */
+export async function readApiFailure(response: Response, loggedMessage?: string): Promise<ApiFailure> {
+  const body: unknown = await response.json().catch(() => null);
+  const code = isRecord(body) && typeof body.code === 'string' ? body.code : null;
+  const stated = apiErrorMessageFor(response.status, body, '');
+  return new ApiFailure(response.status, stated, code, stated || (loggedMessage ? plainFallback(response.status, loggedMessage) : ''));
+}
+
+/**
+ * The words a person reads for a failure, in their language.
+ *
+ * An `ApiFailure` shows the server's stated reason in English only; in French it shows a held translation, else the wording of its status
+ * (sign-in, permission, missing, changed, too large, busy, not available), else the screen's own fallback. Anything else (a TypeError from a
+ * request that got no answer, an ApiShapeError, a thrown string, an `HTTP 500` line) shows the screen's fallback and never its own text.
+ */
+export function userFailureText(error: unknown, fallback: string | null, language: FailureLanguage): string {
+  return statedText(error, language) || (fallback && !isStatusLine(fallback) ? fallback : '') || GENERIC_FAILURE[language];
+}
+
+function statedText(error: unknown, language: FailureLanguage): string {
+  if (!(error instanceof ApiFailure)) return '';
+  // Never expose server implementation details carried by 5xx responses, even when a backend includes a message.
+  if (error.status >= 500) return STATUS_COPY[language][error.status] || STATUS_COPY[language][500];
+  const stated = looksTechnical(error.stated) ? '' : error.stated;
+  if (language === 'en') return (stated && !BARE_SERVER_MESSAGES.has(stated) ? stated : STATUS_COPY.en[error.status]) || stated || '';
+  return FRENCH_SERVER_MESSAGES[stated] ?? STATUS_COPY.fr[error.status] ?? '';
+}
+
+/** The words for a response that was not ok, read once from its body. */
+export async function readUserFailure(response: Response, fallback: string | null, language: FailureLanguage): Promise<string> {
+  return userFailureText(await readApiFailure(response), fallback, language);
+}
+
+/**
+ * The line a screen may add under its own message: what the server stated about a refusal, in the person's language, or null when the failure
+ * says nothing a person can use (no answer, a body that is not the expected shape, a refusal with no statement and no status wording).
+ */
+export function failureDetail(error: unknown, language: FailureLanguage): string | null {
+  return statedText(error, language) || null;
 }

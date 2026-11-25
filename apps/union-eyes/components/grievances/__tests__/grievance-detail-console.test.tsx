@@ -52,6 +52,7 @@ interface Server {
   status: () => Response;
   documents: () => Response;
   access: () => Response;
+  download: () => Response;
 }
 let server: Server;
 let current: Record<string, unknown>;
@@ -61,6 +62,7 @@ const fetchMock = vi.fn(async (url: string, init?: RequestInit): Promise<Respons
   if (url === `/api/grievances/${GRIEVANCE}/status` && method === 'PATCH') return server.status();
   if (url === `/api/grievances/${GRIEVANCE}/documents` && method === 'POST') return server.documents();
   if (url === `/api/grievances/${GRIEVANCE}/access`) return server.access();
+  if (/^\/api\/documents\/[^/]+\/download$/.test(url) && method === 'GET') return server.download();
   return Response.json({ message: `unexpected ${method} ${url}` }, { status: 404 });
 });
 const callsTo = (suffix: string, method: string) =>
@@ -74,6 +76,7 @@ beforeEach(() => {
     status: () => standardSuccessResponse({ status: 'acknowledged' }),
     documents: () => standardSuccessResponse({ id: 'doc-1' }),
     access: () => standardSuccessResponse({ id: 'access-1' }),
+    download: () => standardSuccessResponse({ id: 'doc-1', title: 'Suspension letter', mimeType: 'application/pdf', downloadUrl: '/api/documents/doc-1/content?lease=signed' }),
   };
   fetchMock.mockClear();
   back.mockClear();
@@ -152,13 +155,17 @@ describe('GrievanceDetailConsole: loading', () => {
       throw new Error('connection reset');
     }));
     renderConsole();
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const network = await screen.findByRole('alert');
+    expect(network).toHaveTextContent('Something went wrong. Try again.');
+    expect(network).not.toHaveTextContent('connection reset');
     cleanup();
 
     vi.stubGlobal('fetch', fetchMock);
     server.get = () => standardSuccessResponse({ id: GRIEVANCE, grievanceNumber: 'GR-1', status: 'filed' });
     renderConsole();
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unexpected API response');
+    const malformed = await screen.findByRole('alert');
+    expect(malformed).toHaveTextContent('Something went wrong. Try again.');
+    expect(malformed).not.toHaveTextContent('Unexpected API response');
     expect(screen.queryByText('No events yet')).toBeNull();
   });
 
@@ -245,7 +252,9 @@ describe('GrievanceDetailConsole: the status', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Move to Acknowledged' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('The status could not be changed');
+    expect(failure).not.toHaveTextContent('connection reset');
   });
 
   it('offers nothing to someone with no authority over the matter, and says why', async () => {
@@ -276,7 +285,8 @@ describe('GrievanceDetailConsole: the status', () => {
     const notice = await screen.findByRole('alert');
     expect(notice).toHaveTextContent('The grievance could not be refreshed');
     expect(notice).toHaveTextContent('What is shown may be out of date.');
-    expect(notice).toHaveTextContent('Database unavailable');
+    expect(notice).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(notice).not.toHaveTextContent('Database unavailable');
 
     server.get = () => standardSuccessResponse(detail({ status: 'acknowledged' }));
     fireEvent.click(within(notice).getByRole('button', { name: 'Retry' }));
@@ -339,7 +349,7 @@ describe('GrievanceDetailConsole: adding a document', () => {
     fill();
     current = detail({
       governedDocuments: [
-        { id: 'doc-1', title: 'Suspension letter', filename: 'suspension.pdf', fileUrl: 'https://storage.example.com/a/suspension.pdf', documentType: 'evidence', privacyLabel: 'team_confidential', createdAt: '2026-03-05T12:00:00.000Z' },
+        { id: 'doc-1', title: 'Suspension letter', filename: 'suspension.pdf', documentType: 'evidence', privacyLabel: 'team_confidential', createdAt: '2026-03-05T12:00:00.000Z' },
       ],
     });
 
@@ -348,9 +358,8 @@ describe('GrievanceDetailConsole: adding a document', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('The document was added to this grievance.');
     expect(reads()).toHaveLength(2);
     expect(screen.getByRole('textbox', { name: 'Document title' })).toHaveValue('');
-    const link = screen.getByRole('link', { name: 'Suspension letter' });
-    expect(link).toHaveAttribute('href', 'https://storage.example.com/a/suspension.pdf');
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.getByRole('button', { name: 'Download: Suspension letter' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Suspension letter' })).toBeNull();
     expect(screen.getByText('Team confidential', { selector: 'span' })).toBeInTheDocument();
     expect(screen.queryByText('No documents uploaded')).toBeNull();
   });
@@ -393,7 +402,9 @@ describe('GrievanceDetailConsole: adding a document', () => {
 
     submit();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('The document could not be added');
+    expect(failure).not.toHaveTextContent('connection reset');
     expect(screen.queryByRole('status')).toBeNull();
   });
 
@@ -408,18 +419,62 @@ describe('GrievanceDetailConsole: adding a document', () => {
     expect(callsTo('/documents', 'POST')).toHaveLength(0);
   });
 
-  it('does not make a link of a stored address that is not a web address', async () => {
+  const withDocument = () => {
     current = detail({
       governedDocuments: [
-        { id: 'doc-9', title: 'Old record', filename: null, fileUrl: 'javascript:alert(1)', documentType: 'evidence', privacyLabel: 'privileged', createdAt: '2026-03-05T12:00:00.000Z' },
+        { id: '99999999-9999-4999-8999-999999999999', title: 'Old record', filename: null, documentType: 'evidence', privacyLabel: 'privileged', createdAt: '2026-03-05T12:00:00.000Z' },
       ],
     });
+  };
+
+  it('opens a document through its audited, time-limited link and never shows a stored address', async () => {
+    withDocument();
+    server.download = () => standardSuccessResponse({ id: '99999999-9999-4999-8999-999999999999', title: 'Old record', mimeType: 'application/pdf', downloadUrl: '/api/documents/99999999-9999-4999-8999-999999999999/content?lease=signed' });
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
     renderConsole();
     await loaded();
 
-    expect(screen.getByText('Old record')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Old record' })).toBeNull();
     expect(screen.getByText('Privileged', { selector: 'span' })).toBeInTheDocument();
+    expect(document.body.innerHTML).not.toMatch(/https?:\/\/storage/);
+    fireEvent.click(screen.getByRole('button', { name: 'Download: Old record' }));
+
+    await waitFor(() => expect(open).toHaveBeenCalledWith('/api/documents/99999999-9999-4999-8999-999999999999/content?lease=signed', '_blank', 'noopener,noreferrer'));
+    expect(callsTo('/api/documents/99999999-9999-4999-8999-999999999999/download', 'GET')).toHaveLength(1);
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('says in English and French that a refused document did not open, and opens nothing', async () => {
+    withDocument();
+    server.download = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have access to this document');
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
+    renderConsole();
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: 'Download: Old record' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('You do not have permission to open this document.');
+    cleanup();
+
+    renderConsole('fr-CA');
+    await screen.findByRole('heading', { name: 'Unjust suspension' });
+    fireEvent.click(screen.getByRole('button', { name: 'Télécharger: Old record' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Vous n’avez pas l’autorisation d’ouvrir ce document.');
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('keeps a storage or lost-connection failure in controlled wording and lets the person try again', async () => {
+    withDocument();
+    server.download = () => standardErrorResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, 'Document storage is unavailable');
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
+    renderConsole();
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: 'Download: Old record' }));
+    const failure = await screen.findByRole('alert');
+    expect(failure.textContent).not.toMatch(/Document storage is unavailable|lease|https?:/);
+    server.download = () => standardSuccessResponse({ id: '99999999-9999-4999-8999-999999999999', title: 'Old record', mimeType: 'application/pdf', downloadUrl: '/api/documents/99999999-9999-4999-8999-999999999999/content?lease=again' });
+    fireEvent.click(screen.getByRole('button', { name: 'Download: Old record' }));
+    await waitFor(() => expect(open).toHaveBeenCalledWith('/api/documents/99999999-9999-4999-8999-999999999999/content?lease=again', '_blank', 'noopener,noreferrer'));
   });
 });
 
@@ -506,7 +561,9 @@ describe('GrievanceDetailConsole: steward assignment', () => {
 
     server.get = () => standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Database unavailable');
     fireEvent.click(screen.getByRole('button', { name: 'assign steward' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Database unavailable');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(failure).not.toHaveTextContent('Database unavailable');
   });
 });
 
@@ -524,8 +581,8 @@ describe('GrievanceDetailConsole: French', () => {
     expect(document.body.textContent).not.toMatch(/Case Details|Governed Documents|Event Timeline|Move to|Current status/);
   });
 
-  it('says a refused document in French, with the server’s reason', async () => {
-    server.documents = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'Permission refusée');
+  it('says a refused document in French, worded by its status and never in the server’s English', async () => {
+    server.documents = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'You do not have permission to upload documents to this case');
     renderConsole('fr-CA');
     await screen.findByRole('heading', { name: 'Unjust suspension' });
     fireEvent.change(screen.getByRole('textbox', { name: 'Titre du document' }), { target: { value: 'Lettre' } });
@@ -536,15 +593,18 @@ describe('GrievanceDetailConsole: French', () => {
 
     const failure = await screen.findByRole('alert');
     expect(failure).toHaveTextContent('Le document n’a pas pu être ajouté.');
-    expect(failure).toHaveTextContent('Permission refusée');
+    expect(failure).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
+    expect(failure).not.toHaveTextContent('You do not have permission');
   });
 
   it('says a failed load in French, with a retry', async () => {
-    server.get = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'Interdit');
+    server.get = () => standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Database unavailable');
     renderConsole('fr-CA');
 
     const failure = await screen.findByRole('alert');
     expect(failure).toHaveTextContent('Le grief n’a pas pu être chargé');
+    expect(failure).toHaveTextContent('Le service est momentanément indisponible. Réessayez sous peu.');
+    expect(failure).not.toHaveTextContent(/Database|HTTP/);
     expect(within(failure).getByRole('button', { name: 'Réessayer' })).toBeInTheDocument();
   });
 });

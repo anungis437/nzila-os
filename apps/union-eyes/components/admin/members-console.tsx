@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import JobClassificationManagement from "@/components/admin/JobClassificationManagement";
 import { generateCSV, type CSVColumn } from "@/lib/csv-export";
 import { useMembersConsoleData } from "@/lib/hooks/use-members-console-data";
+import { ApiShapeError, isRecord, readApiFailure, userFailureText } from "@/lib/client/api-envelope";
 import {
   Select,
   SelectContent,
@@ -97,13 +98,13 @@ export default function MembersConsole() {
         setIsLoadingOrgs(true);
         setOrgsError(null);
         const response = await fetch('/api/organizations');
-        if (!response.ok) {
-          throw new Error(`Failed to load organizations (${response.status})`);
-        }
-        const data = await response.json();
-        setOrganizations(data.data || data.organizations || []);
+        if (!response.ok) throw await readApiFailure(response);
+        const data: unknown = await response.json().catch(() => null);
+        const list = isRecord(data) && Array.isArray(data.data) ? data.data : null;
+        if (!list) throw new ApiShapeError('no organization list');
+        setOrganizations(list);
       } catch (error) {
-        setOrgsError(error instanceof Error ? error.message : 'Failed to load organizations');
+        setOrgsError(userFailureText(error, 'Organizations could not be loaded.', 'en'));
       } finally {
         setIsLoadingOrgs(false);
       }

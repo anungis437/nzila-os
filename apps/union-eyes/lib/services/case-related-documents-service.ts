@@ -1,3 +1,4 @@
+import { isCaseDocumentLinkType } from '@/lib/documents/case-link';
 import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -24,7 +25,6 @@ export type RelatedDocument = {
   title: string;
   privacyLabel: string;
   documentType: string | null;
-  fileUrl: string;
   score: number;
   reasons: string[];
   linkedEntities: string[];
@@ -46,8 +46,8 @@ export type RelatedDocumentCandidate = {
   title: string;
   privacyLabel: string;
   documentType: string | null;
-  fileUrl: string;
   updatedAt: Date;
+  uploadedBy: string | null;
   linkedEntityType: string | null;
   linkedEntityId: string | null;
   tags: string[];
@@ -114,7 +114,6 @@ function rankCandidates(candidates: RelatedDocumentCandidate[]) {
         title: candidate.title,
         privacyLabel: candidate.privacyLabel,
         documentType: candidate.documentType,
-        fileUrl: candidate.fileUrl,
         score: scored.score,
         reasons: scored.reasons,
         linkedEntities: [...candidate.linkedEntities],
@@ -137,8 +136,8 @@ function getOrCreateCandidate(
     name: string;
     privacyLabel: string;
     documentType: string | null;
-    fileUrl: string;
     updatedAt: Date;
+    uploadedBy: string | null;
     linkedEntityType: string | null;
     linkedEntityId: string | null;
     tags: string[] | null;
@@ -152,8 +151,8 @@ function getOrCreateCandidate(
     title: titleForDocument(row),
     privacyLabel: row.privacyLabel,
     documentType: row.documentType,
-    fileUrl: row.fileUrl,
     updatedAt: row.updatedAt,
+    uploadedBy: row.uploadedBy,
     linkedEntityType: row.linkedEntityType,
     linkedEntityId: row.linkedEntityId,
     tags: row.tags ?? [],
@@ -205,7 +204,6 @@ export async function getRelatedDocuments(params: {
       name: documents.name,
       privacyLabel: documents.privacyLabel,
       documentType: documents.documentType,
-      fileUrl: documents.fileUrl,
       updatedAt: documents.updatedAt,
       linkedEntityType: documentLinks.linkedEntityType,
       linkedEntityId: documentLinks.linkedEntityId,
@@ -219,7 +217,7 @@ export async function getRelatedDocuments(params: {
     .limit(300);
 
   const directCaseRows = baseRows.filter(
-    (row) => row.linkedEntityType === 'grievance' && row.linkedEntityId === params.caseId,
+    (row) => isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId === params.caseId,
   );
 
   const similarCaseRows = caseRow.grievantId || caseRow.employerId || caseRow.cbaId
@@ -255,7 +253,7 @@ export async function getRelatedDocuments(params: {
   for (const row of baseRows) {
     const candidate = getOrCreateCandidate(candidateMap, row);
 
-    if (row.linkedEntityType === 'grievance' && row.linkedEntityId === params.caseId) {
+    if (isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId === params.caseId) {
       candidate.sourceSignals.add('same_case');
       candidate.linkedEntities.add(`case:${params.caseId}`);
     }
@@ -294,7 +292,7 @@ export async function getRelatedDocuments(params: {
       candidate.linkedEntities.add(`lro:${row.uploadedBy}`);
     }
 
-    if (row.linkedEntityType === 'grievance' && row.linkedEntityId && similarCaseIds.has(row.linkedEntityId)) {
+    if (isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId && similarCaseIds.has(row.linkedEntityId)) {
       candidate.sourceSignals.add('similar_case');
       candidate.linkedEntities.add(`case:${row.linkedEntityId}`);
     }
@@ -309,6 +307,7 @@ export async function getRelatedDocuments(params: {
     privacyLabel: candidate.privacyLabel,
     linkedEntityType: candidate.linkedEntityType,
     linkedEntityId: candidate.linkedEntityId,
+    uploadedBy: candidate.uploadedBy,
   }));
 
   const authorized = await filterAuthorizedDocumentsForActor({

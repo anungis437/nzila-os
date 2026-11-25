@@ -1,4 +1,5 @@
-import { and, desc, eq, isNull, or, sql } from 'drizzle-orm';
+import { DOCUMENT_CASE_LINK_TYPES } from '@/lib/documents/case-link';
+import { and, inArray, desc, eq, isNull, or, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { documentLinks, documents } from '@/db/schema/documents-schema';
 import { externalDocumentAccessGrants } from '@/db/schema/representation-authority-schema';
@@ -44,7 +45,7 @@ export const GET = withExternalMatterResourceAuth(
           eq(externalDocumentAccessGrants.canView, true),
           isNull(externalDocumentAccessGrants.revokedAt),
           or(isNull(externalDocumentAccessGrants.expiresAt), sql`${externalDocumentAccessGrants.expiresAt} > NOW()`),
-          eq(documentLinks.linkedEntityType, 'grievance'),
+          inArray(documentLinks.linkedEntityType, [...DOCUMENT_CASE_LINK_TYPES]),
           eq(documentLinks.linkedEntityId, context.matterId),
           eq(documents.organizationId, context.organizationId),
           eq(documents.status, 'active'),

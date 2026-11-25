@@ -83,7 +83,8 @@ describe('health & safety training page', () => {
     const user = userEvent.setup();
     render(<TrainingPage />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Database unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Database unavailable');
     expect(card('stats.totalRecords.title')).toHaveTextContent('—');
     expect(card('stats.expiringSoon.title')).toHaveTextContent('—');
     expect(screen.queryByText(/training record/)).toBeNull();

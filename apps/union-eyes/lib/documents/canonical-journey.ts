@@ -19,6 +19,7 @@ export type JourneyDenial =
   | 'share_blocked'
   | 'classification_change_blocked'
   | 'list_unavailable'
+  | 'read_unavailable'
   | 'none_selected'
   | 'reference_rejected'
   | 'bulk_unavailable'
@@ -55,7 +56,7 @@ const ENGLISH: JourneyCopy = {
   saved: 'The document was saved.',
   malformed_id: 'The document identifier is not valid.',
   unauthorized: 'You do not have permission to open this document.',
-  storage_failure: 'The document could not be retrieved from storage. No link was issued.',
+  storage_failure: 'The document could not be loaded. Refresh and check your access before trying again.',
   audit_failure: 'The download stopped because the audit record could not be written.',
   conflict: 'The document changed before this request finished. Refresh and try again.',
   upload_rejected: 'The document was not saved.',
@@ -63,6 +64,7 @@ const ENGLISH: JourneyCopy = {
   classification_change_blocked:
     'Classification and retention rules cannot be changed from this screen.',
   list_unavailable: 'The document list could not be loaded.',
+  read_unavailable: 'The document could not be loaded. Refresh and check your access before trying again.',
   none_selected: 'Select a document before downloading.',
   reference_rejected:
     "The file reference or content hash was rejected. Use a file already stored in your organization's document storage; a hash, if given, must be the file's SHA-256.",
@@ -77,30 +79,31 @@ const ENGLISH: JourneyCopy = {
 };
 
 const FRENCH: JourneyCopy = {
-  download: 'Telecharger',
-  saved: 'Le document a ete enregistre.',
-  malformed_id: "L'identifiant du document n'est pas valide.",
-  unauthorized: "Vous n'avez pas l'autorisation d'ouvrir ce document.",
-  storage_failure: "Le document n'a pas pu etre recupere. Aucun lien n'a ete emis.",
-  audit_failure: "Le telechargement a ete interrompu parce que l'audit n'a pas pu etre enregistre.",
-  conflict: 'Le document a change avant la fin de la demande. Actualisez et reessayez.',
-  upload_rejected: "Le document n'a pas ete enregistre.",
+  download: 'Télécharger',
+  saved: 'Le document a été enregistré.',
+  malformed_id: 'L’identifiant du document n’est pas valide.',
+  unauthorized: 'Vous n’avez pas l’autorisation d’ouvrir ce document.',
+  storage_failure: 'Le document n’a pas pu être chargé. Actualisez la page et vérifiez votre accès avant de réessayer.',
+  audit_failure: 'Le téléchargement a été interrompu parce que l’audit n’a pas pu être enregistré.',
+  conflict: 'Le document a changé avant la fin de la demande. Actualisez la page et réessayez.',
+  upload_rejected: 'Le document n’a pas été enregistré.',
   share_blocked:
-    "Le partage n'est pas disponible. Modifier une etiquette de confidentialite n'accorde pas d'acces.",
+    'Le partage n’est pas disponible. Modifier une étiquette de confidentialité n’accorde pas d’accès.',
   classification_change_blocked:
-    'La classification et les regles de conservation ne peuvent pas etre modifiees depuis cet ecran.',
-  list_unavailable: "La liste des documents n'a pas pu etre chargee.",
-  none_selected: 'Selectionnez un document avant le telechargement.',
+    'La classification et les règles de conservation ne peuvent pas être modifiées depuis cet écran.',
+  list_unavailable: 'La liste des documents n’a pas pu être chargée.',
+  read_unavailable: 'Le document n’a pas pu être chargé. Actualisez la page et vérifiez votre accès avant de réessayer.',
+  none_selected: 'Sélectionnez un document avant de le télécharger.',
   reference_rejected:
-    "La reference du fichier ou l'empreinte a ete refusee. Utilisez un fichier deja stocke dans le stockage de documents de votre organisation; l'empreinte, si fournie, doit etre le SHA-256 du fichier.",
-  bulk_unavailable: "Le telechargement groupe n'a pas pu demarrer. Aucun lien n'a ete emis.",
-  bulk_limit: 'Selectionnez au plus 25 documents pour un telechargement groupe.',
-  bulk_complete: '{issued} liens sur {requested} ont ete emis.',
+    'La référence du fichier ou l’empreinte a été refusée. Utilisez un fichier déjà stocké dans l’espace de documents de votre organisation; l’empreinte, si elle est fournie, doit être le SHA-256 du fichier.',
+  bulk_unavailable: 'Le téléchargement groupé n’a pas pu démarrer. Aucun lien n’a été émis.',
+  bulk_limit: 'Sélectionnez au plus 25 documents pour un téléchargement groupé.',
+  bulk_complete: '{issued} liens sur {requested} ont été émis.',
   bulk_partial:
-    "{issued} liens sur {requested} ont ete emis; {failed} ne l'ont pas ete. Les liens deja emis restent valides. Chaque document a ete verifie et consigne separement.",
-  bulk_none: "Aucun lien n'a ete emis ({failed} sur {requested} en echec). Chaque document a ete verifie separement.",
+    '{issued} liens sur {requested} ont été émis; {failed} ne l’ont pas été. Les liens déjà émis restent valides. Chaque document a été vérifié et consigné séparément.',
+  bulk_none: 'Aucun lien n’a été émis ({failed} sur {requested} en échec). Chaque document a été vérifié séparément.',
   retention_unavailable:
-    "Les regles de conservation et les mises en suspens juridiques ne sont pas disponibles ici. Aucun registre canonique de conservation des documents n'existe encore; rien sur cet ecran ne reflete une suspension ou une regle en vigueur.",
+    'Les règles de conservation et les suspensions juridiques ne sont pas disponibles ici. Aucun registre canonique de conservation des documents n’existe encore; rien sur cet écran ne reflète une suspension ou une règle en vigueur.',
 };
 
 export function isDocumentId(value: string): boolean {

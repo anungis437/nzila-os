@@ -63,6 +63,21 @@ describe('NewLetterComposer', () => {
     expect(onCancel).toHaveBeenCalledOnce();
   });
 
+  it.each(['en-CA', 'fr-CA'] as const)('words a refused %s letter by the page language, and never shows an English sentence or exception text in French', async (locale) => {
+    const c = (locale === 'fr-CA' ? frCA : enCA).correspondencePage.composer;
+    const fetchMock = vi.fn().mockResolvedValue(json(422, { code: 'VALIDATION_ERROR', message: 'Recipient email is not valid' }));
+    vi.stubGlobal('fetch', fetchMock);
+    const { onCreated } = mount(locale);
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${c.templates.blank.label}`) }));
+    fireEvent.change(screen.getByRole('textbox', { name: c.subject }), { target: { value: 'Sujet' } });
+    fireEvent.change(screen.getByRole('textbox', { name: c.body }), { target: { value: 'Texte' } });
+    fireEvent.click(screen.getByRole('button', { name: c.create }));
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalledOnce());
+    expect(toast.error).toHaveBeenCalledWith(locale === 'fr-CA' ? 'Certaines informations ne sont pas valides. Vérifiez-les, puis réessayez.' : 'Recipient email is not valid');
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(onCreated).not.toHaveBeenCalled();
+  });
+
   it('keeps French failure and recovery text and requests a French AI draft', async () => {
     const c = frCA.correspondencePage.composer;
     const fetchMock = vi.fn().mockResolvedValue(json(503, { message: 'unavailable' }));

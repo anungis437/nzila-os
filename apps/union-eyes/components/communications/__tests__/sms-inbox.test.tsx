@@ -107,7 +107,8 @@ describe('SmsInbox (jsdom, mocked server)', () => {
   it('says the conversations could not be loaded, with a retry, rather than "No conversations found"', async () => {
     const calls = mockServer(() => ({ status: 500, body: { code: 'INTERNAL_ERROR', message: 'Internal error' } }));
     render(<SmsInbox />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Internal error');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The conversations could not be loaded.');
+    expect(document.body).not.toHaveTextContent('Internal error');
     expect(screen.queryByText('No conversations found')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));

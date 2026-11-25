@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
-import { isRecord, readApiError } from "@/lib/client/api-envelope";
+import { ApiFailure, ApiShapeError, failureLanguage, isRecord, readApiFailure, userFailureText } from "@/lib/client/api-envelope";
 import { caseIntakeResponse } from "@/lib/client/case-intake-response";
 import { dayOf } from "@/lib/client/day";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
@@ -246,7 +246,7 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
       }
 
       if (!submittingUserId) {
-        throw new Error("Authentication required before submitting a case");
+        throw new ApiFailure(401, "");
       }
 
       const claimData = {
@@ -271,7 +271,7 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
       });
 
       if (!response.ok) {
-        throw new Error(await readApiError(response, "Failed to create claim"));
+        throw await readApiFailure(response);
       }
 
       const result: unknown = await response.json();
@@ -279,7 +279,7 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
       const claimId = receipt.success ? receipt.data.claimId : null;
 
       if (!claimId) {
-        throw new Error("Case was created but no case ID was returned");
+        throw new ApiShapeError("case receipt");
       }
 
       // Track for pilot observability + feedback widget
@@ -320,8 +320,8 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
 setIsSubmitting(false);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit intake",
+        title: t('claims.submitFailedTitle'),
+        description: error instanceof ApiShapeError ? t('claims.submitUnconfirmed') : userFailureText(error, t('claims.submitFailed'), failureLanguage(locale)),
       });
     }
   };
@@ -598,7 +598,7 @@ setIsSubmitting(false);
                     checked={formData.isAnonymous}
                     onChange={(e) => setFormData(prev => ({ ...prev, isAnonymous: e.target.checked }))}
                     aria-describedby="file-anonymously-help"
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-0.5 h-6 w-6 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <div>
                     <label htmlFor="file-anonymously" className="block text-sm font-semibold text-gray-900">

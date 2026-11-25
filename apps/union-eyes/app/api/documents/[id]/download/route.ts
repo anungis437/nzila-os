@@ -38,13 +38,17 @@ export const GET = withApi(
     );
 
     switch (outcome.kind) {
-      case 'issued':
-        return standardSuccessResponse({
+      case 'issued': {
+        const response = standardSuccessResponse({
           id: outcome.id,
           title: outcome.title,
           mimeType: outcome.mimeType,
           downloadUrl: outcome.downloadUrl,
         });
+        response.headers.set('Cache-Control', 'private, no-store');
+        response.headers.set('Pragma', 'no-cache');
+        return response;
+      }
       case 'invalid_id':
         return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document ID');
       case 'not_found':

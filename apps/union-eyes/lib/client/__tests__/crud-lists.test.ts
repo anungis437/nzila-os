@@ -41,7 +41,7 @@ describe('fetchAllRows', () => {
 
   it('falls back to the status when the refusal states no reason', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => reply(502, '<html>gateway</html>')));
-    await expect(fetchAllRows('/api/units')).rejects.toThrow('Request failed with status 502');
+    await expect(fetchAllRows('/api/units')).rejects.toThrow('The service is temporarily unavailable. Try again shortly.');
   });
 
   it.each([

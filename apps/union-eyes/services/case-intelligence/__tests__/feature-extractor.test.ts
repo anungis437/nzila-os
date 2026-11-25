@@ -25,7 +25,6 @@ function makeCandidate(overrides: Partial<DocumentCandidate> = {}): DocumentCand
     name: 'doc.pdf',
     privacyLabel: 'internal',
     documentType: 'evidence',
-    fileUrl: 'https://example.test/doc.pdf',
     updatedAt: new Date('2025-01-01T00:00:00Z'),
     linkedEntityType: null,
     linkedEntityId: null,

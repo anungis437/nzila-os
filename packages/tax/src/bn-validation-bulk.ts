@@ -262,6 +262,11 @@ export function generatePossibleProgramAccounts(bn9: string): ProgramAccountSugg
     RZ: 'Information Returns',
     RD: 'Excise Duties',
     RE: 'Excise Tax',
+    RG: 'Air Travellers Security Charge',
+    RN: 'Insurance Premium Tax',
+    LT: 'Luxury Tax',
+    RU: 'Underused Housing Tax',
+    PT: 'Global Minimum Tax',
   }
 
   return CRA_PROGRAM_IDS.map((pid) => ({

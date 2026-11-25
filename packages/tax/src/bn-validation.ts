@@ -2,11 +2,14 @@
  * @nzila/tax — CRA Business Number validation
  *
  * Validates Canadian Business Numbers (BN) and program account numbers
- * against CRA-published format rules.
+ * against CRA-published format rules plus legacy local validation policy.
+ * Passing validation does not establish assignment or registration. The retained
+ * Luhn and nonzero-reference restrictions have not been corroborated by a
+ * current authoritative CRA specification; do not label them CRA-verified.
  *
  * Sources:
  * - CRA RC2 guide: "The Business Number and Your CRA Program Accounts"
- * - BN format: 9 digits (with Luhn check digit)
+ * - BN format: 9 digits; Luhn is retained local policy, not an attested CRA rule
  * - Program account: BN + 2-letter program ID + 4-digit reference number
  *   e.g. 123456789 RC 0001
  *
@@ -33,6 +36,11 @@ export const CRA_PROGRAM_IDS = [
   'RZ', // Information returns
   'RD', // Excise duties
   'RE', // Excise tax
+  'RG', // Air travellers security charge
+  'RN', // Insurance premium tax
+  'LT', // Luxury tax
+  'RU', // Underused housing tax
+  'PT', // Global minimum tax
 ] as const
 
 export type CraProgramId = (typeof CRA_PROGRAM_IDS)[number]
@@ -41,7 +49,9 @@ export type CraProgramId = (typeof CRA_PROGRAM_IDS)[number]
 
 /**
  * Validate a 9-digit BN using the Luhn algorithm (mod-10).
- * CRA uses standard Luhn for the 9th check digit.
+ * This legacy local check is not currently verified as an authoritative CRA rule.
+ * Source for the format/program list (not this checksum policy):
+ * https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/business-registration/business-number-program-account/need-program-accounts.html
  */
 function luhnCheck(digits: string): boolean {
   let sum = 0
@@ -118,7 +128,7 @@ export function validateProgramAccount(input: string): BnValidationResult {
     errors.push(`Unknown CRA program ID "${programId}". Valid IDs: ${CRA_PROGRAM_IDS.join(', ')}`)
   }
 
-  // Reference number must be 0001–9999
+  // Retained local policy: nonzero reference. Not independently CRA-attested.
   const refInt = parseInt(refNum, 10)
   if (refInt < 1) {
     errors.push('Reference number must be 0001 or higher')
@@ -174,6 +184,7 @@ export const ProgramAccountSchema = z
     },
     { message: 'Unknown CRA program identifier' },
   )
+  .refine((v) => Number(v.slice(11)) >= 1, { message: 'Reference number must be 0001 or higher' })
 
 /**
  * Validate a Quebec Enterprise Number (NEQ) — 10 digits.

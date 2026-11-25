@@ -258,7 +258,8 @@ describe('MemberDetailPage: claims', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Claims could not be loaded');
-    expect(alert).toHaveTextContent('Claims are unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Claims are unavailable');
     expect(screen.queryByText('No claims found for this member')).toBeNull();
     expect(screen.queryByText(/\d+ claims?$/)).toBeNull();
   });
@@ -285,12 +286,15 @@ describe('MemberDetailPage: claims', () => {
     ['a claim without a status', plain([claimRow({ status: null })]), 'Unexpected API response: status is missing'],
     ['a claim without an id to open it by', plain([claimRow({ claimId: undefined })]), 'Unexpected API response: claimId is missing'],
     ['a claim date that is not a date', plain([claimRow({ createdAt: 'last week' })]), 'Unexpected API response: createdAt is not a date'],
-  ])('reports %s as unreadable, not as no claims', async (_what, body, message) => {
+  ])('reports %s as unreadable, not as no claims, without showing the parser\'s wording', async (_what, body, message) => {
     claims = ok(body);
     renderPage();
     await screen.findByRole('heading', { name: 'Pat Morin' });
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(message);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Claims could not be loaded');
+    expect(alert).not.toHaveTextContent(message);
+    expect(alert).not.toHaveTextContent('Unexpected API response');
     expect(screen.queryByText('No claims found for this member')).toBeNull();
   });
 });
@@ -306,10 +310,10 @@ describe('MemberDetailPage: a member that could not be shown', () => {
   });
 
   it.each([
-    [500, 'Database unavailable'],
-    [403, 'Insufficient permissions'],
-  ])('says the member could not be loaded, with the reason, when the route answers %i, and does not call it not found', async (status, message) => {
-    member = failed(status, message);
+    [500, 'Database unavailable', 'The service is temporarily unavailable. Try again shortly.'],
+    [403, 'Insufficient permissions', 'Insufficient permissions'],
+  ])('says the member could not be loaded, with the reason, when the route answers %i, and does not call it not found', async (status, stated, message) => {
+    member = failed(status, stated);
     renderPage();
 
     const alert = await screen.findByRole('alert');
@@ -338,11 +342,13 @@ describe('MemberDetailPage: a member that could not be shown', () => {
     ['a member without a name', item(memberRow({ name: null })), 'Unexpected API response: name is missing'],
     ['a seniority that is not a number', item(memberRow({ seniority: 'long' })), 'Unexpected API response: seniority is not a number'],
     ['a hire date that is not a date', item(memberRow({ hireDate: 'soon' })), 'Unexpected API response: hireDate is not a date'],
-  ])('reports %s instead of drawing a member', async (_what, body, message) => {
+  ])('reports %s instead of drawing a member, without showing the parser\'s wording', async (_what, body, message) => {
     member = ok(body);
     renderPage();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(message);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Member details could not be loaded');
+    expect(alert).not.toHaveTextContent(message);
     expect(screen.queryByText('Member Not Found')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Pat Morin' })).toBeNull();
   });

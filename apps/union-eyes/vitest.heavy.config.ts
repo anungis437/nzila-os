@@ -12,7 +12,9 @@ export default defineProject({
     name: "union-eyes-heavy",
     setupFiles: [...sharedSetupFiles, path.resolve(__dirname, "scripts/runtime/heavy-native-test-isolation.ts")],
     include: heavyTests,
-    exclude: [...sharedExclude, ...censusTests],
+    // This file fails closed without an owned native clone. The native project is its
+    // enforced cohort; the ordinary fast command must not select it or count it.
+    exclude: [...sharedExclude, ...censusTests, "**/db/__tests__/external-resource-read.postgres.test.ts"],
     testTimeout: 240_000,
     hookTimeout: 180_000,
     fileParallelism: false,

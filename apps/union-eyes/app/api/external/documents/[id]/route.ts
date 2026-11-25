@@ -1,4 +1,5 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { DOCUMENT_CASE_LINK_TYPES } from '@/lib/documents/case-link';
+import { and, inArray, eq, isNull } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { documentLinks, documents } from '@/db/schema/documents-schema';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
@@ -62,7 +63,7 @@ export const GET = withExternalMatterResourceAuth(
           eq(documents.organizationId, context.organizationId),
           eq(documents.status, 'active'),
           isNull(documents.deletedAt),
-          eq(documentLinks.linkedEntityType, 'grievance'),
+          inArray(documentLinks.linkedEntityType, [...DOCUMENT_CASE_LINK_TYPES]),
           eq(documentLinks.linkedEntityId, context.matterId),
         ),
       )

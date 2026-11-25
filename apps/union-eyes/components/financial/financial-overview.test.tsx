@@ -100,7 +100,8 @@ describe('FinancialOverview', () => {
     stubRoutes({ ...allAnswer(), '/api/admin/dues/overview': reply(failure('INTERNAL_ERROR', 'The ledger could not be read'), 500) })
     render(<FinancialOverview />)
     const banner = await screen.findByRole('alert')
-    expect(banner).toHaveTextContent('Dues overview: The ledger could not be read')
+    expect(banner).toHaveTextContent('The service is temporarily unavailable. Try again shortly.')
+    expect(document.body).not.toHaveTextContent('Dues overview: The ledger could not be read');
     expect(banner).toHaveTextContent('not zero')
     for (const title of ['Total Collected', 'Outstanding', 'Total Overdue']) {
       const card = screen.getByText(title).closest('div')!.parentElement!.parentElement!

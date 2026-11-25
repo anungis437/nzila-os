@@ -114,7 +114,8 @@ describe('DeductionHistory', () => {
       .mockResolvedValueOnce({ ok: true, status: 200, json: async () => envelope({ data: [deduction] }) })
     vi.stubGlobal('fetch', fetchMock)
     renderInIntl(<DeductionHistory userId="member-1" />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('The deductions could not be read')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load data. Please refresh the page.')
+    expect(document.body).not.toHaveTextContent('The deductions could not be read');
     expect(screen.queryByText(enCA.dashboard.dues.deductions.empty)).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: enCA.common.retry }))
     expect(await screen.findByText('$45.50')).toBeInTheDocument()
@@ -166,7 +167,8 @@ describe('PaymentHistory', () => {
   it('shows the server\'s message, not the empty state, when the request fails', async () => {
     answerRoutes({ '/api/dues/payment-history': { ok: false, status: 500, body: failure('The ledger could not be read') } })
     renderInIntl(<PaymentHistory userId="member-1" />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('The ledger could not be read')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load data. Please refresh the page.')
+    expect(document.body).not.toHaveTextContent('The ledger could not be read');
     expect(screen.queryByText(enCA.dashboard.dues.history.empty)).not.toBeInTheDocument()
   })
 
@@ -222,7 +224,8 @@ describe('DuesPaymentPortal', () => {
       }))
     vi.stubGlobal('fetch', fetchMock)
     renderInIntl(<DuesPaymentPortal userId="member-1" />)
-    expect(await screen.findByRole('alert')).toHaveTextContent('The ledger is unreachable')
+    expect(await screen.findByRole('alert')).toHaveTextContent('We could not load your dues balance right now.')
+    expect(document.body).not.toHaveTextContent('The ledger is unreachable');
     expect(screen.queryByText(enCA.dashboard.dues.noDataTitle)).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: enCA.common.retry }))
     expect(await screen.findByText(enCA.dashboard.dues.tabs.deductions)).toBeInTheDocument()

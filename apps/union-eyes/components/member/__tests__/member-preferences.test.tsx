@@ -179,7 +179,9 @@ describe('MemberPreferences: saving', () => {
 
     await user.click(screen.getByRole('button', { name: t.save }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('the preferences are incomplete');
+    const incomplete = await screen.findByRole('alert');
+    expect(incomplete).toHaveTextContent(enCA.memberPreferences.saveError);
+    expect(incomplete).not.toHaveTextContent(/incomplete|Unexpected API response/);
     expect(screen.queryByTestId('prefs-saved')).not.toBeInTheDocument();
   });
 
@@ -191,8 +193,26 @@ describe('MemberPreferences: saving', () => {
 
     await user.click(screen.getByRole('button', { name: t.save }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent(enCA.memberPreferences.saveError);
+    expect(failure).not.toHaveTextContent('Failed to fetch');
     expect(screen.queryByTestId('prefs-saved')).not.toBeInTheDocument();
+  });
+});
+
+describe('MemberPreferences: failures in French', () => {
+  it('words a refused save in French by its status, and not in the route\'s English', async () => {
+    const user = userEvent.setup();
+    renderPreferences('fr-CA');
+    await screen.findByRole('button', { name: frCA.memberPreferences.save });
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403, json: async () => ({ code: 'FORBIDDEN', message: 'Preferences are locked' }) })));
+
+    await user.click(screen.getByRole('button', { name: frCA.memberPreferences.save }));
+
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent(frCA.memberPreferences.saveError);
+    expect(failure).toHaveTextContent('Vous n’avez pas l’autorisation');
+    expect(failure).not.toHaveTextContent('Preferences are locked');
   });
 });
 
@@ -204,7 +224,8 @@ describe('MemberPreferences: when the read fails it does not show a form of made
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(t.loadError);
-    expect(alert).toHaveTextContent('Preferences are unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Preferences are unavailable');
     expect(screen.queryByRole('button', { name: t.save })).not.toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 
@@ -232,6 +253,8 @@ describe('MemberPreferences: when the read fails it does not show a form of made
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
     renderPreferences();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent(enCA.memberPreferences.loadError);
+    expect(failure).not.toHaveTextContent('Failed to fetch');
   });
 });

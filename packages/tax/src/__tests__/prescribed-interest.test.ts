@@ -14,6 +14,34 @@ import {
   getPrescribedRatesForYear,
 } from '../prescribed-interest'
 
+// Independently checked against each CRA YYYY-qN publication under
+// https://www.canada.ca/en/revenue-agency/services/tax/prescribed-interest-rates/
+// Fields: year, quarter, base, arrears, non-corporate refund, benefit, corporate refund.
+const publishedQuarterRates = [
+  [2023, 1, 0.04, 0.08, 0.06, 0.04, 0.04],
+  [2023, 2, 0.05, 0.09, 0.07, 0.05, 0.05],
+  [2023, 3, 0.05, 0.09, 0.07, 0.05, 0.05],
+  [2023, 4, 0.05, 0.09, 0.07, 0.05, 0.05],
+  [2024, 1, 0.06, 0.1, 0.08, 0.06, 0.06],
+  [2024, 2, 0.06, 0.1, 0.08, 0.06, 0.06],
+  [2024, 3, 0.05, 0.09, 0.07, 0.05, 0.05],
+  [2024, 4, 0.05, 0.09, 0.07, 0.05, 0.05],
+  [2025, 1, 0.04, 0.08, 0.06, 0.04, 0.04],
+  [2025, 2, 0.04, 0.08, 0.06, 0.04, 0.04],
+  [2025, 3, 0.03, 0.07, 0.05, 0.03, 0.03],
+  [2025, 4, 0.03, 0.07, 0.05, 0.03, 0.03],
+  [2026, 1, 0.03, 0.07, 0.05, 0.03, 0.03],
+  [2026, 2, 0.03, 0.07, 0.05, 0.03, 0.03],
+  [2026, 3, 0.03, 0.07, 0.05, 0.03, 0.03],
+  [2026, 4, 0.03, 0.07, 0.05, 0.03, 0.03],
+] as const
+
+it.each(publishedQuarterRates)('matches the original CRA publication for %s Q%s', (year, quarter, baseRate, corporateArrearsRate, refundRate, taxableBenefitRate, corporateRefundRate) => {
+  expect(getPrescribedRateByQuarter(year, quarter)).toMatchObject({
+    baseRate, corporateArrearsRate, refundRate, taxableBenefitRate, corporateRefundRate,
+  })
+})
+
 describe('PRESCRIBED_RATES', () => {
   it('has entries from 2023 through 2026', () => {
     const years = [...new Set(PRESCRIBED_RATES.map((r) => r.year))]

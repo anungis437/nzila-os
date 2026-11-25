@@ -168,41 +168,16 @@ jobs:
           UE_CASE_DOMAIN_NATIVE: '1'
         run: |
           set -euo pipefail
-          suites=(
-            db/__tests__/authority-case-projection.pglite.test.ts db/__tests__/authority-kernel-actor.pglite.test.ts
-            db/__tests__/authority-kernel-audit.pglite.test.ts db/__tests__/authority-kernel-case-backfill.pglite.test.ts
-            db/__tests__/authority-kernel-case-sources.pglite.test.ts db/__tests__/authority-kernel-counsel.pglite.test.ts
-            db/__tests__/authority-kernel-finance-sources.pglite.test.ts db/__tests__/authority-kernel-identity.pglite.test.ts
-            db/__tests__/authority-kernel-lifecycle.pglite.test.ts db/__tests__/authority-kernel-resources.pglite.test.ts
-            db/__tests__/authority-kernel-revocation.pglite.test.ts db/__tests__/authority-kernel-storage.pglite.test.ts
-            db/__tests__/review-intake.pglite.test.ts db/__tests__/review-visibility.pglite.test.ts
-            db/__tests__/workaid-union-side.pglite.test.ts lib/db/__tests__/case-read-batch.pglite.test.ts
-            lib/finance/finance-duties.pglite.test.ts lib/services/case-access-service.pglite.test.ts
-            db/auth/authority-physical-guards.pglite.test.ts db/auth/case-primary-domain-guards.pglite.test.ts
-            db/__tests__/message-authority-issuance.pglite.test.ts lib/auth/organization-admin.pglite.test.ts
-            lib/cases/assignment-profiles.pglite.test.ts lib/cases/automatic-assignment.pglite.test.ts
-            lib/cases/kernel-claims.pglite.test.ts
-          )
-          mkdir -p artifacts/ue-native-pg
-          for suite in "${suites[@]}"; do
-            name=$(basename "$suite" .pglite.test.ts)
-            pnpm --filter @nzila/union-eyes exec vitest run "$suite" --reporter=default --reporter=json \
-              --outputFile="../../artifacts/ue-native-pg/kernel-native-$name.json"
+          # Keep generated results outside the source snapshot while the runner
+          # verifies it. Copy the owned results into the existing artifact only
+          # after execution, retaining partial evidence if a suite fails.
+          authority_output="$(mktemp -d "${RUNNER_TEMP}/ue-native-authority.XXXXXX")"
+          authority_exit_code=0
+          node apps/union-eyes/scripts/runtime/run-authority-native-preflight.mjs --output "$authority_output" || authority_exit_code=$?
+          for result in "$authority_output"/*.json; do
+            if [[ -f "$result" ]]; then cp "$result" artifacts/ue-native-pg/; fi
           done
-          node --input-type=module <<'NODE'
-          import { readdirSync, readFileSync } from 'node:fs'
-          const dir = 'artifacts/ue-native-pg'
-          const files = readdirSync(dir).filter((f) => f.startsWith('kernel-native-'))
-          let total = 0
-          for (const f of files) {
-            const r = JSON.parse(readFileSync(`${dir}/${f}`, 'utf8'))
-            if (r.numFailedTests !== 0 || r.numPendingTests !== 0 || r.numTodoTests !== 0 || r.numTotalTests === 0)
-              throw new Error(`${f}: failed=${r.numFailedTests} skipped=${r.numPendingTests} todo=${r.numTodoTests} total=${r.numTotalTests}`)
-            total += r.numTotalTests
-          }
-          if (files.length !== 25) throw new Error(`expected 25 native suites, found ${files.length}`)
-          console.log(`authority kernel native: ${files.length} suites, ${total} tests, zero failures, zero skips`)
-          NODE
+          exit "$authority_exit_code"
 
       # The Django models are the ORM contract of every Django view, task and command, so they run against the schema the
       # platform migrations built, not the one Django's migrations alone describe: constraints, defaults and types are real.

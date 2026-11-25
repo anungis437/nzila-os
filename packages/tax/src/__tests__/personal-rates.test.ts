@@ -3,6 +3,8 @@
  */
 import { describe, it, expect } from 'vitest'
 import {
+  FEDERAL_BRACKETS_2026,
+  FEDERAL_BPA_2026,
   FEDERAL_BRACKETS_2025,
   FEDERAL_BPA_2025,
   PROVINCIAL_PERSONAL_BRACKETS,
@@ -14,22 +16,22 @@ import {
   getProvincialPersonalSchedule,
 } from '../personal-rates'
 
-describe('FEDERAL_BRACKETS_2025', () => {
+describe('FEDERAL_BRACKETS_2026', () => {
   it('has 5 brackets', () => {
-    expect(FEDERAL_BRACKETS_2025).toHaveLength(5)
+    expect(FEDERAL_BRACKETS_2026).toHaveLength(5)
   })
 
   it('starts at 14%', () => {
-    expect(FEDERAL_BRACKETS_2025[0].rate).toBe(0.14)
+    expect(FEDERAL_BRACKETS_2026[0].rate).toBe(0.14)
   })
 
   it('top bracket is 33%', () => {
-    expect(FEDERAL_BRACKETS_2025[4].rate).toBe(0.33)
-    expect(FEDERAL_BRACKETS_2025[4].to).toBeNull()
+    expect(FEDERAL_BRACKETS_2026[4].rate).toBe(0.33)
+    expect(FEDERAL_BRACKETS_2026[4].to).toBeNull()
   })
 
   it('BPA is $16,452', () => {
-    expect(FEDERAL_BPA_2025).toBe(16_452)
+    expect(FEDERAL_BPA_2026).toBe(16_452)
   })
 })
 
@@ -47,32 +49,52 @@ describe('PROVINCIAL_PERSONAL_BRACKETS', () => {
   })
 })
 
+describe('verified annual 2026 reference corrections', () => {
+  it('uses Manitoba’s enacted frozen boundaries despite the conflicting CRA summary', () => {
+    // MB Income Tax Act s.4.1(2); detailed CRA 2026 T4127 table 8.1.
+    const brackets = PROVINCIAL_PERSONAL_BRACKETS.MB.brackets
+    expect(getMarginalRate(47_500, brackets)).toBe(0.1275)
+    expect(getMarginalRate(100_500, brackets)).toBe(0.174)
+    expect(calculateBracketTax(100_000, brackets)).toBe(47_000 * 0.108 + 53_000 * 0.1275)
+  })
+
+  it('uses Newfoundland’s annual $13,094 BPA, not the $15,000 payroll catch-up', () => {
+    expect(getProvincialPersonalSchedule('NL').basicPersonalAmount).toBe(13_094)
+  })
+
+  it('keeps deprecated 2025 names as compatibility aliases, not historical schedules', () => {
+    expect(FEDERAL_BRACKETS_2025).toBe(FEDERAL_BRACKETS_2026)
+    expect(FEDERAL_BPA_2025).toBe(FEDERAL_BPA_2026)
+    expect(getFederalPersonalSchedule().taxYear).toBe(2026)
+  })
+})
+
 describe('calculateBracketTax', () => {
   it('returns 0 for 0 income', () => {
-    expect(calculateBracketTax(0, FEDERAL_BRACKETS_2025)).toBe(0)
+    expect(calculateBracketTax(0, FEDERAL_BRACKETS_2026)).toBe(0)
   })
 
   it('calculates tax in the first bracket', () => {
     // $50,000 * 14% = $7,000
-    expect(calculateBracketTax(50_000, FEDERAL_BRACKETS_2025)).toBe(7_000)
+    expect(calculateBracketTax(50_000, FEDERAL_BRACKETS_2026)).toBe(7_000)
   })
 
   it('calculates across multiple brackets', () => {
     // First bracket: $58,523 * 0.14 = $8,193.22
     // Second bracket: ($100,000 - $58,523) * 0.205 = $41,477 * 0.205 = $8,502.79
     // Total: $16,696.01
-    const tax = calculateBracketTax(100_000, FEDERAL_BRACKETS_2025)
+    const tax = calculateBracketTax(100_000, FEDERAL_BRACKETS_2026)
     expect(tax).toBeCloseTo(16_696.01, 0)
   })
 })
 
 describe('getMarginalRate', () => {
   it('returns first bracket rate for low income', () => {
-    expect(getMarginalRate(30_000, FEDERAL_BRACKETS_2025)).toBe(0.14)
+    expect(getMarginalRate(30_000, FEDERAL_BRACKETS_2026)).toBe(0.14)
   })
 
   it('returns top bracket rate for high income', () => {
-    expect(getMarginalRate(500_000, FEDERAL_BRACKETS_2025)).toBe(0.33)
+    expect(getMarginalRate(500_000, FEDERAL_BRACKETS_2026)).toBe(0.33)
   })
 })
 
@@ -106,7 +128,7 @@ describe('schedule helpers', () => {
     const s = getFederalPersonalSchedule()
     expect(s.jurisdiction).toBe('federal')
     expect(s.taxYear).toBe(2026)
-    expect(s.brackets).toBe(FEDERAL_BRACKETS_2025) // alias for 2026
+    expect(s.brackets).toBe(FEDERAL_BRACKETS_2026) // alias for 2026
   })
 
   it('getProvincialPersonalSchedule returns correct province', () => {

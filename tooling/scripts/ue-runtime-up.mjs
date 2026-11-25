@@ -45,6 +45,15 @@ const REBUILD = args.includes('--rebuild')
 // --redis adds a real Redis container so rate limiting and the cache run against the real dependency (and can be stopped to test degradation).
 const REDIS = args.includes('--redis')
 const PORT_REDIS = Number(opt('port-redis', '56379'))
+// --azurite adds the public Azurite emulator and the repository's ClamAV HTTP adapter. The key is Microsoft's published
+// emulator key, never an Azure secret. A production process accepts it only for this loopback fixture.
+const AZURITE = args.includes('--azurite')
+const PORT_AZURITE = Number(opt('port-azurite', '10000'))
+const PORT_CLAMAV = Number(opt('port-clamav', '3310'))
+const PORT_CLAMAV_HTTP = Number(opt('port-clamav-http', '18080'))
+export const AZURITE_FIXTURE_ACCOUNT = 'devstoreaccount1'
+export const AZURITE_FIXTURE_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='
+const CLAMAV_IMAGE = 'clamav/clamav@sha256:cbc30de94b6e9b33ac14136ff45306cee02a1f9ae522394a3cc5b9215d1affe9'
 const RUNTIME_ID = opt('runtime-id', '')
 if (RUNTIME_ID && !/^[a-z0-9][a-z0-9-]{0,31}$/.test(RUNTIME_ID)) {
   throw new Error('Runtime ID must be 1-32 lowercase letters, digits, or hyphens')
@@ -52,6 +61,8 @@ if (RUNTIME_ID && !/^[a-z0-9][a-z0-9-]{0,31}$/.test(RUNTIME_ID)) {
 const STATE = RUNTIME_ID ? join(STATE_ROOT,'runs',RUNTIME_ID) : STATE_ROOT
 const runtimeName = (base) => RUNTIME_ID ? `${base}-${RUNTIME_ID}` : base
 const REDIS_CONTAINER = runtimeName('ue-runtime-redis')
+const AZURITE_CONTAINER = runtimeName('ue-runtime-azurite')
+const CLAMAV_CONTAINER = runtimeName('ue-runtime-clamav')
 const CONTAINER = runtimeName('ue-runtime-pg')
 const APP_DB = 'ue_runtime'
 const POSTGRES_VERSION = opt('postgres-version', '16')
@@ -140,6 +151,13 @@ export function runtimeEnv() {
     NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${PORT_APP}`,
     PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
     ...(REDIS ? { REDIS_URL: `redis://127.0.0.1:${PORT_REDIS}` } : {}),
+    ...(AZURITE ? {
+      AZURE_STORAGE_ACCOUNT_NAME: AZURITE_FIXTURE_ACCOUNT,
+      AZURE_STORAGE_ACCOUNT_KEY: AZURITE_FIXTURE_KEY,
+      AZURE_STORAGE_BLOB_ENDPOINT: `http://127.0.0.1:${PORT_AZURITE}/${AZURITE_FIXTURE_ACCOUNT}`,
+      AZURE_BLOB_CONTAINER: 'union-eyes',
+      CLAMAV_URL: `http://127.0.0.1:${PORT_CLAMAV_HTTP}`,
+    } : {}),
     UE_RUNTIME_REDIS_CONTAINER: REDIS ? REDIS_CONTAINER : '',
     NAR_SIGNING_SECRET: secrets().nar,
     // Seals queued correspondence (lib/correspondence/email-intent.ts); production provisions its own (bicep evidence-seal-key).
@@ -231,6 +249,7 @@ async function up() {
   const labels = ['--label', `nzila.mission=${UE_DISPOSABLE_MISSION}`, '--label', `nzila.qualification-owner=${owner}`]
   const redisExists = isOwnedContainer(REDIS_CONTAINER)
   const pgExists = isOwnedContainer(CONTAINER)
+  if (AZURITE) await ensureDocumentFixture(labels)
   if (REDIS) {
     const redisRunning = out('docker', ['ps', '--filter', `name=^/${REDIS_CONTAINER}$`, '--format', '{{.Names}}'])
     if(FRESH&&redisExists)run('docker',['rm','-f',REDIS_CONTAINER])
@@ -304,7 +323,7 @@ function startApp() {
   // extension aliases required by NodeNext-style workspace source imports.
   if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID'))))
     run('pnpm', [...filter, 'build'], { env: runtimeEnv() })
-  const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['dev']
+  const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['exec', 'next', 'dev', '--webpack', '--port', String(PORT_APP)]
   const log = openSync(join(STATE, 'app.log'), 'a')
   const child = spawn('pnpm', [...filter, ...serve], {
     cwd: ROOT, env: { ...process.env, ...runtimeEnv() }, shell: useShell('pnpm'), detached: true, stdio: ['ignore', log, log],
@@ -325,7 +344,43 @@ function test() {
   // Separate machine-readable reports ensure later Playwright invocations never overwrite earlier proof.
   // They stay under the ignored disposable state directory and must be selectively uploaded (no secrets.json).
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], {
-    cwd: APP, env: { ...testEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+    cwd: APP, env: { ...testEnv(), ...ownedAzuriteEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+  })
+}
+
+/** Storage settings recorded by `up --azurite`, so a later spec or test sees the same loopback fixture. */
+function ownedAzuriteEnv() {
+  const file = join(STATE, 'runtime-public.json')
+  if (!existsSync(file)) return {}
+  let fixture
+  try { fixture = JSON.parse(readFileSync(file, 'utf8')) } catch { return {} }
+  const azurite = fixture?.azurite
+  if (!azurite?.endpoint || !azurite.container || !azurite.clamavUrl) return {}
+  return {
+    AZURE_STORAGE_ACCOUNT_NAME: AZURITE_FIXTURE_ACCOUNT,
+    AZURE_STORAGE_ACCOUNT_KEY: AZURITE_FIXTURE_KEY,
+    AZURE_STORAGE_BLOB_ENDPOINT: azurite.endpoint,
+    AZURE_BLOB_CONTAINER: azurite.container,
+    CLAMAV_URL: azurite.clamavUrl,
+  }
+}
+
+/** Runs one extra Playwright config (browser or document acceptance) against the owned runtime, with its own report. */
+function spec() {
+  const config = opt('config', '')
+  if (!/^playwright\.[a-z-]+\.config\.ts$/.test(config)) throw new Error('spec requires --config playwright.<name>.config.ts')
+  const extra = ['project', 'grep'].flatMap((name) => (opt(name, '') ? [`--${name}`, opt(name, '')] : []))
+  const label = opt('label', config.replace(/^playwright\.|\.config\.ts$/g, ''))
+  run('npx', ['playwright', 'test', '--config', config, ...extra], {
+    cwd: APP,
+    env: {
+      ...testEnv(),
+      ...ownedAzuriteEnv(),
+      PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
+      UE_RUNTIME_STATE_DIR: STATE,
+      UE_RUNTIME_REPORT: join(STATE, `playwright-${label}.json`),
+      UE_RUNTIME_ARTIFACTS: join(STATE, `playwright-${label}-artifacts`),
+    },
   })
 }
 
@@ -367,9 +422,79 @@ async function restartCheck() {
 function down() {
   const pgOwned = isOwnedContainer(CONTAINER)
   const redisOwned = isOwnedContainer(REDIS_CONTAINER)
+  const azuriteOwned = isOwnedContainer(AZURITE_CONTAINER)
+  const clamavOwned = isOwnedContainer(CLAMAV_CONTAINER)
   stopApp()
+  stopClamavAdapter()
   if (pgOwned) run('docker', ['rm', '-f', CONTAINER])
   if (redisOwned) run('docker', ['rm', '-f', REDIS_CONTAINER])
+  if (azuriteOwned) run('docker', ['rm', '-f', AZURITE_CONTAINER])
+  if (clamavOwned) run('docker', ['rm', '-f', CLAMAV_CONTAINER])
+}
+
+function stopClamavAdapter() {
+  const pidFile = join(STATE, 'clamav-adapter.pid')
+  if (!existsSync(pidFile)) return
+  const pid = readFileSync(pidFile, 'utf8').trim()
+  try { process.kill(Number(pid)) } catch { /* already gone */ }
+}
+
+async function ensureDocumentFixture(labels) {
+  stopClamavAdapter()
+  const startOwned = (name, args) => {
+    const exists = isOwnedContainer(name)
+    if (FRESH && exists) run('docker', ['rm', '-f', name])
+    const running = out('docker', ['ps', '--filter', `name=^/${name}$`, '--format', '{{.Names}}'])
+    if (!running || FRESH) {
+      if (exists && !FRESH) run('docker', ['start', name])
+      else run('docker', ['run', '-d', '--name', name, ...labels, ...args])
+    }
+  }
+  startOwned(AZURITE_CONTAINER, ['-p', `127.0.0.1:${PORT_AZURITE}:10000`, 'mcr.microsoft.com/azure-storage/azurite'])
+  checkLoopbackPort(AZURITE_CONTAINER, PORT_AZURITE, 10000)
+  await waitHttp(PORT_AZURITE, 60_000)
+  startOwned(CLAMAV_CONTAINER, ['-p', `127.0.0.1:${PORT_CLAMAV}:3310`, CLAMAV_IMAGE])
+  checkLoopbackPort(CLAMAV_CONTAINER, PORT_CLAMAV, 3310)
+  const log = openSync(join(STATE, 'clamav-adapter.log'), 'a')
+  const child = spawn(process.execPath, [join(ROOT, 'services/clamav-adapter/server.js')], {
+    cwd: ROOT,
+    env: { ...process.env, CLAMD_HOST: '127.0.0.1', CLAMD_PORT: String(PORT_CLAMAV), PORT: String(PORT_CLAMAV_HTTP) },
+    detached: true,
+    stdio: ['ignore', log, log],
+  })
+  child.unref()
+  writeFileSync(join(STATE, 'clamav-adapter.pid'), String(child.pid))
+  const until = Date.now() + 180_000
+  while (Date.now() < until) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${PORT_CLAMAV_HTTP}/health`, { signal: AbortSignal.timeout(3_000) })
+      if (response.ok) break
+    } catch { /* clamd is still loading its signature database */ }
+    await new Promise((r) => setTimeout(r, 3_000))
+  }
+  const ready = await fetch(`http://127.0.0.1:${PORT_CLAMAV_HTTP}/health`, { signal: AbortSignal.timeout(3_000) }).then((response) => response.ok, () => false)
+  if (!ready) throw new Error('the owned ClamAV fixture did not become healthy')
+  writeFileSync(join(STATE, 'runtime-public.json'), JSON.stringify({
+    azurite: {
+      endpoint: `http://127.0.0.1:${PORT_AZURITE}/${AZURITE_FIXTURE_ACCOUNT}`,
+      container: 'union-eyes',
+      clamavUrl: `http://127.0.0.1:${PORT_CLAMAV_HTTP}`,
+    },
+  }), { mode: 0o600 })
+}
+
+async function waitHttp(port, timeoutMs) {
+  const until = Date.now() + timeoutMs
+  while (Date.now() < until) {
+    try {
+      await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(2_000) })
+      return
+    } catch (error) {
+      if (!/ECONNREFUSED|fetch failed/i.test(String(error))) return
+    }
+    await new Promise((r) => setTimeout(r, 1_000))
+  }
+  throw new Error(`127.0.0.1:${port} did not accept connections`)
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -377,6 +502,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   else if (command === 'up' || command === 'db') await up()
   else if (command === 'seed') seed()
   else if (command === 'test') test()
+  else if (command === 'spec') spec()
   else if (command === 'restart-check') await restartCheck()
   else if (command === 'down') down()
   else if (command === 'all') {

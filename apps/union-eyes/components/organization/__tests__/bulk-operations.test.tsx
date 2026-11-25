@@ -150,7 +150,7 @@ describe('BulkOperations: changing organizations', () => {
     await user.click(screen.getByRole('button', { name: /Activate/ }));
 
     await waitFor(() => expect(toast).toHaveBeenCalledTimes(1));
-    expect(toast).toHaveBeenCalledWith({ title: 'No organization was activated', description: 'Failed to fetch; Database unavailable', variant: 'destructive' });
+    expect(toast).toHaveBeenCalledWith({ title: 'No organization was activated', description: 'The request did not reach the server; The service is temporarily unavailable. Try again shortly.', variant: 'destructive' });
     expect(onSuccess).not.toHaveBeenCalled();
   });
 

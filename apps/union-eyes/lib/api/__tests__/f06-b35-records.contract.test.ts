@@ -9,10 +9,17 @@ describe('F06 audit reads, aliases and read-only GETs', () => {
   it('the organization audit-log list names its columns and serves none of the captured values or network details', () => {
     const source = read('app/api/compliance/audit-logs/route.ts')
     const get = source.slice(source.indexOf('export const GET ='), source.indexOf('export const POST ='))
-    expect(get).toContain('auditId: auditLogs.auditId')
+    expect(get).toContain('await listAuditEntries(tx, organizationId)')
+    const reader = read('lib/audit/audit-reader.ts')
+    expect(reader).toContain('auditId: auditLogs.auditId')
+    expect(reader).toContain('SELECT audit_id, action, resource_type, resource_id, user_id, created_at')
+    expect(reader).toContain('.select(legacyEntryColumns())')
+    expect(reader).not.toMatch(/SELECT\s+\*/i)
     expect(get).not.toMatch(/\.select\(\)/)
+    expect(reader).not.toMatch(/\.select\(\)/)
     for (const column of ['ipAddress', 'userAgent', 'oldValues', 'newValues', 'sessionId', 'correlationId', 'metadata', 'errorMessage', 'archivedPath']) {
       expect(get, column).not.toContain(`auditLogs.${column}`)
+      expect(reader, column).not.toContain(`auditLogs.${column}`)
     }
   })
 

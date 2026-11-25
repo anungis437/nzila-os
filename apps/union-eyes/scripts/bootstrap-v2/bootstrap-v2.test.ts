@@ -1,4 +1,5 @@
 import pg from 'pg'
+import { readFileSync } from 'node:fs'
 import currentSourcePlan from '../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'
 import admissionDecisions from '../../lib/operations/catalog-v2-decisions.json'
 import { describe, expect, it } from 'vitest'
@@ -13,6 +14,7 @@ import {
 import { compileSecurity } from './security'
 import {
   assertCurrentModelOwnership,
+  assertCurrentSourceCommitments,
   currentModelServerDefaults,
   hash,
   quote,
@@ -70,6 +72,13 @@ function plan(tables: SourceTable[]): V2Plan {
 }
 
 describe('prospective bootstrap local authority boundaries', () => {
+  it('binds the shared case-link classifier and refuses its source digest drift', () => {
+    const input = 'apps/union-eyes/lib/documents/case-link.ts'
+    const actual = hash(readFileSync(new URL('../../lib/documents/case-link.ts', import.meta.url), 'utf8'))
+    expect(currentSourcePlan.sourceCommitments[input]).toBe(actual)
+    expect(() => assertCurrentSourceCommitments({ sourceCommitments: { [input]: '0'.repeat(64) } }))
+      .toThrow(`UE_V2_SOURCE_COMMITMENT_DRIFT:${input}`)
+  })
   // Current module admission reads operational state only; no historical
   // commercial transition writer authority is a base-release positive.
   it('preserves the genuine runtime module-admission projection with exact zero SYSTEM powers',()=>{

@@ -175,7 +175,7 @@ describe('AdminPage: overview', () => {
     renderPage();
 
     expect(await screen.findByText('The platform statistics could not be loaded')).toBeInTheDocument();
-    expect(screen.getByText('Unexpected API response: incomplete statistics')).toBeInTheDocument();
+    expect(screen.queryByText(/Unexpected API response/)).toBeNull();
   });
 
   it('shows member figures the route does not measure (null, #1118) as not recorded, not as zero or a failure', async () => {
@@ -266,7 +266,7 @@ describe('AdminPage: users', () => {
     open(enCA.admin.sections.userManagement);
     fireEvent.click(await screen.findByRole('button', { name: 'active' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('The status could not be changed: Forbidden'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('The status could not be changed: You do not have permission to do this.'));
     expect(toast.success).not.toHaveBeenCalled();
   });
 
@@ -410,7 +410,7 @@ describe('AdminPage: database', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Optimize Database' }));
 
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('ANALYZE ran but this role owns none of the tables, so no planner statistics were updated'),
+      expect(toast.error).toHaveBeenCalledWith('The database could not be optimized: ANALYZE ran but this role owns none of the tables, so no planner statistics were updated'),
     );
     expect(toast.success).not.toHaveBeenCalled();
   });
@@ -423,7 +423,7 @@ describe('AdminPage: database', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Optimize Database' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Forbidden'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('The database could not be optimized: You do not have permission to do this.'));
   });
 });
 
@@ -460,7 +460,7 @@ describe('AdminPage: AI endpoint testing', () => {
     expect(JSON.parse(String(call[1]?.body))).toEqual({ query_id: 'query-42', rating: 'bad' });
   });
 
-  it('shows an error answer as an error, with the status and the body as received', async () => {
+  it('shows an error answer as an error, with the status and controlled wording', async () => {
     server.ai = () => new Response('plain text failure', { status: 500 });
     await openTester();
     fireEvent.change(document.getElementById('search-query')!, { target: { value: 'union rights' } });
@@ -469,7 +469,8 @@ describe('AdminPage: AI endpoint testing', () => {
 
     const result = await screen.findByRole('alert');
     expect(result).toHaveTextContent('Error (500)');
-    expect(result).toHaveTextContent('plain text failure');
+    expect(result).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(result).not.toHaveTextContent('plain text failure');
     expect(JSON.parse(String(callsTo('/api/ai/search', 'POST')[0][1]?.body))).toEqual({ query: 'union rights', max_results: 5 });
   });
 
@@ -482,7 +483,9 @@ describe('AdminPage: AI endpoint testing', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Get Feedback' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('connection reset');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Network error');
+    expect(alert).not.toHaveTextContent('connection reset');
   });
 });
 
@@ -538,6 +541,23 @@ describe('AdminPage: French', () => {
     expect(await screen.findByText('Connexions actives')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Optimiser la base de données' }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('La base de données n’a pas pu être optimisée (HTTP 500)'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('La base de données n’a pas pu être optimisée: Le service est momentanément indisponible. Réessayez sous peu.'));
+  });
+  it('words a refused statistics read and a refused removal in French, without the route’s English reason', async () => {
+    server.stats = () => standardErrorResponse(ErrorCode.INSUFFICIENT_PERMISSIONS, "Requires at least 'platform_lead' role");
+    server.userDelete = () => Response.json({ error: 'Member not found' }, { status: 404 });
+    renderPage('fr-CA');
+    const failure = await screen.findByText(frCA.adminConsolePage.statsFailed);
+    expect(failure.closest('[role="alert"]')).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
+    expect(failure.closest('[role="alert"]')).not.toHaveTextContent('platform_lead');
+
+    open(frCA.admin.sections.userManagement);
+    await screen.findByText('Alex Worker');
+    fireEvent.click(screen.getByRole('button', { name: frCA.adminConsolePage.removeUser }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledOnce());
+    const shown = String(toast.error.mock.calls[0][0]);
+    expect(shown).toContain(frCA.adminConsolePage.removeFailed);
+    expect(shown).not.toContain('Member not found');
+    expect(toast.success).not.toHaveBeenCalled();
   });
 });

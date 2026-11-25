@@ -1,0 +1,8 @@
+{
+  "extends": "./ue-v2-forward-upgrade.tsconfig.json",
+  "include": ["prove-ue-v2-second-increment.cts", "lib/ue-v2-second-increment.test.ts"],
+  "exclude": ["../../node_modules"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true
+  }
+}

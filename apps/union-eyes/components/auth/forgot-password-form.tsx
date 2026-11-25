@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { postJson, UNEXPECTED_MESSAGE } from './auth-client';
+import { useTranslations } from 'next-intl';
+import { postJson } from './auth-client';
+import { useRecoveryMessage } from './recovery-messages';
 
 export function ForgotPasswordForm() {
+  const t = useTranslations('passwordRecovery');
+  const localize = useRecoveryMessage();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,14 +20,14 @@ export function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      const answer = await postJson('/api/auth/forgot-password', { email }, 'Something went wrong');
+      const answer = await postJson('/api/auth/forgot-password', { email }, t('requestFailed'));
       if (!answer.ok) {
-        setError(answer.message);
+        setError(localize(answer.message));
         return;
       }
       // The route answers the same neutral { message } whether or not an account exists; an answer without it is not that.
       if (typeof answer.data.message !== 'string') {
-        setError(UNEXPECTED_MESSAGE);
+        setError(t('unexpectedError'));
         return;
       }
       setSubmitted(true);
@@ -36,10 +40,9 @@ export function ForgotPasswordForm() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Check your email</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('checkEmailTitle')}</h2>
           <p className="mt-2 text-sm text-gray-500">
-            If an account with <strong>{email}</strong> exists, we&apos;ve sent a link to reset
-            your password. The link expires in 1 hour.
+            {t.rich('checkEmailBody', { email, strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
         </div>
 
@@ -47,7 +50,7 @@ export function ForgotPasswordForm() {
           href="/login"
           className="inline-block text-sm text-electric hover:text-blue-700 font-medium transition-colors"
         >
-          &larr; Back to sign in
+          {t('backToSignIn')}
         </Link>
       </div>
     );
@@ -56,9 +59,9 @@ export function ForgotPasswordForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Forgot your password?</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('forgotTitle')}</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Enter your email and we&apos;ll send you a reset link.
+          {t('forgotIntro')}
         </p>
       </div>
 
@@ -71,7 +74,7 @@ export function ForgotPasswordForm() {
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email
+            {t('email')}
           </label>
           <input
             id="email"
@@ -81,7 +84,7 @@ export function ForgotPasswordForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-electric focus:ring-2 focus:ring-electric/20 outline-none transition-colors"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
           />
         </div>
 
@@ -90,14 +93,14 @@ export function ForgotPasswordForm() {
           disabled={loading}
           className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Sending…' : 'Send reset link'}
+          {loading ? t('sending') : t('sendResetLink')}
         </button>
       </form>
 
       <p className="text-center text-sm text-gray-500">
-        Remember your password?{' '}
+        {t('rememberPassword')}{' '}
         <Link href="/login" className="text-electric hover:text-blue-700 font-medium transition-colors">
-          Sign in
+          {t('signIn')}
         </Link>
       </p>
     </div>

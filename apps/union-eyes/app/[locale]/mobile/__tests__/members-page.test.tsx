@@ -207,7 +207,8 @@ describe('MobileMembersPage: a directory longer than one page', () => {
     const user = userEvent.setup();
     render(<MobileMembersPage />);
     await user.click(await screen.findByRole('button', { name: 'loadMore' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('loadFailed Database unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('loadFailed Database unavailable');
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
   });
 

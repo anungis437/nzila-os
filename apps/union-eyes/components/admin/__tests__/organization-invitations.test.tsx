@@ -77,4 +77,32 @@ describe('organization invitations', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('could not be completed');
     expect(screen.queryByRole('status')).toBeNull();
   });
+
+  it('shows the server\'s English reason to an English page when an invitation is refused', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (_url, init) => init?.method ? Response.json({ code: 'CONFLICT', message: 'An invitation is already pending for this email' }, { status: 409 }) : Response.json({ invitations: [] })));
+    render(<OrganizationInvitations />); await create();
+    expect(await screen.findByRole('alert')).toHaveTextContent('An invitation is already pending for this email');
+  });
+  it('words a refused invitation in French on a French page and never shows the English reason', async () => {
+    settings.locale = 'fr-CA';
+    vi.stubGlobal('fetch', vi.fn(async (_url, init) => init?.method ? Response.json({ code: 'CONFLICT', message: 'An invitation is already pending for this email' }, { status: 409 }) : Response.json({ invitations: [] })));
+    const user = userEvent.setup(); render(<OrganizationInvitations />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Créer une invitation' })).toBeEnabled());
+    await user.type(screen.getByLabelText('Courriel'), 'new@example.invalid');
+    await user.click(screen.getByRole('button', { name: 'Créer une invitation' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Actualisez');
+    expect(alert.textContent).not.toMatch(/invitation is already/);
+  });
+  it('words a denied or failed request in French without status lines or browser text', async () => {
+    settings.locale = 'fr-CA';
+    vi.stubGlobal('fetch', vi.fn(async (_url, init) => { if (init?.method) throw new TypeError('Failed to fetch'); return Response.json({ invitations: [] }); }));
+    const user = userEvent.setup(); render(<OrganizationInvitations />);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Créer une invitation' })).toBeEnabled());
+    await user.type(screen.getByLabelText('Courriel'), 'new@example.invalid');
+    await user.click(screen.getByRole('button', { name: 'Créer une invitation' }));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('La demande n’a pas pu être traitée');
+    expect(alert.textContent).not.toMatch(/fetch/i);
+  });
 });

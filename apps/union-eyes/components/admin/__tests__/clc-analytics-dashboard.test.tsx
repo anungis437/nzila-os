@@ -158,7 +158,9 @@ describe('CLCAnalyticsDashboard: when a load fails', () => {
     server.annual = () => Response.json({ success: true, data: report() });
     render(<CLCAnalyticsDashboard />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unexpected API response: not an annual compliance report');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Something went wrong. Try again.');
+    expect(alert).not.toHaveTextContent('Unexpected API response');
     expect(screen.queryByText('1,234')).toBeNull();
   });
 
@@ -169,7 +171,9 @@ describe('CLCAnalyticsDashboard: when a load fails', () => {
     server.annual = () => new Response('unavailable', { status: 503 });
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('HTTP 503');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(alert).not.toHaveTextContent('HTTP 503');
     expect(screen.queryByText('1,234')).toBeNull();
   });
 
@@ -218,9 +222,10 @@ describe('CLCAnalyticsDashboard: French', () => {
     const alerts = await screen.findAllByRole('alert');
     expect(alerts).toHaveLength(2);
     expect(alerts[0]).toHaveTextContent(`Le rapport de conformité de ${new Date().getFullYear()} n’a pas pu être chargé`);
-    expect(alerts[0]).toHaveTextContent('Contexte d’organisation requis');
+    expect(alerts[0]).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
     expect(alerts[1]).toHaveTextContent('Les tendances pluriannuelles n’ont pas pu être chargées');
-    expect(alerts[1]).toHaveTextContent('HTTP 503');
+    expect(alerts[1]).toHaveTextContent('Le service est momentanément indisponible. Réessayez sous peu.');
+    expect(alerts[1]).not.toHaveTextContent('HTTP 503');
     for (const alert of alerts) expect(within(alert).getByRole('button', { name: 'Réessayer' })).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/could not be loaded|Retry/);
   });

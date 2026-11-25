@@ -29,7 +29,7 @@ describe('Federal rates', () => {
     expect(FEDERAL_SMALL_BUSINESS_RATE).toBe(0.09)
   })
 
-  it('M&P rate is 13%', () => {
+  it('M&P deduction is 13%, distinct from the 15% net general rate', () => {
     expect(FEDERAL_MP_RATE).toBe(0.13)
   })
 })
@@ -43,8 +43,8 @@ describe('SBD thresholds', () => {
     expect(SBD_CAPITAL_GRIND_START).toBe(10_000_000)
   })
 
-  it('capital grind ends at $15M', () => {
-    expect(SBD_CAPITAL_GRIND_END).toBe(15_000_000)
+  it('capital grind ends at $50M', () => {
+    expect(SBD_CAPITAL_GRIND_END).toBe(50_000_000)
   })
 })
 
@@ -74,11 +74,35 @@ describe('PROVINCIAL_RATES', () => {
   })
 })
 
+describe('2026 provincial rate applicability', () => {
+  // CRA current corporation rates and RQ's 2026-05-04 SBD notice specify
+  // different transition conditions; these snapshots are not whole-year rates.
+  it('preserves Ontario’s midyear split and earlier 3.2% rate', () => {
+    expect(PROVINCIAL_RATES.ON.smallBusinessRate).toBe(0.022)
+    expect(PROVINCIAL_RATES.ON.effectiveFrom).toBe('2026-07-01')
+    expect(PROVINCIAL_RATES.ON.smallBusinessRateCondition).toContain('3.2% before')
+    expect(PROVINCIAL_RATES.ON.smallBusinessRateCondition).toContain('Prorate')
+  })
+
+  it('preserves Quebec’s strict taxation-year-start condition', () => {
+    expect(PROVINCIAL_RATES.QC.smallBusinessRate).toBe(0.022)
+    expect(PROVINCIAL_RATES.QC.effectiveFrom).toBe('2026-04-30')
+    expect(PROVINCIAL_RATES.QC.smallBusinessRateCondition).toContain('beginning after 2026-04-29')
+    expect(PROVINCIAL_RATES.QC.smallBusinessRateCondition).toContain('3.2% for earlier starts')
+  })
+
+  it('preserves Newfoundland’s calendar-date transition from 2.5%', () => {
+    expect(PROVINCIAL_RATES.NL.smallBusinessRate).toBe(0.02)
+    expect(PROVINCIAL_RATES.NL.effectiveFrom).toBe('2026-01-01')
+    expect(PROVINCIAL_RATES.NL.smallBusinessRateCondition).toContain('2.5% before')
+  })
+})
+
 describe('getCombinedCorporateRates', () => {
   it('combines federal + Ontario rates', () => {
     const rates = getCombinedCorporateRates('ON')
     expect(rates.combinedGeneralRate).toBeCloseTo(0.265, 4) // 15% + 11.5%
-    expect(rates.combinedSmallBusinessRate).toBeCloseTo(0.122, 4) // 9% + 3.2%
+    expect(rates.combinedSmallBusinessRate).toBeCloseTo(0.112, 4) // current snapshot: 9% + 2.2%
     expect(rates.sbdLimit).toBe(500_000)
   })
 
@@ -102,14 +126,14 @@ describe('calculateSbdBusinessLimit', () => {
     expect(calculateSbdBusinessLimit(10_000_000)).toBe(500_000)
   })
 
-  it('returns 0 at $15M or above', () => {
-    expect(calculateSbdBusinessLimit(15_000_000)).toBe(0)
-    expect(calculateSbdBusinessLimit(20_000_000)).toBe(0)
+  it('returns 0 at $50M or above', () => {
+    expect(calculateSbdBusinessLimit(50_000_000)).toBe(0)
+    expect(calculateSbdBusinessLimit(60_000_000)).toBe(0)
   })
 
-  it('grinds linearly between $10M and $15M', () => {
-    const at12_5M = calculateSbdBusinessLimit(12_500_000)
-    expect(at12_5M).toBe(250_000) // halfway
+  it('uses the $10M–$50M range rather than eliminating SBD at $15M', () => {
+    expect(calculateSbdBusinessLimit(15_000_000)).toBe(437_500)
+    expect(calculateSbdBusinessLimit(30_000_000)).toBe(250_000) // halfway
   })
 })
 
@@ -133,19 +157,19 @@ describe('calculateAaiiBusinessLimit', () => {
 describe('estimateCorporateTax', () => {
   it('taxes all income at SBD rate for small CCPC', () => {
     const result = estimateCorporateTax('ON', 200_000)
-    // 200K * 12.2% = 24,400
-    expect(result.estimatedTax).toBeCloseTo(24_400, 0)
-    expect(result.breakdown.sbd).toBeCloseTo(24_400, 0)
+    // Current snapshot: 200K * 11.2% = 22,400
+    expect(result.estimatedTax).toBeCloseTo(22_400, 0)
+    expect(result.breakdown.sbd).toBeCloseTo(22_400, 0)
     expect(result.breakdown.general).toBe(0)
   })
 
   it('splits at SBD limit for income > $500K', () => {
     const result = estimateCorporateTax('ON', 800_000)
-    // SBD: 500K * 12.2% = 61,000
+    // Current snapshot SBD: 500K * 11.2% = 56,000
     // General: 300K * 26.5% = 79,500
-    expect(result.breakdown.sbd).toBeCloseTo(61_000, 0)
+    expect(result.breakdown.sbd).toBeCloseTo(56_000, 0)
     expect(result.breakdown.general).toBeCloseTo(79_500, 0)
-    expect(result.estimatedTax).toBeCloseTo(140_500, 0)
+    expect(result.estimatedTax).toBeCloseTo(135_500, 0)
   })
 
   it('applies general rate only for non-CCPC', () => {
@@ -162,7 +186,7 @@ describe('estimateCorporateTax', () => {
   })
 
   it('grinds SBD when taxable capital is high', () => {
-    const result = estimateCorporateTax('ON', 500_000, { taxableCapital: 15_000_000 })
+    const result = estimateCorporateTax('ON', 500_000, { taxableCapital: 50_000_000 })
     // SBD fully ground down — all at general rate
     expect(result.breakdown.sbd).toBe(0)
     expect(result.breakdown.general).toBeCloseTo(500_000 * 0.265, 0)

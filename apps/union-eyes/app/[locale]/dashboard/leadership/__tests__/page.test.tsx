@@ -6,7 +6,8 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 
 const translate = vi.hoisted(() => (key: string) => key);
-vi.mock('next-intl', () => ({ useLocale: () => 'en-CA', useTranslations: () => translate }));
+const intl = vi.hoisted(() => ({ locale: 'en-CA' }));
+vi.mock('next-intl', () => ({ useLocale: () => intl.locale, useTranslations: () => translate }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
 vi.mock('@/components/ui/loading-skeleton-composer', () => ({ LoadingSkeletonComposer: () => <div>skeleton</div> }));
 vi.mock('@/components/leadership/kpi-cards', () => ({ KpiCards: () => <div>kpi-cards</div> }));
@@ -65,6 +66,15 @@ describe('leadership page', () => {
     expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     expect(screen.queryByText('view-employer')).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
+  });
+
+  it('words a refusal in French and does not show the route\'s English reason', async () => {
+    intl.locale = 'fr-CA';
+    answer = { status: 403, body: { code: 'FORBIDDEN', message: 'Requires officer role or above' } };
+    render(<LeadershipPage />);
+    expect(await screen.findByText('Vous n’avez pas l’autorisation d’effectuer cette action.')).toBeInTheDocument();
+    expect(screen.queryByText('Requires officer role or above')).toBeNull();
+    intl.locale = 'en-CA';
   });
 
   it('says why the dashboard could not be read, with the route\'s own reason, and offers a retry', async () => {

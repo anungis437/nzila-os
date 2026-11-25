@@ -103,7 +103,8 @@ describe('CommunicationPreferencesPage (jsdom, mocked server)', () => {
   it('shows a retryable error when the preferences cannot be read, instead of an empty form', async () => {
     mockServer({ 'GET /api/notifications/preferences': () => ({ status: 500, body: { code: 'INTERNAL_ERROR', message: 'Internal error' } }) });
     render(<CommunicationPreferencesPage />);
-    expect(await screen.findByText('Internal error')).toBeInTheDocument();
+    expect(await screen.findByText('errors.fetchFailed')).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('Internal error');
     expect(screen.getByRole('button', { name: 'retryButton' })).toBeInTheDocument();
     expect(screen.queryByRole('switch')).not.toBeInTheDocument();
   });

@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import type { OrganizationStatus } from "@/types/organization";
 import { generateCSV, type CSVColumn } from "@/lib/csv-export";
-import { isRecord, readApiError } from "@/lib/client/api-envelope";
+import { failureText, isRecord, readApiError } from "@/lib/client/api-envelope";
 import { ApiShapeError, asRecord, optionalString, requiredString } from "@/lib/client/row-fields";
 
 interface BulkOperationsProps {
@@ -56,7 +56,7 @@ interface Outcome {
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const plural = (count: number) => `${count} organization${count === 1 ? "" : "s"}`;
-const reasonOf = (error: unknown) => (error instanceof Error && error.message ? error.message : "The request failed");
+const reasonOf = (error: unknown) => failureText(error, "The request did not reach the server");
 
 /** One change to one organization: null when the route accepted it, else why it did not. */
 async function patchOrganization(id: string, body: Record<string, unknown>): Promise<Outcome> {

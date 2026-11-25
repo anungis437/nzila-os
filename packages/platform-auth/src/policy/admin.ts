@@ -21,16 +21,57 @@ export interface PolicyPatch {
   mfaRequiredForRoles?: string[]
 }
 
+/** The policy a caller last read. When given, the update applies only if the stored policy is still exactly this one. */
+export type ExpectedPolicy = Omit<OrgAuthPolicy, 'organizationId'>
+
 export interface UpdatePolicyInput {
   organizationId: string
   actorUserId: string
   patch: PolicyPatch
+  expected?: ExpectedPolicy
 }
 
 export interface UpdatePolicyResult {
   success: boolean
   policy?: OrgAuthPolicy
   error?: string
+  /** True when `expected` no longer matches the stored policy: nothing was written. */
+  conflict?: boolean
+}
+
+const BOOLEAN_FIELDS = [
+  'allowLocalAuth',
+  'allowMagicLink',
+  'allowSso',
+  'requireSso',
+  'requireInvite',
+  'passwordResetAllowed',
+] as const
+
+const sameSet = (a: readonly string[], b: readonly string[]) => {
+  const left = new Set(a.map((value) => value.toLowerCase()))
+  const right = new Set(b.map((value) => value.toLowerCase()))
+  return left.size === right.size && [...left].every((value) => right.has(value))
+}
+
+function matchesExpected(current: OrgAuthPolicy, expected: ExpectedPolicy): boolean {
+  return (
+    BOOLEAN_FIELDS.every((key) => current[key] === expected[key]) &&
+    sameSet(current.allowedEmailDomains, expected.allowedEmailDomains) &&
+    sameSet(current.mfaRequiredForRoles, expected.mfaRequiredForRoles)
+  )
+}
+
+/** Domains are stored lower-case, trimmed and without duplicates; roles without duplicates. What is stored is what the caller reads back. */
+function normalizePatch(patch: PolicyPatch): PolicyPatch {
+  const unique = (values: string[]) => [...new Set(values)]
+  return {
+    ...patch,
+    ...(patch.allowedEmailDomains && {
+      allowedEmailDomains: unique(patch.allowedEmailDomains.map((domain) => domain.trim().toLowerCase())),
+    }),
+    ...(patch.mfaRequiredForRoles && { mfaRequiredForRoles: unique(patch.mfaRequiredForRoles) }),
+  }
 }
 
 function validatePatch(patch: PolicyPatch): string | null {
@@ -61,23 +102,37 @@ function validatePatch(patch: PolicyPatch): string | null {
   return null
 }
 
+function isUniqueViolation(error: unknown): boolean {
+  const code = (error as { code?: unknown; cause?: { code?: unknown } } | null)
+  return code?.code === '23505' || code?.cause?.code === '23505'
+}
+
 export async function updateOrgAuthPolicy(
   input: UpdatePolicyInput,
 ): Promise<UpdatePolicyResult> {
-  const err = validatePatch(input.patch)
+  const patch = normalizePatch(input.patch)
+  const err = validatePatch(patch)
   if (err) return { success: false, error: err }
-  return withTenantAuthContext(input.actorUserId, input.organizationId, () => updateWithContext(input))
+  return withTenantAuthContext(input.actorUserId, input.organizationId, () => updateWithContext({ ...input, patch }))
 }
 
 async function updateWithContext(input: UpdatePolicyInput): Promise<UpdatePolicyResult> {
-  const before = await getOrgAuthPolicy(input.organizationId)
-
-  // Upsert. If no row existed, insert with defaults + patch.
+  // The row is locked before it is read, so the policy compared, the diff audited and the policy written are one serialized state.
   const [existing] = await db
     .select({ organizationId: authOrgPolicies.organizationId })
     .from(authOrgPolicies)
     .where(eq(authOrgPolicies.organizationId, input.organizationId))
     .limit(1)
+    .for('update')
+
+  const before = await getOrgAuthPolicy(input.organizationId)
+  if (input.expected && !matchesExpected(before, input.expected)) {
+    return { success: false, conflict: true, error: 'The sign-in policy changed after it was loaded' }
+  }
+  const merged = { ...before, ...input.patch }
+  if (merged.requireSso && !merged.allowSso) {
+    return { success: false, error: 'Cannot require SSO while disabling it' }
+  }
 
   if (existing) {
     await db
@@ -112,18 +167,26 @@ async function updateWithContext(input: UpdatePolicyInput): Promise<UpdatePolicy
       })
       .where(eq(authOrgPolicies.organizationId, input.organizationId))
   } else {
-    await insertAuthRow(authOrgPolicies, {
-      organizationId: input.organizationId,
-      allowLocalAuth: input.patch.allowLocalAuth ?? true,
-      allowMagicLink: input.patch.allowMagicLink ?? true,
-      allowSso: input.patch.allowSso ?? true,
-      requireSso: input.patch.requireSso ?? false,
-      requireInvite: input.patch.requireInvite ?? false,
-      passwordResetAllowed: input.patch.passwordResetAllowed ?? true,
-      allowedEmailDomains: (input.patch.allowedEmailDomains ?? []) as unknown as object,
-      mfaRequiredForRoles: (input.patch.mfaRequiredForRoles ?? []) as unknown as object,
-      updatedBy: input.actorUserId,
-    })
+    // Two first saves can both find no row to lock; the loser of the key race reports a conflict instead of overwriting.
+    try {
+      await withAuthSavepoint(() => insertAuthRow(authOrgPolicies, {
+        organizationId: input.organizationId,
+        allowLocalAuth: input.patch.allowLocalAuth ?? true,
+        allowMagicLink: input.patch.allowMagicLink ?? true,
+        allowSso: input.patch.allowSso ?? true,
+        requireSso: input.patch.requireSso ?? false,
+        requireInvite: input.patch.requireInvite ?? false,
+        passwordResetAllowed: input.patch.passwordResetAllowed ?? true,
+        allowedEmailDomains: (input.patch.allowedEmailDomains ?? []) as unknown as object,
+        mfaRequiredForRoles: (input.patch.mfaRequiredForRoles ?? []) as unknown as object,
+        updatedBy: input.actorUserId,
+      }))
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        return { success: false, conflict: true, error: 'The sign-in policy changed after it was loaded' }
+      }
+      throw error
+    }
   }
 
   const after = await getOrgAuthPolicy(input.organizationId)

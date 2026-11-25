@@ -1,21 +1,27 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import AuthPageLayout from '@/components/auth/auth-page-layout';
 import { ResetPasswordForm } from '@/components/auth/reset-password-form';
+import { preferredLocale } from '@/lib/locales';
 
-export const metadata: Metadata = {
-  title: 'Reset Password | UnionEyes',
-  description: 'Set a new password for your UnionEyes account.',
-};
+async function recoveryTranslations() {
+  const requestHeaders = await headers();
+  const locale = preferredLocale(requestHeaders.get('cookie'), requestHeaders.get('accept-language'));
+  return getTranslations({ locale, namespace: 'passwordRecovery' });
+}
 
-export default function ResetPasswordPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await recoveryTranslations();
+  return { title: t('resetMetaTitle'), description: t('resetMetaDescription') };
+}
+
+export default async function ResetPasswordPage() {
+  const t = await recoveryTranslations();
   return (
-    <AuthPageLayout
-      appName="UnionEyes"
-      tagline="A Decision System for Labour Leadership"
-      subtitle="Choose a new password for your account."
-    >
+    <AuthPageLayout appName={t('appName')} tagline={t('tagline')} subtitle={t('resetSubtitle')}>
       <ResetPasswordForm />
     </AuthPageLayout>
   );

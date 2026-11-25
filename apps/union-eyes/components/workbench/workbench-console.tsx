@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeading } from '@/components/dashboard/page-heading';
+import { failureLanguage, readApiFailure, userFailureText } from '@/lib/client/api-envelope';
 
 type CaseStatus = "pending" | "in-review" | "approved" | "rejected" | "resolved";
 type CasePriority = "low" | "medium" | "high" | "urgent";
@@ -292,7 +293,7 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
         const response = await fetch(url);
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch assigned claims: ${response.statusText}`);
+          throw await readApiFailure(response);
         }
 
         const answer = (await response.json()) as WorkbenchAnswer;
@@ -302,14 +303,14 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
         const mappedCases = claims.map(claim => mapDbClaimToCase(claim, t));
         setCases(mappedCases);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load assigned claims');
+        setError(userFailureText(err, loadingErrorMessage, failureLanguage(locale)));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAssignedClaims();
-  }, [organizationId, isPlatformOrg, loadingErrorMessage, t]);
+  }, [organizationId, isPlatformOrg, loadingErrorMessage, locale, t]);
 
   // Filter and sort cases
   const filteredAndSortedCases = cases
@@ -472,7 +473,7 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
       const res = await fetch(`/api/cases/${caseItem.claimId}/escalate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes: 'Escalated from case queue' }),
+        body: JSON.stringify({ notes: locale.startsWith('fr') ? 'Escaladé depuis la file des dossiers' : 'Escalated from case queue' }),
       });
       if (res.ok) {
         setActionError(null);

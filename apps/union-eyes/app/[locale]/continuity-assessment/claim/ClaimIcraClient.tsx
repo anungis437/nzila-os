@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiErrorMessage } from '@/lib/client/api-envelope';
+import { apiErrorMessageFor } from '@/lib/client/api-envelope';
 
 interface Props {
   assessmentId: string;
@@ -36,7 +36,7 @@ export default function ClaimIcraClient({ assessmentId, token, locale }: Props) 
         } else if (res.status === 409) {
           setErrorMessage(fr ? 'Ce rapport a déjà été récupéré.' : 'This report has already been claimed.');
         } else {
-          setErrorMessage(apiErrorMessage(body, fr ? 'Récupération impossible.' : 'Claim failed.'));
+          setErrorMessage(apiErrorMessageFor(res.status, body, fr ? 'Récupération impossible.' : 'Claim failed.'));
         }
         return;
       }

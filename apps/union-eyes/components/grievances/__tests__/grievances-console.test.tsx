@@ -282,7 +282,9 @@ describe('GrievancesConsole: a list that could not be read', () => {
     server.list = 'wrong-shape';
     renderConsole();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unexpected API response: no grievances');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent('Something went wrong. Try again.');
+    expect(failure).not.toHaveTextContent('Unexpected API response');
     expect(screen.queryByText(enCA.grievances.noGrievancesFound)).toBeNull();
   });
 
@@ -292,6 +294,8 @@ describe('GrievancesConsole: a list that could not be read', () => {
 
     const failure = await screen.findByRole('alert');
     expect(failure).toHaveTextContent(frCA.grievances.errorLoadingGrievances);
+    expect(failure).toHaveTextContent('Vous n’avez pas l’autorisation d’effectuer cette action.');
+    expect(failure).not.toHaveTextContent('Requires steward role');
     expect(within(failure).getByRole('button', { name: 'Réessayer' })).toBeInTheDocument();
   });
 });
@@ -400,12 +404,13 @@ describe('GrievancesConsole: advancing a status', () => {
     expect(callsTo('/api/grievances', 'GET')).toHaveLength(1);
   });
 
-  it('says what failed, with the HTTP status, when the refusal gives no reason', async () => {
+  it('says the service is unavailable, without a status line or the raw text, when the refusal gives no reason', async () => {
     server.patch = () => new Response('nope', { status: 500 });
 
     await advance('closed');
 
-    expect(await screen.findByText('The status could not be changed (HTTP 500)')).toBeInTheDocument();
+    expect(await screen.findByText('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument();
+    expect(screen.queryByText(/HTTP|nope/)).toBeNull();
   });
 });
 

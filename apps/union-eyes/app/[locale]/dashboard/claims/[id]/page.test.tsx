@@ -7,9 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
-const h = vi.hoisted(() => ({ trackCaseViewed: vi.fn() }))
+const h = vi.hoisted(() => ({ locale: 'en-CA', trackCaseViewed: vi.fn() }))
 
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: () => 'en-CA' }))
+vi.mock('next-intl', () => ({
+  useTranslations: () => Object.assign((key: string) => key, { has: () => false }),
+  useLocale: () => h.locale,
+}))
 vi.mock('next/navigation', () => ({ useParams: () => ({ id: 'claim-1' }), useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/lib/hooks/use-pilot-tracking', () => ({ usePilotTracking: () => ({ trackCaseViewed: h.trackCaseViewed }) }))
 vi.mock('@/components/file-upload', () => ({ FileUpload: () => null }))
@@ -43,6 +46,7 @@ const zone = process.env.TZ
 beforeEach(() => {
   fetchMock.mockReset()
   h.trackCaseViewed.mockReset()
+  h.locale = 'en-CA'
   vi.stubGlobal('fetch', fetchMock)
 })
 
@@ -60,15 +64,46 @@ describe('ClaimDetailPage', () => {
     expect(await screen.findByText('CASE-2026-0042')).toBeInTheDocument()
     expect(screen.getByText('The schedule was changed without notice')).toBeInTheDocument()
     expect(await screen.findByText('Assigned to a steward')).toBeInTheDocument()
+    expect(screen.getByText('Other')).toBeInTheDocument()
     expect(h.trackCaseViewed).toHaveBeenCalledWith('claim-1')
     expect(fetchMock).toHaveBeenCalledWith('/api/cases/claim-1/timeline')
+  })
+
+  it('names a wage and hour case in words and never prints the stored identifier', async () => {
+    routes({ claim: wrapped({ data: { ...claim, claimType: 'wage_dispute' } }), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('Wage dispute')).toBeInTheDocument()
+    expect(screen.queryByText('wage_dispute')).not.toBeInTheDocument()
   })
 
   it('says why the case could not be loaded, in the server\'s words', async () => {
     routes({ claim: failed(500, 'The case store is unavailable'), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
-    expect(await screen.findByText('The case store is unavailable')).toBeInTheDocument()
+    expect(await screen.findByText(/The service is temporarily unavailable\. Try again shortly\./)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The case store is unavailable');
     expect(screen.queryByText('CASE-2026-0042')).toBeNull()
+  })
+
+  it('words a refusal in French and never shows the server\'s English sentence or a status line', async () => {
+    h.locale = 'fr-CA'
+    routes({ claim: failed(500, 'The case store is unavailable'), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('Le service est momentanément indisponible. Réessayez sous peu.')).toBeInTheDocument()
+    expect(screen.queryByText(/case store|HTTP/)).toBeNull()
+  })
+
+  it('shows the page\'s own message, not HTTP text, when the failure body names nothing', async () => {
+    routes({ claim: { ok: false, status: 500, statusText: 'Internal Server Error', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument()
+    expect(screen.queryByText(/HTTP|Internal Server Error/)).toBeNull()
+  })
+
+  it('words a gateway failure by its status instead of its status line', async () => {
+    routes({ claim: { ok: false, status: 502, statusText: 'Bad Gateway', json: async () => { throw new SyntaxError('x') } }, timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument()
+    expect(screen.queryByText(/HTTP|Bad Gateway/)).toBeNull()
   })
 
   it('does not tell a missing case from one the user may not read', async () => {
@@ -81,7 +116,8 @@ describe('ClaimDetailPage', () => {
   it('treats an answer that is not the case as an error, instead of rendering a blank case', async () => {
     routes({ claim: wrapped(claim), timeline: wrapped({ data: [] }) })
     render(<ClaimDetailPage />)
-    expect(await screen.findByText(/Unexpected API response/)).toBeInTheDocument()
+    expect(await screen.findByText('claims.loadDetailFailed')).toBeInTheDocument()
+    expect(screen.queryByText(/Unexpected API response/)).toBeNull()
     expect(screen.queryByText('CASE-2026-0042')).toBeNull()
   })
 

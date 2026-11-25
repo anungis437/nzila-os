@@ -49,7 +49,7 @@ describe('case-related-documents-service', () => {
     filterAuthorizedDocumentsForActor.mockReset();
   });
 
-  it('returns deterministic order for tied scores and always includes reasons', async () => {
+  it.each(['case', 'grievance'])('returns deterministic order for tied scores and always includes reasons under %s links', async (linkType) => {
     queueSelectSteps([
       {
         rows: [
@@ -74,9 +74,8 @@ describe('case-related-documents-service', () => {
             name: 'Doc B',
             privacyLabel: 'team_confidential',
             documentType: 'memo',
-            fileUrl: 'https://example.com/doc-b',
             updatedAt: new Date('2026-02-01T00:00:00.000Z'),
-            linkedEntityType: 'grievance',
+            linkedEntityType: linkType,
             linkedEntityId: 'case-1',
             tags: ['alpha'],
             uploadedBy: 'lro-1',
@@ -88,9 +87,8 @@ describe('case-related-documents-service', () => {
             name: 'Doc A',
             privacyLabel: 'team_confidential',
             documentType: 'memo',
-            fileUrl: 'https://example.com/doc-a',
             updatedAt: new Date('2026-02-01T00:00:00.000Z'),
-            linkedEntityType: 'grievance',
+            linkedEntityType: linkType,
             linkedEntityId: 'case-1',
             tags: ['alpha'],
             uploadedBy: 'lro-1',
@@ -116,6 +114,7 @@ describe('case-related-documents-service', () => {
 
     expect(result.map((doc) => doc.documentId)).toEqual(['doc-a', 'doc-b']);
     expect(result.every((doc) => doc.reasons.length > 0)).toBe(true);
+    expect(result.every((doc) => doc.linkedEntities.includes('case:case-1'))).toBe(true);
   });
 
   it('ranks direct case links above same-member-only links', async () => {
@@ -143,7 +142,6 @@ describe('case-related-documents-service', () => {
             name: 'Direct',
             privacyLabel: 'team_confidential',
             documentType: 'memo',
-            fileUrl: 'https://example.com/direct',
             updatedAt: new Date('2026-02-02T00:00:00.000Z'),
             linkedEntityType: 'grievance',
             linkedEntityId: 'case-2',
@@ -157,7 +155,6 @@ describe('case-related-documents-service', () => {
             name: 'Member',
             privacyLabel: 'team_confidential',
             documentType: 'memo',
-            fileUrl: 'https://example.com/member',
             updatedAt: new Date('2026-02-03T00:00:00.000Z'),
             linkedEntityType: 'member',
             linkedEntityId: 'member-7',
@@ -212,7 +209,6 @@ describe('case-related-documents-service', () => {
             name: 'Allowed',
             privacyLabel: 'team_confidential',
             documentType: 'memo',
-            fileUrl: 'https://example.com/allowed',
             updatedAt: new Date('2026-02-02T00:00:00.000Z'),
             linkedEntityType: 'grievance',
             linkedEntityId: 'case-3',
@@ -226,7 +222,6 @@ describe('case-related-documents-service', () => {
             name: 'Blocked',
             privacyLabel: 'privileged',
             documentType: 'memo',
-            fileUrl: 'https://example.com/blocked',
             updatedAt: new Date('2026-02-02T00:00:00.000Z'),
             linkedEntityType: 'grievance',
             linkedEntityId: 'case-3',

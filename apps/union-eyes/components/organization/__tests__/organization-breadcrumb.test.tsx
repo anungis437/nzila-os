@@ -98,7 +98,7 @@ describe('OrganizationBreadcrumb: a path the context lacks', () => {
 
     const status = await screen.findByRole('status');
     expect(status).toHaveTextContent('Organization path unavailable');
-    expect(screen.getByTitle('Profile service is down')).toBeInTheDocument();
+    expect(screen.getByTitle('The service is temporarily unavailable. Try again shortly.')).toBeInTheDocument();
 
     profileAnswer = profile(home);
     await user.click(screen.getByRole('button', { name: 'Retry' }));

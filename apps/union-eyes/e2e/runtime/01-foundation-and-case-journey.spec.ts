@@ -10,11 +10,13 @@ import { runtimeRequestAs, runtimeRequestAfterSignIn } from '../helpers/runtime-
  * the CURRENT behaviour and is named "KNOWN GAP" so the gap cannot pass as a feature.
  */
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   ageQaCase,
   countGrievances,
+  createQaClaimClosureProbe,
   inspectCase,
   inspectFiling,
   resetQaCase,
@@ -132,7 +134,11 @@ test.describe('landing and navigation by stakeholder, at desktop, tablet and mob
       })
       // Support Agent is an operational role, not a canonical case handler.
       if (role === 'staff') {
-        await expect(page.locator('a[href$="/dashboard/workbench"], a[href$="/dashboard/grievances"], a[href$="/dashboard/correspondence"]')).toHaveCount(0)
+        await expect(
+          page.locator(
+            'a[href$="/dashboard/workbench"], a[href$="/dashboard/grievances"], a[href$="/dashboard/correspondence"]',
+          ),
+        ).toHaveCount(0)
       }
       // Navigation labels the information-architecture contract requires are present somewhere on the page.
       if (testInfo.project.name === 'desktop') {
@@ -399,5 +405,129 @@ test.describe('journey A: member files, authority decides who can see it', () =>
     const timeline = await (await steward.get(`/api/cases/${seeded}/timeline`)).text()
     expect(timeline).toContain('under_review')
     expect((await member.get(`/api/cases/${seeded}/timeline`)).status()).toBeLessThan(500)
+  })
+
+  test('a primary handler resolves and closes a matured claim atomically; early closure, nonprimary callers and failed audit write nothing', async ({}, testInfo) => {
+    test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
+    test.skip(
+      !process.env.DATABASE_URL,
+      'needs the owned disposable database to inspect persistence',
+    )
+    test.setTimeout(240_000)
+    // Both guards refuse a deployed environment before any HTTP or operator write.
+    expect(new URL(BASE).hostname).toMatch(/^(127\.0\.0\.1|localhost)$/)
+    expect(PRIMARY).toBe('11111111-1111-4111-8111-111111111111')
+    const contexts: APIRequestContext[] = []
+    const session = async (userId: string, organizationId: string) => {
+      const context = await as(userId, organizationId)
+      contexts.push(context)
+      return context
+    }
+    const seeded = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2'
+    const reason = 'Synthetic completed investigation and documented closure; no real member facts.'
+    const probe = await createQaClaimClosureProbe(seeded)
+    try {
+      const snapshot = () => probe.snapshot()
+      const committedTransition = async (
+        before: Awaited<ReturnType<typeof snapshot>>,
+        from: string,
+        to: string,
+      ) => {
+        const after = await snapshot()
+        expect(after.claim.status).toBe(to)
+        const delta = <T extends { id: string }>(rows: T[], previous: T[]) =>
+          rows.filter((row) => !previous.some((old) => old.id === row.id))
+        const journal = delta(after.transitions, before.transitions)
+        const history = delta(after.history, before.history)
+        const audit = delta(after.audit, before.audit)
+        expect(journal).toHaveLength(1)
+        expect(history).toHaveLength(1)
+        expect(audit).toHaveLength(1)
+        expect(journal[0]).toMatchObject({
+          from_status: from,
+          to_status: to,
+          changed_by: UE_TEST_USERS.stewardPrimary.userId,
+        })
+        expect(history[0]).toMatchObject({
+          transition_id: journal[0].id,
+          created_by: UE_TEST_USERS.stewardPrimary.userId,
+          message: `Status changed from '${from}' to '${to}'`,
+          metadata: { previousStatus: from, newStatus: to },
+          is_internal: false,
+          visibility_scope: 'member',
+        })
+        expect(audit[0]).toMatchObject({
+          user_id: UE_TEST_USERS.stewardPrimary.userId,
+          details: { event: 'CASE_TRANSITIONED', from, to, reason },
+        })
+        expect(audit[0].content_hash).toMatch(/^[a-f0-9]{64}$/)
+        // PostgreSQL readback proves these were one committed transaction, not
+        // independent successful writes observed after the HTTP response.
+        for (const row of [journal[0], history[0], audit[0]])
+          expect(row.write_xid).toBe(after.claim.write_xid)
+        expect(BigInt(journal[0].transaction_id) % 2n ** 32n).toBe(BigInt(after.claim.write_xid))
+        return after
+      }
+
+      await resetQaCase(seeded)
+      const coordinator = await session(UE_TEST_USERS.chiefStewardPrimary.userId, PRIMARY)
+      const assigned = await coordinator.post(`/api/cases/${seeded}/assign`, {
+        data: { assigneeId: UE_TEST_USERS.stewardPrimary.userId, reason },
+      })
+      expect(assigned.status(), await assigned.text()).toBe(200)
+      const primary = await session(UE_TEST_USERS.stewardPrimary.userId, PRIMARY)
+      const move = (targetStatus: string) =>
+        primary.patch(`/api/cases/${seeded}/transition`, { data: { targetStatus, reason } })
+      expect((await move('under_review')).status()).toBe(200)
+      // The existing helper discloses privileged historical-clock preparation
+      // and refuses every database except its private loopback /ue_runtime.
+      await ageQaCase(seeded, 72)
+      expect((await move('investigation')).status()).toBe(200)
+      const immature = await snapshot()
+      expect((await move('resolved')).status()).toBe(403)
+      expect(await snapshot()).toEqual(immature)
+      await ageQaCase(seeded, 72)
+      const investigation = await snapshot()
+      const resolved = await move('resolved')
+      expect(resolved.status(), await resolved.text()).toBe(200)
+      const resolution = await committedTransition(investigation, 'investigation', 'resolved')
+      expect(resolution.claim.resolved_at).not.toBeNull()
+
+      expect((await move('closed')).status()).toBe(403)
+      expect(await snapshot()).toEqual(resolution)
+      await ageQaCase(seeded, 7 * 24)
+      const mature = await snapshot()
+      for (const [user, organization] of [
+        [UE_TEST_USERS.stewardPrimaryTwo.userId, PRIMARY],
+        [UE_TEST_USERS.adminPrimary.userId, PRIMARY],
+        [UE_TEST_USERS.memberPrimary.userId, PRIMARY],
+        [UE_TEST_USERS.wrongOrgSteward.userId, SECONDARY],
+      ] as const) {
+        const refused = await (
+          await session(user, organization)
+        ).patch(`/api/cases/${seeded}/transition`, { data: { targetStatus: 'closed', reason } })
+        expect([403, 404], `${user}: ${refused.status()}`).toContain(refused.status())
+        expect(await snapshot()).toEqual(mature)
+      }
+
+      try {
+        await probe.installAuditFailure()
+        expect((await move('closed')).status()).toBe(500)
+        expect(await snapshot()).toEqual(mature)
+      } finally {
+        await probe.removeAuditFailure()
+      }
+      const closed = await move('closed')
+      expect(closed.status(), await closed.text()).toBe(200)
+      const closure = await committedTransition(mature, 'resolved', 'closed')
+      expect(closure.claim.closed_at).not.toBeNull()
+      expect(await probe.failureObjects()).toEqual({ triggers: 0, functions: 0 })
+    } finally {
+      try {
+        await probe.close()
+      } finally {
+        await Promise.all(contexts.map((context) => context.dispose()))
+      }
+    }
   })
 })

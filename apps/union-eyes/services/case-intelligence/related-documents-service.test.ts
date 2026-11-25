@@ -54,7 +54,7 @@ describe('case-intelligence related-documents-service', () => {
     delete process.env.FEATURE_CASE_INTELLIGENCE_V1_ML;
   });
 
-  it('filters unauthorized docs before ranking and keeps reasons', async () => {
+  it.each(['case', 'grievance'])('filters unauthorized docs before ranking and keeps reasons under %s links', async (linkType) => {
     queueSelectSteps([
       {
         rows: [{
@@ -68,13 +68,13 @@ describe('case-intelligence related-documents-service', () => {
         rows: [
           {
             id: 'doc-allowed', title: 'Allowed', filename: null, name: 'Allowed', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/allowed', updatedAt: new Date('2026-02-01T00:00:00Z'),
-            linkedEntityType: 'grievance', linkedEntityId: 'case-1', tags: ['termination'], uploadedBy: 'lro-1',
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            linkedEntityType: linkType, linkedEntityId: 'case-1', tags: ['termination'], uploadedBy: 'lro-1',
           },
           {
             id: 'doc-blocked', title: 'Blocked', filename: null, name: 'Blocked', privacyLabel: 'privileged',
-            documentType: 'memo', fileUrl: 'https://example.com/blocked', updatedAt: new Date('2026-02-01T00:00:00Z'),
-            linkedEntityType: 'grievance', linkedEntityId: 'case-1', tags: ['termination'], uploadedBy: 'lro-1',
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            linkedEntityType: linkType, linkedEntityId: 'case-1', tags: ['termination'], uploadedBy: 'lro-1',
           },
         ],
       },
@@ -94,6 +94,7 @@ describe('case-intelligence related-documents-service', () => {
 
     expect(result.map((doc) => doc.documentId)).toEqual(['doc-allowed']);
     expect(result[0]?.reasons.length).toBeGreaterThan(0);
+    expect(result[0]?.linkedEntities).toContain('case:case-1');
   });
 
   it('keeps deterministic ordering when scores tie', async () => {
@@ -110,12 +111,12 @@ describe('case-intelligence related-documents-service', () => {
         rows: [
           {
             id: 'doc-b', title: 'Doc B', filename: null, name: 'Doc B', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/b', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-2', tags: ['discipline'], uploadedBy: 'lro-2',
           },
           {
             id: 'doc-a', title: 'Doc A', filename: null, name: 'Doc A', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/a', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-2', tags: ['discipline'], uploadedBy: 'lro-2',
           },
         ],
@@ -149,7 +150,7 @@ describe('case-intelligence related-documents-service', () => {
         rows: [
           {
             id: 'doc-related', title: 'Related', filename: null, name: 'Related', privacyLabel: 'team_confidential',
-            documentType: 'memo', fileUrl: 'https://example.com/related', updatedAt: new Date('2026-02-01T00:00:00Z'),
+            documentType: 'memo', updatedAt: new Date('2026-02-01T00:00:00Z'),
             linkedEntityType: 'grievance', linkedEntityId: 'case-similar', tags: ['termination'], uploadedBy: 'lro-3',
           },
         ],

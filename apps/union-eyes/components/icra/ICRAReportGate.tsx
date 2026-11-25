@@ -18,7 +18,7 @@
 
 import { useState } from 'react';
 import type { ReportTierId } from '@/lib/icra/types';
-import { apiErrorMessage } from '@/lib/client/api-envelope';
+import { apiErrorMessageFor } from '@/lib/client/api-envelope';
 import { COPY } from '@/lib/icra/copy';
 import { ICRA_PAID_REPORT_PRICES } from '@/lib/icra/pricing';
 import { TurnstileWidget, isTurnstileConfigured } from './TurnstileWidget';
@@ -103,7 +103,7 @@ export function ICRAReportGate({
         return;
       }
       if (!res.ok || !data.url) {
-        setError(apiErrorMessage(data, 'Could not open checkout. Please try again.'));
+        setError(apiErrorMessageFor(res.status, data, 'Could not open checkout. Please try again.'));
         return;
       }
       window.location.href = data.url;

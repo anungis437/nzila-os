@@ -127,7 +127,8 @@ describe('CommitteeManagement: reading', () => {
     const user = userEvent.setup();
     render(<CommitteeManagement organizationId="org-1" />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load committees: Database unavailable');
+    expect(await screen.findByRole('alert')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Failed to load committees: Database unavailable');
     expect(screen.queryByText('No committees yet')).toBeNull();
     expect(screen.queryByText('Bargaining Committee')).toBeNull();
 

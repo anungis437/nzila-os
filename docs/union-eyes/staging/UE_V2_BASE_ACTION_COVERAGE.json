@@ -4520,7 +4520,12 @@
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
       "step1Evidence": null,
-      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration)."
+      "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration).",
+      "documentFamilyRemediation": {
+        "state": "SOURCE_REPAIR_QUALIFICATION_PENDING",
+        "evidence": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json",
+        "stagingAcceptance": false
+      }
     },
     {
       "id": "C14",
@@ -5088,7 +5093,12 @@
         "remaining": "Qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal, saved publication/audit outcomes and rendered English/French/mobile behavior on the deployed follow-up."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "documentFamilyRemediation": {
+        "state": "SOURCE_REPAIR_QUALIFICATION_PENDING",
+        "evidence": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json",
+        "stagingAcceptance": false
+      }
     },
     {
       "id": "C16",
@@ -5925,7 +5935,15 @@
         "remaining": "Accurate scoped counts, freshness, authorized drill-down and inaccessible-source states."
       },
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
-      "step1Evidence": null
+      "step1Evidence": null,
+      "acceptedDrilldownScope": {
+        "requirement": "Truthful scoped aggregates and authorized drill-down where exposed",
+        "employerDrilldownExposed": false,
+        "newEmployerPageRequired": false,
+        "canonicalSource": "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json historicalPilotScope.included[8]",
+        "sourceControl": "apps/union-eyes/app/[locale]/dashboard/leadership/page.test.tsx",
+        "independentMetricReadback": "PENDING_CURRENT_SOURCE_EXECUTION"
+      }
     },
     {
       "id": "C19",
@@ -7643,7 +7661,12 @@
       "currentStep1Qualification": "Source/disposable proof for final integrated bytes remains pending; historical staging observations retain their original application/environment scope.",
       "step1Evidence": null,
       "apiMethodsSource": "Code inspection of the current candidate: each route file and exported method verified to exist (Step 1 integration).",
-      "apiMethodsNote": "Cross-cutting failure, concurrency and recovery coverage across the other actions; it has no route of its own."
+      "apiMethodsNote": "Cross-cutting failure, concurrency and recovery coverage across the other actions; it has no route of its own.",
+      "documentFamilyRemediation": {
+        "state": "SOURCE_REPAIR_QUALIFICATION_PENDING",
+        "evidence": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json",
+        "stagingAcceptance": false
+      }
     }
   ],
   "operations": [
@@ -12479,5 +12502,17 @@
     "evidence": "evidence/ue-v2-forward-upgrade-20261122/operator-binding-6a60c95c.json"
   },
   "latestObservedCandidateDeltaScope": "ENGINEERING_AND_NORMAL_APPLICATION_ADMISSION_ONLY_CURRENT_SOURCE_RUNTIME_PENDING",
-  "scopedStagingDecisionSourceSha": "241006d302c14567e541d619675fbead3ec3f258"
+  "scopedStagingDecisionSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "currentDocumentFamilyRemediation": {
+    "state": "SOURCE_REPAIR_QUALIFICATION_PENDING",
+    "evidence": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json",
+    "candidateSourceSha": null,
+    "priorQualifiedApplicationSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
+    "priorBindingPullRequest": 1308,
+    "priorBindingDisposition": "DRAFT_HELD_FOR_CONFIRMED_DOCUMENT_FAMILY",
+    "actualStagingAcceptance": false,
+    "nativeSecondIncrementProof": "PENDING_CLEAN_CURRENT_EXPORT",
+    "originalStagingUpgradeRunId": 45238707739,
+    "originalDatabaseReceiptRelabeled": false
+  }
 }

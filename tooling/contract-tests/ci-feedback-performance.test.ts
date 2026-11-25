@@ -264,9 +264,27 @@ describe('Union Eyes E2E shard authority', () => {
     const pointer = worker.steps.find((step: { name?: string }) =>
       step.name === 'Point Playwright at the owned canonical runtime without printing credentials',
     )
-    expect(pointer.run).toContain("console.log('::add-mask::' + new URL(operator).password)")
-    expect(pointer.run).toContain("'PLAYWRIGHT_TEST_AUTH=false'")
-    expect(pointer.run).toContain("'UE_CANONICAL_BOOTSTRAP_V2=1'")
+    // The workflow now delegates every binding and secret mask to one owned runtime contract.
+    // Assert the delegation AND the concrete exporter/preflight, not an obsolete handwritten env list.
+    expect(pointer.run.trim()).toBe('node tooling/scripts/ue-e2e-runtime-contract.mjs export')
+    const exporter = read('tooling/scripts/ue-e2e-runtime-contract.mjs')
+    const runtimeContract = read('tooling/scripts/lib/ue-e2e-runtime-contract.mjs')
+    expect(exporter).toContain('mask(env)')
+    expect(exporter).toContain('appendFileSync(githubEnv, githubEnvLines(env))')
+    expect(exporter).toContain('readOwnedServiceBindings(')
+    expect(exporter).toContain('probeContractPorts()')
+    expect(runtimeContract).toContain('validateE2eRuntimeContract(env, { azuriteKey, requireFixture: true })')
+    expect(runtimeContract).toContain("if (new Set(passwords).size !== passwords.length)")
+    for (const required of [
+      'PLAYWRIGHT_TEST_AUTH', 'UE_CANONICAL_BOOTSTRAP_V2',
+      'AUTH_DATABASE_URL', 'AUTH_SYSTEM_DATABASE_URL', 'AUTH_MFA_ENCRYPTION_KEY',
+      'EVIDENCE_SEAL_KEY', 'REDIS_URL', 'AZURE_STORAGE_BLOB_ENDPOINT', 'CLAMAV_URL',
+    ]) expect(runtimeContract).toContain(`'${required}'`)
+    const preflight = worker.steps.find((step: { name?: string }) =>
+      step.name === 'Preflight the Playwright runtime contract',
+    )
+    expect(preflight.run.trim()).toBe('node tooling/scripts/ue-e2e-runtime-contract.mjs check')
+    expect(worker.steps.indexOf(preflight)).toBeLessThan(worker.steps.findIndex((step: { id?: string }) => step.id === 'ue-playwright'))
     expect(read('apps/union-eyes/playwright.config.ts')).toContain('workers: 1')
     expect(read('apps/union-eyes/playwright.config.ts')).toContain('fullyParallel: false')
     const ueRun = worker.steps.find((step: { id?: string }) => step.id === 'ue-playwright')

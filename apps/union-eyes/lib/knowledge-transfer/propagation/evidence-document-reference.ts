@@ -19,7 +19,7 @@
  */
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/db/db';
-import { documents, documentVersions } from '@/db/schema/documents-schema';
+import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { authorizeDocumentsForActor } from '@/lib/services/document-authorization-service';
 
 export type EvidenceDocumentResolution =
@@ -73,8 +73,16 @@ export async function currentDocumentIntegrity(orgId: string, documentId: string
 
 async function loadActiveDocument(orgId: string, documentId: string) {
   const rows = await db
-    .select({ id: documents.id, privacyLabel: documents.privacyLabel, status: documents.status })
+    .select({
+      id: documents.id,
+      privacyLabel: documents.privacyLabel,
+      status: documents.status,
+      uploadedBy: documents.uploadedBy,
+      linkedEntityType: documentLinks.linkedEntityType,
+      linkedEntityId: documentLinks.linkedEntityId,
+    })
     .from(documents)
+    .leftJoin(documentLinks, and(eq(documentLinks.documentId, documents.id), eq(documentLinks.organizationId, orgId)))
     .where(and(eq(documents.id, documentId), eq(documents.organizationId, orgId)))
     .limit(1);
   const doc = rows[0];
@@ -93,7 +101,7 @@ export async function resolveEvidenceDocumentForSubmission(
   const [result] = await authorizeDocumentsForActor({
     organizationId: orgId,
     actor: { userId: submittedBy },
-    documents: [{ id: doc.id, privacyLabel: doc.privacyLabel, linkedEntityType: null, linkedEntityId: null }],
+    documents: [{ id: doc.id, privacyLabel: doc.privacyLabel, linkedEntityType: doc.linkedEntityType, linkedEntityId: doc.linkedEntityId, uploadedBy: doc.uploadedBy }],
   });
   if (!result.allowed) return { status: 'not_authorized' };
   const integrity = await currentDocumentIntegrity(orgId, documentId);

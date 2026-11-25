@@ -134,7 +134,8 @@ describe('CalendarSyncManager: the connections it lists (jsdom, mocked server)',
     const calls = mockServer({ [LIST]: () => answers.shift() ?? { status: 500, body: {} } });
     renderManager();
 
-    expect(await screen.findByText('Database unavailable')).toBeInTheDocument();
+    expect(await screen.findByText('Connected calendars could not be loaded.')).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('Database unavailable');
     expect(screen.queryByText('No external calendars are connected.')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));

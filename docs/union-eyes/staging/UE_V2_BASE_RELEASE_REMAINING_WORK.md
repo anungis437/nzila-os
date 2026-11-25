@@ -1,5 +1,7 @@
 # Union Eyes V2 base-release remaining work
 
+Current document-family repair: merged application e508c801 passed its engineering checks and image attestation, but remains held for the [document linkage and private-byte delivery defects](evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json). The cohesive source repair has focused working-tree checks; full commit-bound qualification, the preserving incremental-function rehearsal and actual staging journeys remain pending. The existing K staging revision and original data/receipts are preserved. The founder’s standing extension is recorded through November 25 at 03:00 UTC; production, finance features and Phase 3B remain excluded. Earlier execution entries below remain historical evidence.
+
 The accepted staging record proves the named casework and access journeys on application `241006d302c14567e541d619675fbead3ec3f258`. It is not a statement that every capability in the application is implemented, or that production readiness has been signed off. This review uses repository snapshot `7753084d79c9db310bc483b87ade0de76415cd7e`, whose Union Eyes application tree is unchanged from that accepted source.
 
 Some earlier defect remediation removed misleading controls or changed false success into an honest unavailable response. Those changes repaired the false behavior while leaving the capability unavailable. A source-remediation count is not a count of implemented features.

@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
-const h = vi.hoisted(() => ({ push: vi.fn(), toast: vi.fn(), trackCaseCreated: vi.fn(), incrementPilotCaseCount: vi.fn() }))
+const h = vi.hoisted(() => ({ locale: 'en-CA', push: vi.fn(), toast: vi.fn(), trackCaseCreated: vi.fn(), incrementPilotCaseCount: vi.fn() }))
 
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: () => 'en-CA' }))
+vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: () => h.locale }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: h.push }) }))
 vi.mock('@nzila/platform-auth/entra/client', () => ({ useUser: () => ({ user: { id: 'user-1' } }) }))
 vi.mock('@/components/ui/use-toast', () => ({ useToast: () => ({ toast: h.toast }) }))
@@ -42,6 +42,7 @@ function fillAndSubmit(container: HTMLElement) {
 }
 
 beforeEach(() => {
+  h.locale = 'en-CA'
   h.push.mockReset()
   h.toast.mockReset()
   h.trackCaseCreated.mockReset()
@@ -59,7 +60,7 @@ describe('NewClaimForm', () => {
     intakeAnswers(filed({ success: true, claimId }))
     const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
     fillAndSubmit(container)
-    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'Case was created but no case ID was returned' })))
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'claims.submitUnconfirmed' })))
     expect(h.trackCaseCreated).not.toHaveBeenCalled()
     expect(h.push).not.toHaveBeenCalled()
   })
@@ -98,7 +99,7 @@ describe('NewClaimForm', () => {
     intakeAnswers(refused(500, {}))
     const second = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
     fillAndSubmit(second.container)
-    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'Failed to create claim' })))
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'The service is temporarily unavailable. Try again shortly.' })))
   })
 
   it('files the case for the signed-in member and follows the case id found at the top of the answer', async () => {
@@ -128,11 +129,35 @@ describe('NewClaimForm', () => {
     expect(JSON.parse(init.body)).toMatchObject({ memberId: 'user-1', isAnonymous: true })
   })
 
-  it('says the case was filed without an id, instead of following nothing', async () => {
+  it('says the server did not confirm the case, instead of following nothing or claiming it failed outright', async () => {
     intakeAnswers(filed({ success: true, data: { claimId: 'claim-9' } }))
     const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
     fillAndSubmit(container)
-    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'Case was created but no case ID was returned' })))
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'claims.submitUnconfirmed' })))
     expect(h.trackCaseCreated).not.toHaveBeenCalled()
+  })
+  it('words a refusal in French on a French page and never shows the route\'s English sentence', async () => {
+    h.locale = 'fr-CA'
+    intakeAnswers(refused(400, { code: 'VALIDATION_ERROR', message: 'Intake validation failed.' }))
+    const { container } = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    fillAndSubmit(container)
+    await waitFor(() => expect(h.toast).toHaveBeenCalled())
+    expect(h.toast).toHaveBeenCalledWith({ variant: 'destructive', title: 'claims.submitFailedTitle', description: 'Certaines informations n’ont pas pu être acceptées. Vérifiez-les, puis réessayez.' })
+    expect(JSON.stringify(h.toast.mock.calls)).not.toMatch(/Intake validation/)
+  })
+
+  it('words a refusal by its status in French, and a request that got no answer by the form\'s own message', async () => {
+    h.locale = 'fr-CA'
+    intakeAnswers(refused(403, { code: 'FORBIDDEN', message: 'Module access denied' }))
+    const first = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    fillAndSubmit(first.container)
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'Vous n’avez pas l’autorisation d’effectuer cette action.' })))
+    first.unmount()
+    h.toast.mockReset()
+    fetchMock.mockImplementation(async (url: string) => { if (url === '/api/auth/me') return session; throw new TypeError('Failed to fetch') })
+    const second = render(<NewClaimForm canUseVoice={false} landOnSubmittedCase returnPath="/dashboard/claims" />)
+    fillAndSubmit(second.container)
+    await waitFor(() => expect(h.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'claims.submitFailed' })))
+    expect(JSON.stringify(h.toast.mock.calls)).not.toMatch(/fetch/i)
   })
 })

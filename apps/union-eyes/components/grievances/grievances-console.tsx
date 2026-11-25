@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent } from "@/components/ui/card";
 import { StewardRecommendations } from "@/components/steward-recommendations";
-import { ApiShapeError, isRecord, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, isRecord, readApiFailure, readUserFailure, userFailureText } from "@/lib/client/api-envelope";
 import { formatDay } from "@/lib/client/day";
 import type { grievanceTypeEnum } from "@/db/schema/domains/claims/grievances";
 import {
@@ -231,16 +231,16 @@ export function GrievancesConsole() {
         setLoading(true);
         setFetchError(null);
         const res = await fetch('/api/grievances');
-        if (!res.ok) throw new Error(await readApiError(res, `HTTP ${res.status}`));
+        if (!res.ok) throw await readApiFailure(res);
         const body: unknown = await res.json();
         if (!isRecord(body) || !Array.isArray(body.data)) throw new ApiShapeError("no grievances");
         setGrievances(body.data.map(toGrievance));
       } catch (error) {
-        setFetchError(error instanceof Error ? error.message : String(error));
+        setFetchError(userFailureText(error, null, language));
       } finally {
         setLoading(false);
       }
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     fetchGrievances();
@@ -306,7 +306,7 @@ export function GrievancesConsole() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) {
-        setActionError(await readApiError(res, `${copy.statusFailed} (HTTP ${res.status})`));
+        setActionError(await readUserFailure(res, copy.statusFailed, language));
         return;
       }
       await fetchGrievances();
@@ -339,7 +339,7 @@ export function GrievancesConsole() {
         }),
       });
       if (!res.ok) {
-        setFormError(await readApiError(res, `${copy.fileFailed} (HTTP ${res.status})`));
+        setFormError(await readUserFailure(res, copy.fileFailed, language));
         return;
       }
       setShowNewForm(false);

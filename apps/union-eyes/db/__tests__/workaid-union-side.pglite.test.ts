@@ -101,8 +101,8 @@ const addDoc = async (caseId: string, o: { uploadedBy?: string; label?: string; 
       `INSERT INTO public.documents (id, organization_id, uploaded_by, privacy_label, contains_legal_privilege, contains_medical_sensitive) VALUES ($1,$2,$3,$4,$5,$6)`,
       [id, ORG, o.uploadedBy ?? U.member, o.label ?? 'team_confidential', o.privileged ?? false, o.medical ?? false],
     )
-    await db.query(`INSERT INTO public.document_links (document_id, linked_entity_type, linked_entity_id) VALUES ($1,'grievance',$2)`, [id, caseId])
-    if (o.alsoCase) await db.query(`INSERT INTO public.document_links (document_id, linked_entity_type, linked_entity_id) VALUES ($1,'grievance',$2)`, [id, o.alsoCase])
+    await db.query(`INSERT INTO public.document_links (organization_id, document_id, linked_entity_type, linked_entity_id) VALUES ($1,$2,'grievance',$3)`, [ORG, id, caseId])
+    if (o.alsoCase) await db.query(`INSERT INTO public.document_links (organization_id, document_id, linked_entity_type, linked_entity_id) VALUES ($1,$2,'grievance',$3)`, [ORG, id, o.alsoCase])
   })
   return id
 }

@@ -50,7 +50,7 @@ describe('portal document journey', () => {
     render(<PortalDocuments locale="fr" />);
 
     expect(screen.getByRole('heading', { name: 'Documents du portail' })).toBeInTheDocument();
-    expect(await screen.findByText("Vous n'avez pas l'autorisation d'ouvrir ce document.")).toBeInTheDocument();
+    expect(await screen.findByText("Vous n’avez pas l’autorisation d’ouvrir ce document.")).toBeInTheDocument();
     expect(screen.queryByText('Member letter')).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain(SECRET);
   });

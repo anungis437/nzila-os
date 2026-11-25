@@ -1,4 +1,6 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { DOCUMENT_CASE_LINK_TYPES } from '@/lib/documents/case-link';
+import { documentAttachmentName } from '@/lib/documents/attachment-name';
+import { and, inArray, eq, isNull } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
@@ -26,13 +28,6 @@ import { authorizeExternalDocumentAccess } from '@/lib/services/external-resourc
  * second one that commits before any byte is released.
  */
 export const EXTERNAL_DOWNLOAD_MAX_BYTES = 50 * 1024 * 1024;
-
-/** A header-safe file name: no path, quotes, control characters or non-ASCII fallback surprises. */
-function attachmentName(raw: string | null | undefined): string {
-  const base = (raw ?? '').split(/[\\/]/).pop() ?? '';
-  const cleaned = base.replace(/[\u0000-\u001f\u007f"]/g, '').trim();
-  return cleaned.length > 0 ? cleaned.slice(0, 200) : 'document';
-}
 
 /** Versions predating explicit byte-count metadata remain pinned by their
  * stored checksum. An explicitly recorded size is never ignored if malformed. */
@@ -102,7 +97,7 @@ export const GET = withExternalMatterResourceAuth(
             eq(documents.organizationId, organizationId),
             eq(documents.status, 'active'),
             isNull(documents.deletedAt),
-            eq(documentLinks.linkedEntityType, 'grievance'),
+            inArray(documentLinks.linkedEntityType, [...DOCUMENT_CASE_LINK_TYPES]),
             eq(documentLinks.linkedEntityId, matterId),
           ),
         )
@@ -181,14 +176,14 @@ export const GET = withExternalMatterResourceAuth(
           medicalSensitive: documents.medicalSensitive })
           .from(documents).innerJoin(documentLinks, eq(documentLinks.documentId, documents.id))
           .where(and(eq(documents.id, documentId), eq(documents.organizationId, organizationId), eq(documents.status, 'active'),
-            isNull(documents.deletedAt), eq(documentLinks.organizationId, organizationId), eq(documentLinks.linkedEntityType, 'grievance'),
-            eq(documentLinks.linkedEntityId, matterId))).limit(1).for('share');
+            isNull(documents.deletedAt), eq(documentLinks.organizationId, organizationId), inArray(documentLinks.linkedEntityType, [...DOCUMENT_CASE_LINK_TYPES]),
+            eq(documentLinks.linkedEntityId, matterId))).limit(1).for('share', { of: documents });
         if (!currentDocument || currentDocument.privacyLabel !== row.privacyLabel || currentDocument.containsLegalPrivilege
           || currentDocument.containsMedicalSensitive || currentDocument.medicalSensitive) return false;
         const [currentVersion] = await tx.select({ id: documentVersions.id, versionNo: documentVersions.versionNo,
           storageKey: documentVersions.storageKey, contentHash: documentVersions.contentHash, metadata: documentVersions.metadata })
           .from(documentVersions).where(and(eq(documentVersions.organizationId, organizationId), eq(documentVersions.documentId, documentId),
-            eq(documentVersions.id, pinnedVersion.id), eq(documentVersions.versionNo, pinnedVersion.versionNo))).limit(1).for('share');
+            eq(documentVersions.id, pinnedVersion.id), eq(documentVersions.versionNo, pinnedVersion.versionNo))).limit(1);
         if (!currentVersion || currentVersion.storageKey !== pinnedVersion.storageKey || currentVersion.contentHash !== checksum
           || versionSize(currentVersion.metadata) !== expectedSize) return false;
         await persistAtomicAudit(tx, {
@@ -220,7 +215,7 @@ export const GET = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Download is unavailable' }, { status: 503 });
     }
 
-    const name = attachmentName(row.filename ?? row.title ?? row.name);
+    const name = documentAttachmentName(row.filename ?? row.title ?? row.name);
     return new Response(new Uint8Array(bytes), {
       status: 200,
       headers: {

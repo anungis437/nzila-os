@@ -2459,7 +2459,7 @@
       "route": "/api/documents/repository/[id]",
       "method": "PATCH",
       "class": "GUARDED_SESSION",
-      "testFiles": 2
+      "testFiles": 3
     },
     {
       "route": "/api/documents/repository/downloads",

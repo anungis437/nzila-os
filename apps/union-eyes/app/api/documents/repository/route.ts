@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { and, desc, eq, gte, ilike, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, inArray, lte, sql } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import {
   standardErrorResponse,
@@ -13,7 +13,6 @@ import {
   documentVersions,
 } from '@/db/schema/documents-schema';
 import { hasMinRole } from '@/lib/api-auth-guard';
-import { grievances } from '@/db/schema/domains/claims/grievances';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
@@ -23,6 +22,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
+import { resolveDocumentCaseId } from '@/lib/documents/document-link-authority';
 import { resolveStoredBlob, storedBlobFailure } from '@/lib/services/document-blob-integrity-service';
 import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
@@ -30,6 +30,7 @@ import { intakeRefusal } from '@/lib/documents/intake-acceptance';
 import { generateSasUrl } from '@/lib/blob-client';
 import { listPage } from '@/lib/api/list-page';
 import { loadUploaderNames } from '@/lib/documents/uploader-names';
+import { DOCUMENT_CASE_LINK_TYPES, DOCUMENT_LINK_TYPES, isCaseDocumentLinkType, isDocumentLinkWellFormed } from '@/lib/documents/case-link';
 
 const uploadDocumentSchema = z.object({
   title: z.string().min(1).max(300),
@@ -52,7 +53,7 @@ const uploadDocumentSchema = z.object({
     'highly_sensitive',
   ]),
   fileSize: z.number().int().nonnegative().optional(),
-  linkedEntityType: z.enum(['case', 'grievance', 'member', 'policy_library', 'template_library', 'collective_agreement', 'other']).optional(),
+  linkedEntityType: z.enum(DOCUMENT_LINK_TYPES).optional(),
   linkedEntityId: z.guid().optional(),
   containsPii: z.boolean().optional(),
   containsMedicalSensitive: z.boolean().optional(),
@@ -60,6 +61,9 @@ const uploadDocumentSchema = z.object({
   memberPii: z.boolean().optional(),
   medicalSensitive: z.boolean().optional(),
   disciplinarySensitive: z.boolean().optional(),
+}).refine((value) => isDocumentLinkWellFormed(value.linkedEntityType, value.linkedEntityId), {
+  message: 'A document link requires both its supported type and identifier',
+  path: ['linkedEntityId'],
 }).refine((value) => [value.intakeId, value.blobPath, value.fileUrl].filter(Boolean).length === (value.fileUrl && value.blobPath ? 2 : 1), {
   message: 'intakeId, blobPath or fileUrl is required (intakeId cannot be combined with a storage reference)',
   path: ['intakeId'],
@@ -135,7 +139,7 @@ export const GET = withApi(
   // A case filter is enforced in SQL rather than scanning the organization's
   // entire repository and discarding nonmatching links after the read.
   if (linkedCase) {
-    conditions.push(eq(documentLinks.linkedEntityId, linkedCase));
+    conditions.push(inArray(documentLinks.linkedEntityType, [...DOCUMENT_CASE_LINK_TYPES]), eq(documentLinks.linkedEntityId, linkedCase));
   }
 
   if (fromDate) {
@@ -146,8 +150,8 @@ export const GET = withApi(
     conditions.push(lte(documents.createdAt, new Date(toDate)));
   }
 
-  const rows = await withRLSContext({ organizationId }, (tx) =>
-    tx
+  const rows = await withRLSContext({ organizationId }, async (tx) => {
+    const candidates = await tx
       .select({
         id: documents.id,
         title: documents.title,
@@ -166,8 +170,15 @@ export const GET = withApi(
       .where(and(...conditions))
       .orderBy(desc(documents.updatedAt), desc(documents.id))
       .limit(limit)
-      .offset(offset),
-  );
+      .offset(offset);
+    // Resolve non-case legacy links inside this one bounded page transaction.
+    // Ordinary case/unlinked documents need no additional query or transaction.
+    return Promise.all(candidates.map(async row => ({
+      ...row,
+      resolvedCaseId: isDocumentLinkWellFormed(row.linkedEntityType, row.linkedEntityId)
+        ? await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: row.linkedEntityType, linkedEntityId: row.linkedEntityId }) : null,
+    })));
+  });
 
   // Representative-level role: eligibility for organization-level (unlinked) documents and the uploader
   // projection only, never case content.
@@ -188,15 +199,16 @@ export const GET = withApi(
   };
 
   const visible = await Promise.all(
-    rows.map(async (row) => {
+    rows.map(async ({ resolvedCaseId: linkedCaseId, ...row }) => {
+      if (!isDocumentLinkWellFormed(row.linkedEntityType, row.linkedEntityId)) return null;
       let caseAccess = {
         isPrimaryOwner: false,
         canViewCase: false,
         canViewPrivateDocuments: false,
       };
 
-      if (row.linkedEntityType === 'grievance' && row.linkedEntityId) {
-        const effective = await caseAccessFor(row.linkedEntityId);
+      if (linkedCaseId) {
+        const effective = await caseAccessFor(linkedCaseId);
         caseAccess = {
           isPrimaryOwner: effective.isPrimaryOwner,
           canViewCase: effective.canViewCase,
@@ -213,7 +225,8 @@ export const GET = withApi(
             isStaff,
             canViewCase: caseAccess.canViewCase,
             hasExplicitGrant: false,
-            linkedEntityId: row.linkedEntityId,
+            linkedEntityType: linkedCaseId ? 'case' : row.linkedEntityType,
+            linkedEntityId: linkedCaseId ?? row.linkedEntityId,
             privacyLabel: row.privacyLabel,
             uploadedBy: row.uploadedBy,
             userId,
@@ -271,25 +284,13 @@ export const POST = withApi(
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid document payload', parsed.error.flatten());
   }
 
-  // Filing a document against a case is a case action: the kernel must allow this principal to add evidence to it.
-  if ((parsed.data.linkedEntityType === 'grievance' || parsed.data.linkedEntityType === 'case') && parsed.data.linkedEntityId) {
-    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: parsed.data.linkedEntityId, userId });
+  // Both aliases and legacy non-case spellings naming a real case use the kernel.
+  const linkedCaseId = await withRLSContext({ organizationId }, tx => resolveDocumentCaseId(tx, {
+    organizationId, linkedEntityType: parsed.data.linkedEntityType, linkedEntityId: parsed.data.linkedEntityId,
+  }));
+  if (linkedCaseId) {
+    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: linkedCaseId, userId });
     if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
-  } else if (parsed.data.linkedEntityId) {
-    // A different link type must not be a way around the case check: an id that names a case of this organization is
-    // filed against that case, so the same kernel decision applies. Any other id is a non-case target.
-    const linkedEntityId = parsed.data.linkedEntityId;
-    const [namedCase] = await withRLSContext({ organizationId }, (tx) =>
-      tx
-        .select({ id: grievances.id })
-        .from(grievances)
-        .where(and(eq(grievances.id, linkedEntityId), eq(grievances.organizationId, organizationId)))
-        .limit(1),
-    );
-    if (namedCase) {
-      const access = await getEffectiveCaseAccess({ organizationId, grievanceId: namedCase.id, userId });
-      if (!access.canViewCase || !access.canUploadDocuments) return standardErrorResponse(ErrorCode.NOT_FOUND, 'Case not found');
-    }
   }
 
   let intakeId: string | null = null;
@@ -305,14 +306,22 @@ export const POST = withApi(
       if (check.replay) {
         // The same principal asking again gets the original result; nothing is written twice.
         const acceptedDocumentId = check.intake.acceptedDocumentId ?? '';
-        const [existing] = await withRLSContext({ organizationId }, (tx) =>
-          tx
-            .select()
-            .from(documents)
-            .where(and(eq(documents.id, acceptedDocumentId), eq(documents.organizationId, organizationId)))
-            .limit(1),
-        );
-        return existing ? standardSuccessResponse({ ...existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
+        const replay = await withRLSContext({ organizationId }, async (tx) => {
+          const [existing] = await tx.select().from(documents)
+            .where(and(eq(documents.id, acceptedDocumentId), eq(documents.organizationId, organizationId), sql`${documents.deletedAt} IS NULL`)).limit(1);
+          if (!existing) return { kind: 'missing' as const };
+          const [link] = await tx.select({ linkedEntityType: documentLinks.linkedEntityType, linkedEntityId: documentLinks.linkedEntityId })
+            .from(documentLinks).where(and(eq(documentLinks.documentId, acceptedDocumentId), eq(documentLinks.organizationId, organizationId))).limit(1);
+          if (!isDocumentLinkWellFormed(link?.linkedEntityType, link?.linkedEntityId)) return { kind: 'denied' as const };
+          const caseId = await resolveDocumentCaseId(tx, { organizationId, linkedEntityType: link?.linkedEntityType, linkedEntityId: link?.linkedEntityId });
+          if (caseId) {
+            const access = await getEffectiveCaseAccess({ organizationId, grievanceId: caseId, userId });
+            if (!access.canViewCase || !access.canUploadDocuments) return { kind: 'denied' as const };
+          } else if (existing.uploadedBy !== userId) return { kind: 'denied' as const };
+          return { kind: 'allowed' as const, existing };
+        });
+        if (replay.kind === 'denied') return standardErrorResponse(ErrorCode.NOT_FOUND, 'Document not found');
+        return replay.kind === 'allowed' ? standardSuccessResponse({ ...replay.existing, replay: true }) : standardErrorResponse(ErrorCode.CONFLICT, 'The intake was already used');
       }
       intakeId = check.intake.id;
       intakeMeta = { mimeType: check.intake.mimeType, size: Number(check.intake.sizeBytes) };
@@ -340,6 +349,16 @@ export const POST = withApi(
   let created;
   try {
   created = await withRLSContext({ organizationId }, async (tx) => {
+    // Storage I/O must not carry a stale case grant into a later write.
+    const currentCaseId = await resolveDocumentCaseId(tx, {
+      organizationId, linkedEntityType: parsed.data.linkedEntityType, linkedEntityId: parsed.data.linkedEntityId,
+    });
+    if (currentCaseId) {
+      const access = await getEffectiveCaseAccess({ organizationId, grievanceId: currentCaseId, userId });
+      if (!access.canViewCase || !access.canUploadDocuments) throw ApiError.notFound('Case');
+    }
+    const finalLinkedEntityType = currentCaseId && !isCaseDocumentLinkType(parsed.data.linkedEntityType)
+      ? 'case' : parsed.data.linkedEntityType;
     // A stored file belongs to one document version; one another document already holds cannot be claimed again.
     const inUse = (
       await tx
@@ -389,11 +408,11 @@ export const POST = withApi(
     // Taking the intake and creating the document are one transaction: a lost race or a refused audit undoes both.
     if (intakeId) await bindIntakeInTx(tx, { organizationId, userId, intakeId, documentId: insertedDocument.id, versionId: firstVersion.id });
 
-    if (parsed.data.linkedEntityType && parsed.data.linkedEntityId) {
+    if (finalLinkedEntityType && parsed.data.linkedEntityId) {
       await tx.insert(documentLinks).values({
         organizationId,
         documentId: insertedDocument.id,
-        linkedEntityType: parsed.data.linkedEntityType,
+        linkedEntityType: finalLinkedEntityType,
         linkedEntityId: parsed.data.linkedEntityId,
         linkedBy: userId,
       });
@@ -409,8 +428,8 @@ export const POST = withApi(
       details: {
         privacyLabel: insertedDocument.privacyLabel,
         documentType: insertedDocument.documentType,
-        ...(parsed.data.linkedEntityType && parsed.data.linkedEntityId
-          ? { linkedEntityType: parsed.data.linkedEntityType, linkedEntityId: parsed.data.linkedEntityId }
+        ...(finalLinkedEntityType && parsed.data.linkedEntityId
+          ? { linkedEntityType: finalLinkedEntityType, linkedEntityId: parsed.data.linkedEntityId }
           : {}),
       },
     });

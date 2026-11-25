@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { apiErrorMessage, isRecord } from '@/lib/client/api-envelope';
+import { apiErrorMessageFor, isRecord } from '@/lib/client/api-envelope';
 import { invitationCopy, invitationLocale, frenchInvitationErrors, type InvitationLocale } from './invitation-copy';
 
 export default function InviteAcceptPage() {
@@ -55,7 +55,7 @@ export default function InviteAcceptPage() {
       });
       const data: unknown = await res.json();
       if (!res.ok) {
-        const message = apiErrorMessage(data, t.failed);
+        const message = apiErrorMessageFor(res.status, data, t.failed);
         setError(locale === 'fr-CA' ? frenchInvitationErrors[message] ?? t.failed : message);
         return;
       }

@@ -173,7 +173,8 @@ describe('CourseCatalog: when the catalogue cannot be read it says so', () => {
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('The course catalogue could not be loaded.');
-    expect(alert).toHaveTextContent('Courses are unavailable');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Courses are unavailable');
     expect(screen.queryByText(/courses$/)).not.toBeInTheDocument();
     expect(screen.queryByText('No courses found')).not.toBeInTheDocument();
     expect(screen.queryByText('No courses are listed')).not.toBeInTheDocument();
@@ -261,7 +262,8 @@ describe('CourseCatalog: sessions and enrollment', () => {
 
     const alert = await within(dialog).findByRole('alert');
     expect(alert).toHaveTextContent('Sessions could not be loaded');
-    expect(alert).toHaveTextContent('Sessions are down');
+    expect(alert).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Sessions are down');
     expect(within(dialog).queryByText(/No session of this course is open/)).not.toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Enroll in selected session' })).toBeDisabled();
   });

@@ -146,15 +146,15 @@ export function bulkOutcomeNotice(locale: string, report: BulkDownloadReport): s
   if (report.items.length === 0) return null;
   const french = locale.toLowerCase().startsWith('fr');
   const transfer = french
-    ? 'Le transfert du fichier n est pas confirme.'
+    ? 'Le transfert du fichier n’est pas confirmé.'
     : 'File transfer is not confirmed.';
   if (french) {
     return [
-      countLabel(report.urlsIssued, 'adresse emise', 'adresses emises'),
-      countLabel(report.denied, 'refuse', 'refuses'),
-      countLabel(report.failed, 'en echec', 'en echec'),
-      countLabel(report.openAttempted, 'fenetre tentee', 'fenetres tentees'),
-      countLabel(report.openFailed, 'fenetre en echec', 'fenetres en echec'),
+      countLabel(report.urlsIssued, 'adresse émise', 'adresses émises'),
+      countLabel(report.denied, 'refusé', 'refusés'),
+      countLabel(report.failed, 'en échec', 'en échec'),
+      countLabel(report.openAttempted, 'ouverture tentée', 'ouvertures tentées'),
+      countLabel(report.openFailed, 'ouverture en échec', 'ouvertures en échec'),
       transfer,
     ].join('. ');
   }

@@ -15,9 +15,26 @@ const emptyState: IntelligenceResponse = {
   precedentDocuments: [],
 };
 
+function readIntelligence(body: unknown): IntelligenceResponse {
+  const data = (body as { data?: Partial<IntelligenceResponse> } | null)?.data;
+  if (
+    !data ||
+    !data.graph ||
+    !Array.isArray(data.graph.nodes) ||
+    !Array.isArray(data.graph.edges) ||
+    !Array.isArray(data.relatedDocuments) ||
+    !Array.isArray(data.similarCases) ||
+    !Array.isArray(data.precedentDocuments)
+  ) {
+    throw new Error('not an intelligence answer');
+  }
+  return data as IntelligenceResponse;
+}
+
 export function CaseIntelligencePanel(props: { caseId: string }) {
   const t = useTranslations("caseIntelligence");
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [data, setData] = useState<IntelligenceResponse>(emptyState);
   const [reasonFilter, setReasonFilter] = useState('');
   const [labelFilter, setLabelFilter] = useState('');
@@ -26,11 +43,17 @@ export function CaseIntelligencePanel(props: { caseId: string }) {
     let isMounted = true;
     const load = async () => {
       setLoading(true);
+      setFailed(false);
       try {
         const response = await fetch(`/api/grievances/${props.caseId}/intelligence`);
+        if (!response.ok) throw new Error('not ok');
         const json = await response.json();
+        const next = readIntelligence(json);
+        if (isMounted) setData(next);
+      } catch {
         if (isMounted) {
-          setData(json?.data ?? emptyState);
+          setData(emptyState);
+          setFailed(true);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -68,9 +91,13 @@ export function CaseIntelligencePanel(props: { caseId: string }) {
           <p className="text-xs text-gray-500">{t("description")}</p>
         </div>
         <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          Continuity interpretation support only. Use this context for stewardship continuity and
-          governance readability, then escalate final determinations to human review.
+          {t("humanReviewNotice")}
         </div>
+        {failed && (
+          <div role="alert" className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            {t("loadFailed")}
+          </div>
+        )}
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           <input
             value={reasonFilter}
@@ -92,10 +119,14 @@ export function CaseIntelligencePanel(props: { caseId: string }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <RelatedDocumentsPanel documents={filteredRelatedDocuments} loading={loading} />
-        <SimilarCasesPanel cases={data.similarCases} loading={loading} />
-        <PrecedentDocumentsPanel documents={data.precedentDocuments} loading={loading} />
-        <CaseGraphSummary graph={data.graph} loading={loading} />
+        {!failed && (
+          <>
+            <RelatedDocumentsPanel documents={filteredRelatedDocuments} loading={loading} />
+            <SimilarCasesPanel cases={data.similarCases} loading={loading} />
+            <PrecedentDocumentsPanel documents={data.precedentDocuments} loading={loading} />
+            <CaseGraphSummary graph={data.graph} loading={loading} />
+          </>
+        )}
       </div>
     </div>
   );

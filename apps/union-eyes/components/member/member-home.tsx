@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { claimLabelKey } from '@/components/claims/member-case-list';
-import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { ApiShapeError, envelopeData, isRecord, failureDetail, failureLanguage, readApiFailure, type FailureLanguage } from '@/lib/client/api-envelope';
 import { fetchAllRows } from '@/lib/client/crud-lists';
 import { asRecord, optionalString, requiredCount, requiredDate, requiredString } from '@/lib/client/row-fields';
 import { announceInboxChanged } from '@/lib/notifications/unread-count';
@@ -24,11 +24,9 @@ type UnreadNotifications = { items: NotificationSummary[]; unreadCount: number }
 const INACTIVE = new Set(['resolved', 'rejected', 'closed']);
 const SHOWN_NOTIFICATIONS = 5;
 
-const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+const reasonOf = (error: unknown, language: FailureLanguage): string => failureDetail(error, language) ?? '';
 
-async function refusal(response: Response): Promise<Error> {
-  return new Error(await readApiError(response, `Request failed with status ${response.status}`));
-}
+const refusal = (response: Response) => readApiFailure(response);
 
 async function readBody(response: Response): Promise<unknown> {
   return response.json().catch(() => {
@@ -81,12 +79,13 @@ async function loadNotifications(): Promise<UnreadNotifications> {
 
 function useLoad<T>(fetcher: () => Promise<T>): [Load<T>, () => void] {
   const [result, setResult] = useState<Load<T>>({ state: 'loading' });
+  const language = failureLanguage(useLocale());
   const load = useCallback(() => {
     fetcher().then(
       (value) => setResult({ state: 'ready', value }),
-      (error: unknown) => setResult({ state: 'error', reason: reasonOf(error) }),
+      (error: unknown) => setResult({ state: 'error', reason: reasonOf(error, language) }),
     );
-  }, [fetcher]);
+  }, [fetcher, language]);
   useEffect(() => {
     load();
   }, [load]);
@@ -136,7 +135,7 @@ export function MemberHome() {
       announceInboxChanged();
       reloadNotifications();
     } catch (error) {
-      setMarkError(reasonOf(error));
+      setMarkError(reasonOf(error, failureLanguage(locale)));
     } finally {
       setMarking(false);
     }
@@ -168,7 +167,7 @@ export function MemberHome() {
           {notifications.state === 'error' && (
             <div role="alert" className="text-sm text-destructive">
               {t('notificationsLoadError')}
-              <span className="block text-xs">{notifications.reason}</span>
+              {notifications.reason && <span className="block text-xs">{notifications.reason}</span>}
               <Button variant="link" size="sm" onClick={reloadNotifications}>{t('retry')}</Button>
             </div>
           )}
@@ -199,7 +198,7 @@ export function MemberHome() {
               {markError !== null && (
                 <p role="alert" className="text-sm text-destructive">
                   {t('markAllReadError')}
-                  <span className="block text-xs">{markError}</span>
+                  {markError && <span className="block text-xs">{markError}</span>}
                 </p>
               )}
               <Button variant="outline" size="sm" disabled={marking} onClick={markAllRead}>{t('markAllRead')}</Button>
@@ -222,7 +221,7 @@ export function MemberHome() {
         {cases.state === 'error' && (
           <div role="alert" className="text-sm text-destructive">
             {t('casesLoadError')}
-            <span className="block text-xs">{cases.reason}</span>
+            {cases.reason && <span className="block text-xs">{cases.reason}</span>}
             <Button variant="link" size="sm" onClick={reloadCases}>{t('retry')}</Button>
           </div>
         )}

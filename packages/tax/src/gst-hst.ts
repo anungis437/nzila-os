@@ -9,7 +9,9 @@
  * - Revenu Québec QST rates
  * - Provincial finance ministry publications
  *
- * All rates current as of 2025–2026.
+ * Standard taxable rates only; exempt/zero-rated and place-of-supply treatment
+ * are outside this lookup. Nova Scotia's 14% HST applies from 2025-04-01.
+ * Source: https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html
  */
 import type { Province } from './types'
 
@@ -28,7 +30,8 @@ export interface ProvincialSalesTax {
   pstRate: number | null
   /** Effective total sales tax rate (GST/HST + PST/QST) */
   totalRate: number
-  /** Whether PST is recoverable as input tax credit (only HST provinces) */
+  /** GST/HST ITC regime indicator. GST-only rows have no provincial tax;
+   * PST and QST are not recovered through CRA GST/HST ITCs. Eligibility varies. */
   provincialPortionRecoverable: boolean
   /** Notes for accountants */
   notes: string
@@ -200,14 +203,20 @@ export function requiresProvincialSalesTaxReturn(province: Province): boolean {
 }
 
 /**
- * GST/HST registration threshold — $30,000 in revenue over 4 consecutive quarters.
- * Below this, registration is voluntary. Above, it's mandatory.
- * Source: ETA s.148(1)
+ * Standard commercial small-supplier threshold: $30,000 of associated worldwide
+ * taxable supplies in any single calendar quarter or the last four consecutive
+ * quarters, with statutory exclusions. Public service bodies generally use
+ * $50,000; taxi/ride-sharing and other exceptions apply. This constant does not
+ * determine registration eligibility or the effective date of registration.
+ * Source: ETA s.148(1), CRA RC4022 (Small supplier)
  */
 export const GST_REGISTRATION_THRESHOLD = 30_000
 
 /**
- * Quick-method threshold — eligible if annual taxable revenue ≤ $400,000.
- * Source: ETA s.227(1)
+ * Quick-method revenue ceiling, not an eligibility decision. The $400,000
+ * includes GST/HST and associated worldwide taxable supplies in any four
+ * consecutive fiscal quarters within the last five, with exclusions. Certain
+ * professional services and public bodies cannot use this method.
+ * Source: CRA RC4022 (Quick method of accounting)
  */
 export const GST_QUICK_METHOD_THRESHOLD = 400_000

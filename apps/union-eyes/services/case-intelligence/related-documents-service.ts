@@ -1,3 +1,4 @@
+import { isCaseDocumentLinkType } from '@/lib/documents/case-link';
 import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
@@ -77,7 +78,7 @@ function dedupeDocuments(rows: DocumentCandidate[]) {
 
 function collectLinkedEntities(candidate: DocumentCandidate, currentCase: CaseSnapshot, similarCaseIds: Set<string>) {
   const entities = new Set<string>();
-  if (candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId === currentCase.id) {
+  if (isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId === currentCase.id) {
     entities.add(`case:${currentCase.id}`);
   }
   if (currentCase.grievantId && candidate.linkedEntityType === 'member' && candidate.linkedEntityId === currentCase.grievantId) {
@@ -93,7 +94,7 @@ function collectLinkedEntities(candidate: DocumentCandidate, currentCase: CaseSn
     entities.add(`worksite:${currentCase.workplaceId}`);
   }
   if (candidate.documentType) entities.add(`type:${candidate.documentType}`);
-  if (candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)) {
+  if (isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)) {
     entities.add(`case:${candidate.linkedEntityId}`);
   }
   for (const tag of candidate.tags ?? []) {
@@ -123,7 +124,6 @@ export async function getRelatedDocuments(params: {
       name: documents.name,
       privacyLabel: documents.privacyLabel,
       documentType: documents.documentType,
-      fileUrl: documents.fileUrl,
       updatedAt: documents.updatedAt,
       linkedEntityType: documentLinks.linkedEntityType,
       linkedEntityId: documentLinks.linkedEntityId,
@@ -137,7 +137,7 @@ export async function getRelatedDocuments(params: {
     .limit(250)) as DocumentCandidate[]).slice(0, 200);
 
   const directCaseRows = baseRows.filter(
-    (row) => row.linkedEntityType === 'grievance' && row.linkedEntityId === params.context.caseId,
+    (row) => isCaseDocumentLinkType(row.linkedEntityType) && row.linkedEntityId === params.context.caseId,
   );
 
   const similarCaseRows = currentCase.grievantId || currentCase.employerId || currentCase.cbaId
@@ -166,6 +166,7 @@ export async function getRelatedDocuments(params: {
     privacyLabel: row.privacyLabel,
     linkedEntityType: row.linkedEntityType,
     linkedEntityId: row.linkedEntityId,
+    uploadedBy: row.uploadedBy,
   }));
 
   const authorizedDocs = await filterAuthorizedDocumentsForActor({
@@ -196,7 +197,7 @@ export async function getRelatedDocuments(params: {
   for (const candidate of baseRows) {
     if (!authorizedIds.has(candidate.id)) continue;
 
-    const sameCase = candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId === currentCase.id;
+    const sameCase = isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId === currentCase.id;
     const sameDocumentType = Boolean(candidate.documentType && directTypes.has(candidate.documentType));
     const semanticSimilarity = computeTokenOverlapSimilarity(
       `${currentCase.title} ${currentCase.description} ${currentCase.awardSummary ?? ''}`,
@@ -211,8 +212,8 @@ export async function getRelatedDocuments(params: {
       directTags,
       assignedLroIds,
       semanticSimilarity,
-      patternSimilarity: candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId) ? 0.75 : 0,
-      usedInSimilarCase: Boolean(candidate.linkedEntityType === 'grievance' && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)),
+      patternSimilarity: isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId) ? 0.75 : 0,
+      usedInSimilarCase: Boolean(isCaseDocumentLinkType(candidate.linkedEntityType) && candidate.linkedEntityId && similarCaseIds.has(candidate.linkedEntityId)),
       isTemplateCandidate: (candidate.tags ?? []).some((tag) => ['template', 'precedent'].includes(tag.toLowerCase())),
     });
 
@@ -246,7 +247,6 @@ export async function getRelatedDocuments(params: {
         patternSimilarity: Number(features.patternSimilarity.toFixed(3)),
       },
       documentType: candidate.documentType,
-      fileUrl: candidate.fileUrl,
       linkedEntities: collectLinkedEntities(candidate, currentCase, similarCaseIds),
       updatedAt: candidate.updatedAt.toISOString(),
     } satisfies RelatedDocumentRankResult;

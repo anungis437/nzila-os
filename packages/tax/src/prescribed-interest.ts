@@ -12,7 +12,8 @@
  * Base rate = 3-month Government of Canada Treasury Bill yield
  * (rounded up to nearest whole %, plus applicable add-ons)
  *
- * Rates from 2023 Q1 through 2026 Q1 (update quarterly).
+ * Rates from 2023 Q1 through 2026 Q4 (update quarterly).
+ * Each quarter is published at CRA /tax/prescribed-interest-rates/YYYY-qN.html.
  */
 
 export interface PrescribedRateQuarter {
@@ -28,11 +29,11 @@ export interface PrescribedRateQuarter {
   baseRate: number
   /** Corporate installment/arrears interest: base + 4% */
   corporateArrearsRate: number
-  /** Refund interest: base + 0% (non-corporate) or base + 0% (corporate) */
+  /** Non-corporate refund interest: base + 2%. */
   refundRate: number
   /** Taxable benefit rate on employee/shareholder loans: base + 0% */
   taxableBenefitRate: number
-  /** Corporate refund interest: base - 2% (min 0) */
+  /** Corporate refund interest: base. */
   corporateRefundRate: number
 }
 
@@ -44,20 +45,20 @@ export interface PrescribedRateQuarter {
  * - Corporate arrears = base + 4%
  * - Non-corporate arrears = base + 4%
  * - Refund (non-corp) = base + 2%
- * - Refund (corporate) = base (since 2023-07-01: base + 0%)
+ * - Refund (corporate) = base throughout the quarters in this table
  * - Taxable benefit = base
  */
 export const PRESCRIBED_RATES: PrescribedRateQuarter[] = [
   // 2023
-  { year: 2023, quarter: 1, startDate: '2023-01-01', endDate: '2023-03-31', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
+  { year: 2023, quarter: 1, startDate: '2023-01-01', endDate: '2023-03-31', baseRate: 0.04, corporateArrearsRate: 0.08, refundRate: 0.06, taxableBenefitRate: 0.04, corporateRefundRate: 0.04 },
   { year: 2023, quarter: 2, startDate: '2023-04-01', endDate: '2023-06-30', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
   { year: 2023, quarter: 3, startDate: '2023-07-01', endDate: '2023-09-30', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
   { year: 2023, quarter: 4, startDate: '2023-10-01', endDate: '2023-12-31', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
   // 2024
-  { year: 2024, quarter: 1, startDate: '2024-01-01', endDate: '2024-03-31', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
-  { year: 2024, quarter: 2, startDate: '2024-04-01', endDate: '2024-06-30', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
+  { year: 2024, quarter: 1, startDate: '2024-01-01', endDate: '2024-03-31', baseRate: 0.06, corporateArrearsRate: 0.10, refundRate: 0.08, taxableBenefitRate: 0.06, corporateRefundRate: 0.06 },
+  { year: 2024, quarter: 2, startDate: '2024-04-01', endDate: '2024-06-30', baseRate: 0.06, corporateArrearsRate: 0.10, refundRate: 0.08, taxableBenefitRate: 0.06, corporateRefundRate: 0.06 },
   { year: 2024, quarter: 3, startDate: '2024-07-01', endDate: '2024-09-30', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
-  { year: 2024, quarter: 4, startDate: '2024-10-01', endDate: '2024-12-31', baseRate: 0.04, corporateArrearsRate: 0.08, refundRate: 0.06, taxableBenefitRate: 0.04, corporateRefundRate: 0.04 },
+  { year: 2024, quarter: 4, startDate: '2024-10-01', endDate: '2024-12-31', baseRate: 0.05, corporateArrearsRate: 0.09, refundRate: 0.07, taxableBenefitRate: 0.05, corporateRefundRate: 0.05 },
   // 2025
   { year: 2025, quarter: 1, startDate: '2025-01-01', endDate: '2025-03-31', baseRate: 0.04, corporateArrearsRate: 0.08, refundRate: 0.06, taxableBenefitRate: 0.04, corporateRefundRate: 0.04 },
   { year: 2025, quarter: 2, startDate: '2025-04-01', endDate: '2025-06-30', baseRate: 0.04, corporateArrearsRate: 0.08, refundRate: 0.06, taxableBenefitRate: 0.04, corporateRefundRate: 0.04 },
@@ -89,6 +90,8 @@ export function getPrescribedRateByQuarter(year: number, quarter: 1 | 2 | 3 | 4)
 /**
  * Get the corporate arrears interest rate for a given date.
  * This is the rate used for installment interest, late payments, etc.
+ * Outside the table coverage, the legacy 7% fallback is not a verified rate;
+ * use getPrescribedRate to detect unsupported dates.
  */
 export function getCorporateArrearsRate(asOf: Date | string): number {
   const rate = getPrescribedRate(asOf)
@@ -98,6 +101,8 @@ export function getCorporateArrearsRate(asOf: Date | string): number {
 /**
  * Get the taxable benefit rate for employee/shareholder loans.
  * Per ITA s.80.4, loans from employer attract deemed interest at this rate.
+ * Outside table coverage, the legacy 3% fallback is not a verified rate;
+ * use getPrescribedRate to detect unsupported dates.
  */
 export function getTaxableBenefitRate(asOf: Date | string): number {
   const rate = getPrescribedRate(asOf)

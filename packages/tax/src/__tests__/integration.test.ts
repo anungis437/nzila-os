@@ -227,7 +227,11 @@ describe('Integration: data freshness audit', () => {
   })
 
   it('detects staleness when date is far in the future', () => {
-    const futureDate = new Date('2027-01-01')
+    // A fixed calendar date stops being a future expiry after a valid refresh.
+    // Keep the actual-clock freshness assertion above and test expiry beyond
+    // the most recently reviewed module, without changing the 90-day policy.
+    const latestReview = Math.max(...DATA_VERSIONS.map((m) => new Date(m.lastVerified).getTime()))
+    const futureDate = new Date(latestReview + 91 * 24 * 60 * 60 * 1000)
     const staleInFuture = DATA_VERSIONS.filter((m) => isModuleStale(m, futureDate))
     expect(staleInFuture.length).toBe(DATA_VERSIONS.length) // all should be stale
   })

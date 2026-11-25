@@ -57,6 +57,8 @@ vi.mock('./service', () => ({
 }))
 
 import { updateOrgAuthPolicy } from './admin'
+import { getOrgAuthPolicy } from './service'
+import { insertAuthRow } from '../auth-db'
 
 describe('updateOrgAuthPolicy — validation', () => {
   beforeEach(() => {
@@ -100,7 +102,8 @@ describe('updateOrgAuthPolicy — validation', () => {
     const fromChain = {
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([{ organizationId: 'org1' }]),
+      limit: vi.fn().mockReturnThis(),
+      for: vi.fn().mockResolvedValue([{ organizationId: 'org1' }]),
     }
     mockSelect.mockReturnValueOnce(fromChain)
     const updateChain = {
@@ -129,7 +132,8 @@ describe('updateOrgAuthPolicy — validation', () => {
     mockSelect.mockReturnValueOnce({
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([{ organizationId: 'org1' }]),
+      limit: vi.fn().mockReturnThis(),
+      for: vi.fn().mockResolvedValue([{ organizationId: 'org1' }]),
     })
     mockUpdate.mockReturnValueOnce({ set: vi.fn().mockReturnThis(), where: vi.fn().mockResolvedValue(undefined) })
     mockInsert.mockReturnValue({ values: vi.fn().mockRejectedValue(new Error('audit down')) })
@@ -137,5 +141,99 @@ describe('updateOrgAuthPolicy — validation', () => {
     await expect(
       updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false } }),
     ).rejects.toThrow('audit down')
+  })
+
+  const row = (locked = vi.fn().mockResolvedValue([{ organizationId: 'org1' }])) => ({
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    for: locked,
+  })
+  const stored = {
+    organizationId: 'org1', allowLocalAuth: true, allowMagicLink: true, allowSso: true, requireSso: false, requireInvite: false,
+    passwordResetAllowed: true, allowedEmailDomains: ['example.com'], mfaRequiredForRoles: ['admin'],
+  }
+  const expected = { ...stored } as Omit<typeof stored, 'organizationId'> & { organizationId?: string }
+  delete expected.organizationId
+
+  it('locks the policy row for update before it reads the policy it compares, audits and writes', async () => {
+    const locked = vi.fn().mockResolvedValue([{ organizationId: 'org1' }])
+    mockSelect.mockReturnValueOnce(row(locked))
+    mockUpdate.mockReturnValueOnce({ set: vi.fn().mockReturnThis(), where: vi.fn().mockResolvedValue(undefined) })
+    mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) })
+    await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false } })
+    expect(locked).toHaveBeenCalledWith('update')
+  })
+
+  it('writes nothing and reports a conflict when the stored policy is no longer the one the caller read', async () => {
+    vi.mocked(getOrgAuthPolicy).mockResolvedValueOnce({ ...stored, allowMagicLink: false })
+    mockSelect.mockReturnValueOnce(row())
+    const r = await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false }, expected })
+    expect(r).toMatchObject({ success: false, conflict: true })
+    expect(mockUpdate).not.toHaveBeenCalled()
+    expect(mockInsert).not.toHaveBeenCalled()
+  })
+
+  it('reports a conflict, and audits nothing, when a concurrent first save wins the insert', async () => {
+    vi.mocked(getOrgAuthPolicy).mockResolvedValueOnce(stored)
+    mockSelect.mockReturnValueOnce(row(vi.fn().mockResolvedValue([])))
+    vi.mocked(insertAuthRow).mockRejectedValueOnce(Object.assign(new Error('duplicate key'), { code: '23505' }))
+    mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) })
+    const r = await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false }, expected })
+    expect(r).toMatchObject({ success: false, conflict: true })
+    expect(insertAuthRow).toHaveBeenCalledTimes(1)
+    expect(mockInsert).not.toHaveBeenCalled()
+  })
+
+  it('does not call any other insert failure a conflict', async () => {
+    mockSelect.mockReturnValueOnce(row(vi.fn().mockResolvedValue([])))
+    vi.mocked(insertAuthRow).mockRejectedValueOnce(Object.assign(new Error('connection lost'), { code: '08006' }))
+    await expect(updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false } })).rejects.toThrow('connection lost')
+  })
+
+  it.each([
+    ['a changed domain list', { allowedEmailDomains: ['other.org'] }],
+    ['a changed role list', { mfaRequiredForRoles: [] }],
+    ['a changed flag', { requireInvite: true }],
+  ])('treats %s as a conflict', async (_name, change) => {
+    vi.mocked(getOrgAuthPolicy).mockResolvedValueOnce({ ...stored, ...change })
+    mockSelect.mockReturnValueOnce(row())
+    const r = await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false }, expected })
+    expect(r.conflict).toBe(true)
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('applies the update when the stored policy still matches what the caller read, ignoring list order and domain case', async () => {
+    vi.mocked(getOrgAuthPolicy)
+      .mockResolvedValueOnce({ ...stored, allowedEmailDomains: ['Example.com'], mfaRequiredForRoles: ['admin'] })
+      .mockResolvedValueOnce({ ...stored, allowLocalAuth: false })
+    mockSelect.mockReturnValueOnce(row())
+    const set = vi.fn().mockReturnThis()
+    mockUpdate.mockReturnValueOnce({ set, where: vi.fn().mockResolvedValue(undefined) })
+    mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) })
+    const r = await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { allowLocalAuth: false }, expected })
+    expect(r).toMatchObject({ success: true, policy: { allowLocalAuth: false } })
+    expect(mockUpdate).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects a patch that requires SSO when the stored policy has SSO disabled', async () => {
+    vi.mocked(getOrgAuthPolicy).mockResolvedValueOnce({ ...stored, allowSso: false })
+    mockSelect.mockReturnValueOnce(row())
+    const r = await updateOrgAuthPolicy({ organizationId: 'org1', actorUserId: 'actor1', patch: { requireSso: true } })
+    expect(r).toMatchObject({ success: false, error: expect.stringMatching(/require SSO/i) })
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('stores domains lower-case, trimmed and without duplicates, and roles without duplicates', async () => {
+    vi.mocked(getOrgAuthPolicy).mockResolvedValue({ ...stored })
+    mockSelect.mockReturnValueOnce(row())
+    const set = vi.fn().mockReturnThis()
+    mockUpdate.mockReturnValueOnce({ set, where: vi.fn().mockResolvedValue(undefined) })
+    mockInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) })
+    await updateOrgAuthPolicy({
+      organizationId: 'org1', actorUserId: 'actor1',
+      patch: { allowedEmailDomains: ['Example.COM', 'example.com', ' other.org'.trim()], mfaRequiredForRoles: ['admin', 'admin'] },
+    })
+    expect(set).toHaveBeenCalledWith(expect.objectContaining({ allowedEmailDomains: ['example.com', 'other.org'], mfaRequiredForRoles: ['admin'] }))
   })
 })

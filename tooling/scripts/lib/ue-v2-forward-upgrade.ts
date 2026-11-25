@@ -17,6 +17,8 @@ import {
 } from '../../../apps/union-eyes/db/auth/business-session-policy'
 import { canonicalCatalogContract } from '../../../apps/union-eyes/lib/operations/canonical-catalog-admission'
 import { retainedAuditTarget, retainedAuditRetirement } from './ue-v2-retained-audit-acl'
+import { INSTALLER_FUNCTION_OWNER_ROLES } from '../../../apps/union-eyes/scripts/bootstrap-v2/execution-roles'
+import { EXTERNAL_READ_OWNER } from '../../../apps/union-eyes/lib/external-resource-read/source'
 
 export interface UpgradeObject {
   kind: string
@@ -67,6 +69,44 @@ export function canonicalFunctionOwnerHandoff(
     sql: `ALTER FUNCTION ${identity} OWNER TO ue_v2_owner`,
     role: 'uev2admin',
   }
+}
+
+/** Existing isolated owners do not confer ownership through a SET-only,
+ * NOINHERIT bridge. Replace their source-declared functions as that same owner;
+ * a new function still follows the installer's create-then-handoff path. */
+export function canonicalFunctionReplacementRole(
+  previous: UpgradeObject,
+  target: UpgradeObject,
+  catalog: UpgradeObject[],
+): string | undefined {
+  assert(
+    previous.kind === 'function' && target.kind === 'function' && previous.id === target.id,
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_IDENTITY_REFUSED',
+  )
+  assert(
+    previous.definition.owner === target.definition.owner,
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_OWNER_CHANGED',
+  )
+  const owner = target.definition.owner
+  const owners = new Set<string>([
+    'ue_v2_owner',
+    ...INSTALLER_FUNCTION_OWNER_ROLES,
+    EXTERNAL_READ_OWNER,
+  ])
+  assert(
+    typeof owner === 'string' && owners.has(owner),
+    'UE_UPGRADE_FUNCTION_REPLACEMENT_OWNER_REFUSED',
+  )
+  const role = catalog.find((object) => object.kind === 'role' && object.id === owner)
+  assert(role, 'UE_UPGRADE_FUNCTION_REPLACEMENT_ROLE_UNDECLARED')
+  if (owner === 'ue_v2_owner') return undefined
+  for (const attribute of ['superuser', 'bypassrls', 'login', 'createrole', 'createdb', 'inherit'])
+    assert.equal(
+      role.definition[attribute],
+      false,
+      'UE_UPGRADE_FUNCTION_REPLACEMENT_ROLE_PRIVILEGED',
+    )
+  return owner
 }
 const ident = /^[a-z_][a-z0-9_]{0,62}$/
 export const quoteUpgradeIdentifier = (s: string) => {
@@ -534,6 +574,10 @@ export async function planCanonicalForwardUpgrade(input: {
       const handoff = canonicalFunctionOwnerHandoff(previous, wanted!)
       if (handoff) result.push(handoff)
     }
+    const replacementRole =
+      previous && kind === 'function' && previous.definition.owner === wanted?.definition.owner
+        ? canonicalFunctionReplacementRole(previous, wanted!, after)
+        : undefined
     for (const [i, node] of parsed.statements.entries()) {
       let sql = parsed.texts[i]
       const tag = Object.keys(node)[0]
@@ -610,7 +654,9 @@ export async function planCanonicalForwardUpgrade(input: {
             ].includes(cmd.AlterTableCmd?.subtype),
             'UE_UPGRADE_ALTER_TABLE_REFUSED',
           )
-      add(type.toLowerCase(), id ?? `${schema}.${name}`, sql)
+      if (replacementRole)
+        result.push({ phase: type.toLowerCase(), object: id!, sql, role: replacementRole })
+      else add(type.toLowerCase(), id ?? `${schema}.${name}`, sql)
     }
   }
   // pg_dump puts ordinary CHECKs inside CREATE TABLE. Existing tables keep

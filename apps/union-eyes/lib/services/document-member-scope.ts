@@ -1,3 +1,5 @@
+import { isCaseDocumentLinkType, isDocumentLinkWellFormed } from '@/lib/documents/case-link'
+
 /**
  * Non-staff document scope.
  *
@@ -15,13 +17,15 @@ export function hasDocumentContextAccess(input: {
   isStaff: boolean
   canViewCase: boolean
   hasExplicitGrant: boolean
+  /** Semantic type after resolving a legacy non-case label that names a case. */
+  linkedEntityType: string | null | undefined
   linkedEntityId: string | null | undefined
   privacyLabel: string | null | undefined
   uploadedBy: string | null | undefined
   userId: string
 }): boolean {
-  if (input.canViewCase) return true
-  if (input.linkedEntityId) return false
+  if (!isDocumentLinkWellFormed(input.linkedEntityType, input.linkedEntityId)) return false
+  if (isCaseDocumentLinkType(input.linkedEntityType)) return input.canViewCase
   if (input.isStaff || input.hasExplicitGrant) return true
   if (input.privacyLabel === 'public_internal') return true
   return Boolean(input.uploadedBy) && input.uploadedBy === input.userId

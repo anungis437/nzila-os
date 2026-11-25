@@ -577,6 +577,11 @@
     "transcriptionFailed": "Não foi possível transcrever a gravação. Digite sua descrição.",
     "microphoneAccessDenied": "Não foi possível acessar o microfone. Permita o acesso ao microfone e tente novamente.",
     "attachmentsPartial": "Seu caso foi enviado, mas {count} anexo(s) não puderam ser carregados. Abra o caso para tentar novamente.",
+    "loadDetailFailed": "Não foi possível carregar este caso. Tente novamente.",
+    "submitFailedTitle": "Seu caso não foi enviado",
+    "submitFailed": "Nada foi registrado. Verifique seus dados e sua conexão e tente novamente.",
+    "signInRequired": "Entre novamente antes de enviar um caso.",
+    "submitUnconfirmed": "O servidor não confirmou seu caso. Verifique seus casos antes de enviar novamente para evitar duplicidade.",
     "submitNewCase": "Criar um Novo Caso",
     "tellUsWhat": "Conte-nos o que aconteceu. Seu sindicato está aqui para ajudar.",
     "voiceRecording": "Gravação de Voz (Opcional)",
@@ -6776,6 +6781,13 @@
     "harassmentSexual": "Assédio — Sexual",
     "contractDispute": "Disputa de Contrato",
     "retaliation": "Retaliação",
+    "wageDispute": "Salário e horário",
+    "safety": "Segurança",
+    "discipline": "Disciplina",
+    "discrimination": "Discriminação",
+    "harassment": "Assédio",
+    "benefitsDenial": "Benefícios",
+    "contracting": "Condições de trabalho",
     "other": "Outro"
   },
   "grievance": {
@@ -10255,7 +10267,9 @@
       "title": "Inteligência de Casos",
       "description": "Relevância governada, casos semelhantes, precedentes e contexto gráfico",
       "filterByReason": "Filtrar por motivo",
-      "allPrivacyLabels": "Todas as etiquetas de privacidade"
+      "allPrivacyLabels": "Todas as etiquetas de privacidade",
+      "humanReviewNotice": "Apenas apoio à interpretação da continuidade. Use este contexto para a continuidade do acompanhamento e a legibilidade da governação e submeta as decisões finais a revisão humana.",
+      "loadFailed": "Não foi possível carregar o contexto do caso, pelo que as listas abaixo não estão disponíveis. Isso não significa que não exista material relacionado."
     },
     "clcRemittance": {
       "totalDue": "Total Devido",

@@ -19,7 +19,7 @@ import { compileExternalAuthBridgeSql } from '../../auth-bridge'
 import { EXTERNAL_READ_AUTHORIZATION, EXTERNAL_READ_POWER, EXTERNAL_READ_QUALIFICATION, externalReadQualificationHash, parseExternalReadQualification, type ExternalReadQualification } from '../../qualification'
 
 export async function externalReaderFixture(options: { installerSemantics?: boolean; rolePreprovisioned?: boolean; institutionalApproval?: boolean;
-  actionRisk?: 'low' | 'medium' | 'high' | 'critical'; actionApprovals?: number } = {}) {
+  actionRisk?: 'low' | 'medium' | 'high' | 'critical'; actionApprovals?: number; documentLinkType?: 'case' | 'grievance' } = {}) {
   const base = await caseDomainFixture(false), { db, org, caseId, actor } = base
   const member = randomUUID()
   try {
@@ -77,7 +77,7 @@ export async function externalReaderFixture(options: { installerSemantics?: bool
       VALUES($1,$2,'Synthetic document','synthetic:fixture','application/octet-stream','application/octet-stream','fixture.bin',$3,'team_confidential')`, [documentId, org, actor])
     await db.query(`INSERT INTO public.document_versions(id,organization_id,document_id,version_no,storage_key,content_hash,uploaded_by)
       VALUES($1,$2,$3,2,$4,$5,$6)`, [versionId, org, documentId, storageKey, checksum, actor])
-    await db.query(`INSERT INTO public.document_links(organization_id,document_id,linked_entity_type,linked_entity_id,linked_by) VALUES($1,$2,'grievance',$3,$4)`, [org, documentId, caseId, actor])
+    await db.query(`INSERT INTO public.document_links(organization_id,document_id,linked_entity_type,linked_entity_id,linked_by) VALUES($1,$2,$5,$3,$4)`, [org, documentId, caseId, actor, options.documentLinkType ?? 'grievance'])
     const representedPerson = member
     await db.query(`INSERT INTO public.representation_authorities(id,organization_id,matter_type,matter_id,represented_person_id,representative_user_id,representative_organization_id,
       scope,source,status,effective_at,expires_at,created_by) VALUES($1,$2,'grievance',$3,$4,$5,$6,ARRAY['view','documents'],'Synthetic existing authority','active',$7,$8,$9)`,

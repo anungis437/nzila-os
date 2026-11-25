@@ -58,9 +58,9 @@ describe('calculateDividendTax', () => {
     expect(r.netTaxAtTopRate).toBeGreaterThanOrEqual(0)
   })
 
-  it('calculates RDTOH refund', () => {
+  it('calculates a potential RDTOH ceiling, not balance-qualified refund', () => {
     const r = calculateDividendTax(10_000, 'eligible', 'ON', 0.5)
-    expect(r.rdtohRefund).toBeCloseTo(3_833, 0)
+    expect(r.rdtohRefund).toBe(3_833.33)
   })
 
   it('effective dividend rate is reasonable', () => {

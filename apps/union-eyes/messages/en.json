@@ -558,6 +558,11 @@
     "transcriptionFailed": "We could not transcribe that recording. Please type your description instead.",
     "microphoneAccessDenied": "Unable to access the microphone. Please allow microphone access and try again.",
     "attachmentsPartial": "Your case was submitted, but {count} attachment(s) could not be uploaded. Open the case to try again.",
+    "loadDetailFailed": "This case could not be loaded. Try again.",
+    "submitFailedTitle": "Your case was not submitted",
+    "submitFailed": "Nothing was filed. Check your details and connection, then try again.",
+    "signInRequired": "Sign in again before submitting a case.",
+    "submitUnconfirmed": "The server did not confirm your case. Check your cases before submitting again so that a duplicate is not filed.",
     "submitNewCase": "Create a New Case",
     "tellUsWhat": "Tell us what happened. Your union is here to help.",
     "voiceRecording": "Voice Recording (Optional)",
@@ -6836,6 +6841,13 @@
     "harassmentSexual": "Harassment – Sexual",
     "contractDispute": "Contract Dispute",
     "retaliation": "Retaliation",
+    "wageDispute": "Wage and hour",
+    "safety": "Safety",
+    "discipline": "Discipline",
+    "discrimination": "Discrimination",
+    "harassment": "Harassment",
+    "benefitsDenial": "Benefits",
+    "contracting": "Working conditions",
     "other": "Other"
   },
   "grievance": {
@@ -9903,7 +9915,9 @@
       "title": "Case Intelligence",
       "description": "Governed relevance, similar cases, precedents, and graph context",
       "filterByReason": "Filter by reason",
-      "allPrivacyLabels": "All privacy labels"
+      "allPrivacyLabels": "All privacy labels",
+      "humanReviewNotice": "Continuity interpretation support only. Use this context for stewardship continuity and governance readability, then escalate final determinations to human review.",
+      "loadFailed": "The case context could not be loaded, so the lists below are not available. This is not the same as there being no related material."
     },
     "clcRemittance": {
       "totalDue": "Total Due",

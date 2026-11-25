@@ -11,6 +11,7 @@
  * response resolving after a newer scope change has already superseded it.
  */
 import { useState, useEffect, useCallback, useRef } from "react";
+import { ApiShapeError, isRecord, readApiFailure, userFailureText } from "@/lib/client/api-envelope";
 
 export interface MembersConsoleOrganization {
   id: string;
@@ -74,15 +75,14 @@ export function useMembersConsoleData(
         ? '/api/admin/members/stats'
         : `/api/admin/members/stats?organizationId=${selectedOrg}`;
       const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to load member statistics (${response.status})`);
-      }
-      const data = await response.json();
+      if (!response.ok) throw await readApiFailure(response);
+      const data: unknown = await response.json().catch(() => null);
+      if (!isRecord(data)) throw new ApiShapeError('no statistics');
       if (statsRequestRef.current !== requestId) return; // superseded by a newer org selection
-      setStats(data);
+      setStats(data as unknown as MembersConsoleMemberStats);
     } catch (error) {
       if (statsRequestRef.current !== requestId) return;
-      setStatsError(error instanceof Error ? error.message : 'Failed to load member statistics');
+      setStatsError(`Member statistics could not be loaded. ${userFailureText(error, '', 'en')}`.trim());
     } finally {
       if (statsRequestRef.current === requestId) setIsLoadingStats(false);
     }
@@ -103,9 +103,9 @@ export function useMembersConsoleData(
         const failedOrgs: string[] = [];
         for (const org of organizations) {
           const response = await fetch(`/api/organizations/${org.id}/members`);
-          if (response.ok) {
-            const data = await response.json();
-            allMembers.push(...(data.data || []));
+          const data: unknown = response.ok ? await response.json().catch(() => null) : null;
+          if (response.ok && isRecord(data) && Array.isArray(data.data)) {
+            allMembers.push(...(data.data as MembersConsoleMember[]));
           } else {
             failedOrgs.push(org.name);
           }
@@ -113,11 +113,11 @@ export function useMembersConsoleData(
         if (membersRequestRef.current !== requestId) return; // superseded
         setMembers(allMembers);
         if (failedOrgs.length > 0) {
-          setMembersError(`Failed to load members for: ${failedOrgs.join(', ')}`);
+          setMembersError(`Members could not be loaded for: ${failedOrgs.join(', ')}.`);
         }
       } catch (error) {
         if (membersRequestRef.current !== requestId) return;
-        setMembersError(error instanceof Error ? error.message : 'Failed to load members');
+        setMembersError(`Members could not be loaded. ${userFailureText(error, '', 'en')}`.trim());
       } finally {
         if (membersRequestRef.current === requestId) setIsLoadingMembers(false);
       }
@@ -125,15 +125,14 @@ export function useMembersConsoleData(
       try {
         setIsLoadingMembers(true);
         const response = await fetch(`/api/organizations/${selectedOrg}/members`);
-        if (!response.ok) {
-          throw new Error(`Failed to load members (${response.status})`);
-        }
-        const data = await response.json();
+        if (!response.ok) throw await readApiFailure(response);
+        const data: unknown = await response.json().catch(() => null);
+        if (!isRecord(data) || !Array.isArray(data.data)) throw new ApiShapeError('no member list');
         if (membersRequestRef.current !== requestId) return;
-        setMembers(data.data || []);
+        setMembers(data.data as MembersConsoleMember[]);
       } catch (error) {
         if (membersRequestRef.current !== requestId) return;
-        setMembersError(error instanceof Error ? error.message : 'Failed to load members');
+        setMembersError(`Members could not be loaded. ${userFailureText(error, '', 'en')}`.trim());
       } finally {
         if (membersRequestRef.current === requestId) setIsLoadingMembers(false);
       }

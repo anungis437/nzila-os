@@ -8,7 +8,7 @@
  * - ITA s.162(2): Repeated late filing (10% + 2%/month, max 20 months)
  * - ITA s.162(7): Failure to file information returns (T4, T5, etc.)
  * - ITA s.163(1): Repeated failure to report income
- * - Excise Tax Act s.280(1): GST/HST late filing penalty
+ * - Excise Tax Act s.280.1: GST/HST late filing penalty
  * - CRA RC4022: General Information for GST/HST Registrants
  */
 
@@ -19,8 +19,13 @@ export interface LateFilingPenaltyInput {
   taxOwing: number
   /** Number of complete months the return is late (0–12 or 0–20) */
   monthsLate: number
-  /** Whether this is a repeat offence within the last 3 tax years */
+  /** A qualifying late-filing penalty was payable in one of the preceding 3 tax years. */
   isRepeatOffender?: boolean
+  /** CRA sent a demand under ITA s.150(2); required for s.162(2). */
+  hasFilingDemand?: boolean
+  /** Explicitly late, including less than one complete month. When omitted,
+   * legacy callers infer lateness only from a positive monthsLate value. */
+  isLate?: boolean
 }
 
 export interface LateFilingPenaltyResult {
@@ -44,8 +49,10 @@ export interface GstLatePenaltyInput {
   netTaxOwing: number
   /** Number of complete months the return is late */
   monthsLate: number
-  /** Whether this is a repeat offence (penalty doubles) */
+  /** @deprecated No generic repeat doubling applies to the s.280.1 formula. */
   isRepeatOffender?: boolean
+  /** Explicitly late, including less than one complete month. */
+  isLate?: boolean
 }
 
 export interface GstLatePenaltyResult {
@@ -67,6 +74,7 @@ export interface InformationReturnPenaltyInput {
 export interface InformationReturnPenaltyResult {
   penalty: number
   rule: string
+  /** Average penalty per slip for display; the legal penalty is per filing/tier. */
   perSlipPenalty: number
 }
 
@@ -90,10 +98,10 @@ export const T2_REPEAT_MONTHLY_RATE = 0.02
 /** Maximum months for repeat late filer (ITA s.162(2)) */
 export const T2_REPEAT_MAX_MONTHS = 20
 
-/** ITA s.162(7) — per-slip penalty for late information returns */
+/** @deprecated General s.162(7) daily amount, not a per-slip multiplier. */
 export const INFO_RETURN_PER_SLIP = 25
 
-/** ITA s.162(7) — daily cap per slip */
+/** @deprecated General s.162(7) maximum, not a daily cap per slip. */
 export const INFO_RETURN_DAILY_CAP = 2_500
 
 /** Minimum penalty per information return filing (ITA s.162(7.01)) */
@@ -102,7 +110,7 @@ export const INFO_RETURN_MINIMUM = 100
 /** Maximum penalty per information return filing (ITA s.162(7.01)) */
 export const INFO_RETURN_MAXIMUM = 7_500
 
-/** Excise Tax Act s.280(1) — GST/HST late filing: 1% + 0.25%/month (max 12 months) */
+/** Excise Tax Act s.280.1 — GST/HST late filing: 1% + 0.25%/month (max 12 months) */
 export const GST_LATE_BASE_RATE = 0.01
 
 /** GST/HST monthly additional penalty rate */
@@ -114,14 +122,16 @@ export const GST_LATE_MAX_MONTHS = 12
 // ── Calculators ─────────────────────────────────────────────────────────────
 
 /**
- * Calculate the late filing penalty for a T2 corporate return.
+ * Calculate the ordinary resident-corporation T2 late-filing penalty.
+ * Non-resident corporation minimum penalties and gross-negligence penalties
+ * require additional facts and are outside this calculator.
  *
  * ITA s.162(1): 5% of unpaid tax + 1% per complete month late (max 12 months).
  * ITA s.162(2): If demanded and previously penalized within 3 years:
  *               10% + 2% per complete month late (max 20 months).
  */
 export function calculateT2LateFilingPenalty(input: LateFilingPenaltyInput): LateFilingPenaltyResult {
-  if (input.taxOwing <= 0 || input.monthsLate <= 0) {
+  if (input.taxOwing <= 0 || !(input.isLate ?? input.monthsLate > 0)) {
     return {
       penalty: 0,
       effectiveRate: 0,
@@ -130,11 +140,11 @@ export function calculateT2LateFilingPenalty(input: LateFilingPenaltyInput): Lat
     }
   }
 
-  const isRepeat = input.isRepeatOffender ?? false
+  const isRepeat = input.isRepeatOffender === true && input.hasFilingDemand === true
   const baseRate = isRepeat ? T2_REPEAT_BASE_RATE : T2_LATE_BASE_RATE
   const monthlyRate = isRepeat ? T2_REPEAT_MONTHLY_RATE : T2_LATE_MONTHLY_RATE
   const maxMonths = isRepeat ? T2_REPEAT_MAX_MONTHS : T2_LATE_MAX_MONTHS
-  const monthsApplied = Math.min(input.monthsLate, maxMonths)
+  const monthsApplied = Math.max(0, Math.min(Math.floor(input.monthsLate), maxMonths))
 
   const basePenalty = Math.round(input.taxOwing * baseRate * 100) / 100
   const monthlyPenalty = Math.round(input.taxOwing * monthlyRate * monthsApplied * 100) / 100
@@ -154,43 +164,41 @@ export function calculateT2LateFilingPenalty(input: LateFilingPenaltyInput): Lat
 /**
  * Calculate the late filing penalty for GST/HST returns.
  *
- * Excise Tax Act s.280(1):
+ * Excise Tax Act s.280.1:
  * - 1% of balance owing
  * - plus 0.25% of balance owing for each complete month late (max 12 months)
  * - Total max: 4% of balance owing
  */
 export function calculateGstLatePenalty(input: GstLatePenaltyInput): GstLatePenaltyResult {
-  if (input.netTaxOwing <= 0 || input.monthsLate <= 0) {
+  if (input.netTaxOwing <= 0 || !(input.isLate ?? input.monthsLate > 0)) {
     return {
       penalty: 0,
       interest: 0,
       total: 0,
-      rule: 'ETA s.280(1): No penalty — tax paid or return not late',
+      rule: 'ETA s.280.1: No penalty — tax paid or return not late',
     }
   }
 
-  const monthsApplied = Math.min(input.monthsLate, GST_LATE_MAX_MONTHS)
+  const monthsApplied = Math.max(0, Math.min(Math.floor(input.monthsLate), GST_LATE_MAX_MONTHS))
   const basePenalty = input.netTaxOwing * GST_LATE_BASE_RATE
   const monthlyPenalty = input.netTaxOwing * GST_LATE_MONTHLY_RATE * monthsApplied
-  let penalty = Math.round((basePenalty + monthlyPenalty) * 100) / 100
-
-  // Repeat offender: penalty is doubled
-  if (input.isRepeatOffender) {
-    penalty = Math.round(penalty * 2 * 100) / 100
-  }
+  const penalty = Math.round((basePenalty + monthlyPenalty) * 100) / 100
 
   return {
     penalty,
     interest: 0, // Interest is separate — use calculateInstallmentInterest with prescribed rate
     total: penalty,
-    rule: `ETA s.280(1): 1% + 0.25%/month × ${monthsApplied}${input.isRepeatOffender ? ' (doubled for repeat)' : ''}`,
+    rule: `ETA s.280.1: 1% + 0.25%/month × ${monthsApplied}`,
   }
 }
 
 /**
  * Calculate penalty for late-filed information returns (T4, T5, T5013, NR4, T3).
  *
- * ITA s.162(7): $25/day per slip, minimum $100, maximum $7,500 per filing.
+ * CRA prescribed-return daily tiers and relieving policy apply by return type
+ * and total slip count, never by multiplying a daily amount by every slip.
+ * T5013 partnership returns instead use ITA s.162(7.1).
+ * https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/file-information-returns-slip-summaries/when-to-file.html
  */
 export function calculateInformationReturnPenalty(
   input: InformationReturnPenaltyInput,
@@ -203,18 +211,28 @@ export function calculateInformationReturnPenalty(
     }
   }
 
-  // $25/day per return (the entire filing, not per slip in the strict sense)
-  // But CRA applies it based on slips: calculate per slip then aggregate
-  const rawPerSlip = INFO_RETURN_PER_SLIP * input.daysLate
-  const perSlipPenalty = Math.min(rawPerSlip, INFO_RETURN_DAILY_CAP)
-  const total = perSlipPenalty * input.numberOfSlips
-
-  // Apply min/max per filing
-  const penalty = Math.min(Math.max(total, INFO_RETURN_MINIMUM), INFO_RETURN_MAXIMUM)
-
+  const type = input.returnType.trim().toUpperCase()
+  const days = Math.min(Math.floor(input.daysLate), 100)
+  const slips = input.numberOfSlips
+  if (!Number.isInteger(slips)) throw new RangeError('Slip count must be an integer')
+  if (type === 'T5013') {
+    const penalty = Math.max(100, 25 * days)
+    return { penalty, perSlipPenalty: Math.round(penalty / slips * 100) / 100,
+      rule: 'ITA s.162(7.1): partnership return, $25/day up to 100 days, minimum $100' }
+  }
+  const prescribed = [
+    'AGR-1', 'T4FHSA', 'NR4', 'PART XVIII', 'RC368', 'RC438', 'RC62', 'RRSP',
+    'T10', 'T1204', 'T215', 'T2202', 'T3', 'T4', 'T4A', 'T4A(P)', 'T4A-NR',
+    'T4A(OAS)', 'T4A-RCA', 'T4E', 'T4PS', 'T4RIF', 'T4RSP', 'T5', 'T5007', 'T5008', 'T5018', 'TFSA',
+  ]
+  if (!prescribed.includes(type)) throw new RangeError('Unverified information-return penalty category: ' + type)
+  const relief = ['NR4', 'T4', 'T4A', 'T4E', 'T5', 'T5018'].includes(type)
+  const daily = relief && slips <= 5 ? 0 : relief && slips <= 10 ? 5
+    : slips <= 50 ? 10 : slips <= 500 ? 15 : slips <= 2500 ? 25 : slips <= 10000 ? 50 : 75
+  const penalty = daily === 0 ? 100 : Math.max(100, daily * days)
   return {
-    penalty: Math.round(penalty * 100) / 100,
-    rule: `ITA s.162(7): $25/day × ${input.daysLate} days × ${input.numberOfSlips} slips (${input.returnType}) — min $100, max $7,500`,
-    perSlipPenalty: Math.round(perSlipPenalty * 100) / 100,
+    penalty,
+    rule: `ITA s.162(7.01) / CRA ${relief ? 'relieving' : 'legislated'} tier: ${type}, ${slips} slips, ${days} days (maximum 100 days)`,
+    perSlipPenalty: Math.round(penalty / slips * 100) / 100,
   }
 }

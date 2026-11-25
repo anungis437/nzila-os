@@ -285,7 +285,8 @@ describe('analytics dashboard: failures', () => {
     })
     const user = userEvent.setup()
     renderDashboard()
-    expect(await screen.findByText('The insight store is down')).toBeInTheDocument()
+    expect(await screen.findByText('Failed to load analytics data')).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent('The insight store is down');
     expect(within(card('Active Insights')).getByText('—')).toBeInTheDocument()
     // The figures that were read are still shown.
     expect(within(card('Claims This Month')).getByText('42')).toBeInTheDocument()
@@ -325,7 +326,7 @@ describe('analytics dashboard: failures', () => {
     toasts.toast.mockReset()
     failInsights = true
     await user.click(screen.getByRole('button', { name: /Refresh/ }))
-    expect(await screen.findByText('down')).toBeInTheDocument()
+    expect(await screen.findByText('Failed to load analytics data')).toBeInTheDocument()
     expect(toasts.toast).not.toHaveBeenCalled()
   })
 })

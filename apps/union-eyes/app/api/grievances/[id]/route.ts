@@ -80,7 +80,6 @@ export const GET = withApi(
         title: documents.title,
         name: documents.name,
         filename: documents.filename,
-        fileUrl: documents.fileUrl,
         documentType: documents.documentType,
         privacyLabel: documents.privacyLabel,
         uploadedBy: documents.uploadedBy,

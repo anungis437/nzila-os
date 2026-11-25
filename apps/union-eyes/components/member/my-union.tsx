@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
+import { ApiShapeError, envelopeData, failureDetail, failureLanguage, readApiFailure, type FailureLanguage } from '@/lib/client/api-envelope';
 import { asRecord, optionalString } from '@/lib/client/row-fields';
 
 type Membership = {
@@ -23,7 +23,7 @@ type Membership = {
 // so each is listed as unavailable and is never rendered as a link, balance or empty result.
 const UNAVAILABLE_SERVICES = ['agreement', 'dues', 'benefits', 'events', 'participation', 'credential'] as const;
 
-const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+const reasonOf = (error: unknown, language: FailureLanguage): string => failureDetail(error, language) ?? '';
 
 /**
  * /api/members/me answers { success, data: { membership } } where membership is the caller's record or null when the organization holds none.
@@ -53,7 +53,7 @@ async function readMembership(response: Response): Promise<Membership | null> {
 
 async function fetchMembership(): Promise<Membership | null> {
   const response = await fetch('/api/members/me');
-  if (!response.ok) throw new Error(await readApiError(response, `Request failed with status ${response.status}`));
+  if (!response.ok) throw await readApiFailure(response);
   return readMembership(response);
 }
 
@@ -74,11 +74,11 @@ export function MyUnion() {
         setLoading(false);
       },
       (error: unknown) => {
-        setLoadError(reasonOf(error));
+        setLoadError(reasonOf(error, failureLanguage(locale)));
         setLoading(false);
       },
     );
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     load();
@@ -113,7 +113,7 @@ export function MyUnion() {
         {!loading && loadError !== null && (
           <div role="alert" className="text-sm text-destructive">
             {t('loadError')}
-            <span className="block text-xs">{loadError}</span>
+            {loadError && <span className="block text-xs">{loadError}</span>}
             <Button variant="link" size="sm" onClick={retry}>{t('retry')}</Button>
           </div>
         )}

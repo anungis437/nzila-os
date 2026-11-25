@@ -17,9 +17,12 @@
  * tables are read through the caller's own organization transaction (`tx`), never the ambient handle.
  */
 import { and, eq, sql } from 'drizzle-orm';
-import { documentAccessGrants, documentLinks, documents } from '@/db/schema/documents-schema';
+import { documentAccessGrants, documents } from '@/db/schema/documents-schema';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { isCaseDocumentLinkType } from './case-link';
+import { allDocumentLinksWellFormed, readDocumentLinks } from './document-links';
+import { resolveDocumentCaseId } from './document-link-authority';
 import {
   isDocumentVisibleByPolicy,
   type GovernancePrivacyLabel,
@@ -72,7 +75,7 @@ export const OCR_MEMBER_POLICY_NOT_ADOPTED: OcrMemberPolicy = { adopted: false }
 export interface OcrAuthorityFacts {
   privacyLabel: string | null;
   isUploader: boolean;
-  /** The kernel's verdicts for the linked grievance; null for an unlinked document. */
+  /** The kernel's verdicts for a case linked under either retained spelling; null for an unlinked document. */
   linkedCase: null | {
     canViewCase: boolean;
     canProcessOcr: boolean;
@@ -128,6 +131,7 @@ export interface DocumentAuthorityContext {
   privacyLabel: string | null;
   uploadedBy: string | null;
   linkedEntityType: string | null;
+  linkedEntityId?: string | null;
   linkedCaseId: string | null;
   grant: { canView: boolean; canProcessOcr: boolean } | null;
   kernel: CaseAccess | null;
@@ -152,11 +156,8 @@ export async function loadDocumentAuthorityContext(
         id: documents.id,
         privacyLabel: documents.privacyLabel,
         uploadedBy: documents.uploadedBy,
-        linkedEntityType: documentLinks.linkedEntityType,
-        linkedEntityId: documentLinks.linkedEntityId,
       })
       .from(documents)
-      .leftJoin(documentLinks, eq(documentLinks.documentId, documents.id))
       .where(
         and(
           eq(documents.id, documentId),
@@ -167,6 +168,8 @@ export async function loadDocumentAuthorityContext(
       .limit(1)
   )[0];
   if (!row) return null;
+  const links = await readDocumentLinks(tx, organizationId, documentId);
+  if (!allDocumentLinksWellFormed(links)) return null;
 
   const grant = (
     await tx
@@ -185,20 +188,32 @@ export async function loadDocumentAuthorityContext(
       .limit(1)
   )[0] ?? null;
 
-  const linkedCaseId = row.linkedEntityType === 'grievance' ? row.linkedEntityId : null;
-  // A document linked to anything other than a grievance has no case authority to borrow: it is judged as unlinked.
-  const kernel = linkedCaseId
-    ? await getEffectiveCaseAccess({ organizationId, grievanceId: linkedCaseId, userId })
-    : null;
+  // A document attached to several cases: the link whose live authority admits processing is the one that decides, so the
+  // answer is the same for every row order. Without such a link the first in the fixed order stands, and it refuses.
+  const candidates: Array<{ link: (typeof links)[number]; linkedCaseId: string | null; kernel: Awaited<ReturnType<typeof getEffectiveCaseAccess>> | null }> = [];
+  for (const link of links) {
+    const linkedCaseId = await resolveDocumentCaseId(tx, { organizationId,
+      linkedEntityType: link.linkedEntityType, linkedEntityId: link.linkedEntityId });
+    // Both case aliases resolve the same live kernel authority; only a recognized non-case link is unlinked here.
+    const kernel = linkedCaseId
+      ? await getEffectiveCaseAccess({ organizationId, grievanceId: linkedCaseId, userId })
+      : null;
+    candidates.push({ link, linkedCaseId, kernel });
+  }
+  const chosen =
+    candidates.find((c) => c.kernel?.canViewCase && c.kernel.canProcessOcr) ??
+    candidates.find((c) => c.kernel?.canViewCase) ??
+    candidates[0];
 
   return {
     documentId: row.id,
     privacyLabel: row.privacyLabel,
     uploadedBy: row.uploadedBy,
-    linkedEntityType: row.linkedEntityType,
-    linkedCaseId,
+    linkedEntityType: chosen.link.linkedEntityType,
+    linkedEntityId: chosen.link.linkedEntityId,
+    linkedCaseId: chosen.linkedCaseId,
     grant,
-    kernel,
+    kernel: chosen.kernel,
   };
 }
 
@@ -220,7 +235,9 @@ export function ocrFactsFrom(ctx: DocumentAuthorityContext, userId: string, memb
           canViewPrivateDocuments: ctx.kernel.canViewPrivateDocuments,
           isPrimaryOwner: ctx.kernel.isPrimaryOwner,
         }
-      : null,
+      : ctx.linkedCaseId || isCaseDocumentLinkType(ctx.linkedEntityType)
+        ? { canViewCase: false, canProcessOcr: false, canViewPrivateDocuments: false, isPrimaryOwner: false }
+        : null,
     grant: ctx.grant,
     memberPolicy: memberPolicy ?? OCR_MEMBER_POLICY_NOT_ADOPTED,
   };

@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Signal, SignalType, SignalUrgency } from "@/lib/types/signal";
 import { ActionHint } from "@/components/onboarding/action-hint";
-import { ApiShapeError, envelopeData, envelopeRows, isRecord, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, envelopeData, envelopeRows, isRecord, failureLanguage, readApiFailure, userFailureText } from "@/lib/client/api-envelope";
 import { asRecord, optionalString, requiredString } from "@/lib/client/row-fields";
 
 // ── Type → icon mapping ─────────────────────────────────────────────────────
@@ -54,7 +54,6 @@ const TYPE_LABEL_KEYS: Record<SignalType, string> = {
 
 // ── Transform API data into Signal format ────────────────────────────────────
 /** A failure the server explained: its words are shown as they came. */
-class ServerMessage extends Error {}
 
 const humanize = (code: string) => code.replace(/_/g, " ");
 
@@ -99,7 +98,7 @@ function notificationToSignal(value: unknown, defaults: { defaultNotification: s
 
 async function readSource<T>(response: PromiseSettledResult<Response>, rowsOf: (body: unknown) => unknown[], map: (row: unknown) => T | null): Promise<T[]> {
   if (response.status === "rejected") throw response.reason;
-  if (!response.value.ok) throw new ServerMessage(await readApiError(response.value, ""));
+  if (!response.value.ok) throw await readApiFailure(response.value);
   return rowsOf(await response.value.json()).flatMap((row) => {
     const item = map(row);
     return item === null ? [] : [item];
@@ -157,7 +156,7 @@ export function InboxConsole() {
     const failures: string[] = [];
     for (const result of results) {
       if (result.status === "fulfilled") items.push(...result.value);
-      else failures.push(result.reason instanceof ServerMessage && result.reason.message !== "" ? result.reason.message : t("errors.loadingError"));
+      else failures.push(userFailureText(result.reason, t("errors.loadingError"), failureLanguage(locale)));
     }
 
     // Sort by createdAt desc
@@ -166,7 +165,7 @@ export function InboxConsole() {
     // A source that could not be read is said so: what is listed is not the whole inbox, and an empty list is not "no signals".
     setError(failures.length > 0 ? [...new Set(failures)].join(" ") : null);
     setLoading(false);
-  }, [t, tInbox]);
+  }, [t, tInbox, locale]);
 
   useEffect(() => { fetchSignals(); }, [fetchSignals]);
 

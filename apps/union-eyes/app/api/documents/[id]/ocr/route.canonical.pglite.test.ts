@@ -64,14 +64,14 @@ const run = (userId = PEER, docId = DOC, organizationId = ORG) => {
 const revisionCount = async () => (await q('SELECT 1 FROM document_transcript_revisions')).rows.length;
 const audits = async () => (await q('SELECT action FROM audit_security.audit_logs')).rows.map((r) => (r as { action: string }).action);
 
-async function seed(opts: { label?: string; linked?: boolean; bytes?: string; hashOf?: string; org?: string } = {}) {
+async function seed(opts: { label?: string; linked?: boolean; linkType?: string; bytes?: string; hashOf?: string; org?: string } = {}) {
   const bytes = opts.bytes ?? 'scan';
   state.blobs.set(KEY, Buffer.from(bytes));
   await q(`INSERT INTO documents (id, organization_id, title, name, filename, file_url, file_type, mime_type, privacy_label, uploaded_by, status)
            VALUES ($1, $2, 'T', 'T', 'f.pdf', 'https://x', 'pdf', 'application/pdf', $3, $4, 'active')`, [DOC, opts.org ?? ORG, opts.label ?? 'team_confidential', UPLOADER]);
   await q(`INSERT INTO document_versions (id, organization_id, document_id, version_no, storage_key, content_hash, uploaded_by)
            VALUES (gen_random_uuid(), $1, $2, 1, $3, $4, $5)`, [opts.org ?? ORG, DOC, KEY, sha(opts.hashOf ?? bytes), UPLOADER]);
-  if (opts.linked) await q(`INSERT INTO document_links (id, organization_id, document_id, linked_entity_type, linked_entity_id, linked_by) VALUES (gen_random_uuid(), $1, $2, 'grievance', $3, $4)`, [ORG, DOC, CASE, UPLOADER]);
+  if (opts.linked) await q(`INSERT INTO document_links (id, organization_id, document_id, linked_entity_type, linked_entity_id, linked_by) VALUES (gen_random_uuid(), $1, $2, $5, $3, $4)`, [ORG, DOC, CASE, UPLOADER, opts.linkType ?? 'grievance']);
 }
 
 async function grant(userId: string, over: { canProcessOcr?: boolean; status?: string; expired?: boolean; revoked?: boolean } = {}) {
@@ -122,14 +122,14 @@ describe('who may process', () => {
     expect(state.extractCalls).toBe(0);
   });
 
-  it('allows a linked document under the kernel’s case:process_ocr, and only with a live case relationship', async () => {
-    await seed({ linked: true });
+  it.each(['case', 'grievance'])('allows %s-linked processing only under the live case kernel', async (linkType) => {
+    await seed({ linked: true, linkType });
     state.kernel = { ...NO_KERNEL, canViewCase: true, canViewPrivateDocuments: true, canProcessOcr: true };
     expect((await run()).status).toBe(200);
   });
 
-  it('refuses a case participant who can view but not process, and a former participant whose relationship ended', async () => {
-    await seed({ linked: true });
+  it.each(['case', 'grievance'])('refuses %s-linked processing after loss of case authority, even with a processing grant', async (linkType) => {
+    await seed({ linked: true, linkType });
     state.kernel = { ...NO_KERNEL, canViewCase: true, canViewPrivateDocuments: true };
     expect((await run()).status).toBe(403);
     // Recusal, revocation or expiry remove canViewCase; a processing grant does not bring it back.
@@ -139,8 +139,8 @@ describe('who may process', () => {
     expect(state.extractCalls).toBe(0);
   });
 
-  it('lets a processing grant work on a linked case only for someone who still has a live case relationship', async () => {
-    await seed({ linked: true });
+  it.each(['case', 'grievance'])('lets a processing grant work on a %s-linked case only with a live case relationship', async (linkType) => {
+    await seed({ linked: true, linkType });
     await grant(PEER, { canProcessOcr: true });
     state.kernel = { ...NO_KERNEL, canViewCase: true, canViewPrivateDocuments: true };
     expect((await run()).status).toBe(200);

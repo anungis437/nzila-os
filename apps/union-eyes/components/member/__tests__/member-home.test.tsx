@@ -225,7 +225,9 @@ describe('MemberHome: marking notices read', () => {
 
     await user.click(await screen.findByRole('button', { name: enCA.memberHome.markAllRead }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('the request was not confirmed');
+    const unconfirmed = await screen.findByRole('alert');
+    expect(unconfirmed).toHaveTextContent(enCA.memberHome.markAllReadError);
+    expect(unconfirmed).not.toHaveTextContent(/not confirmed|Unexpected API response/);
     expect(screen.getByTestId('home-notifications')).toBeInTheDocument();
   });
 
@@ -237,7 +239,9 @@ describe('MemberHome: marking notices read', () => {
 
     await user.click(screen.getByRole('button', { name: enCA.memberHome.markAllRead }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch');
+    const failure = await screen.findByRole('alert');
+    expect(failure).toHaveTextContent(enCA.memberHome.markAllReadError);
+    expect(failure).not.toHaveTextContent('Failed to fetch');
   });
 });
 
@@ -248,7 +252,8 @@ describe('MemberHome: when a read fails, it says so and does not report an empty
     renderHome();
 
     const alert = await screen.findByText(enCA.memberHome.casesLoadError);
-    expect(alert.closest('[role="alert"]')).toHaveTextContent('Claims are unavailable');
+    expect(alert.closest('[role="alert"]')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Claims are unavailable');
     expect(screen.queryByTestId('home-no-cases')).not.toBeInTheDocument();
 
     claimPages = [claimPage([claimRow({})])];
@@ -264,7 +269,8 @@ describe('MemberHome: when a read fails, it says so and does not report an empty
     renderHome();
 
     const alert = await screen.findByText(enCA.memberHome.notificationsLoadError);
-    expect(alert.closest('[role="alert"]')).toHaveTextContent('Inbox is down');
+    expect(alert.closest('[role="alert"]')).toHaveTextContent('The service is temporarily unavailable. Try again shortly.');
+    expect(document.body).not.toHaveTextContent('Inbox is down');
     expect(screen.queryByTestId('home-no-notifications')).not.toBeInTheDocument();
 
     inboxAnswer = inbox([noticeRow({})]);
@@ -308,13 +314,22 @@ describe('MemberHome: when a read fails, it says so and does not report an empty
     expect(document.body).not.toHaveTextContent('Invalid Date');
   });
 
+  it('words a refused read in French and shows none of the route\'s English', async () => {
+    claimPages = [failed(503, 'Claims are unavailable')];
+    renderHome('fr-CA');
+
+    const alert = await screen.findByText(frCA.memberHome.casesLoadError);
+    expect(alert.closest('[role="alert"]')).toHaveTextContent('momentanément indisponible');
+    expect(alert.closest('[role="alert"]')).not.toHaveTextContent('Claims are unavailable');
+  });
+
   it('shows a request that never reached the server, for both lists', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
     renderHome();
 
     const alerts = await screen.findAllByRole('alert');
     expect(alerts).toHaveLength(2);
-    for (const alert of alerts) expect(alert).toHaveTextContent('Failed to fetch');
+    for (const alert of alerts) expect(alert).not.toHaveTextContent('Failed to fetch');
     expect(screen.queryByTestId('home-no-cases')).not.toBeInTheDocument();
     expect(screen.queryByTestId('home-no-notifications')).not.toBeInTheDocument();
   });
@@ -325,7 +340,7 @@ describe('MemberHome: when a read fails, it says so and does not report an empty
 
     const alerts = await screen.findAllByRole('alert');
     expect(alerts.length).toBeGreaterThan(0);
-    expect(document.body).toHaveTextContent('Unexpected API response');
+    expect(document.body).not.toHaveTextContent(/Unexpected API response|Unexpected token/);
   });
 });
 
