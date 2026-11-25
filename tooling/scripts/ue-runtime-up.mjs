@@ -304,7 +304,7 @@ function startApp() {
   // extension aliases required by NodeNext-style workspace source imports.
   if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID'))))
     run('pnpm', [...filter, 'build'], { env: runtimeEnv() })
-  const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['dev']
+  const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['exec', 'next', 'dev', '--webpack', '--port', String(PORT_APP)]
   const log = openSync(join(STATE, 'app.log'), 'a')
   const child = spawn('pnpm', [...filter, ...serve], {
     cwd: ROOT, env: { ...process.env, ...runtimeEnv() }, shell: useShell('pnpm'), detached: true, stdio: ['ignore', log, log],
@@ -326,6 +326,24 @@ function test() {
   // They stay under the ignored disposable state directory and must be selectively uploaded (no secrets.json).
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], {
     cwd: APP, env: { ...testEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+  })
+}
+
+/** Runs one extra Playwright config (browser or document acceptance) against the owned runtime, with its own report. */
+function spec() {
+  const config = opt('config', '')
+  if (!/^playwright\.[a-z-]+\.config\.ts$/.test(config)) throw new Error('spec requires --config playwright.<name>.config.ts')
+  const extra = ['project', 'grep'].flatMap((name) => (opt(name, '') ? [`--${name}`, opt(name, '')] : []))
+  const label = opt('label', config.replace(/^playwright\.|\.config\.ts$/g, ''))
+  run('npx', ['playwright', 'test', '--config', config, ...extra], {
+    cwd: APP,
+    env: {
+      ...testEnv(),
+      PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
+      UE_RUNTIME_STATE_DIR: STATE,
+      UE_RUNTIME_REPORT: join(STATE, `playwright-${label}.json`),
+      UE_RUNTIME_ARTIFACTS: join(STATE, `playwright-${label}-artifacts`),
+    },
   })
 }
 
@@ -377,6 +395,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   else if (command === 'up' || command === 'db') await up()
   else if (command === 'seed') seed()
   else if (command === 'test') test()
+  else if (command === 'spec') spec()
   else if (command === 'restart-check') await restartCheck()
   else if (command === 'down') down()
   else if (command === 'all') {
