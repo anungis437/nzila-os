@@ -55,6 +55,24 @@ describe('MemberCaseList', () => {
       .toEqual(['N° de dossier', 'Type', 'Statut', 'Priorité', 'Soumis le', 'Voir le dossier'])
   })
 
+  it('names a wage and hour case from the catalog in English and French', () => {
+    const wage = { ...rows[0], claimId: 'claim-wage', claimNumber: 'UE-QA-WAGE', claimType: 'wage_dispute' }
+    render(
+      <NextIntlClientProvider locale="fr-CA" messages={frCA}>
+        <MemberCaseList data={[wage]} />
+      </NextIntlClientProvider>,
+    )
+    expect(screen.getAllByText('Salaire et heures').length).toBeGreaterThan(0)
+    expect(screen.queryByText('wage_dispute')).not.toBeInTheDocument()
+    cleanup()
+    render(
+      <NextIntlClientProvider locale="en-CA" messages={enCA}>
+        <MemberCaseList data={[wage]} />
+      </NextIntlClientProvider>,
+    )
+    expect(screen.getAllByText('Wage and hour').length).toBeGreaterThan(0)
+  })
+
   it('humanizes unknown values instead of printing raw identifiers', () => {
     renderList('en-CA')
     expect(screen.getAllByText('Some new type').length).toBeGreaterThan(0)

@@ -6781,6 +6781,13 @@
     "harassmentSexual": "Molestie – Sessuali",
     "contractDispute": "Controversia contrattuale",
     "retaliation": "Ritorsione",
+    "wageDispute": "Retribuzione e orario",
+    "safety": "Sicurezza",
+    "discipline": "Disciplina",
+    "discrimination": "Discriminazione",
+    "harassment": "Molestie",
+    "benefitsDenial": "Benefici",
+    "contracting": "Condizioni di lavoro",
     "other": "Altro"
   },
   "grievance": {

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
 import { CaseDeadlines } from '@/components/claims/case-deadlines';
+import { useClaimLabels } from '@/components/claims/claim-labels';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import { envelopeRow, envelopeRows, failureLanguage, readApiFailure, userFailureText } from '@/lib/client/api-envelope';
 import { formatDay } from '@/lib/client/day';
@@ -71,22 +72,7 @@ export default function ClaimDetailPage() {
     critical: { label: t('priority.urgent'), color: 'bg-red-100 text-red-700' },
   };
 
-  const claimTypeLabels: Record<string, string> = {
-    grievance_discipline: t('claimTypes.grievanceDiscipline'),
-    grievance_schedule: t('claimTypes.grievanceSchedule'),
-    grievance_pay: t('claimTypes.grievancePay'),
-    workplace_safety: t('claimTypes.workplaceSafety'),
-    discrimination_age: t('claimTypes.discriminationAge'),
-    discrimination_gender: t('claimTypes.discriminationGender'),
-    discrimination_race: t('claimTypes.discriminationRace'),
-    discrimination_disability: t('claimTypes.discriminationDisability'),
-    harassment_verbal: t('claimTypes.harassmentVerbal'),
-    harassment_physical: t('claimTypes.harassmentPhysical'),
-    harassment_sexual: t('claimTypes.harassmentSexual'),
-    contract_dispute: t('claimTypes.contractDispute'),
-    retaliation: t('claimTypes.retaliation'),
-    other: t('claimTypes.other'),
-  };
+  const { typeLabel } = useClaimLabels();
   const params = useParams();
   const _router = useRouter();
   const claimId = params.id as string;
@@ -215,7 +201,7 @@ setError(userFailureText(err, t('claims.loadDetailFailed'), failureLanguage(loca
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{claim.claimNumber ?? t('claims.claimDetails')}</h1>
-              {claim.claimType && <p className="text-gray-600">{claimTypeLabels[claim.claimType] || claim.claimType}</p>}
+              {claim.claimType && <p className="text-gray-600">{typeLabel(claim.claimType)}</p>}
             </div>
             <div className="flex flex-wrap gap-2">
               <span className={`shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>

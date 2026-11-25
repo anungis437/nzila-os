@@ -47,11 +47,48 @@ a pull request check and is read from CI, not from this record.
 through `vitest.native.config.ts` against the native PostgreSQL 16 database above it passes 16 of 16. A plain `pnpm test:fast` without that
 database therefore still fails that file, as it does on `main`.
 
+## Browser acceptance on the owned production build
+
+State: `TARGETED_TESTED` on a disposable production build. Not `STAGING_PROVEN` and not `PRODUCTION_ACCEPTED`.
+
+The application was built and served by `node tooling/scripts/ue-runtime-up.mjs up --prod --redis --rebuild` (Next.js production server
+on `127.0.0.1:3002`, PostgreSQL 16 on `127.0.0.1:55430`). Playwright config `apps/union-eyes/playwright.browser.config.ts`, spec
+`e2e/runtime-browser/14-browser-journeys.spec.ts`. Projects: desktop Chromium, mobile Chromium (Pixel 7), mobile WebKit (iPhone 14).
+Each project runs the journeys in `en-CA` and `fr-CA`. Evidence JSON is under `.ue-runtime/evidence/browser-journeys-<project>.json`
+(16 records per project: journey, locale, persona, observed HTTP statuses, and the database rows read back).
+
+Journeys, each in both languages: wrong password refused in the page language, then password plus authenticator; a member files a case
+and the row is read back from `claims` before the list and the detail page open it; seven member pages carry `lang` and no message-key
+leak; an administrator saves the sign-in policy, the page reads it back with GET, `user_management.org_auth_policies` and one
+`org_policy_updated` audit row agree, then the previous value is restored; a member and another organization receive 403 and a stale
+save receives 409; sign-out leaves `/api/cases` at 401 and the next dashboard navigation renders the sign-in form; no cookie and a
+forged `nzila_session` both land on `/{locale}/login` with the form rendered; forgot-password and reset-password render in the cookie
+language, a real reset request is acknowledged, and a forged token is refused with the catalog sentence for `Invalid or expired reset link`.
+
+On the production build of `61f9d712742f1c6d5a55163042e02ab7393c753f`: desktop Chromium 16 passed, mobile Chromium 16 passed, mobile
+WebKit 16 passed. The WebKit run was repeated once. The first pass on that build failed the four administrator journeys because this
+machine's address already had 10 `invalid_password` audits inside 15 minutes (the wrong-password step of the runs immediately before
+it). That is the sign-in risk engine (`login_soft_lockout`, score 50: ten failures from the IP plus a privileged role), not a policy-page
+defect. The repeat started from a count of zero and passed 16. A later production rebuild, after the case-type label fix below, re-ran
+only the filing journey: 2 passed on each of the three projects. The other 14 journeys were not repeated on that rebuild.
+
+Defects closed from this browser pass:
+
+| # | What the browser showed | Fix | Proof |
+| --- | --- | --- | --- |
+| 12 | `GET /login`, `/signup` and `/sign-up` returned 500. Server redirects and the sign-in form's own links land there, and those pages have no translation provider. `/forgot-password` and `/reset-password` returned 500 for the same reason. A redirect `Location` dropped the loopback port. | The edge sends the three pages that have a locale twin to the reader's language and keeps the query. The recovery pages have their own provider, the same language rule, and French copy. A loopback host keeps its port. | `lib/locales.test.ts`; browser journeys `no-session-redirect` and `password-recovery` (48 of 48 on the build above) |
+| 13 | A French sign-in page showed the route's English refusal, including the risk engine's soft lockout | Known refusal sentences map to `loginForm` in both catalogs | `login-form-flows.test.tsx`; the sign-in journey asserts the French page does not show the English sentence |
+| 14 | The document navigation told a member "Bibliotheque du personnel" | A member sees "Mes documents" / "My documents"; the staff label keeps its accent | `documents/__tests__/layout.test.tsx` |
+| 15 | The case detail printed the stored type `wage_dispute` on a French page. Status and priority beside it were translated. | Detail uses the same catalog lookup as the member list. Intake types (`wage_dispute`, `safety`, `discipline`, `discrimination`, `harassment`, `benefits_denial`, `contracting`) are in every catalog. An unknown type is put in words. | `member-case-list.test.tsx`; `page.test.tsx`; filing journey re-run, 2 passed on each project, body contains `claimTypes.wageDispute` and not `wage_dispute` |
+| 16 | The anonymous-filing checkbox, the onboarding dismiss control and the feedback dismiss control were under 24px | Each is at least 24px on the box the person touches | Filing journey touch-target check on the mobile projects |
+
 ## What this record does not prove
 
-- Browser acceptance on desktop and mobile in English and French was not run against a running application in this change. The screen
-  behaviour is proven with jsdom tests in both languages, including accessible names, alerts and retry. The Playwright runtime
-  acceptance remains a CI check.
+- The browser spec above does not cover invitation and onboarding, steward assignment, supervisory review, officer or executive action,
+  messages and correspondence attachments, document upload, preview, download and versions, external delivery and expiry, member privacy
+  restrictions, organization changes by a platform executive, or session expiry. Those remain outside this browser evidence. The screen
+  behaviour they share with the covered journeys is still covered by the jsdom tests named above. The Playwright runtime acceptance in CI
+  is a separate check.
 - Staging behaviour is not claimed. The sign-in policy atomicity and document matrix are source, route and local native evidence.
 - The `Security Design Review Gate` requires the `security-design-reviewed` label from `@nzila/security`. The change touches the
   sign-in policy path, so that review is a human disposition owned by that team; the label is not added by this change.

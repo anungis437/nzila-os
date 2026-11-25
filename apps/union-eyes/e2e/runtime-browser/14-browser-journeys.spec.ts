@@ -15,6 +15,10 @@ import fr from '../../messages/fr-CA.json'
  *
  * Real HTTP, real password and MFA sessions, native PostgreSQL. A journey records the browser project, the language, the
  * persona, the HTTP statuses it observed and the rows it read back, in .ue-runtime/evidence/browser-journeys.json.
+ *
+ * Each language submits one wrong password. Three projects therefore record six invalid-password audits from 127.0.0.1.
+ * Ten of those inside 15 minutes, plus a privileged role, is the sign-in risk engine's soft lockout, and the administrator
+ * journeys then receive 401. Run this file once against a runtime whose last 15 minutes hold fewer than four invalid passwords.
  */
 const PRIMARY = UE_TEST_ORGS.primary.id
 const U = UE_TEST_USERS
@@ -86,9 +90,10 @@ async function touchTargets(page: Page) {
  * handles those rejections (organization-selector and breadcrumb both settle on failure); the error is counted in the evidence, not hidden.
  */
 const isWebKitNavigationAbort = (error: Error) => {
-  // WebKit puts only the tail of the URL in error.message ("/127.0.0.1:3002/api/...") and the full "Fetch API cannot load http://..." line in the stack.
+  // WebKit puts only the tail of the URL in error.message and the full "Fetch API cannot load http://..." line in the stack.
+  // A same-origin fetch cancelled by the next navigation, including an RSC prefetch, is reported this way. The application settles the rejection.
   const text = `${error.message}\n${error.stack ?? ''}`
-  return text.includes('due to access control checks') && text.includes('/api/')
+  return text.includes('due to access control checks') && /https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//.test(text)
 }
 const abortedFetches = new WeakMap<Page, number>()
 const pageErrors = new WeakMap<Page, string[]>()
@@ -193,6 +198,8 @@ for (const locale of LOCALES) {
       await claimLink.click()
       await expect(page).toHaveURL(/\/dashboard\/claims\//, { timeout: 60_000 })
       await expect(page.locator('body')).toContainText(rows[0].claim_number as string, { timeout: 60_000 })
+      await expect(page.locator('body')).toContainText(text.claimTypes.wageDispute)
+      await expect(page.locator('body')).not.toContainText('wage_dispute')
       const audit = await sql<{ n: string }>(
         `SELECT count(*)::text AS n FROM public.audit_logs WHERE organization_id=$1 AND details::text LIKE $2`,
         [PRIMARY, `%${title}%`],

@@ -9,7 +9,10 @@ import '@testing-library/jest-dom/vitest'
 
 const h = vi.hoisted(() => ({ locale: 'en-CA', trackCaseViewed: vi.fn() }))
 
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLocale: () => h.locale }))
+vi.mock('next-intl', () => ({
+  useTranslations: () => Object.assign((key: string) => key, { has: () => false }),
+  useLocale: () => h.locale,
+}))
 vi.mock('next/navigation', () => ({ useParams: () => ({ id: 'claim-1' }), useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/lib/hooks/use-pilot-tracking', () => ({ usePilotTracking: () => ({ trackCaseViewed: h.trackCaseViewed }) }))
 vi.mock('@/components/file-upload', () => ({ FileUpload: () => null }))
@@ -61,8 +64,16 @@ describe('ClaimDetailPage', () => {
     expect(await screen.findByText('CASE-2026-0042')).toBeInTheDocument()
     expect(screen.getByText('The schedule was changed without notice')).toBeInTheDocument()
     expect(await screen.findByText('Assigned to a steward')).toBeInTheDocument()
+    expect(screen.getByText('Other')).toBeInTheDocument()
     expect(h.trackCaseViewed).toHaveBeenCalledWith('claim-1')
     expect(fetchMock).toHaveBeenCalledWith('/api/cases/claim-1/timeline')
+  })
+
+  it('names a wage and hour case in words and never prints the stored identifier', async () => {
+    routes({ claim: wrapped({ data: { ...claim, claimType: 'wage_dispute' } }), timeline: wrapped({ data: [] }) })
+    render(<ClaimDetailPage />)
+    expect(await screen.findByText('Wage dispute')).toBeInTheDocument()
+    expect(screen.queryByText('wage_dispute')).not.toBeInTheDocument()
   })
 
   it('says why the case could not be loaded, in the server\'s words', async () => {

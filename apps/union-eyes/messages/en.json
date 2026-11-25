@@ -6841,6 +6841,13 @@
     "harassmentSexual": "Harassment – Sexual",
     "contractDispute": "Contract Dispute",
     "retaliation": "Retaliation",
+    "wageDispute": "Wage and hour",
+    "safety": "Safety",
+    "discipline": "Discipline",
+    "discrimination": "Discrimination",
+    "harassment": "Harassment",
+    "benefitsDenial": "Benefits",
+    "contracting": "Working conditions",
     "other": "Other"
   },
   "grievance": {

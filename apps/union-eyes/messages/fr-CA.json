@@ -7410,6 +7410,13 @@
     "harassmentSexual": "Harcèlement – Sexuel",
     "contractDispute": "Litige contractuel",
     "retaliation": "Représailles",
+    "wageDispute": "Salaire et heures",
+    "safety": "Sécurité",
+    "discipline": "Discipline",
+    "discrimination": "Discrimination",
+    "harassment": "Harcèlement",
+    "benefitsDenial": "Avantages sociaux",
+    "contracting": "Conditions de travail",
     "other": "Autre"
   },
   "grievance": {
