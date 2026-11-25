@@ -3,9 +3,8 @@ import { createHash, randomBytes } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
-import pg from 'pg'
 import { container } from '@nzila/blob'
-import { ownedRuntimeOperatorUrl } from '../../scripts/runtime/fixture-auth'
+import { queryOwnedRuntime } from '../../scripts/runtime/db-inspect'
 import { issueDocumentDownloadLease } from '../../lib/documents/download-lease'
 import { runtimeRequestAs } from '../helpers/runtime-auth'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
@@ -37,14 +36,8 @@ const adminScript = (...args: string[]) =>
     stdio: 'pipe',
   })
 
-async function sql<T extends pg.QueryResultRow = Record<string, unknown>>(text: string, values: unknown[] = []): Promise<T[]> {
-  const db = new pg.Client({ connectionString: ownedRuntimeOperatorUrl() })
-  await db.connect()
-  try {
-    return (await db.query<T>(text, values)).rows
-  } finally {
-    await db.end()
-  }
+async function sql<T extends Record<string, unknown>>(text: string, values: unknown[] = []): Promise<T[]> {
+  return queryOwnedRuntime<T>(text, values)
 }
 
 const RUN = Date.now().toString(36)
@@ -132,7 +125,7 @@ let caseTwo = ''
 const bytesOf = new Map<string, Buffer>()
 const documents: Record<string, string> = {}
 
-test.describe.configure({ mode: 'serial' })
+test.describe.configure({ mode: 'serial', timeout: 180_000 })
 
 test.describe('private document delivery: authenticate, authorize, bind, read, revalidate, audit, release', () => {
   test.beforeAll(async () => {

@@ -402,3 +402,14 @@ export async function testimonialState(
     return { exists: Boolean(row), visibility: row?.visibility ?? null }
   })
 }
+
+/**
+ * Read or change persisted fixture state through the owned operator. Specs call this instead of importing a database
+ * driver: the operator URL is accepted only for the canonical loopback fixture, and a missing or foreign credential throws.
+ */
+export async function queryOwnedRuntime<T extends pg.QueryResultRow = pg.QueryResultRow>(
+  text: string,
+  values: readonly unknown[] = [],
+): Promise<T[]> {
+  return withApp(async (client) => (await client.query<T>(text, [...values])).rows)
+}

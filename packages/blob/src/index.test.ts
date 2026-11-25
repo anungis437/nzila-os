@@ -196,4 +196,29 @@ describe('AZURE_STORAGE_BLOB_ENDPOINT (emulator override)', () => {
     expect(() => mod.generateSasUrl('docs', 'file.pdf')).toThrow('not permitted in production')
     expect(() => mod.container('docs')).toThrow('not permitted in production')
   })
+
+  it('allows only the loopback Azurite fixture in a canonical production runtime', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('QA_TEST_ENV', 'true')
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+    const mod = await import('./index')
+    expect(mod.generateSasUrl('docs', 'file.pdf')).toBe(
+      'http://127.0.0.1:10000/devstoreaccount1/docs/file.pdf?sig=mock',
+    )
+  })
+
+  it('refuses a foreign endpoint or a real account even with the fixture flags', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('QA_TEST_ENV', 'true')
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+    vi.stubEnv('AZURE_STORAGE_BLOB_ENDPOINT', 'https://evil.example/devstoreaccount1')
+    const foreign = await import('./index')
+    expect(() => foreign.container('docs')).toThrow('not permitted in production')
+    vi.resetModules()
+    mockSdk()
+    vi.stubEnv('AZURE_STORAGE_ACCOUNT_NAME', 'realstorage')
+    vi.stubEnv('AZURE_STORAGE_BLOB_ENDPOINT', 'http://127.0.0.1:10000/devstoreaccount1')
+    const realAccount = await import('./index')
+    expect(() => realAccount.container('docs')).toThrow('not permitted in production')
+  })
 })

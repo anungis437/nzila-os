@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { test, expect, type Page, type Response } from '@playwright/test'
-import pg from 'pg'
 import { computeTotp } from '@nzila/platform-auth/mfa'
-import { ownedRuntimeOperatorUrl, readRuntimeFixtureAuth } from '../../scripts/runtime/fixture-auth'
+import { readRuntimeFixtureAuth } from '../../scripts/runtime/fixture-auth'
+import { queryOwnedRuntime } from '../../scripts/runtime/db-inspect'
 import { loginRuntimePage, runtimeRequestAfterSignIn, runtimeRequestAs } from '../helpers/runtime-auth'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '../../tests/fixtures/test-users'
@@ -16,9 +16,9 @@ import fr from '../../messages/fr-CA.json'
  * Real HTTP, real password and MFA sessions, native PostgreSQL. A journey records the browser project, the language, the
  * persona, the HTTP statuses it observed and the rows it read back, in .ue-runtime/evidence/browser-journeys.json.
  *
- * Each language submits one wrong password. Three projects therefore record six invalid-password audits from 127.0.0.1.
- * Ten of those inside 15 minutes, plus a privileged role, is the sign-in risk engine's soft lockout, and the administrator
- * journeys then receive 401. Run this file once against a runtime whose last 15 minutes hold fewer than four invalid passwords.
+ * Each language submits one wrong password. Projects share 127.0.0.1, and ten login_failed audits in 15 minutes plus a
+ * privileged role is the sign-in risk engine's soft lockout. Each journey releases that fixture window first, so a project
+ * does not depend on an earlier project having cleared it. One journey then proves the rule still locks a privileged sign-in.
  */
 const PRIMARY = UE_TEST_ORGS.primary.id
 const U = UE_TEST_USERS
@@ -27,14 +27,8 @@ const EVIDENCE: Array<Record<string, unknown>> = []
 const MESSAGES = { 'en-CA': en, 'fr-CA': fr } as const
 const LOCALES = ['en-CA', 'fr-CA'] as const
 
-async function sql<T extends pg.QueryResultRow = Record<string, unknown>>(text: string, values: unknown[] = []): Promise<T[]> {
-  const db = new pg.Client({ connectionString: ownedRuntimeOperatorUrl() })
-  await db.connect()
-  try {
-    return (await db.query<T>(text, values)).rows
-  } finally {
-    await db.end()
-  }
+async function sql<T extends Record<string, unknown>>(text: string, values: unknown[] = []): Promise<T[]> {
+  return queryOwnedRuntime<T>(text, values)
 }
 
 const settleCookieBanner = (page: Page) =>
@@ -108,6 +102,23 @@ test.beforeEach(({ page }) => {
     errors.push(`${error.message}\n${(error.stack ?? '').slice(0, 1200)}`)
   })
 })
+async function releaseFixtureSignInWindow(): Promise<void> {
+  await sql(
+    `DELETE FROM user_management.auth_audit_log
+      WHERE event_type = 'login_failed' AND ip_address = '127.0.0.1' AND created_at > now() - interval '16 minutes'`,
+  )
+  await sql(
+    `UPDATE user_management.users
+        SET failed_login_attempts = 0, account_locked_until = NULL
+      WHERE email = $1`,
+    [U.memberPrimary.email],
+  )
+}
+
+test.beforeEach(async () => {
+  await releaseFixtureSignInWindow()
+})
+
 test.afterEach(async ({ page }, testInfo) => {
   const errors = pageErrors.get(page) ?? []
   if (errors.length > 0) await testInfo.attach('uncaught-page-errors', { body: errors.join('\n---\n'), contentType: 'text/plain' })
@@ -117,8 +128,33 @@ test.afterEach(async ({ page }, testInfo) => {
 })
 
 test.afterAll(async ({}, testInfo) => {
+  await releaseFixtureSignInWindow()
   await mkdir(join(STATE_DIR, 'evidence'), { recursive: true })
   await writeFile(join(STATE_DIR, 'evidence', `browser-journeys-${testInfo.project.name}.json`), JSON.stringify(EVIDENCE, null, 2))
+})
+
+test('ten wrong passwords from one address soft-lock the next privileged sign-in', async ({ request }, testInfo) => {
+  const agent = { 'user-agent': 'UnionEyesAcceptance/1.0 (soft-lockout proof)' }
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const refused = await request.post('/api/auth/login', {
+      headers: agent,
+      data: { email: U.memberPrimary.email, password: 'Not-the-password-1!' },
+    })
+    expect(refused.status(), await refused.text()).toBe(401)
+  }
+  const locked = await request.post('/api/auth/login', {
+    headers: agent,
+    data: { email: U.adminPrimary.email, password: UE_TEST_USER_PASSWORD },
+  })
+  const body = await locked.json()
+  expect(locked.status()).toBe(401)
+  expect(body.error ?? body.message).toBe(en.loginForm.softLockout)
+  const rows = await sql<{ event_type: string }>(
+    `SELECT event_type FROM user_management.auth_audit_log
+      WHERE ip_address = '127.0.0.1' AND event_type = 'login_soft_lockout' AND created_at > now() - interval '5 minutes'`,
+  )
+  expect(rows.length).toBeGreaterThan(0)
+  EVIDENCE.push({ journey: 'soft-lockout', project: testInfo.project.name, persona: 'admin', statuses: [{ path: '/api/auth/login', status: 401 }] })
 })
 
 for (const locale of LOCALES) {
@@ -126,7 +162,7 @@ for (const locale of LOCALES) {
   const lang = locale === 'fr-CA' ? 'fr' : 'en'
 
   test.describe(`browser journeys [${locale}]`, () => {
-    test.describe.configure({ mode: 'default' })
+    test.describe.configure({ mode: 'default', timeout: 180_000 })
 
     test(`${locale}: a wrong password is refused in the page language with no technical text, then password + MFA signs the member in`, async ({ page }, testInfo) => {
       await settleCookieBanner(page)

@@ -4,6 +4,7 @@ import path from 'node:path'
 import { describe, it, expect, vi } from 'vitest'
 import {
   createRuntimeFixtureAuth,
+  ownedRuntimeOperatorUrl,
   readRuntimeFixtureAuth,
   writeRuntimeFixtureAuth,
   runtimeFixtureAuthPath,
@@ -76,6 +77,15 @@ describe('private owned runtime auth fixtures', () => {
       expect(() => runtimeFixtureAuthorityContext()).toThrow(
         'Restricted fixture runtime credential',
       )
+      vi.stubEnv('UE_RUNTIME_OPERATOR_DATABASE_URL', database.replace('127.0.0.1', '10.0.0.8'))
+      expect(() => ownedRuntimeOperatorUrl()).toThrow('Owned loopback fixture operator required')
+      vi.stubEnv('UE_RUNTIME_OPERATOR_DATABASE_URL', database.replace('uev2admin', 'postgres'))
+      expect(() => ownedRuntimeOperatorUrl()).toThrow('Owned loopback fixture operator required')
+      vi.stubEnv('UE_RUNTIME_OPERATOR_DATABASE_URL', database.replace('/ue_runtime', '/foreign_db'))
+      expect(() => ownedRuntimeOperatorUrl()).toThrow('Owned loopback fixture operator required')
+      vi.stubEnv('QA_TEST_ENV', '')
+      vi.stubEnv('UE_RUNTIME_OPERATOR_DATABASE_URL', database)
+      expect(() => ownedRuntimeOperatorUrl()).toThrow('Explicit owned canonical fixture operator required')
     } finally {
       vi.unstubAllEnvs()
       rmSync(state, { recursive: true, force: true })

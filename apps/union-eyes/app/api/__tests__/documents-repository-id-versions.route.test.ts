@@ -55,11 +55,16 @@ describe('documents/repository/[id]/versions route', () => {
         if ('id' in projection) return opts.inUse ? [{ id: 'other' }] : [];
         throw new Error('Unconfigured document projection: ' + Object.keys(projection).join(','));
       };
+      const linkRows = () =>
+        row.linkedEntityType == null && row.linkedEntityId == null
+          ? []
+          : [{ linkedEntityType: row.linkedEntityType, linkedEntityId: row.linkedEntityId }];
       const chain = {
         from: vi.fn(() => chain),
         leftJoin: vi.fn(() => chain),
         where: vi.fn(() => chain),
-        orderBy: vi.fn(() => chain),
+        // Link reads are awaited at orderBy. Version reads continue to limit().
+        orderBy: vi.fn(() => ('linkedEntityType' in projection ? Promise.resolve(linkRows()) : chain)),
         limit: vi.fn(async () => rows()),
         for: vi.fn(async () => rows(true)),
       };
