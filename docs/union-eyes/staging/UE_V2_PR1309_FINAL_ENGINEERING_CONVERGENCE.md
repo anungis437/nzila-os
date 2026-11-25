@@ -101,3 +101,27 @@ Defects closed from this browser pass:
 - Removing the stored address from list and suggestion payloads is a contract change for any client that read `fileUrl`. No repository
   client does; the upload forms still accept an address as input.
 - The response-shape census ceilings are unchanged (findings 0).
+
+## CI repair after `eee69955d`
+
+The next two commits repair the four failing checks and add journeys. This section does not name its own commit. The pull request description states the head. Nothing here is Step 1 acceptance.
+
+| Failure | Cause | Correction | Proof |
+| --- | --- | --- | --- |
+| INV-06 raw driver | The browser and document specs imported `pg` | `queryOwnedRuntime` in `scripts/runtime/db-inspect.ts`. The boundary exemption list is unchanged | `db-boundary.test.ts` 16 passed; full contract suite 309 files, 10,177 tests passed |
+| Document repository route tests | Fixtures still returned the link on the document row. The routes read every link as its own query | Fixtures supply the link query. Expected 403 and 404 were not rewritten | Both route files passed, 50 tests |
+| E2E shard 3 fixture operator | Playwright never received `QA_TEST_ENV=true` | The workflow exports the flag with the operator URL. A foreign host, wrong user, wrong database and a missing flag throw | `fixture-auth.test.ts` |
+| E2E shard 4 storage | The document spec evaluates `@nzila/blob` and the production app had no storage | `up --azurite` starts loopback Azurite and the repository ClamAV adapter. Production accepts that endpoint only for loopback, account `devstoreaccount1`, and both fixture flags | Blob tests 12 passed. A disposable adapter scan returned `{"engine":"clamav","status":"clean"}` |
+
+Desktop Chromium, English, on the production process that was already running (so it does not include the invitation outbox):
+
+- A case outside the chief steward's supervisory mandate is not assignable. A case the mandate names is reassigned and the new assignee is read back. The supervisor can read it. The other organization cannot.
+- A member starts a conversation. `messages.thread.create` is in `public.audit_logs`. The inbox shows the subject in English and the French page is French. The other organization cannot read the thread.
+- The document library says "My documents" and "Mes documents". An unknown document id is 404.
+- Organization creation is refused for a local administrator and for the fixture platform title, which is not a platform executive. No organization row was inserted.
+- Expiring the isolated tester's session returns the browser to sign-in. Password and authenticator then open the dashboard.
+- Aborting the filing request once, then submitting again, writes the case.
+
+Each browser journey releases the shared `login_failed` window for `127.0.0.1` before it runs, and one journey still requires ten failures to soft-lock the administrator. That lockout journey is in the spec and has not been executed on this process yet.
+
+Still not proven on this source: invitation redemption (the bearer is written only to the local fixture outbox, which the running process does not have), the private-document byte suite against Azurite, the three-browser matrix of the original 16 journeys plus these new ones, the five repository commands, and the GitHub Actions result for this head.
