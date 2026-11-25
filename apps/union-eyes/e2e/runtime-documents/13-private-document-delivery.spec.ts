@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
 import { container } from '@nzila/blob'
+import { releaseOwnedDocumentUploadQuota } from '../../scripts/runtime/document-upload-quota'
 import { queryOwnedRuntime } from '../../scripts/runtime/db-inspect'
 import { issueDocumentDownloadLease } from '../../lib/documents/download-lease'
 import { runtimeRequestAs } from '../helpers/runtime-auth'
@@ -128,9 +129,12 @@ const documents: Record<string, string> = {}
 test.describe.configure({ mode: 'serial', timeout: 180_000 })
 
 test.describe('private document delivery: authenticate, authorize, bind, read, revalidate, audit, release', () => {
+  const quotaUsers = [U.memberPrimary.userId, U.stewardPrimary.userId] as const
+
   test.beforeAll(async () => {
     // The CI Playwright config caps a hook at 60s. Two scope-case transactions exceed that on a cold runner.
     test.setTimeout(180_000)
+    releaseOwnedDocumentUploadQuota(quotaUsers)
     await container(process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes').createIfNotExists()
     adminScript('restore-fixtures')
     caseOne = await fileCase('Document delivery case one')
@@ -139,6 +143,10 @@ test.describe('private document delivery: authenticate, authorize, bind, read, r
     adminScript('scope-case', caseTwo)
     await assign(U.chiefStewardPrimary.userId, caseOne, U.stewardPrimary.userId)
     await assign(U.chiefStewardPrimary.userId, caseTwo, U.stewardPrimaryTwo.userId)
+  })
+
+  test.beforeEach(() => {
+    releaseOwnedDocumentUploadQuota(quotaUsers)
   })
 
   test.afterAll(async () => {

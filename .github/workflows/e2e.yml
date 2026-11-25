@@ -165,6 +165,7 @@ jobs:
         if: matrix.app == 'union-eyes'
         run: |
           node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process'
           import { appendFileSync, readFileSync } from 'node:fs'
           import { operatorDatabaseUrl, runtimeEnv, AZURITE_FIXTURE_ACCOUNT, AZURITE_FIXTURE_KEY } from './tooling/scripts/ue-runtime-up.mjs'
           const operator = operatorDatabaseUrl()
@@ -206,6 +207,9 @@ jobs:
               'CLAMAV_URL=' + fixture.azurite.clamavUrl,
             )
           }
+          const redisBinding = execFileSync('docker', ['port', 'ue-runtime-redis', '6379/tcp'], { encoding: 'utf8' }).trim()
+          if (redisBinding !== '127.0.0.1:56379') throw new Error('Owned loopback Redis required')
+          lines.push('REDIS_URL=redis://127.0.0.1:56379')
           appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n')
           NODE
 
@@ -257,17 +261,24 @@ jobs:
           CFO_URL: http://localhost:${{ matrix.port }}
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
 
-      # Application performance on a pull request: the real Union Eyes production
-      # build against the synthetic database, public routes only. No token and no
-      # staging target are involved. It runs after Playwright so it cannot skew the
-      # shard, and only on shard 1 so the load is applied once per pull request.
-
+      # Exact-key release of the synthetic document-upload counters, then the 30/31 proof,
+      # before Playwright so a counter left by the proof cannot reach the shard.
+      - name: Prove document-upload quota isolation on the owned Redis
+        if: matrix.app == 'union-eyes'
+        run: pnpm --filter @nzila/union-eyes exec vitest run scripts/runtime/__tests__/document-upload-quota.test.ts --maxWorkers=1
+        env:
+          CI: true
+          UE_DOCUMENT_UPLOAD_QUOTA_PROOF: '1'
       - name: Run Playwright tests (canonical Union Eyes runtime, real password and MFA login)
         id: ue-playwright
         if: matrix.app == 'union-eyes'
         run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
         env:
           CI: true
+      # Application performance on a pull request: the real Union Eyes production
+      # build against the synthetic database, public routes only. No token and no
+      # staging target are involved. It runs after Playwright so it cannot skew the
+      # shard, and only on shard 1 so the load is applied once per pull request.
       - name: Install k6 (application performance smoke)
         if: matrix.app == 'union-eyes' && matrix.shard == 1
         run: |
@@ -484,6 +495,7 @@ jobs:
       - name: Point Playwright at the owned canonical runtime without printing credentials
         run: |
           node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process'
           import { appendFileSync, readFileSync } from 'node:fs'
           import { operatorDatabaseUrl, runtimeEnv, AZURITE_FIXTURE_ACCOUNT, AZURITE_FIXTURE_KEY } from './tooling/scripts/ue-runtime-up.mjs'
           const operator = operatorDatabaseUrl()
@@ -525,9 +537,18 @@ jobs:
               'CLAMAV_URL=' + fixture.azurite.clamavUrl,
             )
           }
+          const redisBinding = execFileSync('docker', ['port', 'ue-runtime-redis', '6379/tcp'], { encoding: 'utf8' }).trim()
+          if (redisBinding !== '127.0.0.1:56379') throw new Error('Owned loopback Redis required')
+          lines.push('REDIS_URL=redis://127.0.0.1:56379')
           appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n')
           NODE
 
+      - name: Prove document-upload quota isolation on the owned Redis
+        if: matrix.app == 'union-eyes'
+        run: pnpm --filter @nzila/union-eyes exec vitest run scripts/runtime/__tests__/document-upload-quota.test.ts --maxWorkers=1
+        env:
+          CI: true
+          UE_DOCUMENT_UPLOAD_QUOTA_PROOF: '1'
       - name: Run Playwright tests (canonical Union Eyes runtime, real password and MFA login)
         id: ue-playwright
         run: pnpm --filter @nzila/union-eyes e2e --shard=${{ matrix.shard }}/${{ matrix.shards }}
