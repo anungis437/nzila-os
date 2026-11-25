@@ -125,6 +125,14 @@ describe('native results contract against the repository', () => {
     assert.ok(files.includes('precedent-library.postgres.test.ts'))
   })
 
+  it('keeps the fail-closed native reader out of the ordinary fast project', () => {
+    const heavy = readFileSync(join(root, 'apps/union-eyes/vitest.heavy.config.ts'), 'utf8')
+    const native = readFileSync(join(root, 'apps/union-eyes/vitest.native.config.ts'), 'utf8')
+    assert.match(heavy, /external-resource-read\.postgres\.test\.ts/)
+    assert.match(native, /postgres\.test\.ts/)
+    assert.ok(files.includes('external-resource-read.postgres.test.ts'))
+  })
+
   it('names only real files with a reason in the committed expected skips', () => {
     const { skippedTests } = JSON.parse(readFileSync(join(here, 'ue-native-expected-skips.json'), 'utf8'))
     // An empty list is the strictest contract: no native test may skip. Every entry that exists must name a real file and a reason.
