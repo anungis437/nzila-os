@@ -37,15 +37,15 @@ committed to the branch cannot name its own commit.
 ## Local native evidence
 
 A disposable PostgreSQL 16 database was built with `node tooling/scripts/ue-runtime-up.mjs db --fresh --postgres-version 16` using Python
-3.11 and the hash-locked `backend/requirements.lock`. On it, `document-intake.postgres.test.ts`,
-`documents-external-workbook-routes.postgres.test.ts`, `external-resource-read.postgres.test.ts` and `grievances-routes.postgres.test.ts`
-ran with `vitest.native.config.ts`: 4 files, 76 tests, 0 skipped. This is a subset. The complete native matrix (PostgreSQL 15 and 16) is
-a pull request check and is read from CI, not from this record.
+3.11 and the hash-locked `backend/requirements.lock`. An earlier subset on that shape (`document-intake.postgres.test.ts`,
+`documents-external-workbook-routes.postgres.test.ts`, `external-resource-read.postgres.test.ts` and `grievances-routes.postgres.test.ts`)
+passed 76 tests. The native config's full file list is in the qualification section below and replaces the earlier statement that the
+full native matrix was left to CI.
 
-`pnpm test:fast` on the final head: 3158 files passed, 124 skipped (skips pre-date this change), 1 failed. The one failing file is
-`db/__tests__/external-resource-read.postgres.test.ts` (16 tests). It needs an owned native database clone and is unchanged from `main`; run
-through `vitest.native.config.ts` against the native PostgreSQL 16 database above it passes 16 of 16. A plain `pnpm test:fast` without that
-database therefore still fails that file, as it does on `main`.
+`pnpm test:fast` on this source, with no native clone URL set: 3,286 files (3,161 passed, 124 skipped, 1 failed) and 43,766 tests (42,105
+passed, 1,632 skipped, 16 failed). The one failing file is `apps/union-eyes/db/__tests__/external-resource-read.postgres.test.ts`. It
+requires `UE_NATIVE_TEMPLATE_URL` and `UE_AUTHORITY_COMBINED_URL`. The same file passed inside the native suite below. The assertion was
+not weakened and the file was not excluded. A plain `pnpm test:fast` without that database still fails that file.
 
 ## Browser acceptance on the owned production build
 
@@ -82,17 +82,21 @@ Defects closed from this browser pass:
 | 15 | The case detail printed the stored type `wage_dispute` on a French page. Status and priority beside it were translated. | Detail uses the same catalog lookup as the member list. Intake types (`wage_dispute`, `safety`, `discipline`, `discrimination`, `harassment`, `benefits_denial`, `contracting`) are in every catalog. An unknown type is put in words. | `member-case-list.test.tsx`; `page.test.tsx`; filing journey re-run, 2 passed on each project, body contains `claimTypes.wageDispute` and not `wage_dispute` |
 | 16 | The anonymous-filing checkbox, the onboarding dismiss control and the feedback dismiss control were under 24px | Each is at least 24px on the box the person touches | Filing journey touch-target check on the mobile projects |
 
-## What this record does not prove
+## What the earlier browser section does not prove
 
-- The browser spec above does not cover invitation and onboarding, steward assignment, supervisory review, officer or executive action,
-  messages and correspondence attachments, document upload, preview, download and versions, external delivery and expiry, member privacy
-  restrictions, organization changes by a platform executive, or session expiry. Those remain outside this browser evidence. The screen
-  behaviour they share with the covered journeys is still covered by the jsdom tests named above. The Playwright runtime acceptance in CI
-  is a separate check.
-- Staging behaviour is not claimed. The sign-in policy atomicity and document matrix are source, route and local native evidence.
-- The `Security Design Review Gate` requires the `security-design-reviewed` label from `@nzila/security`. The change touches the
-  sign-in policy path, so that review is a human disposition owned by that team; the label is not added by this change.
+The 48-journey pass on `61f9d712742f1c6d5a55163042e02ab7393c753f` did not cover invitation redemption, steward assignment, officer and
+executive action, correspondence, platform-executive organization creation, or session expiry. Those journeys are in the qualification
+section below, on a later production build of this source. That earlier section remains the record of the first matrix, not of this source.
+
+- Staging behaviour is not claimed. Local production-build evidence is `TARGETED_TESTED`. It is not `STAGING_PROVEN` and not
+  `PRODUCTION_ACCEPTED`.
+- `UE_SAAS_OPERATIONAL_READINESS` stays `NO_GO — RUNTIME_PROOF_REQUIRED`. Health reports `catalogAuthority.status=ok` and
+  `applicationReady=false` together: catalog admission passed, and the process does not advertise the product as ready.
+- The `Security Design Review Gate` requires the `security-design-reviewed` label from `@nzila/security`. The label already on the pull
+  request is a human disposition. This record does not add or treat it as a new review.
 - The operator consoles stay English-only by decision; French is not required of them.
+- GitHub Actions for the commit that contains this record cannot be named here. The pull request description states that head after the
+  checks are read. This file does not claim `CI_VERIFIED`.
 
 ## Residual risk a reviewer should read
 
@@ -113,15 +117,53 @@ The next two commits repair the four failing checks and add journeys. This secti
 | E2E shard 3 fixture operator | Playwright never received `QA_TEST_ENV=true` | The workflow exports the flag with the operator URL. A foreign host, wrong user, wrong database and a missing flag throw | `fixture-auth.test.ts` |
 | E2E shard 4 storage | The document spec evaluates `@nzila/blob` and the production app had no storage | `up --azurite` starts loopback Azurite and the repository ClamAV adapter. Production accepts that endpoint only for loopback, account `devstoreaccount1`, and both fixture flags | Blob tests 12 passed. A disposable adapter scan returned `{"engine":"clamav","status":"clean"}` |
 
-Desktop Chromium, English, on the production process that was already running (so it does not include the invitation outbox):
+## Local qualification on the rebuilt production process
 
-- A case outside the chief steward's supervisory mandate is not assignable. A case the mandate names is reassigned and the new assignee is read back. The supervisor can read it. The other organization cannot.
-- A member starts a conversation. `messages.thread.create` is in `public.audit_logs`. The inbox shows the subject in English and the French page is French. The other organization cannot read the thread.
-- The document library says "My documents" and "Mes documents". An unknown document id is 404.
-- Organization creation is refused for a local administrator and for the fixture platform title, which is not a platform executive. No organization row was inserted.
-- Expiring the isolated tester's session returns the browser to sign-in. Password and authenticator then open the dashboard.
-- Aborting the filing request once, then submitting again, writes the case.
+State: `TARGETED_TESTED` on a disposable production build of this source. Not `CI_VERIFIED`, not `STAGING_PROVEN`, and not `PRODUCTION_ACCEPTED`. This section replaces the earlier statement that invitation redemption, the private-document suite, the three-browser matrix and the five repository commands were still outstanding.
 
-Each browser journey releases the shared `login_failed` window for `127.0.0.1` before it runs, and one journey still requires ten failures to soft-lock the administrator. That lockout journey is in the spec and has not been executed on this process yet.
+The prior process on port 3002 was stopped. `node tooling/scripts/ue-runtime-up.mjs db --fresh` recreated the owned PostgreSQL 16 container, migrated and seeded it. `node tooling/scripts/ue-runtime-up.mjs up --prod --rebuild --redis --azurite` then rebuilt Next.js and started it. Build id `1795622902678` (11:10 AM America/Toronto). Healthy at 11:17 AM America/Toronto: process, database, auth and Redis `ok`; catalog authority `ok` with `applicationReady=false`. Loopback Azurite is `http://127.0.0.1:10000/devstoreaccount1`, container `union-eyes`, ClamAV adapter `http://127.0.0.1:18080`. The invitation bearer is written only under the private runtime state directory when the local QA guard is on. It is absent from the create and accept JSON, from the evidence files, and from this record.
 
-Still not proven on this source: invitation redemption (the bearer is written only to the local fixture outbox, which the running process does not have), the private-document byte suite against Azurite, the three-browser matrix of the original 16 journeys plus these new ones, the five repository commands, and the GitHub Actions result for this head.
+Re-running bootstrap after pgvector had been installed into that container failed closed (`FRAMEWORK_UNDECLARED_FUNCTION_AUTHORITY` for `halfvec` functions). The supported provisioner treats `vector` as optional when the image does not provide it. The fresh container used for this boot is the stock `postgres:16` image, with the extension unavailable, which is the same condition as `db --fresh`. The native suite below had already run on a container where the extension was installed after bootstrap, matching the CI order in `ue-native-postgres.yml`.
+
+Browser matrix, `playwright.browser.config.ts`, projects desktop Chromium, mobile Chromium (Pixel 7) and mobile WebKit (iPhone 14), `en-CA` and `fr-CA`, workers 1: 75 passed, 0 failed (4.5 minutes, finished 11:23 AM America/Toronto). That is the original journeys plus the Step 1 journeys, including the ten-failure soft lockout on each project. Each journey releases the `127.0.0.1` login-failure window first. The soft-lockout test still requires ten failures and still records `login_soft_lockout`.
+
+Observed on all three projects, from `.ue-runtime/evidence/step1-journeys-<project>.json` (no bearer):
+
+| Journey | Result read back |
+| --- | --- |
+| Invitation | Create 201 with no `token` property. Forged, expired, already-used and tampered accepts returned 400. Revoke returned 200 and a later accept returned 400. A wrong-organization revoke returned 403. The redeemed user has one membership, in the inviting organization. The body `organizationId` does not move the invite. |
+| Assignment | A new filing is outside the mandate (assign 404). After that filing alone is scoped, assign and reassign return 200 and `claims.assigned_to` is the second steward. The canonical fixture cases are not reassigned. The other organization receives 404. |
+| Messages | Thread create 201 and `messages.thread.create` is in `public.audit_logs`. The inbox shows the subject. The French page is French. The other organization receives 404. |
+| Document library | "My documents" and "Mes documents". An unknown id is 404. |
+| Platform executive | Local administrator 403. Unappointed platform title 403. No row inserted. A disposable platform executive receives 201; the organization row's parent, type and level match; `organization.create` and `platform.organization.manage.authorized` (`basis=platform_executive`) are in `public.audit_logs`. Demotion to officer makes the next create 403 with `platform.organization.manage.denied` and `no_live_scoped_platform_staff_mandate`. |
+| Officer, correspondence, privacy | Internal note is absent from the member read. Foreign notes 404. Leadership report 200 for the executive and 403 for the member, and the report does not contain the note. Correspondence persists as `draft`. The member is refused. The other organization receives 403 or 404. |
+| Session | Expiring the isolated tester's session returns the browser to sign-in. Password and authenticator open the dashboard. |
+| Retry | The first filing request is aborted and the page shows a failure. The next submit persists one case. |
+
+Runtime API matrix, `ue-runtime-up.mjs test`: 95 passed, 163 skipped, 0 failed (9.7 minutes, finished 11:33 AM America/Toronto). The skips are the tablet and mobile duplicates of the desktop API journeys. Desktop journey A passed, including the steward's fixture-case list.
+
+Private documents, `playwright.documents.config.ts`, against that Azurite: 13 passed, 0 failed (1.8 minutes, finished 11:19 AM America/Toronto). The suite covers intake and scan, both case-link spellings, authorized download of the stored bytes, organization-level and restricted labels, two-case links, reassignment and revocation, lease binding (other actor, other document, tampered token, expiry, replay), version replacement, hash mismatch, missing object, audit failure with no successful download, the size bound (413), and concurrent downloads. `.ue-runtime/evidence/document-evidence.json` records the assigned representative's issue and content responses as 200 and the `document.download` and `document.download_served` audits. The filing member is refused.
+
+Commands on this source, before this record was added:
+
+| Command | Result |
+| --- | --- |
+| `pnpm lint` | 172 tasks successful |
+| `pnpm typecheck` | 238 tasks successful |
+| `pnpm test:fast` | 3,161 files / 42,105 tests passed; 124 files / 1,632 tests skipped; 1 file / 16 tests failed only because the native clone URL is unset |
+| `pnpm exec vitest run --project contract-tests` | 309 files, 10,177 tests passed |
+| `vitest.native.config.ts` on the fresh PostgreSQL 16 template | 101 files / 1,059 tests passed; 1 file / 4 tests skipped. The skips are the four legacy-topology cases in `current-security-installer.native.test.ts` listed in `tooling/scripts/lib/ue-native-expected-skips.json`. They are not passes. |
+| `npx vitest run --config security/redteam/vitest.config.ts` | 7 files, 106 tests passed |
+| `plan.ts --self-test --check` with `UE_V2_WHEELHOUSE=/tmp/ue-wheelhouse` | passed. 783 tables, 6,326 statements, 303 decisions, 35 exclusions, 0 security blockers, `fullReadiness=NOT_YET_PROVEN` |
+| Catalog overlay check from `apps/union-eyes` | "Current canonical catalog overlay matches its source compilers" |
+
+`pnpm validate:docs` and `pnpm governance:audit` are run again after this section, because they read the documentation tree. Their result for this record is stated in the pull request description with the other exact-head checks. The generated audit reports those commands rewrite are not part of the change.
+
+`insertAuthRow` returns only the inserted columns and the primary key. `RETURNING *` required `SELECT` on columns the redemption role must not read (`42501`). Callers use the inserted identity columns. The V2 source plan was regenerated from that file; the SQL statement text is unchanged and the enum digests moved with the commitment hash. `sourcePlanDigest` in `catalog-v2-decisions.json` is the SHA-256 of `JSON.stringify` of the plan. `UE_RUNTIME_STATE_DIR` is declared test-only. The provisioner passes the recorded loopback Azurite and ClamAV settings into later Playwright processes.
+
+## What remains outside this local proof
+
+- Staging still serves the older application. No staging persona, byte, or expiry proof is claimed.
+- Production deployment, a release GO, and Phase 3B are not authorized. `UE_SAAS_OPERATIONAL_READINESS` stays `NO_GO`.
+- The four legacy current-security installer tests need a released-topology database. They were skipped on purpose and are not qualified here.
+- Exact-head GitHub Actions are read after this commit is pushed. A local pass is not that result.

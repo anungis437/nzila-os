@@ -1,12 +1,15 @@
+import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { test, expect } from '@playwright/test'
-import { computeTotp } from '@nzila/platform-auth/mfa'
-import { loginRuntimePage, runtimeRequestAs } from '../helpers/runtime-auth'
+import { request as playwrightRequest, test, expect, type APIRequestContext } from '@playwright/test'
+import { computeTotp, encryptSecret, generateTotpSecret } from '@nzila/platform-auth/mfa'
+import { hashPassword } from '@nzila/platform-auth/password'
+import { loginRuntimePage, runtimeRequestAfterSignIn, runtimeRequestAs } from '../helpers/runtime-auth'
 import { readRuntimeFixtureAuth } from '../../scripts/runtime/fixture-auth'
 import { UE_TEST_USER_PASSWORD } from '../../tests/fixtures/test-users'
 import { queryOwnedRuntime } from '../../scripts/runtime/db-inspect'
+import { PLATFORM_ORGANIZATION_ID } from '../../lib/authority/platform-organization'
 import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
 
@@ -30,9 +33,94 @@ const audit = (action: string, resourceId: string) =>
     [PRIMARY, resourceId, action],
   )
 
+/** The sign-in risk engine counts failures by address. Each journey starts from an empty window so one project's refusals cannot lock the next. */
+async function releaseFixtureSignInWindow(): Promise<void> {
+  await sql(
+    `DELETE FROM user_management.auth_audit_log
+      WHERE event_type = 'login_failed' AND ip_address = '127.0.0.1' AND created_at > now() - interval '16 minutes'`,
+  )
+}
+
+function invitationBearer(email: string): string | undefined {
+  const file = join(STATE_DIR, 'invitation-outbox.jsonl')
+  const lines = readFileSync(file, 'utf8').trim().split('\n').filter(Boolean)
+  return lines
+    .map((line) => JSON.parse(line) as { to: string; token: string })
+    .filter((entry) => entry.to === email)
+    .at(-1)?.token
+}
+
+async function ensurePlatformOrganization(): Promise<void> {
+  await sql(
+    `INSERT INTO public.organizations
+      (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated,
+       member_count, active_member_count, settings, features_enabled, status, remittance_day, fiscal_year_end, created_at, updated_at)
+     VALUES ($1, 'UE QA Platform', 'ue-qa-platform', 'platform', ARRAY[]::text[], 0,
+       ARRAY[]::varchar[], false, 0, 0, '{}'::jsonb, ARRAY[]::text[], 'active', 15, '2024-12-31', now(), now())
+     ON CONFLICT (id) DO NOTHING`,
+    [PLATFORM_ORGANIZATION_ID],
+  )
+}
+
+/**
+ * A disposable platform executive for this journey only. The shared fixture titles stay unappointed.
+ * The bearer, password and MFA secret stay in memory and are never written to the evidence file.
+ */
+async function appointDisposableExecutive(): Promise<{ userId: string; context: APIRequestContext }> {
+  const key = process.env.AUTH_MFA_ENCRYPTION_KEY
+  if (!key || key.length < 32) throw new Error('Owned fixture MFA key required')
+  const userId = `ue-step1-exec-${stamp()}`
+  const email = `${userId}@nzila.test`
+  const password = `Step1-Exec-${stamp()}!Aa9`
+  const secret = generateTotpSecret()
+  const previous = process.env.AUTH_MFA_ENCRYPTION_KEY
+  process.env.AUTH_MFA_ENCRYPTION_KEY = key
+  let encrypted: string
+  try {
+    encrypted = encryptSecret(secret)
+  } finally {
+    if (previous === undefined) delete process.env.AUTH_MFA_ENCRYPTION_KEY
+    else process.env.AUTH_MFA_ENCRYPTION_KEY = previous
+  }
+  await ensurePlatformOrganization()
+  await sql(
+    `INSERT INTO user_management.users
+      (user_id, email, password_hash, is_active, lifecycle_state, is_system_admin, email_verified, account_source, first_name, last_name, display_name)
+     VALUES ($1, $2, $3, true, 'active', true, true, 'local', 'Step', 'Executive', 'Step Executive')`,
+    [userId, email, await hashPassword(password)],
+  )
+  await sql(
+    `INSERT INTO user_management.organization_users
+      (organization_id, user_id, role, is_active, is_primary, joined_at)
+     VALUES ($1, $2, 'executive', true, true, now())`,
+    [PLATFORM_ORGANIZATION_ID, userId],
+  )
+  await sql(
+    `INSERT INTO user_management.mfa_totp (user_id, secret_encrypted, enabled_at, recovery_codes_hashed)
+     VALUES ($1, $2, now(), '[]'::jsonb)`,
+    [userId, encrypted],
+  )
+  const context = await playwrightRequest.newContext({
+    baseURL: process.env.PLAYWRIGHT_BASE_URL,
+    extraHTTPHeaders: { 'user-agent': 'UnionEyesAcceptance/1.0 (platform-executive)' },
+  })
+  const login = await context.post('/api/auth/login', { data: { email, password } })
+  expect(login.status(), await login.text()).toBe(200)
+  const challenge = (await login.json()) as { requiresMfa?: boolean; mfaChallengeToken?: string }
+  expect(challenge.requiresMfa).toBe(true)
+  const mfa = await context.post('/api/auth/mfa/challenge', {
+    data: { challengeToken: challenge.mfaChallengeToken, code: computeTotp(secret) },
+  })
+  expect(mfa.status(), await mfa.text()).toBe(200)
+  const switched = await context.post('/api/organizations/switch', { data: { organizationId: PLATFORM_ORGANIZATION_ID } })
+  expect(switched.status(), await switched.text()).toBe(200)
+  return { userId, context }
+}
+
 test.describe.configure({ mode: 'serial', timeout: 180_000 })
 
 test.beforeEach(async ({ page }) => {
+  await releaseFixtureSignInWindow()
   await page.addLocatorHandler(
     page.getByRole('dialog').filter({ has: page.getByRole('button', { name: /^(Reject All|Tout refuser)$/i }) }).first(),
     async (dialog) => {
@@ -49,6 +137,8 @@ test.afterAll(async ({}, testInfo) => {
 test('invitation: create, refuse a forged token, redeem, and revoke a second offer', async ({ page }, testInfo) => {
   await loginRuntimePage(page, U.adminPrimary.userId, PRIMARY)
   const admin = page.context().request
+  // Redemption sets the new member's session. Keep it off the administrator's cookie jar.
+  const guest = await playwrightRequest.newContext({ baseURL: process.env.PLAYWRIGHT_BASE_URL })
   const email = `step1.${stamp()}@nzila.test`
   const created = await admin.post('/api/auth/invite/create', { data: { email, role: 'member' } })
   expect(created.status(), await created.text()).toBe(201)
@@ -63,20 +153,21 @@ test('invitation: create, refuse a forged token, redeem, and revoke a second off
   expect(stored[0]?.email).toBe(email)
   expect(stored[0]?.accepted_at).toBeNull()
 
-  const forged = await page.context().request.post('/api/auth/invite/accept', {
+  const forged = await guest.post('/api/auth/invite/accept', {
     data: { token: 'forged-token-value', firstName: 'No', lastName: 'One' },
   })
   expect(forged.status()).toBeGreaterThanOrEqual(400)
   expect((await sql<{ accepted_at: string | null }>(`SELECT accepted_at FROM user_management.invites WHERE id = $1`, [inviteId]))[0]?.accepted_at).toBeNull()
 
-  const outbox = readFileSync(join(STATE_DIR, 'invitation-outbox.jsonl'), 'utf8').trim().split('\n').map((line) => JSON.parse(line) as { to: string; token: string })
-  const token = outbox.filter((entry) => entry.to === email).at(-1)?.token
-  expect(token, 'the fixture outbox holds the bearer the email would carry').toBeTruthy()
-  await page.goto(`/invite/accept?token=${encodeURIComponent(token as string)}`)
-  const accepted = await page.context().request.post('/api/auth/invite/accept', {
-    data: { token, firstName: 'Step', lastName: 'One' },
+  const createdBody = JSON.stringify(invitation)
+  const token = invitationBearer(email)
+  expect(token, 'the private fixture outbox holds the bearer the email would carry').toBeTruthy()
+  expect(createdBody).not.toContain(token)
+  const accepted = await guest.post('/api/auth/invite/accept', {
+    data: { token, firstName: 'Step', lastName: 'One', organizationId: UE_TEST_ORGS.secondary.id },
   })
   expect(accepted.status(), await accepted.text()).toBeLessThan(400)
+  expect(JSON.stringify(await accepted.json())).not.toContain(token)
   const redeemed = await sql<{ accepted_at: string | null }>(`SELECT accepted_at FROM user_management.invites WHERE id = $1`, [inviteId])
   expect(redeemed[0]?.accepted_at).toBeTruthy()
   const member = await sql<{ user_id: string }>(
@@ -86,6 +177,41 @@ test('invitation: create, refuse a forged token, redeem, and revoke a second off
     [email, PRIMARY],
   )
   expect(member).toHaveLength(1)
+  const foreignMembership = await sql<{ organization_id: string }>(
+    `SELECT organization_id::text FROM user_management.organization_users WHERE user_id = $1`,
+    [member[0].user_id],
+  )
+  expect(foreignMembership.map((row) => row.organization_id)).toEqual([PRIMARY])
+  const usedAgain = await guest.post('/api/auth/invite/accept', {
+    data: { token, firstName: 'Step', lastName: 'Again' },
+  })
+  expect(usedAgain.status()).toBeGreaterThanOrEqual(400)
+  expect(await sql(`SELECT user_id FROM user_management.users WHERE lower(email) = $1`, [email])).toHaveLength(1)
+
+  const tampered = `${token!.slice(0, -1)}${token!.endsWith('a') ? 'b' : 'a'}`
+  const tamperedAccept = await guest.post('/api/auth/invite/accept', {
+    data: { token: tampered, firstName: 'Tampered' },
+  })
+  expect(tamperedAccept.status()).toBeGreaterThanOrEqual(400)
+
+  const expiredEmail = `expired.${stamp()}@nzila.test`
+  const expired = await admin.post('/api/auth/invite/create', { data: { email: expiredEmail, role: 'member', organizationId: UE_TEST_ORGS.secondary.id } })
+  expect(expired.status(), await expired.text()).toBe(201)
+  const expiredOffer = await expired.json()
+  expect(expiredOffer).not.toHaveProperty('token')
+  const expiredRow = await sql<{ organization_id: string }>(
+    `SELECT organization_id::text FROM user_management.invites WHERE id = $1`,
+    [expiredOffer.inviteId],
+  )
+  expect(expiredRow[0]?.organization_id).toBe(PRIMARY)
+  await sql(`UPDATE user_management.invites SET expires_at = now() - interval '1 minute' WHERE id = $1`, [expiredOffer.inviteId])
+  const expiredToken = invitationBearer(expiredEmail)
+  expect(expiredToken).toBeTruthy()
+  const expiredAccept = await guest.post('/api/auth/invite/accept', {
+    data: { token: expiredToken, firstName: 'Late' },
+  })
+  expect(expiredAccept.status()).toBeGreaterThanOrEqual(400)
+  expect((await sql<{ accepted_at: string | null }>(`SELECT accepted_at FROM user_management.invites WHERE id = $1`, [expiredOffer.inviteId]))[0]?.accepted_at).toBeNull()
 
   const revokeEmail = `revoke.${stamp()}@nzila.test`
   const second = await admin.post('/api/auth/invite/create', { data: { email: revokeEmail, role: 'member' } })
@@ -95,10 +221,25 @@ test('invitation: create, refuse a forged token, redeem, and revoke a second off
   expect(revoked.status(), await revoked.text()).toBe(200)
   const revokedRow = await sql<{ revoked_at: string | null }>(`SELECT revoked_at FROM user_management.invites WHERE id = $1`, [revokedOffer.inviteId])
   expect(revokedRow[0]?.revoked_at).toBeTruthy()
-  const revokedToken = readFileSync(join(STATE_DIR, 'invitation-outbox.jsonl'), 'utf8').trim().split('\n').map((line) => JSON.parse(line) as { to: string; token: string }).filter((entry) => entry.to === revokeEmail).at(-1)?.token
-  const reuse = await page.context().request.post('/api/auth/invite/accept', { data: { token: revokedToken, firstName: 'Late' } })
+  const revokedToken = invitationBearer(revokeEmail)
+  const reuse = await guest.post('/api/auth/invite/accept', { data: { token: revokedToken, firstName: 'Late' } })
   expect(reuse.status()).toBeGreaterThanOrEqual(400)
-  EVIDENCE.push({ journey: 'invitation', project: testInfo.project.name, inviteId, redeemedUser: member[0]?.user_id })
+  await guest.dispose()
+  const foreignRevoke = await (await runtimeRequestAs(U.wrongOrgSteward.userId, UE_TEST_ORGS.secondary.id)).post('/api/auth/invite/manage', {
+    data: { action: 'revoke', inviteId },
+  })
+  expect(foreignRevoke.status()).toBeGreaterThanOrEqual(400)
+  expect((await sql<{ accepted_at: string | null }>(`SELECT accepted_at FROM user_management.invites WHERE id = $1`, [inviteId]))[0]?.accepted_at).toBeTruthy()
+  EVIDENCE.push({
+    journey: 'invitation',
+    project: testInfo.project.name,
+    inviteId,
+    redeemedUser: member[0]?.user_id,
+    expired: expiredAccept.status(),
+    tampered: tamperedAccept.status(),
+    reused: usedAgain.status(),
+    foreignRevoke: foreignRevoke.status(),
+  })
 })
 
 test('steward assignment and reassignment persist, and the other organization cannot read the case', async ({ page }, testInfo) => {
@@ -124,37 +265,30 @@ test('steward assignment and reassignment persist, and the other organization ca
   })
   expect(uncovered.status(), await uncovered.text()).toBe(404)
 
-  const covered = await sql<{ claim_id: string; assigned_to: string | null }>(
-    `SELECT c.claim_id, c.assigned_to
-       FROM claims c
-       JOIN public.ue_authority_mandates m
-         ON m.organization_id = c.organization_id
-        AND m.principal_user_id = $1
-        AND m.kind = 'supervisory'
-        AND m.status = 'active'
-        AND 'assign' = ANY(m.powers)
-        AND m.scope->'resourceIds' @> to_jsonb(c.claim_id::text)
-      WHERE c.organization_id = $2
-      LIMIT 1`,
-    [U.chiefStewardPrimary.userId, PRIMARY],
-  )
-  expect(covered).toHaveLength(1)
-  const coveredId = covered[0].claim_id
-  const nextAssignee = covered[0].assigned_to === U.stewardPrimary.userId ? U.stewardPrimaryTwo.userId : U.stewardPrimary.userId
-  const reassigned = await coordinator.post(`/api/cases/${coveredId}/assign`, {
-    data: { assigneeId: nextAssignee, reason: 'reassigned inside the mandate' },
+  // Scope this filing only. The canonical fixture cases stay with the holder the kernel seeded.
+  execFileSync('npx', ['tsx', 'scripts/runtime/authority-admin.ts', 'scope-case', caseId], {
+    cwd: process.cwd(),
+    env: { ...process.env, QA_TEST_ENV: 'true' },
+    stdio: 'pipe',
+  })
+  const assigned = await coordinator.post(`/api/cases/${caseId}/assign`, {
+    data: { assigneeId: U.stewardPrimary.userId, reason: 'inside the exact-case mandate' },
+  })
+  expect(assigned.status(), await assigned.text()).toBe(200)
+  const reassigned = await coordinator.post(`/api/cases/${caseId}/assign`, {
+    data: { assigneeId: U.stewardPrimaryTwo.userId, reason: 'reassigned inside the mandate' },
   })
   expect(reassigned.status(), await reassigned.text()).toBe(200)
-  const row = await sql<{ assigned_to: string }>(`SELECT assigned_to FROM claims WHERE claim_id = $1`, [coveredId])
-  expect(row[0]?.assigned_to).toBe(nextAssignee)
+  const row = await sql<{ assigned_to: string }>(`SELECT assigned_to FROM claims WHERE claim_id = $1`, [caseId])
+  expect(row[0]?.assigned_to).toBe(U.stewardPrimaryTwo.userId)
 
   await loginRuntimePage(page, U.memberPrimary.userId, PRIMARY)
   await page.goto(`/en-CA/dashboard/claims/${caseId}`)
   await expect(page.getByText(title).first()).toBeVisible()
-  const review = await (await runtimeRequestAs(U.supervisorPrimary.userId, PRIMARY)).get(`/api/cases/${coveredId}`)
+  const review = await (await runtimeRequestAs(U.supervisorPrimary.userId, PRIMARY)).get(`/api/cases/${caseId}`)
   expect(review.status(), await review.text()).toBe(200)
 
-  const foreign = await (await runtimeRequestAs(U.memberSecondary.userId, UE_TEST_ORGS.secondary.id)).get(`/api/cases/${coveredId}`)
+  const foreign = await (await runtimeRequestAs(U.memberSecondary.userId, UE_TEST_ORGS.secondary.id)).get(`/api/cases/${caseId}`)
   expect([403, 404]).toContain(foreign.status())
   EVIDENCE.push({ journey: 'assignment', project: testInfo.project.name, caseId, foreignStatus: foreign.status() })
 })
@@ -189,23 +323,140 @@ test('documents: the member library is named in both languages, and an unknown d
   EVIDENCE.push({ journey: 'document-library', project: testInfo.project.name, missingStatus: missing.status() })
 })
 
-test('a local administrator and an ineligible platform title are both refused organization creation', async ({ page }, testInfo) => {
+test('a platform executive creates an organization, and removing the appointment ends that authority', async ({ page }, testInfo) => {
   await loginRuntimePage(page, U.adminPrimary.userId, PRIMARY)
+  const refusedSlug = `refused-${stamp()}`
   const refused = await page.context().request.post('/api/organizations', {
-    data: { name: 'Not allowed', slug: `refused-${stamp()}`, type: 'local' },
+    data: { name: 'Not allowed', slug: refusedSlug, type: 'local', parentId: PRIMARY },
   })
   expect(refused.status(), await refused.text()).toBe(403)
 
-  // The fixture platform title is deliberately not a platform executive and cannot select a customer organization as one.
   const operator = await (await runtimeRequestAs(U.platformOperator.userId, PRIMARY)).post('/api/organizations', {
-    data: { name: 'Step 1 disposable local', slug: `step1-${stamp()}`, type: 'local' },
+    data: { name: 'Unappointed title', slug: `unappointed-${stamp()}`, type: 'local', parentId: PRIMARY },
   })
   expect(operator.status(), await operator.text()).toBe(403)
-  const created = await sql<{ count: string }>(
-    `SELECT count(*)::text AS count FROM organizations WHERE name = 'Step 1 disposable local'`,
+  expect((await sql(`SELECT 1 FROM organizations WHERE slug = $1`, [refusedSlug]))).toHaveLength(0)
+
+  const appointed = await appointDisposableExecutive()
+  const slug = `step1-${stamp()}`
+  const created = await appointed.context.post('/api/organizations', {
+    data: { name: 'Step 1 disposable local', slug, type: 'local', parentId: PRIMARY },
+  })
+  expect(created.status(), await created.text()).toBe(201)
+  const createdBody = await created.json()
+  const organizationId = createdBody.data?.id as string
+  expect(organizationId).toBeTruthy()
+  const row = await sql<{ id: string; parent_id: string; organization_type: string; hierarchy_level: number }>(
+    `SELECT id::text, parent_id::text, organization_type, hierarchy_level FROM organizations WHERE slug = $1`,
+    [slug],
   )
-  expect(created[0]?.count).toBe('0')
-  EVIDENCE.push({ journey: 'organization-create-refused', project: testInfo.project.name, adminStatus: refused.status(), operatorStatus: operator.status() })
+  expect(row).toHaveLength(1)
+  expect(row[0].id).toBe(organizationId)
+  expect(row[0].parent_id).toBe(PRIMARY)
+  expect(row[0].organization_type).toBe('local')
+  expect(row[0].hierarchy_level).toBe(1)
+  const createdAudit = await sql(
+    `SELECT 1 FROM public.audit_logs
+      WHERE organization_id::text = $1 AND user_id = $2 AND action = 'organization.create' AND resource_id::text = $1`,
+    [organizationId, appointed.userId],
+  )
+  expect(createdAudit).toHaveLength(1)
+  const exercise = await sql(
+    `SELECT 1 FROM public.audit_logs
+      WHERE organization_id::text = $1 AND user_id = $2 AND action = 'platform.organization.manage.authorized'
+        AND resource_type = 'platform_authority' AND details->>'basis' = 'platform_executive'`,
+    [PLATFORM_ORGANIZATION_ID, appointed.userId],
+  )
+  expect(exercise.length).toBeGreaterThan(0)
+
+  await sql(
+    `UPDATE user_management.organization_users SET role = 'officer' WHERE user_id = $1 AND organization_id = $2`,
+    [appointed.userId, PLATFORM_ORGANIZATION_ID],
+  )
+  const removedSlug = `removed-${stamp()}`
+  const removed = await appointed.context.post('/api/organizations', {
+    data: { name: 'Authority removed', slug: removedSlug, type: 'local', parentId: PRIMARY },
+  })
+  expect(removed.status(), await removed.text()).toBe(403)
+  expect((await sql(`SELECT 1 FROM organizations WHERE slug = $1`, [removedSlug]))).toHaveLength(0)
+  const denial = await sql(
+    `SELECT 1 FROM public.audit_logs
+      WHERE organization_id::text = $1 AND user_id = $2 AND action = 'platform.organization.manage.denied'
+        AND details->>'reason' = 'no_live_scoped_platform_staff_mandate'`,
+    [PLATFORM_ORGANIZATION_ID, appointed.userId],
+  )
+  expect(denial.length).toBeGreaterThan(0)
+  await sql(
+    `UPDATE user_management.users SET is_active = false, is_system_admin = false WHERE user_id = $1`,
+    [appointed.userId],
+  )
+  await appointed.context.dispose()
+  EVIDENCE.push({
+    journey: 'platform-executive-organization',
+    project: testInfo.project.name,
+    organizationId,
+    adminStatus: refused.status(),
+    operatorStatus: operator.status(),
+    createdStatus: created.status(),
+    removedStatus: removed.status(),
+  })
+})
+
+test('an officer reads leadership reporting, a steward drafts correspondence, and a member sees neither private note nor the report', async ({}, testInfo) => {
+  const covered = await sql<{ claim_id: string }>(
+    `SELECT c.claim_id
+       FROM claims c
+      WHERE c.organization_id = $1 AND c.assigned_to = $2
+      LIMIT 1`,
+    [PRIMARY, U.stewardPrimary.userId],
+  )
+  expect(covered).toHaveLength(1)
+  const caseId = covered[0].claim_id
+  const marker = `internal note ${stamp()}`
+  const note = await (await runtimeRequestAfterSignIn(U.stewardPrimary.userId, PRIMARY)).post(`/api/cases/${caseId}/notes`, {
+    data: { text: marker, isInternal: true },
+  })
+  expect(note.status(), await note.text()).toBeLessThan(300)
+  const memberNotes = await (await runtimeRequestAfterSignIn(U.memberPrimary.userId, PRIMARY)).get(`/api/cases/${caseId}/notes`)
+  expect(await memberNotes.text()).not.toContain(marker)
+  const foreignNotes = await (await runtimeRequestAfterSignIn(U.memberSecondary.userId, UE_TEST_ORGS.secondary.id)).get(`/api/cases/${caseId}/notes`)
+  expect(foreignNotes.status()).toBe(404)
+
+  const officer = await runtimeRequestAfterSignIn(U.executivePrimary.userId, PRIMARY)
+  const report = await officer.get('/api/dashboard/leadership')
+  expect(report.status(), await report.text()).toBe(200)
+  expect(await report.text()).not.toContain(marker)
+  const memberReport = await (await runtimeRequestAfterSignIn(U.memberPrimary.userId, PRIMARY)).get('/api/dashboard/leadership')
+  expect(memberReport.status()).toBe(403)
+
+  const subject = `Step 1 letter ${stamp()}`
+  const draft = await (await runtimeRequestAfterSignIn(U.stewardPrimary.userId, PRIMARY)).post('/api/correspondence', {
+    data: {
+      subject,
+      body: 'Please confirm receipt of this draft letter.',
+      type: 'letter',
+      recipients: [{ name: 'Employer representative', recipientType: 'to' }],
+    },
+  })
+  expect(draft.status(), await draft.text()).toBeLessThan(300)
+  const letter = await sql<{ id: string; status: string }>(
+    `SELECT id::text, status FROM correspondence WHERE organization_id = $1 AND subject = $2`,
+    [PRIMARY, subject],
+  )
+  expect(letter).toHaveLength(1)
+  expect(letter[0].status).toBe('draft')
+  const memberLetter = await (await runtimeRequestAfterSignIn(U.memberPrimary.userId, PRIMARY)).get(`/api/correspondence/${letter[0].id}`)
+  expect(memberLetter.status()).toBeGreaterThanOrEqual(400)
+  const foreignLetter = await (await runtimeRequestAfterSignIn(U.memberSecondary.userId, UE_TEST_ORGS.secondary.id)).get(`/api/correspondence/${letter[0].id}`)
+  expect([403, 404]).toContain(foreignLetter.status())
+  EVIDENCE.push({
+    journey: 'officer-correspondence-privacy',
+    project: testInfo.project.name,
+    caseId,
+    correspondenceId: letter[0].id,
+    memberReport: memberReport.status(),
+    foreignNotes: foreignNotes.status(),
+  })
 })
 
 test('an expired session returns to sign-in, and signing in again opens the dashboard', async ({ page }, testInfo) => {

@@ -344,8 +344,25 @@ function test() {
   // Separate machine-readable reports ensure later Playwright invocations never overwrite earlier proof.
   // They stay under the ignored disposable state directory and must be selectively uploaded (no secrets.json).
   run('npx', ['playwright', 'test', '--config', 'playwright.runtime.config.ts', '--grep-invert', 'persistence after a restart'], {
-    cwd: APP, env: { ...testEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
+    cwd: APP, env: { ...testEnv(), ...ownedAzuriteEnv(), UE_RUNTIME_REPORT: join(STATE, 'playwright-main.json') },
   })
+}
+
+/** Storage settings recorded by `up --azurite`, so a later spec or test sees the same loopback fixture. */
+function ownedAzuriteEnv() {
+  const file = join(STATE, 'runtime-public.json')
+  if (!existsSync(file)) return {}
+  let fixture
+  try { fixture = JSON.parse(readFileSync(file, 'utf8')) } catch { return {} }
+  const azurite = fixture?.azurite
+  if (!azurite?.endpoint || !azurite.container || !azurite.clamavUrl) return {}
+  return {
+    AZURE_STORAGE_ACCOUNT_NAME: AZURITE_FIXTURE_ACCOUNT,
+    AZURE_STORAGE_ACCOUNT_KEY: AZURITE_FIXTURE_KEY,
+    AZURE_STORAGE_BLOB_ENDPOINT: azurite.endpoint,
+    AZURE_BLOB_CONTAINER: azurite.container,
+    CLAMAV_URL: azurite.clamavUrl,
+  }
 }
 
 /** Runs one extra Playwright config (browser or document acceptance) against the owned runtime, with its own report. */
@@ -358,6 +375,7 @@ function spec() {
     cwd: APP,
     env: {
       ...testEnv(),
+      ...ownedAzuriteEnv(),
       PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${PORT_APP}`,
       UE_RUNTIME_STATE_DIR: STATE,
       UE_RUNTIME_REPORT: join(STATE, `playwright-${label}.json`),
