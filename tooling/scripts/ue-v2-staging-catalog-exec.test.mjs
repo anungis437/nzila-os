@@ -20,6 +20,7 @@ import {
   containerSource,
   execInvocation,
   revisionDefect,
+  selectReplica,
   executeCatalog,
   CATALOG_CONTRACT,
   CATALOG_SCHEMA,
@@ -58,6 +59,10 @@ function revisionBody(image = EXPECTED_IMAGE) {
     runningState: 'Running',
     containers: [{ name: CONTAINER_NAME, image }],
   }
+}
+
+function replicaBody() {
+  return [{ name: EXPECTED_REVISION + '-77f9c', runningState: 'Running', containers: [CONTAINER_NAME] }]
 }
 
 function query(id, rows) {
@@ -118,7 +123,8 @@ function harness(options = {}) {
       return { code: 0, stdout: JSON.stringify(options.assignments ?? [{ principalId: 'oid-1', roleDefinitionName: 'Nzila UE V2 Staging Deployer', scope: GROUP_ID }]), stderr: '' }
     }
     if (args[0] === 'role' && args[1] === 'definition') return { code: 0, stdout: JSON.stringify(options.definition ?? deployerDefinition()), stderr: '' }
-    if (args[0] === 'containerapp') return { code: 0, stdout: JSON.stringify(options.revision ?? revisionBody()), stderr: '' }
+    if (args[0] === 'containerapp' && args[1] === 'revision') return { code: 0, stdout: JSON.stringify(options.revision ?? revisionBody()), stderr: '' }
+    if (args[0] === 'containerapp' && args[1] === 'replica') return options.replicaRead ?? { code: 0, stdout: JSON.stringify(options.replicas ?? replicaBody()), stderr: '' }
     throw new Error(`UNEXPECTED ${args.join(' ')}`)
   }
   return { calls, spawn, token }
@@ -180,9 +186,48 @@ test('one accepted binding builds one pseudo-terminal exec and parses the catalo
   assert.deepEqual(exec.args.slice(0, 5), ['90', 'script', '-q', '-e', '-c'])
   assert.match(exec.args[5], new RegExp(EXPECTED_REVISION))
   assert.match(exec.args[5], /--container/)
+  assert.match(exec.args[5], /--replica/)
+  assert.match(exec.args[5], new RegExp(replicaBody()[0].name))
   assert.equal(/postgres(?:ql)?:\/\/(?!\[redacted\])\S+/i.test(exec.args[5]), false)
   assert.equal(calls.filter((call) => call.executable === 'az').every((call) => call.args[0] !== 'timeout'), true)
   assert.equal(JSON.stringify(result.report).includes(token), false)
+})
+
+test('replica discovery selects only a running container of the verified revision', () => {
+  const healthy = replicaBody()[0]
+  const selected = selectReplica([{ ...healthy, name: healthy.name + 'z' }, healthy])
+  assert.equal(selected.defect, null)
+  assert.equal(selected.name, healthy.name)
+  assert.equal(selected.eligibleCount, 2)
+  assert.equal(selectReplica([]).defect, 'NO_REPLICA_OBSERVED')
+  assert.equal(selectReplica([{ name: healthy.name, runningState: 'Running' }]).defect, 'REPLICA_FIELDS_ABSENT')
+  assert.equal(selectReplica([{ ...healthy, runningState: 'Stopped' }]).defect, 'NO_ELIGIBLE_RUNNING_REPLICA')
+  assert.equal(selectReplica([{ ...healthy, containers: ['different'] }]).defect, 'NO_ELIGIBLE_RUNNING_REPLICA')
+  assert.equal(selectReplica([{ ...healthy, name: 'another-app--rel6a60c95c9d-1' }]).defect, 'NO_ELIGIBLE_RUNNING_REPLICA')
+  assert.throws(() => execInvocation('wrong-replica'), /REPLICA_BINDING_REFUSED/)
+})
+
+test('replica list failure and no eligible replica refuse exec without retry', async () => {
+  const failed = harness({ replicaRead: { code: 1, stdout: '', stderr: 'replicas unavailable' } })
+  const a = await executeCatalog(liveEnv(), failed.spawn)
+  assert.equal(a.exitCode, 4)
+  assert.equal(a.report.execAttempted, false)
+  assert.deepEqual(a.report.defects, ['REPLICA_LIST_UNREADABLE'])
+  assert.equal(failed.calls.filter((call) => call.executable === 'timeout').length, 0)
+  const empty = harness({ replicas: [] })
+  const b = await executeCatalog(liveEnv(), empty.spawn)
+  assert.equal(b.exitCode, 4)
+  assert.deepEqual(b.report.defects, ['NO_REPLICA_OBSERVED'])
+  assert.equal(b.report.execAttempted, false)
+})
+
+test('WebSocket 404 is classified as transport failure and never as database evidence', async () => {
+  const failed = await executeCatalog(liveEnv(), harness({ exec: { code: 1, stdout: '', stderr: 'Handshake status 404 Not Found' } }).spawn)
+  assert.equal(failed.exitCode, 5)
+  assert.equal(failed.report.execAttempted, true)
+  assert.equal(failed.report.catalog, null)
+  assert.ok(failed.report.defects.includes('EXEC_WEBSOCKET_404'))
+  assert.ok(failed.report.defects.includes('CATALOG_UNREADABLE'))
 })
 
 test('a revision payload without traffic weight fails closed before exec', async () => {
@@ -234,6 +279,7 @@ case "$1 $2" in
   "role assignment") printf '%s\\n' ${JSON.stringify(assignments)} ;;
   "role definition") printf '%s\\n' ${JSON.stringify(definition)} ;;
   "containerapp revision") printf '%s\\n' ${JSON.stringify(revision)} ;;
+  "containerapp replica") printf '%s\\n' ${JSON.stringify(JSON.stringify(replicaBody()))} ;;
   *) printf '%s\\n' "unexpected $*" >&2; exit 9 ;;
 esac
 `)
@@ -262,6 +308,8 @@ printf '%s\\n' 'UE_CATALOG_END'
   assert.equal(azLog.includes('timeout'), false)
   assert.match(azLog, /account show/)
   assert.match(azLog, /containerapp revision show/)
+  assert.match(azLog, /containerapp replica list/)
+  assert.match(timeoutLog, /--replica/)
   assert.match(timeoutLog, /^90 script -q -e -c az /)
   assert.match(timeoutLog, new RegExp(EXPECTED_REVISION))
   assert.equal(/postgres(?:ql)?:\/\/(?!\[redacted\])\S+/i.test(timeoutLog), false)
@@ -428,7 +476,7 @@ test('the workflow is manual, pinned to main, and uses the deploy environment on
   assert.equal(text.includes('deployment group create'), false)
   assert.equal(text.includes('UE_V2_STAGING_DB_ADMIN_PASSWORD'), false)
   assert.equal(text.includes(CONTAINER_APP), false)
-  const command = execInvocation()
+  const command = execInvocation(replicaBody()[0].name)
   assert.equal(command.args[5].includes('eval('), false)
   assert.equal(command.executable, 'timeout')
   assert.equal(command.args[5].includes(CONTAINER_APP), true)

@@ -25,3 +25,13 @@ The container reads `DATABASE_URL` from its own environment. The runner never pr
 ## Dispatch
 
 Do not dispatch this workflow until it is on `main` and a founder approves the `ue-staging` environment. A `COMPLETE` artifact is the catalogue input for a later evidence review. This workflow does not set `S2.02_PREIMAGE_COMPLETE`.
+
+## Run 45859100780 — authenticated ACA console failure
+
+The first founder-approved read-only run on 2026-11-26 authenticated the existing `ue-staging` deploy identity and proved its effective `Microsoft.App/containerApps/exec/action` permission. The expected revision was Healthy and carrying 100% of traffic, and its image digest matched. `az containerapp exec` then failed its WebSocket handshake with HTTP 404 before a container command or SQL statement could run. Evidence artifact: `ue-v2-staging-catalog-45859100780` (GitHub artifact 15140657256). `catalog.json` SHA-256: `e56c1c9c49a6aad368d5626fd225a081a4757a5c19a40cf0c8ed29d45d9535ec`.
+
+This is a console transport failure, **not** a PostgreSQL verdict or proof of an absent `pg` driver. Run 45859100780 consumed the originally authorized one-time execution; this change does **not** authorize a retry.
+
+The next candidate uses read-only `az containerapp replica list --revision` to discover the actual running replica, verifies it belongs to the pinned revision and includes `union-eyes`, then supplies `--replica` explicitly. Missing or ambiguous replica metadata fails closed before exec. This corrects a missing explicit selection according to Azure's published CLI instructions. It is not yet proven to resolve the 404; persistent WebSocket errors may originate within the Azure Container Apps console service.
+
+No new identity, RBAC assignment, Container App revision, database job or firewall rule is needed. A subsequent dispatch requires its own founder authorization and the normal protected environment approval. `S2.02_PREIMAGE_COMPLETE` remains `NO`.
