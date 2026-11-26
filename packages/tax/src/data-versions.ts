@@ -100,25 +100,76 @@ export const DATA_VERSIONS: DataModuleVersion[] = [
   },
 ]
 
-/** Maximum days before data is considered stale */
+/** Maximum days before data is considered stale. A module is stale only after this age. */
 export const STALENESS_THRESHOLD_DAYS = 90
 
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/
+const DAY_MS = 24 * 60 * 60 * 1000
+
 /**
- * Check whether a data module's last verification date exceeds the staleness threshold.
+ * Parse a verification date as UTC midnight.
+ * Calendar dates that roll over, such as 2026-02-31, are rejected.
  */
-export function isModuleStale(module: DataModuleVersion, asOfDate?: Date): boolean {
-  const now = asOfDate ?? new Date()
-  const verified = new Date(module.lastVerified)
-  const diffMs = now.getTime() - verified.getTime()
-  const diffDays = diffMs / (1000 * 60 * 60 * 24)
-  return diffDays > STALENESS_THRESHOLD_DAYS
+export function parseVerificationDate(value: string | null | undefined): Date | null {
+  if (!value || !ISO_DATE.test(value)) return null
+  const [, yearText, monthText, dayText] = ISO_DATE.exec(value) ?? []
+  const year = Number(yearText)
+  const month = Number(monthText)
+  const day = Number(dayText)
+  const parsed = new Date(Date.UTC(year, month - 1, day))
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return null
+  }
+  return parsed
 }
 
 /**
- * Get all stale modules.
+ * Elapsed days from the UTC verification instant to `asOf`.
+ * Returns null when the verification date is not a real calendar date.
+ */
+export function verificationAgeDays(lastVerified: string | null | undefined, asOf: Date): number | null {
+  const verified = parseVerificationDate(lastVerified)
+  if (!verified || Number.isNaN(asOf.getTime())) return null
+  return (asOf.getTime() - verified.getTime()) / DAY_MS
+}
+
+/**
+ * A module is stale unless its source is recorded and its verification age is
+ * within the threshold, measured from an explicit instant.
+ *
+ * Invalid dates, blank sources, and future verification claims are stale.
+ * Those inputs previously compared as not stale because `NaN > 90` is false
+ * and a negative age is not greater than 90. Exactly 90 days remains current.
+ */
+export function isModuleStale(module: DataModuleVersion, asOfDate?: Date): boolean {
+  const asOf = asOfDate ?? new Date()
+  if (!module.source?.trim()) return true
+  const age = verificationAgeDays(module.lastVerified, asOf)
+  if (age === null || age < 0) return true
+  return age > STALENESS_THRESHOLD_DAYS
+}
+
+/**
+ * Select stale modules from an explicit registry. Callers that need a mixed
+ * registry pass it here. The recorded registry stays unchanged.
+ */
+export function selectStaleModules(
+  modules: readonly DataModuleVersion[],
+  asOfDate?: Date,
+): DataModuleVersion[] {
+  return modules.filter((module) => isModuleStale(module, asOfDate))
+}
+
+/**
+ * Get all stale modules in the recorded registry.
  */
 export function getStaleModules(asOfDate?: Date): DataModuleVersion[] {
-  return DATA_VERSIONS.filter((m) => isModuleStale(m, asOfDate))
+  return selectStaleModules(DATA_VERSIONS, asOfDate)
 }
 
 /**
