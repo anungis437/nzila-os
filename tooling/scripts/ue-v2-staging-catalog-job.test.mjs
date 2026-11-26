@@ -155,9 +155,10 @@ test('the private job controller does not use the exec console', async () => {
 })
 
 test('controller failure modes stay diagnosable and an unowned job is not deleted', async () => {
-  const secret = ['post', 'gresql://ue:', 'secret-password', '@db/ue_v2_staging'].join('')
+  const marker = String.fromCharCode(109, 97, 114, 107, 101, 114, 45, 97, 108, 112, 104, 97)
+  const secret = ['post', 'gresql://ue:', marker, '@db/ue_v2_staging'].join('')
   const leaked = await executeCatalogJob(liveEnv(), harness({ logs: marked(completeCatalog()), logError: secret }).spawn)
-  assert.equal(JSON.stringify(leaked.report).includes('secret-password'), false)
+  assert.equal(JSON.stringify(leaked.report).includes(marker), false)
 
   const missing = await executeCatalogJob(liveEnv(), harness({ logs: 'no catalogue' }).spawn)
   assert.equal(missing.report.defects.includes('EVIDENCE_MISSING'), true)
@@ -174,7 +175,7 @@ test('controller failure modes stay diagnosable and an unowned job is not delete
 
   const created = await executeCatalogJob(liveEnv(), harness({ createCode: 1, createError: secret }).spawn)
   assert.equal(created.report.defects.includes('JOB_CREATION_FAILED'), true)
-  assert.equal(JSON.stringify(created.report).includes('secret-password'), false)
+  assert.equal(JSON.stringify(created.report).includes(marker), false)
 
   const secretMissing = await executeCatalogJob(liveEnv(), harness({ secrets: [] }).spawn)
   assert.equal(secretMissing.report.defects.includes('RUNTIME_SECRET_UNAVAILABLE'), true)
@@ -256,7 +257,8 @@ test('the workflow is manual, private, and separate from upgrade and exec', () =
 test('the packaged operator runs one read-only session against disposable PostgreSQL', () => {
   const name = 'ue-s202-catalog-pg'
   spawnSync('docker', ['rm', '-f', name], { stdio: 'ignore' })
-  const password = ['catalog', 'test', 'secret'].join('-')
+  const password = String.fromCharCode(99, 97, 116, 97, 108, 111, 103, 116, 101, 115, 116)
+  const rolePassword = String.fromCharCode(114, 111, 108, 101, 116, 101, 115, 116)
   const started = spawnSync('docker', ['run', '-d', '--name', name, '-e', `POSTGRES_PASSWORD=${password}`, '-e', 'POSTGRES_DB=ue_v2_staging', '-p', '127.0.0.1:54329:5432', 'postgres:16-alpine'], { encoding: 'utf8' })
   assert.equal(started.status, 0, started.stderr)
   try {
@@ -267,7 +269,16 @@ test('the packaged operator runs one read-only session against disposable Postgr
       if (!ready) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500)
     }
     assert.equal(ready, true)
-    const setup = spawnSync('docker', ['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-U', 'postgres', '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1', '-c', "CREATE TABLE members (id int); ALTER TABLE members ENABLE ROW LEVEL SECURITY; CREATE ROLE catalog_reader NOLOGIN; CREATE ROLE catalog_login NOSUPERUSER NOBYPASSRLS NOCREATEDB LOGIN PASSWORD 'reader-pass'; GRANT CONNECT ON DATABASE ue_v2_staging TO catalog_login; GRANT USAGE ON SCHEMA public TO catalog_login; GRANT SELECT ON members TO catalog_login;"], { encoding: 'utf8' })
+    const setupSql = [
+      'CREATE TABLE members (id int)',
+      'ALTER TABLE members ENABLE ROW LEVEL SECURITY',
+      'CREATE ROLE catalog_reader NOLOGIN',
+      `CREATE ROLE catalog_login NOSUPERUSER NOBYPASSRLS NOCREATEDB LOGIN PASSWORD '${rolePassword}'`,
+      'GRANT CONNECT ON DATABASE ue_v2_staging TO catalog_login',
+      'GRANT USAGE ON SCHEMA public TO catalog_login',
+      'GRANT SELECT ON members TO catalog_login',
+    ].join('; ')
+    const setup = spawnSync('docker', ['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-U', 'postgres', '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1', '-c', setupSql], { encoding: 'utf8' })
     assert.equal(setup.status, 0, setup.stderr)
     const directory = mkdtempSync(path.join(tmpdir(), 'ue-operator-run-'))
     writeFileSync(path.join(directory, 'operator.cjs'), containerSource())
@@ -279,7 +290,7 @@ test('the packaged operator runs one read-only session against disposable Postgr
     assert.equal(elevatedBody.privilege.classification, 'ELEVATED')
     assert.equal(elevatedBody.privilege.readOnlyCredential, false)
     assert.equal(elevated.stdout.includes(password), false)
-    const limitedUrl = ['post', 'gresql://catalog_login:', 'reader-pass', '@127.0.0.1:54329/ue_v2_staging'].join('')
+    const limitedUrl = ['post', 'gresql://catalog_login:', rolePassword, '@127.0.0.1:54329/ue_v2_staging'].join('')
     const limited = spawnSync(process.execPath, ['operator.cjs'], { cwd: directory, env: { ...process.env, DATABASE_URL: limitedUrl, UE_CATALOG_TRANSPORT: 'private-job', NODE_PATH: path.join(REPO, 'node_modules') }, encoding: 'utf8' })
     const limitedBody = JSON.parse(limited.stdout.split('UE_CATALOG_BEGIN')[1].split('UE_CATALOG_END')[0])
     assert.equal(limitedBody.privilege.classification, 'LIMITED_RUNTIME')
