@@ -279,7 +279,7 @@ case "$1 $2" in
   "role assignment") printf '%s\\n' ${JSON.stringify(assignments)} ;;
   "role definition") printf '%s\\n' ${JSON.stringify(definition)} ;;
   "containerapp revision") printf '%s\\n' ${JSON.stringify(revision)} ;;
-  "containerapp replica") printf '%s\\n' ${JSON.stringify(replicaBody())} ;;
+  "containerapp replica") printf '%s\\n' ${JSON.stringify(JSON.stringify(replicaBody()))} ;;
   *) printf '%s\\n' "unexpected $*" >&2; exit 9 ;;
 esac
 `)
