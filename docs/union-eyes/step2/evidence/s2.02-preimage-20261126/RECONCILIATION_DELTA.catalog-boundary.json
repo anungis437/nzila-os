@@ -1,0 +1,36 @@
+{
+  "schema": "UE_S2_02_RECONCILIATION_DELTA_V1",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "applyTo": "The Step 2 acceptance register remains single-writer on docs/ue-step2-s200-plan-cfc5. This file is the proposed delta. UE_STEP2_ACCEPTANCE_REGISTER.json was not edited.",
+  "acceptanceRegisterEdited": false,
+  "registerPath": "docs/union-eyes/step2/UE_STEP2_ACCEPTANCE_REGISTER.json",
+  "registerShaAtBranchPoint": "3458b8d114d2621c90fc095a9176f12916040c46",
+  "proposedRegisterDelta": {
+    "servingIdentity.freshObservation": "OBSERVED_CONTROL_PLANE_AT_2026-11-26T06:16:06Z",
+    "servingIdentity.resolution": "CONTROL_PLANE_CONFLICT_RESOLVED_CATALOG_STILL_REQUIRED",
+    "servingIdentity.servingRevision": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+    "servingIdentity.trafficWeight": 100,
+    "servingIdentity.image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef",
+    "servingIdentity.zeroTrafficRevision": "nzila-ue-v2-staging-app--relcccfc8c311",
+    "servingIdentity.evidence": "docs/union-eyes/step2/evidence/s2.02-preimage-20261126/inventory-45766945607.json",
+    "servingIdentity.inventorySha256": "ce136d3510f90875ecbb864b76311d0994c2f2b04e6d3ac44e29b0dae29a03ed",
+    "S2.02-PREIMAGE.status": "BLOCKED_ON_EXEC_PERMISSION",
+    "S2.02-PREIMAGE.evidence": "docs/union-eyes/step2/evidence/s2.02-preimage-20261126/verdict.json",
+    "legacyInstaller.step2Applicability": "INDETERMINATE",
+    "S2_02_PREIMAGE_COMPLETE": "NO"
+  },
+  "mayProceed": {
+    "S2.02-LEGACY-GATE": false,
+    "stagingRehearsalOrApply": false
+  },
+  "priorReceiptsPreserved": [
+    "receipt.json",
+    "probes.json",
+    "commands.json",
+    "access-recovery.json",
+    "founder-authorization.json",
+    "RECONCILIATION_DELTA.json",
+    "SHA256SUMS",
+    "SHA256SUMS.blocked-attempt"
+  ]
+}

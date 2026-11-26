@@ -1,0 +1,17 @@
+{
+  "schema": "UE_S2_02_MIGRATION_BOOTSTRAP_V1",
+  "classification": "NOT_OBSERVED",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "database": "NOT_OBSERVED",
+  "serverVersionFromSql": "NOT_OBSERVED",
+  "serverVersionFromControlPlane": "16",
+  "connectedRole": "NOT_OBSERVED",
+  "migrationTablesFound": [],
+  "installedMigrationIds": "NOT_OBSERVED",
+  "hashes": "NOT_OBSERVED",
+  "timestamps": "NOT_OBSERVED",
+  "bootstrapReceipts": "NOT_OBSERVED",
+  "expectedVersusInstalled": "NOT_OBSERVED",
+  "missingDuplicateOrDivergent": "NOT_OBSERVED",
+  "assumptionRejected": "drizzle.__drizzle_migrations was not queried and is not treated as the only ledger."
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "UE_S2_02_DATABASE_SESSION_V1",
+  "classification": "NOT_OPENED",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "intendedDatabase": "ue_v2_staging",
+  "intendedDatabaseTier": "CONFIGURATION_NOT_SQL",
+  "sqlStatementsExecuted": 0,
+  "transactionOpened": false,
+  "rollbackIssued": false,
+  "persistentSession": false,
+  "permissionBoundary": {
+    "action": "Microsoft.App/containerApps/exec/action",
+    "resourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerApps/nzila-ue-v2-staging-app",
+    "revisionRequiredBeforeExec": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+    "azureDenialBody": null,
+    "reason": "No token that can call the action was presented, so Azure did not return AuthorizationFailed for it. The session that can call it does not exist here.",
+    "observations": [
+      "az is not installed in this runtime. command -v az returned missing.",
+      "No AZURE_CLIENT_ID, AZURE_TENANT_ID, or ue-staging-plan OIDC token is present. The host storage account variables were not used.",
+      "Azure MCP containerapps exposes only containerapps_list. It does not expose container exec.",
+      "containerapps_list for nzila-canada-staging-rg timed out with MCP error -32001.",
+      "postgres_database_query was not called. It authenticates as a supplied Entra or PostgreSQL user from this host. Public network access is Disabled, and that user would not be the revision's existing database identity.",
+      "Run 45766945607 used environment ue-staging-plan. The inventory contract records that identity as an ARM Reader. Reader authorizes */read. Microsoft.App/containerApps/exec/action is not a read. This package does not assign that action."
+    ]
+  },
+  "rejectedPaths": [
+    "Installing a client into the serving revision",
+    "Creating a Container Apps job",
+    "Opening a firewall rule or public endpoint",
+    "Creating a credential, role, or role assignment",
+    "Using the host storage account key",
+    "Dispatching a new workflow. The integration token cannot dispatch Actions, and no workflow on main opens this SQL session.",
+    "Repeating the control-plane reads already stored in inventory-45766945607.json"
+  ],
+  "minimumAdditionalAuthorization": "One principal that already holds Microsoft.App/containerApps/exec/action on the container app above re-reads the serving revision. If it is still nzila-ue-v2-staging-app--rel6a60c95c9d at weight 100, Healthy, and bound to image sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef, that principal runs one az containerapp exec into that revision. The command uses a client already in the image and the revision's existing database identity. It does not print the environment or the connection string. The SQL session is BEGIN READ ONLY, SET LOCAL statement_timeout = '15s', SET LOCAL lock_timeout = '2s', then the approved catalogue queries, then ROLLBACK. If transaction_read_only is not on, the session ends immediately."
+}

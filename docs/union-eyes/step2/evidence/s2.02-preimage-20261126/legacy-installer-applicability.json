@@ -1,0 +1,20 @@
+{
+  "schema": "UE_S2_02_LEGACY_INSTALLER_V1",
+  "classification": "INDETERMINATE",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "previousDisposition": "APPLICABLE_UNTIL_DISPROVEN",
+  "file": "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+  "cases": [
+    "refuses an altered legacy policy and preserves the entire security state and history",
+    "rolls back roles, owners, ACLs and functions after a real database failure during the transition",
+    "restores the exact old constraint and full state after a real failure following its current replacement",
+    "qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP"
+  ],
+  "casesExecuted": false,
+  "casesMarkedPassed": false,
+  "installerExecuted": false,
+  "legacyDatabaseCreated": false,
+  "whyNotCurrentTopologyConfirmed": "The catalogue was not read. Existence and security properties of user_management.auth_business_org_authorized(uuid, text[]) and ue_guard_deadline_reassignment_convergence_policy are NOT_OBSERVED.",
+  "whyNotLegacyTransitionRequired": "Absence of the current function was not demonstrated. A missing read is not a missing object.",
+  "historicalProvenanceRequiredIfLaterLegacy": "NOT_COLLECTED. The four cases need the released pre-current template, including the enabled uev2admin-owned event trigger ue_guard_deadline_reassignment_convergence_policy and the absence of user_management.auth_business_org_authorized(uuid, text[]). That provenance is not established for ue_v2_staging."
+}

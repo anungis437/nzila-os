@@ -1,0 +1,17 @@
+{
+  "schema": "UE_S2_02_AUDIT_SECURITY_V1",
+  "classification": "NOT_OBSERVED",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "relation": "audit_security.audit_logs",
+  "presentToday": "NOT_OBSERVED",
+  "owner": "NOT_OBSERVED",
+  "runtimeSelect": "NOT_OBSERVED",
+  "runtimeInsert": "NOT_OBSERVED",
+  "grantChain": "NOT_OBSERVED",
+  "verdict": "UNAVAILABLE",
+  "historicalSeparated": {
+    "claim": "Rehearsal 45140991614 reported a retained runtime SELECT and INSERT grant on audit_security.audit_logs.",
+    "tier": "HISTORICAL",
+    "usedAsTodaysPosture": false
+  }
+}

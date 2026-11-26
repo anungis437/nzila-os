@@ -1,0 +1,288 @@
+{
+  "schema": "ue-v2-staging-readonly-inventory/v1",
+  "provenance": {
+    "classification": "OBSERVED",
+    "repository": "anungis437/nzila-os",
+    "ref": "refs/heads/main",
+    "workflowSha": "16090703441d042291f4d6eb7a51b35153028a42",
+    "runId": "45766945607",
+    "observedAt": "2026-11-26T06:16:06Z",
+    "commands": [
+      {
+        "id": "account",
+        "args": [
+          "account",
+          "show",
+          "--query",
+          "{subscriptionId:id,tenantId:tenantId}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "resource-group",
+        "args": [
+          "group",
+          "show",
+          "--name",
+          "nzila-canada-staging-rg",
+          "--query",
+          "{id:id,name:name,location:location}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "container-app",
+        "args": [
+          "containerapp",
+          "show",
+          "--resource-group",
+          "nzila-canada-staging-rg",
+          "--name",
+          "nzila-ue-v2-staging-app",
+          "--query",
+          "{id:id,name:name,location:location,provisioningState:properties.provisioningState,latestRevisionName:properties.latestRevisionName,latestReadyRevisionName:properties.latestReadyRevisionName,runningStatus:properties.runningStatus,traffic:properties.configuration.ingress.traffic[].{revisionName:revisionName,weight:weight,label:label}}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "revisions",
+        "args": [
+          "containerapp",
+          "revision",
+          "list",
+          "--resource-group",
+          "nzila-canada-staging-rg",
+          "--name",
+          "nzila-ue-v2-staging-app",
+          "--query",
+          "[].{name:name,active:properties.active,healthState:properties.healthState,provisioningState:properties.provisioningState,trafficWeight:properties.trafficWeight,replicas:properties.replicas,createdTime:properties.createdTime,image:properties.template.containers[0].image,revisionSuffix:properties.template.revisionSuffix}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "postgres-server",
+        "args": [
+          "postgres",
+          "flexible-server",
+          "show",
+          "--resource-group",
+          "nzila-canada-staging-rg",
+          "--name",
+          "nzila-ue-v2-staging-db-d562ba7f",
+          "--query",
+          "{id:id,name:name,version:version,state:state,fullyQualifiedDomainName:fullyQualifiedDomainName,publicNetworkAccess:network.publicNetworkAccess,delegatedSubnetResourceId:network.delegatedSubnetResourceId,privateDnsZoneArmResourceId:network.privateDnsZoneArmResourceId}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "postgres-parameter:max_connections",
+        "args": [
+          "postgres",
+          "flexible-server",
+          "parameter",
+          "show",
+          "--subscription",
+          "d562ba7f-d891-4504-a489-10917c0ebaaf",
+          "--resource-group",
+          "nzila-canada-staging-rg",
+          "--server-name",
+          "nzila-ue-v2-staging-db-d562ba7f",
+          "--name",
+          "max_connections",
+          "--query",
+          "{name:name,value:value,source:source}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "postgres-parameter:reserved_connections",
+        "args": [
+          "postgres",
+          "flexible-server",
+          "parameter",
+          "show",
+          "--subscription",
+          "d562ba7f-d891-4504-a489-10917c0ebaaf",
+          "--resource-group",
+          "nzila-canada-staging-rg",
+          "--server-name",
+          "nzila-ue-v2-staging-db-d562ba7f",
+          "--name",
+          "reserved_connections",
+          "--query",
+          "{name:name,value:value,source:source}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      },
+      {
+        "id": "postgres-parameter:superuser_reserved_connections",
+        "args": [
+          "postgres",
+          "flexible-server",
+          "parameter",
+          "show",
+          "--subscription",
+          "d562ba7f-d891-4504-a489-10917c0ebaaf",
+          "--resource-group",
+          "nzila-canada-staging-rg",
+          "--server-name",
+          "nzila-ue-v2-staging-db-d562ba7f",
+          "--name",
+          "superuser_reserved_connections",
+          "--query",
+          "{name:name,value:value,source:source}",
+          "--only-show-errors",
+          "-o",
+          "json"
+        ],
+        "exitCode": 0,
+        "skipped": false
+      }
+    ]
+  },
+  "acceptance": {
+    "ok": true,
+    "defects": []
+  },
+  "account": {
+    "subscriptionId": {
+      "classification": "OBSERVED",
+      "value": "d562ba7f-d891-4504-a489-10917c0ebaaf"
+    },
+    "tenantId": {
+      "classification": "OBSERVED",
+      "value": "cc15259a-d2bf-421f-8e44-dccf8dc6232a"
+    }
+  },
+  "resourceGroup": {
+    "classification": "OBSERVED",
+    "value": {
+      "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg",
+      "location": "canadacentral",
+      "name": "nzila-canada-staging-rg"
+    }
+  },
+  "containerApp": {
+    "classification": "OBSERVED",
+    "value": {
+      "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.App/containerapps/nzila-ue-v2-staging-app",
+      "latestReadyRevisionName": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+      "latestRevisionName": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+      "location": "Canada Central",
+      "name": "nzila-ue-v2-staging-app",
+      "provisioningState": "Succeeded",
+      "runningStatus": "Running",
+      "traffic": [
+        {
+          "label": null,
+          "revisionName": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+          "weight": 100
+        }
+      ]
+    }
+  },
+  "revisions": {
+    "classification": "OBSERVED",
+    "value": [
+      {
+        "active": true,
+        "createdTime": "2026-11-17T04:14:04+00:00",
+        "healthState": "Healthy",
+        "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:1a518438d0af40871dd171824d1c7f8924c3cbca49041b996a8c501e8bfa1c3d",
+        "name": "nzila-ue-v2-staging-app--relcccfc8c311",
+        "provisioningState": "Provisioned",
+        "replicas": 1,
+        "revisionSuffix": null,
+        "trafficWeight": 0
+      },
+      {
+        "active": true,
+        "createdTime": "2026-11-23T18:09:55+00:00",
+        "healthState": "Healthy",
+        "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef",
+        "name": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+        "provisioningState": "Provisioned",
+        "replicas": 1,
+        "revisionSuffix": null,
+        "trafficWeight": 100
+      }
+    ]
+  },
+  "servingRevision": {
+    "classification": "OBSERVED",
+    "value": {
+      "name": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+      "trafficWeight": 100,
+      "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef",
+      "healthState": "Healthy",
+      "revisionSuffix": null
+    }
+  },
+  "postgresServer": {
+    "classification": "OBSERVED",
+    "value": {
+      "delegatedSubnetResourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-ue-v2-staging-vnet/subnets/pg",
+      "fullyQualifiedDomainName": "nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com",
+      "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-ue-v2-staging-db-d562ba7f",
+      "name": "nzila-ue-v2-staging-db-d562ba7f",
+      "privateDnsZoneArmResourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Network/privateDnsZones/nzila-ue-v2-staging.private.postgres.database.azure.com",
+      "publicNetworkAccess": "Disabled",
+      "state": "Ready",
+      "version": "16"
+    }
+  },
+  "postgresParameters": {
+    "max_connections": {
+      "classification": "OBSERVED",
+      "value": {
+        "name": "max_connections",
+        "source": "system-default",
+        "value": "50"
+      }
+    },
+    "reserved_connections": {
+      "classification": "OBSERVED",
+      "value": {
+        "name": "reserved_connections",
+        "source": "system-default",
+        "value": "5"
+      }
+    },
+    "superuser_reserved_connections": {
+      "classification": "OBSERVED",
+      "value": {
+        "name": "superuser_reserved_connections",
+        "source": "system-default",
+        "value": "10"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "UE_S2_02_RLS_FUNCTION_TOPOLOGY_V1",
+  "classification": "NOT_OBSERVED",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "rlsEnabledTables": "NOT_OBSERVED",
+  "forcedRls": "NOT_OBSERVED",
+  "policies": "NOT_OBSERVED",
+  "tablesWithoutExpectedRls": "NOT_OBSERVED",
+  "securityDefinerFunctions": "NOT_OBSERVED",
+  "crossTenantReads": "NOT_ATTEMPTED",
+  "function": {
+    "signature": "user_management.auth_business_org_authorized(uuid, text[])",
+    "existence": "NOT_OBSERVED",
+    "owner": "NOT_OBSERVED",
+    "securityProperties": "NOT_OBSERVED",
+    "sourceComparison": "NOT_PERFORMED"
+  },
+  "eventTrigger": {
+    "name": "ue_guard_deadline_reassignment_convergence_policy",
+    "existence": "NOT_OBSERVED",
+    "owner": "NOT_OBSERVED",
+    "enabled": "NOT_OBSERVED",
+    "binding": "NOT_OBSERVED"
+  },
+  "namePresenceIsNotCurrentTopology": true
+}

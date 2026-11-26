@@ -1,0 +1,50 @@
+{
+  "schema": "UE_S2_02_EXECUTION_BOUNDARY_RESOLUTION_V1",
+  "recordedAt": "2026-11-26T06:44:53Z",
+  "S2_02_PREIMAGE_COMPLETE": "NO",
+  "catalogue": "NOT_OBSERVED",
+  "identities": {
+    "ue-staging-plan": {
+      "principal": "nzila-os-ue-staging-plan",
+      "documentedRole": "Reader on nzila-canada-staging-rg",
+      "execAction": "NOT_INCLUDED",
+      "liveUse": "Run 45766945607 read the control plane. It did not exec."
+    },
+    "ue-staging": {
+      "principal": "nzila-os-ue-staging-deploy",
+      "documentedRole": "Nzila UE V2 Staging Deployer",
+      "documentedActionsInclude": "Microsoft.App/*",
+      "documentedNotActionsExcludeExec": false,
+      "source": "docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md",
+      "effectiveAssignment": "NOT_OBSERVED",
+      "headerStatus": "The runbook header says prepared, not executed. A later section records change CHG-2026-0114, so the identity has been used. The current role definition was not read."
+    }
+  },
+  "imageClient": {
+    "digest": "sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef",
+    "dockerfileStage": "union-eyes",
+    "node": "PRESENT_IN_SOURCE",
+    "psql": "ABSENT_IN_SOURCE",
+    "npm": "REMOVED_IN_SOURCE",
+    "candidateModule": "pg",
+    "reason": "apps/union-eyes/next.config.ts lists pg and postgres in serverExternalPackages, and the server database client imports them.",
+    "presenceInDigest": "NOT_OBSERVED"
+  },
+  "execTransport": {
+    "command": "az containerapp exec",
+    "revisionFlag": "--revision",
+    "container": "union-eyes",
+    "documentedMode": "interactive console",
+    "unattendedRequirement": "A pseudo-terminal is required on a GitHub runner. The Azure CLI exit code is not the Node exit code. The runner accepts only a UE_CATALOG_BEGIN record.",
+    "source": "https://learn.microsoft.com/en-us/azure/container-apps/container-console"
+  },
+  "mechanism": {
+    "pullRequest": 1317,
+    "branch": "ops/ue-s202-catalog-exec",
+    "commit": "68bae38a7ed5116b22bc4db35052e8f4ee380035",
+    "dispatched": false,
+    "merged": false
+  },
+  "preciseBlocker": "The deploy identity's exec permission and the digest's pg module are unread because the only non-mutating route that can use ue-staging is not on main.",
+  "smallestLegitimateAction": "Merge pull request 1317 by the normal protected path, then approve one ue-staging environment run of Union Eyes V2 — Staging read-only catalog from main. That run either uploads catalog.json or stops with EXEC_ACTION_ABSENT, REVISION_BINDING_CHANGED, or NO_IN_CONTAINER_PG_CLIENT. Do not add a role, firewall rule, job, or package."
+}
