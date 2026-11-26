@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-23 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-26 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,9 +9,9 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 73 |
+| GitHub Workflows | 74 |
 | Contract Test Files | 309 |
-| TS/JS Test Files | 3869 |
+| TS/JS Test Files | 3871 |
 | Python Test Files | 54 |
 
 ## Apps
@@ -106,6 +106,7 @@
 - secret-scan.yml
 - security-bulk-audit-contract.yml
 - security-design-review.yml
+- tax-reference-freshness.yml
 - trivy.yml
 - ue-bootstrap-v2-provenance.yml
 - ue-build-push-proof.yml

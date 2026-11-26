@@ -1,0 +1,52 @@
+name: Tax reference freshness
+
+# Operational currentness of the recorded CRA verification registry.
+# This is not the software test gate. Shared unit coverage still runs on
+# every applicable pull request and still executes the deterministic tests.
+# This workflow runs on a schedule, on demand, and when tax reference data
+# or a tax consumer changes. A stale registry fails this job. It does not
+# rewrite verification dates and it is not a substitute for branch-protection
+# approval of a new required check.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 12 * * 1'
+  pull_request:
+    paths:
+      - 'packages/tax/**'
+      - 'apps/cfo/**'
+      - 'apps/console/**'
+      - '.github/workflows/tax-reference-freshness.yml'
+      - 'docs/categories/platform-and-operations/governance/TAX_REFERENCE_FRESHNESS.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tax-reference-freshness-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Tax reference data currentness
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
+
+      - name: Audit recorded verification dates
+        run: pnpm --filter @nzila/tax freshness:audit -- --out "$RUNNER_TEMP/tax-reference-freshness.json"
+
+      - name: Upload freshness audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tax-reference-freshness-${{ github.run_id }}
+          path: ${{ runner.temp }}/tax-reference-freshness.json
+          retention-days: 30
+          if-no-files-found: error

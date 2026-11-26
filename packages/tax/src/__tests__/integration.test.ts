@@ -211,10 +211,13 @@ describe('Integration: personal tax with capital gains', () => {
 })
 
 describe('Integration: data freshness audit', () => {
-  it('all modules verified within staleness threshold', () => {
-    const stale = getStaleModules()
-    // If this test fails, modules need re-verification against CRA sources
-    expect(stale).toHaveLength(0)
+  it('evaluates the recorded registry from an explicit instant', () => {
+    expect(getStaleModules(new Date('2026-08-26T12:00:00.000Z'))).toHaveLength(0)
+    const staleOnCiDate = getStaleModules(new Date('2026-11-26T00:00:00.000Z'))
+    expect(staleOnCiDate).toHaveLength(DATA_VERSIONS.length)
+    expect(staleOnCiDate.map((module) => module.lastVerified)).toEqual(
+      Array.from({ length: DATA_VERSIONS.length }, () => '2026-08-26'),
+    )
   })
 
   it('every module entry has required metadata', () => {
