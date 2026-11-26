@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 74 |
+| GitHub Workflows | 75 |
 | Contract Test Files | 309 |
 | TS/JS Test Files | 3871 |
 | Python Test Files | 54 |
@@ -118,6 +118,7 @@
 - ue-v2-staging-build.yml
 - ue-v2-staging-deploy.yml
 - ue-v2-staging-forward-upgrade.yml
+- ue-v2-staging-readonly-inventory.yml
 - ue-v2-staging-real-navigation.yml
 - ue-v2-staging-real-session.yml
 - ue-v2-staging-rollback-rehearsal.yml
