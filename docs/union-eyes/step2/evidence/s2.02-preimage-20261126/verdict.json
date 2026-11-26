@@ -1,0 +1,31 @@
+{
+  "schema": "UE_S2_02_PREIMAGE_VERDICT_V1",
+  "package": "S2.02-PREIMAGE",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "S2_02_PREIMAGE_COMPLETE": "NO",
+  "unavailableFact": "No read-only SQL catalogue of ue_v2_staging was captured. Microsoft.App/containerApps/exec/action is not available to this runtime, and it was not granted.",
+  "criteria": [
+    { "id": 1, "requirement": "Authenticated Azure control-plane evidence verified", "result": "MET", "evidence": "control-plane-verification.json" },
+    { "id": 2, "requirement": "Live database identity proven", "result": "UNMET" },
+    { "id": 3, "requirement": "Required database catalogue captured", "result": "UNMET" },
+    { "id": 4, "requirement": "Security roles, RLS, ACLs and functions reconciled", "result": "UNMET" },
+    { "id": 5, "requirement": "Migration and preservation baselines established", "result": "UNMET" },
+    { "id": 6, "requirement": "Legacy installer applicability defensibly classified", "result": "MET_AS_INDETERMINATE", "evidence": "legacy-installer-applicability.json" },
+    { "id": 7, "requirement": "No unaccounted evidence contradiction", "result": "MET", "evidence": "adversarial-findings.json" },
+    { "id": 8, "requirement": "Read-only session ended", "result": "NOT_APPLICABLE_SESSION_NOT_OPENED" },
+    { "id": 9, "requirement": "Evidence artifacts and hashes validate", "result": "MET_FOR_THIS_STOP", "evidence": "SHA256SUMS.catalog-boundary" }
+  ],
+  "legacyInstallerApplicability": "INDETERMINATE",
+  "S2_02_LEGACY_GATE_MAY_PROCEED": false,
+  "acceptanceRegisterEdited": false,
+  "preservedGates": {
+    "STEP_2_PLANNING_COMPLETE": "YES",
+    "STEP_2_ENGINEERING_COMPLETE": "NO",
+    "STEP_2_ACCEPTED": "NO",
+    "STAGING_GO": "HELD",
+    "PRODUCTION_GO": "HELD",
+    "UE_SAAS_OPERATIONAL_READINESS": "NO_GO",
+    "fullReadiness": "NOT_YET_PROVEN"
+  },
+  "nextPackage": "One in-network read-only catalogue exec by a principal that already holds Microsoft.App/containerApps/exec/action, after a fresh serving-revision reconfirmation. Not the security installer, not a deployment, and not S2.02-LEGACY-GATE."
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "UE_S2_02_CONTROL_PLANE_VERIFICATION_V1",
+  "classification": "OBSERVED",
+  "verifiedAt": "2026-11-26T06:23:52Z",
+  "source": {
+    "workflow": "Union Eyes V2 — Staging read-only inventory",
+    "runId": "45766945607",
+    "runUrl": "https://github.com/anungis437/nzila-os/actions/runs/45766945607",
+    "event": "workflow_dispatch",
+    "conclusion": "success",
+    "headSha": "16090703441d042291f4d6eb7a51b35153028a42",
+    "runCreatedAt": "2026-11-26T06:15:30Z",
+    "runUpdatedAt": "2026-11-26T06:16:10Z",
+    "artifactName": "ue-v2-staging-readonly-inventory-45766945607",
+    "artifactId": "15092307210",
+    "artifactDigest": "sha256:9500178dc45c2675dff904f78d87700df014945a51b44bef8a723f43d6824886",
+    "inventoryObservedAt": "2026-11-26T06:16:06Z"
+  },
+  "sha256": {
+    "expected": "ce136d3510f90875ecbb864b76311d0994c2f2b04e6d3ac44e29b0dae29a03ed",
+    "observed": "ce136d3510f90875ecbb864b76311d0994c2f2b04e6d3ac44e29b0dae29a03ed",
+    "command": "sha256sum -c SHA256SUMS",
+    "result": "inventory.json: OK"
+  },
+  "copiedArtifact": "docs/union-eyes/step2/evidence/s2.02-preimage-20261126/inventory-45766945607.json",
+  "servingRevision": {
+    "name": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+    "trafficWeight": 100,
+    "healthState": "Healthy",
+    "runningStatus": "Running",
+    "provisioningState": "Succeeded",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef",
+    "createdTime": "2026-11-23T18:09:55+00:00",
+    "replicas": 1
+  },
+  "previousRevision": {
+    "name": "nzila-ue-v2-staging-app--relcccfc8c311",
+    "trafficWeight": 0,
+    "healthState": "Healthy",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:1a518438d0af40871dd171824d1c7f8924c3cbca49041b996a8c501e8bfa1c3d",
+    "active": true,
+    "replicas": 1
+  },
+  "subscriptionId": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+  "tenantId": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+  "resourceGroup": "nzila-canada-staging-rg",
+  "containerApp": "nzila-ue-v2-staging-app",
+  "postgresServer": {
+    "name": "nzila-ue-v2-staging-db-d562ba7f",
+    "version": "16",
+    "state": "Ready",
+    "publicNetworkAccess": "Disabled",
+    "delegatedSubnet": "nzila-ue-v2-staging-vnet/subnets/pg",
+    "maxConnections": "50",
+    "reservedConnections": "5",
+    "superuserReservedConnections": "10"
+  },
+  "notProvenByThisArtifact": [
+    "PostgreSQL database name",
+    "Connected role",
+    "Migration ledger",
+    "RLS, ACLs, functions, event triggers, table counts, sequences"
+  ],
+  "freshnessLimit": "These control-plane facts are true at inventoryObservedAt. This session could not re-read the container app after that instant. A later exec must stop if the serving revision, weight, health, or image digest differs."
+}

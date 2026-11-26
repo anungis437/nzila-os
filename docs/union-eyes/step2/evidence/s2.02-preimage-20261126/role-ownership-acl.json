@@ -1,0 +1,14 @@
+{
+  "schema": "UE_S2_02_ROLE_OWNERSHIP_ACL_V1",
+  "classification": "NOT_OBSERVED",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "nonSystemRoles": "NOT_OBSERVED",
+  "rolsuper": "NOT_OBSERVED",
+  "rolbypassrls": "NOT_OBSERVED",
+  "rolcanlogin": "NOT_OBSERVED",
+  "memberships": "NOT_OBSERVED",
+  "schemaAndRelationOwners": "NOT_OBSERVED",
+  "grants": "NOT_OBSERVED",
+  "passwordHashesQueried": false,
+  "historicalClaimNotReused": "The managed-administrator BYPASSRLS finding in the 2026-11-22 rehearsal remains historical. It is not a property of this database today."
+}

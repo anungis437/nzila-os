@@ -1,0 +1,79 @@
+{
+  "schema": "UE_S2_02_ADVERSARIAL_FINDINGS_V1",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "findings": [
+    {
+      "id": 1,
+      "challenge": "Catalogue observed through the wrong database",
+      "disposition": "OPEN_BLOCKING",
+      "detail": "No catalogue was read. ue_v2_staging remains a configured name."
+    },
+    {
+      "id": 2,
+      "challenge": "Wrong workload or revision",
+      "disposition": "CONTROL_PLANE_MATCHES_RUN_45766945607",
+      "detail": "The verified artifact names nzila-ue-v2-staging-app--rel6a60c95c9d at weight 100 in subscription d562ba7f-d891-4504-a489-10917c0ebaaf and resource group nzila-canada-staging-rg. No later read confirms it is still serving."
+    },
+    {
+      "id": 3,
+      "challenge": "Excessive database role privileges",
+      "disposition": "NOT_OBSERVED",
+      "detail": "No pg_roles read. The historical BYPASSRLS rehearsal is not reused."
+    },
+    {
+      "id": 4,
+      "challenge": "RLS-enabled tables with bypassing owners",
+      "disposition": "NOT_OBSERVED"
+    },
+    {
+      "id": 5,
+      "challenge": "Unsafe security-definer functions",
+      "disposition": "NOT_OBSERVED"
+    },
+    {
+      "id": 6,
+      "challenge": "Audit grants that survived the expected migration",
+      "disposition": "NOT_OBSERVED_TODAY",
+      "detail": "Rehearsal 45140991614 stays historical."
+    },
+    {
+      "id": 7,
+      "challenge": "Missing migration history",
+      "disposition": "NOT_OBSERVED"
+    },
+    {
+      "id": 8,
+      "challenge": "Unreconciled ownership or sequence changes",
+      "disposition": "NOT_OBSERVED"
+    },
+    {
+      "id": 9,
+      "challenge": "Incomplete row-count visibility",
+      "disposition": "NO_COUNTS_CLAIMED"
+    },
+    {
+      "id": 10,
+      "challenge": "False current-topology classification",
+      "disposition": "CLOSED",
+      "detail": "Classification is INDETERMINATE. CURRENT_TOPOLOGY_CONFIRMED was not used."
+    },
+    {
+      "id": 11,
+      "challenge": "Secrets in logs or evidence",
+      "disposition": "CLOSED",
+      "detail": "The copied inventory has no connection string or password field. No environment dump was taken from the revision. Host storage credentials were not read or written."
+    },
+    {
+      "id": 12,
+      "challenge": "Read-only transaction invoked a side-effecting function",
+      "disposition": "CLOSED",
+      "detail": "No SQL session was opened."
+    },
+    {
+      "id": 13,
+      "challenge": "Evidence copied from historical receipts",
+      "disposition": "CLOSED_FOR_CONTROL_PLANE",
+      "detail": "Serving revision, image, and server metadata come from artifact 15092307210 after SHA-256 verification. Catalogue sections are NOT_OBSERVED rather than filled from rehearsal files. The earlier receipt.json is preserved and is not this observation."
+    }
+  ]
+}

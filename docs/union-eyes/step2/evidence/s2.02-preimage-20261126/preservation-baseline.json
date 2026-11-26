@@ -1,0 +1,16 @@
+{
+  "schema": "UE_S2_02_PRESERVATION_BASELINE_V1",
+  "classification": "NOT_OBSERVED",
+  "recordedAt": "2026-11-26T06:23:52Z",
+  "schemas": "NOT_OBSERVED",
+  "tables": "NOT_OBSERVED",
+  "counts": "NOT_OBSERVED",
+  "countsAreGlobalTotals": false,
+  "sequences": "NOT_OBSERVED",
+  "nextvalCalled": false,
+  "ownershipFingerprints": "NOT_OBSERVED",
+  "aclFingerprints": "NOT_OBSERVED",
+  "migrationFingerprints": "NOT_OBSERVED",
+  "rlsFingerprints": "NOT_OBSERVED",
+  "customerRowsExported": false
+}
