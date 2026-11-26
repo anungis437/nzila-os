@@ -78,9 +78,13 @@ function redact(value) {
     .replace(/postgres(?:ql)?:\\/\\/[^\\s'"]+/gi, 'postgresql://[redacted]')
     .replace(/\\b(password|pwd|secret|token|accountkey)\\s*[:=]\\s*\\S+/gi, '$1=[redacted]')
 }
+const crypto = require('crypto')
 function ident(value) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) throw new Error('IDENTIFIER_REFUSED')
   return '"' + value.replaceAll('"', '""') + '"'
+}
+function inventoryDigest(rows) {
+  return crypto.createHash('sha256').update(rows.map((row) => row.schema + '.' + row.name).sort().join('\\n')).digest('hex')
 }
 function failed(id, error) {
   const message = redact(error.message)
@@ -118,7 +122,21 @@ async function main() {
     const row = identity.rows && identity.rows[0]
     out.identity = row ?? null
     if (!row || row.transaction_read_only !== 'on' || row.database !== 'ue_v2_staging') { out.blocker = 'IDENTITY_REFUSED'; return }
-    const statements = [
+    out.observedAt = new Date().toISOString()
+    out.readOnlyCredential = false
+    out.transport = process.env.UE_CATALOG_TRANSPORT || 'not-recorded'
+    let continuation = null
+    if (process.env.UE_CATALOG_CONTINUATION) {
+      try { continuation = JSON.parse(process.env.UE_CATALOG_CONTINUATION) } catch { out.blocker = 'CONTINUATION_REJECTED'; return }
+      if (!continuation || continuation.schema !== 'ue-v2-staging-catalog-continuation/v1' || continuation.database !== 'ue_v2_staging' || !(continuation.expiresAt > out.observedAt)) { out.blocker = 'CONTINUATION_REJECTED'; return }
+      out.sessionKind = 'continuation'
+      out.baselineSessionId = continuation.baselineSessionId
+    } else out.sessionKind = 'baseline'
+    const privilege = await query(client, 'privilege', 'SELECT rolname, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname = current_user')
+    out.queries.push(privilege)
+    const privilegeRow = privilege.rows && privilege.rows[0]
+    out.privilege = privilegeRow ? { user: privilegeRow.rolname, rolsuper: privilegeRow.rolsuper === true, rolbypassrls: privilegeRow.rolbypassrls === true, classification: (privilegeRow.rolsuper === true || privilegeRow.rolbypassrls === true || privilegeRow.rolcreatedb === true || privilegeRow.rolcreaterole === true) ? 'ELEVATED' : 'LIMITED_RUNTIME', readOnlyCredential: false } : { classification: 'UNREADABLE', readOnlyCredential: false }
+    const statements = continuation ? [] : [
       ['migration_relations', "SELECT n.nspname AS schema, c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND c.relname IN ('__drizzle_migrations','drizzle_migrations','schema_migrations','django_migrations') AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
       ['migration_columns', "SELECT table_schema, table_name, column_name, data_type FROM information_schema.columns WHERE table_name IN ('__drizzle_migrations','drizzle_migrations','schema_migrations','django_migrations') AND table_schema NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2, 3"],
       ['roles', "SELECT rolname, rolsuper, rolbypassrls, rolcanlogin, rolinherit FROM pg_roles WHERE rolname NOT LIKE 'pg_%' ORDER BY rolname"],
@@ -134,20 +152,29 @@ async function main() {
       ['tables', "SELECT n.nspname AS schema, c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"]
     ]
     for (const [id, sql] of statements) out.queries.push(await query(client, id, sql))
-    const discovered = out.queries.find((item) => item.id === 'migration_relations')
-    const drizzlePresent = Boolean(discovered && Array.isArray(discovered.rows) && discovered.rows.some((item) => item.schema === 'drizzle' && item.name === '__drizzle_migrations'))
-    if (drizzlePresent) out.queries.push(await query(client, 'drizzle_rows', 'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id'))
-    else out.queries.push({ id: 'drizzle_rows', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_DISCOVERY' })
-    const audit = out.queries.find((item) => item.id === 'audit')
-    const auditAbsent = Boolean(audit && !audit.error && Array.isArray(audit.rows) && audit.rows.length === 0)
-    if (auditAbsent) out.queries.push({ id: 'audit_grants', classification: 'NOT_ATTEMPTED', reason: 'PARENT_ABSENT' })
-    else out.queries.push(await query(client, 'audit_grants', "SELECT r.rolname, a.privilege_type FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) a JOIN pg_roles r ON r.oid = a.grantee WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs' ORDER BY 1, 2"))
+    if (continuation) out.queries.push(await query(client, 'tables', "SELECT n.nspname AS schema, c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"))
+    if (!continuation) {
+      const discovered = out.queries.find((item) => item.id === 'migration_relations')
+      const drizzlePresent = Boolean(discovered && Array.isArray(discovered.rows) && discovered.rows.some((item) => item.schema === 'drizzle' && item.name === '__drizzle_migrations'))
+      if (drizzlePresent) out.queries.push(await query(client, 'drizzle_rows', 'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id'))
+      else out.queries.push({ id: 'drizzle_rows', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_DISCOVERY' })
+      const audit = out.queries.find((item) => item.id === 'audit')
+      const auditAbsent = Boolean(audit && !audit.error && Array.isArray(audit.rows) && audit.rows.length === 0)
+      if (auditAbsent) out.queries.push({ id: 'audit_grants', classification: 'NOT_ATTEMPTED', reason: 'PARENT_ABSENT' })
+      else out.queries.push(await query(client, 'audit_grants', "SELECT r.rolname, a.privilege_type FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) a JOIN pg_roles r ON r.oid = a.grantee WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs' ORDER BY 1, 2"))
+    }
     const tables = out.queries.find((item) => item.id === 'tables')
     const names = tables && Array.isArray(tables.rows) ? tables.rows : []
+    let targets = names
+    if (continuation) {
+      if (inventoryDigest(names) !== continuation.inventoryDigest) { out.blocker = 'SCHEMA_DRIFT'; return }
+      targets = Array.isArray(continuation.remaining) ? continuation.remaining : []
+      out.inventoryDigest = continuation.inventoryDigest
+    }
     const started = Date.now()
     let attempted = 0
-    out.countBudget = { wallBudgetMs: COUNT_WALL_BUDGET_MS, maxStatements: COUNT_MAX_STATEMENTS, sourceTableDeclarations: SOURCE_TABLE_DECLARATIONS, discovered: names.length }
-    for (const table of names) {
+    out.countBudget = { wallBudgetMs: COUNT_WALL_BUDGET_MS, maxStatements: COUNT_MAX_STATEMENTS, sourceTableDeclarations: SOURCE_TABLE_DECLARATIONS, discovered: names.length, targeted: targets.length }
+    for (const table of targets) {
       if (attempted >= COUNT_MAX_STATEMENTS || (Date.now() - started) > COUNT_WALL_BUDGET_MS) {
         out.counts.push({ schema: table.schema, name: table.name, visibleToConnectedRole: true, globalTotal: false, classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET' })
         continue
@@ -170,7 +197,10 @@ async function main() {
       try { await client.query('ROLLBACK'); out.rolledBack = true } catch { out.rolledBack = false }
       try { await client.end() } catch { /* the session is abandoned */ }
     }
-    process.stdout.write(BEGIN + '\\n' + JSON.stringify(out) + '\\n' + END + '\\n')
+    const body = JSON.stringify(out)
+    const digest = crypto.createHash('sha256').update(body).digest('hex')
+    process.stdout.write(BEGIN + '\\n' + body + '\\n' + END + '\\n')
+    process.stdout.write('UE_CATALOG_SHA256 ' + digest + '\\n')
   }
 }
 main()
@@ -251,7 +281,7 @@ export function evaluateCatalogCompleteness(catalog, contract = CATALOG_CONTRACT
     return { verdict: 'CATALOG_UNREADABLE', reason: 'CATALOG_OUTPUT_UNREADABLE', ...empty }
   }
   if (catalog.schema !== contract.schema) return refused('UNEXPECTED_SCHEMA_VERSION')
-  if (['NO_IN_CONTAINER_PG_CLIENT', 'DATABASE_URL_ABSENT', 'QUERY_FAILED'].includes(catalog.blocker)) return refused(catalog.blocker)
+  if (['NO_IN_CONTAINER_PG_CLIENT', 'DATABASE_URL_ABSENT', 'QUERY_FAILED', 'CONTINUATION_REJECTED', 'SCHEMA_DRIFT'].includes(catalog.blocker)) return refused(catalog.blocker)
   if (catalog.rolledBack !== true) return refused('ROLLBACK_FAILED')
   const identity = catalog.identity
   if (catalog.blocker === 'IDENTITY_REFUSED' || !identity || identity.transaction_read_only !== 'on' || identity.database !== EXPECTED_DATABASE) {
@@ -295,6 +325,82 @@ export function evaluateCatalogCompleteness(catalog, contract = CATALOG_CONTRACT
     S2_02_PREIMAGE_COMPLETE: 'NO',
     S2_02_LEGACY_GATE: 'INDETERMINATE',
   }
+}
+
+export const CONTINUATION_SCHEMA = 'ue-v2-staging-catalog-continuation/v1'
+export const CONTINUATION_TTL_MS = 24 * 60 * 60 * 1000
+
+export function inventoryDigest(tables) {
+  const names = [...tables].map((table) => `${table.schema}.${table.name}`).sort()
+  return createHash('sha256').update(names.join('\n')).digest('hex')
+}
+
+export function buildContinuationToken(catalog, binding, now = Date.now()) {
+  const tables = (catalog?.queries ?? []).find((item) => item.id === 'tables')
+  const rows = Array.isArray(tables?.rows) ? tables.rows : []
+  const counts = Array.isArray(catalog?.counts) ? catalog.counts : []
+  const completed = counts.filter((item) => item.classification === 'OBSERVED').map((item) => ({ schema: item.schema, name: item.name }))
+  const remaining = counts.filter((item) => item.classification === 'NOT_ATTEMPTED').map((item) => ({ schema: item.schema, name: item.name }))
+  if (!remaining.length) return null
+  return {
+    schema: CONTINUATION_SCHEMA,
+    database: EXPECTED_DATABASE,
+    revision: binding.revision,
+    image: binding.image,
+    inventoryDigest: inventoryDigest(rows),
+    completed,
+    remaining,
+    issuedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + CONTINUATION_TTL_MS).toISOString(),
+    baselineSessionId: binding.sessionId,
+    baselineObservedAt: catalog.observedAt ?? null,
+  }
+}
+
+export function continuationDefect(token, binding, now = Date.now()) {
+  if (!token || token.schema !== CONTINUATION_SCHEMA || token.database !== EXPECTED_DATABASE) return 'CONTINUATION_REJECTED'
+  if (token.revision !== binding.revision || token.image !== binding.image) return 'REVISION_BINDING_CHANGED'
+  if (!Number.isFinite(Date.parse(token.expiresAt)) || Date.parse(token.expiresAt) <= now) return 'CONTINUATION_EXPIRED'
+  if (!/^[a-f0-9]{64}$/.test(token.inventoryDigest ?? '')) return 'CONTINUATION_REJECTED'
+  const names = [...(token.completed ?? []), ...(token.remaining ?? [])]
+  const seen = new Set()
+  for (const item of names) {
+    const key = `${item.schema}.${item.name}`
+    if (seen.has(key)) return 'CONTINUATION_OVERLAP'
+    seen.add(key)
+  }
+  return null
+}
+
+export function reconcileCatalogSessions(sessions, binding) {
+  if (!Array.isArray(sessions) || sessions.length === 0) return { verdict: 'CATALOG_UNREADABLE', reason: 'EVIDENCE_MISSING' }
+  const [first, ...rest] = sessions
+  const times = sessions.map((session) => session.observedAt)
+  if (times.some((value) => typeof value !== 'string') || new Set(times).size !== times.length) {
+    return { verdict: 'CATALOG_REFUSED', reason: 'CONTINUATION_TIMESTAMPS' }
+  }
+  const merged = structuredClone(first.catalog)
+  const baselineCounts = new Map((merged.counts ?? []).map((item) => [`${item.schema}.${item.name}`, item]))
+  for (const session of rest) {
+    const defect = continuationDefect(session.token, binding, session.now ?? Date.parse(session.observedAt))
+    if (defect) return { verdict: 'CATALOG_REFUSED', reason: defect }
+    const discovered = (session.catalog?.queries ?? []).find((item) => item.id === 'tables')
+    if (!discovered || inventoryDigest(discovered.rows ?? []) !== session.token.inventoryDigest) {
+      return { verdict: 'CATALOG_REFUSED', reason: 'SCHEMA_DRIFT' }
+    }
+    for (const count of session.catalog?.counts ?? []) {
+      const key = `${count.schema}.${count.name}`
+      const prior = baselineCounts.get(key)
+      if (prior && prior.classification === 'OBSERVED') {
+        return { verdict: 'CATALOG_REFUSED', reason: String(prior.n) === String(count.n) ? 'CONTINUATION_OVERLAP' : 'CONTINUATION_CONTRADICTION' }
+      }
+      baselineCounts.set(key, count)
+    }
+  }
+  merged.counts = [...baselineCounts.values()]
+  merged.observedAt = first.observedAt
+  const evaluation = evaluateCatalogCompleteness(merged)
+  return { verdict: evaluation.verdict, reason: evaluation.reason, evaluation, catalog: merged, sessions: times }
 }
 
 export function parseCatalogStdout(text) {
