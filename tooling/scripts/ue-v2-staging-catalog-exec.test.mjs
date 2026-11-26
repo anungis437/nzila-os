@@ -21,9 +21,10 @@ import {
   execInvocation,
   revisionDefect,
   executeCatalog,
-  QUERY_MANIFEST,
+  CATALOG_CONTRACT,
+  CATALOG_SCHEMA,
   parseCatalogStdout,
-  qualifyCatalog,
+  evaluateCatalogCompleteness,
   principalFromAccessToken,
   roleCoversExec,
   writeReport,
@@ -72,6 +73,7 @@ function completeCatalog() {
     query('roles', [{ rolname: 'union_eyes_runtime', rolsuper: false, rolbypassrls: false, rolcanlogin: true }]),
     query('memberships', []),
     query('relations', [{ schema: 'public', name: 'members', relkind: 'r' }]),
+    query('rls', [{ schema: 'public', name: 'members', relrowsecurity: true, relforcerowsecurity: true }]),
     query('policies', []),
     query('function', [{ schema: 'user_management', name: 'auth_business_org_authorized', args: 'uuid, text[]' }]),
     query('security_definer', []),
@@ -82,12 +84,16 @@ function completeCatalog() {
     query('tables', [{ schema: 'public', name: 'members' }]),
   ]
   return {
-    schema: 'ue-v2-staging-catalog/v1',
+    schema: CATALOG_SCHEMA,
     rolledBack: true,
     identity: { version: 'PostgreSQL 16', database: 'ue_v2_staging', user: 'union_eyes_runtime', transaction_read_only: 'on' },
     queries,
-    counts: [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, result: { id: 'count_public_members', rows: [{ n: '1' }] } }],
+    counts: [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '1' }],
   }
+}
+
+function verdictOf(body) {
+  return evaluateCatalogCompleteness(body).verdict
 }
 
 function deployerDefinition() {
@@ -163,15 +169,18 @@ test('one accepted binding builds one pseudo-terminal exec and parses the catalo
   assert.equal(result.report.execPermission, 'EFFECTIVE_ALLOW_OBSERVED')
   assert.equal(result.report.execAttempted, true)
   assert.equal(result.report.catalog.identity.user, 'union_eyes_runtime')
-  assert.equal(result.report.catalog.qualification.complete, true)
+  assert.equal(result.report.verdict, 'CATALOG_COMPLETE')
+  assert.equal(result.report.catalog.evaluation.verdict, 'CATALOG_COMPLETE')
   assert.equal(result.report.S2_02_PREIMAGE_COMPLETE, 'NO')
-  assert.equal(result.report.catalog.qualification.manifest.length, QUERY_MANIFEST.length)
+  assert.equal(result.report.S2_02_LEGACY_GATE, 'INDETERMINATE')
+  assert.equal(result.report.catalog.evaluation.categories.length, CATALOG_CONTRACT.categories.length)
   const exec = calls.find((call) => call.executable === 'timeout')
+  assert.equal(exec.args[5].includes('eval('), false)
   assert.equal(exec.executable, 'timeout')
   assert.deepEqual(exec.args.slice(0, 5), ['90', 'script', '-q', '-e', '-c'])
   assert.match(exec.args[5], new RegExp(EXPECTED_REVISION))
   assert.match(exec.args[5], /--container/)
-  assert.equal(exec.args[5].includes('DATABASE_URL'), false)
+  assert.equal(/postgres(?:ql)?:\/\/(?!\[redacted\])\S+/i.test(exec.args[5]), false)
   assert.equal(calls.filter((call) => call.executable === 'az').every((call) => call.args[0] !== 'timeout'), true)
   assert.equal(JSON.stringify(result.report).includes(token), false)
 })
@@ -244,9 +253,10 @@ printf '%s\\n' 'UE_CATALOG_END'
     encoding: 'utf8',
   })
   assert.equal(run.status, 0, run.stderr)
-  assert.match(run.stdout, /catalog=COMPLETE/)
+  assert.match(run.stdout, /catalog=CATALOG_COMPLETE/)
   assert.equal(run.stdout.includes('catalog=OBSERVED'), false)
   assert.match(run.stdout, /S2_02_PREIMAGE_COMPLETE=NO/)
+  assert.match(run.stdout, /S2_02_LEGACY_GATE=INDETERMINATE/)
   const azLog = readFileSync(path.join(directory, 'az.log'), 'utf8')
   const timeoutLog = readFileSync(path.join(directory, 'timeout.log'), 'utf8')
   assert.equal(azLog.includes('timeout'), false)
@@ -254,7 +264,7 @@ printf '%s\\n' 'UE_CATALOG_END'
   assert.match(azLog, /containerapp revision show/)
   assert.match(timeoutLog, /^90 script -q -e -c az /)
   assert.match(timeoutLog, new RegExp(EXPECTED_REVISION))
-  assert.equal(timeoutLog.includes('DATABASE_URL'), false)
+  assert.equal(/postgres(?:ql)?:\/\/(?!\[redacted\])\S+/i.test(timeoutLog), false)
   const report = readFileSync(path.join(out, 'catalog.json'), 'utf8')
   assert.equal(report.includes(token), false)
   assert.equal(report.includes(TOKEN_SECRET), false)
@@ -262,47 +272,83 @@ printf '%s\\n' 'UE_CATALOG_END'
   rmSync(directory, { recursive: true, force: true })
 })
 
-test('an audit error, an unverified ledger, empty queries, and a count cap stay partial', async () => {
+test('the catalogue contract rejects incomplete evidence and keeps a complete session distinct from S2.02', async () => {
   const marked = (body) => `UE_CATALOG_BEGIN\n${JSON.stringify(body)}\nUE_CATALOG_END\n`
   const withQuery = (id, replacement) => {
     const body = completeCatalog()
     body.queries = body.queries.map((item) => item.id === id ? replacement : item)
     return body
   }
+  const classification = (body, id) => evaluateCatalogCompleteness(body).categories.flatMap((category) => category.queries ?? []).find((item) => item.id === id)?.classification
 
-  const auditBody = withQuery('audit', { id: 'audit', error: 'permission denied for relation audit_logs' })
-  const audit = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(auditBody) }).spawn)
-  assert.equal(audit.exitCode, 5)
-  assert.equal(audit.report.defects.includes('CATALOG_PARTIAL'), true)
-  assert.equal(audit.report.catalog.qualification.manifest.find((item) => item.id === 'audit').classification, 'UNREADABLE')
-  assert.equal(audit.report.S2_02_PREIMAGE_COMPLETE, 'NO')
-
-  const verifiedMiss = withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' })
-  verifiedMiss.queries = verifiedMiss.queries.map((item) => item.id === 'migration_relations' ? query('migration_relations', []) : item)
-  const verified = qualifyCatalog(verifiedMiss)
-  assert.equal(verified.manifest.find((item) => item.id === 'drizzle_rows').classification, 'ABSENT')
-  assert.equal(verified.complete, true)
-
-  const unverified = qualifyCatalog(withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' }))
-  assert.equal(unverified.manifest.find((item) => item.id === 'drizzle_rows').classification, 'UNREADABLE')
-  assert.equal(unverified.complete, false)
+  assert.equal(verdictOf(completeCatalog()), 'CATALOG_COMPLETE')
 
   const empty = completeCatalog()
   empty.queries = []
   const emptyRun = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(empty) }).spawn)
   assert.equal(emptyRun.exitCode, 5)
-  assert.equal(emptyRun.report.catalog.qualification.manifest.every((item) => item.classification === 'MISSING'), true)
+  assert.equal(emptyRun.report.verdict, 'CATALOG_PARTIAL')
+  assert.equal(emptyRun.report.S2_02_PREIMAGE_COMPLETE, 'NO')
+
+  const omitted = completeCatalog()
+  omitted.queries = omitted.queries.filter((item) => !['policies', 'security_definer', 'event_trigger', 'migration_columns'].includes(item.id))
+  assert.equal(verdictOf(omitted), 'CATALOG_PARTIAL')
+
+  const verifiedLedger = withQuery('drizzle_rows', { id: 'drizzle_rows', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_DISCOVERY' })
+  verifiedLedger.queries = verifiedLedger.queries.map((item) => item.id === 'migration_relations' ? query('migration_relations', []) : item)
+  assert.equal(classification(verifiedLedger, 'drizzle_rows'), 'ABSENT_VERIFIED')
+  assert.equal(verdictOf(verifiedLedger), 'CATALOG_COMPLETE')
+
+  const ledgerError = withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' })
+  assert.equal(classification(ledgerError, 'drizzle_rows'), 'UNREADABLE')
+  assert.equal(verdictOf(ledgerError), 'CATALOG_PARTIAL')
+
+  const audit = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(withQuery('audit', { id: 'audit', error: 'permission denied for relation audit_logs' })) }).spawn)
+  assert.equal(audit.exitCode, 5)
+  assert.equal(audit.report.verdict, 'CATALOG_PARTIAL')
+  assert.equal(classification(audit.report.catalog, 'audit'), 'UNREADABLE')
+
+  assert.equal(verdictOf(withQuery('rls', { id: 'rls', error: 'permission denied for table pg_class' })), 'CATALOG_PARTIAL')
+  assert.equal(verdictOf(withQuery('event_trigger', { id: 'event_trigger', error: 'permission denied for table pg_event_trigger' })), 'CATALOG_PARTIAL')
+
+  const absentFunction = withQuery('function', { id: 'function', rowCount: 0, rows: [] })
+  const absentEvaluation = evaluateCatalogCompleteness(absentFunction)
+  assert.equal(absentEvaluation.verdict, 'CATALOG_COMPLETE')
+  assert.equal(classification(absentFunction, 'function'), 'ABSENT_VERIFIED')
+  assert.equal(absentEvaluation.legacyObservation, 'LEGACY_TRANSITION_REQUIRED')
+  assert.equal(absentEvaluation.S2_02_LEGACY_GATE, 'INDETERMINATE')
+  assert.equal(absentEvaluation.S2_02_PREIMAGE_COMPLETE, 'NO')
+
+  const wrongSchema = completeCatalog()
+  wrongSchema.schema = 'ue-v2-staging-catalog/v1'
+  assert.equal(verdictOf(wrongSchema), 'CATALOG_REFUSED')
+  assert.equal(evaluateCatalogCompleteness(wrongSchema).reason, 'UNEXPECTED_SCHEMA_VERSION')
 
   const capped = completeCatalog()
-  capped.counts = [{ classification: 'NOT_TAKEN', reason: 'TABLE_COUNT_CAP', tables: 61 }]
-  const cap = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(capped) }).spawn)
-  assert.equal(cap.exitCode, 5)
-  assert.equal(cap.report.catalog.qualification.counts, 'NOT_TAKEN')
-  assert.equal(cap.report.defects.includes('CATALOG_PARTIAL'), true)
+  capped.counts = [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET' }]
+  const cap = evaluateCatalogCompleteness(capped)
+  assert.equal(cap.verdict, 'CATALOG_PARTIAL')
+  assert.match(cap.additionalProcedure, /NOT_ATTEMPTED/)
 
-  const full = qualifyCatalog(completeCatalog())
-  assert.equal(full.complete, true)
-  assert.equal(full.manifest.some((item) => item.classification === 'UNREADABLE' || item.classification === 'MISSING'), false)
+  const timedCount = completeCatalog()
+  timedCount.counts = [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'TIMED_OUT', error: 'canceling statement due to statement timeout' }]
+  assert.equal(verdictOf(timedCount), 'CATALOG_PARTIAL')
+
+  const mismatched = completeCatalog()
+  mismatched.identity = { ...mismatched.identity, transaction_read_only: 'off' }
+  mismatched.blocker = 'IDENTITY_REFUSED'
+  assert.equal(verdictOf(mismatched), 'CATALOG_REFUSED')
+
+  const rolled = completeCatalog()
+  rolled.rolledBack = false
+  assert.equal(verdictOf(rolled), 'CATALOG_REFUSED')
+  assert.equal(evaluateCatalogCompleteness(rolled).reason, 'ROLLBACK_FAILED')
+
+  const malformed = parseCatalogStdout('UE_CATALOG_BEGIN\n{not-json\nUE_CATALOG_END\n')
+  assert.equal(malformed.verdict, 'CATALOG_UNREADABLE')
+  const unmarked = parseCatalogStdout('no markers')
+  assert.equal(unmarked.verdict, 'CATALOG_UNREADABLE')
+  assert.equal(unmarked.blocker, 'EXEC_OUTPUT_WITHOUT_CATALOG_MARKER')
 })
 
 test('the container program resolves pg, refuses a writable transaction, and rolls back', () => {
@@ -313,7 +359,9 @@ test('the container program resolves pg, refuses a writable transaction, and rol
   assert.match(source, /BEGIN READ ONLY/)
   assert.match(source, /ROLLBACK/)
   writeFileSync(path.join(directory, 'program.cjs'), source)
-  writeFileSync(path.join(directory, 'pg.cjs'), `
+  mkdirSync(path.join(directory, 'node_modules', 'pg'), { recursive: true })
+  writeFileSync(path.join(directory, 'node_modules', 'pg', 'package.json'), '{"name":"pg","main":"index.js"}\n')
+  writeFileSync(path.join(directory, 'node_modules', 'pg', 'index.js'), `
     class Client {
       constructor(config) { this.url = config.connectionString; this.queries = [] }
       async connect() {}
@@ -326,10 +374,9 @@ test('the container program resolves pg, refuses a writable transaction, and rol
     }
     module.exports = { Client }
   `)
-  const nodePath = directory
-  const run = spawnSync(process.execPath, ['-e', `require('module').Module._resolveFilename = ((orig) => function(request, parent, isMain, options) { if (request === 'pg') return ${JSON.stringify(path.join(directory, 'pg.cjs'))}; return orig.call(this, request, parent, isMain, options) })(require('module').Module._resolveFilename); require(${JSON.stringify(path.join(directory, 'program.cjs'))})`], {
+  const run = spawnSync(process.execPath, ['program.cjs'], {
     cwd: directory,
-    env: { ...process.env, DATABASE_URL: ['post', 'gresql://union_eyes_runtime:', ['secret', 'password'].join('-'), '@db.internal/ue_v2_staging'].join(''), NODE_PATH: nodePath },
+    env: { ...process.env, DATABASE_URL: ['post', 'gresql://union_eyes_runtime:', ['secret', 'password'].join('-'), '@db.internal/ue_v2_staging'].join('') },
     encoding: 'utf8',
   })
   assert.equal(run.stdout.includes('secret-password'), false)
@@ -381,7 +428,8 @@ test('the workflow is manual, pinned to main, and uses the deploy environment on
   assert.equal(text.includes('deployment group create'), false)
   assert.equal(text.includes('UE_V2_STAGING_DB_ADMIN_PASSWORD'), false)
   assert.equal(text.includes(CONTAINER_APP), false)
-  const command = execInvocation('SELECT 1')
+  const command = execInvocation()
+  assert.equal(command.args[5].includes('eval('), false)
   assert.equal(command.executable, 'timeout')
   assert.equal(command.args[5].includes(CONTAINER_APP), true)
   assert.equal(command.args[5].startsWith('az '), true)

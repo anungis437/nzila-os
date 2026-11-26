@@ -22,6 +22,10 @@ export const CONTAINER_NAME = 'union-eyes'
 export const EXPECTED_REVISION = 'nzila-ue-v2-staging-app--rel6a60c95c9d'
 export const EXPECTED_IMAGE = 'nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef'
 export const EXPECTED_DATABASE = 'ue_v2_staging'
+export const CATALOG_SCHEMA = 'ue-v2-staging-catalog/v2'
+export const COUNT_WALL_BUDGET_MS = 45000
+export const COUNT_MAX_STATEMENTS = 250
+export const SOURCE_TABLE_DECLARATIONS = 1224
 export const EXEC_ACTION = 'Microsoft.App/containerApps/exec/action'
 export const GROUP_ID = `/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}`
 
@@ -65,6 +69,10 @@ export function containerSource() {
   return `
 const BEGIN = ${JSON.stringify(MARK_BEGIN)}
 const END = ${JSON.stringify(MARK_END)}
+const SCHEMA = ${JSON.stringify(CATALOG_SCHEMA)}
+const COUNT_WALL_BUDGET_MS = ${COUNT_WALL_BUDGET_MS}
+const COUNT_MAX_STATEMENTS = ${COUNT_MAX_STATEMENTS}
+const SOURCE_TABLE_DECLARATIONS = ${SOURCE_TABLE_DECLARATIONS}
 function redact(value) {
   return String(value)
     .replace(/postgres(?:ql)?:\\/\\/[^\\s'"]+/gi, 'postgresql://[redacted]')
@@ -73,6 +81,11 @@ function redact(value) {
 function ident(value) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) throw new Error('IDENTIFIER_REFUSED')
   return '"' + value.replaceAll('"', '""') + '"'
+}
+function failed(id, error) {
+  const message = redact(error.message)
+  const timedOut = /statement timeout|canceling statement/i.test(message)
+  return { id, error: message, classification: timedOut ? 'TIMED_OUT' : 'UNREADABLE' }
 }
 async function query(client, id, sql) {
   const save = 'ue_cat_' + id.replace(/[^a-z0-9]+/gi, '_').slice(0, 40)
@@ -83,11 +96,11 @@ async function query(client, id, sql) {
     return { id, rowCount: result.rowCount, rows: result.rows }
   } catch (error) {
     await client.query('ROLLBACK TO SAVEPOINT ' + save)
-    return { id, error: redact(error.message) }
+    return failed(id, error)
   }
 }
 async function main() {
-  const out = { schema: 'ue-v2-staging-catalog/v1', queries: [], rolledBack: false }
+  const out = { schema: SCHEMA, queries: [], counts: [], rolledBack: false }
   let client
   try {
     let pg
@@ -108,32 +121,46 @@ async function main() {
     const statements = [
       ['migration_relations', "SELECT n.nspname AS schema, c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND c.relname IN ('__drizzle_migrations','drizzle_migrations','schema_migrations','django_migrations') AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
       ['migration_columns', "SELECT table_schema, table_name, column_name, data_type FROM information_schema.columns WHERE table_name IN ('__drizzle_migrations','drizzle_migrations','schema_migrations','django_migrations') AND table_schema NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2, 3"],
-      ['drizzle_rows', "SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id"],
       ['roles', "SELECT rolname, rolsuper, rolbypassrls, rolcanlogin, rolinherit FROM pg_roles WHERE rolname NOT LIKE 'pg_%' ORDER BY rolname"],
       ['memberships', "SELECT r.rolname AS role, m.rolname AS member FROM pg_auth_members am JOIN pg_roles r ON r.oid = am.roleid JOIN pg_roles m ON m.oid = am.member ORDER BY 1, 2"],
       ['relations', "SELECT n.nspname AS schema, c.relname AS name, c.relkind, pg_get_userbyid(c.relowner) AS owner, c.relrowsecurity, c.relforcerowsecurity, c.relacl::text AS acl FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind IN ('r','S') AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
+      ['rls', "SELECT n.nspname AS schema, c.relname AS name, c.relrowsecurity, c.relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
       ['policies', "SELECT n.nspname AS schema, c.relname AS name, pol.polname, pol.polcmd, pol.polpermissive, pg_get_expr(pol.polqual, pol.polrelid) AS using_expr, pg_get_expr(pol.polwithcheck, pol.polrelid) AS check_expr FROM pg_policy pol JOIN pg_class c ON c.oid = pol.polrelid JOIN pg_namespace n ON n.oid = c.relnamespace ORDER BY 1, 2, 3"],
       ['function', "SELECT n.nspname AS schema, p.proname AS name, pg_get_function_identity_arguments(p.oid) AS args, pg_get_userbyid(p.proowner) AS owner, p.prosecdef, md5(p.prosrc) AS source_md5 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'user_management' AND p.proname = 'auth_business_org_authorized'"],
       ['security_definer', "SELECT n.nspname AS schema, p.proname AS name, pg_get_function_identity_arguments(p.oid) AS args, pg_get_userbyid(p.proowner) AS owner, md5(p.prosrc) AS source_md5 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE p.prosecdef AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
       ['event_trigger', "SELECT e.evtname, e.evtenabled, e.evtevent, n.nspname AS schema, p.proname AS name, pg_get_function_identity_arguments(p.oid) AS args, pg_get_userbyid(p.proowner) AS owner FROM pg_event_trigger e JOIN pg_proc p ON p.oid = e.evtfoid JOIN pg_namespace n ON n.oid = p.pronamespace WHERE e.evtname = 'ue_guard_deadline_reassignment_convergence_policy'"],
       ['audit', "SELECT to_regclass('audit_security.audit_logs') AS rel, pg_get_userbyid(c.relowner) AS owner, c.relacl::text AS acl, c.relrowsecurity, c.relforcerowsecurity, has_table_privilege(current_user, c.oid, 'SELECT') AS current_select, has_table_privilege(current_user, c.oid, 'INSERT') AS current_insert, has_table_privilege(current_user, c.oid, 'UPDATE') AS current_update, has_table_privilege(current_user, c.oid, 'DELETE') AS current_delete FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs'"],
-      ['audit_grants', "SELECT r.rolname, a.privilege_type FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) a JOIN pg_roles r ON r.oid = a.grantee WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs' ORDER BY 1, 2"],
       ['sequences', "SELECT n.nspname AS schema, c.relname AS name, s.seqstart::text AS seqstart, s.seqincrement::text AS seqincrement, pg_get_userbyid(c.relowner) AS owner FROM pg_sequence s JOIN pg_class c ON c.oid = s.seqrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
       ['tables', "SELECT n.nspname AS schema, c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"]
     ]
     for (const [id, sql] of statements) out.queries.push(await query(client, id, sql))
+    const discovered = out.queries.find((item) => item.id === 'migration_relations')
+    const drizzlePresent = Boolean(discovered && Array.isArray(discovered.rows) && discovered.rows.some((item) => item.schema === 'drizzle' && item.name === '__drizzle_migrations'))
+    if (drizzlePresent) out.queries.push(await query(client, 'drizzle_rows', 'SELECT id, hash, created_at FROM drizzle.__drizzle_migrations ORDER BY id'))
+    else out.queries.push({ id: 'drizzle_rows', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_DISCOVERY' })
+    const audit = out.queries.find((item) => item.id === 'audit')
+    const auditAbsent = Boolean(audit && !audit.error && Array.isArray(audit.rows) && audit.rows.length === 0)
+    if (auditAbsent) out.queries.push({ id: 'audit_grants', classification: 'NOT_ATTEMPTED', reason: 'PARENT_ABSENT' })
+    else out.queries.push(await query(client, 'audit_grants', "SELECT r.rolname, a.privilege_type FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) a JOIN pg_roles r ON r.oid = a.grantee WHERE n.nspname = 'audit_security' AND c.relname = 'audit_logs' ORDER BY 1, 2"))
     const tables = out.queries.find((item) => item.id === 'tables')
-    out.counts = []
-    const names = tables && tables.rows ? tables.rows : []
-    if (names.length > 60) out.counts.push({ classification: 'NOT_TAKEN', reason: 'TABLE_COUNT_CAP', tables: names.length })
-    else for (const table of names) {
-      try {
-        const sql = 'SELECT count(*)::bigint AS n FROM ONLY ' + ident(table.schema) + '.' + ident(table.name)
-        const counted = await query(client, 'count_' + table.schema + '_' + table.name, sql)
-        out.counts.push({ schema: table.schema, name: table.name, visibleToConnectedRole: true, globalTotal: false, result: counted })
-      } catch (error) {
-        out.counts.push({ schema: table.schema, name: table.name, visibleToConnectedRole: true, globalTotal: false, error: redact(error.message) })
+    const names = tables && Array.isArray(tables.rows) ? tables.rows : []
+    const started = Date.now()
+    let attempted = 0
+    out.countBudget = { wallBudgetMs: COUNT_WALL_BUDGET_MS, maxStatements: COUNT_MAX_STATEMENTS, sourceTableDeclarations: SOURCE_TABLE_DECLARATIONS, discovered: names.length }
+    for (const table of names) {
+      if (attempted >= COUNT_MAX_STATEMENTS || (Date.now() - started) > COUNT_WALL_BUDGET_MS) {
+        out.counts.push({ schema: table.schema, name: table.name, visibleToConnectedRole: true, globalTotal: false, classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET' })
+        continue
       }
+      attempted += 1
+      let counted
+      try {
+        counted = await query(client, 'count_' + table.schema + '_' + table.name, 'SELECT count(*)::bigint AS n FROM ONLY ' + ident(table.schema) + '.' + ident(table.name))
+      } catch (error) {
+        counted = failed('count', error)
+      }
+      const n = counted.rows && counted.rows[0] ? String(counted.rows[0].n) : null
+      out.counts.push({ schema: table.schema, name: table.name, visibleToConnectedRole: true, globalTotal: false, classification: counted.classification || (n === null ? 'UNREADABLE' : 'OBSERVED'), n, error: counted.error })
     }
   } catch (error) {
     out.blocker = out.blocker || 'QUERY_FAILED'
@@ -150,90 +177,144 @@ main()
 `
 }
 
-export const QUERY_MANIFEST = [
-  { id: 'identity', absence: 'forbidden' },
-  { id: 'migration_relations', absence: 'forbidden' },
-  { id: 'migration_columns', absence: 'forbidden' },
-  { id: 'drizzle_rows', absence: 'missing-relation' },
-  { id: 'roles', absence: 'forbidden' },
-  { id: 'memberships', absence: 'forbidden' },
-  { id: 'relations', absence: 'forbidden' },
-  { id: 'policies', absence: 'forbidden' },
-  { id: 'function', absence: 'zero-rows' },
-  { id: 'security_definer', absence: 'forbidden' },
-  { id: 'event_trigger', absence: 'zero-rows' },
-  { id: 'audit', absence: 'zero-rows' },
-  { id: 'audit_grants', absence: 'forbidden' },
-  { id: 'sequences', absence: 'forbidden' },
-  { id: 'tables', absence: 'forbidden' },
-]
-
-function relationMissing(error) {
-  return /does not exist|undefined_table/i.test(String(error ?? ''))
+export const CATALOG_CONTRACT = {
+  schema: CATALOG_SCHEMA,
+  categories: [
+    { id: 'database_identity', queries: [{ id: 'identity', accept: ['OBSERVED'] }] },
+    { id: 'migration_discovery', queries: [{ id: 'migration_relations', accept: ['OBSERVED'] }] },
+    { id: 'migration_history', queries: [
+      { id: 'migration_columns', accept: ['OBSERVED'] },
+      { id: 'drizzle_rows', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'discovery' },
+    ] },
+    { id: 'roles_and_memberships', queries: [
+      { id: 'roles', accept: ['OBSERVED'] },
+      { id: 'memberships', accept: ['OBSERVED'] },
+    ] },
+    { id: 'relation_ownership_acl', queries: [{ id: 'relations', accept: ['OBSERVED'] }] },
+    { id: 'rls_configuration', queries: [{ id: 'rls', accept: ['OBSERVED'] }] },
+    { id: 'rls_policies', queries: [{ id: 'policies', accept: ['OBSERVED'] }] },
+    { id: 'function_topology', queries: [{ id: 'function', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'zero-rows' }] },
+    { id: 'security_definer', queries: [{ id: 'security_definer', accept: ['OBSERVED'] }] },
+    { id: 'event_triggers', queries: [{ id: 'event_trigger', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'zero-rows' }] },
+    { id: 'audit_permissions', queries: [{ id: 'audit', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'zero-rows' }] },
+    { id: 'audit_grants', queries: [{ id: 'audit_grants', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'parent-audit' }] },
+    { id: 'sequences', queries: [{ id: 'sequences', accept: ['OBSERVED'] }] },
+    { id: 'business_tables', queries: [{ id: 'tables', accept: ['OBSERVED'] }] },
+    { id: 'preservation_counts', counts: true },
+  ],
 }
 
-function classifyQuery(spec, query, body) {
-  if (!query) return 'MISSING'
-  if (query.error) {
-    if (spec.id === 'audit_grants' && relationMissing(query.error)) {
-      const audit = (body.queries ?? []).find((item) => item.id === 'audit')
-      if (audit && !audit.error && Array.isArray(audit.rows) && audit.rows.length === 0) return 'ABSENT'
+function findQuery(catalog, id) {
+  return (catalog?.queries ?? []).find((item) => item?.id === id) ?? null
+}
+
+function timeoutText(value) {
+  return /statement timeout|canceling statement/i.test(String(value ?? ''))
+}
+
+function discoveryHasDrizzle(catalog) {
+  const relations = findQuery(catalog, 'migration_relations')
+  if (!relations || relations.error || !Array.isArray(relations.rows)) return null
+  return relations.rows.some((row) => row.schema === 'drizzle' && row.name === '__drizzle_migrations')
+}
+
+export function classifyCatalogQuery(spec, query, catalog) {
+  if (!query) return 'NOT_ATTEMPTED'
+  if (query.classification === 'TIMED_OUT' || timeoutText(query.error)) return 'TIMED_OUT'
+  if (query.error || query.classification === 'UNREADABLE') return 'UNREADABLE'
+  if (query.classification === 'NOT_ATTEMPTED') {
+    if (query.reason === 'RELATION_NOT_IN_DISCOVERY' && spec.absence === 'discovery' && discoveryHasDrizzle(catalog) === false) return 'ABSENT_VERIFIED'
+    if (query.reason === 'PARENT_ABSENT' && spec.absence === 'parent-audit') {
+      const audit = classifyCatalogQuery({ absence: 'zero-rows' }, findQuery(catalog, 'audit'), catalog)
+      if (audit === 'ABSENT_VERIFIED') return 'ABSENT_VERIFIED'
     }
-    if (spec.absence === 'missing-relation' && relationMissing(query.error)) {
-      const relations = (body.queries ?? []).find((item) => item.id === 'migration_relations')
-      const listed = Array.isArray(relations?.rows) && relations.rows.some((row) => row.schema === 'drizzle' && row.name === '__drizzle_migrations')
-      if (relations && !relations.error && !listed) return 'ABSENT'
-    }
-    return 'UNREADABLE'
+    return 'NOT_ATTEMPTED'
   }
   if (!Array.isArray(query.rows)) return 'UNREADABLE'
-  if (query.rows.length === 0 && spec.absence === 'zero-rows') return 'ABSENT'
+  if (query.rows.length === 0 && spec.absence === 'zero-rows') return 'ABSENT_VERIFIED'
   return 'OBSERVED'
 }
 
-function classifyCounts(body) {
-  const counts = body?.counts
-  if (!Array.isArray(counts)) return 'MISSING'
-  if (counts.some((item) => item?.classification === 'NOT_TAKEN' || item?.reason === 'TABLE_COUNT_CAP')) return 'NOT_TAKEN'
-  const tables = (body.queries ?? []).find((item) => item.id === 'tables')
-  if (!tables || tables.error || !Array.isArray(tables.rows)) return 'UNREADABLE'
-  for (const table of tables.rows) {
-    const count = counts.find((item) => item.schema === table.schema && item.name === table.name)
-    if (!count || count.error || count.result?.error) return 'UNREADABLE'
+function classifyCount(count) {
+  if (!count) return 'NOT_ATTEMPTED'
+  if (count.classification === 'NOT_ATTEMPTED') return 'NOT_ATTEMPTED'
+  if (count.classification === 'TIMED_OUT' || timeoutText(count.error)) return 'TIMED_OUT'
+  if (count.error || count.classification === 'UNREADABLE' || count.globalTotal !== false || count.visibleToConnectedRole !== true) return 'UNREADABLE'
+  if (count.n === undefined || count.n === null || count.n === '') return 'UNREADABLE'
+  return 'OBSERVED'
+}
+
+export function evaluateCatalogCompleteness(catalog, contract = CATALOG_CONTRACT) {
+  const empty = { categories: [], legacyObservation: null, additionalProcedure: null, S2_02_PREIMAGE_COMPLETE: 'NO', S2_02_LEGACY_GATE: 'INDETERMINATE' }
+  const refused = (reason) => ({ verdict: 'CATALOG_REFUSED', reason, ...empty })
+  if (!catalog || typeof catalog !== 'object' || Array.isArray(catalog)) {
+    return { verdict: 'CATALOG_UNREADABLE', reason: 'CATALOG_OUTPUT_UNREADABLE', ...empty }
   }
-  return 'OBSERVED'
-}
-
-export function qualifyCatalog(body) {
-  const manifest = QUERY_MANIFEST.map((spec) => ({
-    id: spec.id,
-    classification: classifyQuery(spec, (body?.queries ?? []).find((item) => item.id === spec.id), body ?? {}),
-  }))
-  const counts = classifyCounts(body ?? {})
-  const sessionOk = body?.rolledBack === true
-    && body?.identity?.transaction_read_only === 'on'
-    && body?.identity?.database === EXPECTED_DATABASE
-    && !body?.blocker
-  const queriesOk = manifest.every((item) => item.classification === 'OBSERVED' || item.classification === 'ABSENT')
-  const complete = sessionOk && queriesOk && counts === 'OBSERVED'
-  return { complete, blocker: complete ? null : 'CATALOG_PARTIAL', manifest, counts }
+  if (catalog.schema !== contract.schema) return refused('UNEXPECTED_SCHEMA_VERSION')
+  if (['NO_IN_CONTAINER_PG_CLIENT', 'DATABASE_URL_ABSENT', 'QUERY_FAILED'].includes(catalog.blocker)) return refused(catalog.blocker)
+  if (catalog.rolledBack !== true) return refused('ROLLBACK_FAILED')
+  const identity = catalog.identity
+  if (catalog.blocker === 'IDENTITY_REFUSED' || !identity || identity.transaction_read_only !== 'on' || identity.database !== EXPECTED_DATABASE) {
+    return refused('IDENTITY_REFUSED')
+  }
+  const identityRow = findQuery(catalog, 'identity')?.rows?.[0]
+  if (identityRow && (identityRow.database !== identity.database || identityRow.transaction_read_only !== identity.transaction_read_only)) {
+    return refused('IDENTITY_INCONSISTENT')
+  }
+  const categories = contract.categories.map((category) => {
+    if (category.counts) {
+      const tables = findQuery(catalog, 'tables')
+      const rows = tables && !tables.error && Array.isArray(tables.rows) ? tables.rows : null
+      if (!rows) return { id: category.id, classification: 'UNREADABLE', accepted: false, items: [] }
+      const items = rows.map((table) => ({
+        schema: table.schema,
+        name: table.name,
+        classification: classifyCount((catalog.counts ?? []).find((item) => item.schema === table.schema && item.name === table.name)),
+      }))
+      return { id: category.id, classification: items.every((item) => item.classification === 'OBSERVED') ? 'OBSERVED' : 'PARTIAL', accepted: items.every((item) => item.classification === 'OBSERVED'), items }
+    }
+    const queries = category.queries.map((spec) => {
+      const classification = classifyCatalogQuery(spec, findQuery(catalog, spec.id), catalog)
+      return { id: spec.id, classification, accepted: spec.accept.includes(classification) }
+    })
+    return { id: category.id, accepted: queries.every((item) => item.accepted), queries }
+  })
+  const functionClass = categories.flatMap((category) => category.queries ?? []).find((item) => item.id === 'function')?.classification
+  const legacyObservation = functionClass === 'ABSENT_VERIFIED' ? 'LEGACY_TRANSITION_REQUIRED' : null
+  const counts = categories.find((category) => category.id === 'preservation_counts')
+  const additionalProcedure = counts && !counts.accepted
+    ? 'Repeat one read-only session on the same revision for the NOT_ATTEMPTED or TIMED_OUT tables only. Keep count(*) on ONLY the relation, the 15s statement timeout, and the 45s wall budget. Do not disable row security, export rows, or raise the budget to force a complete result.'
+    : null
+  const complete = categories.every((category) => category.accepted)
+  return {
+    verdict: complete ? 'CATALOG_COMPLETE' : 'CATALOG_PARTIAL',
+    reason: complete ? null : 'REQUIRED_EVIDENCE_INCOMPLETE',
+    categories,
+    legacyObservation,
+    additionalProcedure,
+    S2_02_PREIMAGE_COMPLETE: 'NO',
+    S2_02_LEGACY_GATE: 'INDETERMINATE',
+  }
 }
 
 export function parseCatalogStdout(text) {
   const redacted = redact(text)
   const start = redacted.lastIndexOf(MARK_BEGIN)
   const end = redacted.lastIndexOf(MARK_END)
-  if (start < 0 || end < start) return { ok: false, blocker: 'EXEC_OUTPUT_WITHOUT_CATALOG_MARKER', transcript: redacted.slice(-4000) }
+  if (start < 0 || end < start) return { ok: false, verdict: 'CATALOG_UNREADABLE', blocker: 'EXEC_OUTPUT_WITHOUT_CATALOG_MARKER', transcript: redacted.slice(-4000) }
+  let body
   try {
-    const body = JSON.parse(redacted.slice(start + MARK_BEGIN.length, end).trim())
-    if (body.blocker) return { ok: false, blocker: body.blocker, body }
-    const qualification = qualifyCatalog(body)
-    body.qualification = qualification
-    if (!qualification.complete) return { ok: false, blocker: 'CATALOG_PARTIAL', body }
-    return { ok: true, blocker: null, body }
+    body = JSON.parse(redacted.slice(start + MARK_BEGIN.length, end).trim())
   } catch {
-    return { ok: false, blocker: 'CATALOG_OUTPUT_UNREADABLE', transcript: redacted.slice(-4000) }
+    return { ok: false, verdict: 'CATALOG_UNREADABLE', blocker: 'CATALOG_OUTPUT_UNREADABLE', transcript: redacted.slice(-4000) }
   }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return { ok: false, verdict: 'CATALOG_UNREADABLE', blocker: 'CATALOG_OUTPUT_UNREADABLE', transcript: redacted.slice(-4000) }
+  }
+  const evaluation = evaluateCatalogCompleteness(body)
+  body.evaluation = evaluation
+  const ok = evaluation.verdict === 'CATALOG_COMPLETE'
+  return { ok, verdict: evaluation.verdict, blocker: ok ? null : evaluation.verdict, body }
 }
 
 // Same revision properties inventory run 45766945607 returned from `revision list`:
@@ -241,9 +322,14 @@ export function parseCatalogStdout(text) {
 // one resource. A missing field is REVISION_FIELDS_ABSENT, not a looser match.
 export const REVISION_QUERY = '{name:name,healthState:properties.healthState,trafficWeight:properties.trafficWeight,runningState:properties.runningState,containers:properties.template.containers[].{name:name,image:image}}'
 
-export function execInvocation(source) {
-  const encoded = Buffer.from(source).toString('base64')
-  const node = `node -e "eval(Buffer.from('${encoded}','base64').toString())"`
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", `'"'"'`)}'`
+}
+
+export function execInvocation() {
+  const program = containerSource()
+  if (program.includes('eval(')) throw new Error('CONTAINER_PROGRAM_REFUSES_EVAL')
+  const node = `node -e ${shellQuote(program)}`
   const args = [
     'containerapp', 'exec',
     '--resource-group', RESOURCE_GROUP,
@@ -300,7 +386,9 @@ export async function executeCatalog(env, spawn) {
     subscriptionId: null,
     tenantId: null,
     caller: null,
+    verdict: null,
     S2_02_PREIMAGE_COMPLETE: 'NO',
+    S2_02_LEGACY_GATE: 'INDETERMINATE',
     execPermission: 'NOT_OBSERVED',
     revision: 'NOT_OBSERVED',
     execAttempted: false,
@@ -380,18 +468,21 @@ export async function executeCatalog(env, spawn) {
   }
 
   report.execAttempted = true
-  const invocation = execInvocation(containerSource())
+  const invocation = execInvocation()
   if (invocation.executable !== 'timeout') throw new Error('EXEC_WRAPPER_MUST_BE_TIMEOUT')
   const exec = await spawn(invocation.executable, invocation.args)
   report.execExitCode = exec.code
   if (exec.code === 124) {
+    report.verdict = 'CATALOG_REFUSED'
     report.defects.push('EXEC_TIMED_OUT')
     return { exitCode: 5, report }
   }
   const parsed = parseCatalogStdout(`${exec.stdout}\n${exec.stderr}`)
   report.catalog = parsed.body ?? null
+  report.verdict = parsed.verdict
   if (!parsed.ok) {
-    report.defects.push(parsed.blocker ?? parsed.body?.blocker ?? 'CATALOG_INCOMPLETE')
+    report.defects.push(parsed.verdict)
+    if (parsed.blocker && parsed.blocker !== parsed.verdict) report.defects.push(parsed.blocker)
     if (parsed.transcript) report.transcriptTail = parsed.transcript
     return { exitCode: 5, report }
   }
@@ -422,7 +513,7 @@ if (invoked) {
   }
   const result = await executeCatalog(process.env, launch)
   const digest = writeReport(directory, result.report)
-  const catalogStatus = result.exitCode === 0 ? 'COMPLETE' : result.report.defects.includes('CATALOG_PARTIAL') ? 'PARTIAL' : 'INCOMPLETE'
-  console.log(`catalog=${catalogStatus} sha256=${digest} defects=${result.report.defects.join(',')} S2_02_PREIMAGE_COMPLETE=NO`)
+  const verdict = result.report.verdict ?? 'CATALOG_REFUSED'
+  console.log(`catalog=${verdict} sha256=${digest} defects=${result.report.defects.join(',')} S2_02_PREIMAGE_COMPLETE=NO S2_02_LEGACY_GATE=INDETERMINATE`)
   process.exit(result.exitCode)
 }
