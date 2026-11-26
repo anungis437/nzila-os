@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-23 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-26 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 73 |
+| GitHub Workflows | 74 |
 | Contract Test Files | 309 |
 | TS/JS Test Files | 3869 |
 | Python Test Files | 54 |
@@ -117,6 +117,7 @@
 - ue-v2-staging-build.yml
 - ue-v2-staging-deploy.yml
 - ue-v2-staging-forward-upgrade.yml
+- ue-v2-staging-readonly-inventory.yml
 - ue-v2-staging-real-navigation.yml
 - ue-v2-staging-real-session.yml
 - ue-v2-staging-rollback-rehearsal.yml
