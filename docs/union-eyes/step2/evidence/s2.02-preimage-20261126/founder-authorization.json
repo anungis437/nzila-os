@@ -1,0 +1,28 @@
+{
+  "schema": "UE_S2_02_FOUNDER_AUTHORIZATION_REQUEST_V1",
+  "granted": false,
+  "planningApprovalIsNotInfrastructureAuthorization": true,
+  "immediateBlocker": "CONTROL_PLANE_DISPATCH",
+  "oneMinimalAuthorization": {
+    "actor": "A founder with permission to edit the ue-staging-plan environment and to dispatch Actions.",
+    "change": "Add deployment branch docs/ue-step2-s200-plan-cfc5 to environment ue-staging-plan, whose live policy currently contains only main (policy id 66125508).",
+    "action": "Dispatch .github/workflows/ue-v2-staging-readonly-inventory.yml on that ref once. operation=apply is not part of this workflow.",
+    "identity": "Existing federated credential subject repo:anungis437/nzila-os:environment:ue-staging-plan. No new Azure identity, role, or credential.",
+    "scope": "Reader queries for the Container App revisions and the PostgreSQL server resource in nzila-canada-staging-rg.",
+    "duration": "One workflow run.",
+    "cleanup": "Remove docs/ue-step2-s200-plan-cfc5 from the ue-staging-plan deployment branch policy after the artifact is retrieved.",
+    "dataRestrictions": "The workflow queries names, status, traffic, image references, and server network fields. It does not query secrets, environment variables, or SQL."
+  },
+  "notSufficient": "Dispatching ue-v2-staging-deploy.yml operation=what-if is eligible from main today, but it is a deployment preview and records only the revision at 100 percent traffic before continuing into what-if. This package did not dispatch it because the integration token received HTTP 403, and a deployment preview is not the inventory.",
+  "subsequentDatabaseAuthorization": {
+    "neededBecause": "The plan identity cannot open a connection to the VNet-injected server, and no existing read-only in-network SQL workflow was found.",
+    "doNotCreate": [
+      "firewall rule",
+      "Container Apps job",
+      "database role",
+      "federated credential"
+    ],
+    "request": "One in-network read-only SQL session against ue_v2_staging on nzila-ue-v2-staging-db-d562ba7f, using an existing runtime role, BEGIN READ ONLY, statement timeout, catalogue and counts only. No customer rows, document bytes, or connection strings in the output. No session remains after it ends.",
+    "preferredExistingMechanism": "A non-interactive exec into the already running V2 staging revision. That requires Microsoft.App/containerApps/exec/action, which Reader does not have. This package does not use the ue-staging deploy environment."
+  }
+}

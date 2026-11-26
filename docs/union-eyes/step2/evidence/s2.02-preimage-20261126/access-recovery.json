@@ -1,0 +1,70 @@
+{
+  "schema": "UE_S2_02_ACCESS_RECOVERY_V1",
+  "package": "S2.02-PREIMAGE",
+  "observedAt": "2026-11-26T00:48:49Z",
+  "S2_02_PREIMAGE_COMPLETE": "NO",
+  "servingRevision": "NOT_OBSERVED",
+  "databasePreimage": "NOT_OBSERVED",
+  "legacyInstallerApplicability": "INDETERMINATE",
+  "legacyCasesExecuted": false,
+  "preservedEarlierObservation": "receipt.json, probes.json, commands.json and SHA256SUMS.blocked-attempt remain the unauthenticated attempt",
+  "branchPolicy": {
+    "tier": "OBSERVED",
+    "failedRun": 45730225940,
+    "failedJob": 139610104408,
+    "head": "cursor/ue-step2-s200-plan-cfc5",
+    "validator": "scripts/release/validate-branch-tag-policy.ts",
+    "result": "cursor/ue-step2-s200-plan-cfc5 rejected; docs/ue-step2-s200-plan-cfc5 accepted by the same validator"
+  },
+  "githubHeadRename": {
+    "tier": "OBSERVED",
+    "source": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch",
+    "behavior": "Renaming the head branch of an open pull request closes that pull request. The base branch of other open pull requests would be updated. The rename API was not called, so PR 1310 was not closed by a rename."
+  },
+  "planEnvironment": {
+    "tier": "OBSERVED",
+    "name": "ue-staging-plan",
+    "deploymentBranchPolicy": [
+      "main"
+    ],
+    "policyId": 66125508,
+    "federatedSubject": "repo:anungis437/nzila-os:environment:ue-staging-plan",
+    "identity": "nzila-os-ue-staging-plan",
+    "role": "Reader on nzila-canada-staging-rg, from the workload-identity runbook. The role assignment was not re-read from Azure."
+  },
+  "dispatch": {
+    "tier": "OBSERVED",
+    "workflow": "ue-v2-staging-deploy.yml",
+    "ref": "main",
+    "operation": "what-if",
+    "httpStatus": 403,
+    "error": "Resource not accessible by integration",
+    "applyRequested": false,
+    "azureCalled": false
+  },
+  "preparedWorkflow": {
+    "path": ".github/workflows/ue-v2-staging-readonly-inventory.yml",
+    "dispatched": false,
+    "reason": "The environment allows only main, and this token cannot create a workflow_dispatch event."
+  },
+  "databasePath": {
+    "tier": "NOT_OBSERVED",
+    "sqlSession": false,
+    "firewallRuleCreated": false,
+    "jobCreated": false,
+    "forwardUpgradeScriptInvoked": false,
+    "reason": "No existing in-network read-only SQL path was executed. The plan identity is an ARM Reader and this runner is outside the staging VNet. The forward-upgrade job script creates a Container Apps job and was not run."
+  },
+  "historicalNotUsedAsCurrent": [
+    "Pinned revision name nzila-ue-v2-staging-app--relcccfc8c311 was logged by what-if run 45233543114 at 2026-11-23T18:00:32Z. Historical only."
+  ],
+  "preservedGates": {
+    "STEP_2_PLANNING_COMPLETE": "YES",
+    "STEP_2_ENGINEERING_COMPLETE": "NO",
+    "STEP_2_ACCEPTED": "NO",
+    "STAGING_GO": "HELD",
+    "PRODUCTION_GO": "HELD",
+    "UE_SAAS_OPERATIONAL_READINESS": "NO_GO",
+    "fullReadiness": "NOT_YET_PROVEN"
+  }
+}

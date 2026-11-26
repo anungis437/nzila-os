@@ -1,0 +1,8037 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP2_ACCEPTANCE_REGISTER",
+  "step2PlanningComplete": true,
+  "step2EngineeringComplete": false,
+  "step2Accepted": false,
+  "stagingGo": "HELD",
+  "productionGo": "HELD",
+  "ueSaasOperationalReadiness": "NO_GO",
+  "fullReadiness": "NOT_YET_PROVEN",
+  "phase3B": "NOT_STARTED",
+  "financialOfficer21": "OUT_OF_SCOPE",
+  "step1": {
+    "baselineSha": "b00a3624619be09aa77cd201fa7fe8a8c16b21f3",
+    "pullRequest": 1309,
+    "state": "DRAFT_OPEN_NOT_MERGED",
+    "step1EngineeringComplete": true,
+    "step1Accepted": true,
+    "acceptanceLocation": "PR 1309 description for this exact SHA. The committed convergence record cannot name that later SHA.",
+    "merged": false,
+    "deployed": false
+  },
+  "main": {
+    "observedSha": "97cd90fb029af07dbfcbf4455c1068acfd6e1cb8",
+    "observedCommit": "Merge pull request #1307",
+    "containsStep1Baseline": false,
+    "observation": "git rev-parse origin/main and git merge-base --is-ancestor during S2.00. This is a repository observation, not an Azure observation."
+  },
+  "deploymentCandidatePin": {
+    "path": "tooling/scripts/lib/ue-v2-staging-candidate.json",
+    "applicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+    "incompatibility": "The deployment pin still names 6a60c95c. It does not name the accepted Step 1 head. S2.01-BIND moves it only after the merge commit exists."
+  },
+  "servingIdentity": {
+    "freshObservation": "UNEXECUTED",
+    "resolution": "CONFLICTED_HISTORICAL",
+    "receipts": [
+      {
+        "path": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/operator-binding-6a60c95c.json",
+        "recordedAt": "2026-11-23T16:38:17.935777+00:00",
+        "servingSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+        "apply": "NOT_LAUNCHED"
+      },
+      {
+        "path": "docs/union-eyes/staging/UE_V2_BASE_RELEASE_REMAINING_WORK.md",
+        "servingSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+        "note": "November 23 section says the D4 rehearsal failed and no apply was launched."
+      },
+      {
+        "path": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json",
+        "recordedAt": "2026-11-24T00:41:59.795884+00:00",
+        "servingSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+        "note": "The field names 6a60c95c. The same object does not contain a revision name, traffic weight or command transcript."
+      }
+    ],
+    "stopCondition": "S2.02-PREIMAGE must replace this conflict with a fresh observation before any rehearsal or apply."
+  },
+  "legacyInstaller": {
+    "disposition": "OUTSIDE_STEP_1_WITH_TRACKED_DEPENDENCY",
+    "step2Applicability": "APPLICABLE_UNTIL_DISPROVEN",
+    "cases": 4,
+    "file": "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+    "expectedSkips": "tooling/scripts/lib/ue-native-expected-skips.json",
+    "owner": "team-union-eyes-engineering@nzila.ai",
+    "notPasses": true,
+    "rule": "Run all four cases before the staging transition only when the fresh preimage still has the released pre-current security topology. A current-schema bootstrap is not a substitute. If the preimage already has current topology, keep the cases tracked for a later restore of an older database and do not call them passes."
+  },
+  "denominators": {
+    "functionalActionFamilies": 22,
+    "operationalFamiliesTotal": 15,
+    "operationalFamiliesRequired": 13,
+    "operationalFamiliesDeferred": 2,
+    "stakeholderFamiliesTotal": 35,
+    "stakeholderFamiliesRequired": 26,
+    "storedRoleValues": 39,
+    "requiredRoleBoundaries": 34,
+    "lifecycleStages": 16,
+    "operatingModelPresets": 4,
+    "crossCuttingVariantsRequired": 6,
+    "crossCuttingVariantsDeferred": 1,
+    "requiredScopeNodes": 654,
+    "requiredScopeNodesByInventory": {
+      "authorityActionIndex": 20,
+      "baseFamilies": 35,
+      "canonicalDecisionCoverage.scopeApplicability": 74,
+      "commercialCommitmentMatrix.rows": 15,
+      "historicalCapabilities": 69,
+      "historicalPersonaIdentifiers": 103,
+      "historicalPilotScope.excluded": 1,
+      "historicalPilotScope.included": 13,
+      "historicalStoryIndex": 62,
+      "operatingModelScope.crossCuttingVariants": 6,
+      "operatingModelScope.presets": 4,
+      "reconstructedPersonaContracts": 119,
+      "registryCapabilities": 57,
+      "stakeholderCensus.roleValues": 34,
+      "stakeholderCensus.stakeholderFamilies": 26,
+      "stakeholderLifecycle.stages": 16
+    },
+    "stagingCriteriaRequired": 20,
+    "stagingCriteriaAdvisory": 1
+  },
+  "actions": [
+    {
+      "id": "C01",
+      "action": "Invitation to first case",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable browser invitation journey on the Step 1 production build. Provider delivery is not proven.",
+      "stakeholderIds": [
+        "SA02",
+        "SA03",
+        "SA04",
+        "SA10",
+        "SA24",
+        "SA28",
+        "SA30",
+        "SA33"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/auth/invite/create/route.ts",
+        "apps/union-eyes/app/api/auth/invite/accept/route.ts",
+        "apps/union-eyes/app/invite/accept/page.tsx"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C02",
+      "action": "Truthful invitation email status",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Invitation UI exists in the action contract. No provider receipt is bound to b00a362.",
+      "stakeholderIds": [
+        "SA04",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/auth/invite/create/route.ts",
+        "apps/union-eyes/components/admin/organization-invitations.tsx"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C03",
+      "action": "Invitation reissue and revocation",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable journey recorded revoke, replay refusal and wrong-organization refusal.",
+      "stakeholderIds": [
+        "SA04",
+        "SA10",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/auth/invite/manage/route.ts",
+        "apps/union-eyes/components/admin/organization-invitations.tsx"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C04",
+      "action": "Organization-admin invitation entry",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Admin invitation route exists. The disposable journey proved platform-executive organization creation, not the full organization-admin console.",
+      "stakeholderIds": [
+        "SA04",
+        "SA10",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/[locale]/dashboard/admin/members/page.tsx",
+        "apps/union-eyes/app/api/auth/invite/manage/route.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C05",
+      "action": "Persistent organization setup",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable platform-executive create returned 201 and read the organization row back. Staging setup is unproven.",
+      "stakeholderIds": [
+        "SA03",
+        "SA10",
+        "SA24",
+        "SA26",
+        "SA30",
+        "SA33",
+        "SA35"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/pilot/onboarding/route.ts",
+        "apps/union-eyes/app/[locale]/dashboard/admin/onboarding/page.tsx"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C06",
+      "action": "Membership and access lifecycle",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Redeemed invitation created one membership in the inviting organization. Suspension, reinstatement and deployed revocation are unproven.",
+      "stakeholderIds": [
+        "SA04",
+        "SA05",
+        "SA10",
+        "SA26",
+        "SA30",
+        "SA32",
+        "SA33",
+        "SA35"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/organization/members/route.ts",
+        "apps/union-eyes/lib/authority/store/active-membership-source.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C07",
+      "action": "Multiple capacity and active organization",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Authority facts and representation protocol source exist. No multi-capacity journey is in the Step 1 browser matrix.",
+      "stakeholderIds": [
+        "SA05",
+        "SA08",
+        "SA09",
+        "SA14",
+        "SA15",
+        "SA16",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/authority/store/facts.ts",
+        "apps/union-eyes/lib/representation/protocol-service.ts",
+        "apps/union-eyes/lib/authority/store/case-scope.ts",
+        "apps/union-eyes/db/auth/case-scope-physical-guards.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C08",
+      "action": "Connected intake to closure",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable filing persisted a claim and reopened it. Closure is not in that journey.",
+      "stakeholderIds": [
+        "SA01",
+        "SA06",
+        "SA07",
+        "SA30",
+        "SA34"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/cases/route.ts",
+        "apps/union-eyes/app/api/cases/[caseId]/transition/route.ts",
+        "apps/union-eyes/lib/authority/policies/case.ts",
+        "apps/union-eyes/lib/authority/store/case-scope.ts",
+        "apps/union-eyes/db/auth/case-scope-physical-guards.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C09",
+      "action": "Automatic workload and expertise assignment",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable proof assigned one scoped filing to a second steward. Automatic workload matching remains a pending staging criterion.",
+      "stakeholderIds": [
+        "SA06",
+        "SA07",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/cases/automatic-assignment.ts",
+        "apps/union-eyes/lib/cases/assignment-profiles.ts",
+        "apps/union-eyes/lib/authority/store/case-scope.ts",
+        "apps/union-eyes/db/auth/case-scope-physical-guards.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C10",
+      "action": "Senior representative supervision",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Case policy and issuance source exist. No supervision journey is in the Step 1 matrix.",
+      "stakeholderIds": [
+        "SA08",
+        "SA09",
+        "SA13",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/authority/policies/case.ts",
+        "apps/union-eyes/lib/authority/issuance.ts",
+        "apps/union-eyes/lib/authority/store/case-scope.ts",
+        "apps/union-eyes/db/auth/case-scope-physical-guards.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C11",
+      "action": "Successor handoff",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Lifecycle store source exists. No successor journey is in the Step 1 matrix.",
+      "stakeholderIds": [
+        "SA05",
+        "SA06",
+        "SA07",
+        "SA08",
+        "SA30",
+        "SA34"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/authority/store/lifecycle.ts",
+        "apps/union-eyes/lib/deadline-engine/assignment-sync.ts",
+        "apps/union-eyes/lib/authority/store/case-scope.ts",
+        "apps/union-eyes/db/auth/case-scope-physical-guards.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C12",
+      "action": "Member case follow-through",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable member list and detail reopened the persisted case.",
+      "stakeholderIds": [
+        "SA01",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/cases/[caseId]/route.ts",
+        "apps/union-eyes/lib/cases/claim-identity.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C13",
+      "action": "Role-specific document journey",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Private-document suite and E2E shard 4 passed on the disposable runtime of the Step 1 head. Staging byte delivery is unproven.",
+      "stakeholderIds": [
+        "SA01",
+        "SA06",
+        "SA07",
+        "SA11",
+        "SA14",
+        "SA15",
+        "SA16",
+        "SA17",
+        "SA18",
+        "SA19",
+        "SA20",
+        "SA28",
+        "SA29",
+        "SA30",
+        "SA32",
+        "SA34",
+        "SA35"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/services/document-service.ts",
+        "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+        "apps/union-eyes/lib/external-resource-middleware.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C14",
+      "action": "User-facing sealed evidence export",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Older candidates recorded export work. That evidence is not bound to b00a362 and is not staging acceptance.",
+      "stakeholderIds": [
+        "SA06",
+        "SA07",
+        "SA30",
+        "SA34"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
+        "apps/union-eyes/lib/evidence-export.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C15",
+      "action": "OCR document extraction",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "The action contract names the OCR route and service. No OCR receipt is bound to this head.",
+      "stakeholderIds": [
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+        "apps/union-eyes/lib/services/ocr-service.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C16",
+      "action": "Correspondence approval and dispatch",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable journey persisted a draft and refused the member. Dispatch and provider acceptance are unproven.",
+      "stakeholderIds": [
+        "SA06",
+        "SA07",
+        "SA09",
+        "SA11",
+        "SA17",
+        "SA18",
+        "SA19",
+        "SA20",
+        "SA22",
+        "SA28",
+        "SA29",
+        "SA30",
+        "SA34"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/correspondence/route.ts",
+        "apps/union-eyes/lib/services/correspondence-service.ts",
+        "apps/union-eyes/lib/correspondence/email-delivery.ts",
+        "apps/union-eyes/app/[locale]/dashboard/correspondence/new-letter-composer.tsx"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C17",
+      "action": "Staff messaging and preferences",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable thread create wrote messages.thread.create. Preferences and deployed delivery are unproven.",
+      "stakeholderIds": [
+        "SA01",
+        "SA06",
+        "SA07",
+        "SA11",
+        "SA22",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/messages/threads/route.ts",
+        "apps/union-eyes/app/api/notifications/preferences/route.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C18",
+      "action": "Leadership indicators and drill-down",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable leadership report allowed the executive and refused the member. Drill-down is unproven.",
+      "stakeholderIds": [
+        "SA09",
+        "SA27",
+        "SA30"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/dashboard/leadership/route.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C19",
+      "action": "Organization administration and audit operations",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable sign-in policy save and platform organization create read rows and audit events back. Full admin audit operations are unproven.",
+      "stakeholderIds": [
+        "SA02",
+        "SA03",
+        "SA09",
+        "SA10",
+        "SA13",
+        "SA14",
+        "SA21",
+        "SA23",
+        "SA24",
+        "SA25",
+        "SA26",
+        "SA27",
+        "SA30",
+        "SA33",
+        "SA35"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/admin/representation-protocol/route.ts",
+        "apps/union-eyes/lib/representation/protocol-service.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C20",
+      "action": "Privacy request handling",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Privacy request route and library exist in the action contract. No DSAR journey is in the Step 1 matrix.",
+      "stakeholderIds": [
+        "SA01",
+        "SA12",
+        "SA13",
+        "SA21",
+        "SA25",
+        "SA30",
+        "SA32",
+        "SA33"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/app/api/privacy/dsar/route.ts",
+        "apps/union-eyes/lib/privacy/requests.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C21",
+      "action": "Connected deadlines",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "SOURCE_PRESENT_RUNTIME_UNPROVEN",
+      "step1EvidenceTier": "UNEXECUTED",
+      "evidence": "Deadline source exists. No connected-deadline journey is in the Step 1 matrix.",
+      "stakeholderIds": [
+        "SA01",
+        "SA06",
+        "SA07",
+        "SA11",
+        "SA20",
+        "SA28",
+        "SA30",
+        "SA34"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/cases/case-deadlines.ts",
+        "apps/union-eyes/lib/deadline-engine/reminder-worker.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "C22",
+      "action": "Failure, concurrency and recovery coverage",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "classification": "PARTIALLY_IMPLEMENTED",
+      "step1EvidenceTier": "TARGETED_TESTED",
+      "evidence": "Disposable proof covers filing retry, policy 409, document audit failure and concurrent downloads. It is not the whole family and it is not staging.",
+      "stakeholderIds": [
+        "SA02",
+        "SA05",
+        "SA08",
+        "SA12",
+        "SA13",
+        "SA14",
+        "SA15",
+        "SA16",
+        "SA17",
+        "SA18",
+        "SA19",
+        "SA20",
+        "SA21",
+        "SA22",
+        "SA23",
+        "SA24",
+        "SA25",
+        "SA26",
+        "SA27",
+        "SA28",
+        "SA29",
+        "SA30",
+        "SA31",
+        "SA32",
+        "SA33",
+        "SA35"
+      ],
+      "entryPoints": [
+        "apps/union-eyes/lib/authority/store/mutations.ts",
+        "apps/union-eyes/db/auth/authority-physical-guards.ts",
+        "apps/union-eyes/lib/audit/atomic-audit.ts",
+        "apps/union-eyes/lib/authority/store/case-scope.ts",
+        "apps/union-eyes/db/auth/case-scope-physical-guards.ts"
+      ],
+      "stagingAcceptance": "UNEXECUTED"
+    }
+  ],
+  "operations": [
+    {
+      "id": "O01",
+      "action": "Controlled inbox delivery",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O02",
+      "action": "Authenticated casework performance",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O03",
+      "action": "Sustained pilot workload",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O04",
+      "action": "Continuous backup freshness",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O05",
+      "action": "Daily audit seal monitoring",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O06",
+      "action": "Worker and cron freshness",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O07",
+      "action": "Dependency health",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O08",
+      "action": "External alerts and recovery",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O09",
+      "action": "Full-traffic failover",
+      "scope": "DEFERRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "DEFERRED_NOT_A_PASS",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O10",
+      "action": "Physical devices and browser engines",
+      "scope": "DEFERRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "DEFERRED_NOT_A_PASS",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O11",
+      "action": "Accessibility",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O12",
+      "action": "Complete bilingual states",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O13",
+      "action": "Registry and status consistency",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O14",
+      "action": "Pilot outcomes and telemetry",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    },
+    {
+      "id": "O15",
+      "action": "Incident and periodic restore cadence",
+      "scope": "REQUIRED",
+      "historicalLedgerState": "CURRENT_STEP_1_CANDIDATE_UNQUALIFIED",
+      "disposition": "REQUIRED_UNEXECUTED",
+      "stagingAcceptance": "UNEXECUTED"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.03-CUTOVER"
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.01-REQUALIFY"
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "historicalStatus": "PASS",
+      "countsTowardRequired20": false,
+      "step2Status": "UNEXECUTED",
+      "packageId": null
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.01-REQUALIFY"
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.03-WHATIF"
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.03-CUTOVER"
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.02-FORWARD"
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.04-ENTRA"
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.02-PREIMAGE"
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.05-CASE"
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.06-WORKERS"
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.07-TRUTH"
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.05-DOCS"
+    },
+    {
+      "id": "SENSITIVE_FINANCE_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.05-FINANCE"
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.07-OPS"
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.07-TRUTH"
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.04-EXTERNAL"
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.08-CRITERIA"
+    },
+    {
+      "id": "REPAIRED_ONBOARDING_ACTIONS",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.05-INVITE"
+    },
+    {
+      "id": "AUTOMATIC_WORKLOAD_EXPERTISE_ASSIGNMENT",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.05-ASSIGN"
+    },
+    {
+      "id": "BASE_ACTION_COVERAGE",
+      "requirement": "REQUIRED",
+      "historicalStatus": "PENDING",
+      "countsTowardRequired20": true,
+      "step2Status": "UNEXECUTED",
+      "packageId": "S2.08-CRITERIA"
+    }
+  ],
+  "scopeNodes": [
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:assign",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:close",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:comment",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:disclose_to_member",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:draft_action",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:export_sealed_evidence",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:modify_document",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:process_ocr",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:read",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:read_internal",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:read_own_submission",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:read_privileged",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:read_third_party_restricted",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:transition",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:upload_evidence",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "case:write_notes",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "message:archive",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "message:close",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "message:read",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "authorityActionIndex",
+      "id": "message:reply",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C01",
+      "baseActionIds": [
+        "C01"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C02",
+      "baseActionIds": [
+        "C02"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C03",
+      "baseActionIds": [
+        "C03"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C04",
+      "baseActionIds": [
+        "C04"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C05",
+      "baseActionIds": [
+        "C05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C06",
+      "baseActionIds": [
+        "C06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C07",
+      "baseActionIds": [
+        "C07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C08",
+      "baseActionIds": [
+        "C08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C09",
+      "baseActionIds": [
+        "C09"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C10",
+      "baseActionIds": [
+        "C10"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C11",
+      "baseActionIds": [
+        "C11"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C12",
+      "baseActionIds": [
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C13",
+      "baseActionIds": [
+        "C13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C14",
+      "baseActionIds": [
+        "C14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C15",
+      "baseActionIds": [
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C16",
+      "baseActionIds": [
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C17",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C18",
+      "baseActionIds": [
+        "C18"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C19",
+      "baseActionIds": [
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C20",
+      "baseActionIds": [
+        "C20"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C21",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "C22",
+      "baseActionIds": [
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O01",
+      "baseActionIds": [
+        "O01"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O02",
+      "baseActionIds": [
+        "O02"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O03",
+      "baseActionIds": [
+        "O03"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O04",
+      "baseActionIds": [
+        "O04"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O05",
+      "baseActionIds": [
+        "O05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O06",
+      "baseActionIds": [
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O07",
+      "baseActionIds": [
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O08",
+      "baseActionIds": [
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O11",
+      "baseActionIds": [
+        "O11"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O12",
+      "baseActionIds": [
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O13",
+      "baseActionIds": [
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O14",
+      "baseActionIds": [
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "baseFamilies",
+      "id": "O15",
+      "baseActionIds": [
+        "O15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-01",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-02",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-03",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-04",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-05",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-06",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-07",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-08",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-09",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-10",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-11",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-13",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-14",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-15",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-23",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-27",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-IA-32",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-01",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-02",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-03",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-04",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-05",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-06",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-07",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-08",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-01",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-02",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-03",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-04",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-05",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-06",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-0C2-10",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-12",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "DEC-PD-14",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "PDR-0C2-REPRESENTATIVE-V1",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "PDR-0C2-STEWARD-V1",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ARBITRATION-PRECEDENT-LIBRARY-AUDIENCE-AND-PUBLICATION",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-AUDIT-HISTORY-READERS",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-BARGAINING-UNIT-AND-WORKSITE-RECORD-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-BUSINESS-CONTINUITY-RECORDS-OWNER",
+      "baseActionIds": [
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-COMMUNICATIONS-CAMPAIGN-OWNER",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-COMPLIANCE-DETERMINATION-AUTHORITY",
+      "baseActionIds": [
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-CUPE-VOCABULARY-AUTHORITY-AND-SERVICE-LEVELS",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ESIGNATURE-REQUEST-AUTHORITY-SIGNER-IDENTITY-AND-LEGAL-VALIDITY",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-EXTERNAL-REPRESENTATIVE-DOCUMENT-DEPOSIT",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-FEDERATION-AFFILIATE-DATA-SHARING",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-KNOWLEDGE-PUBLICATION",
+      "baseActionIds": [
+        "C05",
+        "C08",
+        "C10",
+        "C11",
+        "C13",
+        "C14",
+        "C15",
+        "C22",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTE-DISPOSITION",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-MEMBER-LOCATION-PROCESSING",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-MEMBER-NOTIFICATION-SENDERS-AND-DEVICES",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-MEMBER-PORTAL-DOCUMENT-INTAKE-AND-PUBLICATION",
+      "baseActionIds": [
+        "C05",
+        "C08",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-MEMBERSHIP-LINKING-BY-EMAIL-AND-LEGACY-IDENTITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-OBSERVABILITY-ALERT-OWNER",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ONBOARDING-CROSS-ORGANIZATION-DISCLOSURE",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ONBOARDING-EVENT-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ONBOARDING-RECOMMENDATION-BASIS",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ORGANIZATION-BILLING-AND-REMITTANCE-SETTINGS-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ORGANIZATION-CONTEXT-SELECTION-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ORGANIZATION-RECORD-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ORGANIZATION-ROSTER-AND-ROLE-GRANT-AUTHORITY",
+      "baseActionIds": [
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-ORGANIZATION-SHARING-SETTINGS-AUTHORITY",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-PILOT-DEMO-RUNTIME-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-PILOT-USAGE-SIGNAL-READERS-AND-BASIS",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-PLATFORM-CONTRACT-AUTHORITY",
+      "baseActionIds": [
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-PLATFORM-STAFF-MANDATE",
+      "baseActionIds": [
+        "C13",
+        "C15",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-QUEUE-STATUS-READERS-AND-SERVICE-CREDENTIAL",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-REPORT-DEFINITION-READERS-AND-SHARING",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-REPORT-SOURCE-DATA-READERS",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-REPRESENTATION-AUTHORITY-SOURCE",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-SCHEDULED-REPORT-RECIPIENTS-AND-DELIVERY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-SECURITY-EVENT-READERS-AND-AUTHORSHIP",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-STEWARD-DIRECTORY-AND-APPOINTMENT-AUTHORITY",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-SUPPORT-AND-STORAGE-FIGURES-OWNER",
+      "baseActionIds": [
+        "C05",
+        "C08",
+        "C17",
+        "C22",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "canonicalDecisionCoverage.scopeApplicability",
+      "id": "UE-INST-TRIAGE-DESIGNATION-ELIGIBILITY-AND-EXPIRY-RECORD",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC01",
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC02",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC03",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C14",
+        "C16",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC04",
+      "baseActionIds": [
+        "C10",
+        "C11",
+        "C12",
+        "C21",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC05",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C18"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC06",
+      "baseActionIds": [
+        "C18",
+        "C19",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC07",
+      "baseActionIds": [
+        "C07",
+        "C09",
+        "C15",
+        "C18",
+        "C19",
+        "C20",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC08",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C19",
+        "C20",
+        "C22",
+        "O15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC09",
+      "baseActionIds": [
+        "C01",
+        "C04",
+        "C05",
+        "C19",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC12",
+      "baseActionIds": [
+        "C12",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC13",
+      "baseActionIds": [
+        "C04",
+        "C05",
+        "C06",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC14",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C10",
+        "C13",
+        "C16",
+        "C19",
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC15",
+      "baseActionIds": [
+        "C05",
+        "C06",
+        "C13",
+        "C19",
+        "C22",
+        "O15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC16",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C08",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C19",
+        "C20",
+        "C21",
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "commercialCommitmentMatrix.rows",
+      "id": "PC17",
+      "baseActionIds": [
+        "O13",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-001",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-002",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-003",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-004",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-005",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-006",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-A-007",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-B-001",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-B-002",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-C-001",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-E-001",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-F-001",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-F-002",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-F-003",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-H-001",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-H-002",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-H-003",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-H-004",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-H-005",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-H-006",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-I-001",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-I-002",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-J-001",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-001",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-002",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-003",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-004",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-005",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-006",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-007",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-008",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-010",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-K-011",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-CAP-REVIEW-INTAKE",
+      "baseActionIds": [
+        "C12",
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-A11Y-BILINGUAL",
+      "baseActionIds": [
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ANALYTICS-REPORT-AUTHORIZATION",
+      "baseActionIds": [
+        "C18",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ARBITRATION-PRECEDENT-LIBRARY",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-AUDIT-LOG-VISIBILITY",
+      "baseActionIds": [
+        "C19",
+        "C22",
+        "O05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-BARGAINING-RECORDS",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-CLAUSE-LIBRARY-SHARING",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-COMPLIANCE-ASSURANCE",
+      "baseActionIds": [
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-CONTENT-LIBRARY-EDITORIAL",
+      "baseActionIds": [
+        "C05",
+        "C08",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-CUPE-VOCABULARY-REFERENCE-DATA",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C21",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-DEADLINE-OVERDUE",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-DELIVERY-EVIDENCE",
+      "baseActionIds": [
+        "C01",
+        "C16",
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-LEGACY-COMPATIBILITY-AND-DIAGNOSTIC-ROUTES",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-M04-MEMBER-REQUESTS",
+      "baseActionIds": [
+        "C12",
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-MAIN-APP-CRONS",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+      "baseActionIds": [
+        "C19",
+        "C22",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+      "baseActionIds": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ORGANIZATION-ONBOARDING",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+      "baseActionIds": [
+        "C05",
+        "C18",
+        "C19",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-PKI-SIGNING-WORKFLOW",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-PLATFORM-CROSS-TENANT-ENUMERATION",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+      "baseActionIds": [
+        "C19",
+        "C22",
+        "O07",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-PRIVACY-RIGHTS",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-REP-CORRESPONDENCE",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-REP-TRANSITION-REASON-LEAK",
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ROUTE-DOMAIN-SCOPE",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-ROUTE-EXPOSURE-HARDENING",
+      "baseActionIds": [
+        "C01",
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+      "baseActionIds": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalCapabilities",
+      "id": "UE-OMIT-STEWARD-CANONICAL-ABSENT",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G01",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G04",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G09",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G10",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G14",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G15",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G16",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G17",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G18",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G19",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G21",
+      "baseActionIds": [
+        "C19",
+        "C22",
+        "O05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G22",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G23",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G26",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G28",
+      "baseActionIds": [
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G29",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "G30",
+      "baseActionIds": [
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M01",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M02",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M03",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M04",
+      "baseActionIds": [
+        "C12",
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M05",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M06",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M07",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M09",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "M10",
+      "baseActionIds": [
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O02",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O03",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O11",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O16",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O17",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O18",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O20",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O21",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O22",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O23",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O24",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "O26",
+      "baseActionIds": [
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R01",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R02",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R03",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R05",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R06",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R07",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R08",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R09",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R10",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R11",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R12",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R13",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R14",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R15",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R16",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R17",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R19",
+      "baseActionIds": [
+        "C18",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R20",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R21",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R22",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R23",
+      "baseActionIds": [
+        "C18",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "R24",
+      "baseActionIds": [
+        "C08",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-01",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-02",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-03",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-05",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-06",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-07",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-08",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-09",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-10",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-11",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-12",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-13",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-14",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-15",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-16",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-17",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-18",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-19",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-20",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-21",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-22",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-23",
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-ACT-25",
+      "baseActionIds": [
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-1",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-2",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-3",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-4",
+      "baseActionIds": [
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-5",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-6",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "REP-NAV-7",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR01",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR02",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR03",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR08",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR09",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR10",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR11",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR12",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPersonaIdentifiers",
+      "id": "SR22",
+      "baseActionIds": [
+        "O10",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.excluded",
+      "id": "Admin console (full)",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Auth (NextAuth + Argon2id)",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Case / Grievance filing",
+      "baseActionIds": [
+        "C08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Case assignment engine",
+      "baseActionIds": [
+        "C09"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Case intake (idempotent)",
+      "baseActionIds": [
+        "C08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Correlation-ID instrumentation",
+      "baseActionIds": [
+        "C22",
+        "O06",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Document OCR",
+      "baseActionIds": [
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Evidence export + sealing",
+      "baseActionIds": [
+        "C14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "File upload (DMS)",
+      "baseActionIds": [
+        "C13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Hash-chained audit trail",
+      "baseActionIds": [
+        "C22",
+        "O05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Leadership dashboard (ED view)",
+      "baseActionIds": [
+        "C18"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "RBAC / multi-role per org",
+      "baseActionIds": [
+        "C06",
+        "C07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Setup checklist / first-run UX",
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalPilotScope.included",
+      "id": "Steward workbench (queue view)",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "ADMIN-ASSIGN-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "ADMIN-CANNOT-BYPASS-AUDIT",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "ADMIN-CHANGE-CASE-STATE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "ADMIN-MANAGE-PERMITTED-USERS",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "ADMIN-REASSIGN-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "ADMIN-RESOLVE-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDIT-MUTATION-CREATES-DECISION-OR-DELEGATION",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDIT-NAR-VERIFY",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDIT-READONLY-MUTATION-DENIAL",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDIT-UNAUTHORIZED-EXPORT-DENIED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDIT-WRONG-ORG-ACCESS-DENIED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDITOR-CANNOT-ACCESS-WRONG-ORG",
+      "baseActionIds": [
+        "C14",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDITOR-CANNOT-CHANGE-ROLES",
+      "baseActionIds": [
+        "C14",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDITOR-CANNOT-MUTATE-CASE",
+      "baseActionIds": [
+        "C14",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDITOR-EXPORT-AUDIT-PACK",
+      "baseActionIds": [
+        "C14",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDITOR-VERIFY-NAR-PROOF",
+      "baseActionIds": [
+        "C14",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUDITOR-VIEW-AUDIT-TRAIL",
+      "baseActionIds": [
+        "C14",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUTH-EXPIRED-SESSION-BEHAVIOR",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUTH-LOGIN-FAILURE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUTH-LOGIN-SUCCESS",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUTH-ROLE-BASED-LANDING",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "AUTH-UNAUTHENTICATED-ACCESS-DENIED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CASE-LIFECYCLE-ASSIGNED-TO-ESCALATED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CASE-LIFECYCLE-DRAFT-TO-SUBMITTED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CASE-LIFECYCLE-ESCALATED-TO-RESOLVED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CASE-LIFECYCLE-INVALID-TRANSITIONS-FAIL",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CASE-LIFECYCLE-RESOLVED-TERMINAL",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CASE-LIFECYCLE-SUBMITTED-TO-ASSIGNED",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CONCURRENCY-ASSIGNMENT-RACE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CONCURRENCY-DOUBLE-SUBMIT",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CONCURRENCY-ESCALATION-RACE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "CONCURRENCY-STALE-UPDATE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "EXTERNAL-TESTER-ACTIONS-AUDITABLE",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "EXTERNAL-TESTER-CANNOT-ACCESS-PLATFORM-ADMIN",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "EXTERNAL-TESTER-CANNOT-ACCESS-PRODLIKE-ORG",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "EXTERNAL-TESTER-CANNOT-EXPORT-CROSS-ORG-AUDIT",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "EXTERNAL-TESTER-COMPLETE-ALLOWED-UX-FLOWS",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "EXTERNAL-TESTER-ISOLATED-ORG-ONLY",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "INTELLIGENCE-BENCHMARK-GATED",
+      "baseActionIds": [
+        "C18",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "INTELLIGENCE-METRICS-GATED",
+      "baseActionIds": [
+        "C18",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "INTELLIGENCE-PIPELINE-HEALTH-RESTRICTED",
+      "baseActionIds": [
+        "C18",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "INTELLIGENCE-POLICY-INSIGHTS-GATED",
+      "baseActionIds": [
+        "C18",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "INTELLIGENCE-STALE-DATA-SURFACED",
+      "baseActionIds": [
+        "C18",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-CANNOT-VIEW-RESTRICTED-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-CANNOT-VIEW-WRONG-ORG-DOCUMENT",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C13",
+        "C14",
+        "C15",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-CREATE-GRIEVANCE-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-SUBMIT-INTAKE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-UPLOAD-DOCUMENT",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C13",
+        "C14",
+        "C15",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-VIEW-ALLOWED-DOCUMENT",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C13",
+        "C14",
+        "C15",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "MEMBER-VIEW-OWN-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-ATTEMPTED-ROLE-ESCALATION",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-MALFORMED-PAYLOAD",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-MISSING-PERMISSION",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-SUSPENDED-USER-BEHAVIOR",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-UNAUTHORIZED-EXPORT",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-UNAUTHORIZED-MUTATION",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "NEG-WRONG-ORG-ACCESS",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "STEWARD-CANNOT-PERFORM-ADMIN-ACTION",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "STEWARD-COMMENT-ANNOTATE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "STEWARD-REQUEST-ESCALATION",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "STEWARD-REVIEW-CASE",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "historicalStoryIndex",
+      "id": "STEWARD-UPDATE-ALLOWED-FIELDS",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.crossCuttingVariants",
+      "id": "PM01",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.crossCuttingVariants",
+      "id": "PM02",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.crossCuttingVariants",
+      "id": "PM03",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.crossCuttingVariants",
+      "id": "PM04",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.crossCuttingVariants",
+      "id": "PM06",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.crossCuttingVariants",
+      "id": "PM07",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.presets",
+      "id": "lro",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.presets",
+      "id": "national_rep",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.presets",
+      "id": "officer",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "operatingModelScope.presets",
+      "id": "steward",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "FO-DENY-01",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "FO-DENY-02",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "FO-DENY-03",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "FO-DENY-04",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "FO-DENY-05",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R01",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R02",
+      "baseActionIds": [
+        "C18"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R03",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R05",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R06",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R07",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R08",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R09",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R10",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R11",
+      "baseActionIds": [
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R12",
+      "baseActionIds": [
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R13",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R14",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R15",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R16",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R17",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R19",
+      "baseActionIds": [
+        "C18",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R20",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R21",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R22",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R23",
+      "baseActionIds": [
+        "C18",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "R24",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-01",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-02",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-03",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-05",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-06",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-07",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-08",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-09",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-10",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-11",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-12",
+      "baseActionIds": [
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-13",
+      "baseActionIds": [
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-14",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-15",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-16",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-17",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-18",
+      "baseActionIds": [
+        "C11",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-19",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-20",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-21",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-22",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-23",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-ACT-25",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-JRN-A",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-JRN-B",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-JRN-C",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-JRN-D",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-JRN-E",
+      "baseActionIds": [
+        "C16",
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-JRN-F",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-1",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-2",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-3",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-4",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-5",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-6",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-NAV-7",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "REP-SCN-SMALL-LOCAL",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-01",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-02",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-03",
+      "baseActionIds": [
+        "C18"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-04",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-05",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-06",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-07",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-08",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-09",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-10",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-11",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-12",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-13",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-14",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-15",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-16",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-17",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-18",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-19",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-20",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-21",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-22",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-23",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-24",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-25",
+      "baseActionIds": [
+        "C16",
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-26",
+      "baseActionIds": [
+        "C16",
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-27",
+      "baseActionIds": [
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-28",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-29",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-30",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-31",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-33",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-34",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-35",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-36",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-38",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-39",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-ACT-40",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-01",
+      "baseActionIds": [
+        "C01",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-02",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12",
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-03",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-04",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-05",
+      "baseActionIds": [
+        "C16"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-06",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-07",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-DENY-08",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-1",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-2",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C10",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-3",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-4",
+      "baseActionIds": [
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-5",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-6",
+      "baseActionIds": [
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "reconstructedPersonaContracts",
+      "id": "STW-NAV-7",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-ACTION-ALERT-TEST-EXECUTION",
+      "baseActionIds": [
+        "C22",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-ADMIN-PILOT-STATUS",
+      "baseActionIds": [
+        "C19",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-APPROVED-LETTER-EMAIL",
+      "baseActionIds": [
+        "C16",
+        "C22",
+        "O01"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-AUDIT-SEAL",
+      "baseActionIds": [
+        "C22",
+        "O05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-AUTOMATIC-CASE-ASSIGNMENT",
+      "baseActionIds": [
+        "C09",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-BACKUP-FRESHNESS",
+      "baseActionIds": [
+        "C22",
+        "O04"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-BUILD-OPERATIONAL-ISOLATION",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CANONICAL-MEMBER-DIRECTORY-BOOTSTRAP",
+      "baseActionIds": [
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CASE-DEADLINE-MANAGEMENT",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CASE-SEALED-EVIDENCE-EXPORT",
+      "baseActionIds": [
+        "C14",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CLAIM-ANONYMOUS-FILING",
+      "baseActionIds": [
+        "C12",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CLAIM-DEADLINES-SURFACE",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CLAMAV-PROBE",
+      "baseActionIds": [
+        "C13",
+        "C22",
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CRON-DAILY-METRICS",
+      "baseActionIds": [
+        "C18",
+        "C22",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CRON-FRESHNESS",
+      "baseActionIds": [
+        "C21",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CRON-OVERDUE-NOTIFICATIONS",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CRON-PROCESS-MESSAGES",
+      "baseActionIds": [
+        "C17",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-CRON-PROCESS-NOTIFICATIONS",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DB-MIGRATIONS-APPLIED",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DB-POSTGRES-PING",
+      "baseActionIds": [
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-ASSIGNMENT-CONTINUITY",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-CORE",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-DELIVERY",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-DIRECT-DEAD-LETTER",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-EXECUTION-PERSISTENCE",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-OVERDUE",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-PROVIDER-ACCEPTANCE",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-RECOVERY",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-REMINDERS",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEADLINE-WORKER-CLAIM",
+      "baseActionIds": [
+        "C21",
+        "C22",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEMO-SEPARATE-PACKAGE",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DEPLOYMENT-REVISION",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-DUES-PORTAL-BALANCE",
+      "baseActionIds": [
+        "C12",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-EMAIL-PROBE",
+      "baseActionIds": [
+        "C01",
+        "C16",
+        "C21",
+        "O01",
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-EMERGENCY-DECLARATION",
+      "baseActionIds": [
+        "C22",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-ORGANIZATION-INVITATIONS",
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-ORGANIZATION-SETUP-CHECKLIST",
+      "baseActionIds": [
+        "C05",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-PILOT-TRAINING-GUIDES",
+      "baseActionIds": [
+        "C05",
+        "C08",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-PRIVACY-BREACH-ASSESSMENT",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-PRIVACY-DSAR-WORKFLOW",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-PRIVACY-INCIDENT-WORKFLOW",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-PRIVACY-PROVINCIAL-CASES",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-QUEUE-DEPTH",
+      "baseActionIds": [
+        "C21",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-REALITY-DEMO-GUARD",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-REGISTRY-CONSISTENCY",
+      "baseActionIds": [
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-REP-CASE-AUTHORITY-SCOPING",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-REP-MANDATE-RECUSAL-DELEGATION",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-REP-PROTOCOL-GOVERNANCE",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-RESTORE-PROOF",
+      "baseActionIds": [
+        "C22",
+        "O04",
+        "O15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-SECRET-AUTH",
+      "baseActionIds": [
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-SECRET-DATABASE-URL",
+      "baseActionIds": [
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-SECRET-ENTRA-TENANT",
+      "baseActionIds": [
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-SENTRY-PROBE",
+      "baseActionIds": [
+        "C22",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-STORAGE-PROBE",
+      "baseActionIds": [
+        "C13",
+        "C22",
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-SYNTHETIC-MONITORING",
+      "baseActionIds": [
+        "C22",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-TENANT-ISOLATION",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "registryCapabilities",
+      "id": "UE-WORKER-HEARTBEAT",
+      "baseActionIds": [
+        "C21",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "admin",
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "app_owner",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "bargaining_committee",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "billing_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "billing_specialist",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "chief_steward",
+      "baseActionIds": [
+        "C07",
+        "C09",
+        "C10",
+        "C11",
+        "C18",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "clc_executive",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "clc_staff",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "clerk",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C17",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "compliance_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "content_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "coo",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "cto",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "customer_success_director",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "data_analyst",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "data_analytics_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "fed_executive",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "fed_staff",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "health_safety_rep",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "integration_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "integration_specialist",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "member",
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17",
+        "C20"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "national_officer",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "officer",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C18",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "platform_lead",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "president",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C18",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "secretary_treasurer",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C18",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "security_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "steward",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C11",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "support_agent",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "support_manager",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "system_admin",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "training_coordinator",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.roleValues",
+      "id": "vice_president",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C18",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA01",
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17",
+        "C20",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA03",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA04",
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA05",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA06",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA07",
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA08",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA09",
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C16",
+        "C18",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA10",
+      "baseActionIds": [
+        "C01",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C19"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA11",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA12",
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA13",
+      "baseActionIds": [
+        "C10",
+        "C19",
+        "C20",
+        "C22",
+        "O05"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA15",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA16",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA18",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA19",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA22",
+      "baseActionIds": [
+        "C16",
+        "C17",
+        "C22",
+        "O01"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA23",
+      "baseActionIds": [
+        "C19",
+        "C22",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA24",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA25",
+      "baseActionIds": [
+        "C19",
+        "C20",
+        "C22",
+        "O05",
+        "O07",
+        "O08"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA28",
+      "baseActionIds": [
+        "C01",
+        "C13",
+        "C16",
+        "C21",
+        "C22",
+        "O01",
+        "O06",
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA29",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C22",
+        "O07"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA30",
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C20",
+        "C21",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA31",
+      "baseActionIds": [
+        "C22",
+        "O01",
+        "O11",
+        "O12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA33",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C06",
+        "C19",
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderCensus.stakeholderFamilies",
+      "id": "SA34",
+      "baseActionIds": [
+        "C08",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C21"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L01",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L02",
+      "baseActionIds": [
+        "C05",
+        "C19",
+        "C22",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L03",
+      "baseActionIds": [
+        "C05",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L04",
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06",
+        "C08",
+        "C12"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L05",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C09",
+        "C10",
+        "C11",
+        "C19",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L06",
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L07",
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L08",
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L09",
+      "baseActionIds": [
+        "C16",
+        "C17",
+        "C21",
+        "O01",
+        "O06"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L10",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C14",
+        "C16",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L11",
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C12",
+        "C21",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L12",
+      "baseActionIds": [
+        "C19",
+        "C20",
+        "C22",
+        "O05",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L13",
+      "baseActionIds": [
+        "C22",
+        "O02",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O09",
+        "O15"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L14",
+      "baseActionIds": [
+        "C18",
+        "C19",
+        "O13",
+        "O14"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L15",
+      "baseActionIds": [
+        "C06",
+        "C13",
+        "C14",
+        "C19",
+        "C20",
+        "C22"
+      ],
+      "proofStatus": "UNEXECUTED"
+    },
+    {
+      "inventory": "stakeholderLifecycle.stages",
+      "id": "L16",
+      "baseActionIds": [
+        "C22",
+        "O10",
+        "O11",
+        "O12",
+        "O13"
+      ],
+      "proofStatus": "UNEXECUTED"
+    }
+  ],
+  "deferredNotPasses": [
+    "O09",
+    "O10",
+    "PM05",
+    "SA02",
+    "SA14",
+    "SA17",
+    "SA20",
+    "SA21",
+    "SA26",
+    "SA27",
+    "SA32",
+    "SA35"
+  ],
+  "excluded": [
+    "Union finance and dues persistence",
+    "Financial Officer 2.1",
+    "Production deployment"
+  ],
+  "evidencePaths": [
+    "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
+    "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_SEMANTIC_REVIEW_20261117.json",
+    "docs/union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json",
+    "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+    "docs/union-eyes/staging/UE_V2_BASE_RELEASE_REMAINING_WORK.md",
+    "docs/union-eyes/staging/UE_V2_PR1309_FINAL_ENGINEERING_CONVERGENCE.md",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/persona-and-lifecycle-census.json",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/operator-binding-6a60c95c.json",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/document-family-remediation-20261123.json",
+    "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-6a60c95c.json",
+    "ops/change-records/CHG-2026-0114.founder-authorization.md",
+    "docs/union-eyes/reality-remediation/26_UE_PHASE3A_RUNTIME_ACCEPTANCE.md",
+    "docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md",
+    "apps/union-eyes/lib/reality/capability-registry.ts",
+    "tooling/scripts/lib/ue-v2-staging-candidate.json",
+    "tooling/scripts/lib/ue-native-expected-skips.json",
+    ".github/workflows/ue-v2-staging-deploy.yml",
+    ".github/workflows/ue-v2-staging-build.yml",
+    ".github/workflows/ue-v2-staging-forward-upgrade.yml",
+    ".github/workflows/ue-v2-staging-rollback-rehearsal.yml"
+  ],
+  "institutionalDecisions": [
+    {
+      "id": "ID-MERGE",
+      "state": "REQUIRED_BEFORE_S2.01",
+      "decision": "Founder approval to merge PR 1309."
+    },
+    {
+      "id": "ID-APPLY",
+      "state": "REQUIRED_BEFORE_S2.03",
+      "decision": "Founder approval to apply the bound candidate to staging. CHG-2026-0114 does not bind b00a362."
+    },
+    {
+      "id": "ID-SCOPE-BACKFILL",
+      "state": "NOT_ISSUED",
+      "decision": "No case-scope backfill or institutional mandate is authorized. UE-CAP-B-002 stays unadopted."
+    },
+    {
+      "id": "ID-FINANCE",
+      "state": "EXCLUDED",
+      "decision": "Union finance, dues persistence and Financial Officer 2.1 stay excluded."
+    },
+    {
+      "id": "ID-PHASE3B",
+      "state": "NOT_STARTED",
+      "decision": "Phase 3B stays closed while UE_SAAS_OPERATIONAL_READINESS is NO_GO."
+    }
+  ],
+  "capabilityClasses": {
+    "implementedOnDisposableOrCiOnly": [
+      "C01",
+      "C03",
+      "C04",
+      "C05",
+      "C06",
+      "C08",
+      "C09",
+      "C12",
+      "C13",
+      "C16",
+      "C17",
+      "C18",
+      "C19",
+      "C22"
+    ],
+    "sourcePresentRuntimeUnproven": [
+      "C02",
+      "C07",
+      "C10",
+      "C11",
+      "C14",
+      "C15",
+      "C20",
+      "C21"
+    ],
+    "blockedByInstitutionalAuthority": [
+      "UE-CAP-B-002 case-scope backfill",
+      "Live customer mandate issuance"
+    ],
+    "infrastructureNotAUserPass": [
+      "PostgreSQL RLS and physical guards",
+      "Bootstrap V2 catalog",
+      "Authority store"
+    ],
+    "presentationNotAPass": [
+      "Seven navigation profiles: member, steward, chief_steward, officer, secretary_treasurer, admin, app_owner"
+    ],
+    "stagingEvidenceHistoricalAndConflicting": [
+      "servingIdentity"
+    ],
+    "localAndCiEvidence": [
+      "Step 1 PR 1309 checks on b00a362",
+      "Disposable browser and document journeys in the convergence record"
+    ],
+    "missingProductionLikeEvidence": [
+      "Fresh staging revision readback",
+      "Deployed Entra session on the Step 1 head",
+      "Deployed C01-C22 and O01-O08, O11-O15"
+    ],
+    "externalDependencies": [
+      "Azure Container Apps",
+      "Azure Container Registry",
+      "Azure PostgreSQL",
+      "Azure Cache for Redis",
+      "Azure Storage",
+      "Key Vault",
+      "Entra",
+      "ClamAV adapter",
+      "Email provider"
+    ],
+    "outsideStep2": [
+      "Production",
+      "Phase 3B",
+      "Financial Officer 2.1",
+      "O09",
+      "O10",
+      "PM05",
+      "Certified elections and ratification",
+      "WorkAid activation"
+    ]
+  },
+  "stakeholderCounts": {
+    "total": 35,
+    "required": 26,
+    "deferred": 9
+  },
+  "roleCounts": {
+    "stored": 39,
+    "required": 34,
+    "excluded": 5
+  }
+}

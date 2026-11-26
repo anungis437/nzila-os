@@ -1,0 +1,66 @@
+{
+  "observedAt": "2026-11-26T00:38:17Z",
+  "probes": [
+    {
+      "name": "arm-subscription-unauthenticated",
+      "startedAt": "2026-11-26T00:38:09Z",
+      "finishedAt": "2026-11-26T00:38:09Z",
+      "status": "completed",
+      "error": null,
+      "result": {
+        "httpStatus": 401,
+        "code": "AuthenticationFailed",
+        "message": "Authentication failed. The 'Authorization' header is missing."
+      }
+    },
+    {
+      "name": "dns:nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com",
+      "startedAt": "2026-11-26T00:38:09Z",
+      "finishedAt": "2026-11-26T00:38:09Z",
+      "status": "completed",
+      "error": null,
+      "result": {
+        "host": "nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com",
+        "resolution": "NXDOMAIN_OR_UNRESOLVED",
+        "error": "Name or service not known"
+      }
+    },
+    {
+      "name": "dns:nzila-ue-v2-staging.private.postgres.database.azure.com",
+      "startedAt": "2026-11-26T00:38:09Z",
+      "finishedAt": "2026-11-26T00:38:09Z",
+      "status": "completed",
+      "error": null,
+      "result": {
+        "host": "nzila-ue-v2-staging.private.postgres.database.azure.com",
+        "resolution": "NXDOMAIN_OR_UNRESOLVED",
+        "error": "Name or service not known"
+      }
+    },
+    {
+      "name": "dns:nzila-ue-v2-staging-db.postgres.database.azure.com",
+      "startedAt": "2026-11-26T00:38:09Z",
+      "finishedAt": "2026-11-26T00:38:09Z",
+      "status": "completed",
+      "error": null,
+      "result": {
+        "host": "nzila-ue-v2-staging-db.postgres.database.azure.com",
+        "addresses": [
+          "40.85.252.0"
+        ]
+      }
+    },
+    {
+      "name": "tcp:unconfirmed-public-name",
+      "startedAt": "2026-11-26T00:38:09Z",
+      "finishedAt": "2026-11-26T00:38:17Z",
+      "status": "completed",
+      "error": null,
+      "result": {
+        "host": "nzila-ue-v2-staging-db.postgres.database.azure.com",
+        "port": 5432,
+        "result": "TimeoutError"
+      }
+    }
+  ]
+}
