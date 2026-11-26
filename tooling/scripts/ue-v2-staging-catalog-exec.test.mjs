@@ -21,7 +21,9 @@ import {
   execInvocation,
   revisionDefect,
   executeCatalog,
+  QUERY_MANIFEST,
   parseCatalogStdout,
+  qualifyCatalog,
   principalFromAccessToken,
   roleCoversExec,
   writeReport,
@@ -54,6 +56,37 @@ function revisionBody(image = EXPECTED_IMAGE) {
     trafficWeight: 100,
     runningState: 'Running',
     containers: [{ name: CONTAINER_NAME, image }],
+  }
+}
+
+function query(id, rows) {
+  return { id, rowCount: rows.length, rows }
+}
+
+function completeCatalog() {
+  const queries = [
+    query('identity', [{ version: 'PostgreSQL 16', database: 'ue_v2_staging', user: 'union_eyes_runtime', transaction_read_only: 'on' }]),
+    query('migration_relations', [{ schema: 'drizzle', name: '__drizzle_migrations' }]),
+    query('migration_columns', [{ table_schema: 'drizzle', table_name: '__drizzle_migrations', column_name: 'hash', data_type: 'text' }]),
+    query('drizzle_rows', [{ id: 1, hash: 'abc', created_at: '2026-01-01' }]),
+    query('roles', [{ rolname: 'union_eyes_runtime', rolsuper: false, rolbypassrls: false, rolcanlogin: true }]),
+    query('memberships', []),
+    query('relations', [{ schema: 'public', name: 'members', relkind: 'r' }]),
+    query('policies', []),
+    query('function', [{ schema: 'user_management', name: 'auth_business_org_authorized', args: 'uuid, text[]' }]),
+    query('security_definer', []),
+    query('event_trigger', [{ evtname: 'ue_guard_deadline_reassignment_convergence_policy', evtenabled: 'O' }]),
+    query('audit', [{ rel: 'audit_security.audit_logs', current_select: false, current_insert: false }]),
+    query('audit_grants', []),
+    query('sequences', []),
+    query('tables', [{ schema: 'public', name: 'members' }]),
+  ]
+  return {
+    schema: 'ue-v2-staging-catalog/v1',
+    rolledBack: true,
+    identity: { version: 'PostgreSQL 16', database: 'ue_v2_staging', user: 'union_eyes_runtime', transaction_read_only: 'on' },
+    queries,
+    counts: [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, result: { id: 'count_public_members', rows: [{ n: '1' }] } }],
   }
 }
 
@@ -122,13 +155,7 @@ test('a changed image binding stops before exec', async () => {
 })
 
 test('one accepted binding builds one pseudo-terminal exec and parses the catalogue', async () => {
-  const catalog = {
-    schema: 'ue-v2-staging-catalog/v1',
-    rolledBack: true,
-    identity: { version: 'PostgreSQL 16', database: 'ue_v2_staging', user: 'union_eyes_runtime', transaction_read_only: 'on' },
-    queries: [],
-    counts: [],
-  }
+  const catalog = completeCatalog()
   const stdout = `noise\nUE_CATALOG_BEGIN\n${JSON.stringify(catalog)}\nUE_CATALOG_END\n`
   const { calls, spawn, token } = harness({ catalogStdout: stdout })
   const result = await executeCatalog(liveEnv(), spawn)
@@ -136,6 +163,9 @@ test('one accepted binding builds one pseudo-terminal exec and parses the catalo
   assert.equal(result.report.execPermission, 'EFFECTIVE_ALLOW_OBSERVED')
   assert.equal(result.report.execAttempted, true)
   assert.equal(result.report.catalog.identity.user, 'union_eyes_runtime')
+  assert.equal(result.report.catalog.qualification.complete, true)
+  assert.equal(result.report.S2_02_PREIMAGE_COMPLETE, 'NO')
+  assert.equal(result.report.catalog.qualification.manifest.length, QUERY_MANIFEST.length)
   const exec = calls.find((call) => call.executable === 'timeout')
   assert.equal(exec.executable, 'timeout')
   assert.deepEqual(exec.args.slice(0, 5), ['90', 'script', '-q', '-e', '-c'])
@@ -202,16 +232,21 @@ esac
 printf '%s\\n' "$*" >> ${JSON.stringify(path.join(directory, 'timeout.log'))}
 if [ "$1" != 90 ]; then exit 97; fi
 printf '%s\\n' 'UE_CATALOG_BEGIN'
-printf '%s\\n' '{"schema":"ue-v2-staging-catalog/v1","rolledBack":true,"identity":{"database":"ue_v2_staging","transaction_read_only":"on","user":"union_eyes_runtime"},"queries":[],"counts":[]}'
+cat "$UE_FAKE_CATALOG_FILE"
 printf '%s\\n' 'UE_CATALOG_END'
 `)
   chmodSync(path.join(bin, 'az'), 0o755)
   chmodSync(path.join(bin, 'timeout'), 0o755)
+  const catalogFile = path.join(directory, 'catalog-body.json')
+  writeFileSync(catalogFile, JSON.stringify(completeCatalog()))
   const run = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-exec.mjs'), '--out', out], {
-    env: { ...process.env, ...liveEnv(), PATH: `${bin}:${process.env.PATH}`, UE_FAKE_TOKEN: token },
+    env: { ...process.env, ...liveEnv(), PATH: `${bin}:${process.env.PATH}`, UE_FAKE_TOKEN: token, UE_FAKE_CATALOG_FILE: catalogFile },
     encoding: 'utf8',
   })
   assert.equal(run.status, 0, run.stderr)
+  assert.match(run.stdout, /catalog=COMPLETE/)
+  assert.equal(run.stdout.includes('catalog=OBSERVED'), false)
+  assert.match(run.stdout, /S2_02_PREIMAGE_COMPLETE=NO/)
   const azLog = readFileSync(path.join(directory, 'az.log'), 'utf8')
   const timeoutLog = readFileSync(path.join(directory, 'timeout.log'), 'utf8')
   assert.equal(azLog.includes('timeout'), false)
@@ -225,6 +260,49 @@ printf '%s\\n' 'UE_CATALOG_END'
   assert.equal(report.includes(TOKEN_SECRET), false)
   assert.match(report, /EFFECTIVE_ALLOW_OBSERVED/)
   rmSync(directory, { recursive: true, force: true })
+})
+
+test('an audit error, an unverified ledger, empty queries, and a count cap stay partial', async () => {
+  const marked = (body) => `UE_CATALOG_BEGIN\n${JSON.stringify(body)}\nUE_CATALOG_END\n`
+  const withQuery = (id, replacement) => {
+    const body = completeCatalog()
+    body.queries = body.queries.map((item) => item.id === id ? replacement : item)
+    return body
+  }
+
+  const auditBody = withQuery('audit', { id: 'audit', error: 'permission denied for relation audit_logs' })
+  const audit = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(auditBody) }).spawn)
+  assert.equal(audit.exitCode, 5)
+  assert.equal(audit.report.defects.includes('CATALOG_PARTIAL'), true)
+  assert.equal(audit.report.catalog.qualification.manifest.find((item) => item.id === 'audit').classification, 'UNREADABLE')
+  assert.equal(audit.report.S2_02_PREIMAGE_COMPLETE, 'NO')
+
+  const verifiedMiss = withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' })
+  verifiedMiss.queries = verifiedMiss.queries.map((item) => item.id === 'migration_relations' ? query('migration_relations', []) : item)
+  const verified = qualifyCatalog(verifiedMiss)
+  assert.equal(verified.manifest.find((item) => item.id === 'drizzle_rows').classification, 'ABSENT')
+  assert.equal(verified.complete, true)
+
+  const unverified = qualifyCatalog(withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' }))
+  assert.equal(unverified.manifest.find((item) => item.id === 'drizzle_rows').classification, 'UNREADABLE')
+  assert.equal(unverified.complete, false)
+
+  const empty = completeCatalog()
+  empty.queries = []
+  const emptyRun = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(empty) }).spawn)
+  assert.equal(emptyRun.exitCode, 5)
+  assert.equal(emptyRun.report.catalog.qualification.manifest.every((item) => item.classification === 'MISSING'), true)
+
+  const capped = completeCatalog()
+  capped.counts = [{ classification: 'NOT_TAKEN', reason: 'TABLE_COUNT_CAP', tables: 61 }]
+  const cap = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(capped) }).spawn)
+  assert.equal(cap.exitCode, 5)
+  assert.equal(cap.report.catalog.qualification.counts, 'NOT_TAKEN')
+  assert.equal(cap.report.defects.includes('CATALOG_PARTIAL'), true)
+
+  const full = qualifyCatalog(completeCatalog())
+  assert.equal(full.complete, true)
+  assert.equal(full.manifest.some((item) => item.classification === 'UNREADABLE' || item.classification === 'MISSING'), false)
 })
 
 test('the container program resolves pg, refuses a writable transaction, and rolls back', () => {

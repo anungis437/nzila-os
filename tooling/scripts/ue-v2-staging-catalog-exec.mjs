@@ -150,6 +150,75 @@ main()
 `
 }
 
+export const QUERY_MANIFEST = [
+  { id: 'identity', absence: 'forbidden' },
+  { id: 'migration_relations', absence: 'forbidden' },
+  { id: 'migration_columns', absence: 'forbidden' },
+  { id: 'drizzle_rows', absence: 'missing-relation' },
+  { id: 'roles', absence: 'forbidden' },
+  { id: 'memberships', absence: 'forbidden' },
+  { id: 'relations', absence: 'forbidden' },
+  { id: 'policies', absence: 'forbidden' },
+  { id: 'function', absence: 'zero-rows' },
+  { id: 'security_definer', absence: 'forbidden' },
+  { id: 'event_trigger', absence: 'zero-rows' },
+  { id: 'audit', absence: 'zero-rows' },
+  { id: 'audit_grants', absence: 'forbidden' },
+  { id: 'sequences', absence: 'forbidden' },
+  { id: 'tables', absence: 'forbidden' },
+]
+
+function relationMissing(error) {
+  return /does not exist|undefined_table/i.test(String(error ?? ''))
+}
+
+function classifyQuery(spec, query, body) {
+  if (!query) return 'MISSING'
+  if (query.error) {
+    if (spec.id === 'audit_grants' && relationMissing(query.error)) {
+      const audit = (body.queries ?? []).find((item) => item.id === 'audit')
+      if (audit && !audit.error && Array.isArray(audit.rows) && audit.rows.length === 0) return 'ABSENT'
+    }
+    if (spec.absence === 'missing-relation' && relationMissing(query.error)) {
+      const relations = (body.queries ?? []).find((item) => item.id === 'migration_relations')
+      const listed = Array.isArray(relations?.rows) && relations.rows.some((row) => row.schema === 'drizzle' && row.name === '__drizzle_migrations')
+      if (relations && !relations.error && !listed) return 'ABSENT'
+    }
+    return 'UNREADABLE'
+  }
+  if (!Array.isArray(query.rows)) return 'UNREADABLE'
+  if (query.rows.length === 0 && spec.absence === 'zero-rows') return 'ABSENT'
+  return 'OBSERVED'
+}
+
+function classifyCounts(body) {
+  const counts = body?.counts
+  if (!Array.isArray(counts)) return 'MISSING'
+  if (counts.some((item) => item?.classification === 'NOT_TAKEN' || item?.reason === 'TABLE_COUNT_CAP')) return 'NOT_TAKEN'
+  const tables = (body.queries ?? []).find((item) => item.id === 'tables')
+  if (!tables || tables.error || !Array.isArray(tables.rows)) return 'UNREADABLE'
+  for (const table of tables.rows) {
+    const count = counts.find((item) => item.schema === table.schema && item.name === table.name)
+    if (!count || count.error || count.result?.error) return 'UNREADABLE'
+  }
+  return 'OBSERVED'
+}
+
+export function qualifyCatalog(body) {
+  const manifest = QUERY_MANIFEST.map((spec) => ({
+    id: spec.id,
+    classification: classifyQuery(spec, (body?.queries ?? []).find((item) => item.id === spec.id), body ?? {}),
+  }))
+  const counts = classifyCounts(body ?? {})
+  const sessionOk = body?.rolledBack === true
+    && body?.identity?.transaction_read_only === 'on'
+    && body?.identity?.database === EXPECTED_DATABASE
+    && !body?.blocker
+  const queriesOk = manifest.every((item) => item.classification === 'OBSERVED' || item.classification === 'ABSENT')
+  const complete = sessionOk && queriesOk && counts === 'OBSERVED'
+  return { complete, blocker: complete ? null : 'CATALOG_PARTIAL', manifest, counts }
+}
+
 export function parseCatalogStdout(text) {
   const redacted = redact(text)
   const start = redacted.lastIndexOf(MARK_BEGIN)
@@ -157,7 +226,11 @@ export function parseCatalogStdout(text) {
   if (start < 0 || end < start) return { ok: false, blocker: 'EXEC_OUTPUT_WITHOUT_CATALOG_MARKER', transcript: redacted.slice(-4000) }
   try {
     const body = JSON.parse(redacted.slice(start + MARK_BEGIN.length, end).trim())
-    return { ok: !body.blocker && body.rolledBack === true && body.identity?.transaction_read_only === 'on' && body.identity?.database === EXPECTED_DATABASE, body }
+    if (body.blocker) return { ok: false, blocker: body.blocker, body }
+    const qualification = qualifyCatalog(body)
+    body.qualification = qualification
+    if (!qualification.complete) return { ok: false, blocker: 'CATALOG_PARTIAL', body }
+    return { ok: true, blocker: null, body }
   } catch {
     return { ok: false, blocker: 'CATALOG_OUTPUT_UNREADABLE', transcript: redacted.slice(-4000) }
   }
@@ -227,6 +300,7 @@ export async function executeCatalog(env, spawn) {
     subscriptionId: null,
     tenantId: null,
     caller: null,
+    S2_02_PREIMAGE_COMPLETE: 'NO',
     execPermission: 'NOT_OBSERVED',
     revision: 'NOT_OBSERVED',
     execAttempted: false,
@@ -348,6 +422,7 @@ if (invoked) {
   }
   const result = await executeCatalog(process.env, launch)
   const digest = writeReport(directory, result.report)
-  console.log(`catalog=${result.exitCode === 0 ? 'OBSERVED' : 'INCOMPLETE'} sha256=${digest} defects=${result.report.defects.join(',')}`)
+  const catalogStatus = result.exitCode === 0 ? 'COMPLETE' : result.report.defects.includes('CATALOG_PARTIAL') ? 'PARTIAL' : 'INCOMPLETE'
+  console.log(`catalog=${catalogStatus} sha256=${digest} defects=${result.report.defects.join(',')} S2_02_PREIMAGE_COMPLETE=NO`)
   process.exit(result.exitCode)
 }
