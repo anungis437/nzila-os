@@ -163,7 +163,12 @@ export function parseCatalogStdout(text) {
   }
 }
 
-export function execCommandLine(source) {
+// Same revision properties inventory run 45766945607 returned from `revision list`:
+// healthState, trafficWeight, and containers[].image. `revision show` is that
+// one resource. A missing field is REVISION_FIELDS_ABSENT, not a looser match.
+export const REVISION_QUERY = '{name:name,healthState:properties.healthState,trafficWeight:properties.trafficWeight,runningState:properties.runningState,containers:properties.template.containers[].{name:name,image:image}}'
+
+export function execInvocation(source) {
   const encoded = Buffer.from(source).toString('base64')
   const node = `node -e "eval(Buffer.from('${encoded}','base64').toString())"`
   const args = [
@@ -175,7 +180,10 @@ export function execCommandLine(source) {
     '--command', node,
   ]
   const quoted = args.map((arg) => `'${arg.replaceAll("'", `'"'"'`)}'`).join(' ')
-  return ['timeout', '90', 'script', '-q', '-e', '-c', `az ${quoted}`, '/dev/null']
+  return {
+    executable: 'timeout',
+    args: ['90', 'script', '-q', '-e', '-c', `az ${quoted}`, '/dev/null'],
+  }
 }
 
 export function liveAuthorization(env) {
@@ -194,12 +202,24 @@ function parseJson(text, label) {
 function revisionAccepted(revision) {
   const container = (revision?.containers ?? []).find((item) => item.name === CONTAINER_NAME)
   return revision?.name === EXPECTED_REVISION
-    && Number(revision?.trafficWeight) === 100
+    && revision?.trafficWeight === 100
     && revision?.healthState === 'Healthy'
     && container?.image === EXPECTED_IMAGE
 }
 
-export async function executeCatalog(env, call) {
+export function revisionDefect(revision) {
+  const container = (revision?.containers ?? []).find((item) => item.name === CONTAINER_NAME)
+  const present = typeof revision?.name === 'string' && revision.name.length > 0
+    && typeof revision?.healthState === 'string' && revision.healthState.length > 0
+    && typeof revision?.trafficWeight === 'number' && Number.isFinite(revision.trafficWeight)
+    && typeof container?.image === 'string' && container.image.length > 0
+  if (!present) return 'REVISION_FIELDS_ABSENT'
+  if (!revisionAccepted(revision)) return 'REVISION_BINDING_CHANGED'
+  return null
+}
+
+export async function executeCatalog(env, spawn) {
+  const arm = (args) => spawn('az', args)
   const defects = liveAuthorization(env)
   const report = {
     schema: 'ue-v2-staging-catalog-exec/v1',
@@ -214,7 +234,7 @@ export async function executeCatalog(env, call) {
   }
   if (defects.length) return { exitCode: 1, report }
 
-  const account = await call(['account', 'show', '--query', '{subscriptionId:id,tenantId:tenantId}', '-o', 'json'])
+  const account = await arm(['account', 'show', '--query', '{subscriptionId:id,tenantId:tenantId}', '-o', 'json'])
   if (account.code !== 0) {
     report.defects.push('ACCOUNT_UNREAD')
     report.accountError = redact(account.stderr).slice(0, 500)
@@ -228,7 +248,7 @@ export async function executeCatalog(env, call) {
     return { exitCode: 1, report }
   }
 
-  const token = await call(['account', 'get-access-token', '--query', 'accessToken', '-o', 'tsv'])
+  const token = await arm(['account', 'get-access-token', '--query', 'accessToken', '-o', 'tsv'])
   if (token.code !== 0) {
     report.defects.push('CALLER_UNREAD')
     return { exitCode: 1, report }
@@ -239,7 +259,7 @@ export async function executeCatalog(env, call) {
     return { exitCode: 1, report }
   }
 
-  const assignments = await call(['role', 'assignment', 'list', '--scope', GROUP_ID, '--include-inherited', '-o', 'json'])
+  const assignments = await arm(['role', 'assignment', 'list', '--scope', GROUP_ID, '--include-inherited', '-o', 'json'])
   if (assignments.code !== 0) {
     report.defects.push('ROLE_ASSIGNMENTS_UNREAD')
     report.roleError = redact(assignments.stderr).slice(0, 500)
@@ -250,7 +270,7 @@ export async function executeCatalog(env, call) {
   report.caller.roles = mine.map((item) => ({ role: item.roleDefinitionName, scope: item.scope }))
   const definitions = []
   for (const item of mine) {
-    const definition = await call(['role', 'definition', 'list', '--name', item.roleDefinitionName, '--scope', GROUP_ID, '-o', 'json'])
+    const definition = await arm(['role', 'definition', 'list', '--name', item.roleDefinitionName, '--scope', GROUP_ID, '-o', 'json'])
     if (definition.code !== 0) {
       report.defects.push('ROLE_DEFINITION_UNREAD')
       return { exitCode: 1, report }
@@ -265,12 +285,12 @@ export async function executeCatalog(env, call) {
     return { exitCode: 3, report }
   }
 
-  const revision = await call([
+  const revision = await arm([
     'containerapp', 'revision', 'show',
     '--resource-group', RESOURCE_GROUP,
     '--name', CONTAINER_APP,
     '--revision', EXPECTED_REVISION,
-    '--query', '{name:name,healthState:properties.healthState,trafficWeight:properties.trafficWeight,runningState:properties.runningState,containers:properties.template.containers[].{name:name,image:image}}',
+    '--query', REVISION_QUERY,
     '-o', 'json',
   ])
   if (revision.code !== 0) {
@@ -279,14 +299,21 @@ export async function executeCatalog(env, call) {
     return { exitCode: 4, report }
   }
   report.revision = parseJson(revision.stdout, 'REVISION')
-  if (!revisionAccepted(report.revision)) {
-    report.defects.push('REVISION_BINDING_CHANGED')
+  const bindingDefect = revisionDefect(report.revision)
+  if (bindingDefect) {
+    report.defects.push(bindingDefect)
     return { exitCode: 4, report }
   }
 
   report.execAttempted = true
-  const exec = await call(execCommandLine(containerSource()))
+  const invocation = execInvocation(containerSource())
+  if (invocation.executable !== 'timeout') throw new Error('EXEC_WRAPPER_MUST_BE_TIMEOUT')
+  const exec = await spawn(invocation.executable, invocation.args)
   report.execExitCode = exec.code
+  if (exec.code === 124) {
+    report.defects.push('EXEC_TIMED_OUT')
+    return { exitCode: 5, report }
+  }
   const parsed = parseCatalogStdout(`${exec.stdout}\n${exec.stderr}`)
   report.catalog = parsed.body ?? null
   if (!parsed.ok) {
@@ -306,8 +333,8 @@ export function writeReport(directory, report) {
   return digest
 }
 
-function callAz(bin, args) {
-  const result = spawnSync(bin, args, { encoding: 'utf8' })
+export function launch(executable, args) {
+  const result = spawnSync(executable, args, { encoding: 'utf8' })
   return { code: result.status ?? 1, stdout: result.stdout ?? '', stderr: result.stderr ?? '' }
 }
 
@@ -319,7 +346,7 @@ if (invoked) {
     console.error('CATALOG_OUTPUT_REQUIRED')
     process.exit(1)
   }
-  const result = await executeCatalog(process.env, (args) => callAz(process.env.UE_CATALOG_AZ_BIN || 'az', args))
+  const result = await executeCatalog(process.env, launch)
   const digest = writeReport(directory, result.report)
   console.log(`catalog=${result.exitCode === 0 ? 'OBSERVED' : 'INCOMPLETE'} sha256=${digest} defects=${result.report.defects.join(',')}`)
   process.exit(result.exitCode)

@@ -16,7 +16,7 @@ The serving image `sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d
 
 ## Session
 
-`az containerapp exec` is an interactive console. Microsoft Learn documents `--revision` and `--container`. On a runner without a terminal it needs a pseudo-terminal (`script`) or it fails before the command starts. The Azure CLI exit code is not the Node process exit code, so the runner accepts the catalogue only when stdout contains the `UE_CATALOG_BEGIN` record, `transaction_read_only` is `on`, the database is `ue_v2_staging`, and the script issued `ROLLBACK`.
+`az containerapp exec` is an interactive console. Microsoft Learn documents `--revision` and `--container`. On a runner without a terminal it needs a pseudo-terminal (`script`) or it fails before the command starts. The process that starts that console is `timeout`, not `az`. ARM reads use `az` by themselves. A 124 from `timeout` is `EXEC_TIMED_OUT` and is not a catalogue. A revision show that omits `trafficWeight`, `healthState`, or the `union-eyes` image is `REVISION_FIELDS_ABSENT`. Those property paths are the ones inventory run 45766945607 already returned. The Azure CLI exit code is not the Node process exit code, so the runner accepts the catalogue only when stdout contains the `UE_CATALOG_BEGIN` record, `transaction_read_only` is `on`, the database is `ue_v2_staging`, and the script issued `ROLLBACK`.
 
 The revision, health, traffic weight, and image digest are read immediately before that single exec. The expected binding is `nzila-ue-v2-staging-app--rel6a60c95c9d` at weight 100, Healthy, with the digest above. Any other binding stops the run.
 

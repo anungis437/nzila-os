@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -18,7 +18,8 @@ import {
   TENANT_ID,
   actionCovers,
   containerSource,
-  execCommandLine,
+  execInvocation,
+  revisionDefect,
   executeCatalog,
   parseCatalogStdout,
   principalFromAccessToken,
@@ -66,9 +67,10 @@ function deployerDefinition() {
 function harness(options = {}) {
   const calls = []
   const token = jwt({ oid: 'oid-1', appid: 'app-1', tid: TENANT_ID, password: TOKEN_SECRET })
-  const call = async (args) => {
-    calls.push(args)
-    if (args[0] === 'timeout') return options.exec ?? { code: 0, stdout: options.catalogStdout ?? '', stderr: '' }
+  const spawn = async (executable, args) => {
+    calls.push({ executable, args })
+    if (executable === 'timeout') return options.exec ?? { code: 0, stdout: options.catalogStdout ?? '', stderr: '' }
+    if (executable !== 'az') throw new Error(`UNEXPECTED_EXECUTABLE ${executable}`)
     if (args[0] === 'account' && args[1] === 'show') {
       return { code: 0, stdout: JSON.stringify({ subscriptionId: SUBSCRIPTION_ID, tenantId: TENANT_ID }), stderr: '' }
     }
@@ -80,7 +82,7 @@ function harness(options = {}) {
     if (args[0] === 'containerapp') return { code: 0, stdout: JSON.stringify(options.revision ?? revisionBody()), stderr: '' }
     throw new Error(`UNEXPECTED ${args.join(' ')}`)
   }
-  return { calls, call, token }
+  return { calls, spawn, token }
 }
 
 test('Microsoft.App/* covers exec and Reader does not', () => {
@@ -99,23 +101,23 @@ test('the access-token decoder keeps only the caller identifiers', () => {
 })
 
 test('a missing exec allow stops before revision and container exec', async () => {
-  const { calls, call, token } = harness({ definition: [{ permissions: [{ actions: ['*/read'], notActions: [] }] }] })
-  const result = await executeCatalog(liveEnv(), call)
+  const { calls, spawn, token } = harness({ definition: [{ permissions: [{ actions: ['*/read'], notActions: [] }] }] })
+  const result = await executeCatalog(liveEnv(), spawn)
   assert.equal(result.exitCode, 3)
   assert.equal(result.report.execPermission, 'NOT_GRANTED')
   assert.equal(result.report.execAttempted, false)
-  assert.equal(calls.some((args) => args[0] === 'containerapp' || args[0] === 'timeout'), false)
+  assert.equal(calls.some((call) => call.executable === 'timeout' || call.args[0] === 'containerapp'), false)
   assert.equal(JSON.stringify(result.report).includes(token), false)
   assert.equal(JSON.stringify(result.report).includes(TOKEN_SECRET), false)
 })
 
 test('a changed image binding stops before exec', async () => {
-  const { calls, call } = harness({ revision: revisionBody('nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:' + 'ab'.repeat(32)) })
-  const result = await executeCatalog(liveEnv(), call)
+  const { calls, spawn } = harness({ revision: revisionBody('nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:' + 'ab'.repeat(32)) })
+  const result = await executeCatalog(liveEnv(), spawn)
   assert.equal(result.exitCode, 4)
   assert.deepEqual(result.report.defects, ['REVISION_BINDING_CHANGED'])
   assert.equal(result.report.execAttempted, false)
-  assert.equal(calls.some((args) => args[0] === 'timeout'), false)
+  assert.equal(calls.some((call) => call.executable === 'timeout'), false)
   assert.equal(result.report.revision.containers[0].image.endsWith('ab'.repeat(32)), true)
 })
 
@@ -128,20 +130,101 @@ test('one accepted binding builds one pseudo-terminal exec and parses the catalo
     counts: [],
   }
   const stdout = `noise\nUE_CATALOG_BEGIN\n${JSON.stringify(catalog)}\nUE_CATALOG_END\n`
-  const { calls, call, token } = harness({ catalogStdout: stdout })
-  const result = await executeCatalog(liveEnv(), call)
+  const { calls, spawn, token } = harness({ catalogStdout: stdout })
+  const result = await executeCatalog(liveEnv(), spawn)
   assert.equal(result.exitCode, 0)
   assert.equal(result.report.execPermission, 'EFFECTIVE_ALLOW_OBSERVED')
   assert.equal(result.report.execAttempted, true)
   assert.equal(result.report.catalog.identity.user, 'union_eyes_runtime')
-  const exec = calls.find((args) => args[0] === 'timeout')
-  assert.equal(exec[1], '90')
-  assert.equal(exec[2], 'script')
-  assert.equal(exec[5], '-c')
-  assert.match(exec[6], new RegExp(EXPECTED_REVISION))
-  assert.match(exec[6], /--container/)
-  assert.equal(exec[6].includes('DATABASE_URL'), false)
+  const exec = calls.find((call) => call.executable === 'timeout')
+  assert.equal(exec.executable, 'timeout')
+  assert.deepEqual(exec.args.slice(0, 5), ['90', 'script', '-q', '-e', '-c'])
+  assert.match(exec.args[5], new RegExp(EXPECTED_REVISION))
+  assert.match(exec.args[5], /--container/)
+  assert.equal(exec.args[5].includes('DATABASE_URL'), false)
+  assert.equal(calls.filter((call) => call.executable === 'az').every((call) => call.args[0] !== 'timeout'), true)
   assert.equal(JSON.stringify(result.report).includes(token), false)
+})
+
+test('a revision payload without traffic weight fails closed before exec', async () => {
+  const incomplete = revisionBody()
+  incomplete.trafficWeight = null
+  const { calls, spawn } = harness({ revision: incomplete })
+  const result = await executeCatalog(liveEnv(), spawn)
+  assert.equal(revisionDefect(incomplete), 'REVISION_FIELDS_ABSENT')
+  assert.equal(result.exitCode, 4)
+  assert.deepEqual(result.report.defects, ['REVISION_FIELDS_ABSENT'])
+  assert.equal(calls.some((call) => call.executable === 'timeout'), false)
+})
+
+test('timeout, a failed exec, and a missing marker do not become a catalogue', async () => {
+  const leaked = ['post', 'gresql://ue:', ['secret', 'password'].join('-'), '@db/ue_v2_staging'].join('')
+  const timed = await executeCatalog(liveEnv(), harness({ exec: { code: 124, stdout: '', stderr: leaked } }).spawn)
+  assert.equal(timed.exitCode, 5)
+  assert.equal(timed.report.defects.includes('EXEC_TIMED_OUT'), true)
+  assert.equal(timed.report.catalog, null)
+  assert.equal(JSON.stringify(timed.report).includes(['secret', 'password'].join('-')), false)
+
+  const failed = await executeCatalog(liveEnv(), harness({ exec: { code: 1, stdout: 'hello', stderr: leaked } }).spawn)
+  assert.equal(failed.exitCode, 5)
+  assert.equal(failed.report.defects.includes('EXEC_OUTPUT_WITHOUT_CATALOG_MARKER'), true)
+  assert.equal(failed.report.transcriptTail.includes(['secret', 'password'].join('-')), false)
+  assert.match(failed.report.transcriptTail, /\[redacted\]/)
+
+  const unmarked = await executeCatalog(liveEnv(), harness({ exec: { code: 0, stdout: 'hello', stderr: '' } }).spawn)
+  assert.equal(unmarked.exitCode, 5)
+  assert.equal(unmarked.report.defects.includes('EXEC_OUTPUT_WITHOUT_CATALOG_MARKER'), true)
+  assert.equal(unmarked.report.catalog, null)
+})
+
+test('the real launcher executes timeout for the console and az for the control plane', () => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'ue-catalog-launch-'))
+  const bin = path.join(directory, 'bin')
+  const out = path.join(directory, 'out')
+  mkdirSync(bin)
+  const token = jwt({ oid: 'oid-1', appid: 'app-1', tid: TENANT_ID, password: TOKEN_SECRET })
+  const revision = JSON.stringify(revisionBody())
+  const definition = JSON.stringify(deployerDefinition())
+  const assignments = JSON.stringify([{ principalId: 'oid-1', roleDefinitionName: 'Nzila UE V2 Staging Deployer', scope: GROUP_ID }])
+  const account = JSON.stringify({ subscriptionId: SUBSCRIPTION_ID, tenantId: TENANT_ID })
+  writeFileSync(path.join(bin, 'az'), `#!/bin/sh
+printf '%s\\n' "$*" >> ${JSON.stringify(path.join(directory, 'az.log'))}
+case "$1 $2" in
+  "account show") printf '%s\\n' ${JSON.stringify(account)} ;;
+  "account get-access-token") printf '%s\\n' "$UE_FAKE_TOKEN" ;;
+  "role assignment") printf '%s\\n' ${JSON.stringify(assignments)} ;;
+  "role definition") printf '%s\\n' ${JSON.stringify(definition)} ;;
+  "containerapp revision") printf '%s\\n' ${JSON.stringify(revision)} ;;
+  *) printf '%s\\n' "unexpected $*" >&2; exit 9 ;;
+esac
+`)
+  writeFileSync(path.join(bin, 'timeout'), `#!/bin/sh
+printf '%s\\n' "$*" >> ${JSON.stringify(path.join(directory, 'timeout.log'))}
+if [ "$1" != 90 ]; then exit 97; fi
+printf '%s\\n' 'UE_CATALOG_BEGIN'
+printf '%s\\n' '{"schema":"ue-v2-staging-catalog/v1","rolledBack":true,"identity":{"database":"ue_v2_staging","transaction_read_only":"on","user":"union_eyes_runtime"},"queries":[],"counts":[]}'
+printf '%s\\n' 'UE_CATALOG_END'
+`)
+  chmodSync(path.join(bin, 'az'), 0o755)
+  chmodSync(path.join(bin, 'timeout'), 0o755)
+  const run = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-exec.mjs'), '--out', out], {
+    env: { ...process.env, ...liveEnv(), PATH: `${bin}:${process.env.PATH}`, UE_FAKE_TOKEN: token },
+    encoding: 'utf8',
+  })
+  assert.equal(run.status, 0, run.stderr)
+  const azLog = readFileSync(path.join(directory, 'az.log'), 'utf8')
+  const timeoutLog = readFileSync(path.join(directory, 'timeout.log'), 'utf8')
+  assert.equal(azLog.includes('timeout'), false)
+  assert.match(azLog, /account show/)
+  assert.match(azLog, /containerapp revision show/)
+  assert.match(timeoutLog, /^90 script -q -e -c az /)
+  assert.match(timeoutLog, new RegExp(EXPECTED_REVISION))
+  assert.equal(timeoutLog.includes('DATABASE_URL'), false)
+  const report = readFileSync(path.join(out, 'catalog.json'), 'utf8')
+  assert.equal(report.includes(token), false)
+  assert.equal(report.includes(TOKEN_SECRET), false)
+  assert.match(report, /EFFECTIVE_ALLOW_OBSERVED/)
+  rmSync(directory, { recursive: true, force: true })
 })
 
 test('the container program resolves pg, refuses a writable transaction, and rolls back', () => {
@@ -220,8 +303,10 @@ test('the workflow is manual, pinned to main, and uses the deploy environment on
   assert.equal(text.includes('deployment group create'), false)
   assert.equal(text.includes('UE_V2_STAGING_DB_ADMIN_PASSWORD'), false)
   assert.equal(text.includes(CONTAINER_APP), false)
-  const command = execCommandLine('SELECT 1')
-  assert.equal(command[6].includes(CONTAINER_APP), true)
+  const command = execInvocation('SELECT 1')
+  assert.equal(command.executable, 'timeout')
+  assert.equal(command.args[5].includes(CONTAINER_APP), true)
+  assert.equal(command.args[5].startsWith('az '), true)
   const directory = mkdtempSync(path.join(tmpdir(), 'ue-catalog-report-'))
   const digest = writeReport(directory, { defects: [] })
   assert.equal(readFileSync(path.join(directory, 'SHA256SUMS'), 'utf8').startsWith(digest), true)
