@@ -29,7 +29,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "freshness:audit": "tsx src/freshness-audit-cli.ts"
   },
   "dependencies": {
     "@nzila/db": "workspace:*",
