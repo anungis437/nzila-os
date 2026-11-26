@@ -24,12 +24,18 @@ import {
   JOB_PURPOSE,
   STAGING_HOST,
   assertStagingTarget,
+  EVIDENCE_CHUNK_CHARS,
+  EVIDENCE_LINE_BUDGET,
+  EVIDENCE_MAX_BYTES,
+  EVIDENCE_TAIL_LINES,
   cleanupOwnedJob,
   executeCatalogJob,
+  frameCatalog,
   jobNameForRun,
   jobSpecification,
   operatorImageDefect,
   ownedJobDefect,
+  reassembleCatalog,
 } from './ue-v2-staging-catalog-job.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -75,9 +81,20 @@ function completeCatalog() {
 }
 
 function marked(body, digestOverride) {
-  const json = JSON.stringify(body)
-  const digest = digestOverride ?? createHash('sha256').update(json).digest('hex')
-  return `UE_CATALOG_BEGIN\n${json}\nUE_CATALOG_END\nUE_CATALOG_SHA256 ${digest}\n`
+  const framed = frameCatalog(JSON.stringify(body))
+  if (!digestOverride) return framed.text
+  return framed.text.replaceAll(framed.digest, digestOverride)
+}
+
+function virtualClock(step) {
+  let time = 0
+  return {
+    now: () => time,
+    sleep: async () => { time += step },
+    intervalMs: step,
+    deadlineMs: step,
+    stopDeadlineMs: step,
+  }
 }
 
 function liveEnv(extra = {}) {
@@ -104,7 +121,11 @@ function revision() {
 
 function harness(options = {}) {
   const calls = []
-  let shows = 0
+  const statuses = [...(options.statuses ?? [options.status ?? 'Succeeded'])]
+  let statusIndex = 0
+  let stopped = false
+  let deleted = false
+  const owned = { name: jobNameForRun(RUN), tags: { purpose: JOB_PURPOSE, runId: RUN, source: SHA } }
   const spawn = async (executable, args) => {
     calls.push({ executable, args })
     const line = args.join(' ')
@@ -113,16 +134,37 @@ function harness(options = {}) {
     if (line.includes('secrets[].name')) return { code: 0, stdout: JSON.stringify(options.secrets ?? ['database-url']), stderr: '' }
     if (line.includes('job create')) return { code: options.createCode ?? 0, stdout: '', stderr: options.createError ?? '' }
     if (line.includes('job start')) return { code: options.startCode ?? 0, stdout: `${jobNameForRun(RUN)}-exec\n`, stderr: '' }
-    if (line.includes('execution show')) return { code: 0, stdout: `${options.status ?? 'Succeeded'}\n`, stderr: '' }
-    if (line.includes('logs show')) return { code: 0, stdout: options.logs ?? '', stderr: options.logError ?? '' }
-    if (line.includes('job show')) {
-      shows += 1
-      if (options.unowned) return { code: 0, stdout: JSON.stringify({ name: 'ue-v2-forward-1', tags: { purpose: 'staging-forward-upgrade', runId: '1' } }), stderr: '' }
-      if (options.cleanupMissing && shows === 1) return { code: 1, stdout: '', stderr: 'not found' }
-      if (shows > 1) return { code: options.afterCode ?? 3, stdout: '', stderr: 'missing' }
-      return { code: 0, stdout: JSON.stringify({ name: jobNameForRun(RUN), tags: { purpose: JOB_PURPOSE, runId: RUN, source: SHA } }), stderr: '' }
+    if (line.includes('job stop')) {
+      stopped = true
+      return { code: options.stopCode ?? 0, stdout: '', stderr: options.stopError ?? '' }
     }
-    if (line.includes('job delete')) return { code: options.deleteCode ?? 0, stdout: '', stderr: options.deleteError ?? '' }
+    if (line.includes('execution show')) {
+      if (Array.isArray(options.showCodes)) {
+        const code = options.showCodes[statusIndex] ?? 0
+        if (code !== 0) {
+          statusIndex += 1
+          return { code, stdout: '', stderr: 'transient' }
+        }
+      }
+      const status = stopped ? (options.afterStop ?? 'Stopped') : statuses[Math.min(statusIndex, statuses.length - 1)]
+      if (!stopped) statusIndex += 1
+      return { code: 0, stdout: `${status}\n`, stderr: '' }
+    }
+    if (line.includes('logs show')) return { code: 0, stdout: options.logs ?? '', stderr: options.logError ?? '' }
+    if (line.includes('job delete')) {
+      deleted = true
+      return { code: options.deleteCode ?? 0, stdout: '', stderr: options.deleteError ?? '' }
+    }
+    if (line.includes('job show')) {
+      if (options.createCode && calls.filter((call) => call.args.join(' ').includes('job show')).length === 1 && options.createShow) {
+        if (options.createShow === 'absent') return { code: 3, stdout: '', stderr: 'ResourceNotFound' }
+        if (options.createShow === 'ambiguous') return { code: 1, stdout: '', stderr: 'network reset' }
+        if (options.createShow === 'unowned') return { code: 0, stdout: JSON.stringify({ name: 'scheduled-dues', tags: { purpose: 'cron' } }), stderr: '' }
+      }
+      if (deleted) return { code: options.afterCode ?? 3, stdout: '', stderr: 'missing' }
+      if (options.unowned) return { code: 0, stdout: JSON.stringify({ name: 'ue-v2-forward-1', tags: { purpose: 'staging-forward-upgrade', runId: '1' } }), stderr: '' }
+      return { code: 0, stdout: JSON.stringify(owned), stderr: '' }
+    }
     return { code: 1, stdout: '', stderr: `UNEXPECTED ${line}` }
   }
   return { calls, spawn }
@@ -145,7 +187,10 @@ test('the private job controller does not use the exec console', async () => {
   const text = readFileSync(new URL('./ue-v2-staging-catalog-job.mjs', import.meta.url), 'utf8')
   assert.equal(text.includes('containerapp exec'), false)
   assert.equal(text.includes("exec/action"), false)
-  const produced = await executeCatalogJob(liveEnv(), harness({ logs: marked(completeCatalog()) }).spawn)
+  const fake = harness({ logs: marked(completeCatalog()) })
+  const produced = await executeCatalogJob(liveEnv(), fake.spawn)
+  assert.equal(fake.calls.some((call) => call.args.includes(String(EVIDENCE_TAIL_LINES))), true)
+  assert.equal(fake.calls.some((call) => call.args.at(-2) === '--tail' && call.args.at(-1) === '200'), false)
   assert.equal(produced.exitCode, 0)
   assert.equal(produced.report.verdict, 'CATALOG_COMPLETE')
   assert.equal(produced.report.catalogAccepted, true)
@@ -171,11 +216,30 @@ test('controller failure modes stay diagnosable and an unowned job is not delete
   assert.equal(unowned.reason, 'UNOWNED_JOB')
 
   const cleanup = await executeCatalogJob(liveEnv(), harness({ logs: marked(completeCatalog()), deleteCode: 1 }).spawn)
+  assert.equal(cleanup.exitCode, 6)
+  assert.equal(cleanup.report.catalogAccepted, false)
   assert.equal(cleanup.report.defects.includes('JOB_CLEANUP_FAILED'), true)
 
-  const created = await executeCatalogJob(liveEnv(), harness({ createCode: 1, createError: secret }).spawn)
+  const createdHarness = harness({ createCode: 1, createError: secret })
+  const created = await executeCatalogJob(liveEnv(), createdHarness.spawn)
   assert.equal(created.report.defects.includes('JOB_CREATION_FAILED'), true)
+  assert.equal(createdHarness.calls.some((call) => call.args.includes('delete')), true)
   assert.equal(JSON.stringify(created.report).includes(marker), false)
+
+  const absent = harness({ createCode: 1, createShow: 'absent' })
+  const absentResult = await executeCatalogJob(liveEnv(), absent.spawn)
+  assert.equal(absentResult.report.defects.includes('JOB_CREATION_FAILED'), true)
+  assert.equal(absent.calls.some((call) => call.args.includes('delete')), false)
+
+  const ambiguous = harness({ createCode: 1, createShow: 'ambiguous' })
+  const ambiguousResult = await executeCatalogJob(liveEnv(), ambiguous.spawn)
+  assert.equal(ambiguousResult.report.defects.includes('JOB_CLEANUP_UNPROVEN'), true)
+  assert.equal(ambiguous.calls.some((call) => call.args.includes('delete')), false)
+
+  const foreign = harness({ createCode: 1, createShow: 'unowned' })
+  const foreignResult = await executeCatalogJob(liveEnv(), foreign.spawn)
+  assert.equal(foreignResult.report.defects.includes('JOB_CREATION_FAILED'), true)
+  assert.equal(foreign.calls.some((call) => call.args.includes('delete')), false)
 
   const secretMissing = await executeCatalogJob(liveEnv(), harness({ secrets: [] }).spawn)
   assert.equal(secretMissing.report.defects.includes('RUNTIME_SECRET_UNAVAILABLE'), true)
@@ -183,8 +247,26 @@ test('controller failure modes stay diagnosable and an unowned job is not delete
   const wrongAccount = await executeCatalogJob(liveEnv(), harness({ subscriptionId: 'other' }).spawn)
   assert.equal(wrongAccount.report.defects.includes('WRONG_SUBSCRIPTION'), true)
 
-  const timed = await executeCatalogJob(liveEnv(), harness({ status: 'Running' }).spawn)
+  const clock = virtualClock(1000)
+  const running = harness({ statuses: ['Running'], stopCode: 1 })
+  const timed = await executeCatalogJob(liveEnv(), running.spawn, clock)
   assert.equal(timed.report.defects.includes('JOB_EXECUTION_TIMED_OUT'), true)
+  assert.equal(timed.report.defects.includes('JOB_CLEANUP_UNPROVEN'), true)
+  assert.equal(timed.report.phases.delete, 'HELD')
+  assert.equal(running.calls.some((call) => call.args.includes('delete')), false)
+
+  const stopping = harness({ statuses: ['Running'], logs: marked(completeCatalog()) })
+  const stopped = await executeCatalogJob(liveEnv(), stopping.spawn, virtualClock(1000))
+  assert.equal(stopped.report.executionStatus, 'Stopped')
+  assert.equal(stopped.exitCode, 5)
+  assert.equal(stopped.report.catalogAccepted, false)
+  assert.equal(stopped.report.cleanup.deleted, true)
+
+  const failed = await executeCatalogJob(liveEnv(), harness({ status: 'Failed', logs: marked(completeCatalog()) }).spawn)
+  assert.equal(failed.exitCode, 5)
+  assert.equal(failed.report.defects.includes('JOB_EXECUTION_FAILED'), true)
+  assert.equal(failed.report.catalogAccepted, false)
+  assert.equal(failed.report.catalog.schema, CATALOG_SCHEMA)
 
   const production = await executeCatalogJob(liveEnv({ UE_CATALOG_TARGET: JSON.stringify({ resourceGroup: 'nzila-production-rg', database: 'ue_v2_production', host: 'prod.postgres.database.azure.com' }) }), async () => { throw new Error('AZURE_CALLED') })
   assert.equal(production.report.defects.includes('WRONG_ENVIRONMENT'), true)
@@ -230,6 +312,52 @@ test('count continuation reconciles one inventory and rejects drift or overlap',
   assert.equal(reconcileCatalogSessions([{ catalog: baseline, observedAt: baseline.observedAt }, contradicted], binding).reason, 'CONTINUATION_CONTRADICTION')
 })
 
+test('observation waits through pending and running, and a short log tail is not a catalogue', async () => {
+  const clock = virtualClock(1000)
+  clock.deadlineMs = 10000
+  const sequence = harness({ statuses: ['Pending', 'Running', 'Running', 'Succeeded'], logs: marked(completeCatalog()) })
+  const produced = await executeCatalogJob(liveEnv(), sequence.spawn, clock)
+  assert.equal(produced.exitCode, 0)
+  assert.deepEqual(produced.report.executionObservations.map((item) => item.status), ['Pending', 'Running', 'Running', 'Succeeded'])
+  assert.equal(sequence.calls.some((call) => call.args.includes('stop')), false)
+
+  const retry = harness({ statuses: ['Succeeded'], showCodes: [1, 1, 0], logs: marked(completeCatalog()) })
+  const retried = await executeCatalogJob(liveEnv(), retry.spawn, { ...virtualClock(1000), deadlineMs: 10000 })
+  assert.equal(retried.exitCode, 0)
+  assert.equal(retried.report.executionObservations.filter((item) => item.status === 'UNREAD').length, 2)
+
+  const payload = 'x'.repeat(EVIDENCE_CHUNK_CHARS * 250)
+  const framed = frameCatalog(JSON.stringify({ pad: payload }))
+  assert.ok(framed.chunks > 200)
+  assert.ok(framed.text.split('\n').filter(Boolean).every((line) => line.length <= EVIDENCE_LINE_BUDGET))
+  assert.equal(reassembleCatalog(framed.text).ok, true)
+  const tail = framed.text.trim().split('\n').slice(-200).join('\n')
+  assert.equal(reassembleCatalog(tail).defect, 'EVIDENCE_MISSING')
+  const truncated = await executeCatalogJob(liveEnv(), harness({ logs: tail }).spawn)
+  assert.equal(truncated.report.defects.includes('EVIDENCE_MISSING'), true)
+  assert.equal(truncated.report.catalogAccepted, false)
+
+  const overflow = frameCatalog('y'.repeat(EVIDENCE_MAX_BYTES + 1))
+  assert.match(overflow.text, /overflow=1/)
+  assert.equal(reassembleCatalog(overflow.text).defect, 'EVIDENCE_TRANSPORT_EXCEEDED')
+  const refused = await executeCatalogJob(liveEnv(), harness({ logs: overflow.text }).spawn)
+  assert.equal(refused.report.defects.includes('EVIDENCE_TRANSPORT_EXCEEDED'), true)
+  assert.equal(refused.report.catalogAccepted, false)
+})
+
+test('a failed controller run still writes the catalogue receipt', () => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'ue-catalog-out-'))
+  const result = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--out', directory], {
+    env: { ...process.env, UE_CATALOG_JOB_LIVE: '0' },
+    encoding: 'utf8',
+  })
+  assert.notEqual(result.status, 0)
+  const receipt = JSON.parse(readFileSync(path.join(directory, 'catalog.json'), 'utf8'))
+  assert.equal(receipt.defects.includes('WRONG_ENVIRONMENT'), true)
+  assert.equal(receipt.S2_02_PREIMAGE_COMPLETE, 'NO')
+  rmSync(directory, { recursive: true, force: true })
+})
+
 test('the workflow is manual, private, and separate from upgrade and exec', () => {
   const text = readFileSync(WORKFLOW, 'utf8')
   const workflow = YAML.parse(text)
@@ -240,6 +368,7 @@ test('the workflow is manual, private, and separate from upgrade and exec', () =
   assert.equal(text.includes('UE_V2_STAGING_DB_ADMIN_PASSWORD'), false)
   assert.equal(text.includes('forward-upgrade'), false)
   assert.equal(text.includes('postgres flexible-server firewall'), false)
+  assert.match(text, /if: always\(\)/)
   const docker = readFileSync(path.join(REPO, 'tooling/docker/ue-v2-catalog-operator.Dockerfile'), 'utf8')
   assert.match(docker, /ENTRYPOINT \["node", "\/app\/ue-catalog\/operator.cjs"\]/)
   assert.match(docker, /USER 1001:1001/)
@@ -280,26 +409,45 @@ test('the packaged operator runs one read-only session against disposable Postgr
     ].join('; ')
     const setup = spawnSync('docker', ['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-U', 'postgres', '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1', '-c', setupSql], { encoding: 'utf8' })
     assert.equal(setup.status, 0, setup.stderr)
-    const directory = mkdtempSync(path.join(tmpdir(), 'ue-operator-run-'))
-    writeFileSync(path.join(directory, 'operator.cjs'), containerSource())
+    const context = mkdtempSync(path.join(tmpdir(), 'ue-catalog-image-'))
+    writeFileSync(path.join(context, 'operator.cjs'), containerSource())
+    writeFileSync(path.join(context, 'base.Dockerfile'), [
+      'FROM node:22-slim',
+      'WORKDIR /app',
+      'RUN npm install --omit=dev --no-fund --no-audit pg@8.20.0 \\',
+      ' && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx',
+      'RUN groupadd --system --gid 1001 nodejs \\',
+      ' && useradd --system --uid 1001 --no-create-home nextjs \\',
+      ' && chown -R nextjs:nodejs /app',
+      'USER 1001:1001',
+      '',
+    ].join('\n'))
+    const base = spawnSync('docker', ['build', '-f', path.join(context, 'base.Dockerfile'), '-t', 'ue-s202-catalog-base', context], { encoding: 'utf8' })
+    assert.equal(base.status, 0, base.stderr)
+    const image = spawnSync('docker', ['build', '-f', path.join(REPO, 'tooling/docker/ue-v2-catalog-operator.Dockerfile'), '--build-arg', 'QUALIFIED_APPLICATION_IMAGE=ue-s202-catalog-base', '--build-arg', 'OPERATOR_SOURCE_SHA=local', '-t', 'ue-s202-catalog-operator', context], { encoding: 'utf8' })
+    assert.equal(image.status, 0, image.stderr)
+    const probe = spawnSync('docker', ['run', '--rm', '--entrypoint', 'node', '-e', 'NODE_PATH=', 'ue-s202-catalog-operator', '-e', 'process.chdir("/app/ue-catalog"); const pg = require("pg"); if (process.getuid() !== 1001) process.exit(2); if (!pg.Client) process.exit(3); console.log("PG_RESOLVED " + require.resolve("pg"));'], { encoding: 'utf8' })
+    assert.equal(probe.status, 0, probe.stderr)
+    assert.match(probe.stdout, /PG_RESOLVED \/app\/node_modules\/pg\/lib\/index\.js/)
+    const runOperator = (url) => spawnSync('docker', ['run', '--rm', '--network', 'host', '-e', 'NODE_PATH=', '-e', `DATABASE_URL=${url}`, '-e', 'UE_CATALOG_TRANSPORT=private-job', 'ue-s202-catalog-operator'], { encoding: 'utf8' })
     const elevatedUrl = ['post', 'gresql://postgres:', password, '@127.0.0.1:54329/ue_v2_staging'].join('')
-    const elevated = spawnSync(process.execPath, ['operator.cjs'], { cwd: directory, env: { ...process.env, DATABASE_URL: elevatedUrl, UE_CATALOG_TRANSPORT: 'private-job', NODE_PATH: path.join(REPO, 'node_modules') }, encoding: 'utf8' })
-    const elevatedBody = JSON.parse(elevated.stdout.split('UE_CATALOG_BEGIN')[1].split('UE_CATALOG_END')[0])
+    const elevated = runOperator(elevatedUrl)
+    const elevatedBody = JSON.parse(reassembleCatalog(elevated.stdout).body)
     assert.equal(elevatedBody.rolledBack, true)
     assert.equal(elevatedBody.identity.transaction_read_only, 'on')
     assert.equal(elevatedBody.privilege.classification, 'ELEVATED')
     assert.equal(elevatedBody.privilege.readOnlyCredential, false)
     assert.equal(elevated.stdout.includes(password), false)
     const limitedUrl = ['post', 'gresql://catalog_login:', rolePassword, '@127.0.0.1:54329/ue_v2_staging'].join('')
-    const limited = spawnSync(process.execPath, ['operator.cjs'], { cwd: directory, env: { ...process.env, DATABASE_URL: limitedUrl, UE_CATALOG_TRANSPORT: 'private-job', NODE_PATH: path.join(REPO, 'node_modules') }, encoding: 'utf8' })
-    const limitedBody = JSON.parse(limited.stdout.split('UE_CATALOG_BEGIN')[1].split('UE_CATALOG_END')[0])
+    const limited = runOperator(limitedUrl)
+    const limitedBody = JSON.parse(reassembleCatalog(limited.stdout).body)
     assert.equal(limitedBody.privilege.classification, 'LIMITED_RUNTIME')
     assert.equal(limitedBody.counts.find((item) => item.name === 'members').globalTotal, false)
     const wrongUrl = ['post', 'gresql://postgres:', password, '@127.0.0.1:54329/postgres'].join('')
-    const wrong = spawnSync(process.execPath, ['operator.cjs'], { cwd: directory, env: { ...process.env, DATABASE_URL: wrongUrl, NODE_PATH: path.join(REPO, 'node_modules') }, encoding: 'utf8' })
-    const wrongBody = JSON.parse(wrong.stdout.split('UE_CATALOG_BEGIN')[1].split('UE_CATALOG_END')[0])
+    const wrong = runOperator(wrongUrl)
+    const wrongBody = JSON.parse(reassembleCatalog(wrong.stdout).body)
     assert.equal(wrongBody.blocker, 'IDENTITY_REFUSED')
-    rmSync(directory, { recursive: true, force: true })
+    rmSync(context, { recursive: true, force: true })
   } finally {
     spawnSync('docker', ['rm', '-f', name], { stdio: 'ignore' })
   }

@@ -26,6 +26,8 @@ export const CATALOG_SCHEMA = 'ue-v2-staging-catalog/v2'
 export const COUNT_WALL_BUDGET_MS = 45000
 export const COUNT_MAX_STATEMENTS = 250
 export const SOURCE_TABLE_DECLARATIONS = 1224
+export const EVIDENCE_CHUNK_CHARS = 3000
+export const EVIDENCE_MAX_BYTES = 8 * 1024 * 1024
 export const EXEC_ACTION = 'Microsoft.App/containerApps/exec/action'
 export const GROUP_ID = `/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}`
 
@@ -199,8 +201,24 @@ async function main() {
     }
     const body = JSON.stringify(out)
     const digest = crypto.createHash('sha256').update(body).digest('hex')
-    process.stdout.write(BEGIN + '\\n' + body + '\\n' + END + '\\n')
-    process.stdout.write('UE_CATALOG_SHA256 ' + digest + '\\n')
+    if (process.env.UE_CATALOG_TRANSPORT === 'private-job') {
+      const chunkChars = ${EVIDENCE_CHUNK_CHARS}
+      const maxBytes = ${EVIDENCE_MAX_BYTES}
+      if (body.length > maxBytes) {
+        process.stdout.write('UE_CATALOG_FRAME v1 chunks=0 sha256=' + digest + ' bytes=' + String(body.length) + ' overflow=1\\n')
+      } else {
+        const count = Math.max(1, Math.ceil(body.length / chunkChars))
+        process.stdout.write('UE_CATALOG_FRAME v1 chunks=' + String(count) + ' sha256=' + digest + ' bytes=' + String(body.length) + '\\n')
+        for (let index = 0; index < count; index += 1) {
+          process.stdout.write('UE_CATALOG_CHUNK ' + String(index + 1) + '/' + String(count) + ' ' + body.slice(index * chunkChars, (index + 1) * chunkChars) + '\\n')
+        }
+      }
+      process.stdout.write(END + '\\n')
+      process.stdout.write('UE_CATALOG_SHA256 ' + digest + '\\n')
+    } else {
+      process.stdout.write(BEGIN + '\\n' + body + '\\n' + END + '\\n')
+      process.stdout.write('UE_CATALOG_SHA256 ' + digest + '\\n')
+    }
   }
 }
 main()

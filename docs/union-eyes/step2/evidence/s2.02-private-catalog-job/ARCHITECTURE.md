@@ -22,8 +22,11 @@ The forward-upgrade job was not reused as the operator. It exposes DDL and the a
 - Revision and image are rechecked. A mismatch is `REVISION_BINDING_CHANGED`.
 - The operator image must be the catalog repository digest, not the application digest.
 - The app must already have a secret named `database-url`. The value is not read.
-- Job name is `ue-s202-cat-<run id>`. Deletion requires that exact name plus matching purpose, run id, and source tags.
+- Job name is `ue-s202-cat-<run id>`. Deletion requires that exact name plus matching purpose, run id, and source tags, and it requires a terminal execution. A running execution is stopped before deletion. If it is still running, the job is kept and the receipt says `JOB_CLEANUP_UNPROVEN`.
 - Counts stay inside the existing 15s / 45s / 250 budget. Continuation tokens expire in 24 hours and are not a second authorization.
+- Evidence is a hashed chunk frame: 3000-character payloads, 4096-character line budget, 8 MiB maximum, 2813-line retrieval. Incomplete frames do not become `CATALOG_COMPLETE`.
+
+The operator image test builds `tooling/docker/ue-v2-catalog-operator.Dockerfile` on a local base that installs `pg` at `/app/node_modules/pg` and runs as uid 1001 with `NODE_PATH` unset. This environment cannot pull the private application digest. A live dispatch still builds `FROM` that digest.
 
 ## Release holds
 
