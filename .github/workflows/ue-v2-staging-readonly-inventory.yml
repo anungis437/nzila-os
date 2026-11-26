@@ -1,0 +1,76 @@
+name: Union Eyes V2 · Staging read-only inventory
+
+# Control-plane inventory for nzila-ue-v2-staging-app. It uses the existing
+# ue-staging-plan OIDC subject (repo:anungis437/nzila-os:environment:ue-staging-plan).
+# It does not deploy, run what-if, change traffic, open a firewall rule, start a
+# job, or open a SQL session.
+#
+# Eligibility, checked 2026-11-26: ue-staging-plan deployment branch policy allows
+# only main. This file is not on main. Do not dispatch it until a founder adds
+# docs/ue-step2-s200-plan-cfc5 to that environment policy. This repository's
+# integration token received HTTP 403 on workflow_dispatch and cannot start it.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ue-v2-staging-readonly-inventory
+  cancel-in-progress: false
+
+env:
+  STAGING_RG: nzila-canada-staging-rg
+  APP_NAME: nzila-ue-v2-staging-app
+  PG_SERVER: nzila-ue-v2-staging-db-d562ba7f
+  EXPECTED_SUBSCRIPTION: d562ba7f-d891-4504-a489-10917c0ebaaf
+  EXPECTED_TENANT: cc15259a-d2bf-421f-8e44-dccf8dc6232a
+
+jobs:
+  inventory:
+    name: UE V2 Staging · Read-only inventory
+    runs-on: ubuntu-latest
+    environment: ue-staging-plan
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Azure Login (OIDC, plan identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read the staging control plane
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/inventory"
+          az account show --query '{subscriptionId:id,tenantId:tenantId}' -o json > "$RUNNER_TEMP/inventory/account.json"
+          python3 - << 'PY'
+          import json, os
+          account = json.load(open(os.environ["RUNNER_TEMP"] + "/inventory/account.json"))
+          if account["subscriptionId"] != os.environ["EXPECTED_SUBSCRIPTION"]:
+              raise SystemExit("WRONG_SUBSCRIPTION")
+          if account["tenantId"] != os.environ["EXPECTED_TENANT"]:
+              raise SystemExit("WRONG_TENANT")
+          PY
+          az group show -n "$STAGING_RG" --query '{id:id,name:name,location:location}' -o json > "$RUNNER_TEMP/inventory/resource-group.json"
+          az containerapp show -g "$STAGING_RG" -n "$APP_NAME" --query '{id:id,name:name,location:location,provisioningState:properties.provisioningState,fqdn:properties.configuration.ingress.fqdn,latestRevisionName:properties.latestRevisionName,latestReadyRevisionName:properties.latestReadyRevisionName,runningStatus:properties.runningStatus,traffic:properties.configuration.ingress.traffic}' -o json > "$RUNNER_TEMP/inventory/containerapp.json"
+          az containerapp revision list -g "$STAGING_RG" -n "$APP_NAME" --query '[].{name:name,active:properties.active,healthState:properties.healthState,provisioningState:properties.provisioningState,trafficWeight:properties.trafficWeight,replicas:properties.replicas,createdTime:properties.createdTime,image:properties.template.containers[0].image}' -o json > "$RUNNER_TEMP/inventory/revisions.json"
+          az postgres flexible-server show -g "$STAGING_RG" -n "$PG_SERVER" --query '{id:id,name:name,version:version,state:state,fullyQualifiedDomainName:fullyQualifiedDomainName,publicNetworkAccess:network.publicNetworkAccess,delegatedSubnetResourceId:network.delegatedSubnetResourceId,privateDnsZoneArmResourceId:network.privateDnsZoneArmResourceId}' -o json > "$RUNNER_TEMP/inventory/postgres-server.json"
+          for PARAM in max_connections reserved_connections superuser_reserved_connections; do
+            az postgres flexible-server parameter show --subscription "$EXPECTED_SUBSCRIPTION" -g "$STAGING_RG" --server-name "$PG_SERVER" --name "$PARAM" --query '{name:name,value:value,source:source}' -o json > "$RUNNER_TEMP/inventory/postgres-parameter-$PARAM.json"
+          done
+
+      - name: Upload sanitized inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-readonly-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/inventory/
+          retention-days: 30
+          if-no-files-found: error
