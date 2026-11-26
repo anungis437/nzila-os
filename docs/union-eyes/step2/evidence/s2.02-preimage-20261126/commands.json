@@ -1,0 +1,50 @@
+{
+  "schema": "UE_S2_02_PREIMAGE_COMMANDS_V1",
+  "commands": [
+    {
+      "id": "git-fetch",
+      "command": "git fetch origin main fix/ue-private-document-delivery cursor/ue-step2-s200-plan-cfc5",
+      "effect": "read"
+    },
+    {
+      "id": "gh-pr-1309",
+      "command": "gh pr view 1309 --repo anungis437/nzila-os",
+      "effect": "read"
+    },
+    {
+      "id": "gh-pr-1310",
+      "command": "gh pr view 1310 --repo anungis437/nzila-os",
+      "effect": "read"
+    },
+    {
+      "id": "azure-mcp-subscription-list",
+      "command": "Azure MCP subscription_list",
+      "result": "MCP error -32001 Request timed out",
+      "effect": "read"
+    },
+    {
+      "id": "azure-mcp-containerapps-list",
+      "command": "Azure MCP containerapps_list resource-group nzila-canada-staging-rg subscription d562ba7f-d891-4504-a489-10917c0ebaaf",
+      "result": "MCP error -32001 Request timed out",
+      "effect": "read"
+    },
+    {
+      "id": "azure-mcp-postgres-config",
+      "command": "Azure MCP postgres_server_config_get server nzila-ue-v2-staging-db-d562ba7f",
+      "result": "MCP error -32001 Request timed out",
+      "effect": "read"
+    },
+    {
+      "id": "arm-get-subscription",
+      "command": "GET https://management.azure.com/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf?api-version=2022-12-01",
+      "result": "401 AuthenticationFailed, Authorization header missing",
+      "effect": "read"
+    },
+    {
+      "id": "dns-and-tcp",
+      "command": "socket.getaddrinfo and a TCP connect with no PostgreSQL startup message",
+      "result": "see probes.json",
+      "effect": "read"
+    }
+  ]
+}

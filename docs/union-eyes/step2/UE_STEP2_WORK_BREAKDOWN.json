@@ -1,0 +1,804 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP2_WORK_BREAKDOWN",
+  "step2PlanningComplete": true,
+  "step2EngineeringComplete": false,
+  "step2Accepted": false,
+  "packages": [
+    {
+      "status": "PLANNING_ARTIFACT",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.00-PLAN",
+      "phase": "S2.00",
+      "lane": "INTEGRATION",
+      "title": "Scope, evidence and dependency freeze",
+      "objective": "Freeze the Step 2 denominator, coverage register, deployment conflict and acceptance contracts without authorizing implementation.",
+      "deliverables": [
+        "docs/union-eyes/step2/UE_STEP2_MASTER_PLAN.md",
+        "docs/union-eyes/step2/UE_STEP2_WORK_BREAKDOWN.json",
+        "docs/union-eyes/step2/UE_STEP2_ACTION_AUTHORITY_MATRIX.json",
+        "docs/union-eyes/step2/UE_STEP2_DEPLOYMENT_AND_DATA_PLAN.md",
+        "docs/union-eyes/step2/UE_STEP2_ACCEPTANCE_REGISTER.json",
+        "docs/union-eyes/step2/UE_STEP2_ADVERSARIAL_REVIEW.md",
+        "docs/union-eyes/step2/UE_STEP2_EXECUTION_ORDER.md"
+      ],
+      "dependencies": [],
+      "verificationCommands": [
+        "node tooling/scripts/ue-step2-plan-validate.mjs"
+      ],
+      "acceptance": "The validator exits 0. STEP_2_PLANNING_COMPLETE may be YES. STEP_2_ENGINEERING_COMPLETE and STEP_2_ACCEPTED stay NO."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.01-INTEGRATE",
+      "phase": "S2.01",
+      "lane": "A",
+      "title": "Normal integration of PR 1309",
+      "objective": "Merge only after founder approval. The merge commit is a new source and does not inherit b00a362 check runs.",
+      "deliverables": [
+        "Evidence cited by S2.01-INTEGRATE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.00-PLAN",
+        "FOUNDER_MERGE_APPROVAL"
+      ],
+      "verificationCommands": [
+        "gh pr view 1309 --json state,mergedAt,mergeCommit"
+      ],
+      "acceptance": "PR 1309 is merged by the normal path. The merge commit is recorded. No staging apply is implied."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.01-REQUALIFY",
+      "phase": "S2.01",
+      "lane": "A",
+      "title": "Exact-head qualification of the merge commit",
+      "objective": "Run the required GitHub checks on the merge commit before any image is treated as the candidate.",
+      "deliverables": [
+        "Evidence cited by S2.01-REQUALIFY after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.01-INTEGRATE"
+      ],
+      "verificationCommands": [
+        "The required workflows named in the execution order, on the merge SHA"
+      ],
+      "acceptance": "Every required check on the merge SHA succeeded. Skipped main-only jobs are listed and are not counted as passes."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.01-IMAGE",
+      "phase": "S2.01",
+      "lane": "A",
+      "title": "Immutable application and scanner images",
+      "objective": "Build through .github/workflows/ue-v2-staging-build.yml and record registry digests.",
+      "deliverables": [
+        "Evidence cited by S2.01-IMAGE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.01-REQUALIFY"
+      ],
+      "verificationCommands": [
+        ".github/workflows/ue-v2-staging-build.yml"
+      ],
+      "acceptance": "Application, ClamAV adapter and cron image digests are attested to the merge SHA."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.01-BIND",
+      "phase": "S2.01",
+      "lane": "A",
+      "title": "Candidate source freeze",
+      "objective": "Rebind tooling/scripts/lib/ue-v2-staging-candidate.json from 6a60c95c to the merge SHA. Do not bind b00a362 while it is unmerged.",
+      "deliverables": [
+        "Evidence cited by S2.01-BIND after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.01-IMAGE"
+      ],
+      "verificationCommands": [
+        "git diff on the candidate pin and the typed projection"
+      ],
+      "acceptance": "The candidate pin, typed projection and release manifest name the same merge SHA. SQL statement count does not change unless a reviewed plan regeneration says so."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.02-PREIMAGE",
+      "phase": "S2.02",
+      "lane": "A",
+      "title": "Read-only staging and database preimage",
+      "objective": "Resolve the serving-SHA conflict with a fresh revision, traffic, image and database observation. Capture PostgreSQL version, migration history, owners, ACLs, RLS attributes, sequences and row counts.",
+      "deliverables": [
+        "Evidence cited by S2.02-PREIMAGE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.00-PLAN"
+      ],
+      "verificationCommands": [
+        "az containerapp revision list and a read-only catalog query. Neither command is run by S2.00."
+      ],
+      "acceptance": "A new evidence file names the command, time, revision, traffic weight, image digest and database catalog. Historical receipts are not reused as this observation."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.02-LEGACY-GATE",
+      "phase": "S2.02",
+      "lane": "A",
+      "title": "Released-topology applicability gate",
+      "objective": "Decide from the fresh preimage whether the four legacy installer cases must run before this transition.",
+      "deliverables": [
+        "Evidence cited by S2.02-LEGACY-GATE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.02-PREIMAGE"
+      ],
+      "verificationCommands": [
+        "The read-only function and event-trigger probe described in the deployment plan"
+      ],
+      "acceptance": "If the preimage lacks current security topology, all four current-security-installer cases pass on authentic provenance before upgrade. If the preimage is already current topology, the four cases stay tracked and are not called passes. A current bootstrap is not substituted for a historical upgrade."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.02-REHEARSAL",
+      "phase": "S2.02",
+      "lane": "A",
+      "title": "Preserving upgrade rehearsal and rollback",
+      "objective": "Rehearse the data-preserving forward upgrade and a full transactional rollback on the staging preimage.",
+      "deliverables": [
+        "Evidence cited by S2.02-REHEARSAL after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.02-LEGACY-GATE",
+        "S2.01-BIND"
+      ],
+      "verificationCommands": [
+        ".github/workflows/ue-v2-staging-forward-upgrade.yml and .github/workflows/ue-v2-staging-rollback-rehearsal.yml"
+      ],
+      "acceptance": "Row counts, sequences, migration history and unrelated ACLs match the preimage after rollback. A failed historical rehearsal is not reused."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.02-FORWARD",
+      "phase": "S2.02",
+      "lane": "A",
+      "title": "Forward recovery after a committed upgrade",
+      "objective": "Prove the upgraded database starts the candidate and that recovery proceeds forward rather than by deleting data.",
+      "deliverables": [
+        "Evidence cited by S2.02-FORWARD after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.02-REHEARSAL"
+      ],
+      "verificationCommands": [
+        "The forward-upgrade workflow apply mode after a successful rehearsal"
+      ],
+      "acceptance": "Original rows remain. Temporary privileges are gone. The candidate reaches its health check. No delete or truncate of business data is present in the evidence."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.03-WHATIF",
+      "phase": "S2.03",
+      "lane": "A",
+      "title": "No-delete infrastructure what-if",
+      "objective": "Run the staging deploy workflow in what-if mode and refuse deletes and drift.",
+      "deliverables": [
+        "Evidence cited by S2.03-WHATIF after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.02-FORWARD",
+        "S2.01-BIND",
+        "FOUNDER_STAGING_APPLY_APPROVAL"
+      ],
+      "verificationCommands": [
+        ".github/workflows/ue-v2-staging-deploy.yml what-if"
+      ],
+      "acceptance": "The what-if artifact has no deletes. The reviewed fingerprint matches the apply-time what-if."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.03-ZERO-TRAFFIC",
+      "phase": "S2.03",
+      "lane": "A",
+      "title": "Zero-traffic candidate",
+      "objective": "Prepare the new revision at zero traffic while the current revision keeps 100 percent.",
+      "deliverables": [
+        "Evidence cited by S2.03-ZERO-TRAFFIC after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-WHATIF"
+      ],
+      "verificationCommands": [
+        ".github/workflows/ue-v2-staging-deploy.yml"
+      ],
+      "acceptance": "The new revision is healthy at 0 percent and the previously serving revision remains at 100 percent until promotion."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.03-CUTOVER",
+      "phase": "S2.03",
+      "lane": "A",
+      "title": "Controlled traffic cutover and readback",
+      "objective": "Shift traffic only after health, then read back source, image and revision.",
+      "deliverables": [
+        "Evidence cited by S2.03-CUTOVER after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-ZERO-TRAFFIC"
+      ],
+      "verificationCommands": [
+        "The promote step in ue-v2-staging-deploy.yml"
+      ],
+      "acceptance": "Serving revision, image digest and source SHA match the bound candidate. STAGING_GO remains HELD until S2.08."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.04-ENTRA",
+      "phase": "S2.04",
+      "lane": "B",
+      "title": "Deployed Entra sessions and MFA",
+      "objective": "Exercise real staging identity sessions, MFA and session revocation on the serving revision.",
+      "deliverables": [
+        "Evidence cited by S2.04-ENTRA after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        ".github/workflows/ue-v2-staging-real-session.yml"
+      ],
+      "acceptance": "A real session starts and a revoked session is refused. Synthetic QA cookies are not this proof."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.04-MEMBERSHIP",
+      "phase": "S2.04",
+      "lane": "B",
+      "title": "Membership, role change and multiple organizations",
+      "objective": "Prove active membership, role change, organization selection and departure.",
+      "deliverables": [
+        "Evidence cited by S2.04-MEMBERSHIP after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-ENTRA"
+      ],
+      "verificationCommands": [
+        "Deployed membership and organization journeys for the required families that own C05, C06 and C07"
+      ],
+      "acceptance": "A role title without active membership is refused. A second organization does not inherit the first organization cases."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.04-MANDATE",
+      "phase": "S2.04",
+      "lane": "B",
+      "title": "Mandate, delegation, expiry, revocation and recusal",
+      "objective": "Prove resource authority that is separate from role title, including expiry and conflict.",
+      "deliverables": [
+        "Evidence cited by S2.04-MANDATE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-MEMBERSHIP"
+      ],
+      "verificationCommands": [
+        "Deployed mandate journeys for C07, C10 and C11"
+      ],
+      "acceptance": "An expired, revoked, conflicted or missing mandate is refused. Office title does not replace the mandate."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.04-EXTERNAL",
+      "phase": "S2.04",
+      "lane": "B",
+      "title": "External and affiliated principal boundaries",
+      "objective": "Prove affiliated titles, employers, adverse parties and deferred counsel do not receive local case access.",
+      "deliverables": [
+        "Evidence cited by S2.04-EXTERNAL after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-MANDATE"
+      ],
+      "verificationCommands": [
+        "The denial rows in the action-authority matrix"
+      ],
+      "acceptance": "Every denial row for SA15, SA16, SA18, SA19, SA22 and the deferred external families is evidenced. Deferred families are not passes."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-INVITE",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C01 through C04 on the serving revision",
+      "objective": "Qualify invitation, truthful provider status, reissue, revocation and organization-admin entry with negative cases.",
+      "deliverables": [
+        "Evidence cited by S2.05-INVITE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-ENTRA"
+      ],
+      "verificationCommands": [
+        "Deployed invitation journeys plus the provider receipt for C02"
+      ],
+      "acceptance": "Positive and negative results, readback and audit are stored. A queued message without provider truth does not pass C02."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-ORG",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C05 through C07 on the serving revision",
+      "objective": "Qualify organization setup, membership lifecycle and multiple capacity.",
+      "deliverables": [
+        "Evidence cited by S2.05-ORG after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-MEMBERSHIP"
+      ],
+      "verificationCommands": [
+        "Deployed organization and membership journeys"
+      ],
+      "acceptance": "Persisted organization, membership and active-organization selection survive reload. Cross-organization reads fail."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-CASE",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C08 through C12 on the serving revision",
+      "objective": "Qualify intake, assignment, supervision, handoff and member follow-through, including closure.",
+      "deliverables": [
+        "Evidence cited by S2.05-CASE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-MANDATE"
+      ],
+      "verificationCommands": [
+        "Deployed case journeys"
+      ],
+      "acceptance": "An unassigned case is not visible to an executive title. Closure and handoff remove the prior actor access. Member follow-through stays on that member case."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-ASSIGN",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C09 automatic workload and expertise",
+      "objective": "Qualify the automatic assignment criterion separately from a manual assign.",
+      "deliverables": [
+        "Evidence cited by S2.05-ASSIGN after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.05-CASE"
+      ],
+      "verificationCommands": [
+        "AUTOMATIC_WORKLOAD_EXPERTISE_ASSIGNMENT staging criterion"
+      ],
+      "acceptance": "The serving revision assigns from workload and expertise rules. A manual assign is not substituted."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-DOCS",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C13 through C15 on the serving revision",
+      "objective": "Qualify document journey, sealed export and OCR against private bytes.",
+      "deliverables": [
+        "Evidence cited by S2.05-DOCS after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "Deployed document, export and OCR journeys"
+      ],
+      "acceptance": "Bytes match the stored object. A sealed export refuses the wrong actor. OCR does not bypass document authority. Local shard 4 is not this proof."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-MAIL",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C16 and C17 on the serving revision",
+      "objective": "Qualify correspondence approval, dispatch and staff messaging.",
+      "deliverables": [
+        "Evidence cited by S2.05-MAIL after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.06-INBOX"
+      ],
+      "verificationCommands": [
+        "Deployed correspondence and message journeys"
+      ],
+      "acceptance": "A draft is not reported as dispatched. The member does not see internal notes. The other organization is refused."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-LEAD",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C18 and C19 on the serving revision",
+      "objective": "Qualify leadership indicators and organization administration without title bypass.",
+      "deliverables": [
+        "Evidence cited by S2.05-LEAD after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-MANDATE"
+      ],
+      "verificationCommands": [
+        "Deployed leadership and admin journeys"
+      ],
+      "acceptance": "Indicators drill to a case only when the actor has that case authority. Admin audit operations read back the audit row."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-PRIVACY",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C20 privacy requests",
+      "objective": "Qualify a privacy request through decision, readback and audit.",
+      "deliverables": [
+        "Evidence cited by S2.05-PRIVACY after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-ENTRA"
+      ],
+      "verificationCommands": [
+        "Deployed privacy-request journey"
+      ],
+      "acceptance": "The request persists. An unauthorized actor is refused. Completion is not reported when the write or audit fails."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-DEADLINE",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C21 connected deadlines",
+      "objective": "Qualify deadline creation, reminder and actor-specific visibility.",
+      "deliverables": [
+        "Evidence cited by S2.05-DEADLINE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.06-WORKERS"
+      ],
+      "verificationCommands": [
+        "Deployed deadline journey and the reminder worker"
+      ],
+      "acceptance": "A deadline is visible only to an authorized actor. A missed worker run is reported as missed."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-RECOVERY",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "C22 concurrency and recovery",
+      "objective": "Qualify conflict, retry, audit failure and recovery on the serving revision.",
+      "deliverables": [
+        "Evidence cited by S2.05-RECOVERY after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "Deployed concurrency and failure journeys"
+      ],
+      "acceptance": "A failed audit is not returned as success. A retry does not create a second case. A conflict returns 409."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.05-FINANCE",
+      "phase": "S2.05",
+      "lane": "B",
+      "title": "Sensitive finance denial",
+      "objective": "Prove every required role is refused union finance and dues behavior.",
+      "deliverables": [
+        "Evidence cited by S2.05-FINANCE after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "SENSITIVE_FINANCE_BOUNDARIES staging criterion"
+      ],
+      "acceptance": "The deployed finance surface denies all 34 required roles. No financial transaction is created. Financial Officer 2.1 stays out of scope."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.06-INBOX",
+      "phase": "S2.06",
+      "lane": "B",
+      "title": "O01 controlled inbox and provider state",
+      "objective": "Prove recipient delivery, deduplication, retry and dead letter with a controlled inbox.",
+      "deliverables": [
+        "Evidence cited by S2.06-INBOX after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "A controlled-inbox run against the serving revision"
+      ],
+      "acceptance": "Provider state is correlated to the audit row. A spoofed provider is refused. Absence of an inbox is an unexecuted proof."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.06-WORKERS",
+      "phase": "S2.06",
+      "lane": "B",
+      "title": "Workers, cron, retry and dead letter",
+      "objective": "Prove worker freshness and exactly-once handling for the required jobs.",
+      "deliverables": [
+        "Evidence cited by S2.06-WORKERS after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "O06 on the serving revision"
+      ],
+      "acceptance": "A stale worker is visible as stale. A retry does not double-apply. Dead letters are inspectable."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.07-PERF",
+      "phase": "S2.07",
+      "lane": "C",
+      "title": "O02 and O03 workload",
+      "objective": "Measure authenticated casework and the sustained pilot workload on the serving revision.",
+      "deliverables": [
+        "Evidence cited by S2.07-PERF after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "The existing authenticated casework load harness pointed at the serving revision"
+      ],
+      "acceptance": "Thresholds are the contract thresholds. A result from another SHA is not reused."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.07-OPS",
+      "phase": "S2.07",
+      "lane": "C",
+      "title": "Backup, audit seal, health, alerts and restore",
+      "objective": "Qualify O04, O05, O07, O08 and O15 from fresh operational evidence.",
+      "deliverables": [
+        "Evidence cited by S2.07-OPS after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "Fresh backup, seal, health, alert and restore receipts"
+      ],
+      "acceptance": "Each receipt names the serving revision. A missed backup or seal is not a pass."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.07-UX",
+      "phase": "S2.07",
+      "lane": "C",
+      "title": "O11 accessibility and O12 bilingual states",
+      "objective": "Qualify accessibility and English/French states on the serving revision, including a narrow viewport.",
+      "deliverables": [
+        "Evidence cited by S2.07-UX after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "Deployed EN/FR and accessibility journeys"
+      ],
+      "acceptance": "O10 physical-device expansion stays deferred and is not counted. The Step 1 local browser matrix is not this proof."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.07-TRUTH",
+      "phase": "S2.07",
+      "lane": "C",
+      "title": "O13 registry truth and O14 telemetry",
+      "objective": "Qualify capability status and pilot telemetry against the serving revision.",
+      "deliverables": [
+        "Evidence cited by S2.07-TRUTH after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.03-CUTOVER"
+      ],
+      "verificationCommands": [
+        "O13 and O14 on the serving revision"
+      ],
+      "acceptance": "A route or navigation label is not a capability pass. Telemetry does not invent institutional adoption."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.08-ADVERSARIAL",
+      "phase": "S2.08",
+      "lane": "INTEGRATION",
+      "title": "Independent adversarial acceptance",
+      "objective": "Challenge security, privacy, authority, preservation and deployment integrity against the serving evidence.",
+      "deliverables": [
+        "Evidence cited by S2.08-ADVERSARIAL after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.04-EXTERNAL",
+        "S2.05-INVITE",
+        "S2.05-ORG",
+        "S2.05-CASE",
+        "S2.05-ASSIGN",
+        "S2.05-DOCS",
+        "S2.05-MAIL",
+        "S2.05-LEAD",
+        "S2.05-PRIVACY",
+        "S2.05-DEADLINE",
+        "S2.05-RECOVERY",
+        "S2.05-FINANCE",
+        "S2.06-INBOX",
+        "S2.06-WORKERS",
+        "S2.07-PERF",
+        "S2.07-OPS",
+        "S2.07-UX",
+        "S2.07-TRUTH"
+      ],
+      "verificationCommands": [
+        "A new adversarial record bound to the serving SHA"
+      ],
+      "acceptance": "Every material finding is fixed or disposed. No finding is closed by a different SHA."
+    },
+    {
+      "status": "PLANNED",
+      "engineeringComplete": false,
+      "stagingGo": "HELD",
+      "productionGo": "HELD",
+      "verificationExecutedInS200": false,
+      "id": "S2.08-CRITERIA",
+      "phase": "S2.08",
+      "lane": "INTEGRATION",
+      "title": "Twenty staging criteria",
+      "objective": "Reconcile every required UE_STAGING_GO_CONTRACT criterion on the serving revision.",
+      "deliverables": [
+        "Evidence cited by S2.08-CRITERIA after execution. None is produced by S2.00."
+      ],
+      "dependencies": [
+        "S2.08-ADVERSARIAL"
+      ],
+      "verificationCommands": [
+        "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json"
+      ],
+      "acceptance": "All 20 required criteria are PASS on the serving SHA. The advisory local-regression criterion is not one of the 20. This planning package does not mark them PASS."
+    }
+  ]
+}

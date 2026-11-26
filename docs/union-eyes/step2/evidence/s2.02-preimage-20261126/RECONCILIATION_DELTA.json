@@ -1,0 +1,17 @@
+{
+  "schema": "UE_S2_02_RECONCILIATION_DELTA_V1",
+  "applyTo": "integration branch only. Do not patch docs/union-eyes/step2/UE_STEP2_ACCEPTANCE_REGISTER.json from this lane observation.",
+  "acceptanceRegisterEdited": false,
+  "proposedRegisterDelta": {
+    "servingIdentity.freshObservation": "ATTEMPTED_BLOCKED",
+    "servingIdentity.resolution": "CONFLICTED_HISTORICAL",
+    "S2.02-PREIMAGE.status": "BLOCKED",
+    "S2.02-PREIMAGE.evidence": "docs/union-eyes/step2/evidence/s2.02-preimage-20261126/receipt.json",
+    "legacyInstaller.step2Applicability": "INDETERMINATE",
+    "S2_02_PREIMAGE_COMPLETE": "NO"
+  },
+  "mayProceed": {
+    "S2.02-LEGACY-GATE": false,
+    "S2.01-INTEGRATE": "still blocked by FOUNDER_MERGE_APPROVAL, independent of this package"
+  }
+}

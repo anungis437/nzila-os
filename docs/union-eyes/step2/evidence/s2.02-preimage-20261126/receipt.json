@@ -1,0 +1,97 @@
+{
+  "schema": "UE_S2_02_PREIMAGE_RECEIPT_V1",
+  "package": "S2.02-PREIMAGE",
+  "verdict": "NO",
+  "S2_02_PREIMAGE_COMPLETE": "NO",
+  "observedAt": "2026-11-26T00:38:17Z",
+  "observationWindow": {
+    "probeFile": "probes.json",
+    "firstProbe": "2026-11-26T00:38:09Z",
+    "lastProbe": "2026-11-26T00:38:17Z"
+  },
+  "identitiesRefreshed": {
+    "step1Sha": "b00a3624619be09aa77cd201fa7fe8a8c16b21f3",
+    "step1Pr": 1309,
+    "step1PrState": "OPEN_DRAFT",
+    "planningSha": "0a52d6cb1221389d1cd25759a2b0853f05f56f3d",
+    "planningPr": 1310,
+    "planningPrState": "OPEN",
+    "originMain": "97cd90fb029af07dbfcbf4455c1068acfd6e1cb8",
+    "refreshCommand": "git fetch origin main fix/ue-private-document-delivery cursor/ue-step2-s200-plan-cfc5"
+  },
+  "intendedTarget": {
+    "tenantId": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+    "subscriptionId": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+    "resourceGroup": "nzila-canada-staging-rg",
+    "containerApp": "nzila-ue-v2-staging-app",
+    "postgresServerNameFromBicep": "nzila-ue-v2-staging-db-d562ba7f",
+    "postgresDatabaseFromUpgradeScript": "ue_v2_staging",
+    "source": "tooling/scripts/lib/union-eyes-v2-staging-release.mjs and infrastructure/bicep/ue-v2/main.bicep. This is configuration, not a live resource read."
+  },
+  "azureAccount": "NOT_OBSERVED",
+  "containerAppResourceId": "NOT_OBSERVED",
+  "servingRevision": "NOT_OBSERVED",
+  "trafficWeight": "NOT_OBSERVED",
+  "imageDigest": "NOT_OBSERVED",
+  "sourceShaOnServingImage": "NOT_OBSERVED",
+  "health": "NOT_OBSERVED",
+  "database": {
+    "version": "NOT_OBSERVED",
+    "catalogFingerprint": "NOT_OBSERVED",
+    "migrations": "NOT_OBSERVED",
+    "bootstrap": "NOT_OBSERVED",
+    "ownership": "NOT_OBSERVED",
+    "rls": "NOT_OBSERVED",
+    "acls": "NOT_OBSERVED",
+    "rowCounts": "NOT_OBSERVED",
+    "securityTopology": "INDETERMINATE"
+  },
+  "legacyInstallerApplicability": "INDETERMINATE",
+  "legacyCasesPassed": false,
+  "blockers": [
+    {
+      "id": "NO_AZURE_CREDENTIAL",
+      "tier": "observed",
+      "detail": "GET https://management.azure.com/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf returned HTTP 401 AuthenticationFailed because the Authorization header was absent. az is not installed. No Azure credential profile or instance metadata service is present. Azure MCP data calls timed out with MCP error -32001."
+    },
+    {
+      "id": "DATABASE_NAME_UNRESOLVED",
+      "tier": "observed",
+      "detail": "The bicep server name nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com did not resolve. The private zone name nzila-ue-v2-staging.private.postgres.database.azure.com did not resolve. No SQL session was opened."
+    },
+    {
+      "id": "UNCONFIRMED_PUBLIC_NAME",
+      "tier": "observed",
+      "detail": "nzila-ue-v2-staging-db.postgres.database.azure.com resolved to 40.85.252.0 and TCP 5432 timed out. That name is not the staging server name in main.bicep. It was not authenticated and is not the V2 preimage."
+    }
+  ],
+  "historicalClaimsNotUsedAsObservation": [
+    "cccfc8c311a1017f80241bf089c00ef0c6828751",
+    "6a60c95c9de17e9343e0414bb51766afbc190054"
+  ],
+  "servingConflict": "UNRESOLVED",
+  "planConflicts": [
+    {
+      "item": "S2.02-PREIMAGE requires a fresh revision, traffic, image and catalog observation.",
+      "result": "Not collected. The frozen plan's CONFLICTED_HISTORICAL resolution stands."
+    }
+  ],
+  "historicallyDocumentedRisksNotReobserved": [
+    "Retained audit_security.audit_logs SELECT/INSERT grant. Rehearsal 45140991614. Historical.",
+    "Managed administrator BYPASSRLS versus operator NOBYPASSRLS. Historical.",
+    "Function-owner and catalog rehearsal failures. Historical."
+  ],
+  "preservedGates": {
+    "STEP_2_ENGINEERING_COMPLETE": "NO",
+    "STEP_2_ACCEPTED": "NO",
+    "STAGING_GO": "HELD",
+    "PRODUCTION_GO": "HELD",
+    "UE_SAAS_OPERATIONAL_READINESS": "NO_GO",
+    "fullReadiness": "NOT_YET_PROVEN"
+  },
+  "notDone": [
+    "No merge of #1309 or #1310.",
+    "No staging deployment, cutover, Azure write, database write, firewall change, or credential change.",
+    "The legacy discovery workflow was not dispatched. It targets the retired subscription and creates a firewall rule."
+  ]
+}
