@@ -322,11 +322,38 @@ export function parseCatalogStdout(text) {
 // one resource. A missing field is REVISION_FIELDS_ABSENT, not a looser match.
 export const REVISION_QUERY = '{name:name,healthState:properties.healthState,trafficWeight:properties.trafficWeight,runningState:properties.runningState,containers:properties.template.containers[].{name:name,image:image}}'
 
+// The revision's control-plane health is not a proof that a particular replica is
+// reachable through ACA's WebSocket console. Resolve one running target explicitly.
+export const REPLICA_QUERY = '[].{name:name,runningState:properties.runningState,containers:properties.containers[].name}'
+
+export function selectReplica(replicas) {
+  if (!Array.isArray(replicas) || replicas.length === 0) {
+    return { defect: 'NO_REPLICA_OBSERVED', name: null, eligibleCount: 0 }
+  }
+  if (replicas.some((replica) =>
+    !replica || typeof replica.name !== 'string' || typeof replica.runningState !== 'string'
+    || !Array.isArray(replica.containers) || replica.containers.some((name) => typeof name !== 'string')
+  )) {
+    return { defect: 'REPLICA_FIELDS_ABSENT', name: null, eligibleCount: 0 }
+  }
+  const eligible = replicas.filter((replica) =>
+    replica.name.startsWith(EXPECTED_REVISION + '-')
+    && /^[a-z0-9-]+$/.test(replica.name)
+    && replica.runningState === 'Running'
+    && replica.containers.includes(CONTAINER_NAME)
+  ).sort((a, b) => a.name.localeCompare(b.name))
+  if (!eligible.length) return { defect: 'NO_ELIGIBLE_RUNNING_REPLICA', name: null, eligibleCount: 0 }
+  return { defect: null, name: eligible[0].name, eligibleCount: eligible.length }
+}
+
 function shellQuote(value) {
   return `'${String(value).replaceAll("'", `'"'"'`)}'`
 }
 
-export function execInvocation() {
+export function execInvocation(replicaName) {
+  if (typeof replicaName !== 'string' || !replicaName.startsWith(EXPECTED_REVISION + '-') || !/^[a-z0-9-]+$/.test(replicaName)) {
+    throw new Error('REPLICA_BINDING_REFUSED')
+  }
   const program = containerSource()
   if (program.includes('eval(')) throw new Error('CONTAINER_PROGRAM_REFUSES_EVAL')
   const node = `node -e ${shellQuote(program)}`
@@ -335,6 +362,7 @@ export function execInvocation() {
     '--resource-group', RESOURCE_GROUP,
     '--name', CONTAINER_APP,
     '--revision', EXPECTED_REVISION,
+    '--replica', replicaName,
     '--container', CONTAINER_NAME,
     '--command', node,
   ]
@@ -391,6 +419,7 @@ export async function executeCatalog(env, spawn) {
     S2_02_LEGACY_GATE: 'INDETERMINATE',
     execPermission: 'NOT_OBSERVED',
     revision: 'NOT_OBSERVED',
+    replica: 'NOT_OBSERVED',
     execAttempted: false,
     catalog: null,
   }
@@ -467,8 +496,36 @@ export async function executeCatalog(env, spawn) {
     return { exitCode: 4, report }
   }
 
+  // Resolve the actual running replica only after the revision, traffic and
+  // immutable image binding have passed. A 404 may still be an ACA console
+  // service failure; never infer SQL success from the absence of an error.
+  const replicaRead = await arm([
+    'containerapp', 'replica', 'list',
+    '--resource-group', RESOURCE_GROUP,
+    '--name', CONTAINER_APP,
+    '--revision', EXPECTED_REVISION,
+    '--query', REPLICA_QUERY,
+    '-o', 'json',
+  ])
+  if (replicaRead.code !== 0) {
+    report.defects.push('REPLICA_LIST_UNREADABLE')
+    report.replicaError = redact(replicaRead.stderr).slice(0, 500)
+    return { exitCode: 4, report }
+  }
+  let replicaList
+  try { replicaList = parseJson(replicaRead.stdout, 'REPLICA_LIST') } catch {
+    report.defects.push('REPLICA_LIST_UNREADABLE')
+    return { exitCode: 4, report }
+  }
+  const selected = selectReplica(replicaList)
+  report.replica = { selectedName: selected.name, eligibleCount: selected.eligibleCount }
+  if (selected.defect) {
+    report.defects.push(selected.defect)
+    return { exitCode: 4, report }
+  }
+
   report.execAttempted = true
-  const invocation = execInvocation()
+  const invocation = execInvocation(selected.name)
   if (invocation.executable !== 'timeout') throw new Error('EXEC_WRAPPER_MUST_BE_TIMEOUT')
   const exec = await spawn(invocation.executable, invocation.args)
   report.execExitCode = exec.code
@@ -481,6 +538,7 @@ export async function executeCatalog(env, spawn) {
   report.catalog = parsed.body ?? null
   report.verdict = parsed.verdict
   if (!parsed.ok) {
+    if (/Handshake status 404 Not Found/i.test(`${exec.stdout}\n${exec.stderr}`)) report.defects.push('EXEC_WEBSOCKET_404')
     report.defects.push(parsed.verdict)
     if (parsed.blocker && parsed.blocker !== parsed.verdict) report.defects.push(parsed.blocker)
     if (parsed.transcript) report.transcriptTail = parsed.transcript
