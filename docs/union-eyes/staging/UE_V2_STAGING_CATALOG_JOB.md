@@ -75,6 +75,7 @@ When something can't be proven:
 - A cleanup failure overrides a successful catalogue (exit 6).
 
 Other create and start cases:
+- Any catalogue job left by another run stops the run before creation (`RESIDUAL_CATALOG_JOB`, with the job names in the report). A job counts if its name starts with `ue-s202-cat-` or it is tagged `purpose=s202-private-catalog`. It is never stopped or deleted here: only its own run's cleanup may remove it. A leftover privileged job still holds the admin secret, so it is an incident. If the job list can't be read, the run also stops (`JOB_STATE_UNREADABLE`).
 - An existing job with the same name stops the run before creation.
 - After a create error, the job is reconciled by the same rules.
 - A start error is followed by the same settle-then-delete path.

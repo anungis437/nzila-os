@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -205,6 +205,11 @@ function harness(options = {}) {
       const code = Array.isArray(options.deleteCodes) ? (options.deleteCodes[deleteCalls - 1] ?? 0) : (options.deleteCode ?? 0)
       if (code === 0 && !options.deleteNoop) deleted = true
       return { code, stdout: '', stderr: options.deleteError ?? '' }
+    }
+    if (line.includes('containerapp job list')) {
+      if (options.jobListCode) return { code: options.jobListCode, stdout: '', stderr: 'transient' }
+      const own = created && !deleted ? [{ name: NAME, purpose: JOB_PURPOSE }] : []
+      return { code: 0, stdout: options.jobListRaw ?? JSON.stringify([...own, ...(options.otherJobs ?? [])]), stderr: '' }
     }
     if (line.includes('job show')) {
       if (options.createShow === 'ambiguous' && created === false) return { code: 1, stdout: '', stderr: 'network reset' }
@@ -884,6 +889,11 @@ test('offline assembly opens each privileged session, chains it, and reconciles 
   assert.equal(/"n":"(41|7)"/.test(JSON.stringify(summary)), false, 'the public-safe summary carries no values')
   assert.equal(summary.S2_02_PREIMAGE_COMPLETE, 'NO')
 
+  // A key that is not the session's recipient opens nothing.
+  const stranger = assemblePlane([firstDir, secondDir], { privateKeyPem: generateRecipientKeyPair().privateKeyPem })
+  assert.notEqual(stranger.defect, undefined, 'a mismatched private key is refused')
+  assert.equal(stranger.catalog, undefined)
+
   // A tampered artifact is refused before it is opened.
   writeFileSync(path.join(secondDir, 'catalog-evidence.json'), readFileSync(path.join(secondDir, 'catalog-evidence.json'), 'utf8').replace('"plane":"privileged"', '"plane":"privileged" '))
   assert.equal(assemblePlane([firstDir, secondDir], { privateKeyPem: FOUNDER.privateKeyPem }).defect, 'SESSION_ARTIFACT_UNVERIFIED')
@@ -895,6 +905,15 @@ test('offline assembly opens each privileged session, chains it, and reconciles 
   const key = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--generate-recipient', path.join(REPO, 'founder.pem')], { encoding: 'utf8' })
   assert.equal(key.status, 1)
   assert.equal(existsSync(path.join(REPO, 'founder.pem')), false)
+  // Like ssh, a private key readable by group or others is refused before anything is read or written.
+  const loose = mkdtempSync(path.join(tmpdir(), 'ue-loose-key-'))
+  writeFileSync(path.join(loose, 'recipient.pem'), FOUNDER.privateKeyPem, { mode: 0o644 })
+  chmodSync(path.join(loose, 'recipient.pem'), 0o644)
+  const open = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--assemble', '--runtime', runtimeDir, '--privileged', firstDir, '--key', path.join(loose, 'recipient.pem'), '--out', path.join(loose, 'preimage')], { encoding: 'utf8' })
+  assert.equal(open.status, 1)
+  assert.match(open.stderr, /RECIPIENT_KEY_PERMISSIONS_TOO_OPEN/)
+  assert.equal(existsSync(path.join(loose, 'preimage')), false, 'nothing is written with a loose key')
+  rmSync(loose, { recursive: true, force: true })
   for (const directory of directories) rmSync(directory, { recursive: true, force: true })
 })
 
@@ -910,4 +929,29 @@ test('the founder key tool writes the private half once, 0600, and prints only t
   const again = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--generate-recipient', target], { encoding: 'utf8' })
   assert.notEqual(again.status, 0, 'an existing key is never overwritten')
   rmSync(directory, { recursive: true, force: true })
+})
+
+test('a catalogue job left by any other run blocks a new session and is never touched', async () => {
+  for (const plane of ['runtime', 'privileged']) {
+    const env = plane === 'privileged' ? privilegedEnv() : {}
+    const leftover = await run({ env, otherJobs: [{ name: 'ue-s202-cat-45940281038', purpose: JOB_PURPOSE }, { name: 'nzila-ue-v2-stagin-sla', purpose: null }] })
+    assert.equal(leftover.report.verdict, 'RESIDUAL_CATALOG_JOB', plane)
+    assert.deepEqual(leftover.report.residualJobs, ['ue-s202-cat-45940281038'])
+    assert.equal(leftover.fake.did('job create'), false, 'nothing is created next to a residual job')
+    assert.equal(leftover.fake.did('job stop'), false)
+    assert.equal(leftover.fake.did('job delete'), false, 'another run\'s job is never deleted here')
+    assert.equal(leftover.report.catalogAccepted, false)
+    assert.equal(JSON.stringify(leftover.report).includes(ADMIN_PASSWORD), false)
+  }
+  const tagged = await run({ otherJobs: [{ name: 'renamed-by-hand', purpose: JOB_PURPOSE }] })
+  assert.equal(tagged.report.verdict, 'RESIDUAL_CATALOG_JOB', 'the purpose tag alone identifies a catalogue job')
+  const unreadable = await run({ jobListCode: 1 })
+  assert.equal(unreadable.report.verdict, 'JOB_STATE_UNREADABLE')
+  assert.equal(unreadable.fake.did('job create'), false)
+  const garbled = await run({ jobListRaw: '{"not":"a list"}' })
+  assert.equal(garbled.report.verdict, 'JOB_STATE_UNREADABLE')
+  assert.equal(garbled.fake.did('job create'), false)
+  const unrelated = await run({ otherJobs: [{ name: 'ue-role-probe2', purpose: null }, { name: 'nzila-ue-v2-stagin-alert', purpose: null }] })
+  assert.equal(unrelated.fake.did('job create'), true, 'unrelated scheduled jobs do not block a session')
+  assert.equal(unrelated.report.residualJobs, undefined)
 })
