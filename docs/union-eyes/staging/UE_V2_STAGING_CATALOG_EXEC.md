@@ -1,6 +1,6 @@
 # Union Eyes V2 staging catalogue exec
 
-This workflow is the execution route for the S2.02 catalogue. It is not a deployment and it is not the forward-upgrade job.
+Runs `45859100780` and `45887919234` both failed in the Container Apps exec WebSocket handshake with HTTP 404. That console is not the collection path. The private-network job is `ue-v2-staging-catalog-job.yml`. This file remains the record of the rejected console route.
 
 ## Authority
 

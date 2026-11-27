@@ -1,0 +1,118 @@
+name: Union Eyes V2 — Staging private catalog job
+
+# One temporary private-network catalogue job. It does not open a Container
+# Apps exec console and it does not grant roles. Evidence returns through the
+# environment's Log Analytics workspace (existing Monitoring Contributor grant).
+# Dispatch is manual, from main, and still requires the ue-staging approval.
+
+on:
+  workflow_dispatch:
+    inputs:
+      continuation_run_id:
+        description: Run id of a previous catalog job whose artifact holds a continuation token (leave empty for a baseline session)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+concurrency:
+  group: ue-v2-staging-catalog-job
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the catalog operator image
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: build
+    outputs:
+      image: ${{ steps.image.outputs.reference }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Package the same catalogue programme and push its digest
+        id: image
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import { writeFileSync } from 'node:fs'; import { containerSource } from './tooling/scripts/ue-v2-staging-catalog-exec.mjs'; const source = containerSource(); if (source.includes(['containerapp', 'exec'].join(' ')) || source.includes(['UE', 'UPGRADE', 'OPERATION'].join('_'))) process.exit(2); writeFileSync('operator.cjs', source)"
+          node --check operator.cjs
+          # The base is the private qualified application image: log in before the build pulls it.
+          az acr login -n nzilaventuresacr
+          docker build --platform linux/amd64 -f tooling/docker/ue-v2-catalog-operator.Dockerfile \
+            --build-arg QUALIFIED_APPLICATION_IMAGE=nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef \
+            --build-arg OPERATOR_SOURCE_SHA="$GITHUB_SHA" \
+            -t nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" .
+          # Run the real image's own entrypoint, as the job will, with no database:
+          # it must resolve pg from /app/node_modules as uid 1001 and frame its refusal.
+          docker run --rm --user 1001:1001 -e NODE_PATH= \
+            -e UE_CATALOG_TRANSPORT=private-job -e UE_CATALOG_RUN_ID="$GITHUB_RUN_ID" -e UE_CATALOG_SOURCE_SHA="$GITHUB_SHA" \
+            nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" > "$RUNNER_TEMP/operator-smoke.txt"
+          node tooling/scripts/ue-v2-staging-catalog-job.mjs --verify-image-smoke "$RUNNER_TEMP/operator-smoke.txt"
+          docker push nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA"
+          DIGEST=$(az acr manifest show-metadata -r nzilaventuresacr -n nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" --query digest -o tsv)
+          echo "reference=nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog@$DIGEST" >> "$GITHUB_OUTPUT"
+
+  catalog:
+    name: Run one owned private catalog job
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Install the Container Apps and Log Analytics CLI extensions
+        run: |
+          set -euo pipefail
+          az config set extension.use_dynamic_install=no --only-show-errors
+          az extension add --name containerapp --upgrade --yes --only-show-errors
+          az extension add --name log-analytics --upgrade --yes --only-show-errors
+          az monitor log-analytics query --help > /dev/null
+      - name: Fetch the previous session for a continuation
+        if: inputs.continuation_run_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRIOR_RUN: ${{ inputs.continuation_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$PRIOR_RUN" =~ ^[0-9]{1,12}$ ]] || { echo "::error::continuation_run_id must be a run id"; exit 1; }
+          meta=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PRIOR_RUN" --jq '[.path, .head_branch, .event, .repository.full_name] | @tsv')
+          [ "$meta" = "$(printf '.github/workflows/ue-v2-staging-catalog-job.yml\tmain\tworkflow_dispatch\t%s' "$GITHUB_REPOSITORY")" ] || { echo "::error::run $PRIOR_RUN is not this workflow dispatched from main"; exit 1; }
+          gh run download "$PRIOR_RUN" -R "$GITHUB_REPOSITORY" -n "ue-v2-staging-catalog-job-$PRIOR_RUN" -D "$RUNNER_TEMP/prior"
+          echo "UE_CATALOG_PRIOR_DIR=$RUNNER_TEMP/prior" >> "$GITHUB_ENV"
+      - name: Create, observe, and delete one owned catalog job
+        env:
+          UE_CATALOG_JOB_LIVE: '1'
+          OPERATOR_IMAGE: ${{ needs.build.outputs.image }}
+        run: node tooling/scripts/ue-v2-staging-catalog-job.mjs --out "$RUNNER_TEMP/catalog"
+      # An interrupted or cancelled run leaves its job behind; this removes only
+      # the job owned by this run, after its executions are terminal.
+      - name: Remove this run's owned job if it remains
+        if: always()
+        env:
+          UE_CATALOG_JOB_LIVE: '1'
+          OPERATOR_IMAGE: ${{ needs.build.outputs.image }}
+        run: node tooling/scripts/ue-v2-staging-catalog-job.mjs --cleanup-only --out "$RUNNER_TEMP/catalog"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ue-v2-staging-catalog-job-${{ github.run_id }}
+          path: ${{ runner.temp }}/catalog
+          if-no-files-found: warn
+          retention-days: 14
