@@ -96,7 +96,7 @@ export function buildBaselines() {
   return { steward, representative, 'financial-officer': financialOfficer, decisions: decisionData }
 }
 
-const esc = (value) => String(value ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ')
+const esc = (value) => String(value ?? '').replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ')
 const list = (items) => (items ?? []).map((i) => `- ${esc(i)}`).join('<br>')
 const bullets = (items) => (items ?? []).map((i) => esc(i)).join('<br>')
 

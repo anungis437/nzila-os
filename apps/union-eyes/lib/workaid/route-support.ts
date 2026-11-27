@@ -59,3 +59,11 @@ export function workAidErrorResponse(error: unknown): NextResponse {
   if (denied) return denied
   throw error
 }
+
+/**
+ * WorkAid wording proposal and adoption are deferred from the base release (WORKAID_WORDING_DEFERRED). The routes still
+ * authenticate the caller's live organization membership first, then answer 501: never a 2xx, never SQL or a store call.
+ */
+export function workAidWordingDeferredResponse(): NextResponse {
+  return NextResponse.json({ success: false, error: 'NOT_IMPLEMENTED', code: 'WORKAID_WORDING_DEFERRED' }, { status: 501 })
+}

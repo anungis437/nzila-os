@@ -249,5 +249,5 @@ main()
   })
   .finally(async () => {
     for (const c of clients.reverse()) await c.end().catch(() => {})
-    if (container) docker(['rm', '-f', container])
+    if (container) docker(['rm', '-f', '-v', container])
   })

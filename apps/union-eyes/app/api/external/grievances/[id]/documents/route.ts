@@ -8,6 +8,7 @@ import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-
 export const GET = withExternalMatterResourceAuth(
   {
     requiredPermission: 'view_documents',
+    protectedRead: 'documents',
     resolve: resolveExternalGrievanceResource,
   },
   async (_request, context) => {

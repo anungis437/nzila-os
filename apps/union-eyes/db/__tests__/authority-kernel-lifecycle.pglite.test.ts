@@ -63,7 +63,11 @@ describe('issuance rules: no rule, no authority', () => {
 
   it('default templates are drafted INACTIVE with the placeholder instrument', async () => {
     const ids = await k.as(U.president)((t) => draftDefaultIssuanceRules(t, k.deps, ORG, U.president))
-    expect(ids).toHaveLength(DEFAULT_ISSUANCE_TEMPLATES.length)
+    // A customer organization drafts every template except platform-wide authority, which exists only in the platform organization.
+    expect(ids).toHaveLength(DEFAULT_ISSUANCE_TEMPLATES.filter((t) => t.domain !== 'platform_staff').length)
+    const domains = await k.as(U.president)((t) => t.query<{ domain: string }>(`SELECT DISTINCT domain FROM ue_authority_issuance_rules WHERE id = ANY($1::uuid[])`, [ids]))
+    expect(domains.rows.map((row) => row.domain)).not.toContain('platform_staff')
+    await expect(k.as(U.president)((t) => draftIssuanceRule(t, k.deps, { domain: 'platform_staff', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: ['platform.stats.read'], maxTermDays: 30, requiresAcceptance: true, requiredIndependentApprovals: 1, organizationId: ORG, draftedBy: U.president }))).rejects.toThrow(/only in the platform organization/)
     const r = await k.as(U.president)((t) => t.query<{ status: string; source_instrument: string }>(`SELECT DISTINCT status, source_instrument FROM ue_authority_issuance_rules WHERE id = ANY($1::uuid[])`, [ids]))
     expect(r.rows).toEqual([{ status: 'draft', source_instrument: 'PENDING_INSTITUTIONAL_SOURCE' }])
   })

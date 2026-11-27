@@ -17,17 +17,19 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { serializeRawDates } from '@/db/driver-dates'
+import { nativeActionUrl, installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { seedMembership, type Db } from './authority-kernel-harness'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
-const state = vi.hoisted(() => ({ db: null as unknown, organization: '' }))
+const state = vi.hoisted(() => ({ db: null as unknown, organization: '', actor: '' }))
 
 async function inRole<T>(organizationId: string, work: (tx: unknown) => Promise<T>): Promise<T> {
   const db = state.db as { transaction: <R>(fn: (tx: { execute: (query: unknown) => Promise<unknown> }) => Promise<R>) => Promise<R> }
-  return db.transaction(async (tx) => {
+  return withNativeCanonicalActor(state.actor, organizationId, (binding) => db.transaction(async (tx) => {
     await tx.execute(sql.raw('SET LOCAL ROLE union_eyes_runtime'))
-    await tx.execute(sql`SELECT set_config('app.current_org_id', ${organizationId}, true)`)
+    await installNativeBusinessContext((statement) => tx.execute(statement), binding)
     return work(tx)
-  })
+  }))
 }
 
 // The query asks for the request's transaction; the test's request belongs to state.organization.
@@ -58,7 +60,7 @@ describe.skipIf(!URL)('the deadline dashboard on the combined schema, as the rea
   beforeAll(async () => {
     admin = new pg.Client({ connectionString: URL })
     await admin.connect()
-    client = postgres(URL!, { max: 2, onnotice: () => undefined })
+    client = postgres(nativeActionUrl('union_eyes_runtime', URL), { max: 2, onnotice: () => undefined })
     state.db = drizzle(client)
     serializeRawDates(client)
     const sfx = randomUUID().slice(0, 8)
@@ -72,6 +74,8 @@ describe.skipIf(!URL)('the deadline dashboard on the combined schema, as the rea
          VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
         [id, name, `deadline-${sfx}-${id.slice(0, 6)}`],
       )
+      const seed: Db = { exec: (text) => admin.query(text), query: (text, params) => admin.query(text, params) }
+      await seedMembership(seed, `deadline-reader-${id}`, id, 'steward')
     }
 
     // Organization A: five pending (one overdue by five days, two due within three days of which one is critical, and a stale flag each way),
@@ -95,6 +99,7 @@ describe.skipIf(!URL)('the deadline dashboard on the combined schema, as the rea
 
   const summaryFor = (sessionOrganization: string, queriedOrganization = sessionOrganization) => {
     state.organization = sessionOrganization
+    state.actor = `deadline-reader-${sessionOrganization}`
     return queries!.getDeadlineDashboardSummary(queriedOrganization)
   }
 

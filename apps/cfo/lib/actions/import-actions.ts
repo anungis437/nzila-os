@@ -7,12 +7,10 @@
  */
 'use server'
 
-import { auth } from '@nzila/platform-auth/entra/server'
-import { requirePermission } from '@/lib/rbac'
-import { platformDb } from '@nzila/db/platform'
-import { orgs } from '@nzila/db/schema'
-import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
+import { resolveOrgContext } from '@/lib/resolve-org'
+import { createCfoClient } from '@/lib/services/clients'
+import { sql } from 'drizzle-orm'
 
 interface ImportRow {
   name: string
@@ -125,7 +123,7 @@ const PROVINCE_ALIASES: Record<string, string> = {
   'prince edward island': 'CA-PE',
   pe: 'CA-PE',
   pei: 'CA-PE',
-  'newfoundland': 'CA-NL',
+  newfoundland: 'CA-NL',
   nl: 'CA-NL',
   yukon: 'CA-YT',
   yt: 'CA-YT',
@@ -144,74 +142,88 @@ function normalizeProvince(raw?: string): string {
 }
 
 export async function importClientsFromCsv(csvText: string): Promise<ImportResult> {
-  const { userId } = await auth()
-  if (!userId) return { ok: false, imported: 0, skipped: 0, errors: ['Unauthorized'] }
-  await requirePermission('clients:create')
+  return resolveOrgContext('platform', { permission: 'clients:create' }, async (context) => {
+    const userId = context.userId
 
-  const { headers, rows } = parseCsv(csvText)
-  if (headers.length === 0) {
-    return { ok: false, imported: 0, skipped: 0, errors: ['CSV appears empty or has no headers.'] }
-  }
-
-  // Map headers to canonical field names
-  const headerMap = headers.map((h) => HEADER_ALIASES[h] ?? null)
-  const nameIdx = headerMap.indexOf('name')
-  if (nameIdx === -1) {
-    return {
-      ok: false,
-      imported: 0,
-      skipped: 0,
-      errors: [`Could not find a "name" column. Found headers: ${headers.join(', ')}`],
-    }
-  }
-
-  let imported = 0
-  let skipped = 0
-  const errors: string[] = []
-
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i]
-    const rowNum = i + 2 // 1-indexed + header row
-
-    // Build an ImportRow from the mapped columns
-    const record: ImportRow = { name: '' }
-    for (let j = 0; j < headerMap.length; j++) {
-      const field = headerMap[j]
-      if (field && row[j]) {
-        ;(record as unknown as Record<string, string>)[field] = row[j]
+    const { headers, rows } = parseCsv(csvText)
+    if (headers.length === 0) {
+      return {
+        ok: false,
+        imported: 0,
+        skipped: 0,
+        errors: ['CSV appears empty or has no headers.'],
       }
     }
 
-    if (!record.name.trim()) {
-      errors.push(`Row ${rowNum}: Skipped — name is empty`)
-      skipped++
-      continue
+    // Map headers to canonical field names
+    const headerMap = headers.map((h) => HEADER_ALIASES[h] ?? null)
+    const nameIdx = headerMap.indexOf('name')
+    if (nameIdx === -1) {
+      return {
+        ok: false,
+        imported: 0,
+        skipped: 0,
+        errors: [`Could not find a "name" column. Found headers: ${headers.join(', ')}`],
+      }
     }
 
-    try {
-      await platformDb.insert(orgs).values({
-        legalName: record.name.trim(),
-        jurisdiction: normalizeProvince(record.jurisdiction),
-        incorporationNumber: record.incorporationNumber?.trim() || null,
-        fiscalYearEnd: record.fiscalYearEnd?.trim() || null,
-        status: 'active',
-        policyConfig: {
-          contactEmail: record.email?.trim() || null,
-          businessType: record.businessType?.trim() || null,
-          industry: record.industry?.trim() || null,
-          phone: record.phone?.trim() || null,
-          importedFrom: 'csv',
-        },
-      })
-      imported++
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      errors.push(`Row ${rowNum} (${record.name}): ${msg}`)
-      skipped++
-    }
-  }
+    let imported = 0
+    let skipped = 0
+    const errors: string[] = []
 
-  logger.info('CSV import completed', { imported, skipped, errorCount: errors.length, actorId: userId })
-  revalidatePath('/dashboard/clients')
-  return { ok: imported > 0, imported, skipped, errors: errors.slice(0, 20) }
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+      const rowNum = i + 2 // 1-indexed + header row
+
+      // Build an ImportRow from the mapped columns
+      const record: ImportRow = { name: '' }
+      for (let j = 0; j < headerMap.length; j++) {
+        const field = headerMap[j]
+        if (field && row[j]) {
+          ;(record as unknown as Record<string, string>)[field] = row[j]
+        }
+      }
+
+      if (!record.name.trim()) {
+        errors.push(`Row ${rowNum}: Skipped — name is empty`)
+        skipped++
+        continue
+      }
+
+      try {
+        await context.db.execute(sql`SAVEPOINT cfo_import_client_row`)
+        await createCfoClient(
+          context,
+          {
+            name: record.name.trim(),
+            jurisdiction: normalizeProvince(record.jurisdiction),
+            incorporationNumber: record.incorporationNumber?.trim() || undefined,
+            fiscalYearEnd: record.fiscalYearEnd?.trim() || undefined,
+            contactEmail: record.email?.trim() || undefined,
+            businessType: record.businessType?.trim() || undefined,
+            industry: record.industry?.trim() || undefined,
+            phone: record.phone?.trim() || undefined,
+          },
+          'importClientsFromCsv',
+        )
+        await context.db.execute(sql`RELEASE SAVEPOINT cfo_import_client_row`)
+
+        imported++
+      } catch (err) {
+        await context.db.execute(sql`ROLLBACK TO SAVEPOINT cfo_import_client_row`)
+        await context.db.execute(sql`RELEASE SAVEPOINT cfo_import_client_row`)
+        const msg = err instanceof Error ? err.message : String(err)
+        errors.push(`Row ${rowNum} (${record.name}): ${msg}`)
+        skipped++
+      }
+    }
+
+    logger.info('CSV import completed', {
+      imported,
+      skipped,
+      errorCount: errors.length,
+      actorId: userId,
+    })
+    return { ok: imported > 0, imported, skipped, errors: errors.slice(0, 20) }
+  })
 }

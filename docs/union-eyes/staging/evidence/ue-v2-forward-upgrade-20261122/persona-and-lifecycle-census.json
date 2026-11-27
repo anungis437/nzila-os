@@ -1,0 +1,1568 @@
+{
+  "recordedAt": "2026-11-22T21:31:59.659333+00:00",
+  "purpose": "Traceability census for the existing base action ledger; not a new release gate or a change of accepted scope.",
+  "scopeSource": "docs/union-eyes/staging/UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json",
+  "scopeSourceSha256": "a4f7e990ae25d1897ff5f9cfd6a7ddcb6d98e3967343b505aad6b779da11fe50",
+  "denominators": {
+    "stakeholderFamilies": 35,
+    "requiredStakeholderFamilies": 26,
+    "deferredStakeholderFamilies": 9,
+    "storedRoleValues": 39,
+    "requiredRoleBoundaries": 34,
+    "deprecatedOrExcludedRoleValues": 5,
+    "requiredLifecycleStages": 16,
+    "requiredOperatingModelPresets": 4,
+    "requiredCrossCuttingVariants": 6,
+    "functionalActionFamilies": 22,
+    "requiredOperationalFamilies": 13
+  },
+  "currentRemoteNavigationProfiles": [
+    "member",
+    "steward",
+    "chief_steward",
+    "officer",
+    "secretary_treasurer",
+    "admin",
+    "app_owner"
+  ],
+  "requiredRoleValuesOutsideSevenProfileSubset": [
+    "coo",
+    "cto",
+    "platform_lead",
+    "customer_success_director",
+    "support_manager",
+    "data_analytics_manager",
+    "billing_manager",
+    "integration_manager",
+    "compliance_manager",
+    "security_manager",
+    "support_agent",
+    "data_analyst",
+    "billing_specialist",
+    "integration_specialist",
+    "content_manager",
+    "training_coordinator",
+    "system_admin",
+    "clc_executive",
+    "clc_staff",
+    "fed_executive",
+    "fed_staff",
+    "national_officer",
+    "president",
+    "vice_president",
+    "clerk",
+    "bargaining_committee",
+    "health_safety_rep"
+  ],
+  "roleBoundaryRows": [
+    {
+      "id": "app_owner",
+      "name": "app_owner",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "coo",
+      "name": "coo",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "cto",
+      "name": "cto",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "platform_lead",
+      "name": "platform_lead",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "customer_success_director",
+      "name": "customer_success_director",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "support_manager",
+      "name": "support_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "data_analytics_manager",
+      "name": "data_analytics_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "billing_manager",
+      "name": "billing_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "integration_manager",
+      "name": "integration_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "compliance_manager",
+      "name": "compliance_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "security_manager",
+      "name": "security_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "support_agent",
+      "name": "support_agent",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "data_analyst",
+      "name": "data_analyst",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "billing_specialist",
+      "name": "billing_specialist",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "integration_specialist",
+      "name": "integration_specialist",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "content_manager",
+      "name": "content_manager",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "training_coordinator",
+      "name": "training_coordinator",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "system_admin",
+      "name": "system_admin",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "clc_executive",
+      "name": "clc_executive",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "clc_staff",
+      "name": "clc_staff",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "fed_executive",
+      "name": "fed_executive",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "fed_staff",
+      "name": "fed_staff",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "national_officer",
+      "name": "national_officer",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "admin",
+      "name": "admin",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "president",
+      "name": "president",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C18",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "vice_president",
+      "name": "vice_president",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C18",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "secretary_treasurer",
+      "name": "secretary_treasurer",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C18",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "chief_steward",
+      "name": "chief_steward",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C09",
+        "C10",
+        "C11",
+        "C18",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "officer",
+      "name": "officer",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C18",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "clerk",
+      "name": "clerk",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C17",
+        "C19"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "steward",
+      "name": "steward",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C11",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "bargaining_committee",
+      "name": "bargaining_committee",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "health_safety_rep",
+      "name": "health_safety_rep",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Exercise this stored role as an eligibility/trust-boundary value for enabled base actions; it grants no content or institutional power.",
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "ROLE_BOUNDARY_REQUIRED",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "member",
+      "name": "member",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17",
+        "C20"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "guest",
+      "name": "guest",
+      "scope": "EXCLUDED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "congress_staff",
+      "name": "congress_staff",
+      "scope": "EXCLUDED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "federation_staff",
+      "name": "federation_staff",
+      "scope": "EXCLUDED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "union_rep",
+      "name": "union_rep",
+      "scope": "EXCLUDED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "staff_rep",
+      "name": "staff_rep",
+      "scope": "EXCLUDED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    }
+  ],
+  "stakeholderFamilyRows": [
+    {
+      "id": "SA01",
+      "name": "Active member / represented member",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17",
+        "C20",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA02",
+      "name": "Anonymous visitor, prospect, assessment respondent",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C01",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA03",
+      "name": "Pilot applicant, client champion, authorized customer signer / sponsor",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Only the named actor responsibility on the mapped current base actions, with actual resource-scoped authority or a verified external process.",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "O14"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA04",
+      "name": "Unredeemed invitee / first-time member",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA05",
+      "name": "Former, suspended, reinstated or departed member / staff",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C11",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA06",
+      "name": "Steward, shop steward, workplace delegate",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA07",
+      "name": "Representative / LRO / business agent / grievance officer",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C09",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA08",
+      "name": "Chief steward, senior representative, supervisor, temporary successor",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA09",
+      "name": "Executive office-holder / president / vice-president / secretary-treasurer",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C10",
+        "C16",
+        "C18",
+        "C19"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA10",
+      "name": "Organization administrator / membership administrator",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C19"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA11",
+      "name": "Administrative clerk / correspondence coordinator",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C17",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA12",
+      "name": "Privacy officer / assigned information-rights handler",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C20",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA13",
+      "name": "Governance reviewer, internal auditor, trustee (nonfinancial scope only)",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Only the named actor responsibility on the mapped current base actions, with actual resource-scoped authority or a verified external process.",
+      "baseActionIds": [
+        "C10",
+        "C19",
+        "C20",
+        "C22",
+        "O05"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA14",
+      "name": "Committee members, bargaining and health-and-safety representatives",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA15",
+      "name": "Unaffiliated external representative / staff representative from another organization",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Complete synthetic matter/document grant-to-revocation journey for existing external routes; no blanket cross-local authority or customer adoption.",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA16",
+      "name": "National union, federation, regional and congress officers/staff",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Complete synthetic matter/document grant-to-revocation journey for existing external routes; no blanket cross-local authority or customer adoption.",
+      "baseActionIds": [
+        "C07",
+        "C13",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA17",
+      "name": "WorkAid professional, external lawyer/counsel, paralegal, specialist caseworker",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA18",
+      "name": "Employer / management / HR / industrial-relations counterpart",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA19",
+      "name": "Respondent, adverse party, witness or third-party evidence contributor",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA20",
+      "name": "Arbitrator, mediator, tribunal, labour board or regulatory authority",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C21",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA21",
+      "name": "External auditor, assessor, privacy regulator or authorized investigator",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C19",
+        "C20",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA22",
+      "name": "Other approved recipient, respondent contact, designated third-party recipient",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C16",
+        "C17",
+        "C22",
+        "O01"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA23",
+      "name": "Platform founder, operations and system administration",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C19",
+        "C22",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O15"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA24",
+      "name": "Customer success, onboarding/support personnel and technical support",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Only the named actor responsibility on the mapped current base actions, with actual resource-scoped authority or a verified external process.",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA25",
+      "name": "Platform security, compliance and authorized incident/evidence reviewer",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C19",
+        "C20",
+        "C22",
+        "O05",
+        "O07",
+        "O08"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA26",
+      "name": "Platform commercial, billing and contract operations",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C05",
+        "C06",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA27",
+      "name": "Platform content/training and integration/analytics personnel",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C18",
+        "C19",
+        "C22",
+        "O14"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA28",
+      "name": "Identity provider, email provider, file scanner/storage, background worker",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C13",
+        "C16",
+        "C21",
+        "C22",
+        "O01",
+        "O06",
+        "O07"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA29",
+      "name": "External processor / connector, signing provider, third-party integration",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Only actual base Entra/email/scanner/storage/scheduler service trust boundaries; optional connectors and generic signing providers are deferred.",
+      "baseActionIds": [
+        "C13",
+        "C16",
+        "C22",
+        "O07"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA30",
+      "name": "Unauthorized stranger, spoofed provider, compromised or foreign principal",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C20",
+        "C21",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA31",
+      "name": "Synthetic test operator, controlled external inbox recipient and lifecycle fixture",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C22",
+        "O01",
+        "O11",
+        "O12"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA32",
+      "name": "Training participant / event attendee / volunteer / retired member or non-member claimant",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C06",
+        "C13",
+        "C20",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    },
+    {
+      "id": "SA33",
+      "name": "Customer procurement, legal/data-protection, IT/identity and security approvers",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C06",
+        "C19",
+        "C20",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA34",
+      "name": "Case-support staff, evidence/appeal coordinator and records custodian",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C11",
+        "C13",
+        "C14",
+        "C16",
+        "C21"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "SA35",
+      "name": "Institutional data steward, migration operator and legacy-system custodian",
+      "scope": "DEFERRED",
+      "currentBaseOutcome": "No positive extension is added to this base release. Preserve existing lawful behavior; verify every reachable denial, isolation, minimization and truthful unavailable boundary.",
+      "baseActionIds": [
+        "C05",
+        "C06",
+        "C13",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "REQUIRED_DENIALS_POSITIVE_FEATURE_DEFERRED",
+      "currentCandidateEvidence": null,
+      "state": "PRESERVED_SCOPE_DISPOSITION_NOT_A_PASS"
+    }
+  ],
+  "lifecycleRows": [
+    {
+      "id": "L01",
+      "name": "L01",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Existing-base lifecycle/trust boundary and truthful externally operated handoff. Public acquisition automation, live customer acceptance and payment/conversion products remain outside Step 1.",
+      "baseActionIds": [
+        "C01",
+        "C05",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L02",
+      "name": "L02",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C05",
+        "C19",
+        "C22",
+        "O13"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L03",
+      "name": "L03",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C05",
+        "C07",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L04",
+      "name": "L04",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06",
+        "C08",
+        "C12"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L05",
+      "name": "L05",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C06",
+        "C07",
+        "C09",
+        "C10",
+        "C11",
+        "C19",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L06",
+      "name": "L06",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C12",
+        "C13",
+        "C17"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L07",
+      "name": "L07",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L08",
+      "name": "L08",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C13",
+        "C14",
+        "C15",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L09",
+      "name": "L09",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C16",
+        "C17",
+        "C21",
+        "O01",
+        "O06"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L10",
+      "name": "L10",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Existing-base lifecycle/trust boundary and truthful externally operated handoff. Public acquisition automation, live customer acceptance and payment/conversion products remain outside Step 1.",
+      "baseActionIds": [
+        "C08",
+        "C13",
+        "C14",
+        "C16",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L11",
+      "name": "L11",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C08",
+        "C10",
+        "C11",
+        "C12",
+        "C21",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L12",
+      "name": "L12",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C19",
+        "C20",
+        "C22",
+        "O05",
+        "O13"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L13",
+      "name": "L13",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C22",
+        "O02",
+        "O04",
+        "O05",
+        "O06",
+        "O07",
+        "O08",
+        "O09",
+        "O15"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L14",
+      "name": "L14",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": "Existing-base lifecycle/trust boundary and truthful externally operated handoff. Public acquisition automation, live customer acceptance and payment/conversion products remain outside Step 1.",
+      "baseActionIds": [
+        "C18",
+        "C19",
+        "O13",
+        "O14"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": "BASE_SLICE_AND_REQUIRED_DENIALS",
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L15",
+      "name": "L15",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C06",
+        "C13",
+        "C14",
+        "C19",
+        "C20",
+        "C22"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    },
+    {
+      "id": "L16",
+      "name": "L16",
+      "scope": "REQUIRED",
+      "currentBaseOutcome": null,
+      "baseActionIds": [
+        "C22",
+        "O10",
+        "O11",
+        "O12",
+        "O13"
+      ],
+      "mandatoryDenials": true,
+      "coverageKind": null,
+      "currentCandidateEvidence": null,
+      "state": "UNVERIFIED_CURRENT_CANDIDATE"
+    }
+  ],
+  "rules": [
+    "Seven navigation profiles are a subset, never the acceptance denominator.",
+    "Every required row needs evidence of its scoped action or mandatory denial, tenant/resource boundary, lifecycle/recovery and audit where applicable.",
+    "Map equivalent decisions only after proving the same enforcing path; role similarity or shared menu is not proof.",
+    "Controlled identities may exercise multiple states with explicit restoration; titles do not imply separate human reviewers.",
+    "Finance feature implementation, production deployment and fictional independent approvals remain excluded."
+  ],
+  "stagingGo": false,
+  "productionAuthorized": false,
+  "applicationCandidateSha": "f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c",
+  "currentDeployedSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751"
+}

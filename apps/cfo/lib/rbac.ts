@@ -11,11 +11,11 @@ import { isSuperAdmin } from '@nzila/os-core/config/super-admins'
  * Stored in auth session claims (nzilaRole).
  */
 export type PlatformRole =
-  | 'platform_admin'   // Nzila platform administrators
-  | 'studio_admin'     // Studio-level admin
-  | 'ops'              // Operations / DevOps
-  | 'analyst'          // Data analyst
-  | 'viewer'           // Read-only platform access
+  | 'platform_admin' // Nzila platform administrators
+  | 'studio_admin' // Studio-level admin
+  | 'ops' // Operations / DevOps
+  | 'analyst' // Data analyst
+  | 'viewer' // Read-only platform access
 
 /** @deprecated Use PlatformRole instead */
 export type NzilaRole = PlatformRole
@@ -25,21 +25,21 @@ export type NzilaRole = PlatformRole
  * Stored in org_members.firmRole (org metadata).
  */
 export type FirmRole =
-  | 'firm_owner'          // Managing partner — full control, billing, firm settings
-  | 'partner'             // Partner — full client access, approve engagements, manage team
-  | 'manager'             // Senior accountant / engagement manager — review, approve, assign
-  | 'senior_accountant'   // Senior staff — tax prep, bookkeeping, limited admin
-  | 'staff_accountant'    // Junior staff — daily work, no admin access
-  | 'bookkeeper'          // Bookkeeping only — GL, bank rec, no tax / advisory
-  | 'admin_assistant'     // Office admin — scheduling, docs, no financial access
+  | 'firm_owner' // Managing partner — full control, billing, firm settings
+  | 'partner' // Partner — full client access, approve engagements, manage team
+  | 'manager' // Senior accountant / engagement manager — review, approve, assign
+  | 'senior_accountant' // Senior staff — tax prep, bookkeeping, limited admin
+  | 'staff_accountant' // Junior staff — daily work, no admin access
+  | 'bookkeeper' // Bookkeeping only — GL, bank rec, no tax / advisory
+  | 'admin_assistant' // Office admin — scheduling, docs, no financial access
 
 /**
  * Client-level roles — for external users accessing the client portal.
  */
 export type ClientRole =
-  | 'client_owner'    // Business owner — sees their data, approves deliverables, signs
-  | 'client_contact'  // Secondary contact (e.g., office manager) — view + upload docs
-  | 'client_viewer'   // Read-only view of their own reports/documents
+  | 'client_owner' // Business owner — sees their data, approves deliverables, signs
+  | 'client_contact' // Secondary contact (e.g., office manager) — view + upload docs
+  | 'client_viewer' // Read-only view of their own reports/documents
 
 /** Union of all firm + client roles (entity-scoped) */
 export type EntityRole = FirmRole | ClientRole
@@ -147,106 +147,192 @@ export type Permission =
 export const FIRM_PERMISSIONS: Record<FirmRole, readonly Permission[]> = {
   firm_owner: [
     'dashboard:view',
-    'clients:view', 'clients:create', 'clients:edit', 'clients:delete', 'clients:assign',
-    'client_portal:view', 'client_portal:upload', 'client_portal:approve',
-    'ledger:view', 'ledger:write', 'ledger:approve',
-    'documents:view', 'documents:upload', 'documents:delete',
-    'tasks:view', 'tasks:create', 'tasks:assign', 'tasks:complete',
-    'reports:view', 'reports:create', 'reports:export',
-    'integrations:view', 'integrations:manage',
-    'tax_tools:view', 'tax_tools:calculate',
-    'workflows:view', 'workflows:create', 'workflows:manage',
+    'clients:view',
+    'clients:create',
+    'clients:edit',
+    'clients:delete',
+    'clients:assign',
+    'client_portal:view',
+    'client_portal:upload',
+    'client_portal:approve',
+    'ledger:view',
+    'ledger:write',
+    'ledger:approve',
+    'documents:view',
+    'documents:upload',
+    'documents:delete',
+    'tasks:view',
+    'tasks:create',
+    'tasks:assign',
+    'tasks:complete',
+    'reports:view',
+    'reports:create',
+    'reports:export',
+    'integrations:view',
+    'integrations:manage',
+    'tax_tools:view',
+    'tax_tools:calculate',
+    'workflows:view',
+    'workflows:create',
+    'workflows:manage',
     'alerts:view',
-    'notifications:view', 'notifications:manage',
-    'advisory_ai:view', 'advisory_ai:use',
+    'notifications:view',
+    'notifications:manage',
+    'advisory_ai:view',
+    'advisory_ai:use',
     'ai_insights:view',
-    'messages:view', 'messages:send',
-    'security:view', 'security:manage',
+    'messages:view',
+    'messages:send',
+    'security:view',
+    'security:manage',
     'audit:view',
-    'settings:view', 'settings:manage',
-    'fx:view', 'fx:convert',
+    'settings:view',
+    'settings:manage',
+    'fx:view',
+    'fx:convert',
   ],
   partner: [
     'dashboard:view',
-    'clients:view', 'clients:create', 'clients:edit', 'clients:assign',
-    'client_portal:view', 'client_portal:upload', 'client_portal:approve',
-    'ledger:view', 'ledger:write', 'ledger:approve',
-    'documents:view', 'documents:upload', 'documents:delete',
-    'tasks:view', 'tasks:create', 'tasks:assign', 'tasks:complete',
-    'reports:view', 'reports:create', 'reports:export',
-    'integrations:view', 'integrations:manage',
-    'tax_tools:view', 'tax_tools:calculate',
-    'workflows:view', 'workflows:create', 'workflows:manage',
+    'clients:view',
+    'clients:create',
+    'clients:edit',
+    'clients:assign',
+    'client_portal:view',
+    'client_portal:upload',
+    'client_portal:approve',
+    'ledger:view',
+    'ledger:write',
+    'ledger:approve',
+    'documents:view',
+    'documents:upload',
+    'documents:delete',
+    'tasks:view',
+    'tasks:create',
+    'tasks:assign',
+    'tasks:complete',
+    'reports:view',
+    'reports:create',
+    'reports:export',
+    'integrations:view',
+    'integrations:manage',
+    'tax_tools:view',
+    'tax_tools:calculate',
+    'workflows:view',
+    'workflows:create',
+    'workflows:manage',
     'alerts:view',
-    'notifications:view', 'notifications:manage',
-    'advisory_ai:view', 'advisory_ai:use',
+    'notifications:view',
+    'notifications:manage',
+    'advisory_ai:view',
+    'advisory_ai:use',
     'ai_insights:view',
-    'messages:view', 'messages:send',
+    'messages:view',
+    'messages:send',
     'security:view',
     'audit:view',
     'settings:view',
-    'fx:view', 'fx:convert',
+    'fx:view',
+    'fx:convert',
   ],
   manager: [
     'dashboard:view',
-    'clients:view', 'clients:create', 'clients:edit', 'clients:assign',
-    'client_portal:view', 'client_portal:upload', 'client_portal:approve',
-    'ledger:view', 'ledger:write', 'ledger:approve',
-    'documents:view', 'documents:upload',
-    'tasks:view', 'tasks:create', 'tasks:assign', 'tasks:complete',
-    'reports:view', 'reports:create', 'reports:export',
+    'clients:view',
+    'clients:create',
+    'clients:edit',
+    'clients:assign',
+    'client_portal:view',
+    'client_portal:upload',
+    'client_portal:approve',
+    'ledger:view',
+    'ledger:write',
+    'ledger:approve',
+    'documents:view',
+    'documents:upload',
+    'tasks:view',
+    'tasks:create',
+    'tasks:assign',
+    'tasks:complete',
+    'reports:view',
+    'reports:create',
+    'reports:export',
     'integrations:view',
-    'tax_tools:view', 'tax_tools:calculate',
-    'workflows:view', 'workflows:create', 'workflows:manage',
+    'tax_tools:view',
+    'tax_tools:calculate',
+    'workflows:view',
+    'workflows:create',
+    'workflows:manage',
     'alerts:view',
     'notifications:view',
-    'advisory_ai:view', 'advisory_ai:use',
+    'advisory_ai:view',
+    'advisory_ai:use',
     'ai_insights:view',
-    'messages:view', 'messages:send',
+    'messages:view',
+    'messages:send',
     'audit:view',
     'settings:view',
-    'fx:view', 'fx:convert',
+    'fx:view',
+    'fx:convert',
   ],
   senior_accountant: [
     'dashboard:view',
-    'clients:view', 'clients:edit',
-    'client_portal:view', 'client_portal:upload',
-    'ledger:view', 'ledger:write',
-    'documents:view', 'documents:upload',
-    'tasks:view', 'tasks:create', 'tasks:complete',
-    'reports:view', 'reports:create', 'reports:export',
+    'clients:view',
+    'clients:edit',
+    'client_portal:view',
+    'client_portal:upload',
+    'ledger:view',
+    'ledger:write',
+    'documents:view',
+    'documents:upload',
+    'tasks:view',
+    'tasks:create',
+    'tasks:complete',
+    'reports:view',
+    'reports:create',
+    'reports:export',
     'integrations:view',
-    'tax_tools:view', 'tax_tools:calculate',
+    'tax_tools:view',
+    'tax_tools:calculate',
     'workflows:view',
     'alerts:view',
     'notifications:view',
-    'advisory_ai:view', 'advisory_ai:use',
+    'advisory_ai:view',
+    'advisory_ai:use',
     'ai_insights:view',
-    'messages:view', 'messages:send',
+    'messages:view',
+    'messages:send',
     'audit:view',
-    'fx:view', 'fx:convert',
+    'fx:view',
+    'fx:convert',
   ],
   staff_accountant: [
     'dashboard:view',
     'clients:view',
     'client_portal:view',
-    'ledger:view', 'ledger:write',
-    'documents:view', 'documents:upload',
-    'tasks:view', 'tasks:complete',
+    'ledger:view',
+    'ledger:write',
+    'documents:view',
+    'documents:upload',
+    'tasks:view',
+    'tasks:complete',
     'reports:view',
-    'tax_tools:view', 'tax_tools:calculate',
+    'tax_tools:view',
+    'tax_tools:calculate',
     'workflows:view',
     'alerts:view',
     'notifications:view',
-    'messages:view', 'messages:send',
+    'messages:view',
+    'messages:send',
     'fx:view',
   ],
   bookkeeper: [
     'dashboard:view',
     'clients:view',
-    'ledger:view', 'ledger:write',
-    'documents:view', 'documents:upload',
-    'tasks:view', 'tasks:complete',
+    'ledger:view',
+    'ledger:write',
+    'documents:view',
+    'documents:upload',
+    'tasks:view',
+    'tasks:complete',
     'reports:view',
     'alerts:view',
     'notifications:view',
@@ -257,10 +343,12 @@ export const FIRM_PERMISSIONS: Record<FirmRole, readonly Permission[]> = {
     'dashboard:view',
     'clients:view',
     'client_portal:view',
-    'documents:view', 'documents:upload',
+    'documents:view',
+    'documents:upload',
     'tasks:view',
     'notifications:view',
-    'messages:view', 'messages:send',
+    'messages:view',
+    'messages:send',
   ],
 } as const
 
@@ -270,16 +358,22 @@ export const FIRM_PERMISSIONS: Record<FirmRole, readonly Permission[]> = {
 export const CLIENT_PERMISSIONS: Record<ClientRole, readonly Permission[]> = {
   client_owner: [
     'dashboard:view',
-    'client_portal:view', 'client_portal:upload', 'client_portal:approve',
-    'documents:view', 'documents:upload',
+    'client_portal:view',
+    'client_portal:upload',
+    'client_portal:approve',
+    'documents:view',
+    'documents:upload',
     'reports:view',
     'notifications:view',
-    'messages:view', 'messages:send',
+    'messages:view',
+    'messages:send',
   ],
   client_contact: [
     'dashboard:view',
-    'client_portal:view', 'client_portal:upload',
-    'documents:view', 'documents:upload',
+    'client_portal:view',
+    'client_portal:upload',
+    'documents:view',
+    'documents:upload',
     'reports:view',
     'notifications:view',
     'messages:view',
@@ -298,33 +392,26 @@ export const CLIENT_PERMISSIONS: Record<ClientRole, readonly Permission[]> = {
  */
 export const PLATFORM_PERMISSIONS: Record<PlatformRole, readonly Permission[]> = {
   platform_admin: [
-    'platform_admin:view', 'platform_admin:manage',
-    'security:view', 'security:manage',
-    'settings:view', 'settings:manage',
+    'platform_admin:view',
+    'platform_admin:manage',
+    'security:view',
+    'security:manage',
+    'settings:view',
+    'settings:manage',
     'audit:view',
     'dashboard:view',
   ],
   studio_admin: [
     'platform_admin:view',
     'security:view',
-    'settings:view', 'settings:manage',
+    'settings:view',
+    'settings:manage',
     'audit:view',
     'dashboard:view',
   ],
-  ops: [
-    'security:view',
-    'audit:view',
-    'dashboard:view',
-    'alerts:view',
-  ],
-  analyst: [
-    'reports:view', 'reports:export',
-    'ai_insights:view',
-    'dashboard:view',
-  ],
-  viewer: [
-    'dashboard:view',
-  ],
+  ops: ['security:view', 'audit:view', 'dashboard:view', 'alerts:view'],
+  analyst: ['reports:view', 'reports:export', 'ai_insights:view', 'dashboard:view'],
+  viewer: ['dashboard:view'],
 } as const
 
 // ── Page-level permission requirements ──────────────────────────────────────
@@ -334,25 +421,25 @@ export const PLATFORM_PERMISSIONS: Record<PlatformRole, readonly Permission[]> =
  * Used by the layout for sidebar filtering and by pages for access checks.
  */
 export const PAGE_PERMISSIONS: Record<string, Permission> = {
-  'dashboard':       'dashboard:view',
-  'clients':         'clients:view',
-  'client-portal':   'client_portal:view',
-  'ledger':          'ledger:view',
-  'documents':       'documents:view',
-  'tasks':           'tasks:view',
-  'reports':         'reports:view',
-  'integrations':    'integrations:view',
-  'tax-tools':       'tax_tools:view',
-  'workflows':       'workflows:view',
-  'alerts':          'alerts:view',
-  'notifications':   'notifications:view',
-  'advisory-ai':     'advisory_ai:view',
-  'ai-insights':     'ai_insights:view',
-  'messages':        'messages:view',
-  'security':        'security:view',
-  'audit':           'audit:view',
-  'platform-admin':  'platform_admin:view',
-  'settings':        'settings:view',
+  dashboard: 'dashboard:view',
+  clients: 'clients:view',
+  'client-portal': 'client_portal:view',
+  ledger: 'ledger:view',
+  documents: 'documents:view',
+  tasks: 'tasks:view',
+  reports: 'reports:view',
+  integrations: 'integrations:view',
+  'tax-tools': 'tax_tools:view',
+  workflows: 'workflows:view',
+  alerts: 'alerts:view',
+  notifications: 'notifications:view',
+  'advisory-ai': 'advisory_ai:view',
+  'ai-insights': 'ai_insights:view',
+  messages: 'messages:view',
+  security: 'security:view',
+  audit: 'audit:view',
+  'platform-admin': 'platform_admin:view',
+  settings: 'settings:view',
 } as const
 
 // ── Permission checking ─────────────────────────────────────────────────────
@@ -360,22 +447,17 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
 /**
  * Check whether a given role (firm or client) has a specific permission.
  */
-export function roleHasPermission(
-  role: FirmRole | ClientRole,
-  permission: Permission,
-): boolean {
-  const perms = (FIRM_PERMISSIONS as Record<string, readonly Permission[]>)[role]
-    ?? (CLIENT_PERMISSIONS as Record<string, readonly Permission[]>)[role]
+export function roleHasPermission(role: FirmRole | ClientRole, permission: Permission): boolean {
+  const perms =
+    (FIRM_PERMISSIONS as Record<string, readonly Permission[]>)[role] ??
+    (CLIENT_PERMISSIONS as Record<string, readonly Permission[]>)[role]
   return perms?.includes(permission) ?? false
 }
 
 /**
  * Check whether a platform role has a specific permission.
  */
-export function platformRoleHasPermission(
-  role: PlatformRole,
-  permission: Permission,
-): boolean {
+export function platformRoleHasPermission(role: PlatformRole, permission: Permission): boolean {
   return PLATFORM_PERMISSIONS[role]?.includes(permission) ?? false
 }
 
@@ -383,10 +465,12 @@ export function platformRoleHasPermission(
  * Get all permissions for a given role.
  */
 export function getPermissionsForRole(role: AppRole): readonly Permission[] {
-  return (FIRM_PERMISSIONS as Record<string, readonly Permission[]>)[role]
-    ?? (CLIENT_PERMISSIONS as Record<string, readonly Permission[]>)[role]
-    ?? (PLATFORM_PERMISSIONS as Record<string, readonly Permission[]>)[role]
-    ?? []
+  return (
+    (FIRM_PERMISSIONS as Record<string, readonly Permission[]>)[role] ??
+    (CLIENT_PERMISSIONS as Record<string, readonly Permission[]>)[role] ??
+    (PLATFORM_PERMISSIONS as Record<string, readonly Permission[]>)[role] ??
+    []
+  )
 }
 
 /**
@@ -427,8 +511,7 @@ export async function getUserRole(): Promise<PlatformRole> {
 
   // Super-admin email override
   const user = await currentUser()
-  const email = user?.primaryEmailAddress?.emailAddress
-              ?? user?.emailAddresses?.[0]?.emailAddress
+  const email = user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress
   if (isSuperAdmin(email)) {
     return 'platform_admin'
   }
@@ -450,19 +533,22 @@ export async function getUserFirmRole(): Promise<FirmRole | ClientRole> {
 /**
  * Get both platform and firm roles for the current user.
  */
-export async function getUserRoles(): Promise<{
+export async function getUserRoles(expectedActorUserId?: string): Promise<{
   platformRole: PlatformRole
   firmRole: FirmRole | ClientRole
 }> {
-  const { sessionClaims } = await auth()
+  const { userId, sessionClaims } = await auth()
+  if (expectedActorUserId && userId !== expectedActorUserId)
+    throw new Error('Forbidden: authenticated actor changed')
   const meta = sessionClaims?.publicMetadata as Record<string, unknown> | undefined
   let platformRole = (meta?.nzilaRole as PlatformRole) || 'viewer'
 
   // Super-admin email override
   if (platformRole !== 'platform_admin') {
     const user = await currentUser()
-    const email = user?.primaryEmailAddress?.emailAddress
-                ?? user?.emailAddresses?.[0]?.emailAddress
+    if (expectedActorUserId && user && user.id !== expectedActorUserId)
+      throw new Error('Forbidden: authenticated profile changed')
+    const email = user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress
     if (isSuperAdmin(email)) {
       platformRole = 'platform_admin'
     }
@@ -494,11 +580,13 @@ export async function hasPermission(permission: Permission): Promise<boolean> {
  */
 export async function requirePermission(
   permission: Permission,
+  expectedActorUserId?: string,
 ): Promise<{ platformRole: PlatformRole; firmRole: FirmRole | ClientRole }> {
-  const roles = await getUserRoles()
-  const allowed = roles.platformRole === 'platform_admin'
-    || platformRoleHasPermission(roles.platformRole, permission)
-    || roleHasPermission(roles.firmRole, permission)
+  const roles = await getUserRoles(expectedActorUserId)
+  const allowed =
+    roles.platformRole === 'platform_admin' ||
+    platformRoleHasPermission(roles.platformRole, permission) ||
+    roleHasPermission(roles.firmRole, permission)
 
   if (!allowed) {
     throw new Error(

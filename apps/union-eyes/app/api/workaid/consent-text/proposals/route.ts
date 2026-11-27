@@ -1,16 +1,12 @@
 /**
- * /api/workaid/consent-text/proposals
- *   GET  — open wording proposals for an executive who holds office. A proposal is not consent text.
- *   POST — that executive records institution-supplied wording. The body is not authored here.
- * Nothing becomes current until a different executive adopts it.
+ * /api/workaid/consent-text/proposals — retained WorkAid wording workflow, deferred from the base release.
+ *   GET  — authenticates the caller's organization membership, then answers 501 WORKAID_WORDING_DEFERRED.
+ *   POST — authenticates, validates the released proposal input contract (400 when malformed), then answers 501.
+ * Neither handler reaches SQL or the authority store; nothing is proposed or adopted.
  */
-import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { withRLSContext } from '@/lib/db/with-rls-context'
 import { getCaseActor } from '@/lib/cases/case-authorization'
-import { drizzleExecutor, kernelDeps } from '@/lib/authority/store/route-adapter'
-import { listOpenConsentWordingProposals, proposeConsentWording } from '@/lib/authority/store/workaid-disclosure'
-import { parseBody, workAidErrorResponse } from '@/lib/workaid/route-support'
+import { parseBody, workAidErrorResponse, workAidWordingDeferredResponse } from '@/lib/workaid/route-support'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,14 +17,8 @@ const proposeSchema = z.object({
 
 export async function GET() {
   try {
-    const actor = await getCaseActor()
-    const proposals = await withRLSContext(async (tx) =>
-      listOpenConsentWordingProposals(drizzleExecutor(tx), kernelDeps, { organizationId: actor.organizationId, reviewerUserId: actor.userId }),
-    )
-    return NextResponse.json({
-      success: true,
-      proposals: proposals.map((row) => ({ ...row, proposedAt: row.proposedAt.toISOString() })),
-    })
+    await getCaseActor()
+    return workAidWordingDeferredResponse()
   } catch (error) {
     return workAidErrorResponse(error)
   }
@@ -36,18 +26,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const actor = await getCaseActor()
+    await getCaseActor()
     const body = await parseBody(request, proposeSchema)
     if (!body.ok) return body.response
-    const proposalId = await withRLSContext(async (tx) =>
-      proposeConsentWording(drizzleExecutor(tx), kernelDeps, {
-        organizationId: actor.organizationId,
-        proposerUserId: actor.userId,
-        version: body.data.version,
-        body: body.data.body,
-      }),
-    )
-    return NextResponse.json({ success: true, proposalId, adopted: false }, { status: 201 })
+    return workAidWordingDeferredResponse()
   } catch (error) {
     return workAidErrorResponse(error)
   }

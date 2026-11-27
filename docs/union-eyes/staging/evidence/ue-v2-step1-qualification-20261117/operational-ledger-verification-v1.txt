@@ -1,0 +1,2 @@
+Verified canonical local ledger and cited artifact hashes: proof-artifacts/evidence/2026-11-17/evidence.att.deployment.ue-step1-local-0327fba86786-20261117T214423.1794951864255.json
+Verified canonical local ledger and cited artifact hashes: proof-artifacts/evidence/2026-11-17/evidence.att.doctrine-compliance.ue-step1-local-0327fba86786-20261117T214423.1794951865003.json

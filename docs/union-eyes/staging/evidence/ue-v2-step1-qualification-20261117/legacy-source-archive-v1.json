@@ -1,0 +1,13 @@
+{
+  "recordedAt": "2026-11-18T00:34:03.099071+00:00",
+  "scope": "OWNED_HISTORICAL_FIXTURE_SOURCE_ARCHIVAL",
+  "sourceCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "archivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/legacy-source-0327.tar.gz",
+  "archiveSha256": "85143223eb9e14a52cc17b0790514be707c9f45f818ee49f972d6832075b76f1",
+  "archiveBytes": 109945823,
+  "verifiedFiles": 22728,
+  "verifiedUncompressedBytes": 368117459,
+  "verification": "Every tracked regular source file in archive matched the actual historical fixture snapshot before cleanup",
+  "cleanup": "Only expanded owned historical source snapshot removed; shared dependency symlinks not followed, existing source/worktrees/data untouched",
+  "qualificationClaim": false
+}

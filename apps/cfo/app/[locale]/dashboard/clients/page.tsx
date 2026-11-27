@@ -1,3 +1,4 @@
+import { CfoScopeError, resolveOrgContext } from '@/lib/resolve-org'
 /**
  * CFO — Clients List Page (Server Component).
  *
@@ -19,6 +20,14 @@ export default async function ClientsPage({
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
   await requirePermission('clients:view')
+  const canCreateClient = await resolveOrgContext(
+    'platform',
+    { permission: 'clients:create' },
+    async () => true,
+  ).catch((error) => {
+    if (error instanceof CfoScopeError) return false
+    throw error
+  })
 
   const params = await searchParams
   const page = Number(params.page ?? '1')
@@ -39,16 +48,18 @@ export default async function ClientsPage({
         <div>
           <h2 className="font-poppins text-2xl font-bold text-foreground">Clients</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {total} client{total !== 1 ? 's' : ''} in your firm
+            {total} client{total !== 1 ? 's' : ''} you can access
           </p>
         </div>
-        <Link
-          href="clients/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-electric/90"
-        >
-          <Plus className="h-4 w-4" />
-          Add Client
-        </Link>
+        {canCreateClient && (
+          <Link
+            href="clients/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-electric/90"
+          >
+            <Plus className="h-4 w-4" />
+            Add Client
+          </Link>
+        )}
       </div>
 
       {/* Search & Filters */}
@@ -136,9 +147,7 @@ export default async function ClientsPage({
                       {client.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {client.memberCount ?? '—'}
-                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{client.memberCount ?? '—'}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {client.createdAt
                       ? new Date(client.createdAt).toLocaleDateString('en-CA')

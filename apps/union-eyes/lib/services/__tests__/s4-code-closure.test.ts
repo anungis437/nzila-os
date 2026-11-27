@@ -86,6 +86,6 @@ describe('S4 code closure of partial fixes', () => {
     expect(snapshot).not.toContain('.transaction(')
     const route = read('app/api/rewards/wallet/route.ts')
     expect(route).toContain('rlsOrgContext: true')
-    expect(route).toContain('getWalletSnapshot(organizationId!, userId!, limit, offset)')
+    expect(route).toMatch(/getWalletSnapshot\(\s*organizationId!,\s*userId!,\s*limit,\s*offset,?\s*\)/)
   })
 })

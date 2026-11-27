@@ -1,0 +1,17 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+{"proof":"owned-legacy-current-security-active-platform-staff-counts","before":{"rules":0,"mandates":0},"after":{"rules":0,"mandates":0},"statement":"Counts prove preservation on this synthetic fixture, not that accepted active platform_staff mandates are inert."}
+ ✓ |union-eyes-native| db/__tests__/current-security-installer.native.test.ts (4 tests) 14572ms
+   ✓ actual released-to-current security transaction on owned native PostgreSQL (4)
+     ✓ refuses an altered legacy policy and preserves the entire security state and history 2333ms
+     ✓ rolls back roles, owners, ACLs and functions after a real database failure during the transition 3003ms
+     ✓ restores the exact old constraint and full state after a real failure following its current replacement 3248ms
+     ✓ qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP 5986ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  23:13:45
+   Duration  15.70s (tests 93%, transform 4%, setup 1%, import 1%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v16.json

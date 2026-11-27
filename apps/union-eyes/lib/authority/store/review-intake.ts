@@ -124,7 +124,7 @@ export async function openMemberReview(
   const sortedAdverse = [...adverseUserIds].sort()
   const existing = (
     await exec.query<Row>(
-      `SELECT id::text AS id FROM ue_authority_reviews
+      `SELECT id::text AS id FROM public.ue_authority_reviews
         WHERE organization_id = $1::uuid AND opened_by = $2 AND review_type = $3 AND status = 'open'
           AND COALESCE((SELECT array_agg(a::text ORDER BY a::text) FROM unnest(adverse_user_ids) a), ARRAY[]::text[]) = $4::text[]
         ORDER BY created_at LIMIT 1`,
@@ -133,7 +133,7 @@ export async function openMemberReview(
   ).rows[0]
   // The same member asking again for the same open review gets that review back rather than another permanent row.
   if (existing && isUuid(existing.id)) return { id: String(existing.id), reviewType, status: 'open', created: false, ...NOTIFICATION }
-  const recent = Number((await exec.query<Row>(`SELECT count(*)::int AS n FROM ue_authority_reviews WHERE organization_id = $1::uuid AND opened_by = $2 AND created_at > now() - interval '24 hours'`, [input.organizationId, input.actorUserId])).rows[0]?.n ?? 0)
+  const recent = Number((await exec.query<Row>(`SELECT count(*)::int AS n FROM public.ue_authority_reviews WHERE organization_id = $1::uuid AND opened_by = $2 AND created_at > now() - interval '24 hours'`, [input.organizationId, input.actorUserId])).rows[0]?.n ?? 0)
   if (recent >= REVIEW_INTAKE_DAILY_LIMIT) throw new AuthorityStoreError('PRECONDITION', 'REVIEW_INTAKE_LIMIT: too many reviews opened today')
   const id = await registerReview(exec, deps, {
     organizationId: input.organizationId,
@@ -159,7 +159,7 @@ export async function listMemberReviewIntake(
   const ownRows = (
     await exec.query<Row>(
       `SELECT id::text AS id, review_type, status, created_at, opened_by, complainant_user_id
-         FROM ue_authority_reviews
+         FROM public.ue_authority_reviews
         WHERE organization_id = $1::uuid
           AND (opened_by = $2 OR complainant_user_id = $2)
           AND NOT ($2 = ANY(adverse_user_ids))
@@ -198,7 +198,7 @@ export async function listMemberReviewIntake(
     const rows = (
       await exec.query<Row>(
         `SELECT id::text AS id, review_type, status, created_at, complainant_user_id, adverse_user_ids, classification
-           FROM ue_authority_reviews
+           FROM public.ue_authority_reviews
           WHERE organization_id = $1::uuid AND id = ANY($2::uuid[])
           ORDER BY created_at DESC, id`,
         [input.organizationId, [...candidateIds]],

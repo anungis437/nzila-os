@@ -82,6 +82,11 @@ const MUTATION_ALLOWLIST = [
   // Flow — commerce app with legacy direct DB mutations in services/repositories.
   // Tracked for migration to createAuditedScopedDb.
   'apps/flow/',
+  // Control-plane policy replay engine — writes replay sessions/results (governance evidence
+  // about historical decisions, not business data); each executed replay is itself audited
+  // through recordGovernanceEvent('policy.replay_executed') with initiator, counts and drift.
+  // The file moved from server/authority (unscanned) to lib/services unchanged.
+  'apps/control-plane/lib/services/authority/policy-replay-engine.ts',
   // Test scaffold — ephemeral directory created/destroyed by golden-path tests.
   'apps/test-scaffold-gp/',
 ]

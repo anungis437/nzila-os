@@ -1,0 +1,3 @@
+generate-runtime-health-status: wrote reports/runtime/runtime-health-status-latest.json
+  apps: 20
+  healthy=6 degraded=4 failing=4 not_instrumented=6

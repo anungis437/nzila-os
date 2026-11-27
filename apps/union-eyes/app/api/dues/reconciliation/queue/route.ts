@@ -1,30 +1,38 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Reconciliation Queue
  *
  * GET /api/dues/reconciliation/queue — List remittance line items needing review
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db';
-import { remittanceLineItems, employerRemittances } from '@/db/schema/dues-finance-schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { db } from '@/db'
+import { remittanceLineItems, employerRemittances } from '@/db/schema/dues-finance-schema'
+import { eq, and, sql } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'List remittance line items pending reconciliation' },
   },
   async ({ organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
+    requireBaseFinancialAuthority()
+
     await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
-    );
+      requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:view',
+        requiresLedger: true,
+      }),
+    )
 
     const rows = await db
       .select({
@@ -44,17 +52,14 @@ export const GET = withApi(
         periodEnd: employerRemittances.periodEnd,
       })
       .from(remittanceLineItems)
-      .leftJoin(
-        employerRemittances,
-        eq(remittanceLineItems.remittanceId, employerRemittances.id),
-      )
+      .leftJoin(employerRemittances, eq(remittanceLineItems.remittanceId, employerRemittances.id))
       .where(
         and(
           eq(remittanceLineItems.organizationId, organizationId),
           sql`${remittanceLineItems.lineStatus} in ('pending', 'exception', 'manual_review')`,
         ),
-      );
+      )
 
-    return { data: rows, total: rows.length };
+    return { data: rows, total: rows.length }
   },
-);
+)

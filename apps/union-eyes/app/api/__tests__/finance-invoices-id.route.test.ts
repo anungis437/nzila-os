@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -26,14 +29,15 @@ describe('finance/invoices/[id] route', () => {
     m.getInvoiceWithLineItems.mockResolvedValue({ id: INVOICE, lineItems: [] });
   });
 
-  it('asks the wrapper for a secretary-treasurer, the entitlement and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for a secretary-treasurer and declares no entitlement and no ambient tenant transaction', async () => {
     const { GET } = await loadRoute();
-    expect(declaredOptions(GET)).toMatchObject({
+    const options = declaredOptions(GET);
+    expect(options).toMatchObject({
       auth: { minRole: 'secretary_treasurer' },
-      entitlement: 'financial_intelligence_suite',
-      rlsOrgContext: true,
+      rlsOrgContext: false,
       registry: { audience: 'officer', evidenceRequired: true },
     });
+    expect(options.entitlement).toBeUndefined();
   });
 
   it('returns validation error when invoice id is missing or is not a uuid', async () => {
@@ -43,35 +47,32 @@ describe('finance/invoices/[id] route', () => {
     expect(m.getInvoiceWithLineItems).not.toHaveBeenCalled();
   });
 
-  it('returns the caller organization\'s invoice when it exists', async () => {
+  it.each([
+    ['an invoice that exists', () => m.getInvoiceWithLineItems.mockResolvedValue({ id: INVOICE, lineItems: [] })],
+    ['an invoice the organization does not have', () => m.getInvoiceWithLineItems.mockResolvedValue(null)],
+    ['a read that fails', () => m.getInvoiceWithLineItems.mockRejectedValue(new Error('db down'))],
+  ])('refuses a valid invoice id with 501 NOT_IMPLEMENTED and reads nothing: %s', async (_label, arrange) => {
+    arrange();
     const { GET } = await loadRoute();
     const response = await GET(request(), as(INVOICE));
-    const json = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(m.getInvoiceWithLineItems).toHaveBeenCalledWith(INVOICE, 'org_1');
-    expect(json.data).toEqual({ id: INVOICE, lineItems: [] });
-  });
-
-  it('returns 404 for an invoice the organization does not have', async () => {
-    const { GET } = await loadRoute();
-    m.getInvoiceWithLineItems.mockResolvedValueOnce(null);
-    expect((await GET(request(), as(INVOICE))).status).toBe(404);
-  });
-
-  it('is refused without the entitlement, and reads nothing', async () => {
-    const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('no module'));
-    const response = await GET(request(), as(INVOICE));
-
-    expect(response.status).toBe(403);
-    expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'financial_intelligence_suite', 'u1');
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
     expect(m.getInvoiceWithLineItems).not.toHaveBeenCalled();
   });
 
-  it('reports a read that failed as a 500, never as a missing invoice', async () => {
+  it('refuses with 501 whether or not the organization holds the module: no entitlement check or read runs', async () => {
     const { GET } = await loadRoute();
-    m.getInvoiceWithLineItems.mockRejectedValueOnce(new Error('db down'));
-    expect((await GET(request(), as(INVOICE))).status).toBe(500);
+    for (const entitled of [true, false]) {
+      m.requireEntitlement.mockReset();
+      if (entitled) m.requireEntitlement.mockResolvedValue(undefined);
+      else m.requireEntitlement.mockRejectedValue(new Error('no module'));
+      const response = await GET(request(), as(INVOICE));
+
+      expect(response.status).toBe(501);
+      expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    }
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
+    expect(m.getInvoiceWithLineItems).not.toHaveBeenCalled();
   });
 });

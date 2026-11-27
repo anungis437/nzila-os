@@ -27,19 +27,12 @@ const callers = {
   notification_queue: 'lib/services/notification-service.ts',
   organization_members: 'lib/services/member-access-revocation-service.ts',
   organizations: 'app/api/organizations/route.ts',
-  payments: 'app/api/payments/webhooks/stripe/route.ts',
-  per_capita_remittances: 'services/clc/per-capita-calculator.ts',
   pilot_applications: 'app/api/pilot/apply/[id]/commercial-transition/route.ts',
-  recognition_awards: 'lib/services/rewards/award-service.ts',
   reserved_matter_votes: 'app/api/governance/reserved-matters/[id]/class-b-vote/route.ts',
   union_density: 'lib/services/external-data/wage-enrichment-service.ts',
   user_notification_preferences: 'app/api/notifications/preferences/route.ts',
   wage_benchmarks: 'lib/services/external-data/wage-enrichment-service.ts',
-  webhook_receipts: 'lib/services/rewards/webhook-service.ts',
-  commercial_contracts: 'app/api/pilot/apply/[id]/commercial-transition/route.ts',
   deadline_audit_events: 'lib/deadline-engine/audit.ts',
-  dues_transactions: 'lib/dues/dues-settlement.ts',
-  member_dues_ledger: 'lib/dues/dues-settlement.ts',
   deadline_reassignment_convergence: 'lib/deadline-engine/assignment-sync.ts',
   deadline_reminder_executions: 'lib/deadline-engine/reminder-worker.ts',
   deadline_reminders: 'lib/deadline-engine/reminder-worker.ts',
@@ -81,8 +74,6 @@ const callers = {
   platform_invoices: 'services/platform-economics/billing-service.ts',
   public_intake_audit_events: 'lib/public-intake/intake-audit.ts',
   rbac_audit_log: 'db/queries/enhanced-rbac-queries.ts',
-  reward_budget_envelopes: 'lib/services/rewards/budget-service.ts',
-  reward_wallet_ledger: 'lib/services/rewards/wallet-service.ts',
   role_definitions: 'db/queries/enhanced-rbac-queries.ts',
   scim_configurations: 'lib/scim/scim-token.ts',
   scim_events_log: 'lib/scim/events-log.ts',
@@ -104,7 +95,20 @@ const callers = {
 } as const
 
 /** The exact number of relations the plan grants a SYSTEM INSERT, UPDATE or DELETE; one source caller each. */
-export const SYSTEM_MUTATION_DENOMINATOR = 89
+export const SYSTEM_MUTATION_DENOMINATOR = Object.keys(callers).length
+/** Removed positive callers remain mandatory denial boundaries. These are
+ * explicit source decisions, never a census learned from database grants. */
+export const ZERO_SYSTEM_MUTATION_TABLES = [
+  'commercial_contracts',
+  'dues_transactions',
+  'member_dues_ledger',
+  'payments',
+  'per_capita_remittances',
+  'recognition_awards',
+  'reward_budget_envelopes',
+  'reward_wallet_ledger',
+  'webhook_receipts',
+] as const
 
 export interface SystemMutationContract {
   table: string
@@ -125,6 +129,26 @@ export const systemMutationRules = (plan: V2Plan): SecurityRule[] =>
   )
 
 export function systemMutationContracts(plan: V2Plan): SystemMutationContract[] {
+  for (const table of ZERO_SYSTEM_MUTATION_TABLES) {
+    const source = plan.tables.find((candidate) => candidate.name === table)
+    assert(source?.authority, `UE_V2_ZERO_SYSTEM_CURRENT_SOURCE_REQUIRED:${table}`)
+    assert.deepEqual(
+      source.authority.requiredSystemPrivileges,
+      [],
+      `UE_V2_ZERO_SYSTEM_AUTHORITY_REQUIRED:${table}`,
+    )
+  }
+  const allRules = compileSecurity(plan).rules
+  for (const table of ZERO_SYSTEM_MUTATION_TABLES) {
+    const rule = allRules.find((rule) => rule.table === table)
+    assert(rule && rule.status === 'COMPLETE', `UE_V2_ZERO_SYSTEM_CURRENT_SOURCE_REQUIRED:${table}`)
+    assert.equal(rule.systemPrivileges.length, 0, `UE_V2_ZERO_SYSTEM_AUTHORITY_REQUIRED:${table}`)
+    assert.equal(
+      rule.systemSelectColumns?.length ?? 0,
+      0,
+      `UE_V2_ZERO_SYSTEM_COLUMN_AUTHORITY_REQUIRED:${table}`,
+    )
+  }
   const rules = systemMutationRules(plan)
   assert.equal(
     rules.length,
@@ -157,20 +181,13 @@ export function systemMutationContracts(plan: V2Plan): SystemMutationContract[] 
     const selector = rule.table === 'external_data_sync_log' ? 'sync_id' : 'id'
     assert(table.columns.some((column) => column.name === selector))
     // Returning shapes are SQL component projections, not proof that every caller was invoked.
-    const insertReturning =
-      rule.table === 'commercial_contracts'
-        ? ['id']
-        : rule.systemPrivileges.includes('SELECT')
-          ? ['*']
-          : []
+    const insertReturning = rule.systemPrivileges.includes('SELECT') ? ['*'] : []
     const updateReturning =
       rule.table === 'external_data_sync_log'
         ? ['sync_id']
-        : rule.table === 'commercial_contracts'
-          ? ['id']
-          : rule.systemPrivileges.includes('SELECT')
-            ? ['*']
-            : []
+        : rule.systemPrivileges.includes('SELECT')
+          ? ['*']
+          : []
     const updateColumns: Record<string, string> = {
       icra_assessment_answers: 'note',
       icra_assessments: 'report_tier_id',

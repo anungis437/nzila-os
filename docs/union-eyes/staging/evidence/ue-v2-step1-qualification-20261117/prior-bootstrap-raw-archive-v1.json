@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-11-17T23:55:28.388011+00:00",
+  "scope": "Owned untracked prior bootstrap output archival; preserves bytes, recovers disk, not qualification proof",
+  "records": [
+    {
+      "originalPath": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.json",
+      "originalBytes": 135994914,
+      "originalSha256": "4467a1be928b06691f4710c88a493c18ba880f0f3196c01985b4cd0ececed5c4",
+      "archivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-bootstrap-raw/UE_CANONICAL_SCHEMA_V2.json.gz",
+      "archiveBytes": 4557866,
+      "archiveSha256": "7632402bf2c95e903faf85a588f34b674fbb9f3499f0565e6ab3a12e9e702e47",
+      "status": "PRIOR_UNQUALIFIED_OUTPUT_PRESERVED"
+    },
+    {
+      "originalPath": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2.md",
+      "originalBytes": 40336388,
+      "originalSha256": "4d010846b8395c6d9b5ee3e0f50201e02d6c025d33a8a9f2ee78bac9dcc325a1",
+      "archivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-bootstrap-raw/UE_CANONICAL_SCHEMA_V2.md.gz",
+      "archiveBytes": 981490,
+      "archiveSha256": "9262ea0032c57813c7495d1ffa4d93c91c5ab3b73868b3c223d9c2a5a47a4c5e",
+      "status": "PRIOR_UNQUALIFIED_OUTPUT_PRESERVED"
+    },
+    {
+      "originalPath": "docs/union-eyes/bootstrap-v2/UE_BOOTSTRAP_V2_RUNTIME_EVIDENCE.json",
+      "originalBytes": 13416398,
+      "originalSha256": "12738b8057bb757f50f1b740ff85cf75ba02eb0d6a32b8112ad4e383a34c4714",
+      "archivePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/prior-bootstrap-raw/UE_BOOTSTRAP_V2_RUNTIME_EVIDENCE.json.gz",
+      "archiveBytes": 363830,
+      "archiveSha256": "74b7e3b89e812349a7dd9d86b65e6ae1aa308ab1806ede3b6757cadc0bcab553",
+      "status": "PRIOR_UNQUALIFIED_OUTPUT_PRESERVED"
+    }
+  ]
+}

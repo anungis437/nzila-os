@@ -4,6 +4,7 @@ Tests for grievances models.
 
 import uuid
 
+from django.db import DatabaseError, connection, transaction
 from django.test import TestCase
 
 from .models import (
@@ -82,21 +83,24 @@ class ClaimPrecedentAnalysisModelTest(TestCase):
 
 class ClaimUpdatesModelTest(TestCase):
     def test_create(self):
+        # Case history is written only through the application's audited path: the database's physical guard refuses a raw
+        # history row that has no organization context and canonical audit record, and nothing is kept.
         claim = create_valid(Claims,
             organization_id=uuid.uuid4(),
             claim_number="CLM-CU-001",
         )
-        obj = create_valid(ClaimUpdates, claim=claim)
-        self.assertIsNotNone(obj.id)
-        self.assertEqual(obj.claim, claim)
+        with self.assertRaisesMessage(DatabaseError, "CASE_HISTORY_ORIGIN_REQUIRED"):
+            with transaction.atomic():
+                create_valid(ClaimUpdates, claim=claim)
+                connection.cursor().execute("SET CONSTRAINTS ALL IMMEDIATE")
+        self.assertFalse(ClaimUpdates.objects.filter(claim=claim).exists())
 
     def test_str(self):
         claim = create_valid(Claims,
             organization_id=uuid.uuid4(),
             claim_number="CLM-CU-002",
         )
-        obj = create_valid(ClaimUpdates, claim=claim)
-        self.assertIsInstance(str(obj), str)
+        self.assertIsInstance(str(ClaimUpdates(claim=claim, message="baseline")), str)
 
 
 class DeadlineRulesModelTest(TestCase):

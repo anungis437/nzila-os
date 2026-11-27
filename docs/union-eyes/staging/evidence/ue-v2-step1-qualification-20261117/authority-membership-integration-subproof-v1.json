@@ -1,0 +1,135 @@
+{
+  "recordedAt": "2026-11-17T23:54:59.434929+00:00",
+  "scope": "INTERIM_STEP_1_SOURCE_AND_DISPOSABLE_NATIVE_COMPONENTS",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "proofs": [
+    {
+      "proof": "authority-upstream-red-v1",
+      "success": false,
+      "passed": 23,
+      "failed": 2,
+      "skipped": 0,
+      "artifacts": [
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-upstream-red-v1.json",
+          "bytes": 14719,
+          "sha256": "127dc49acaa99bf05d7baec0fa57730a042abca1bef24f8cf5fb9e2b40ede352"
+        },
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-upstream-red-v1.txt",
+          "bytes": 4916,
+          "sha256": "1bddbad283965eb367eb6ee7308d76ac5daefaf515ad18fa3c1fe6932f999fc7"
+        }
+      ]
+    },
+    {
+      "proof": "authority-upstream-green-v1",
+      "success": true,
+      "passed": 176,
+      "failed": 0,
+      "skipped": 0,
+      "artifacts": [
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-upstream-green-v1.json",
+          "bytes": 77138,
+          "sha256": "fe38df90ac904a859efe21050b3cdd44dccc6a58fe0ecd80e0580ba9f5b6fa57"
+        },
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-upstream-green-v1.txt",
+          "bytes": 649,
+          "sha256": "51b6804d44bdd328a4e4d68b39524b4abc5012414a2513f4634b66314722422a"
+        }
+      ]
+    },
+    {
+      "proof": "authority-domain-native-v3",
+      "success": true,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "artifacts": [
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-domain-native-v3.json",
+          "bytes": 7754,
+          "sha256": "ef7ab58c3a150c21d2faf31711b7838f0ca3216465f7abe4674623e10beca4b5"
+        },
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/authority-domain-native-v3.txt",
+          "bytes": 751,
+          "sha256": "c6574245df10a0c2b18efd975723031315c63e8f8d111f126df6b618201ffcda"
+        }
+      ]
+    },
+    {
+      "proof": "membership-native-v6",
+      "success": true,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "artifacts": [
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/membership-native-v6.json",
+          "bytes": 7242,
+          "sha256": "4d504e58c29a3a635264c67b0e36be44b3d1b3f341c3c3f03d431080d6898c2c"
+        },
+        {
+          "path": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/membership-native-v6.txt",
+          "bytes": 138,
+          "sha256": "7d217ffcb7bbab0d22f67a44e14c9bafca1fc0e8d0432623280b03905027db12"
+        }
+      ]
+    }
+  ],
+  "sourceSha256": [
+    {
+      "path": "apps/union-eyes/lib/authority/kernel.ts",
+      "sha256": "753ac19e7e6aa4e73c991e2db07393f02235fcc24361f8f0513021d9c6073bd8"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/policies/case.ts",
+      "sha256": "fd7aae30734d91107cd908c18c66bc21d152f699555838bcd60e2ec1fe0dc2e4"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-primary-domain-guards.ts",
+      "sha256": "b79499eb5549bcb8c718678fa91cde6b811ab5f7e6eb63bdf2d3af9e62c51ba2"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-primary-domain-guards.pglite.test.ts",
+      "sha256": "7cf04c4eabb7601cf2fe82d57186cffd322a98354c6bb5766c8fc5b791c2fc06"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/membership-semantics.ts",
+      "sha256": "fde5c410d2a98c1bb49bbe5027c1e2c2b6bf6e3d5b28bdca4ac925df963cb2a6"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/membership-semantics.test.ts",
+      "sha256": "be8c7ef81ca82b51686facc598b761b39c86bf9dc0af2b21d5a0d1b49b6cb6c3"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/membership-semantics.native.test.ts",
+      "sha256": "8e15991284b4e4b3245b4cc5c1873488ad4eeae43bacdd9b1ea6b8b121ec178a"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/role-prerequisites.ts",
+      "sha256": "ce6283bcb869fb835dd088ac74ec924d785e81ca440df6ff971a24f1f2bd1ead"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "181dd2428baea5607eee417017a88d4632be54ceb3d8f6cb866c7f7ebd2448e1"
+    }
+  ],
+  "limitations": [
+    "Full integrated qualification pending; no staging or production promotion.",
+    "Domain native proof is PostgreSQL16; membership proof records actual PostgreSQL15 ARM64 and16 AMD64 separately.",
+    "Red counterexamples retained; only subsequent focused component results are passing."
+  ],
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "618057d775fa3c4ef158a6876ba76f15abd558a6c16f8c92832b3c9797905579",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/authority-membership-integration-subproof-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

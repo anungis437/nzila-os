@@ -14,6 +14,8 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { seedMembership, type Db } from './authority-kernel-harness'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
@@ -21,11 +23,14 @@ const state = vi.hoisted(() => ({ db: null as unknown }))
 
 type Tx = { execute: (q: unknown) => Promise<unknown> }
 async function inRole<T>(role: 'union_eyes_runtime' | 'union_eyes_system', org: string, user: string, work: (tx: unknown) => Promise<T>): Promise<T> {
-  return (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
+  const run = (binding?: AuthenticatedOrgBinding) => (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
     await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${user}, true), set_config('app.current_org_id', ${org}, true)`)
+    // A runtime actor acts through their verified business session, as the canonical topology requires (ue_v2_verified_business_session).
+    if (binding) await installNativeBusinessContext((statement) => tx.execute(statement as never), binding)
     return work(tx)
   })
+  return role === 'union_eyes_runtime' && org && user ? withNativeCanonicalActor(user, org, run) : run()
 }
 const context = vi.hoisted(() => ({ org: '', user: '' }))
 
@@ -68,8 +73,9 @@ describe.skipIf(!URL)('document intake, transcripts and signature acknowledgment
   }
   const failAudit = (action: string) => admin.query(`INSERT INTO ue_audit_faults(action) VALUES ($1) ON CONFLICT DO NOTHING`, [action])
   const clearFaults = () => admin.query(`DELETE FROM ue_audit_faults`)
+  // Canonical mode (this database's mode) writes the hash-chained public.audit_logs; the legacy audit_security table is not the runtime's.
   const auditCount = async (action: string, org = ORG_A) =>
-    count(`SELECT count(*) AS n FROM audit_security.audit_logs WHERE action = $1 AND organization_id = $2`, [action, org])
+    count(`SELECT count(*) AS n FROM public.audit_logs WHERE action = $1 AND organization_id = $2`, [action, org])
 
   async function seedDocument(docId: string, org: string, uploader: string, keySuffix: string) {
     await admin.query(
@@ -130,8 +136,10 @@ describe.skipIf(!URL)('document intake, transcripts and signature acknowledgment
     await admin.query(`GRANT SELECT ON ue_audit_faults TO PUBLIC`)
     await admin.query(`CREATE OR REPLACE FUNCTION ue_audit_fault() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
         IF EXISTS (SELECT 1 FROM ue_audit_faults WHERE action = NEW.action) THEN RAISE EXCEPTION 'injected audit fault'; END IF; RETURN NEW; END $$`)
-    await admin.query(`DROP TRIGGER IF EXISTS ue_audit_fault_trg ON audit_security.audit_logs`)
-    await admin.query(`CREATE TRIGGER ue_audit_fault_trg BEFORE INSERT ON audit_security.audit_logs FOR EACH ROW EXECUTE FUNCTION ue_audit_fault()`)
+    for (const table of ['audit_security.audit_logs', 'public.audit_logs']) {
+      await admin.query(`DROP TRIGGER IF EXISTS ue_audit_fault_trg ON ${table}`)
+      await admin.query(`CREATE TRIGGER ue_audit_fault_trg BEFORE INSERT ON ${table} FOR EACH ROW EXECUTE FUNCTION ue_audit_fault()`)
+    }
   }, 120_000)
 
   afterAll(async () => {
@@ -188,8 +196,12 @@ describe.skipIf(!URL)('document intake, transcripts and signature acknowledgment
     // A replay by the same principal is recognised; another principal never learns the intake exists.
     act(ORG_A, USER_A)
     expect(await lifecycle!.checkIntakeForAcceptance({ organizationId: ORG_A, userId: USER_A, intakeId: intake.id, operation: 'create_document' }, storage)).toMatchObject({ ok: true, replay: true })
+    // Each other caller asks in their own authenticated session: the reviewer in the same organization, USER_B in theirs.
+    act(ORG_A, REVIEWER)
     expect(await lifecycle!.checkIntakeForAcceptance({ organizationId: ORG_A, userId: REVIEWER, intakeId: intake.id, operation: 'create_document' }, storage)).toEqual({ ok: false, kind: 'not_found' })
+    act(ORG_B, USER_B)
     expect(await lifecycle!.checkIntakeForAcceptance({ organizationId: ORG_B, userId: USER_B, intakeId: intake.id, operation: 'create_document' }, storage)).toEqual({ ok: false, kind: 'not_found' })
+    act(ORG_A, USER_A)
 
     // An accepted intake is terminal and its object can never be cancelled or marked for deletion.
     expect(await lifecycle!.cancelIntake({ organizationId: ORG_A, userId: USER_A, intakeId: intake.id })).toEqual({ ok: false, kind: 'accepted' })
@@ -208,7 +220,8 @@ describe.skipIf(!URL)('document intake, transcripts and signature acknowledgment
     expect(await count(`SELECT count(*) AS n FROM document_versions WHERE storage_key = $1`, [intake.key])).toBe(1)
   })
 
-  afterEach(() => { delete process.env.UE_CANONICAL_BOOTSTRAP_V2 })
+  // This clone is canonical (the isolation setup sets the flag to 1): a test that switches the mode puts it back.
+  afterEach(() => { process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1' })
 
   it('reconciles abandoned uploads as the system role: expires, deletes the exact object, records a failed deletion and retries, never touches accepted objects', async () => {
     const lapsed = await openAs(ORG_A, USER_A, 'lapsed', new Date(Date.now() - 3 * 3_600_000))
@@ -218,6 +231,7 @@ describe.skipIf(!URL)('document intake, transcripts and signature acknowledgment
 
     // Outside Canonical V2 the audit fallback is audit_security.audit_logs, which the system role cannot write. The
     // reaper then fails closed: nothing is expired, because nothing may change without its audit record.
+    process.env.UE_CANONICAL_BOOTSTRAP_V2 = '0'
     await expect(lifecycle!.expireDueIntakes()).rejects.toThrow()
     expect(await count(`SELECT count(*) AS n FROM document_intakes WHERE id = $1 AND status = 'open'`, [lapsed.id])).toBe(1)
 

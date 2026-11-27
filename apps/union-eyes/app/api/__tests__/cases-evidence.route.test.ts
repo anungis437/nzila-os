@@ -15,16 +15,20 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api/with-api', () => ({
   withApi: vi.fn((_: unknown, handler: (...args: any[]) => unknown) => handler),
 }));
-vi.mock('@/lib/api/errors', () => {
+vi.mock('@/lib/api/errors', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api/errors')>('@/lib/api/errors');
   const makeError = (status: number, message: string, details?: unknown) => Object.assign(new Error(message), { status, details });
+  // The real class (the finance base-release boundary extends it at module load), with this test's static stubs.
+  class ApiError extends actual.ApiError {}
   return {
-    ApiError: {
+    ...actual,
+    ApiError: Object.assign(ApiError, {
       badRequest: (message: string, details?: unknown) => makeError(400, message, details),
       notFound: (_entity: string, id?: string) => makeError(404, id ? `Not found: ${id}` : 'Not found'),
       unauthorized: () => makeError(401, 'Unauthorized'),
       forbidden: () => makeError(403, 'Forbidden'),
       externalService: (_svc: string, message: string) => makeError(503, message),
-    },
+    }),
   };
 });
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));

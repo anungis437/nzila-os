@@ -36,6 +36,23 @@ jobs:
           SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
 
+      - name: Check generated authority census and its dependent evidence trace
+        env:
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
+          set -euo pipefail
+          pnpm exec tsx apps/union-eyes/scripts/reality/transitive-authority-census.ts --check
+          pnpm exec tsx apps/union-eyes/scripts/reality/step1-evidence-trace.ts --check
+
+      # Fail on related role, navigation, generated-manifest and action-projection
+      # drift together, before spending the full suite's runtime. These same
+      # assertions remain in the whole suite below; this is an early diagnostic.
+      - name: Check connected case access contracts before the whole suite
+        run: pnpm --filter @nzila/union-eyes qualification:case-access
+
+      - name: Check frontend response contracts before the whole suite
+        run: pnpm --filter @nzila/union-eyes qualification:ui-census
+
       - name: Run the full declared Union Eyes Vitest project, not a directory subset
         shell: bash
         run: |

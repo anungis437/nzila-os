@@ -1,3 +1,5 @@
+import { ingestKnowledgeAction } from '@/lib/services/ai-proposal-service'
+import { AiIngestKnowledgeSourceProposalSchema } from '@nzila/ai-core'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Convenience: Ingest Knowledge Source (AI Action)
@@ -6,17 +8,9 @@
  * Wraps propose + execute in one flow for auto-approved low-risk actions.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { aiActions } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { createLogger } from '@nzila/os-core'
-import {
-  ACTION_TYPES,
-  AiIngestKnowledgeSourceProposalSchema,
-  checkActionPolicy,
-  executeAction,
-  appendAiAuditEvent,
-} from '@nzila/ai-core'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { asAiError } from '@/lib/catch-utils'
 
@@ -38,100 +32,8 @@ export async function POST(req: NextRequest) {
     })
     if (!access.ok) return access.response
 
-    // 1. Create action
-    const [action] = await platformDb
-      .insert(aiActions)
-      .values({
-        orgId: proposal.orgId,
-        appKey: proposal.appKey,
-        profileKey: proposal.profileKey,
-        actionType: ACTION_TYPES.AI_INGEST_KNOWLEDGE_SOURCE,
-        status: 'proposed',
-        proposalJson: proposal as unknown as Record<string, unknown>,
-        requestedBy: access.context.userId,
-        relatedDomainType: 'knowledge_source',
-      })
-      .returning()
-
-    await appendAiAuditEvent({
-      orgId: proposal.orgId,
-      actorClerkUserId: access.context.userId,
-      action: 'ai.action_proposed',
-      targetType: 'ai_action',
-      targetId: action.id,
-      afterJson: {
-        actionType: ACTION_TYPES.AI_INGEST_KNOWLEDGE_SOURCE,
-        sourceTitle: proposal.source.title,
-      },
-    })
-
-    // 2. Policy check
-    const policyDecision = await checkActionPolicy({
-      actionType: ACTION_TYPES.AI_INGEST_KNOWLEDGE_SOURCE,
-      orgId: proposal.orgId,
-      appKey: proposal.appKey,
-      profileKey: proposal.profileKey,
-      proposalJson: proposal as unknown as Record<string, unknown>,
-      actor: access.context.userId,
-    })
-
-    if (!policyDecision.allowed) {
-      await platformDb
-        .update(aiActions)
-        .set({
-          status: 'rejected',
-          policyDecisionJson: policyDecision,
-          updatedAt: new Date(),
-        })
-        .where(eq(aiActions.id, action.id))
-
-      return NextResponse.json({
-        actionId: action.id,
-        status: 'rejected',
-        policyDecision,
-      }, { status: 403 })
-    }
-
-    // 3. Auto-approve if applicable
-    if (policyDecision.autoApproved) {
-      await platformDb
-        .update(aiActions)
-        .set({
-          status: 'approved',
-          riskTier: policyDecision.riskTier,
-          policyDecisionJson: policyDecision,
-          approvedBy: 'system',
-          approvedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(aiActions.id, action.id))
-
-      // 4. Execute immediately
-      const result = await executeAction(action.id, access.context.userId)
-
-      return NextResponse.json({
-        actionId: action.id,
-        ...result,
-      }, { status: result.status === 'success' ? 201 : 500 })
-    }
-
-    // Not auto-approved — return awaiting
-    await platformDb
-      .update(aiActions)
-      .set({
-        status: 'awaiting_approval',
-        riskTier: policyDecision.riskTier,
-        policyDecisionJson: policyDecision,
-        approvalsRequiredJson: policyDecision.approvalsRequired,
-        updatedAt: new Date(),
-      })
-      .where(eq(aiActions.id, action.id))
-
-    return NextResponse.json({
-      actionId: action.id,
-      status: 'awaiting_approval',
-      policyDecision,
-    }, { status: 202 })
+    const result = await ingestKnowledgeAction(proposal, access.context.userId)
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     const aiErr = asAiError(err)
     if (aiErr) {
@@ -141,9 +43,6 @@ export async function POST(req: NextRequest) {
       )
     }
     logger.error('[Knowledge Ingest Error]', err instanceof Error ? err : { detail: err })
-    return NextResponse.json(
-      { error: 'Internal server error', code: 'unknown' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Internal server error', code: 'unknown' }, { status: 500 })
   }
 }

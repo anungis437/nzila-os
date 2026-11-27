@@ -15,6 +15,7 @@ import { insertMandate, openApprovalRequest, recordApprovalDecision, revokeConse
 import { recordCounselAcceptance, recordFinancialStep, referToWorkAid, registerReview } from '../../lib/authority/store/workflow'
 import { runIdempotent } from '../../lib/authority/store/idempotency'
 import type { PGlite } from '@electric-sql/pglite'
+import type { SqlExecutor } from '../../lib/authority/store/executor'
 
 let db: PGlite
 let k: ReturnType<typeof kit>
@@ -79,8 +80,15 @@ describe('TypeScript layer: the actor is the session principal, never a paramete
       organizationId: ORG, principalUserId: U.officer, kind: 'supervisory', powers: ['read'], sourceInstrument: 'x', grantedBy: U.president, effectiveAt: minutesAgo(), expiresAt: daysAhead(1), issuanceRuleId: null }))).rejects.toThrow(FORGED)
   })
 
-  it('financial steps, reviews, referrals and idempotency keys cannot be attributed to someone else', async () => {
-    await expect(k.as(U.president)((t) => recordFinancialStep(t, k.deps, { organizationId: ORG, actorUserId: U.treasurer, paymentId: newUuid(), step: 'approved' }))).rejects.toThrow(FORGED)
+  it('excluded financial steps refuse before SQL; reviews, referrals and idempotency keys reject a forged actor', async () => {
+    let attemptedQueries = 0
+    const financialExecutor: SqlExecutor = { query: () => {
+      attemptedQueries++
+      throw new Error('Excluded financial actor query reached')
+    } }
+    await expect(k.as(U.president)(() => recordFinancialStep(financialExecutor, k.deps, { organizationId: ORG, actorUserId: U.treasurer, paymentId: newUuid(), step: 'approved' })))
+      .rejects.toMatchObject({ name: 'BaseFinancialCapabilityUnavailable', code: 'NOT_IMPLEMENTED', status: 501 })
+    expect(attemptedQueries).toBe(0)
     await expect(k.as(U.president)((t) => registerReview(t, k.deps, { organizationId: ORG, openedBy: U.member, reviewType: 'complaint' }))).rejects.toThrow(FORGED)
     await expect(k.as(U.president)((t) => referToWorkAid(t, k.deps, { organizationId: ORG, referrerUserId: U.steward, caseId: newUuid(), memberUserId: U.member, categories: ['status'] }))).rejects.toThrow(FORGED)
     await expect(k.as(U.officer)((t) => runIdempotent(t, { organizationId: ORG, actorUserId: U.president, key: 'k-1', operation: 'op', payload: {} }, async () => 'x'))).rejects.toThrow(FORGED)

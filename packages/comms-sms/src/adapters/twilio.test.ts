@@ -51,6 +51,31 @@ describe('twilioAdapter', () => {
       expect(result.error).toBe('Invalid phone number')
     })
 
+    it('forwards a valid statusCallback URL', async () => {
+      mockCreate.mockResolvedValueOnce({ sid: 'SM789' })
+      const result = await twilioAdapter.send(
+        req({ metadata: { statusCallback: 'https://app.example.test/api/webhooks/twilio' } }),
+        creds,
+      )
+      expect(result.ok).toBe(true)
+      expect(mockCreate).toHaveBeenCalledWith({
+        to: '+15551234567',
+        from: '+15550000000',
+        body: 'Hello',
+        statusCallback: 'https://app.example.test/api/webhooks/twilio',
+      })
+    })
+
+    it.each([
+      ['undefined/api/webhooks/twilio'],
+      ['javascript:alert(1)'],
+      [42],
+    ])('refuses an invalid statusCallback (%s) without calling Twilio', async (statusCallback) => {
+      const result = await twilioAdapter.send(req({ metadata: { statusCallback } }), creds)
+      expect(result).toEqual({ ok: false, error: 'Invalid Twilio statusCallback' })
+      expect(mockCreate).not.toHaveBeenCalled()
+    })
+
     it('sends empty body when body is undefined', async () => {
       mockCreate.mockResolvedValueOnce({ sid: 'SM456' })
       await twilioAdapter.send(req({ body: undefined }), creds)

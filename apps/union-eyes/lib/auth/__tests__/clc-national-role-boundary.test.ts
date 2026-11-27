@@ -79,45 +79,64 @@
  * real importers — the moment one gains a real caller, this test fails
  * and that new call site must enforce its own allow-list before shipping.
  */
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { relative, resolve } from 'node:path';
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { TENANT_SELF_SERVICE_ASSIGNABLE_ROLES } from '@nzila/platform-auth/invites';
 import { ROLE_HIERARCHY, PLATFORM_ELEVATED_ROLES } from '@/lib/api-auth-guard';
 
 const APP_ROOT = resolve(__dirname, '..', '..', '..');
 
-/**
- * Real (non-test) importer count for a given module path, searched across
- * app/, actions/, lib/, services/ within apps/union-eyes. Excludes the
- * defining file itself and any __tests__/.test./.spec. file. Uses `grep -l`
- * (list-matching-files) rather than counting every match, since we only
- * care whether ANY real importer exists.
+/** Production code references, including renamed imports and computed calls.
+ * Generated JSON decision prose and code comments confer no call path. The
+ * scanner still treats an exact computed symbol literal as a reference, so a
+ * namespace/dynamic invocation cannot hide an unrestricted membership writer.
  */
-function realImporterFiles(moduleSpecifierFragment: string, definingFileRelativePath: string): string[] {
-  let out = '';
-  try {
-    out = execFileSync(
-      'grep',
-      ['-rl', '--exclude-dir=node_modules', '--exclude-dir=.next', '-E', moduleSpecifierFragment, 'app', 'lib', 'actions', 'services'],
-      { cwd: APP_ROOT, encoding: 'utf8' },
-    );
-  } catch (err: unknown) {
-    // grep exits 1 when there are no matches at all — that's a valid "zero importers" result.
-    const execErr = err as { status?: number; stdout?: string };
-    if (execErr.status === 1) return [];
-    out = execErr.stdout ?? '';
-  }
-  return out
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((file) => !file.includes('__tests__') && !file.includes('.test.') && !file.includes('.spec.'))
-    .filter((file) => file !== definingFileRelativePath);
+function referencesSymbol(source: string, symbol: string): boolean {
+  const tree = ts.createSourceFile('production.tsx', source, ts.ScriptTarget.Latest, true);
+  let found = false;
+  const visit = (node: ts.Node): void => {
+    if ((ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
+      && node.text === symbol) found = true;
+    ts.forEachChild(node, visit);
+  };
+  visit(tree);
+  return found;
+}
+
+function realImporterFiles(symbol: string, definingFileRelativePath: string): string[] {
+  const references: string[] = [];
+  const walk = (directory: string): void => {
+    if (!existsSync(directory)) return;
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const file = resolve(directory, entry.name);
+      if (entry.isDirectory()) {
+        if (!['node_modules', '__tests__', '.next'].includes(entry.name) && !entry.name.startsWith('.')) walk(file);
+      } else if (entry.isFile() && /\.[cm]?[jt]sx?$/.test(entry.name)
+        && !/\.(?:test|spec)\./.test(entry.name) && !entry.name.endsWith('.d.ts')) {
+        const local = relative(APP_ROOT, file).split('\\').join('/');
+        if (local !== definingFileRelativePath && referencesSymbol(readFileSync(file, 'utf8'), symbol)) references.push(local);
+      }
+    }
+  };
+  for (const directory of ['app', 'lib', 'actions', 'services']) walk(resolve(APP_ROOT, directory));
+  return references.sort();
 }
 
 describe('CLC national dashboard authority boundary (PR #752 round 5/6/12)', () => {
+  it('source reachability ignores historical prose and comments while retaining aliased and computed writer references', () => {
+    const symbol = 'bulkUpdateMemberRole';
+    expect(referencesSymbol('// bulkUpdateMemberRole is historical evidence\nexport const x = 1', symbol)).toBe(false);
+    expect(referencesSymbol('const note = "historical bulkUpdateMemberRole evidence"', symbol)).toBe(false);
+    for (const source of [
+      'import { bulkUpdateMemberRole as writeRole } from "./member-service"; writeRole()',
+      'service.bulkUpdateMemberRole()',
+      'service["bulkUpdateMemberRole"]()',
+      'const key = "bulkUpdateMemberRole"; service[key]()',
+    ]) expect(referencesSymbol(source, symbol)).toBe(true);
+  });
+
   it('TENANT_SELF_SERVICE_ASSIGNABLE_ROLES (the actual invite-service allow-list) has ZERO overlap with the canonical PLATFORM_ELEVATED_ROLES set', () => {
     const overlap = PLATFORM_ELEVATED_ROLES.filter((role) => TENANT_SELF_SERVICE_ASSIGNABLE_ROLES.has(role));
     expect(overlap, 'a tenant self-service writer must never be able to assign a platform-elevated role').toEqual([]);

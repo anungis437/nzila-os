@@ -3,11 +3,6 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { initializeConsoleWrapper } from './lib/console-wrapper';
-
-// Initialize console wrapper for production logging control
-initializeConsoleWrapper();
-
 const clientDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 const sentryEnabled = process.env.NEXT_PUBLIC_SENTRY_ENABLED !== 'false';
 const allowSentryOnDemoHosts = process.env.NEXT_PUBLIC_SENTRY_ENABLE_ON_DEMO === 'true';

@@ -21,37 +21,19 @@ describe('the statuses the screen knows', () => {
   });
 });
 
-describe('nextStatuses: what the server’s lifecycle rules allow', () => {
-  it('moves a draft on to a submitted state, and a filed grievance on to acknowledged', () => {
-    expect(nextStatuses('draft', null)).toEqual(['new', 'filed', 'converted']);
-    expect(nextStatuses('filed', null)).toEqual(['acknowledged']);
+describe('nextStatuses: the server projection is the only source of offered actions', () => {
+  it('offers exactly the server-authorized database statuses', () => {
+    expect(nextStatuses('filed', ['acknowledged'])).toEqual(['acknowledged']);
+    expect(nextStatuses('settled', ['closed'])).toEqual(['closed']);
   });
-
-  it('needs a steward assigned before an acknowledged grievance goes to investigation', () => {
-    expect(nextStatuses('acknowledged', null)).toEqual([]);
-    expect(nextStatuses('acknowledged', 'rep-1')).toEqual(['investigating']);
+  it('does not infer actions from a status or assignment when the projection is missing', () => {
+    for (const status of GRIEVANCE_STATUSES) expect(nextStatuses(status)).toEqual([]);
   });
-
-  it('offers nothing a steward may not do, and nothing the route cannot accept: no documentation is sent with a status change', () => {
-    // From investigation the lifecycle also allows mediation and arbitration (officers), resolution and closure (documentation, admin).
-    expect(nextStatuses('investigating', 'rep-1')).toEqual(['response_due']);
-    expect(nextStatuses('settled', 'rep-1')).toEqual([]);
-    expect(nextStatuses('closed', 'rep-1')).toEqual([]);
-  });
-
-  it('offers only statuses of the database, never the lifecycle’s own names for them', () => {
-    for (const status of GRIEVANCE_STATUSES) {
-      for (const next of nextStatuses(status, 'rep-1')) {
-        expect(GRIEVANCE_STATUSES).toContain(next);
-        expect(['triage', 'investigation', 'negotiation', 'resolved']).not.toContain(next);
-        expect(next).not.toBe(status);
-      }
-    }
-  });
-
-  it('offers nothing from a status the lifecycle does not know', () => {
-    expect(nextStatuses('something_new', 'rep-1')).toEqual([]);
-    expect(nextStatuses('', null)).toEqual([]);
+  it('fails closed on unknown states, unknown targets, duplicates and the current status', () => {
+    expect(nextStatuses('something_new', ['closed'])).toEqual([]);
+    expect(nextStatuses('filed', ['acknowledged', 'arbitrary'])).toEqual([]);
+    expect(nextStatuses('filed', ['acknowledged', 'acknowledged'])).toEqual([]);
+    expect(nextStatuses('filed', ['filed'])).toEqual([]);
   });
 });
 
@@ -67,9 +49,9 @@ describe('maySetStatus: the authority the status route requires', () => {
   });
   const grievance = (status: string, primaryLroId: string | null, effectiveAccess: ReturnType<typeof access>) => ({ status, primaryLroId, effectiveAccess });
 
-  it('is held by the primary owner and by an active secondary LRO', () => {
-    expect(maySetStatus(grievance('filed', 'rep-1', access({ isPrimaryOwner: true, accessRole: 'primary_owner' })))).toBe(true);
-    expect(maySetStatus(grievance('filed', 'rep-1', access({ isSecondaryCollaborator: true, accessRole: 'secondary_lro' })))).toBe(true);
+  it('is held only by an explicit kernel transition projection', () => {
+    expect(maySetStatus(grievance('filed', 'rep-1', access({ isPrimaryOwner: true, accessRole: 'primary_owner', canTransition: true })))).toBe(true);
+    expect(maySetStatus(grievance('filed', 'rep-1', access({ isSecondaryCollaborator: true, accessRole: 'secondary_lro', canTransition: true })))).toBe(true);
   });
 
   it('is not held by a reviewer, a read-only collaborator or a representative with no relationship to the matter', () => {
@@ -78,8 +60,8 @@ describe('maySetStatus: the authority the status route requires', () => {
     expect(maySetStatus(grievance('filed', 'rep-1', access()))).toBe(false);
   });
 
-  it('is held by any representative for an intake nobody is assigned to, and not once one is', () => {
-    expect(maySetStatus(grievance('draft', null, access()))).toBe(true);
+  it('is not inferred from an unassigned intake', () => {
+    expect(maySetStatus(grievance('draft', null, access()))).toBe(false);
     expect(maySetStatus(grievance('draft', 'rep-1', access()))).toBe(false);
   });
 });

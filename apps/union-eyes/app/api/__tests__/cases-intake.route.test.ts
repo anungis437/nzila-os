@@ -13,6 +13,9 @@ const m = vi.hoisted(() => ({
   enforceDecision: vi.fn(),
   createNarProofAdapter: vi.fn(),
   canonical: vi.fn(),
+  canonicalContact: vi.fn(),
+  withCanonicalApiContext: vi.fn(),
+  ensureOwnDirectoryProfile: vi.fn(),
   canonicalProof: { createProof: vi.fn() },
   logger: {
     info: vi.fn(),
@@ -33,6 +36,8 @@ vi.mock('@/lib/cases/case-authorization', async (original) => ({
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: m.canonical }));
+vi.mock('@/lib/auth/canonical-context', () => ({ getCanonicalOrganizationContext: m.canonicalContact, withCanonicalApiContext: m.withCanonicalApiContext }));
+vi.mock('@/lib/members/own-directory-profile', () => ({ ensureOwnDirectoryProfile: m.ensureOwnDirectoryProfile }));
 vi.mock('@/lib/audit/canonical-nar-proof', () => ({
   canonicalNarProofAdapter: m.canonicalProof,
   createCanonicalNarProofAdapter: () => m.canonicalProof,
@@ -85,6 +90,11 @@ describe('cases/intake route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.canonical.mockReturnValue(false);
+    m.withCanonicalApiContext.mockImplementation(async (operation: () => Promise<unknown>) => operation());
+    m.canonicalContact.mockImplementation(async (options) => ({ userId: options.expectedActorUserId,
+      organizationId: options.organizationId, role: 'member', email: 'member@example.invalid', firstName: 'Member', lastName: null,
+      isSystemAdmin: false }));
+    m.ensureOwnDirectoryProfile.mockResolvedValue({ memberId: 'directory-profile', created: true });
     m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.selectClaimRows.length = 0;
     m.auth.mockResolvedValue({ userId: 'user_1' });
@@ -124,6 +134,25 @@ describe('cases/intake route', () => {
       };
       return fn(tx);
     });
+  });
+
+  it('runs the whole canonical intake inside one established organization binding', async () => {
+    const { POST } = await loadRoute();
+    m.canonical.mockReturnValue(true);
+    m.auth.mockResolvedValue({ userId: null });
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(m.withCanonicalApiContext).toHaveBeenCalledOnce();
+    expect(response.status).toBe(401);
+  });
+
+  it('answers with the handler itself when no canonical binding can be established', async () => {
+    const { POST } = await loadRoute();
+    m.canonical.mockReturnValue(true);
+    m.withCanonicalApiContext.mockRejectedValueOnce(Object.assign(new Error('MEMBERSHIP_REQUIRED'), { name: 'AuthOrgBindingError' }));
+    m.auth.mockResolvedValue({ userId: null });
+    const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    expect(response.status).toBe(401);
+    expect(m.auth).toHaveBeenCalledOnce();
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -211,7 +240,7 @@ describe('cases/intake route', () => {
     expect(response.status).toBe(201);
     expect(payload).toMatchObject({ success: true, status: 'submitted', claimId: 'claim_1' });
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
-      action: 'case.intake_submitted',
+      action: 'claim.create',
       resourceType: 'claims',
       resourceId: 'claim_1',
       organizationId: 'org_1',
@@ -258,6 +287,16 @@ describe('cases/intake route', () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
     expect(response.status).toBe(500);
+    expect(m.createClaim).not.toHaveBeenCalled();
+  });
+
+  it('refuses case creation when canonical contact projection cannot commit',async()=>{
+    m.canonical.mockReturnValue(true);
+    m.ensureOwnDirectoryProfile.mockRejectedValueOnce(new Error('mandatory member audit unavailable'));
+    const {POST}=await loadRoute();
+    const response=await POST(new Request('http://localhost/api/cases/intake',{method:'POST',body:'{}'}));
+    expect(response.status).toBe(500);
+    expect(m.ensureOwnDirectoryProfile).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({userId:'user_1',organizationId:'org_1'}));
     expect(m.createClaim).not.toHaveBeenCalled();
   });
 

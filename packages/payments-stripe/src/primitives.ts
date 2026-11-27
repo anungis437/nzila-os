@@ -9,6 +9,21 @@ import { getStripeEnv } from './env'
 import type { NzilaStripeMetadata } from './types'
 import type Stripe from 'stripe'
 
+/** Reserved routing metadata comes from the caller's verified scope, never
+ * from auxiliary provider metadata that a signed webhook later interprets. */
+function scopedMetadata(input: { orgId: string; ventureId?: string; metadata?: Record<string, string> }): NzilaStripeMetadata {
+  const metadata = input.metadata ?? {}
+  for (const [key, expected] of [['org_id', input.orgId], ['venture_id', input.ventureId]] as const) {
+    if (Object.hasOwn(metadata, key) && (!expected || metadata[key] !== expected))
+      throw new Error(`Reserved Stripe metadata conflicts: ${key}`)
+  }
+  return {
+    ...metadata,
+    org_id: input.orgId,
+    ...(input.ventureId && { venture_id: input.ventureId }),
+  }
+}
+
 // ── Customer Creation ───────────────────────────────────────────────────────
 
 export interface CreateCustomerInput {
@@ -20,13 +35,8 @@ export interface CreateCustomerInput {
 }
 
 export async function createCustomer(input: CreateCustomerInput): Promise<Stripe.Customer> {
+  const metadata = scopedMetadata(input)
   const stripe = getStripeClient()
-
-  const metadata: NzilaStripeMetadata = {
-    org_id: input.orgId,
-    ...(input.ventureId && { venture_id: input.ventureId }),
-    ...input.metadata,
-  }
 
   return stripe.customers.create({
     email: input.email,
@@ -55,14 +65,9 @@ export interface CreateCheckoutSessionInput {
 export async function createCheckoutSession(
   input: CreateCheckoutSessionInput,
 ): Promise<Stripe.Checkout.Session> {
+  const metadata = scopedMetadata(input)
   const stripe = getStripeClient()
   const env = getStripeEnv()
-
-  const metadata: NzilaStripeMetadata = {
-    org_id: input.orgId,
-    ...(input.ventureId && { venture_id: input.ventureId }),
-    ...input.metadata,
-  }
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = input.lineItems.map(
     (item) => {
@@ -147,13 +152,8 @@ export interface CreateSubscriptionResult {
 export async function createSubscription(
   input: CreateSubscriptionInput,
 ): Promise<CreateSubscriptionResult> {
+  const metadata = scopedMetadata(input)
   const stripe = getStripeClient()
-
-  const metadata = {
-    org_id: input.orgId,
-    ...(input.ventureId && { venture_id: input.ventureId }),
-    ...input.metadata,
-  }
 
   const subscription = await stripe.subscriptions.create({
     customer: input.customerId,
@@ -219,13 +219,8 @@ export interface CreateSubscriptionCheckoutSessionInput {
 export async function createSubscriptionCheckoutSession(
   input: CreateSubscriptionCheckoutSessionInput,
 ): Promise<{ sessionId: string; url: string }> {
+  const metadata = scopedMetadata(input)
   const stripe = getStripeClient()
-
-  const metadata = {
-    org_id: input.orgId,
-    ...(input.ventureId && { venture_id: input.ventureId }),
-    ...input.metadata,
-  }
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',

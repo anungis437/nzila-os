@@ -1,8 +1,9 @@
 import { logger, redactFields } from '@nzila/os-core/telemetry'
 import type { OperationalMeasurement } from './arm-operational-probes'
+import { BASE_WORKER_CODES } from './base-worker-scope'
 
 export const BASE_OPERATIONAL_MEASUREMENTS = [
-  'backup', 'dlrem', 'dlovd', 'alert', 'sla', 'reap', 'sigexp', 'dependencies', 'audit', 'queue', 'mail',
+  'backup', ...BASE_WORKER_CODES, 'dependencies', 'audit', 'queue', 'mail',
 ] as const
 
 /** A missing collector result must not turn Object.every([]) into success. */

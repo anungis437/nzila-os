@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
@@ -8,6 +9,26 @@ import { connectLocalV2, createCurrentState } from './installer'
 import { compileMinimumRoleProvisioningSql } from './minimum-installer'
 import { qualifyNativePrivileges } from './manifest-security'
 import type { V2Plan } from './source'
+
+/** The same restricted fixture login grants are exercised by the SQL-engine regression. */
+export function nativeFixtureLoginSql(password: string, auth = false) {
+  assert.match(password, /^[a-f0-9]{48}$/, 'Owned fixture password must be random 24-byte hex')
+  return [
+    ['ue_v2_mutation_runtime', 'union_eyes_runtime'],
+    ['ue_v2_mutation_system', 'union_eyes_system'],
+    ...(auth
+      ? [
+          ['ue_v2_mutation_auth', 'nzila_auth_gateway'],
+          ['ue_v2_mutation_auth_system', 'nzila_auth_system_gateway'],
+        ]
+      : []),
+  ]
+    .map(
+      ([user, role]) =>
+        `CREATE ROLE ${user} LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '${password}'; GRANT ${role} TO ${user};`,
+    )
+    .join('\n')
+}
 
 export async function openNativeRuntimeFixture(plan: V2Plan, options: { auth?: boolean } = {}) {
   const password = randomBytes(24).toString('hex')
@@ -33,7 +54,7 @@ export async function openNativeRuntimeFixture(plan: V2Plan, options: { auth?: b
         assert.equal(inspection[0].Name, `/${name}`)
         assert.equal(inspection[0].Config.Labels['nzila.mission'], 'UE_BOOTSTRAP_V2_RUNTIME')
         assert.equal(inspection[0].Config.Labels['nzila.qualification-owner'], ownership)
-        execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
+        execFileSync('docker', ['rm', '-f', '-v', container], { stdio: 'pipe' })
         container = undefined
       }
     }
@@ -62,7 +83,7 @@ export async function openNativeRuntimeFixture(plan: V2Plan, options: { auth?: b
         '127.0.0.1::5432',
         '-e',
         `POSTGRES_PASSWORD=${password}`,
-        'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337',
+        nativePostgres16Image(),
       ],
       { encoding: 'utf8' },
     ).trim()
@@ -101,15 +122,7 @@ export async function openNativeRuntimeFixture(plan: V2Plan, options: { auth?: b
     await createCurrentState(seed, plan)
     await seed.query('COMMIT')
     assert.deepEqual((await qualifyNativePrivileges(seed, plan)).mismatches, [])
-    for (const [user, role] of [
-      ['ue_v2_mutation_runtime', 'union_eyes_runtime'],
-      ['ue_v2_mutation_system', 'union_eyes_system'],
-      ...(options.auth ? [['ue_v2_mutation_auth', 'nzila_auth_gateway']] : []),
-    ]) {
-      await admin.query(
-        `CREATE ROLE ${user} LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '${password}'; GRANT ${role} TO ${user}`,
-      )
-    }
+    await admin.query(nativeFixtureLoginSql(password, options.auth))
     const runtime = await connect('ue_v2_mutation_runtime', 'ue_v2_clean_system_mutations')
     const system = await connect('ue_v2_mutation_system', 'ue_v2_clean_system_mutations')
     systemSql = postgres({
@@ -133,6 +146,7 @@ export async function openNativeRuntimeFixture(plan: V2Plan, options: { auth?: b
       runtimeUrl: url('ue_v2_mutation_runtime'),
       systemUrl: url('ue_v2_mutation_system'),
       authUrl: options.auth ? url('ue_v2_mutation_auth') : undefined,
+      authSystemUrl: options.auth ? url('ue_v2_mutation_auth_system') : undefined,
     }
   } catch (error: unknown) {
     await dispose()

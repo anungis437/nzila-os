@@ -2,7 +2,8 @@
  * The seal records kept in the platform audit log, read back.
  *
  * SignatureService seal() repeats the chain head in the platform's own audit log (canonical ledger or legacy table, whichever the
- * deployment writes). Until now nothing read it back, so a trail whose newest events had been removed still verified. This returns what
+ * deployment writes), and this reads that same store: canonical mode never reads the legacy table, whose schema the canonical runtime role
+ * holds no usage of (see lib/audit/audit-reader.ts). Until now nothing read it back, so a trail whose newest events had been removed still verified. This returns what
  * was recorded, for the integrity statement to check the trail against. Only the head and the event count are read, never other details.
  */
 import { sql } from 'drizzle-orm'
@@ -23,19 +24,12 @@ const toWitness = (row: WitnessRow): ChainWitness | null => {
 }
 
 export async function readSealWitnesses(tx: RLSTx, organizationId: string, documentId: string): Promise<ChainWitness[]> {
-  const legacy = rowsOf(await tx.execute(
-    sql`SELECT metadata->>'chainHead' AS chain_head, metadata->>'chainedEvents' AS chained_events
-        FROM audit_security.audit_logs
-        WHERE organization_id = ${organizationId}::uuid AND action = ${SEAL_AUDIT_ACTION} AND resource_id = ${documentId}::uuid`,
-  ))
-  const witnesses = legacy.map(toWitness)
-  if (currentStateContextEnabled()) {
-    const canonical = rowsOf(await tx.execute(
-      sql`SELECT details->>'chainHead' AS chain_head, details->>'chainedEvents' AS chained_events
+  const rows = rowsOf(await tx.execute(currentStateContextEnabled()
+    ? sql`SELECT details->>'chainHead' AS chain_head, details->>'chainedEvents' AS chained_events
           FROM public.audit_logs
-          WHERE organization_id = ${organizationId}::uuid AND action = ${SEAL_AUDIT_ACTION} AND resource_id = ${documentId}`,
-    ))
-    witnesses.push(...canonical.map(toWitness))
-  }
-  return witnesses.filter((witness): witness is ChainWitness => witness !== null)
+          WHERE organization_id = ${organizationId}::uuid AND action = ${SEAL_AUDIT_ACTION} AND resource_id = ${documentId}`
+    : sql`SELECT metadata->>'chainHead' AS chain_head, metadata->>'chainedEvents' AS chained_events
+          FROM audit_security.audit_logs
+          WHERE organization_id = ${organizationId}::uuid AND action = ${SEAL_AUDIT_ACTION} AND resource_id = ${documentId}::uuid`))
+  return rows.map(toWitness).filter((witness): witness is ChainWitness => witness !== null)
 }

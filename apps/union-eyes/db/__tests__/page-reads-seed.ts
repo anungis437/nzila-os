@@ -42,7 +42,7 @@ export async function insertMember(
   member: { userId: string; role?: string; name?: string; email?: string; status?: string },
 ): Promise<string> {
   const { rows } = await admin.query(
-    `INSERT INTO organization_members (user_id, role, organization_id, name, email, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id::text AS id`,
+    `INSERT INTO organization_members (exempt_from_per_capita, user_id, role, organization_id, name, email, status) VALUES (false, $1, $2, $3, $4, $5, $6) RETURNING id::text AS id`,
     [member.userId, member.role ?? 'member', organizationId, member.name ?? member.userId, member.email ?? `${member.userId}@example.test`, member.status ?? 'active'],
   )
   return rows[0].id as string

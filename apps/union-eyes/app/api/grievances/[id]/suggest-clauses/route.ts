@@ -1,3 +1,4 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * Suggest Clauses API
  *
@@ -31,7 +32,7 @@ const bodySchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     entitlement: 'grievance_case_suite',
     // The grievance and the clauses are read through the ambient handle, so the handler runs in the caller's organization transaction.
     rlsOrgContext: true,

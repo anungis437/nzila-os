@@ -22,6 +22,7 @@ function makeChain() {
 }
 function makeTx() {
   return {
+    execute: vi.fn().mockResolvedValue([]),
     select: () => makeChain(),
     insert: () => makeChain(),
     update: () => makeChain(),
@@ -49,7 +50,7 @@ describe('claims-queries', () => {
   });
 
   it('createClaim generates claim number and returns claim', async () => {
-    push([{ count: 2 }], [{ claimId: 'c1', claimNumber: 'CASE-X' }]);
+    push([{ nextNumber: '3' }], [{ claimId: 'c1', claimNumber: 'CASE-X' }]);
     const r = await q.createClaim({ memberId: 'm1', organizationId: 'org' } as never);
     expect(r).toEqual({ claimId: 'c1', claimNumber: 'CASE-X' });
   });

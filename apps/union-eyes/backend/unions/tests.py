@@ -8,7 +8,7 @@ from datetime import date
 from decimal import Decimal
 
 from auth_core.models import OrganizationMembers, Organizations
-from django.db import connection
+from django.db import DatabaseError, connection, transaction
 from django.test import TestCase
 from django.utils import timezone
 
@@ -912,13 +912,18 @@ class TestRecognitionAwardTypesStr(TestCase):
 
 class TestRecognitionAwardsCreate(TestCase):
     def test_create(self):
-        obj = create_valid(RecognitionAwards)
-        self.assertIsNotNone(obj.id)
+        # An award is made only from a pending peer nomination: the database's physical guard refuses a raw award row.
+        before = RecognitionAwards.objects.count()
+        with self.assertRaisesMessage(DatabaseError, "PENDING_PEER_NOMINATION_REQUIRED"):
+            with transaction.atomic():
+                create_valid(RecognitionAwards)
+                connection.cursor().execute("SET CONSTRAINTS ALL IMMEDIATE")
+        self.assertEqual(RecognitionAwards.objects.count(), before)
 
 
 class TestRecognitionAwardsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(create_valid(RecognitionAwards)), str)
+        self.assertIsInstance(str(RecognitionAwards(id=uuid.uuid4())), str)
 
 
 class TestRewardBudgetEnvelopesCreate(TestCase):

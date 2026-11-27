@@ -1,11 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { drizzle } from 'drizzle-orm/pglite'
 import { sql } from 'drizzle-orm'
 import type { PGlite } from '@electric-sql/pglite'
 import { generateDrizzleJson, generateMigration } from 'drizzle-kit/api'
 import { auditLogs } from '@/db/schema/domains/infrastructure/audit'
 import { newUuid, ORG, ORG_B, seedMembership, U } from '@/db/__tests__/authority-kernel-harness'
-import { freshDb, kit } from '@/db/__tests__/authority-kernel-testkit'
+import { appDrizzle, freshDb, kit } from '@/db/__tests__/authority-kernel-testkit'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { saveAssignmentProfile } from './assignment-profiles'
 import { automaticallyAssignRepresentative } from './automatic-assignment'
@@ -15,7 +14,7 @@ let k: ReturnType<typeof kit>
 let person: string
 let caseId: string
 const admin = 'synthetic-profile-admin'
-const as = <T>(userId: string, fn: (tx: RLSTx) => Promise<T>, organizationId = ORG) => drizzle(pg).transaction(async tx => {
+const as = <T>(userId: string, fn: (tx: RLSTx) => Promise<T>, organizationId = ORG) => appDrizzle(pg).transaction(async tx => {
   await tx.execute(sql`SELECT set_config('app.current_org_id',${organizationId},true),set_config('app.current_user_id',${userId},true)`)
   return fn(tx as unknown as RLSTx)
 })

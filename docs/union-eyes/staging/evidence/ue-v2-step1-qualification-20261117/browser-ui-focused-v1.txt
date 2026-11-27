@@ -1,0 +1,12 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+
+ Test Files  3 passed (3)
+      Tests  30 passed (30)
+   Start at  17:57:05
+   Duration  8.16s (tests 59%, environment 26%, import 13%, transform 2%)
+
+    Isolate  3 workers spawned · ~787ms startup each (spawn + environment, per file)
+             at least ~1.57s faster with isolate: false — reuses workers across files instead of one per file
+

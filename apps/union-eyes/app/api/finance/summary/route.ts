@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Executive Financial Summary API
  *
@@ -5,32 +6,38 @@
  * executive dashboard. Returns dues, remittances, collection rates,
  * member counts, payment plans, and period trends in a single call.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { sql } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { sql } from 'drizzle-orm'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
+    rlsOrgContext: false,
     auth: { minRole: 'secretary_treasurer' },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Finance'], summary: 'Executive financial summary' },
   },
   async ({ organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
     // Mandate verification and every financial query share the same authenticated,
     // tenant-bound transaction. Never preflight the grant in a separate transaction.
+    requireBaseFinancialAuthority()
+
     return withRLSContext({ organizationId, userId }, async (tx) => {
       await requireLiveFinancialMandate(tx, {
-        organizationId, userId, action: 'finance:view', requiresLedger: true,
-      });
-    const orgIdCast = sql`${organizationId}::uuid`;
+        organizationId,
+        userId,
+        action: 'finance:view',
+        requiresLedger: true,
+      })
+      const orgIdCast = sql`${organizationId}::uuid`
 
-    // ── Remittance trend (monthly, last 12) ───────────────────────────
-    const remittanceTrend = await tx.execute(sql`
+      // ── Remittance trend (monthly, last 12) ───────────────────────────
+      const remittanceTrend = await tx.execute(sql`
       SELECT
         fiscal_year                       AS "year",
         fiscal_month                      AS "month",
@@ -44,10 +51,10 @@ export const GET = withApi(
       WHERE organization_id = ${orgIdCast}
       ORDER BY fiscal_year DESC, fiscal_month DESC
       LIMIT 12
-    `);
+    `)
 
-    // ── Collection rate (ratio of payments to charges) ────────────────
-    const [collectionRow] = await tx.execute(sql`
+      // ── Collection rate (ratio of payments to charges) ────────────────
+      const [collectionRow] = await tx.execute(sql`
       SELECT
         COALESCE(SUM(CASE WHEN transaction_type = 'payment'
                           THEN ABS(amount) ELSE 0 END), 0)::numeric AS "totalPaid",
@@ -56,17 +63,16 @@ export const GET = withApi(
         COUNT(DISTINCT user_id)                                      AS "uniqueMembers"
       FROM member_dues_ledger
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    const totalPaid = Number(collectionRow?.totalPaid ?? 0);
-    const totalCharged = Number(collectionRow?.totalCharged ?? 0);
-    // No charge denominator means no measurable collection rate, not 100% success.
-    const collectionRate = totalCharged > 0
-      ? Math.round((totalPaid / totalCharged) * 1000) / 10
-      : null;
+      const totalPaid = Number(collectionRow?.totalPaid ?? 0)
+      const totalCharged = Number(collectionRow?.totalCharged ?? 0)
+      // No charge denominator means no measurable collection rate, not 100% success.
+      const collectionRate =
+        totalCharged > 0 ? Math.round((totalPaid / totalCharged) * 1000) / 10 : null
 
-    // ── Member standing snapshot ──────────────────────────────────────
-    const [standingRow] = await tx.execute(sql`
+      // ── Member standing snapshot ──────────────────────────────────────
+      const [standingRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                               AS "totalMembers",
         COUNT(*) FILTER (WHERE arrears_status = 'current')::int     AS "currentMembers",
@@ -75,10 +81,10 @@ export const GET = withApi(
         COUNT(*) FILTER (WHERE has_payment_plan)::int               AS "onPaymentPlan"
       FROM member_arrears
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    // ── Active payment plans ──────────────────────────────────────────
-    const [planRow] = await tx.execute(sql`
+      // ── Active payment plans ──────────────────────────────────────────
+      const [planRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                 AS "activePlans",
         COALESCE(SUM(remaining_balance::numeric), 0)  AS "totalRemaining",
@@ -86,10 +92,10 @@ export const GET = withApi(
       FROM payment_plans
       WHERE organization_id = ${orgIdCast}
         AND status = 'active'
-    `);
+    `)
 
-    // ── Financial periods summary ─────────────────────────────────────
-    const periods = await tx.execute(sql`
+      // ── Financial periods summary ─────────────────────────────────────
+      const periods = await tx.execute(sql`
       SELECT
         fiscal_year         AS "year",
         fiscal_month        AS "month",
@@ -101,10 +107,10 @@ export const GET = withApi(
       WHERE organization_id = ${orgIdCast}
       ORDER BY fiscal_year DESC, fiscal_month DESC
       LIMIT 6
-    `);
+    `)
 
-    // ── Reconciliation health ─────────────────────────────────────────
-    const [reconRow] = await tx.execute(sql`
+      // ── Reconciliation health ─────────────────────────────────────────
+      const [reconRow] = await tx.execute(sql`
       SELECT
         COUNT(*) FILTER (WHERE is_reconciled)::int      AS "reconciled",
         COUNT(*) FILTER (WHERE NOT is_reconciled)::int  AS "unreconciled",
@@ -112,17 +118,17 @@ export const GET = withApi(
           THEN total_amount::numeric ELSE 0 END), 0)    AS "unreconciledAmount"
       FROM employer_remittances
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    // ── Org member count from org_members ─────────────────────────────
-    const [orgRow] = await tx.execute(sql`
+      // ── Org member count from org_members ─────────────────────────────
+      const [orgRow] = await tx.execute(sql`
       SELECT COUNT(*)::int AS "totalOrgMembers"
       FROM organization_members
       WHERE organization_id = ${organizationId}
-    `);
+    `)
 
-    // ── Strike fund ──────────────────────────────────────────────────
-    const [strikeRow] = await tx.execute(sql`
+      // ── Strike fund ──────────────────────────────────────────────────
+      const [strikeRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                              AS "totalDisbursements",
         COALESCE(SUM(payment_amount), 0)                           AS "totalDisbursed",
@@ -131,10 +137,10 @@ export const GET = withApi(
         COUNT(*) FILTER (WHERE t4a_generated)::int                 AS "t4aGenerated"
       FROM strike_fund_disbursements sfd
       WHERE sfd.organization_id = ${orgIdCast}
-    `);
+    `)
 
-    // ── Per-capita tax obligations ───────────────────────────────────
-    const perCapitaRows = await tx.execute(sql`
+      // ── Per-capita tax obligations ───────────────────────────────────
+      const perCapitaRows = await tx.execute(sql`
       SELECT
         remittance_year                       AS "year",
         remittance_month                      AS "month",
@@ -147,18 +153,18 @@ export const GET = withApi(
       WHERE organization_id = ${orgIdCast}
       ORDER BY remittance_year DESC, remittance_month DESC
       LIMIT 12
-    `);
+    `)
 
-    const perCapitaArr = perCapitaRows as Record<string, unknown>[];
-    const perCapitaTotalPaid = perCapitaArr
-      .filter((r) => r.status === 'paid')
-      .reduce((s, r) => s + Number(r.amount), 0);
-    const perCapitaTotalPending = perCapitaArr
-      .filter((r) => r.status !== 'paid')
-      .reduce((s, r) => s + Number(r.amount), 0);
+      const perCapitaArr = perCapitaRows as Record<string, unknown>[]
+      const perCapitaTotalPaid = perCapitaArr
+        .filter((r) => r.status === 'paid')
+        .reduce((s, r) => s + Number(r.amount), 0)
+      const perCapitaTotalPending = perCapitaArr
+        .filter((r) => r.status !== 'paid')
+        .reduce((s, r) => s + Number(r.amount), 0)
 
-    // ── Inbound per-capita (what child orgs owe THIS org) ────────────
-    const inboundRows = await tx.execute(sql`
+      // ── Inbound per-capita (what child orgs owe THIS org) ────────────
+      const inboundRows = await tx.execute(sql`
       SELECT
         o.id                                          AS "orgId",
         o.name                                        AS "orgName",
@@ -178,25 +184,25 @@ export const GET = withApi(
         AND o.status = 'active'
       GROUP BY o.id, o.name
       ORDER BY o.name
-    `);
+    `)
 
-    const inboundArr = inboundRows as Record<string, unknown>[];
-    const hasChildren = inboundArr.length > 0;
-    const inboundTotalDue = inboundArr.reduce((s, r) => s + Number(r.totalDue), 0);
-    const inboundTotalPaid = inboundArr.reduce((s, r) => s + Number(r.totalPaid), 0);
-    const inboundTotalOverdue = inboundArr.reduce((s, r) => s + Number(r.totalOverdue), 0);
+      const inboundArr = inboundRows as Record<string, unknown>[]
+      const hasChildren = inboundArr.length > 0
+      const inboundTotalDue = inboundArr.reduce((s, r) => s + Number(r.totalDue), 0)
+      const inboundTotalPaid = inboundArr.reduce((s, r) => s + Number(r.totalPaid), 0)
+      const inboundTotalOverdue = inboundArr.reduce((s, r) => s + Number(r.totalOverdue), 0)
 
-    // ── Grievance / arbitration costs ────────────────────────────────
-    const [grievanceRow] = await tx.execute(sql`
+      // ── Grievance / arbitration costs ────────────────────────────────
+      const [grievanceRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                           AS "totalClaims",
         COUNT(*) FILTER (WHERE status::text = 'open')::int      AS "openClaims",
         COALESCE(SUM(NULLIF(legal_costs, '')::numeric), 0)      AS "totalLegalCosts"
       FROM claims
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    const [arbRow] = await tx.execute(sql`
+      const [arbRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                            AS "totalArbitrations",
         COALESCE(SUM(a.estimated_cost), 0)::numeric              AS "estimatedCost",
@@ -205,28 +211,28 @@ export const GET = withApi(
       FROM arbitrations a
       JOIN claims c ON c.claim_id = a.grievance_id
       WHERE c.organization_id = ${orgIdCast}
-    `);
+    `)
 
-    const [settlementRow] = await tx.execute(sql`
+      const [settlementRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                            AS "totalSettlements",
         COALESCE(SUM(monetary_amount), 0)                        AS "totalSettled",
         COUNT(*) FILTER (WHERE status = 'accepted')::int         AS "accepted"
       FROM grievance_settlements
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    // ── Pension health ───────────────────────────────────────────────
-    const [pensionRow] = await tx.execute(sql`
+      // ── Pension health ───────────────────────────────────────────────
+      const [pensionRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                                AS "totalMembers",
         COUNT(*) FILTER (WHERE membership_status = 'active')::int    AS "activeMembers",
         COALESCE(SUM(years_of_service::numeric), 0)                  AS "totalYearsService"
       FROM pension_members
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    const [contribRow] = await tx.execute(sql`
+      const [contribRow] = await tx.execute(sql`
       SELECT
         COUNT(*)::int                                                        AS "totalContributions",
         COUNT(*) FILTER (WHERE payment_status = 'received')::int             AS "received",
@@ -237,10 +243,10 @@ export const GET = withApi(
           THEN amount ELSE 0 END), 0)                                        AS "totalPending"
       FROM pension_contributions
       WHERE organization_id = ${orgIdCast}
-    `);
+    `)
 
-    // ── GL / Budget snapshot ─────────────────────────────────────────
-    const glSummary = await tx.execute(sql`
+      // ── GL / Budget snapshot ─────────────────────────────────────────
+      const glSummary = await tx.execute(sql`
       SELECT
         ca.type                                AS "accountType",
         SUM(tb.closing_balance::numeric)       AS "balance"
@@ -252,14 +258,14 @@ export const GET = withApi(
           WHERE organization_id = ${orgIdCast}
         )
       GROUP BY ca.type
-    `);
+    `)
 
-    const glMap: Record<string, number> = {};
-    for (const row of glSummary as Record<string, unknown>[]) {
-      glMap[String(row.accountType)] = Number(row.balance);
-    }
+      const glMap: Record<string, number> = {}
+      for (const row of glSummary as Record<string, unknown>[]) {
+        glMap[String(row.accountType)] = Number(row.balance)
+      }
 
-    const budgetRows = await tx.execute(sql`
+      const budgetRows = await tx.execute(sql`
       SELECT
         name,
         total_budget::numeric        AS "totalBudget",
@@ -270,155 +276,156 @@ export const GET = withApi(
       WHERE organization_id = ${organizationId}
         AND status = 'active'
       ORDER BY total_budget DESC
-    `);
+    `)
 
-    // Sensitive consolidated financial access must leave a durable audit receipt.
-    // Failure to append the audit aborts this read rather than returning an unaudited 200.
-    await persistAtomicAudit(tx, {
-      organizationId,
-      userId,
-      action: 'finance.summary.read',
-      resourceType: 'financial_summary',
-      resourceId: organizationId,
-      details: { scope: 'organization', includesFinancialDetails: true },
-    });
+      // Sensitive consolidated financial access must leave a durable audit receipt.
+      // Failure to append the audit aborts this read rather than returning an unaudited 200.
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'finance.summary.read',
+        resourceType: 'financial_summary',
+        resourceId: organizationId,
+        details: { scope: 'organization', includesFinancialDetails: true },
+      })
 
-    return {
-      collectionRate,
-      totalPaid,
-      totalCharged,
-      uniquePayingMembers: Number(collectionRow?.uniqueMembers ?? 0),
-      totalOrgMembers: Number(orgRow?.totalOrgMembers ?? 0),
+      return {
+        collectionRate,
+        totalPaid,
+        totalCharged,
+        uniquePayingMembers: Number(collectionRow?.uniqueMembers ?? 0),
+        totalOrgMembers: Number(orgRow?.totalOrgMembers ?? 0),
 
-      memberStanding: {
-        total: Number(standingRow?.totalMembers ?? 0),
-        current: Number(standingRow?.currentMembers ?? 0),
-        warning: Number(standingRow?.warningMembers ?? 0),
-        suspended: Number(standingRow?.suspendedMembers ?? 0),
-        onPaymentPlan: Number(standingRow?.onPaymentPlan ?? 0),
-      },
+        memberStanding: {
+          total: Number(standingRow?.totalMembers ?? 0),
+          current: Number(standingRow?.currentMembers ?? 0),
+          warning: Number(standingRow?.warningMembers ?? 0),
+          suspended: Number(standingRow?.suspendedMembers ?? 0),
+          onPaymentPlan: Number(standingRow?.onPaymentPlan ?? 0),
+        },
 
-      paymentPlans: {
-        activePlans: Number(planRow?.activePlans ?? 0),
-        totalRemaining: Number(planRow?.totalRemaining ?? 0),
-        totalRecovered: Number(planRow?.totalRecovered ?? 0),
-      },
+        paymentPlans: {
+          activePlans: Number(planRow?.activePlans ?? 0),
+          totalRemaining: Number(planRow?.totalRemaining ?? 0),
+          totalRecovered: Number(planRow?.totalRecovered ?? 0),
+        },
 
-      reconciliation: {
-        reconciled: Number(reconRow?.reconciled ?? 0),
-        unreconciled: Number(reconRow?.unreconciled ?? 0),
-        unreconciledAmount: Number(reconRow?.unreconciledAmount ?? 0),
-      },
+        reconciliation: {
+          reconciled: Number(reconRow?.reconciled ?? 0),
+          unreconciled: Number(reconRow?.unreconciled ?? 0),
+          unreconciledAmount: Number(reconRow?.unreconciledAmount ?? 0),
+        },
 
-      remittanceTrend: (remittanceTrend as Record<string, unknown>[]).map((r) => ({
-        year: Number(r.year),
-        month: Number(r.month),
-        amount: Number(r.amount),
-        memberCount: Number(r.memberCount),
-        expected: Number(r.expected),
-        variance: Number(r.variance),
-        reconciled: Boolean(r.reconciled),
-        status: String(r.status),
-      })),
-
-      financialPeriods: (periods as Record<string, unknown>[]).map((p) => ({
-        year: Number(p.year),
-        month: Number(p.month),
-        status: String(p.status),
-        revenue: Number(p.revenue),
-        arrears: Number(p.arrears),
-        memberCount: Number(p.memberCount),
-      })),
-
-      // ── New domains ──────────────────────────────────────────────────
-      strikeFund: {
-        totalDisbursements: Number(strikeRow?.totalDisbursements ?? 0),
-        totalDisbursed: Number(strikeRow?.totalDisbursed ?? 0),
-        craThresholdBreaches: Number(strikeRow?.craThresholdBreaches ?? 0),
-        requiresT4a: Number(strikeRow?.requiresT4a ?? 0),
-        t4aGenerated: Number(strikeRow?.t4aGenerated ?? 0),
-      },
-
-      perCapitaTax: {
-        totalPaid: perCapitaTotalPaid,
-        totalPending: perCapitaTotalPending,
-        entries: perCapitaArr.map((r) => ({
+        remittanceTrend: (remittanceTrend as Record<string, unknown>[]).map((r) => ({
           year: Number(r.year),
           month: Number(r.month),
           amount: Number(r.amount),
-          members: Number(r.members),
-          rate: Number(r.rate),
+          memberCount: Number(r.memberCount),
+          expected: Number(r.expected),
+          variance: Number(r.variance),
+          reconciled: Boolean(r.reconciled),
           status: String(r.status),
-          dueDate: String(r.dueDate),
         })),
-      },
 
-      perCapitaInbound: {
-        isParentOrg: hasChildren,
-        childCount: inboundArr.length,
-        totalDue: inboundTotalDue,
-        totalPaid: inboundTotalPaid,
-        totalOverdue: inboundTotalOverdue,
-        children: inboundArr.map((r) => ({
-          orgId: String(r.orgId),
-          orgName: String(r.orgName),
-          totalDue: Number(r.totalDue),
-          totalPaid: Number(r.totalPaid),
-          totalOverdue: Number(r.totalOverdue),
-          pendingCount: Number(r.pendingCount),
-          overdueCount: Number(r.overdueCount),
+        financialPeriods: (periods as Record<string, unknown>[]).map((p) => ({
+          year: Number(p.year),
+          month: Number(p.month),
+          status: String(p.status),
+          revenue: Number(p.revenue),
+          arrears: Number(p.arrears),
+          memberCount: Number(p.memberCount),
         })),
-      },
 
-      grievanceCosts: {
-        totalClaims: Number(grievanceRow?.totalClaims ?? 0),
-        openClaims: Number(grievanceRow?.openClaims ?? 0),
-        totalLegalCosts: Number(grievanceRow?.totalLegalCosts ?? 0),
-        arbitrations: {
-          total: Number(arbRow?.totalArbitrations ?? 0),
-          estimatedCost: Number(arbRow?.estimatedCost ?? 0),
-          actualCost: Number(arbRow?.actualCost ?? 0),
-          unionShare: Number(arbRow?.unionShare ?? 0),
+        // ── New domains ──────────────────────────────────────────────────
+        strikeFund: {
+          totalDisbursements: Number(strikeRow?.totalDisbursements ?? 0),
+          totalDisbursed: Number(strikeRow?.totalDisbursed ?? 0),
+          craThresholdBreaches: Number(strikeRow?.craThresholdBreaches ?? 0),
+          requiresT4a: Number(strikeRow?.requiresT4a ?? 0),
+          t4aGenerated: Number(strikeRow?.t4aGenerated ?? 0),
         },
-        settlements: {
-          total: Number(settlementRow?.totalSettlements ?? 0),
-          totalSettled: Number(settlementRow?.totalSettled ?? 0),
-          accepted: Number(settlementRow?.accepted ?? 0),
+
+        perCapitaTax: {
+          totalPaid: perCapitaTotalPaid,
+          totalPending: perCapitaTotalPending,
+          entries: perCapitaArr.map((r) => ({
+            year: Number(r.year),
+            month: Number(r.month),
+            amount: Number(r.amount),
+            members: Number(r.members),
+            rate: Number(r.rate),
+            status: String(r.status),
+            dueDate: String(r.dueDate),
+          })),
         },
-      },
 
-      pensionHealth: {
-        totalMembers: Number(pensionRow?.totalMembers ?? 0),
-        activeMembers: Number(pensionRow?.activeMembers ?? 0),
-        totalYearsService: Number(pensionRow?.totalYearsService ?? 0),
-        contributions: {
-          total: Number(contribRow?.totalContributions ?? 0),
-          received: Number(contribRow?.received ?? 0),
-          pending: Number(contribRow?.pending ?? 0),
-          totalFunded: Number(contribRow?.totalFunded ?? 0),
-          totalPending: Number(contribRow?.totalPending ?? 0),
+        perCapitaInbound: {
+          isParentOrg: hasChildren,
+          childCount: inboundArr.length,
+          totalDue: inboundTotalDue,
+          totalPaid: inboundTotalPaid,
+          totalOverdue: inboundTotalOverdue,
+          children: inboundArr.map((r) => ({
+            orgId: String(r.orgId),
+            orgName: String(r.orgName),
+            totalDue: Number(r.totalDue),
+            totalPaid: Number(r.totalPaid),
+            totalOverdue: Number(r.totalOverdue),
+            pendingCount: Number(r.pendingCount),
+            overdueCount: Number(r.overdueCount),
+          })),
         },
-      },
 
-      glSnapshot: {
-        assets: glMap['asset'] ?? 0,
-        liabilities: glMap['liability'] ?? 0,
-        equity: glMap['equity'] ?? 0,
-        revenue: glMap['revenue'] ?? 0,
-        expenses: glMap['expense'] ?? 0,
-        netPosition: (glMap['asset'] ?? 0) - (glMap['liability'] ?? 0),
-      },
+        grievanceCosts: {
+          totalClaims: Number(grievanceRow?.totalClaims ?? 0),
+          openClaims: Number(grievanceRow?.openClaims ?? 0),
+          totalLegalCosts: Number(grievanceRow?.totalLegalCosts ?? 0),
+          arbitrations: {
+            total: Number(arbRow?.totalArbitrations ?? 0),
+            estimatedCost: Number(arbRow?.estimatedCost ?? 0),
+            actualCost: Number(arbRow?.actualCost ?? 0),
+            unionShare: Number(arbRow?.unionShare ?? 0),
+          },
+          settlements: {
+            total: Number(settlementRow?.totalSettlements ?? 0),
+            totalSettled: Number(settlementRow?.totalSettled ?? 0),
+            accepted: Number(settlementRow?.accepted ?? 0),
+          },
+        },
 
-      budgets: (budgetRows as Record<string, unknown>[]).map((b) => ({
-        name: String(b.name),
-        totalBudget: Number(b.totalBudget),
-        allocated: Number(b.allocated),
-        spent: Number(b.spent),
-        utilization: Number(b.totalBudget) > 0
-          ? Math.round((Number(b.spent) / Number(b.totalBudget)) * 1000) / 10
-          : 0,
-      })),
-    };
-    });
+        pensionHealth: {
+          totalMembers: Number(pensionRow?.totalMembers ?? 0),
+          activeMembers: Number(pensionRow?.activeMembers ?? 0),
+          totalYearsService: Number(pensionRow?.totalYearsService ?? 0),
+          contributions: {
+            total: Number(contribRow?.totalContributions ?? 0),
+            received: Number(contribRow?.received ?? 0),
+            pending: Number(contribRow?.pending ?? 0),
+            totalFunded: Number(contribRow?.totalFunded ?? 0),
+            totalPending: Number(contribRow?.totalPending ?? 0),
+          },
+        },
+
+        glSnapshot: {
+          assets: glMap['asset'] ?? 0,
+          liabilities: glMap['liability'] ?? 0,
+          equity: glMap['equity'] ?? 0,
+          revenue: glMap['revenue'] ?? 0,
+          expenses: glMap['expense'] ?? 0,
+          netPosition: (glMap['asset'] ?? 0) - (glMap['liability'] ?? 0),
+        },
+
+        budgets: (budgetRows as Record<string, unknown>[]).map((b) => ({
+          name: String(b.name),
+          totalBudget: Number(b.totalBudget),
+          allocated: Number(b.allocated),
+          spent: Number(b.spent),
+          utilization:
+            Number(b.totalBudget) > 0
+              ? Math.round((Number(b.spent) / Number(b.totalBudget)) * 1000) / 10
+              : 0,
+        })),
+      }
+    })
   },
-);
+)

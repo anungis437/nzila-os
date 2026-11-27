@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import { execFileSync } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
@@ -10,6 +11,7 @@ import {
   FRAMEWORK_MODEL_OWNERS,
   FRAMEWORK_ROLES,
   DEDICATED_ADMIN_MODEL_OWNERS,
+  PLATFORM_METADATA_MODEL_OWNERS,
 } from './framework-contract'
 import { compileFrameworkSql } from './framework-sql'
 import { inspectFrameworkPrivileges } from './framework-privileges'
@@ -119,7 +121,7 @@ native('local current Django framework role and RLS boundary', () => {
         '127.0.0.1::5432',
         '-e',
         `POSTGRES_PASSWORD=${password}`,
-        'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337',
+        nativePostgres16Image(),
       ],
       { encoding: 'utf8' },
     ).trim()
@@ -164,9 +166,14 @@ native('local current Django framework role and RLS boundary', () => {
     for (const statement of plan.currentModels.ddl.filter(
       (entry) =>
         Boolean(DEDICATED_ADMIN_MODEL_OWNERS[entry.owner]) ||
-        ['users', 'oauth_providers', 'organizations', 'donations', 'audit_logs'].includes(
-          entry.owner,
-        ),
+        [
+          'users',
+          'oauth_providers',
+          'organizations',
+          'donations',
+          'audit_logs',
+          'clc_chart_of_accounts',
+        ].includes(entry.owner),
     ))
       await owner.query(statement.sql)
     await owner.query(
@@ -181,9 +188,14 @@ native('local current Django framework role and RLS boundary', () => {
       ...plan,
       tables: plan.tables.filter(
         (table) =>
-          ['users', 'oauth_providers', 'organizations', 'donations', 'audit_logs'].includes(
-            table.name,
-          ) ||
+          [
+            'users',
+            'oauth_providers',
+            'organizations',
+            'donations',
+            'audit_logs',
+            'clc_chart_of_accounts',
+          ].includes(table.name) ||
           (Boolean(DEDICATED_ADMIN_MODEL_OWNERS[table.name]) &&
             !FRAMEWORK_MODEL_OWNERS[table.name]),
       ),
@@ -217,7 +229,7 @@ native('local current Django framework role and RLS boundary', () => {
         { encoding: 'utf8' },
       ).trim()
       expect(label).toBe('UE_BOOTSTRAP_V2_FRAMEWORK')
-      execFileSync('docker', ['rm', '-f', container], { stdio: 'pipe' })
+      execFileSync('docker', ['rm', '-f', '-v', container], { stdio: 'pipe' })
     }
   })
 
@@ -246,7 +258,15 @@ native('local current Django framework role and RLS boundary', () => {
     )
     expect(proof.failures).toEqual([])
     expect(proof.result).toBe('PASS')
-    expect(proof.tableReports).toHaveLength(21)
+    // Eighteen framework models and the two retained security-event models.
+    // Billing's chart remains a separate denied overgrant target below.
+    expect(Object.keys(PLATFORM_METADATA_MODEL_OWNERS).sort()).toEqual([
+      'failed_login_attempts',
+      'rate_limit_events',
+    ])
+    expect(proof.tableReports.map((report) => report.table).sort()).toEqual(
+      Object.keys(DEDICATED_ADMIN_MODEL_OWNERS).sort(),
+    )
     expect(proof.tableReports.every((report) => report.status === 'PASS')).toBe(true)
     expect(proof.applicationInvocation).toBe(
       process.env.UE_V2_NATIVE_FRAMEWORK_APPLICATION === '1'

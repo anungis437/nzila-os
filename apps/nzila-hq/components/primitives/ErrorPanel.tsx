@@ -12,7 +12,8 @@
  * `NZILA_HQ_RBAC_DENIED: ...` — we detect that prefix and render a friendlier
  * message.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { browserErrorReference, recordBrowserError } from '@nzila/os-core/browser-diagnostics'
 
 interface ErrorPanelProps {
   error: Error & { digest?: string }
@@ -20,16 +21,17 @@ interface ErrorPanelProps {
   scope: string
 }
 
-export function ErrorPanel({ error, reset, scope }: ErrorPanelProps) {
+export function ErrorPanel({ error, reset }: ErrorPanelProps) {
   const [copied, setCopied] = useState(false)
-  const incidentId = error.digest ?? generateIncidentId()
+  const localReference = useId()
+  const diagnosticReference = browserErrorReference(error.digest, localReference)
+  const incidentId = diagnosticReference.value
   const isRbac = error.message.startsWith('NZILA_HQ_RBAC_DENIED')
 
   useEffect(() => {
-    // Surface to the browser console so it's discoverable via devtools without
-    // hijacking Next's own error reporting.
-    console.error(`[nzila-hq:${scope}]`, incidentId, error)
-  }, [scope, incidentId, error])
+    recordBrowserError({ app: 'nzila-hq', surface: 'error-panel', code: 'CLIENT_BOUNDARY_ERROR',
+      reference: diagnosticReference.value, referenceOrigin: diagnosticReference.origin })
+  }, [error, diagnosticReference.value, diagnosticReference.origin])
 
   const onCopy = async () => {
     try {
@@ -56,7 +58,7 @@ export function ErrorPanel({ error, reset, scope }: ErrorPanelProps) {
         <p className="mt-1 text-sm text-slate-600">
           {isRbac
             ? 'If you believe this is a mistake, contact a founder or president to adjust your role.'
-            : 'The error has been logged. You can retry, or share the incident ID with the platform team.'}
+            : 'You can retry, or share this reference with support.'}
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -77,7 +79,7 @@ export function ErrorPanel({ error, reset, scope }: ErrorPanelProps) {
             {copied ? 'Copied ✓' : 'Copy incident ID'}
           </button>
           <code className="rounded bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-700">
-            {incidentId}
+            {diagnosticReference.origin === 'local' ? 'Local reference: ' : 'Reference: '}{incidentId}
           </code>
         </div>
 
@@ -92,11 +94,4 @@ export function ErrorPanel({ error, reset, scope }: ErrorPanelProps) {
       </div>
     </div>
   )
-}
-
-function generateIncidentId(): string {
-  // Browser-only fallback when error.digest is missing (rare in production).
-  const rnd = Math.random().toString(36).slice(2, 8)
-  const ts = Date.now().toString(36).slice(-6)
-  return `hq-${ts}-${rnd}`
 }

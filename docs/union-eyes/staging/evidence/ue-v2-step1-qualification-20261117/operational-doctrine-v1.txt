@@ -1,0 +1,13 @@
+
+> @nzila/doctrine-enforcement@0.1.0 test /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/doctrine-enforcement
+> vitest run --maxWorkers=1
+
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/packages/doctrine-enforcement
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  16:36:29
+   Duration  836ms (import 75%, transform 21%, tests 3%, worker 2%)
+

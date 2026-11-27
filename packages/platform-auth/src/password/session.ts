@@ -15,6 +15,7 @@ import { authUserSessions } from '@nzila/db/schema'
 import { eq, and, gt, sql } from 'drizzle-orm'
 import { cookies } from 'next/headers'
 import { authDb, getAuthContext, withAuthContext } from '../auth-db'
+import { isLocalQaRuntime } from '../runtime-identity'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -109,6 +110,33 @@ export async function validateSession(
   return validateSessionWithExecutor(tokenHash, dbExecutor)
 }
 
+/**
+ * The activity stamp must never wait. `user_sessions` carries the per-principal case-mail authority lock
+ * (ue_lock_queued_mail_authority), so a request that validates its session while its own open transaction already holds that
+ * principal's lock (a case intake, for example) would otherwise wait on itself with no way for PostgreSQL to see the cycle.
+ * The stamp is informational only; under contention it is skipped and its savepoint rolled back, and validation is unaffected.
+ */
+async function touchSessionLastUsed(dbExecutor: typeof db, sessionId: string): Promise<void> {
+  try {
+    await dbExecutor.transaction(async (savepoint) => {
+      // postgres.js returns the rows array; PGlite returns { rows }.
+      const read = (await savepoint.execute(sql`SELECT current_setting('lock_timeout') AS value`)) as unknown as
+        Array<{ value: string }> | { rows: Array<{ value: string }> }
+      const [previous] = Array.isArray(read) ? read : read.rows
+      await savepoint.execute(sql`SELECT set_config('lock_timeout', '100ms', true)`)
+      await savepoint
+        .update(authUserSessions)
+        .set({ lastUsedAt: new Date() })
+        .where(eq(authUserSessions.sessionId, sessionId))
+      await savepoint.execute(sql`SELECT set_config('lock_timeout', ${previous?.value ?? '0'}, true)`)
+    })
+  } catch (error) {
+    const code = (error as { code?: unknown; cause?: { code?: unknown } })?.code ??
+      (error as { cause?: { code?: unknown } })?.cause?.code
+    if (code !== '55P03') throw error
+  }
+}
+
 async function validateSessionWithExecutor(
   tokenHash: string,
   dbExecutor: typeof db,
@@ -133,11 +161,7 @@ async function validateSessionWithExecutor(
 
   if (!session) return null
 
-  // Update last_used_at
-  await dbExecutor
-    .update(authUserSessions)
-    .set({ lastUsedAt: new Date() })
-    .where(eq(authUserSessions.sessionId, session.sessionId))
+  await touchSessionLastUsed(dbExecutor, session.sessionId)
 
   return {
     sessionId: session.sessionId,
@@ -269,10 +293,17 @@ export async function rebindSessionOrganization(options: {
 
 // ─── Cookie Management ──────────────────────────────────────────────────────
 
+/** Secure in every production build, except the owned local QA runtime (isLocalQaRuntime: QA_TEST_ENV=true, UE_ENVIRONMENT=local and
+ * no deployment identity), which serves a production build over plain HTTP on loopback; a Secure cookie would never be sent back there,
+ * so its real password/MFA journeys could not hold a session. Every deployed environment keeps Secure. */
+export function sessionCookieSecure(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
+  return env.NODE_ENV === 'production' && !isLocalQaRuntime(env)
+}
+
 export function sessionCookieAttributes(expiresAt: Date) {
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: sessionCookieSecure(),
     sameSite: 'lax' as const,
     expires: expiresAt,
     path: '/',
@@ -294,7 +325,7 @@ export async function clearSessionCookie(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.set(SESSION_COOKIE_NAME, '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: sessionCookieSecure(),
     sameSite: 'lax',
     expires: new Date(0),
     path: '/',

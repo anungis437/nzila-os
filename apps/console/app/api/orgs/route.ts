@@ -1,3 +1,7 @@
+import {
+  listUserOrganizations,
+  createOrganization,
+} from '@/lib/services/organization-admin-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Orgs CRUD
@@ -5,9 +9,7 @@
  * POST /api/orgs          → create org (platform_admin, studio_admin, ops)
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { orgs, orgMembers } from '@nzila/db/schema'
-import { eq, and } from 'drizzle-orm'
+
 import { z } from 'zod'
 import { authenticateUser, requirePlatformRole } from '@/lib/api-guards'
 
@@ -15,7 +17,10 @@ const CreateOrgSchema = z.object({
   legalName: z.string().min(1),
   jurisdiction: z.string().min(2).max(10),
   incorporationNumber: z.string().optional(),
-  fiscalYearEnd: z.string().regex(/^\d{2}-\d{2}$/).optional(), // MM-DD
+  fiscalYearEnd: z
+    .string()
+    .regex(/^\d{2}-\d{2}$/)
+    .optional(), // MM-DD
 })
 
 export async function GET() {
@@ -23,25 +28,8 @@ export async function GET() {
   if (!authResult.ok) return authResult.response
   const { userId } = authResult
 
-  // Return orgs where user is a member
-  const rows = await platformDb
-    .select({
-      id: orgs.id,
-      legalName: orgs.legalName,
-      jurisdiction: orgs.jurisdiction,
-      incorporationNumber: orgs.incorporationNumber,
-      fiscalYearEnd: orgs.fiscalYearEnd,
-      status: orgs.status,
-      createdAt: orgs.createdAt,
-    })
-    .from(orgs)
-    .innerJoin(orgMembers, and(
-      eq(orgMembers.orgId, orgs.id),
-      eq(orgMembers.userId, userId),
-      eq(orgMembers.status, 'active'),
-    ))
-
-  return NextResponse.json(rows)
+  const result = await listUserOrganizations(userId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -56,22 +44,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [org] = await platformDb
-    .insert(orgs)
-    .values({
-      legalName: parsed.data.legalName,
-      jurisdiction: parsed.data.jurisdiction,
-      incorporationNumber: parsed.data.incorporationNumber ?? null,
-      fiscalYearEnd: parsed.data.fiscalYearEnd ?? null,
-    })
-    .returning()
-
-  // Auto-add creator as org_admin
-  await platformDb.insert(orgMembers).values({
-    orgId: org.id,
-    userId,
-    role: 'org_admin',
-  })
-
-  return NextResponse.json(org, { status: 201 })
+  const result = await createOrganization(parsed.data, userId)
+  return NextResponse.json(result.body, { status: result.status })
 }

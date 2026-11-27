@@ -17,8 +17,8 @@
  *   EVIDENCE_SEAL_KEY   — HMAC key used when pack was sealed (required if HMAC-signed)
  */
 // @ts-check
-import { existsSync, readFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { existsSync, readFileSync, realpathSync } from 'node:fs'
+import { isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { parseArgs } from 'node:util'
 import { createHash } from 'node:crypto'
 
@@ -27,11 +27,13 @@ const { values } = parseArgs({
   args: process.argv.slice(2),
   options: {
     output: { type: 'string', default: 'evidence-output' },
+    'base-path': { type: 'string', default: process.cwd() },
   },
   strict: false,
 })
 
 const OUTPUT_DIR = resolve(typeof values.output === 'string' ? values.output : 'evidence-output')
+const BASE_PATH = realpathSync(resolve(typeof values['base-path'] === 'string' ? values['base-path'] : process.cwd()))
 const PACK_PATH = join(OUTPUT_DIR, 'pack.json')
 const SEAL_PATH = join(OUTPUT_DIR, 'seal.json')
 
@@ -50,32 +52,54 @@ if (!existsSync(SEAL_PATH)) {
 const pack = JSON.parse(readFileSync(PACK_PATH, 'utf-8'))
 const seal = JSON.parse(readFileSync(SEAL_PATH, 'utf-8'))
 
-// ── Verify using os-core; fall back to inline check ──────────────────────────
+// ── Verify using os-core; failures must never select a weaker verifier ───────
 /**
  * @param {any} packData
  * @param {any} sealData
  */
 async function verify(packData, sealData) {
-  try {
-    const { verifySeal } = await import('@nzila/os-core/evidence/seal')
-    return verifySeal(
-      /** @type {any} */ ({ ...packData, seal: sealData }),
-      { hmacKey: process.env.EVIDENCE_SEAL_KEY },
-    )
-  } catch {
-    // Inline fallback: recompute pack digest and compare
-    const canonical = JSON.stringify(Object.fromEntries(
-      Object.entries(packData).sort(([a], [b]) => a.localeCompare(b))
-    ))
-    const recomputedDigest = createHash('sha256').update(canonical).digest('hex')
-    if (recomputedDigest !== sealData.packDigest) {
-      return {
-        valid: false,
-        reason: `Pack digest mismatch: expected ${sealData.packDigest.slice(0, 16)}... got ${recomputedDigest.slice(0, 16)}...`,
-      }
-    }
-    return { valid: true, reason: 'Pack digest matches (fallback inline verification)' }
+  const key = process.env.EVIDENCE_SEAL_KEY
+  if (process.env.NODE_ENV === 'production' && (!key || key.length < 32)) {
+    throw new Error('EVIDENCE_SEAL_KEY of at least 32 characters is required in production')
   }
+  if (!sealData || sealData.sealVersion !== '1.0' || sealData.algorithm !== 'sha256' ||
+      !/^[a-f0-9]{64}$/.test(sealData.packDigest) || !/^[a-f0-9]{64}$/.test(sealData.artifactsMerkleRoot) ||
+      !Array.isArray(packData.artifacts) || sealData.artifactCount !== packData.artifacts.length) {
+    throw new Error('Malformed or inconsistent evidence seal envelope')
+  }
+  if (key && (!/^[a-f0-9]{64}$/.test(sealData.hmacSignature) ||
+      sealData.hmacKeyId !== createHash('sha256').update(key).digest('hex').slice(-8))) {
+    throw new Error('Configured evidence key requires its matching HMAC signature and key identifier')
+  }
+  const { verifySeal } = await import('@nzila/os-core/evidence/seal')
+  const result = verifySeal(
+    /** @type {any} */ ({ ...packData, seal: sealData }),
+    { hmacKey: key },
+  )
+  if (!result.valid) return result
+
+  // The seal authenticates the index. Each referenced local artifact must also
+  // exist and match its recorded bytes; a valid index cannot certify a changed
+  // report or silently skip a missing one.
+  for (const artifact of packData.artifacts) {
+    if (!artifact || typeof artifact.path !== 'string' || !artifact.path ||
+        artifact.path.includes('\0') || isAbsolute(artifact.path) ||
+        artifact.path.split(/[\\/]/).includes('..') ||
+        !/^[a-f0-9]{64}$/.test(artifact.sha256) ||
+        !Number.isSafeInteger(artifact.sizeBytes) || artifact.sizeBytes < 0) {
+      throw new Error('Malformed evidence artifact descriptor')
+    }
+    const filePath = realpathSync(resolve(BASE_PATH, artifact.path))
+    const withinBase = relative(BASE_PATH, filePath)
+    if (withinBase === '..' || withinBase.startsWith(`..${sep}`) || isAbsolute(withinBase)) {
+      throw new Error('Evidence artifact resolves outside the artifact base path')
+    }
+    const bytes = readFileSync(filePath)
+    if (bytes.length !== artifact.sizeBytes || createHash('sha256').update(bytes).digest('hex') !== artifact.sha256) {
+      throw new Error(`Evidence artifact bytes differ from the sealed index: ${artifact.path}`)
+    }
+  }
+  return result
 }
 
 const result = await verify(pack, seal)
@@ -102,5 +126,6 @@ console.log('')
 console.log(`  Pack digest:    ${seal.packDigest.slice(0, 32)}...`)
 console.log(`  Merkle root:    ${seal.artifactsMerkleRoot.slice(0, 32)}...`)
 console.log(`  Artifact count: ${seal.artifactCount}`)
+console.log(`  Authentication: ${result.signatureVerified === true ? 'HMAC verified' : 'unsigned digest only'}`)
 console.log(`  Sealed at:      ${seal.sealedAt}`)
 console.log(`  Reason:         ${'reason' in result ? result.reason : (result.errors.length === 0 ? 'OK' : result.errors.join('; '))}`)

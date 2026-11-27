@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { analyzeMultiYearTrends } from '@/services/clc/compliance-reports';
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import {
@@ -24,6 +25,8 @@ export const GET = withApi(
     openapi: { tags: ['Admin', 'CLC'], summary: 'CLC multi-year remittance trends' },
   },
   async ({ request, userId, organizationId }) => {
+    // per_capita_remittances has no runtime or system grant in the current source: 501 with the reason, before any statement.
+    requireContainedStorageAuthority('per_capita_remittances');
   if (!userId) return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required');
   if (!organizationId) return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
 

@@ -71,9 +71,15 @@ describe.skipIf(!URL)('the workbook pages on the combined schema, as the real ro
     request.userId = userId
     request.capability = capability
   }
+  // A declared member's page request carries their live canonical session (the stranger and an anonymous caller have none).
+  const organizationOf: Record<string, string> = {}
+  const asRequest = <T,>(work: () => Promise<T>) => {
+    const organizationId = request.userId ? organizationOf[request.userId] : undefined
+    return request.userId && organizationId ? savepointHarness.asCanonicalRequest(request.userId, organizationId, work) : work()
+  }
   const params = (id: string) => ({ params: Promise.resolve({ locale: 'en', id }) })
-  const hubPage = (id: string) => hub!(params(id))
-  const holdersPage = (id: string) => memoryHolders!(params(id))
+  const hubPage = (id: string) => asRequest(() => hub!(params(id)))
+  const holdersPage = (id: string) => asRequest(() => memoryHolders!(params(id)))
   const html = async (id: string) => renderToStaticMarkup(await hubPage(id))
   const notFound = async (run: () => Promise<unknown>) => expect(await run().then(() => 'served', (error: Error) => error.message)).toBe('NEXT_NOT_FOUND')
   const readsOf = (workbookId: string) =>
@@ -88,6 +94,12 @@ describe.skipIf(!URL)('the workbook pages on the combined schema, as the real ro
     await insertMember(admin, ORG_A, { userId: U.steward, role: 'steward' })
     await insertMember(admin, ORG_A, { userId: U.member, role: 'member' })
     await insertMember(admin, ORG_B, { userId: U.stewardB, role: 'steward' })
+    // The same people as canonical members (the stranger stays undeclared): they act through real canonical sessions.
+    for (const [who, organizationId, role] of [[U.claimant, ORG_A, 'member'], [U.steward, ORG_A, 'steward'], [U.member, ORG_A, 'member'], [U.stewardB, ORG_B, 'steward']] as const)
+    {
+      organizationOf[who] = organizationId
+      await savepointHarness.declare(who, organizationId, role)
+    }
 
     const issued = capabilities!.issueWorkbookCapability()
     openToken = issued.token

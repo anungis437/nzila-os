@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Payment Receipt Route (Read-Only)
  *
@@ -5,22 +6,24 @@
  * (receipt) belonging to the authenticated member. Backed by the native
  * member_dues_ledger table.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db';
-import { memberDuesLedger } from '@/db/schema/dues-finance-schema';
-import { eq, and } from 'drizzle-orm';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { db } from '@/db'
+import { memberDuesLedger } from '@/db/schema/dues-finance-schema'
+import { eq, and } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Dues'], summary: "Get a member's dues payment receipt by ledger entry ID" },
   },
   async ({ organizationId, userId, params }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization/user context required');
-    const { id } = await params;
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization/user context required')
+    const { id } = await params
+
+    requireBaseFinancialAuthority()
 
     const [entry] = await db
       .select()
@@ -31,10 +34,10 @@ export const GET = withApi(
           eq(memberDuesLedger.organizationId, organizationId),
           eq(memberDuesLedger.userId, userId),
         ),
-      );
+      )
 
-    if (!entry) throw ApiError.notFound('Dues payment receipt');
+    if (!entry) throw ApiError.notFound('Dues payment receipt')
 
-    return { data: entry };
+    return { data: entry }
   },
-);
+)

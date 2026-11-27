@@ -26,7 +26,9 @@ vi.mock('@/lib/logger', () => ({
   logger: { warn: mocks.warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }))
 
-import { isPlatformAdminUser, requireApiAuth } from '../api-auth-guard'
+import { getCurrentUser, hasMinRole, isPlatformAdminUser, PLATFORM_ELEVATED_ROLES, requireApiAuth } from '../api-auth-guard'
+import { getRoleLevel, TENANT_LOCAL_ROLES, UserRole } from '../auth/roles'
+import { canonicalPageGuardRoleLevel } from '../dashboard/role-experience'
 import { POST as clearCache } from '../../app/api/admin/system/cache/route'
 
 describe('canonical imperative API authentication', () => {
@@ -71,6 +73,21 @@ describe('canonical imperative API authentication', () => {
     })
     await expect(requireApiAuth({ roles: ['app_owner'] })).rejects.toThrow('Forbidden:')
     expect(mocks.warn).toHaveBeenCalled()
+  })
+
+  it('preserves the union Clerk role but refuses the existing canonical numeric steward guard', async () => {
+    mocks.organization.mockResolvedValue({ ...actor, role: 'clerk' })
+    expect((await getCurrentUser())?.role).toBe('clerk')
+    expect(await hasMinRole('member')).toBe(true)
+    expect(await hasMinRole('steward')).toBe(false)
+    expect(await hasMinRole('officer')).toBe(false)
+  })
+
+  it.each([...TENANT_LOCAL_ROLES, ...PLATFORM_ELEVATED_ROLES])('models actual canonical page refusals for the declared %s role', async role => {
+    mocks.organization.mockResolvedValue({ ...actor, role })
+    for (const minimum of [UserRole.MEMBER, UserRole.STEWARD, UserRole.OFFICER, UserRole.ADMIN]) {
+      expect(await hasMinRole(minimum)).toBe(canonicalPageGuardRoleLevel(role) >= getRoleLevel(minimum))
+    }
   })
 
   it('retains authenticated private profiles without inventing organization authority', async () => {

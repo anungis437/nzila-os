@@ -17,6 +17,7 @@ import type { RLSTx } from '@/lib/db/with-rls-context'
 import { assignThread, listTriageQueue } from '@/lib/messaging/thread-assignment'
 import { grantDesignation, revokeDesignation } from '@/lib/triage/designations'
 import { createMemberThread, findReadableThread, listThreads } from '@/lib/messaging/thread-access'
+import { nativeActionUrl, installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const adapt = (c: pg.Client): Db => ({ exec: (s) => c.query(s), query: (s, p) => c.query(s, p as unknown[]) as never })
@@ -33,10 +34,11 @@ describe.skipIf(!URL)('conversation assignment on the combined deployed schema, 
   const deps = { assigneeEligible: async (userId: string) => eligible.has(userId) }
 
   const inOrg = <T>(org: string, userId: string, fn: (tx: RLSTx) => Promise<T>) =>
-    rdb.transaction(async (t) => {
-      await t.execute(sql`SELECT set_config('app.current_org_id', ${org}, true), set_config('app.current_user_id', ${userId}, true)`)
+    withNativeCanonicalActor(userId, org, (binding) => rdb.transaction(async (t) => {
+      await t.execute(sql`SET LOCAL ROLE union_eyes_runtime`)
+      await installNativeBusinessContext((statement) => t.execute(statement), binding)
       return fn(t as unknown as RLSTx)
-    })
+    }))
   const actor = (userId: string, role: 'member' | 'steward' | 'admin' = 'steward', organizationId = ORG_A) => ({ userId, organizationId, role })
   const rejectsWith = async (promise: Promise<unknown>, pattern: RegExp) => {
     const error = (await promise.then(() => null, (e: unknown) => e)) as { message?: string; cause?: { message?: string } } | null
@@ -78,7 +80,7 @@ describe.skipIf(!URL)('conversation assignment on the combined deployed schema, 
         [user, role, org],
       )
     }
-    runtime = new pg.Client({ connectionString: URL })
+    runtime = new pg.Client({ connectionString: nativeActionUrl('union_eyes_runtime', URL) })
     await runtime.connect()
     await runtime.query('SET ROLE union_eyes_runtime')
     rdb = drizzle(runtime)

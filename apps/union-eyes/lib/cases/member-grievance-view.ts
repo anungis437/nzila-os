@@ -8,6 +8,7 @@ const MEMBER_FIELDS = [
   'priority',
   'title',
   'description',
+  'representedMemberUserId',
   'grievantId',
   'createdBy',
   'grievantName',

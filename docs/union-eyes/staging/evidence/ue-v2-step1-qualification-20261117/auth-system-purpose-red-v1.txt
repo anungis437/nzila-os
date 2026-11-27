@@ -1,0 +1,71 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+{"proof":"AUTH_SYSTEM_PURPOSE_BOUNDARY","engine":"PGlite","nativeVerdict":"UNEXECUTED","compilerSourceSha256":"f6d0bdb51c27460a09b48841c2f0c563ec5eb819bb274c107ef7539c41480be6","compiledSqlSha256":"43fed89077d6d5bf9298a0d7c7bcee343733023cc37cb73491bf4c2098a0cd67"}
+ ❯ |union-eyes| db/auth/auth-system-purpose.pglite.test.ts (8 tests | 2 failed) 1028ms
+   ❯ system auth mutation purpose at the physical write boundary (8)
+     × refuses inactive target session revival or indeterminate state true and leaves the row unchanged 7ms
+     × refuses inactive target session revival or indeterminate state null and leaves the row unchanged 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes| db/auth/auth-system-purpose.pglite.test.ts > system auth mutation purpose at the physical write boundary > refuses inactive target session revival or indeterminate state true and leaves the row unchanged
+AssertionError: expected { failureCode: null, …(1) } to deeply equal { failureCode: '42501', …(1) }
+
+- Expected
++ Received
+
+  {
+-   "failureCode": "42501",
++   "failureCode": null,
+    "persisted": [
+      {
+-       "is_active": false,
++       "is_active": true,
+      },
+    ],
+  }
+
+ ❯ db/auth/auth-system-purpose.pglite.test.ts:97:40
+     95|     } catch (error) { failureCode = (error as { code?: string }).code …
+     96|     const persisted = (await db.query('SELECT is_active FROM user_mana…
+     97|     expect({ failureCode, persisted }).toEqual({ failureCode: '42501',…
+       |                                        ^
+     98|   })
+     99|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |union-eyes| db/auth/auth-system-purpose.pglite.test.ts > system auth mutation purpose at the physical write boundary > refuses inactive target session revival or indeterminate state null and leaves the row unchanged
+AssertionError: expected { failureCode: null, …(1) } to deeply equal { failureCode: '42501', …(1) }
+
+- Expected
++ Received
+
+  {
+-   "failureCode": "42501",
++   "failureCode": null,
+    "persisted": [
+      {
+-       "is_active": false,
++       "is_active": null,
+      },
+    ],
+  }
+
+ ❯ db/auth/auth-system-purpose.pglite.test.ts:97:40
+     95|     } catch (error) { failureCode = (error as { code?: string }).code …
+     96|     const persisted = (await db.query('SELECT is_active FROM user_mana…
+     97|     expect({ failureCode, persisted }).toEqual({ failureCode: '42501',…
+       |                                        ^
+     98|   })
+     99|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  18:34:35
+   Duration  1.51s (tests 73%, import 23%, transform 4%)
+

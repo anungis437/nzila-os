@@ -23,6 +23,8 @@ import {
 } from './source'
 import { syntheticParameter } from './runtime-security'
 import { qualificationExitCode } from './clean-room'
+import { currentModuleAdmissionAuthority, MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS } from './module-admission-storage-contract'
+import { currentExternalSyncLogAuthority, EXTERNAL_SYNC_LOG_MODEL_SOURCE, EXTERNAL_SYNC_LOG_SYSTEM_READ_COLUMNS } from './external-sync-log-storage-contract'
 
 function table(
   name: string,
@@ -68,76 +70,57 @@ function plan(tables: SourceTable[]): V2Plan {
 }
 
 describe('prospective bootstrap local authority boundaries', () => {
-  // The column-read contracts (service-column-contracts.ts) confine a SYSTEM writer that has no table SELECT to the
-  // columns its own WHERE needs. Current authority grants both relations table-level SYSTEM SELECT, for reasons recorded
-  // in their storage-authority entries (commercial transition reads the contract it accepts, 86aa8adb2; the data-source
-  // overview lists sync runs as a system read, a0404b79b). The mechanism is proved on the narrower authority it applies
-  // to; the current authority is pinned separately so a later change to it is a reviewed decision, not a silent one.
-  it('confines a SYSTEM writer without table SELECT to the commercial transition lookup and returned identifier', () => {
-    const compiled = compileSecurity(
-      plan([
-        table(
-          'commercial_contracts',
-          ['id', 'organization_id', 'contract_number', 'status'],
-          ['INSERT', 'UPDATE'],
-        ),
-      ]),
-    )
-    expect(compiled.rules[0].systemSelectColumns).toEqual(['id', 'contract_number'])
-    expect(compiled.rules[0].systemPrivileges).toEqual(['INSERT', 'UPDATE'])
-    expect(compiled.statements.join('\n')).toContain(
-      'GRANT SELECT ("id", "contract_number") ON TABLE public."commercial_contracts" TO union_eyes_system;',
-    )
-    expect(compiled.statements.join('\n')).not.toContain(
-      'GRANT SELECT ON TABLE public."commercial_contracts" TO union_eyes_system;',
-    )
-    expect(() =>
-      compileSecurity(plan([table('commercial_contracts', undefined, ['INSERT', 'UPDATE'])])),
-    ).toThrow('UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:commercial_contracts')
+  // Current module admission reads operational state only; no historical
+  // commercial transition writer authority is a base-release positive.
+  it('preserves the genuine runtime module-admission projection with exact zero SYSTEM powers',()=>{
+    const source=structuredClone((currentSourcePlan as unknown as V2Plan).tables.find(table=>table.name==='commercial_contracts')!)
+    source.authority=currentModuleAdmissionAuthority(source)!
+    const compiled=compileSecurity(plan([source]))
+    const rule=compiled.rules[0]
+    expect(rule.runtimePrivileges).toEqual([])
+    expect(rule.runtimeColumnPrivileges).toEqual([{privilege:'SELECT',columns:[...MODULE_ADMISSION_RUNTIME_COLUMN_CONTRACTS.commercial_contracts.select]}])
+    expect(rule.systemPrivileges).toEqual([])
+    expect(rule.systemSelectColumns??[]).toEqual([])
+    expect(compiled.statements.filter(statement=>statement.startsWith('GRANT')&&statement.includes('commercial_contracts')&&statement.includes('union_eyes_system'))).toEqual([])
+    expect(compiled.statements.join('\n')).toContain('GRANT SELECT ("id", "organization_id", "status", "expiration_date") ON TABLE public."commercial_contracts" TO union_eyes_runtime;')
   })
-  it('confines a SYSTEM writer without table SELECT to the source-owned sync-log UPDATE predicate', () => {
-    const source = table(
-      'external_data_sync_log',
-      ['id', 'sync_id', 'status'],
-      ['INSERT', 'UPDATE'],
-    )
-    const compiled = compileSecurity(plan([source]))
-    expect(compiled.rules[0].systemSelectColumns).toEqual(['sync_id'])
-    expect(compiled.rules[0].systemPrivileges).toEqual(['INSERT', 'UPDATE'])
-    expect(compiled.statements.join('\n')).toContain(
-      'GRANT SELECT ("sync_id") ON TABLE public."external_data_sync_log" TO union_eyes_system;',
-    )
-    expect(compiled.statements.join('\n')).not.toContain(
-      'GRANT SELECT ON TABLE public."external_data_sync_log" TO union_eyes_system;',
-    )
-    expect(() =>
-      compileSecurity(plan([table('external_data_sync_log', ['id'], ['INSERT', 'UPDATE'])])),
-    ).toThrow('UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:external_data_sync_log')
+  it('confines current SYSTEM sync reads to the actual overview and cron projection',()=>{
+    const source=table('external_data_sync_log',[...EXTERNAL_SYNC_LOG_SYSTEM_READ_COLUMNS,'error_details','initiated_by','parameters'])
+    source.source=EXTERNAL_SYNC_LOG_MODEL_SOURCE
+    source.authority=currentExternalSyncLogAuthority(source,source.authority)!
+    const compiled=compileSecurity(plan([source]))
+    expect(compiled.rules[0].systemSelectColumns).toEqual([...EXTERNAL_SYNC_LOG_SYSTEM_READ_COLUMNS])
+    expect(compiled.rules[0].systemPrivileges).toEqual(['INSERT','UPDATE'])
+    expect(compiled.statements.join('\n')).not.toContain('GRANT SELECT, INSERT, UPDATE ON TABLE public."external_data_sync_log" TO union_eyes_system;')
+    const missing={...source,columns:source.columns.filter(column=>column.name!=='sync_id')}
+    expect(()=>compileSecurity(plan([missing]))).toThrow('UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:external_data_sync_log')
   })
-  it.each([
-    ['commercial_contracts', ['id', 'organization_id', 'contract_number', 'status']],
-    ['external_data_sync_log', ['id', 'sync_id', 'status']],
-  ])('pins the current table-level SYSTEM SELECT authority of %s', (name, columns) => {
-    const compiled = compileSecurity(plan([table(name, columns)]))
-    expect(compiled.rules[0].systemPrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE'])
-    expect(compiled.rules[0].systemSelectColumns).toBeUndefined()
-    expect(compiled.statements.join('\n')).toContain(
-      `GRANT SELECT, INSERT, UPDATE ON TABLE public."${name}" TO union_eyes_system;`,
-    )
-    expect(compiled.statements.join('\n')).not.toMatch(
-      new RegExp(`GRANT SELECT \\([^)]*\\) ON TABLE public\\."${name}"`),
-    )
+  it('refuses the obsolete commercial SYSTEM writer authority and undeclared source owner',()=>{
+    const source=structuredClone((currentSourcePlan as unknown as V2Plan).tables.find(table=>table.name==='commercial_contracts')!)
+    source.authority=currentModuleAdmissionAuthority(source)!
+    const oldAuthority:SourceTable={...source,authority:{...source.authority,requiredSystemPrivileges:['SELECT','INSERT','UPDATE']}}
+    expect(()=>compileSecurity(plan([oldAuthority]))).toThrow('UE_V2_REWARDS_RUNTIME_COLUMN_AUTHORITY_REQUIRED:commercial_contracts')
+    expect(()=>compileSecurity(plan([{...source,source:'test-current-model'}]))).toThrow('UE_V2_MODULE_ADMISSION_SOURCE_REQUIRED:commercial_contracts')
   })
-  it('pins the packaged admission denials to unresolved current-source ownership geometry', () => {
-    const compiled = compileSecurity(currentSourcePlan as unknown as V2Plan)
+  it('pins explicit current-source containment and separately refuses unresolved authority', () => {
+    const source = currentSourcePlan as unknown as V2Plan
+    const compiled = compileSecurity(source)
     for (const name of ['arbitration_decisions', 'signature_audit_trail']) {
       const rule = compiled.rules.find(entry => entry.table === name)
-      expect(rule).toMatchObject({ status: 'DENY_UNRESOLVED', runtimePrivileges: [], systemPrivileges: [] })
+      // COMPLETE describes the compiler's explicit denial rule only.
+      expect(rule).toMatchObject({ classification: 'CONTAINED_NO_AUTHORITY', status: 'COMPLETE', runtimePrivileges: [], systemPrivileges: [] })
       expect(admissionDecisions.entries.find(entry => entry.table === name)).toMatchObject({
         classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [],
       })
-      expect(compiled.blockers.some(entry => entry.table === name)).toBe(true)
+      expect(compiled.blockers.some(entry => entry.table === name)).toBe(false)
       expect(compiled.statements.filter(sql => sql.startsWith('GRANT ') && sql.includes(`public."${name}"`))).toEqual([])
+      const unresolved = compileSecurity({ ...source, tables: source.tables.map(table =>
+        table.name === name ? { ...table, authority: null } : table) })
+      expect(unresolved.rules.find(entry => entry.table === name)).toMatchObject({
+        status: 'DENY_UNRESOLVED', runtimePrivileges: [], systemPrivileges: [],
+      })
+      expect(unresolved.blockers.some(entry => entry.table === name)).toBe(true)
+      expect(unresolved.statements.filter(sql => sql.startsWith('GRANT ') && sql.includes(`public."${name}"`))).toEqual([])
     }
   })
   it('honors a recorded user-parent override when a child also references a sibling table', () => {

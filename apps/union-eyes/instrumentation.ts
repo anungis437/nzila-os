@@ -1,4 +1,13 @@
  
+type BootstrapDiagnosticCode = 'UE_DEMO_GUARD_REFUSED' | 'UE_DEMO_GUARD_FAILED' |
+  'UE_TEST_BYPASS_REFUSED' | 'UE_TEST_BYPASS_GUARD_FAILED' | 'UE_OTEL_INITIALIZATION_FAILED'
+
+// Inline and dependency-free: this must also work when a loader/import failed.
+function bootstrapDiagnostic(code: BootstrapDiagnosticCode): void {
+  try { process.stderr.write(JSON.stringify({ app: 'union-eyes', level: 'error', code }) + '\n') }
+  catch { /* Output failure must never prevent a guard from terminating boot. */ }
+}
+
 export async function register() {
   // Every stored calendar day is anchored to UTC midnight and the Django backend runs in UTC (TIME_ZONE = "UTC"). The Node server formats and compares in UTC as well, so a host
   // set to another zone cannot move a day in an e-mail, a PDF, a receipt or a due-date calculation (day-render census, UE-CONV-H-029). Set before anything reads a date.
@@ -31,17 +40,15 @@ export async function register() {
         nodeEnv: process.env.NODE_ENV,
       });
       if (!verdict.ok) {
-        const reason = `[demo-deployment-guard] REFUSED: ${verdict.reason ?? 'unsafe environment'}`;
-        console.error(reason);
+        bootstrapDiagnostic('UE_DEMO_GUARD_REFUSED');
         // Hard-fail the process. A pilot-facing container must not stay
         // up while claiming to serve real data with the demo profile on.
         process.exit(1);
       }
-    } catch (error) {
+    } catch {
       // If the guard itself is broken we prefer to fail closed rather
       // than silently continue.
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('[demo-deployment-guard] failed to evaluate; refusing to start:', message);
+      bootstrapDiagnostic('UE_DEMO_GUARD_FAILED');
       process.exit(1);
     }
 
@@ -56,12 +63,11 @@ export async function register() {
       const { evaluateTestBypassGuard, readTestBypassGuardEnv } = await import('./lib/reality/test-bypass-guard');
       const verdict = evaluateTestBypassGuard(readTestBypassGuardEnv());
       if (!verdict.ok) {
-        console.error(`[test-bypass-guard] REFUSED (${verdict.reasonCode}): ${verdict.reason}`);
+        bootstrapDiagnostic('UE_TEST_BYPASS_REFUSED');
         process.exit(1);
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('[test-bypass-guard] failed to evaluate; refusing to start:', message);
+    } catch {
+      bootstrapDiagnostic('UE_TEST_BYPASS_GUARD_FAILED');
       process.exit(1);
     }
 
@@ -69,16 +75,9 @@ export async function register() {
     try {
       const { initOtel } = await import('@nzila/os-core/telemetry');
       await initOtel({ appName: 'union-eyes' });
-    } catch (error) {
+    } catch {
       // Log error but don't fail startup - tracing is non-critical.
-      // Use console.* here instead of dynamic-importing ./lib/logger:
-      // Turbopack's instrumentation loader cannot instantiate relative
-      // module factories from inside the register() catch path, which
-      // surfaces as "module factory is not available" and crashes dev.
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorStack = error instanceof Error ? error.stack : undefined;
-      console.error('[instrumentation] Failed to initialize OpenTelemetry tracing:', errorMessage);
-      if (errorStack) console.error(errorStack);
+      bootstrapDiagnostic('UE_OTEL_INITIALIZATION_FAILED');
     }
 
     // Initialise os-core metrics (SLO counters for union-eyes)
@@ -103,9 +102,6 @@ export async function register() {
 
   // Node.js runtime initialization (not Edge runtime)
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    // Initialize console wrapper for production logging control (Node.js only)
-    const { initializeConsoleWrapper } = await import('./lib/console-wrapper');
-    initializeConsoleWrapper();
     try {
       const { createLogger } = await import('@nzila/os-core/telemetry');
       const osLogger = createLogger('union-eyes');

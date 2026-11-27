@@ -1,11 +1,10 @@
 'use server'
 
 import { redirect as _redirect } from 'next/navigation'
-import { auth } from '@nzila/platform-auth/entra/server'
+import { resolveOrgContext } from '../resolve-org'
 import { platformDb } from '@nzila/db/platform'
 import { partners, partnerUsers } from '@nzila/db/schema'
 import { eq, desc, sql, and as _and } from 'drizzle-orm'
-import { requirePlatformAdmin, isPlatformAdmin as _isPlatformAdmin } from '../partner-auth'
 
 // ── Partner Management Actions ───────────────────────────────────────────────
 
@@ -18,7 +17,7 @@ export async function getPartners(_options?: {
   type?: string
   search?: string
 }) {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   const query = platformDb
     .select({
@@ -58,7 +57,7 @@ export async function getPartners(_options?: {
  * Get a single partner by ID
  */
 export async function getPartner(partnerId: string) {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   const [partner] = await platformDb
     .select()
@@ -76,7 +75,7 @@ export async function updatePartnerStatus(
   partnerId: string,
   status: 'pending' | 'active' | 'suspended' | 'churned'
 ) {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   await platformDb
     .update(partners)
@@ -93,7 +92,7 @@ export async function updatePartnerTier(
   partnerId: string,
   tier: 'registered' | 'select' | 'elite'
 ) {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   await platformDb
     .update(partners)
@@ -110,7 +109,7 @@ export async function assignAccountManager(
   partnerId: string,
   ownerId: string | null
 ) {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   await platformDb
     .update(partners)
@@ -124,7 +123,7 @@ export async function assignAccountManager(
  * Get partner users
  */
 export async function getPartnerTeamMembers(partnerId: string) {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   return platformDb
     .select()
@@ -138,7 +137,7 @@ export async function getPartnerTeamMembers(partnerId: string) {
  * Get platform-wide partner statistics
  */
 export async function getPlatformStats() {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   const [stats] = await platformDb.execute(sql`
     SELECT 
@@ -152,7 +151,7 @@ export async function getPlatformStats() {
       COUNT(*) FILTER (WHERE type = 'channel') as channel_partners,
       COUNT(*) FILTER (WHERE type = 'isv') as isv_partners,
       COUNT(*) FILTER (WHERE type = 'enterprise') as enterprise_partners
-    FROM partners
+    FROM public.partners
   `)
 
   return stats
@@ -175,7 +174,7 @@ export interface PlatformAnalytics {
 }
 
 export async function getPlatformAnalytics(): Promise<PlatformAnalytics> {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   try {
     const [dealAgg] = (await platformDb.execute(sql`
@@ -183,7 +182,7 @@ export async function getPlatformAnalytics(): Promise<PlatformAnalytics> {
         COUNT(*) as total_deals,
         COALESCE(SUM(CAST(COALESCE(metadata->>'estimatedArr','0') AS NUMERIC)),0) as total_arr,
         COUNT(*) FILTER (WHERE metadata->>'stage' = 'won') as won_deals
-      FROM audit_log WHERE action = 'deal.registered' OR action = 'deal.updated'
+      FROM public.audit_log WHERE action = 'deal.registered' OR action = 'deal.updated'
     `)) as unknown as [{ total_deals: number; total_arr: number; won_deals: number }]
 
     const totalDeals = Number(dealAgg?.total_deals ?? 0)
@@ -233,11 +232,11 @@ const DEFAULT_SETTINGS: AdminSettings = {
 }
 
 export async function getAdminSettings(): Promise<AdminSettings> {
-  await requirePlatformAdmin()
+  await resolveOrgContext({ scope: 'platform' })
 
   try {
     const [row] = (await platformDb.execute(sql`
-      SELECT metadata FROM audit_log
+      SELECT metadata FROM public.audit_log
       WHERE action = 'admin.settings.updated'
       ORDER BY created_at DESC LIMIT 1
     `)) as unknown as [{ metadata: AdminSettings } | undefined]
@@ -251,13 +250,12 @@ export async function getAdminSettings(): Promise<AdminSettings> {
 export async function updateAdminSettings(
   settings: AdminSettings,
 ): Promise<{ success: boolean }> {
-  await requirePlatformAdmin()
+  const { actorId } = await resolveOrgContext({ scope: 'platform' })
 
   try {
-    const { userId } = await auth()
     await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('admin.settings.updated', ${userId ?? 'system'}, 'settings', 'platform',
+      sql`INSERT INTO public.audit_log (action, actor_id, entity_type, org_id, metadata)
+      VALUES ('admin.settings.updated', ${actorId}, 'settings', NULL,
         ${JSON.stringify(settings)}::jsonb)`,
     )
     return { success: true }

@@ -9,12 +9,15 @@ import { auditAuthorityMutation } from '../../lib/authority/store/audit'
 import { requireCounselSession } from '../../lib/authority/store/enforce'
 import {
   createAssertionBackedCounselVerifier,
+  createJwsBackedCounselVerifier,
   createDurableNonceStore,
   loadCounselEngagement,
   recordCounselEngagement,
   revokeCounselEngagement,
 } from '../../lib/authority/store/counsel'
 import type { PGlite } from '@electric-sql/pglite'
+import { generateKeyPairSync, sign } from 'node:crypto'
+import { COUNSEL_ASSERTION_JWS_TYPE, createCounselIssuerRegistry } from '../../lib/authority/counsel-assertion-jws'
 
 let db: PGlite
 let k: ReturnType<typeof kit>
@@ -170,5 +173,32 @@ describe('assertion-backed counsel verification', () => {
 
   it('a union administrator holding a genuine assertion for someone else cannot become counsel', async () => {
     await expect(session(U.vp, verifierFor(assertion()))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
+  })
+})
+
+describe('signed counsel assertions (JWS verifier) through the real counsel session', () => {
+  const keys = generateKeyPairSync('ec', { namedCurve: 'P-256' })
+  const stranger = generateKeyPairSync('ec', { namedCurve: 'P-256' })
+  const registry = createCounselIssuerRegistry([{ issuer: ISSUER, kid: 'gw-1', alg: 'ES256', publicJwk: keys.publicKey.export({ format: 'jwk' }) }])
+  const signed = (claims: Record<string, unknown> = {}, key = keys.privateKey) => {
+    const now = Math.floor(Date.now() / 1000)
+    const body = { iss: ISSUER, aud: COUNSEL_AUDIENCE, sub: LAWYER, org: ORG, matter: MATTER, nonce: `nonce-${newUuid()}`, iat: now - 10, exp: now + 120, ...claims }
+    const input = `${Buffer.from(JSON.stringify({ alg: 'ES256', typ: COUNSEL_ASSERTION_JWS_TYPE, kid: 'gw-1' })).toString('base64url')}.${Buffer.from(JSON.stringify(body)).toString('base64url')}`
+    return `${input}.${sign('sha256', Buffer.from(input), { key, dsaEncoding: 'ieee-p1363' }).toString('base64url')}`
+  }
+  const verifierFromToken = (token: string) => createJwsBackedCounselVerifier({ token, registry })
+
+  it('a genuinely signed assertion for exactly this counsel authorizes once; its replay is refused by the durable nonce register', async () => {
+    const token = signed()
+    expect(await session(LAWYER, verifierFromToken(token))).toBe(LAWYER)
+    await expect(session(LAWYER, verifierFromToken(token))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
+  })
+
+  it('a token signed by a key outside the registry, for another matter or organization, or for someone else is refused', async () => {
+    await expect(session(LAWYER, verifierFromToken(signed({}, stranger.privateKey)))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
+    await expect(session(LAWYER, verifierFromToken(signed({ matter: newUuid() })))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
+    await expect(session(LAWYER, verifierFromToken(signed({ org: ORG_B })))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
+    await expect(session(LAWYER, verifierFromToken(signed({ sub: U.president })))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
+    await expect(session(U.vp, verifierFromToken(signed()))).rejects.toThrow(/COUNSEL_NOT_VERIFIED/)
   })
 })

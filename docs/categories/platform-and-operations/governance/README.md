@@ -12,6 +12,10 @@ The governance layer defines how the platform captures policy references, valida
 - `docs/governance/audit-logging-model.md` — audit evidence model
 - `docs/governance/decision-intelligence-revenue.md` — monetization, tiering, and data-moat policy for intelligence APIs
 
+## Tax reference data
+
+- `docs/categories/platform-and-operations/governance/TAX_REFERENCE_FRESHNESS.md` — 90-day CRA verification rule, the live audit, and the release boundary
+
 ## Current Guardrails
 
 - `pnpm exec tsx scripts/check-decision-coverage.ts` — warning-only decision registration coverage check

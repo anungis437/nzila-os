@@ -1,21 +1,23 @@
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access';
 /**
  * Steward Workload Snapshot
  *
  * GET /api/grievances/workload — Aggregate stats for the steward load card
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceCaseAuthorityScope } from '@/lib/cases/grievance-list-scope';
 import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import { and } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
     rlsOrgContext: true,
-    auth: { minRole: 'steward' },
+    auth: { required: true, roles: [...CASE_HANDLER_ROLES] },
     entitlement: 'grievance_case_suite',
     openapi: { tags: ['Grievances'], summary: 'Steward workload stats' },
   },
@@ -24,8 +26,6 @@ export const GET = withApi(
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const ACTIVE_STATUSES = ['filed', 'step_1', 'step_2', 'step_3', 'arbitration', 'mediation'];
 
@@ -33,10 +33,14 @@ export const GET = withApi(
     // Seniority does not widen it to the organization-wide figure.
     const scope = grievanceCaseAuthorityScope(organizationId, userId);
 
-    const rows = await db
-      .select()
+    const rows = await withRLSContext({ organizationId }, async tx => {
+      const candidates = await tx
+      .select({ id: grievances.id, status: grievances.status, createdAt: grievances.createdAt })
       .from(grievances)
       .where(and(scope, productionGrievanceCondition()));
+      const decisions = await decideCaseCapabilitiesBatch(tx, { userId, organizationId, caseIds: candidates.map(row => row.id) });
+      return candidates.filter(row => decisions.get(row.id)?.['case:read'].effect === 'allow');
+    });
 
     const activeCases = rows.filter(g => ACTIVE_STATUSES.includes(g.status)).length;
 

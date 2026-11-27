@@ -1,0 +1,25 @@
+error: relation "case_respondent_active_uniq" already exists
+    at /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/node_modules/pg/lib/client.js:631:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async hook (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/manifest-trace.ts:193:5)
+    at async execute (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/installer.ts:153:15)
+    at async createCurrentState (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/installer.ts:183:10)
+    at async runCleanRoom (/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes/scripts/bootstrap-v2/clean-room.ts:206:5) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42P07',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'index.c',
+  line: '885',
+  routine: 'index_create'
+}

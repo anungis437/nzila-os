@@ -6286,6 +6286,10 @@
     },
     "staff": {
       "title": "Opérations du personnel CTC",
+      "releaseScope": {
+        "title": "Portée de cette version",
+        "description": "Les remises du CTC et les rapports nationaux de synchronisation ne sont pas inclus dans cette version."
+      },
       "workflow": {
         "title": "Flux d'approbation",
         "description": "Réviser et approuver les cotisations en attente"
@@ -11806,7 +11810,7 @@
     "wordingProposed": "La proposition est enregistrée. Ce n'est pas un texte de consentement tant qu'un autre dirigeant ne l'adopte pas.",
     "wordingAdopted": "Ce texte est maintenant le texte de consentement en vigueur.",
     "wordingWithdrawn": "La proposition a été retirée. Ce n'est pas un texte de consentement.",
-    "wordingUnavailable": "L'adoption du texte n'est pas installée sur cette base de données.",
+    "wordingUnavailable": "La proposition et l’adoption du texte ne sont pas disponibles dans cette version de base.",
     "openJourney": "Consentement et signalement WorkAid"
   },
   "financialAuthorityPage": {
@@ -11885,5 +11889,10 @@
     "accessChanged": "Votre accès au dossier a changé. Rechargez le dossier pour vérifier votre accès.",
     "savedRefreshFailed": "La modification a été enregistrée, mais la liste actuelle n’a pas pu être chargée. Réessayez pour afficher le dernier état.",
     "truncated": "Les 200 premières échéances sont affichées."
+  },
+  "memberDirectoryBootstrap": {
+    "pending": "Finalisation de votre profil de membre…",
+    "failed": "Votre connexion a réussi, mais votre profil de membre n’a pas pu être finalisé. Réessayez avec cette session.",
+    "retry": "Réessayer"
   }
 }

@@ -40,7 +40,7 @@ vi.mock('next/headers', () => ({
   cookies: vi.fn(),
 }))
 
-import { revokeAllUserSessions } from './session'
+import { revokeAllUserSessions, sessionCookieSecure } from './session'
 
 describe('revokeAllUserSessions — db executor override', () => {
   beforeEach(() => {
@@ -65,5 +65,20 @@ describe('revokeAllUserSessions — db executor override', () => {
 
     expect(overrideUpdate).toHaveBeenCalledTimes(1)
     expect(authUpdate).not.toHaveBeenCalled()
+  })
+})
+
+describe('sessionCookieSecure', () => {
+  it('is Secure in every deployed production build and relaxed only in the owned local QA runtime', () => {
+    expect(sessionCookieSecure({ NODE_ENV: 'production' })).toBe(true)
+    for (const identity of ['production', 'staging', 'pilot', 'demo'])
+      expect(sessionCookieSecure({ NODE_ENV: 'production', QA_TEST_ENV: 'true', UE_ENVIRONMENT: identity })).toBe(true)
+    // A local identity alone, or QA alone, is not the owned QA runtime.
+    expect(sessionCookieSecure({ NODE_ENV: 'production', UE_ENVIRONMENT: 'local' })).toBe(true)
+    expect(sessionCookieSecure({ NODE_ENV: 'production', QA_TEST_ENV: 'true' })).toBe(true)
+    // Any deployment signal alongside the local QA markers keeps Secure.
+    expect(sessionCookieSecure({ NODE_ENV: 'production', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'local', TARGET_ENVIRONMENT: 'staging' })).toBe(true)
+    expect(sessionCookieSecure({ NODE_ENV: 'production', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'local' })).toBe(false)
+    expect(sessionCookieSecure({ NODE_ENV: 'development' })).toBe(false)
   })
 })

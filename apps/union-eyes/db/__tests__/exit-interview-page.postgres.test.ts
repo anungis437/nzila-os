@@ -16,6 +16,7 @@ import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -59,6 +60,8 @@ describe.skipIf(!URL)('the exit interview page read on the combined schema, as t
     admin = await harness.start(URL!)
     await insertOrganization(admin, tag, { id: ORG_A })
     await insertOrganization(admin, tag, { id: ORG_B })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
     ids.shared = await interview(ORG_A, 'shared', { status: 'published', consent: true, level: 'public_internal', createdBy: owner })
     ids.notShared = await interview(ORG_A, 'not-shared', { status: 'published', consent: false, level: 'public_internal', createdBy: owner })
     ids.draft = await interview(ORG_A, 'draft', { status: 'draft', consent: false, level: 'public_internal', createdBy: owner })

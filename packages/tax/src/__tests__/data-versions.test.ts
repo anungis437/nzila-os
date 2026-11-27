@@ -6,9 +6,11 @@ import {
   DATA_VERSIONS,
   STALENESS_THRESHOLD_DAYS,
   isModuleStale,
+  selectStaleModules,
   getStaleModules,
   getModuleVersion,
   getLatestVerificationDate,
+  type DataModuleVersion,
 } from '../data-versions'
 
 describe('DATA_VERSIONS', () => {
@@ -43,22 +45,75 @@ describe('STALENESS_THRESHOLD_DAYS', () => {
   })
 })
 
+const AS_OF = new Date('2026-11-26T00:00:00.000Z')
+const DAY_MS = 24 * 60 * 60 * 1000
+
+function moduleOn(lastVerified: string, source = 'CRA fixture'): DataModuleVersion {
+  return { module: 'fixture', taxYear: 2026, lastVerified, source }
+}
+
 describe('isModuleStale', () => {
-  it('returns false when recently verified', () => {
-    const mod = { module: 'test', taxYear: 2025, lastVerified: new Date().toISOString().split('T')[0], source: 'test' }
-    expect(isModuleStale(mod)).toBe(false)
+  it('accepts a module verified on the evaluation instant', () => {
+    expect(isModuleStale(moduleOn('2026-11-26'), AS_OF)).toBe(false)
   })
 
-  it('returns true when verification is old', () => {
-    const mod = { module: 'test', taxYear: 2025, lastVerified: '2024-01-01', source: 'test' }
-    expect(isModuleStale(mod)).toBe(true)
+  it('accepts a module verified 89 days earlier', () => {
+    const verified = new Date(AS_OF.getTime() - 89 * DAY_MS).toISOString().slice(0, 10)
+    expect(isModuleStale(moduleOn(verified), AS_OF)).toBe(false)
+  })
+
+  it('keeps a module that is exactly 90 days old', () => {
+    const verified = new Date(AS_OF.getTime() - 90 * DAY_MS).toISOString().slice(0, 10)
+    expect(isModuleStale(moduleOn(verified), AS_OF)).toBe(false)
+    expect(isModuleStale(moduleOn('2026-08-26'), new Date('2026-11-24T00:00:00.000Z'))).toBe(false)
+  })
+
+  it('rejects a module one millisecond past 90 days', () => {
+    const atThreshold = new Date('2026-11-24T00:00:00.000Z')
+    expect(isModuleStale(moduleOn('2026-08-26'), new Date(atThreshold.getTime() + 1))).toBe(true)
+  })
+
+  it('rejects a future verification date', () => {
+    expect(isModuleStale(moduleOn('2026-11-27'), AS_OF)).toBe(true)
+  })
+
+  it('rejects invalid or missing verification metadata', () => {
+    expect(isModuleStale(moduleOn('2026-02-31'), AS_OF)).toBe(true)
+    expect(isModuleStale(moduleOn(''), AS_OF)).toBe(true)
+    expect(isModuleStale(moduleOn('2026-11-26', '   '), AS_OF)).toBe(true)
+  })
+
+  it('crosses a leap-day boundary by elapsed UTC time', () => {
+    const verified = new Date(Date.UTC(2024, 1, 29))
+    const exactlyNinety = new Date(verified.getTime() + 90 * DAY_MS)
+    expect(isModuleStale(moduleOn('2024-02-29'), exactlyNinety)).toBe(false)
+    expect(isModuleStale(moduleOn('2024-02-29'), new Date(exactlyNinety.getTime() + 1))).toBe(true)
+  })
+
+  it('uses the UTC date boundary rather than a local offset', () => {
+    const beforeUtcMidnight = new Date('2026-11-23T23:59:59.999Z')
+    expect(isModuleStale(moduleOn('2026-08-26'), beforeUtcMidnight)).toBe(false)
+    expect(isModuleStale(moduleOn('2026-08-26'), new Date('2026-11-24T00:00:00.001Z'))).toBe(true)
+  })
+})
+
+describe('selectStaleModules', () => {
+  it('returns only the modules that fail the explicit evaluation instant', () => {
+    const modules = [
+      { ...moduleOn('2026-11-26'), module: 'fresh' },
+      { ...moduleOn('2026-08-26'), module: 'stale' },
+      { ...moduleOn('2026-11-27'), module: 'future' },
+    ]
+    expect(selectStaleModules(modules, AS_OF).map((module) => module.module)).toEqual(['stale', 'future'])
   })
 })
 
 describe('getStaleModules', () => {
-  it('returns array', () => {
-    const stale = getStaleModules()
-    expect(Array.isArray(stale)).toBe(true)
+  it('evaluates the recorded registry from the supplied instant', () => {
+    expect(getStaleModules(new Date('2026-08-26T00:00:00.000Z'))).toHaveLength(0)
+    expect(getStaleModules(new Date('2026-11-24T00:00:00.000Z'))).toHaveLength(0)
+    expect(getStaleModules(AS_OF)).toHaveLength(DATA_VERSIONS.length)
+    expect(DATA_VERSIONS.every((module) => module.lastVerified === '2026-08-26')).toBe(true)
   })
 })
 

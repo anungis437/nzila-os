@@ -1,0 +1,184 @@
+{
+  "scope": "INTERIM_SECURITY_TEST_HARNESS_FAMILY_REPAIRS",
+  "recordedAt": "2026-11-18T04:45:10.467860+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "repairs": [
+    "Production symbol references use TypeScript syntax including aliases/computed keys; generated JSON prose/comments do not constitute role-writer callers. No writer authority changed.",
+    "Governance/pilot/roster fixtures retain actual SQL tag/static functions required by canonical auth schema. Existing response, ownership, denial and audit assertions retained.",
+    "Reserved-matter INSERT required-column check compiles the actual statement sent to transport."
+  ],
+  "focusedObservedResults": [
+    {
+      "cohort": "governance/pilot/representation",
+      "passed": 98,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 17
+    },
+    {
+      "cohort": "admin-roster",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "cohort": "source-reference-boundary",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "focusedLint": {
+    "files": 17,
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 59,
+    "raw": {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/governance-pilot-context-lint-v1.txt",
+      "sha256": "918d7cb70708682c37c0c80d608db30f3824651c323390be013ca370f83fac43",
+      "bytes": 8022
+    }
+  },
+  "rawPrivateProof": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/governance-pilot-context-red-v1.txt",
+      "sha256": "2601a32cbe7c14fd899c5a5ae585964d2196d5e7840b2f9c3fe20fd729a41e20",
+      "bytes": 3777
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/governance-pilot-context-green-v1.txt",
+      "sha256": "05d4cf36a2d164ed71073055ccda345bd5292142f3b992c9774c6d72eee1ec38",
+      "bytes": 438
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/admin-stats-context-red-v1.txt",
+      "sha256": "df21b54010b20625cc9453e04b4c828559adcdbd81f87f6d560f259d136be630",
+      "bytes": 2955
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/admin-stats-context-green-v1.txt",
+      "sha256": "6322c6701a078d325ee33f9d195624ba5a32e223ea0ee0a3cbe031f4667a5765",
+      "bytes": 245
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/clc-source-reference-gate-green-v1.txt",
+      "sha256": "bdf8c4769b3e52cb258a8798bafe1de8ebead5ead1d7a6f698a20389b1004b4f",
+      "bytes": 227
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/clc-source-reference-gate-lint-v1.txt",
+      "sha256": "e13547504b238755704f4c6faebaa9684753730d7aa6667117efde076bc6a88f",
+      "bytes": 502
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/clc-source-reference-gate-lint-v2.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "sourceBindingsAtRecord": [
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-council-elections.route.test.ts",
+      "sha256": "1023bed32e8b6139ab276bc93f35a4cf9d59f647f2c23f247e3ffccb867722b5",
+      "bytes": 1731
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-dashboard.route.test.ts",
+      "sha256": "d8afb548883bedaa10362a8f7b3c2d0c685c422c560b1825f1ef90058774fff4",
+      "bytes": 2759
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-elections-session-id.route.test.ts",
+      "sha256": "e7f5f7381e8b63d0e304f4aedb320deeb529eb91c70fe31a16e048ad03bab56e",
+      "bytes": 4800
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-elections-session-results.route.test.ts",
+      "sha256": "6ab2db7cf3eaa6bbcea9bbea42da6537f348e9eec87c2a059c57b6de346982c5",
+      "bytes": 3502
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-elections-session-vote-idor-fix.route.test.ts",
+      "sha256": "216a38edc6055438ba93d299925615d94554db60f1efff744bfa1d85a806f140",
+      "bytes": 5911
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-elections-sessions.route.test.ts",
+      "sha256": "1251b57a6f7f851844b787d46a772955dbbc932a4034a0bceeb21d9202755bb7",
+      "bytes": 4037
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-golden-share.route.test.ts",
+      "sha256": "9cb7f83e72018f2e6e5c096e011961a197e8b8a76a5c2631f6877ae710257241",
+      "bytes": 1586
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-lifecycle-unavailable.contract.test.ts",
+      "sha256": "db2090a3c09cb32c72ab92e02295c4f1177f30b0612287062aeb9055a9338610",
+      "bytes": 3961
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-mission-audits.route.test.ts",
+      "sha256": "a567baa4de4a71e4324d3d8e27db4806f007e70e719a6ae1806b65f4ba4d185e",
+      "bytes": 1769
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-policies-rules.route.test.ts",
+      "sha256": "76cf1efeb89f07bd8cc0a0a729b24a6fe2d351b844d6088c9946b0db9c0256fb",
+      "bytes": 1950
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-policy-templates.route.test.ts",
+      "sha256": "0cbb10415313e8ba578ef6977f8c1374f07f92acf911d048640f5c5560761f59",
+      "bytes": 2454
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-reserved-matters-class-b-vote.route.test.ts",
+      "sha256": "164290acbc01ad16770628fe772e1c49ef46501d38d324fc698390161d96f45c",
+      "bytes": 3775
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-reserved-matters-id.route.test.ts",
+      "sha256": "6f2d3e681b85ad104a755e88d939b48117925ed36e2f2af2224f73f6822a309a",
+      "bytes": 1866
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-reserved-matters.route.test.ts",
+      "sha256": "829ec88dffd14f9cbcd4645b32114c63f1d347d1c319a43ba06097cae4ff053b",
+      "bytes": 2344
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/governance-telemetry.route.test.ts",
+      "sha256": "0c8050e7e45e6f798af75fdb3b294fd337446831a4b30bfe82b954af2209e05d",
+      "bytes": 3347
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/pilot-current.route.test.ts",
+      "sha256": "0b34a3ff03fe9bffb1231f7031e04fae2c6ead7eab32d8fbc376b303937c2e8b",
+      "bytes": 3991
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/representation-protocol.test.ts",
+      "sha256": "2914d75e74a8667eac0a8808f657cea6fe706f59b1424e6aae67b37db0baa7b2",
+      "bytes": 9531
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/admin-members-stats.route.test.ts",
+      "sha256": "befe075d75c7a53a0775ca01b63eaf113ff641d16becc7dd78cb56e477b3bd3d",
+      "bytes": 4900
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/__tests__/clc-national-role-boundary.test.ts",
+      "sha256": "58cf383322245b3dac5a76d6e76ee1ad44a6281a9e8bf74e03808ffd215cee52",
+      "bytes": 12490
+    }
+  ],
+  "limits": [
+    "Mocked route transports establish component behavior; no authenticated native/HTTP/browser proof.",
+    "Full test:fast v1 is running and includes earlier failures; no full-run pass.",
+    "Admin roster file added after17-file lint; final full lint still required.",
+    "Initial root-cwd source-gate lint failed missing configuration; app retry passed."
+  ],
+  "finalCandidateQualified": false
+}

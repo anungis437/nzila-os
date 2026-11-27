@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
+  batch:vi.fn(),
   membershipRows: [] as unknown[],
   claimRows: [] as unknown[],
   membershipWhere: vi.fn(),
@@ -20,8 +21,7 @@ vi.mock('@/lib/api/framework', () => ({
 
 vi.mock('@/db/schema', () => ({ claims: m.table('claims') }));
 vi.mock('@/db/schema-organizations', () => ({ organizationMembers: m.table('organization_members') }));
-vi.mock('@/db/db', () => ({
-  db: {
+const fakeDb = {
     select: (shape: Record<string, unknown>) => ({
       from: (from: { __table: string }) => ({
         where: (condition: unknown) => {
@@ -35,8 +35,9 @@ vi.mock('@/db/db', () => ({
         },
       }),
     }),
-  },
-}));
+  };
+vi.mock('@/lib/db/with-rls-context',()=>({withRLSContext:async(_ctx:unknown,fn:any)=>fn(fakeDb)}));
+vi.mock('@/lib/authority/store/route-adapter',()=>({decideCaseCapabilitiesBatch:m.batch}));
 vi.mock('drizzle-orm', () => ({
   and: (...parts: unknown[]) => ({ and: parts }),
   or: (...parts: unknown[]) => ({ or: parts }),
@@ -60,6 +61,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   m.membershipRows = [{ userId: 'user_member' }];
   m.claimRows = [];
+  m.batch.mockImplementation(async(_tx,input)=>new Map(input.caseIds.map((id:string)=>[id,{'case:read':{effect:id==='denied'?'deny':'allow'}}])));
   m.getCaseActor.mockResolvedValue(actor);
 });
 
@@ -93,7 +95,7 @@ describe('GET /api/members/[id]/claims', () => {
     const rows = [{ id: 'c-2', claimId: 'cid-2', claimNumber: 'CLM-2', claimType: 'wage_dispute', status: 'under_review', priority: 'high', createdAt: '2026-03-02T00:00:00.000Z', updatedAt: '2026-03-03T00:00:00.000Z' }];
     m.claimRows = rows;
 
-    await expect(call(MEMBERSHIP_ID)).resolves.toBe(rows);
+    await expect(call(MEMBERSHIP_ID)).resolves.toEqual(rows);
 
     expect(m.claimsWhere.mock.calls[0][0]).toEqual({
       and: [
@@ -122,8 +124,16 @@ describe('GET /api/members/[id]/claims', () => {
 
   it('lists nothing for a member the caller may read nothing about: an empty list is the kernel\'s answer, not an error', async () => {
     m.claimRows = [];
+  m.batch.mockImplementation(async(_tx,input)=>new Map(input.caseIds.map((id:string)=>[id,{'case:read':{effect:id==='denied'?'deny':'allow'}}])));
 
     await expect(call(MEMBERSHIP_ID)).resolves.toEqual([]);
+  });
+
+  it('omits a candidate after a fresh denial, and propagates unavailable authority',async()=>{
+    m.claimRows=[{claimId:'denied'},{claimId:'allowed'}];
+    await expect(call(MEMBERSHIP_ID)).resolves.toEqual([{claimId:'allowed'}]);
+    m.batch.mockRejectedValue(new Error('canonical facts unavailable'));
+    await expect(call(MEMBERSHIP_ID)).rejects.toThrow('unavailable');
   });
 
   it('passes a refusal of the caller through, before the membership is read', async () => {

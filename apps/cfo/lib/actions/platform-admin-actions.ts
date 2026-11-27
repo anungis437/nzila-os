@@ -1,182 +1,70 @@
-/**
- * CFO Server Actions — Platform Administration.
- *
- * Multi-org firm management, MRR computation, and subscription actions.
- * Restricted to platform_admin role.
- */
+/** Existing global administration under the actual platform permission source. */
 'use server'
-
-import { auth } from '@nzila/platform-auth/entra/server'
-import { platformDb } from '@nzila/db/platform'
-import { sql } from 'drizzle-orm'
-import { logger } from '@/lib/logger'
-import { requirePermission } from '@/lib/rbac'
 import { revalidatePath } from 'next/cache'
-
-/* ─── Types ─── */
-
-export interface Firm {
-  id: string
-  name: string
-  status: 'active' | 'suspended' | 'trial'
-  subscriptionTier: 'starter' | 'professional' | 'enterprise'
-  userCount: number
-  clientCount: number
-  createdAt: Date
+import { logger } from '@/lib/logger'
+import { CfoScopeError, resolveOrgContext } from '@/lib/resolve-org'
+import {
+  platformFirms,
+  platformMetrics,
+  changeFirm,
+  type Firm,
+  type PlatformMetrics,
+} from '@/lib/services/platform-administration'
+export type { Firm, PlatformMetrics } from '@/lib/services/platform-administration'
+/** Log a failed action with the structured logger and rethrow it unchanged.
+ * Scope denials are not operational failures and are not logged here. */
+function logged<T>(operation: string, run: () => Promise<T>): Promise<T> {
+  return run().catch((error: unknown) => {
+    if (!(error instanceof CfoScopeError))
+      logger.error(`Platform admin ${operation} failed`, { error })
+    throw error
+  })
 }
-
-export interface PlatformMetrics {
-  totalFirms: number
-  activeFirms: number
-  totalUsers: number
-  totalClients: number
-  mrr: number
-  trialCount: number
+/** Invalidate the admin dashboard only after a committed, successful change. */
+async function firmChange(
+  operation: string,
+  run: () => Promise<{ success: boolean }>,
+): Promise<{ success: boolean }> {
+  const result = await logged(operation, run)
+  if (!result.success) return result
+  try {
+    revalidatePath('/dashboard/platform-admin')
+  } catch {
+    logger.warn('Platform admin cache invalidation unavailable after commit')
+  }
+  return result
 }
-
-const TIER_PRICES: Record<string, number> = {
-  starter: 199,
-  professional: 499,
-  enterprise: 999,
-}
-
-/* ─── Queries ─── */
-
 export async function getPlatformMetrics(): Promise<PlatformMetrics> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('platform_admin:manage')
-
-  try {
-    const firmRows = (await platformDb.execute(
-      sql`SELECT id, metadata->>'name' as name,
-        metadata->>'status' as status,
-        metadata->>'subscriptionTier' as "subscriptionTier"
-      FROM audit_log WHERE action = 'firm.registered'
-      ORDER BY created_at DESC`,
-    )) as unknown as { rows: { id: string; name: string; status: string; subscriptionTier: string }[] }
-
-    const firms = firmRows.rows ?? []
-    const activeFirms = firms.filter((f) => f.status === 'active')
-    const trialFirms = firms.filter((f) => f.status === 'trial')
-    const mrr = activeFirms.reduce(
-      (sum, f) => sum + (TIER_PRICES[f.subscriptionTier] ?? 0),
-      0,
-    )
-
-    const [userCount] = (await platformDb.execute(
-      sql`SELECT COUNT(DISTINCT actor_id) as total FROM audit_log`,
-    )) as unknown as [{ total: number }]
-
-    const [clientCount] = (await platformDb.execute(
-      sql`SELECT COUNT(*) as total FROM audit_log WHERE action = 'org.created' AND entity_type = 'client'`,
-    )) as unknown as [{ total: number }]
-
-    return {
-      totalFirms: firms.length,
-      activeFirms: activeFirms.length,
-      totalUsers: Number(userCount?.total ?? 0),
-      totalClients: Number(clientCount?.total ?? 0),
-      mrr,
-      trialCount: trialFirms.length,
-    }
-  } catch (error) {
-    logger.error('getPlatformMetrics failed', { error })
-    return { totalFirms: 0, activeFirms: 0, totalUsers: 0, totalClients: 0, mrr: 0, trialCount: 0 }
-  }
+  return logged('metrics', () =>
+    resolveOrgContext('platform', { permission: 'platform_admin:manage' }, platformMetrics),
+  )
 }
-
 export async function listFirms(): Promise<Firm[]> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('platform_admin:manage')
-
-  try {
-    const rows = (await platformDb.execute(
-      sql`SELECT id, metadata->>'name' as name,
-        metadata->>'status' as status,
-        metadata->>'subscriptionTier' as "subscriptionTier",
-        COALESCE((metadata->>'userCount')::int, 0) as "userCount",
-        COALESCE((metadata->>'clientCount')::int, 0) as "clientCount",
-        created_at as "createdAt"
-      FROM audit_log WHERE action = 'firm.registered'
-      ORDER BY created_at DESC`,
-    )) as unknown as { rows: Firm[] }
-    return rows.rows ?? []
-  } catch (error) {
-    logger.error('listFirms failed', { error })
-    return []
-  }
+  return logged('list firms', () =>
+    resolveOrgContext('platform', { permission: 'platform_admin:manage' }, platformFirms),
+  )
 }
-
 export async function suspendFirm(firmId: string): Promise<{ success: boolean }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('platform_admin:manage')
-
-  try {
-    await platformDb.execute(
-      sql`UPDATE audit_log SET metadata = metadata || '{"status": "suspended"}'::jsonb
-      WHERE id = ${firmId} AND action = 'firm.registered'`,
-    )
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('firm.suspended', ${userId}, 'firm', ${firmId},
-        ${JSON.stringify({ suspendedBy: userId })}::jsonb)`,
-    )
-    revalidatePath('/dashboard/platform-admin')
-    return { success: true }
-  } catch (error) {
-    logger.error('suspendFirm failed', { error })
-    return { success: false }
-  }
+  return firmChange('suspend firm', () =>
+    resolveOrgContext('platform', { permission: 'platform_admin:manage' }, (context) =>
+      changeFirm(context, firmId, { status: 'suspended' }),
+    ),
+  )
 }
-
 export async function reactivateFirm(firmId: string): Promise<{ success: boolean }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('platform_admin:manage')
-
-  try {
-    await platformDb.execute(
-      sql`UPDATE audit_log SET metadata = metadata || '{"status": "active"}'::jsonb
-      WHERE id = ${firmId} AND action = 'firm.registered'`,
-    )
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('firm.reactivated', ${userId}, 'firm', ${firmId},
-        ${JSON.stringify({ reactivatedBy: userId })}::jsonb)`,
-    )
-    revalidatePath('/dashboard/platform-admin')
-    return { success: true }
-  } catch (error) {
-    logger.error('reactivateFirm failed', { error })
-    return { success: false }
-  }
+  return firmChange('reactivate firm', () =>
+    resolveOrgContext('platform', { permission: 'platform_admin:manage' }, (context) =>
+      changeFirm(context, firmId, { status: 'active' }),
+    ),
+  )
 }
-
 export async function updateFirmSubscription(
   firmId: string,
   tier: Firm['subscriptionTier'],
 ): Promise<{ success: boolean }> {
-  const { userId } = await auth()
-  if (!userId) throw new Error('Unauthorized')
-  await requirePermission('platform_admin:manage')
-
-  try {
-    await platformDb.execute(
-      sql`UPDATE audit_log SET metadata = metadata || ${JSON.stringify({ subscriptionTier: tier })}::jsonb
-      WHERE id = ${firmId} AND action = 'firm.registered'`,
-    )
-    await platformDb.execute(
-      sql`INSERT INTO audit_log (action, actor_id, entity_type, org_id, metadata)
-      VALUES ('firm.subscription.updated', ${userId}, 'firm', ${firmId},
-        ${JSON.stringify({ tier, updatedBy: userId })}::jsonb)`,
-    )
-    revalidatePath('/dashboard/platform-admin')
-    return { success: true }
-  } catch (error) {
-    logger.error('updateFirmSubscription failed', { error })
-    return { success: false }
-  }
+  return firmChange('update firm subscription', () =>
+    resolveOrgContext('platform', { permission: 'platform_admin:manage' }, (context) =>
+      changeFirm(context, firmId, { subscriptionTier: tier }),
+    ),
+  )
 }

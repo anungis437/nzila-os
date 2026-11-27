@@ -12,7 +12,7 @@
  * break the user's underlying operation.
  */
 import 'server-only'
-import { getHqDb } from './client'
+import { getHqDb } from '../../lib/db/client'
 import { auditLog } from './schema'
 import { createLogger, writeDiagnostic } from '@nzila/os-core/telemetry'
 

@@ -2,7 +2,13 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { assertCurrentSourceCommitments, folder, hash, root, type V2Plan } from './source'
-import { systemMutationContracts, systemMutationRules } from './system-mutation-contracts'
+import { compileSecurity } from './security'
+import {
+  systemMutationContracts,
+  systemMutationRules,
+  SYSTEM_MUTATION_DENOMINATOR,
+  ZERO_SYSTEM_MUTATION_TABLES,
+} from './system-mutation-contracts'
 
 const plan: V2Plan = JSON.parse(
   readFileSync(path.join(folder, 'UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'), 'utf8'),
@@ -36,14 +42,31 @@ describe('current source-bound SYSTEM mutation contracts', () => {
       `UE_V2_SOURCE_COMMITMENT_DRIFT:${file}`,
     )
   })
-  it('binds the exact 89 authorized relations, source callers and real selector columns', () => {
+  it('binds the exact current explicit authorized relations, source callers and real selector columns', () => {
     const contracts = systemMutationContracts(plan)
     expect(contracts.map((contract) => contract.table)).toEqual(
       systemMutationRules(plan).map((rule) => rule.table),
     )
-    expect(contracts).toHaveLength(89)
+    expect(SYSTEM_MUTATION_DENOMINATOR).toBe(80)
+    expect(contracts).toHaveLength(SYSTEM_MUTATION_DENOMINATOR)
     for (const contract of contracts) expect(contract.callerDigest).toMatch(/^[a-f0-9]{64}$/)
   })
+  it.each(ZERO_SYSTEM_MUTATION_TABLES)(
+    'retains %s as an explicit zero-SYSTEM source boundary',
+    (table) => {
+      const current = compileSecurity(plan).rules.find((rule) => rule.table === table)
+      expect(current?.systemPrivileges).toEqual([])
+      expect(current?.systemSelectColumns ?? []).toEqual([])
+      expect(systemMutationContracts(plan).some((contract) => contract.table === table)).toBe(false)
+      const changed = structuredClone(plan)
+      changed.tables.find(
+        (candidate) => candidate.name === table,
+      )!.authority!.requiredSystemPrivileges = ['INSERT']
+      expect(() => systemMutationContracts(changed)).toThrow(
+        `UE_V2_ZERO_SYSTEM_AUTHORITY_REQUIRED:${table}`,
+      )
+    },
+  )
   it('fails closed on a changed mutation census instead of silently dropping tables', () => {
     const changed = structuredClone(plan)
     changed.tables.find(

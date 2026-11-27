@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-11-18T12:43:41.142175+00:00",
+  "scope": "ACTUAL_FRESH_PG16_RUNTIME_MATRIX_BLOCKED_DURING_SETUP",
+  "result": "SUITE_SETUP_FAILED_NO_RUNTIME_CHECKS_QUALIFIED",
+  "counts": {
+    "passed": 0,
+    "failedTestCases": 0,
+    "skippedAfterSetupFailure": 364,
+    "skippedCasesCountAsPassed": false
+  },
+  "sqlState": "42501",
+  "failure": "permission denied for function public.ue_external_guard_approval while CREATE TRIGGER attaches the actual source function under ue_v2_owner",
+  "sourcePlanSha256": "1775e9a8fe9b76830e82ec3f463bc31c68a37b1dfa42da8380a35b3050e34996",
+  "sourceChangedDuringRun": [],
+  "containerInventoryRestored": true,
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v1.json",
+      "sha256": "e19f2025ec7de6349a85ce23392e782fd38f91b0bb8c3cd22b865b99e624d457",
+      "bytes": 156367
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v1.log",
+      "sha256": "7a3d6b1cc4392b1a0f877ca4a01c68f587b2d27302ee9f39d5c662d326a5b893",
+      "bytes": 86921
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v1-source.json",
+      "sha256": "a61e49c6d3aebdcb5a3c7deefe057dfc9bb6671b71382def494bdaa3fdea1357",
+      "bytes": 198337
+    }
+  ],
+  "confirmedRootCause": "Preprovisioned producer transfers function ownership to the isolated reader before trigger attachment. Existing SQL fixture had default PUBLIC EXECUTE, unlike the real installer. Its broad default masked the missing installer EXECUTE after ownership transfer.",
+  "repairBoundary": "Match revoked defaults in the actual SQL fixture; attach source triggers while functions are still owned by the installer, then transfer ownership and apply the identical final ACL. No added EXECUTE grants or privilege fallback.",
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false
+}

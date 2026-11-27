@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { signInWithEntra } from '@nzila/platform-auth/entra/client';
 import { defaultLocale, locales } from '@/i18n/config';
-import { getJson, localeOfPath, postJson, UNEXPECTED_MESSAGE } from './auth-client';
+import { organizationChoicesResponse, organizationSwitchResponse } from '@/lib/client/organization-selection-response';
+import { getJson, localeOfPath, postJson, NETWORK_MESSAGE, UNEXPECTED_MESSAGE } from './auth-client';
 
 type Mode = 'password' | 'magic-link' | 'sso';
 
@@ -44,12 +46,36 @@ function readMethods(data: Record<string, unknown>): MethodAvailability | null {
 type LoginFormProps = {
   postLoginPath?: string;
 };
+type OrganizationChoice = { id: string; name: string; slug: string };
+
+function offeredOrganizations(data: Record<string, unknown>): OrganizationChoice[] | null {
+  const parsed = organizationChoicesResponse.safeParse(data);
+  if (!parsed.success) return null;
+  const answer = parsed.data;
+  const membershipIds = new Set<string>();
+  for (const membership of answer.memberships) {
+    membershipIds.add(membership.organizationId);
+  }
+  const choices: OrganizationChoice[] = [];
+  for (const organization of answer.organizations) {
+    if (!membershipIds.has(organization.id) || choices.some((choice) => choice.id === organization.id)) return null;
+    choices.push({ id: organization.id, name: organization.name, slug: organization.slug });
+  }
+  if (answer.activeOrganizationId !== null && !choices.some((choice) => choice.id === answer.activeOrganizationId)) return null;
+  return choices;
+}
 
 export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormProps) {
+  const t = useTranslations('loginForm');
+  const auth = useTranslations('auth');
   const router = useRouter();
   const pathname = usePathname();
   const postLoginPath = configuredPostLoginPath ?? `/${localeOfPath(pathname, locales, defaultLocale)}/dashboard`;
   const [mode, setMode] = useState<Mode>('password');
+  // Until React has hydrated, a submit would be a native form navigation that reloads the page and drops what was typed;
+  // keep the controls off until the handlers are attached, and expose the state for automated journeys.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +88,48 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
   const [mfaChallengeToken, setMfaChallengeToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState('');
   const [mfaUseRecovery, setMfaUseRecovery] = useState(false);
+  const [authenticationComplete, setAuthenticationComplete] = useState(false);
+  const [organizations, setOrganizations] = useState<OrganizationChoice[] | null>(null);
+  const [organizationId, setOrganizationId] = useState('');
+
+  const localizeMessage = useCallback((message: string) =>
+    message === NETWORK_MESSAGE ? t('networkError') : message === UNEXPECTED_MESSAGE ? t('unexpectedError') :
+      message === 'Invalid code' ? t('invalidCode') :
+        message === 'Organization authority denied' ? t('organizationAccessChanged') : message, [t]);
+
+  async function bindOrganization(id: string) {
+    const answer = await postJson('/api/organizations/switch', { organizationId: id }, t('organizationSelectionFailed'));
+    if (!answer.ok) { setError(localizeMessage(answer.message)); return; }
+    const selected = organizationSwitchResponse.safeParse(answer.data);
+    if (!selected.success || selected.data.activeOrganizationId !== id ||
+        selected.data.organization.id !== id) { setError(t('unexpectedError')); return; }
+    router.push(postLoginPath);
+  }
+
+  async function finishAuthentication() {
+    setAuthenticationComplete(true); setMfaChallengeToken(null); setMfaCode(''); setInfo(null);
+    setOrganizations(null); setOrganizationId('');
+    const answer = await getJson('/api/users/me/organizations', t('organizationLookupFailed'));
+    if (!answer.ok) { setError(localizeMessage(answer.message)); return; }
+    const choices = offeredOrganizations(answer.data);
+    if (!choices) { setError(t('unexpectedError')); return; }
+    if (typeof answer.data.activeOrganizationId === 'string') { router.push(postLoginPath); return; }
+    setOrganizations(choices);
+    if (choices.length === 0) { setError(t('noOrganizationAccess')); return; }
+    if (choices.length === 1) {
+      setOrganizationId(choices[0].id);
+      await bindOrganization(choices[0].id);
+    }
+  }
+
+  async function submitOrganization(event: React.FormEvent) {
+    event.preventDefault(); setError(null);
+    if (!organizations?.some((choice) => choice.id === organizationId)) {
+      setError(t('organizationAccessChanged')); return;
+    }
+    setLoading(true);
+    try { await bindOrganization(organizationId); } finally { setLoading(false); }
+  }
 
   // The latest request wins: a slow answer for an address that has since been edited is not applied.
   const refreshMethods = useCallback(async (currentEmail: string) => {
@@ -71,20 +139,20 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
       setMethodsNote(null);
       return;
     }
-    const answer = await getJson(`/api/auth/methods?email=${encodeURIComponent(currentEmail)}`, 'Sign-in options could not be checked');
+    const answer = await getJson(`/api/auth/methods?email=${encodeURIComponent(currentEmail)}`, t('methodsFailed'));
     if (request !== methodsRequest.current) return;
     const available = answer.ok ? readMethods(answer.data) : null;
     if (available === null) {
       // The standard options stay on offer, and the person is told they are not the result of a check for this address.
       setMethods(DEFAULT_METHODS);
-      setMethodsNote(`We could not check which sign-in options apply to this address, so the standard ones are shown. ${answer.ok ? UNEXPECTED_MESSAGE : answer.message}`);
+      setMethodsNote(t('methodsFallback', { reason: answer.ok ? t('unexpectedError') : localizeMessage(answer.message) }));
       return;
     }
     setMethodsNote(null);
     setMethods(available);
     if (available.ssoRequired) setMode('sso');
     else if (!available.password && available.magicLink) setMode('magic-link');
-  }, []);
+  }, [t, localizeMessage]);
 
   useEffect(() => {
     const t = setTimeout(() => void refreshMethods(email), 350);
@@ -97,23 +165,29 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
     setInfo(null);
     setLoading(true);
     try {
-      const answer = await postJson('/api/auth/login', { email, password }, 'Login failed');
+      const answer = await postJson('/api/auth/login', { email, password }, t('loginFailed'));
       if (!answer.ok) {
-        setError(answer.message);
+        setError(localizeMessage(answer.message));
         return;
       }
       const { data } = answer;
-      if (data.requiresMfa === true && typeof data.mfaChallengeToken === 'string' && data.mfaChallengeToken) {
+      if (data.requiresMfa !== undefined && typeof data.requiresMfa !== 'boolean') {
+        setError(t('unexpectedError')); return;
+      }
+      if (data.requiresMfa === true) {
+        if (typeof data.mfaChallengeToken !== 'string' || !data.mfaChallengeToken) {
+          setError(t('unexpectedError')); return;
+        }
         setMfaChallengeToken(data.mfaChallengeToken);
-        setInfo('Enter the 6-digit code from your authenticator app.');
+        setInfo(t('mfaPrompt'));
         return;
       }
       // A signed-in answer names the user; one that does not is not a sign-in, whatever its status.
       if (typeof data.user !== 'object' || data.user === null) {
-        setError(UNEXPECTED_MESSAGE);
+        setError(t('unexpectedError'));
         return;
       }
-      router.push(postLoginPath);
+      await finishAuthentication();
     } finally {
       setLoading(false);
     }
@@ -128,16 +202,16 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
       const body = mfaUseRecovery
         ? { challengeToken: mfaChallengeToken, recoveryCode: mfaCode.trim() }
         : { challengeToken: mfaChallengeToken, code: mfaCode.trim() };
-      const answer = await postJson('/api/auth/mfa/challenge', body, 'Verification failed');
+      const answer = await postJson('/api/auth/mfa/challenge', body, t('verificationFailed'));
       if (!answer.ok) {
-        setError(answer.message);
+        setError(localizeMessage(answer.message));
         return;
       }
       if (answer.data.ok !== true) {
-        setError(UNEXPECTED_MESSAGE);
+        setError(t('unexpectedError'));
         return;
       }
-      router.push(postLoginPath);
+      await finishAuthentication();
     } finally {
       setLoading(false);
     }
@@ -149,19 +223,19 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
     setInfo(null);
     setLoading(true);
     try {
-      const answer = await postJson('/api/auth/magic-link/request', { email }, 'Could not send sign-in link');
+      const answer = await postJson('/api/auth/magic-link/request', { email }, t('linkFailed'));
       if (!answer.ok) {
-        setError(answer.message);
+        setError(localizeMessage(answer.message));
         return;
       }
       const { data } = answer;
       if (typeof data.token === 'string' && data.token) {
         const verifyUrl = `/magic-link/verify?token=${encodeURIComponent(data.token)}`;
-        setInfo(`Sign-in link sent. (Dev mode) Continue at: ${verifyUrl}`);
+        setInfo(t('devLink', { url: verifyUrl }));
       } else if (typeof data.message === 'string' && data.message) {
         setInfo(data.message);
       } else {
-        setError(UNEXPECTED_MESSAGE);
+        setError(t('unexpectedError'));
       }
     } finally {
       setLoading(false);
@@ -174,7 +248,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
     try {
       await signInWithEntra(postLoginPath);
     } catch {
-      setError('Unable to start Microsoft sign-in. Please try again.');
+      setError(t('ssoStartFailed'));
     } finally {
       setLoading(false);
     }
@@ -192,18 +266,18 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           priority
         />
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{t('welcome')}</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Sign in to your account to continue
+            {t('subtitle')}
           </p>
         </div>
       </div>
 
-      {!methods.ssoRequired && (methods.password || methods.magicLink) && (
+      {!authenticationComplete && !methods.ssoRequired && (methods.password || methods.magicLink) && (
         <div
           className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1 text-sm"
           role="tablist"
-          aria-label="Sign-in method"
+          aria-label={t('method')}
         >
           {methods.password && (
             <button
@@ -219,7 +293,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
                 mode === 'password' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Password
+              {auth('password')}
             </button>
           )}
           {methods.magicLink && (
@@ -236,39 +310,72 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
                 mode === 'magic-link' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Email me a link
+              {t('emailLink')}
             </button>
           )}
         </div>
       )}
 
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">{error}</div>
+        <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">{error}</div>
       )}
       {info && (
-        <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700 wrap-break-word">{info}</div>
+        <div role="status" className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700 wrap-break-word">{info}</div>
       )}
       {methodsNote && (
         <div role="status" className="rounded-xl bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">{methodsNote}</div>
       )}
 
-      {methods.ssoRequired ? (
+      {authenticationComplete ? (
+        <div className="space-y-4">
+          <h3 className="font-semibold">{t('chooseOrganizationTitle')}</h3>
+          {loading && !organizations && <p role="status">{t('loadingOrganizations')}</p>}
+          {organizations && organizations.length > 0 && <form onSubmit={submitOrganization} className="space-y-4">
+            <label htmlFor="sign-in-organization" className="block text-sm font-medium">
+              {t('organization')}
+            </label>
+            <select id="sign-in-organization" value={organizationId}
+              onChange={(event) => setOrganizationId(event.target.value)} disabled={loading} required
+              className="min-h-11 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2">
+              <option value="">{t('chooseOrganizationPlaceholder')}</option>
+              {organizations.map((organization) => <option key={organization.id} value={organization.id}>
+                {organization.name} — {organization.slug}
+              </option>)}
+            </select>
+            <button type="submit" disabled={loading || !organizationId || !hydrated}
+              className="min-h-11 w-full whitespace-normal rounded-lg bg-blue-700 px-4 py-2 text-white disabled:opacity-50">
+              {t('continueOrganization')}
+            </button>
+          </form>}
+          <button type="button" disabled={loading} className="min-h-11 w-full whitespace-normal rounded-lg border px-3 py-2"
+            onClick={() => { setError(null); setLoading(true); void finishAuthentication().finally(() => setLoading(false)); }}>
+            {t('refreshOrganizations')}
+          </button>
+          <button type="button" disabled={loading} className="min-h-11 w-full whitespace-normal rounded-lg border px-3 py-2"
+            onClick={() => {
+              setAuthenticationComplete(false); setOrganizations(null); setOrganizationId('');
+              setPassword(''); setMfaChallengeToken(null); setMfaCode(''); setMfaUseRecovery(false); setInfo(null); setError(null);
+            }}>
+            {t('restartSignIn')}
+          </button>
+        </div>
+      ) : methods.ssoRequired ? (
         <div className="space-y-3">
-          <p className="text-sm text-gray-600">Your organization requires single sign-on.</p>
+          <p className="text-sm text-gray-600">{t('ssoRequired')}</p>
           <button
             type="button"
             onClick={continueWithSso}
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition-all"
           >
-            Continue with Microsoft
+            {t('continueMicrosoft')}
           </button>
         </div>
       ) : mfaChallengeToken ? (
-        <form onSubmit={submitMfaChallenge} className="space-y-4">
+        <form onSubmit={submitMfaChallenge} className="space-y-4" data-hydrated={hydrated ? 'true' : 'false'}>
           <div>
             <label htmlFor="mfa-code" className="block text-sm font-medium text-gray-700 mb-1">
-              {mfaUseRecovery ? 'Recovery code' : 'Authenticator code'}
+              {mfaUseRecovery ? t('recoveryCode') : t('authenticatorCode')}
             </label>
             <input
               id="mfa-code"
@@ -285,10 +392,10 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Verifying…' : 'Verify'}
+            {loading ? t('verifying') : t('verify')}
           </button>
           <div className="flex items-center justify-between text-sm">
             <button
@@ -300,7 +407,7 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
               }}
               className="text-electric hover:text-blue-700"
             >
-              {mfaUseRecovery ? 'Use authenticator code' : 'Use recovery code'}
+              {mfaUseRecovery ? t('useAuthenticator') : t('useRecovery')}
             </button>
             <button
               type="button"
@@ -313,14 +420,14 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
               }}
               className="text-gray-500 hover:text-gray-700"
             >
-              Cancel
+              {t('cancel')}
             </button>
           </div>
         </form>
       ) : mode === 'password' ? (
-        <form onSubmit={submitPassword} className="space-y-4">
+        <form onSubmit={submitPassword} className="space-y-4" data-hydrated={hydrated ? 'true' : 'false'}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">{auth('email')}</label>
             <input
               id="email"
               type="email"
@@ -334,9 +441,9 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">{auth('password')}</label>
               {methods.passwordReset && (
-                <Link href="/forgot-password" className="text-sm text-electric hover:text-blue-700 transition-colors">Forgot password?</Link>
+                <Link href="/forgot-password" className="text-sm text-electric hover:text-blue-700 transition-colors">{auth('forgotPassword')}</Link>
               )}
             </div>
             <input
@@ -352,16 +459,16 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? t('signingIn') : t('signIn')}
           </button>
         </form>
       ) : (
-        <form onSubmit={submitMagicLink} className="space-y-4">
+        <form onSubmit={submitMagicLink} className="space-y-4" data-hydrated={hydrated ? 'true' : 'false'}>
           <div>
-            <label htmlFor="ml-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="ml-email" className="block text-sm font-medium text-gray-700 mb-1">{auth('email')}</label>
             <input
               id="ml-email"
               type="email"
@@ -372,41 +479,41 @@ export function LoginForm({ postLoginPath: configuredPostLoginPath }: LoginFormP
               className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-electric focus:ring-2 focus:ring-electric/20 outline-none transition-colors"
               placeholder="you@example.com"
             />
-            <p className="mt-1 text-xs text-gray-500">We&apos;ll email a one-time sign-in link. Valid for 15 minutes.</p>
+            <p className="mt-1 text-xs text-gray-500">{t('magicLinkNotice')}</p>
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Sending…' : 'Send sign-in link'}
+            {loading ? t('sending') : t('sendLink')}
           </button>
         </form>
       )}
 
-      {!methods.ssoRequired && methods.sso && (
+      {!authenticationComplete && !methods.ssoRequired && methods.sso && (
         <>
           <div className="relative">
             <div className="absolute inset-0 flex items-center" aria-hidden>
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-gray-400">or</span>
+              <span className="bg-white px-2 text-gray-400">{t('or')}</span>
             </div>
           </div>
           <button
             type="button"
             onClick={continueWithSso}
-            disabled={loading}
+            disabled={loading || !hydrated}
             className="w-full border border-gray-200 hover:bg-gray-50 text-gray-900 font-medium py-2.5 px-4 rounded-xl transition-colors"
           >
-            Continue with Microsoft
+            {t('continueMicrosoft')}
           </button>
         </>
       )}
 
       <p className="text-center text-sm text-gray-500">
-        Access is provisioned by your organization administrator.
+        {t('accessProvisioned')}
       </p>
     </div>
   );

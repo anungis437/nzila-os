@@ -9,6 +9,7 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { caseReadScope, getCaseActor } from '@/lib/cases/case-authorization';
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,34 +24,29 @@ export const GET = withApi(
   async () => {
     const actor = await getCaseActor();
 
-    const [claimsResult, membersResult] = await withRLSContext(
+    const { claims, membersResult } = await withRLSContext(
       { organizationId: actor.organizationId },
-      async (rlsDb) => Promise.all([
-        rlsDb.execute(sql`
-          SELECT
-            count(*) FILTER (WHERE c.status NOT IN ('resolved','closed','rejected'))::int AS "activeClaims",
-            count(*) FILTER (WHERE c.status IN ('submitted','under_review'))::int          AS "pendingReviews",
-            count(*) FILTER (WHERE c.status IN ('resolved','closed'))::int                 AS "resolvedCases",
-            count(*) FILTER (WHERE c.priority IN ('high','critical')
-                             AND c.status NOT IN ('resolved','closed','rejected'))::int    AS "highPriorityClaims"
-          FROM claims c
-          WHERE ${caseReadScope(actor, 'c')}
-        `),
-        // The organization's member count is institutional information, not a figure for an ordinary member.
-        actor.role === 'member'
-          ? Promise.resolve([] as Array<Record<string, number>>)
-          : rlsDb.execute(sql`
-              SELECT count(*)::int AS "activeMembers"
-              FROM organization_members
-              WHERE organization_id = ${actor.organizationId}
-                AND status = 'active'
-            `),
-      ]),
-    ).catch(() => {
-      throw ApiError.internal('Dashboard statistics are unavailable');
-    });
+      async (tx) => {
+        const candidates = Array.from(await tx.execute(sql`
+          SELECT c.claim_id AS "claimId", c.status, c.priority
+          FROM claims c WHERE ${caseReadScope(actor, 'c')}
+        `)) as unknown as Array<{claimId: string; status: string; priority: string}>;
+        const decisions = await decideCaseCapabilitiesBatch(tx, { ...actor, caseIds: candidates.map(row => row.claimId) });
+        const visible = candidates.filter(row => decisions.get(row.claimId)?.['case:read'].effect === 'allow');
+        const active = (status: string) => !['resolved','closed','rejected'].includes(status);
+        const membersResult = actor.role === 'member' ? [] : await tx.execute(sql`
+          SELECT count(*)::int AS "activeMembers" FROM organization_members
+          WHERE organization_id = ${actor.organizationId} AND status = 'active'
+        `);
+        return { claims: {
+          activeClaims: visible.filter(row => active(row.status)).length,
+          pendingReviews: visible.filter(row => ['submitted','under_review'].includes(row.status)).length,
+          resolvedCases: visible.filter(row => ['resolved','closed'].includes(row.status)).length,
+          highPriorityClaims: visible.filter(row => active(row.status) && ['high','critical'].includes(row.priority)).length,
+        }, membersResult };
+      },
+    ).catch(() => { throw ApiError.internal('Dashboard statistics are unavailable'); });
 
-    const claims = (claimsResult[0] as Record<string, number>) ?? {};
     const members = (membersResult[0] as Record<string, number> | undefined) ?? null;
 
     // The consumers read the bare object, so the shape is preserved.

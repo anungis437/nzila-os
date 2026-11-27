@@ -1,4 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = {
+  status: 501,
+  code: ErrorCode.NOT_IMPLEMENTED,
+  message: 'Finance and dues persistence are not available in this release.',
+};
 
 // The route's own contract. The kernel decisions and the atomic ledger are proven against PostgreSQL in
 // lib/finance/finance-duties.pglite.test.ts.
@@ -24,7 +31,6 @@ vi.mock('@/lib/authority/store/finance-route-adapter', async (importOriginal) =>
   readFinancialTransaction: m.read,
 }));
 
-import { FinancialDutyError } from '@/lib/authority/store/finance-route-adapter';
 
 const PAYMENT = '00000000-0000-4000-8000-0000000000aa';
 const ACCOUNT = '00000000-0000-4000-8000-0000000000bb';
@@ -41,28 +47,16 @@ const route = async () => (await import('../payments/[id]/duties/route')) as unk
 describe('payments/[id]/duties', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('registers a payment into the workflow with an account and the required approvals', async () => {
-    m.perform.mockResolvedValue({ stepId: 'step_1' });
-    const { POST } = await route();
-    const result = await POST(ctx({ step: 'registered', accountId: ACCOUNT, requiredApprovals: 2 }));
-    expect(result).toEqual({ success: true, data: { transactionId: PAYMENT, step: 'registered', stepId: 'step_1' } });
-    expect(m.perform).toHaveBeenCalledWith(
-      m.tx,
-      { userId: 'u1', organizationId: 'org_1', transactionId: PAYMENT, step: 'registered', accountId: ACCOUNT, requiredApprovals: 2 },
-      undefined,
-      expect.objectContaining({ action: 'finance.payment.register', resourceType: 'payments', resourceId: PAYMENT }),
-    );
-  });
-
   it.each([
-    ['prepared', 'finance.payment.prepare'],
-    ['approved', 'finance.payment.approve'],
-    ['reconciled', 'finance.payment.reconcile'],
-  ] as const)('records %s as one kernel-decided step with its own audit action', async (step, action) => {
-    m.perform.mockResolvedValue({ stepId: 'step_2' });
+    ['registered', { step: 'registered', accountId: ACCOUNT, requiredApprovals: 2 }],
+    ['prepared', { step: 'prepared' }],
+    ['approved', { step: 'approved' }],
+    ['reconciled', { step: 'reconciled' }],
+  ] as const)('refuses a well-formed %s step with 501 before any kernel decision, database or audit work', async (_step, body) => {
     const { POST } = await route();
-    await POST(ctx({ step }));
-    expect(m.perform).toHaveBeenCalledWith(m.tx, expect.objectContaining({ step, accountId: undefined }), undefined, expect.objectContaining({ action }));
+    await expect(POST(ctx(body))).rejects.toMatchObject(REFUSAL);
+    expect(m.perform).not.toHaveBeenCalled();
+    expect(m.read).not.toHaveBeenCalled();
   });
 
   it('never executes a payment: executing is the money movement and lives only in the route that moves the money', async () => {
@@ -89,24 +83,16 @@ describe('payments/[id]/duties', () => {
     expect(m.perform).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['FINANCE_SOURCE_UNAVAILABLE', 501],
-    ['FINANCIAL_MANDATES_NOT_ISSUED', 403],
-    ['NOT_FOUND', 404],
-    ['DUTY_NOT_HELD', 403],
-    ['STEP_REFUSED', 409],
-  ] as const)('answers %s as HTTP %i on both verbs', async (code, status) => {
-    m.perform.mockRejectedValue(new FinancialDutyError(code, 'refused'));
-    m.read.mockRejectedValue(new FinancialDutyError(code, 'refused'));
-    const { POST, GET } = await route();
-    expect((await POST(ctx({ step: 'prepared' }))).status).toBe(status);
-    expect((await GET(ctx())).status).toBe(status);
+  it('refuses the read with 501 before the kernel view duty is consulted', async () => {
+    const { GET } = await route();
+    await expect(GET(ctx())).rejects.toMatchObject(REFUSAL);
+    expect(m.read).not.toHaveBeenCalled();
+    expect(m.perform).not.toHaveBeenCalled();
   });
 
-  it('reads through the kernel view duty', async () => {
-    m.read.mockResolvedValue({ transactionId: PAYMENT, state: 'approved' });
+  it('still rejects a read without organization context as a 400 before the refusal', async () => {
     const { GET } = await route();
-    expect(await GET(ctx())).toEqual({ data: { transactionId: PAYMENT, state: 'approved' } });
-    expect(m.read).toHaveBeenCalledWith(m.tx, { userId: 'u1', organizationId: 'org_1', transactionId: PAYMENT });
+    await expect(GET(ctx(undefined, { organizationId: null }))).rejects.toMatchObject({ status: 400 });
+    expect(m.read).not.toHaveBeenCalled();
   });
 });

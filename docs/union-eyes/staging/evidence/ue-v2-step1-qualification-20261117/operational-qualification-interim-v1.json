@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-17T21:44:26.082Z",
+  "candidateBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "sourceInputs": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-qualification-inputs-v1.json",
+  "sourceInputsHash": "sha256-be1698029accaceb3b6d15aa76e0caea9dd4521d3ba6acb56320e97b157cfbb7",
+  "candidateIsFinal": false,
+  "qualificationState": "INTERIM_LOCAL_OPERATIONAL_AND_GOVERNANCE_SUBPROOFS",
+  "commands": [
+    {
+      "command": [
+        "node",
+        "tooling/runtime-governance/check-env.mjs"
+      ],
+      "observedExitCode": 0,
+      "expectedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-environment-inputs-v1.txt",
+      "logHash": "sha256-d5042f609cf0a318d9d6279fb6171db09981ed831f3e562d8d06b70ea9e6384f"
+    },
+    {
+      "command": [
+        "node",
+        "tooling/runtime-governance/generate-attestation.mjs",
+        "--class=deployment"
+      ],
+      "observedExitCode": 0,
+      "expectedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-attestation-deployment-v1.txt",
+      "logHash": "sha256-7ba53fc149406ec3ba1811e4710ffd92a30b1772696b7d266727246742c4be59"
+    },
+    {
+      "command": [
+        "node",
+        "tooling/runtime-governance/write-evidence.mjs",
+        "--from-attestation=/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/proof-artifacts/attestations/ue-step1-local-0327fba86786-20261117T214423/deployment.json"
+      ],
+      "observedExitCode": 0,
+      "expectedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-ledger-deployment-v1.txt",
+      "logHash": "sha256-7bfba81359a67731ab5c081caaec8b2d68bf433d48d71cf6c57721c45420aa44"
+    },
+    {
+      "command": [
+        "node",
+        "tooling/runtime-governance/generate-attestation.mjs",
+        "--class=doctrine-compliance"
+      ],
+      "observedExitCode": 0,
+      "expectedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-attestation-doctrine-compliance-v1.txt",
+      "logHash": "sha256-ebbe0a466b5ad006deb84f16305e3725821448d1a22c5c860da8ad474094175e"
+    },
+    {
+      "command": [
+        "node",
+        "tooling/runtime-governance/write-evidence.mjs",
+        "--from-attestation=/Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/proof-artifacts/attestations/ue-step1-local-0327fba86786-20261117T214423/doctrine-compliance.json"
+      ],
+      "observedExitCode": 0,
+      "expectedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-ledger-doctrine-compliance-v1.txt",
+      "logHash": "sha256-59c223894b02e8842b701f2a665d1f531528d0170a8c6bf0b93ae3b2bb543d78"
+    },
+    {
+      "command": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import { readFileSync } from 'node:fs';\nimport { computeContentHash, ledgerRecordSchema, validateAttestation, verifyCitedEvidence } from './tooling/runtime-governance/contracts.mjs';\nfor (const path of JSON.parse(process.env.UE_LOCAL_LEDGER_RECORDS)) {\n const record=ledgerRecordSchema.parse(JSON.parse(readFileSync(path,'utf8')));\n if(computeContentHash(record.payload)!==record.contentHash)throw Error('ledger payload hash mismatch');\n const att=validateAttestation(record.payload.attestation); verifyCitedEvidence(att);\n console.log('Verified canonical local ledger and cited artifact hashes:',path);\n}"
+      ],
+      "observedExitCode": 0,
+      "expectedExitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/operational-ledger-verification-v1.txt",
+      "logHash": "sha256-239018e0025cb262d9c0aa91ad867790055613fa422960e00c47432c2c393f36"
+    }
+  ],
+  "attestations": [
+    "proof-artifacts/attestations/ue-step1-local-0327fba86786-20261117T214423/deployment.json",
+    "proof-artifacts/attestations/ue-step1-local-0327fba86786-20261117T214423/doctrine-compliance.json"
+  ],
+  "ledgerRecords": [
+    "proof-artifacts/evidence/2026-11-17/evidence.att.deployment.ue-step1-local-0327fba86786-20261117T214423.1794951864255.json",
+    "proof-artifacts/evidence/2026-11-17/evidence.att.doctrine-compliance.ue-step1-local-0327fba86786-20261117T214423.1794951865003.json"
+  ],
+  "promotions": {
+    "staging": false,
+    "production": false
+  },
+  "step2Started": false,
+  "remainingScope": "No final Step1 verdict. Live measurements, actual deployment, immutable signing/storage and final candidate qualification remain unproven here."
+}

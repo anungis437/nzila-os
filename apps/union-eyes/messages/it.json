@@ -89,7 +89,7 @@
     "wordingProposed": "La proposta è stata registrata. Non è il testo del consenso finché un altro dirigente non la adotta.",
     "wordingAdopted": "Il testo è ora il testo di consenso corrente.",
     "wordingWithdrawn": "La proposta è stata ritirata. Non è il testo del consenso.",
-    "wordingUnavailable": "L'adozione del testo non è installata su questo database.",
+    "wordingUnavailable": "La proposta e l’adozione del testo non sono disponibili in questa versione di base.",
     "openJourney": "Consenso e rinvio WorkAid"
   },
   "memberDocuments": {

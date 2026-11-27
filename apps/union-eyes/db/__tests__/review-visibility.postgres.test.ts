@@ -27,7 +27,9 @@ import { kit } from './authority-kernel-testkit'
 import { auditAuthorityMutation, reconcileAuthorityAudit } from '../../lib/authority/store/audit'
 import { enforceAuthority } from '../../lib/authority/store/enforce'
 import type { SqlExecutor } from '../../lib/authority/store/executor'
-import { membershipSourceVia } from '../../lib/authority/store/identity'
+import { activeMembershipSource } from '../../lib/authority/store/active-membership-source'
+import { runAuthorityTransaction } from '../../lib/authority/store/executor'
+import { setNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import { acceptInstrument, changeMandate, declareOwnRecusal, liftRecusal } from '../../lib/authority/store/lifecycle'
 import { openMemberReview } from '../../lib/authority/store/review-intake'
 import { registerReview } from '../../lib/authority/store/workflow'
@@ -102,7 +104,14 @@ describe.skipIf(!URL)('review visibility on the combined deployed schema, as the
     identityReader = new pg.Client({ connectionString: URL })
     await identityReader.connect()
     await identityReader.query('SET ROLE union_eyes_system')
-    k = kit(adapt(runtime), membershipSourceVia(identityReader as unknown as SqlExecutor))
+    // Canonical V2: each actor works in their own verified business session (ue_v2_verified_business_session), and membership facts
+    // come from the reader-owned definer the topology answers (activeMembershipSource); the system role reads no identity relation.
+    k = kit(adapt(runtime), activeMembershipSource, (user, org, operation) =>
+      withNativeCanonicalActor(user, org, (binding) => runAuthorityTransaction(runtime as unknown as SqlExecutor,
+        { organizationId: binding.organizationId, userId: binding.userId, sessionToken: binding.sessionToken }, async (tx) => {
+          await tx.query('SET LOCAL ROLE union_eyes_runtime')
+          return operation(tx)
+        })))
     await k.adoptDefaultRules(
       ORG,
       (domain, operation) => (domain === 'governance_review' && ['issue', 'revoke'].includes(operation)) || (domain === 'recusal' && operation === 'lift'),
@@ -139,8 +148,9 @@ describe.skipIf(!URL)('review visibility on the combined deployed schema, as the
     })
 
     it('adds exactly one restrictive SELECT policy for the runtime role to each table, and leaves every grant and the FORCE RLS state alone', async () => {
+      // Canonical V2 adds its own RESTRICTIVE verified-business-session policy (ue_v2_*) to every kernel table; this migration adds exactly these two.
       const policies = await admin.query(
-        `SELECT tablename, policyname, permissive, cmd, roles::text roles FROM pg_policies WHERE permissive = 'RESTRICTIVE' AND tablename = ANY ($1::text[]) ORDER BY tablename`,
+        `SELECT tablename, policyname, permissive, cmd, roles::text roles FROM pg_policies WHERE permissive = 'RESTRICTIVE' AND policyname NOT LIKE 'ue\\_v2\\_%' AND tablename = ANY ($1::text[]) ORDER BY tablename`,
         [authorityKernelEntries.map((e) => e.table)],
       )
       expect(policies.rows).toEqual([
@@ -148,7 +158,9 @@ describe.skipIf(!URL)('review visibility on the combined deployed schema, as the
         { tablename: 'ue_authority_reviews', policyname: 'ue_authority_reviews_visibility', permissive: 'RESTRICTIVE', cmd: 'SELECT', roles: '{union_eyes_runtime}' },
       ])
       for (const table of ['ue_authority_reviews', 'ue_authority_events']) {
-        expect(Number((await admin.query(`SELECT count(*) n FROM pg_policies WHERE tablename = $1`, [table])).rows[0].n)).toBe(6)
+        // The application roles' policies (canonical V2's dedicated readers carry their own, which this migration does not touch).
+        expect(Number((await admin.query(`SELECT count(*) n FROM pg_policies WHERE tablename = $1 AND policyname NOT LIKE 'ue\\_v2\\_%' AND roles && ARRAY['union_eyes_runtime','union_eyes_system']::name[]`, [table])).rows[0].n)).toBe(6)
+        expect((await admin.query(`SELECT policyname, permissive FROM pg_policies WHERE tablename = $1 AND policyname LIKE 'ue\\_v2\\_%'`, [table])).rows).toEqual([{ policyname: 'ue_v2_verified_business_session', permissive: 'RESTRICTIVE' }])
         expect((await admin.query(`SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE oid = $1::regclass`, [table])).rows[0]).toEqual({ relrowsecurity: true, relforcerowsecurity: true })
         const entry = authorityKernelEntries.find((e) => e.table === table)!
         const live: string[] = []
@@ -160,12 +172,15 @@ describe.skipIf(!URL)('review visibility on the combined deployed schema, as the
     })
 
     it('control: without the policies a member who is neither party nor overseer reads every review and every review snapshot', async () => {
+      // In the stranger's own verified business session, as canonical V2 requires of every runtime read.
+      await withNativeCanonicalActor(P.stranger, ORG, async (binding) => {
       await admin.query('BEGIN')
       try {
         await admin.query('DROP POLICY ue_authority_reviews_visibility ON ue_authority_reviews')
         await admin.query('DROP POLICY ue_authority_events_review_visibility ON ue_authority_events')
         await admin.query('SET LOCAL ROLE union_eyes_runtime')
         await admin.query(`SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`, [ORG, P.stranger])
+        await setNativeBusinessContext(admin, binding)
         const rows = (await admin.query(`SELECT id::text id, array_to_string(adverse_user_ids, ',') adverse FROM ue_authority_reviews`)).rows
         expect(rows.map((r) => r.id).sort()).toEqual(sorted(R1, R2, R3))
         expect(rows.find((r) => r.id === R1)!.adverse).toEqual(P.adverse)
@@ -174,6 +189,7 @@ describe.skipIf(!URL)('review visibility on the combined deployed schema, as the
       } finally {
         await admin.query('ROLLBACK')
       }
+      })
       expect(await reviews(P.stranger)).toEqual([])
     })
   })
@@ -340,15 +356,18 @@ describe.skipIf(!URL)('review visibility on the combined deployed schema, as the
 
   describe('rollback restores the earlier behaviour', () => {
     it('after the rollback statements the stranger reads again (inside a discarded transaction)', async () => {
+      await withNativeCanonicalActor(P.stranger, ORG, async (binding) => {
       await admin.query('BEGIN')
       try {
         await admin.query(sqlOf(ROLLBACK).join(';'))
         await admin.query('SET LOCAL ROLE union_eyes_runtime')
         await admin.query(`SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`, [ORG, P.stranger])
+        await setNativeBusinessContext(admin, binding)
         expect(Number((await admin.query(`SELECT count(*) n FROM ue_authority_reviews`)).rows[0].n)).toBeGreaterThanOrEqual(3)
       } finally {
         await admin.query('ROLLBACK')
       }
+      })
       expect(await reviews(P.stranger)).toEqual([])
     })
   })

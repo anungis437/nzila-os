@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-18T00:44:15.191800+00:00",
+  "state": "EXISTING_WORKFLOW_V2_COMPONENT_VERIFIER_IMPLEMENTED_LOCALLY_TESTED",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "sourceFiles": [
+    {
+      "file": ".github/workflows/ue-http-runtime.yml",
+      "sha256": "e601a0335fd2285fed36ae33ae364fc9973f65b8a37bb5f11b1c809ed484989b"
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.ts",
+      "sha256": "c5b75c3a6dfc9135a41701895b4dff3a8eba73c50d2e8d5cd408cbdd4ed0e21f"
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts",
+      "sha256": "b8e0a313ff05afdefb0ca70d7c75cee2b037b2239e1e246dbd768313bbaaa674"
+    }
+  ],
+  "workflow": {
+    "file": ".github/workflows/ue-http-runtime.yml",
+    "newJobWithinExistingWorkflow": "v2-engineering-runtime",
+    "legacyJobConfigurationUnchanged": true,
+    "checkout": "Exact pull_request.head.sha or workflow-dispatch github.sha; credentials not persisted",
+    "runtimeFlags": {
+      "UE_V2_BROWSER_ACCEPTANCE": "1",
+      "UE_V2_AUTHENTICATED_CASEWORK_LOAD": "1"
+    },
+    "resourceProfile": {
+      "parentNodeHeapMb": 2048,
+      "nextChildHeapMb": 4096
+    },
+    "prerequisites": [
+      "Pinned cp311 Linux image, exact hashlocked wheel download and artifact-hash comparison",
+      "Committed source plan self-test/check with two deterministic generations",
+      "Offline hashlocked runner install for owned vault cryptography",
+      "Existing official Ubuntu archive bootstrap and Playwright Chromium installation",
+      "Pinned PostgreSQL16 fixture image pulled before --pull never runtime",
+      "Focused evidence verifier and credential/browser/load contract tests"
+    ],
+    "artifactDirectory": "artifacts/ue-v2-next-ci/",
+    "artifactUpload": "Always; missing artifacts fail; retention14days",
+    "continueOnError": false
+  },
+  "semantics": {
+    "defaultCliExitAndStatusUnchanged": "Actual default child must exit1 with HTTP_SMOKE_PASS_FINAL_ACCEPTANCE_NOT_PROVEN. Success0, cancelled/null/unknown/error exits fail the component verifier.",
+    "qualifiedResult": "PASS_REQUIRED_ENGINEERING_COMPONENTS only after all declared components, exact source provenance, observed boundaries, redaction and actual resource cleanup verify.",
+    "stagingAcceptance": "NOT_PROVEN",
+    "productionDeployment": false,
+    "newReleaseGate": false,
+    "canonicalCoverageGateReplaced": false,
+    "otherFoundationJobsRemainIndependent": true
+  },
+  "verification": [
+    "Fresh executionUUID, exact sourceSHA, raw and semantic committed-plan hashes, source producer verification, tracked source cleanliness before and after, snapshot/build/transport-observer digests",
+    "Actual production build exit0, runtime readiness, HTTP probe and persisted ordinary/system smoke outcomes",
+    "Chromium engine/version, all four EN/FR desktop/mobile profiles and all11 named checks, no browser errors/external requests/server errors, closed contexts/browser",
+    "Original warmup plus full60s/5rps/1concurrency and180s/20rps/5concurrency stages; exact unchanged profile/digest, scheduled counts/sample hashes/histogram consistency, unchanged throughput/latency/error thresholds and tenant denials",
+    "Observed Node traffic only to owned loopback ports, no denied/external attempts; known synthetic secrets absent; no legacy predev/security bypass",
+    "Awaited auth-pool closure and native fixture disposal, exited owned server/vault/identity and removed owned snapshot/state; any failed cleanup rejects qualification",
+    "Required raw CLI exit, sanitized command output, sanitized runtime receipt and sanitized progress bytes hashed and verified; missing/duplicate/traversal/symlink/altered artifacts fail"
+  ],
+  "tests": {
+    "finalNextSuite": {
+      "passed": 43,
+      "failed": 0,
+      "skipped": 0,
+      "project": "union-eyes-heavy",
+      "maxWorkers": 1,
+      "nodeHeapMb": 2048,
+      "scope": "Parser/safety fixtures plus actual owned loopback boundary subprocesses; never actual Next/browser/load execution."
+    },
+    "broaderFocusedBatchBeforeFinalTypeGuardAndSymlinkCase": {
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 6,
+      "scope": "Actual PGlite credential boundaries, Next evidence/network contracts, load/browser contracts and owned local vault/key-authority SDK checks."
+    },
+    "focusedESLintExitCode": 0,
+    "workflowYamlAndStaticContractCheck": "PASS",
+    "diffCheckExitCode": 0
+  },
+  "typecheckFollowup": {
+    "observed": "Parent full monorepo TSC found actual TS18048 for potentially absent port declaration during source implementation.",
+    "repair": "Assert and narrow the actual required port string and use the concrete appended owned-port value; no suppression or blanket non-null assertion.",
+    "finalIntegratedTypecheck": "PENDING_ROOT_FROZEN_SOURCE_RUN"
+  },
+  "logs": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/next-ci-component-verifier-v1.txt",
+      "sha256": "11cd2c771bc52eb11aaf53c4e32c4e888d8926617227cf6c23623b006997cc94"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/next-ci-component-related-regressions-v1.txt",
+      "sha256": "d950f5f70c3a3c4ebae81cda8a81796391645478a977ea1ee08332172705fcfd"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/next-ci-component-eslint-v1.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/next-ci-workflow-validation-v1.txt",
+      "sha256": "99c3400751d4dda70102690f969cc29d184ca42d29eae2ab5ac19f9a9f40ea1d"
+    }
+  ],
+  "runtimeExecution": {
+    "newHostedJob": "UNEXECUTED",
+    "defaultNextProductionBuild": "UNEXECUTED_BY_THIS_BATCH",
+    "fourProfileBrowser": "UNEXECUTED_BY_THIS_BATCH",
+    "fullAuthenticatedLoad": "UNEXECUTED_BY_THIS_BATCH",
+    "docker": "NOT_EXECUTED_BY_THIS_BATCH"
+  },
+  "remaining": [
+    "Regenerate and commit exact source-bound plan after all producers freeze.",
+    "Run integrated typechecks and required repository checks on the final source.",
+    "Publish candidate through root-owned GitHub execution and run this existing workflow against the exact committed source; repair any actual observed failure without relaxing assertions.",
+    "Preserve raw CI artifact/provenance and reconcile canonical coverage only from actual results. No Step1 completion or staging GO is established here."
+  ],
+  "stagingPromoted": false,
+  "productionPromoted": false
+}

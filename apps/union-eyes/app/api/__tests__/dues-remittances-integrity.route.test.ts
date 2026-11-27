@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
+const refused = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL };
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -63,63 +67,58 @@ describe('employer remittance records cannot be reconciled or file-bound by the 
     expect(m.db.update).not.toHaveBeenCalled();
   });
 
-  it('PATCH still allows notes and a review/failed flag', async () => {
+  it('PATCH refuses notes and a review/failed flag with 501 NOT_IMPLEMENTED: nothing is read, updated or mandated', async () => {
     const { PATCH } = await import('../dues/remittances/[id]/route');
-    await (PATCH as any)({
+    await expect((PATCH as any)({
       organizationId: 'org_1',
       userId: 'u1',
       params: Promise.resolve({ id: 'rem_1' }),
       request: jsonRequest({ notes: 'check totals', processingStatus: 'requires_review' }),
-    });
-    expect(m.updateSet).toHaveBeenCalledWith(expect.objectContaining({ notes: 'check totals', processingStatus: 'requires_review' }));
+    })).rejects.toMatchObject(refused);
+    expect(m.updateSet).not.toHaveBeenCalled();
+    expect(m.db.update).not.toHaveBeenCalled();
+    expect(m.db.select).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
   });
 
-  it('POST ignores caller-supplied file bindings and always records pending / unreconciled', async () => {
-    const { POST } = await import('../dues/remittances/route');
-    await (POST as any)({
-      organizationId: 'org_1',
-      userId: 'u1',
-      request: jsonRequest({
-        employerId: EMPLOYER_ID,
-        periodStart: '2026-01-01',
-        periodEnd: '2026-01-31',
-        fiscalYear: 2026,
-        fiscalMonth: 1,
-        remittanceDate: '2026-02-01',
-        totalAmount: '100.00',
-        memberCount: 3,
-        fileUrl: 'https://attacker.example/evidence.csv',
-        fileName: 'fake.csv',
-        isReconciled: true,
-        processingStatus: 'completed',
-      }),
-    });
-    const values = m.insertValues.mock.calls[0][0];
-    expect(values.fileUrl).toBeUndefined();
-    expect(values.fileName).toBeUndefined();
-    expect(values.processingStatus).toBe('pending');
-    expect(values.isReconciled).toBe(false);
-    expect(values.organizationId).toBe('org_1');
-    expect(m.requireLiveFinancialMandate).toHaveBeenCalled();
-  });
+  const remittance = {
+    employerId: EMPLOYER_ID,
+    periodStart: '2026-01-01',
+    periodEnd: '2026-01-31',
+    fiscalYear: 2026,
+    fiscalMonth: 1,
+    remittanceDate: '2026-02-01',
+    totalAmount: '100.00',
+    memberCount: 3,
+  };
 
-  it('POST writes nothing when no financial mandate has been issued', async () => {
-    m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('No financial mandate has been issued in this organization.'), { status: 403 }));
+  it('POST refuses a remittance with 501 NOT_IMPLEMENTED, including one carrying caller-supplied file bindings and reconciliation: nothing is recorded', async () => {
     const { POST } = await import('../dues/remittances/route');
     await expect((POST as any)({
       organizationId: 'org_1',
       userId: 'u1',
       request: jsonRequest({
-        employerId: EMPLOYER_ID,
-        periodStart: '2026-01-01',
-        periodEnd: '2026-01-31',
-        fiscalYear: 2026,
-        fiscalMonth: 1,
-        remittanceDate: '2026-02-01',
-        totalAmount: '100.00',
-        memberCount: 3,
+        ...remittance,
+        fileUrl: 'https://attacker.example/evidence.csv',
+        fileName: 'fake.csv',
+        isReconciled: true,
+        processingStatus: 'completed',
       }),
-    })).rejects.toThrow(/financial mandate/);
+    })).rejects.toMatchObject(refused);
+    expect(m.insertValues).not.toHaveBeenCalled();
+    expect(m.db.insert).not.toHaveBeenCalled();
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
+  });
+
+  it('POST refuses with 501, not a mandate error, when no financial mandate has been issued: the mandate is never consulted and nothing is written', async () => {
+    m.requireLiveFinancialMandate.mockRejectedValue(Object.assign(new Error('No financial mandate has been issued in this organization.'), { status: 403 }));
+    const { POST } = await import('../dues/remittances/route');
+    await expect((POST as any)({
+      organizationId: 'org_1',
+      userId: 'u1',
+      request: jsonRequest(remittance),
+    })).rejects.toMatchObject(refused);
+    expect(m.requireLiveFinancialMandate).not.toHaveBeenCalled();
     expect(m.db.insert).not.toHaveBeenCalled();
   });
 });

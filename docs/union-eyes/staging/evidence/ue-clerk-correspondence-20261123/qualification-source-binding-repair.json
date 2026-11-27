@@ -1,0 +1,143 @@
+{
+  "status": "SOURCE_BINDING_REPAIR_TARGETED_TESTED_NOT_STAGING",
+  "recordedAt": "2026-11-23T05:32:58.467136+00:00",
+  "supersededCombinedSourceSha": "c9a19eb02f5a0aa256f16d198941b5a76ff82b4f",
+  "observedCi": {
+    "forwardWorkflowRun": 45116077268,
+    "workflowConclusion": "FAILURE",
+    "nativeProofStatus": "PASS_DISPOSABLE_MANAGED_FORWARD_UPGRADE",
+    "nativeQualificationSource": "c9a19eb02f5a0aa256f16d198941b5a76ff82b4f",
+    "nativeReceiptSha256": "1e94660187f7cfe812bf2054a5beeb45da35586e5accfc73794a4acfc2ae0849",
+    "subsequentFailure": "UE_UPGRADE_APPLICATION_PLAN_DIFFERS: proposed source plan7d010442 differs from admitted AA plan b7a2170c. The guard correctly refuses live assets; PR orchestration was trying that before admission.",
+    "sharedCoverageRun": 45116077267,
+    "sharedFailure": "The navigation generator labelled AA but imported current-checkout navigation. Runtime unit tests and this source-derived snapshot check are separate outcomes."
+  },
+  "repair": {
+    "nativePullRequests": "Keep actual native upgrade, rollback, privilege, original-data, sequence and catalog-admission proof for proposed source. Package/upload live operator assets only for workflow_dispatch; existing admitted-source producer, protected build and staging gates are unchanged.",
+    "navigation": "Evaluate pure navigation modules and their relative dependencies from the canonical reviewed application Git tree. Refuse mutable refs, missing snapshot files, external imports and nonapplication paths; never fall back to HEAD/workspace modules. Shared CI explicitly fetches the declared commit when its checkout is shallow; HEAD is unchanged.",
+    "acceptedNavigationSnapshot": "AA remains the declared source. Its inventory bytes are unchanged, and the corrected generator --check passes against the actual AA Git tree.",
+    "scope": "Tooling/qualification only. Application source, auth/database packages, schema plan7d010442 and all6326 SQL statements remain unchanged from the superseded combined source."
+  },
+  "targetedChecks": {
+    "node": {
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0
+    },
+    "operatorPythonControls": {
+      "passed": 11,
+      "failed": 0
+    },
+    "releaseControls": {
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0
+    },
+    "scopedTypechecks": {
+      "navigation": 0,
+      "operator": 0
+    },
+    "acceptedSnapshotCheckExitCode": 0
+  },
+  "counterexamples": [
+    "Declared accepted source with deliberately broken different HEAD still yields accepted navigation and exact dependency digests",
+    "A file present only in HEAD cannot satisfy a missing accepted-source file",
+    "Mutable refs, external imports and out-of-application paths refuse",
+    "PR preservation proof remains unconditional; live asset preparation/upload stays manual-only and the image build stays main-only",
+    "A real shallow clone cannot read the old source until fetching that exact commit; the fetch leaves HEAD unchanged. Noncommit Git objects also refuse."
+  ],
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "28b0daa37e92b6ce78faa31e355332804747606a8c26011b1a1c7c09d30e2a2f"
+    },
+    {
+      "path": ".github/workflows/ue-v2-staging-forward-upgrade.yml",
+      "sha256": "bd103498c1e2361f81d039823822e9fc5c47469fd8c07b89f55164cbe7a06e92"
+    },
+    {
+      "path": "tooling/scripts/generate-ue-v2-navigation-inventory.cts",
+      "sha256": "e36946f6d76155375a5b37069a5abb11012c503fb05227d9f350dd295d0348de"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-navigation-source.ts",
+      "sha256": "352417ace7f5909dafc1fc75f8a02fc4552eec7e033edfca1a1f6b9e92f0f1ed"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-navigation-source.test.ts",
+      "sha256": "a1e65c8d3c24692f027ab87c15652c61e0134a819ef1fc3d1e7861add7ffe5bd"
+    }
+  ],
+  "fullRepositoryChecks": "RESTART_REQUIRED_ON_NEW_IMMUTABLE_SOURCE",
+  "freshExactSourceCi": "PENDING",
+  "stagingAcceptance": false,
+  "productionAuthorized": false,
+  "protectedLiveProducerAndExecutionCodeUnchanged": [
+    {
+      "path": "tooling/scripts/prepare-ue-v2-forward-upgrade.cts",
+      "sha256": "847809bfe8183d400f743f08478cc18a3a3e347b5c3f6f2c401c7702feea27ca"
+    },
+    {
+      "path": "tooling/scripts/ue-v2-staging-forward-upgrade.cts",
+      "sha256": "006ecff0402054ad4f0087b819927069777fc2bd8c7158c41bdfb76ea5b79066"
+    },
+    {
+      "path": "tooling/scripts/run-ue-v2-forward-upgrade-job.py",
+      "sha256": "ef2be75c9c74356e775e233d75ef9ca72645d6725286ce736565ef30d91991fd"
+    }
+  ],
+  "subsequentGeneratedCensusFailure": {
+    "sourceSha": "bf7854e88f7a8a19773c7b81b6d88734bba739a8",
+    "runUrl": "https://github.com/anungis437/nzila-os/actions/runs/45119152389",
+    "wholeApplicationPassed": 27227,
+    "wholeApplicationFailed": 1,
+    "wholeApplicationUnexecuted": 36,
+    "contractsPassed": 10175,
+    "localPassed": 41363,
+    "localFailed": 1,
+    "localSkipped": 1623,
+    "localPending": 13,
+    "missingNativeTemplateRepaired": true,
+    "all16ExternalReaderCasesActuallyPassed": true,
+    "exactFailure": "transitive-authority-census.test.ts: committed census matches current source exactly",
+    "repair": "Regenerate existing deterministic census using the official source generator. Six added correspondence importer counts; untested guarded mutation exports104to103; all921exports and boundary classes unchanged; threshold remains104.",
+    "newSourceFiveRequiredCommandsAndFreshCi": "PENDING",
+    "stagingAcceptance": false,
+    "targetedWorkingTreeChecks": {
+      "authorityCensus": 6,
+      "fullScopeReconciliation": 6,
+      "failed": 0,
+      "skipped": 0,
+      "runtimeAcceptanceInferred": false
+    }
+  },
+  "subsequentDependentTraceFailure": {
+    "sourceSha": "9f1cc921d58e8a06fe7c232f4c507a355f1c9091",
+    "runUrl": "https://github.com/anungis437/nzila-os/actions/runs/45122423497",
+    "passedAssertions": 27227,
+    "failedAssertions": 1,
+    "unexecuted": 36,
+    "failure": "step1-evidence-trace.test.ts exact source comparison: four routeTestFiles counts still describe the pre-census state.",
+    "sourceFamily": [
+      "apps/union-eyes/scripts/reality/transitive-authority-census.ts",
+      "apps/union-eyes/scripts/reality/step1-evidence-trace.ts"
+    ],
+    "generatedFamily": [
+      "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/transitive-authority-census-v1.json",
+      "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/s1-a02-a05-a06-evidence-trace-v1.json"
+    ],
+    "permanentPreflight": ".github/workflows/ue-full-regression.yml checks both generators before the unchanged whole application suite.",
+    "localRun": "Lint/typecheck passed; fast suite terminated after actualCI identified dependent-trace failure. No full-fast or five-command pass claimed.",
+    "newSourceFullQualification": "PENDING",
+    "stagingAcceptance": false,
+    "targetedWorkingTreeChecks": {
+      "realityFiles": 11,
+      "passed": 124,
+      "failed": 0,
+      "skipped": 0,
+      "officialGeneratorCliChecksPassed": 2,
+      "unchangedFullApplicationSuiteVerified": true,
+      "runtimeAcceptanceInferred": false
+    }
+  }
+}

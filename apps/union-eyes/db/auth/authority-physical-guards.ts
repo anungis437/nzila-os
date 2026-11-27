@@ -1,8 +1,99 @@
 /** Current source-owned institutional protections; reference SQL is never replayed on live databases. */
 import type { PhysicalGuardContract } from './physical-guard-catalog'
+import { ACTIVE_RECUSAL_SQL } from '../../lib/authority/common'
+
+// Data-only immutable validation: no authority lookup or institutional entitlement is conferred.
+const MANDATE_SCOPE_VALID_BODY = `
+  SELECT CASE WHEN scope IS NULL OR jsonb_typeof(scope)<>'object' THEN false ELSE
+    (scope-ARRAY['unitIds','territoryIds','resourceIds','accountIds','classificationCeiling'])='{}'::jsonb
+    AND (NOT(scope ? 'classificationCeiling') OR scope->'classificationCeiling' IN ('"standard"'::jsonb,'"confidential"'::jsonb))
+    AND NOT EXISTS(SELECT FROM jsonb_each(scope) field WHERE field.key IN ('unitIds','territoryIds','resourceIds','accountIds')
+      AND (jsonb_typeof(field.value)<>'array' OR EXISTS(
+        SELECT FROM jsonb_array_elements(CASE WHEN jsonb_typeof(field.value)='array' THEN field.value ELSE '[]'::jsonb END) item
+        WHERE jsonb_typeof(item)<>'string' OR item#>>'{}' !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')))
+    END
+`
+// Current-only additive protection: existing stored history is not rewritten.
+// The released update guards continue to govern adoption and resolution.
+const INITIAL_LIFECYCLE_STATE_BODY = `
+BEGIN
+  IF TG_TABLE_NAME = 'ue_authority_issuance_rules' THEN
+    IF NEW.status IS DISTINCT FROM 'draft' OR COALESCE(cardinality(NEW.approved_by),-1) <> 0
+       OR NEW.activated_at IS NOT NULL OR NEW.retired_at IS NOT NULL THEN
+      RAISE EXCEPTION 'ISSUANCE_RULE_MUST_START_DRAFT: new rules require a clean draft before recorded adoption' USING ERRCODE='42501';
+    END IF;
+  ELSIF TG_TABLE_NAME = 'ue_authority_approval_requests' THEN
+    IF NEW.status IS DISTINCT FROM 'open' OR NEW.decided_at IS NOT NULL THEN
+      RAISE EXCEPTION 'APPROVAL_REQUEST_MUST_START_OPEN: new requests require recorded decisions before resolution' USING ERRCODE='42501';
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'INITIAL_LIFECYCLE_TABLE_UNSUPPORTED' USING ERRCODE='42501';
+  END IF;
+  RETURN NEW;
+END;
+`
+// Additive companion: existing released guard bodies remain immutable on installed databases.
+const LIFECYCLE_DECISION_GUARD_BODY = `
+DECLARE checked_at timestamptz;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.principal:'||person,0))
+    FROM (SELECT DISTINCT person FROM unnest(ARRAY[NEW.approver_user_id,NEW.authority_line_user_id]) person ORDER BY person) people;
+  checked_at:=clock_timestamp();
+  IF EXISTS (
+    SELECT FROM public.ue_authority_recusals
+    WHERE organization_id = NEW.organization_id AND resource_type = 'approval_request'
+      AND resource_id = NEW.approval_request_id
+      AND principal_user_id IN (NEW.approver_user_id, NEW.authority_line_user_id)
+      AND ${ACTIVE_RECUSAL_SQL.replaceAll('clock_timestamp()', 'checked_at')}
+  ) THEN
+    RAISE EXCEPTION 'RECUSED: no effective independent recusal lift' USING ERRCODE = '42501';
+  END IF;
+  IF NEW.delegation_id IS NOT NULL AND NOT EXISTS (
+    SELECT FROM public.ue_authority_delegations d
+    WHERE d.id = NEW.delegation_id AND d.organization_id = NEW.organization_id
+      AND d.delegate_user_id = NEW.approver_user_id AND d.delegator_user_id = NEW.authority_line_user_id
+      AND d.status = 'active' AND d.revoked_at IS NULL
+      AND isfinite(d.effective_at) AND isfinite(d.expires_at)
+      AND d.effective_at <= checked_at AND d.expires_at > checked_at
+      AND (NOT d.requires_acceptance OR EXISTS (
+        SELECT FROM public.ue_authority_acceptances a
+        WHERE a.organization_id = d.organization_id AND a.instrument_type = 'delegation'
+          AND a.instrument_id = d.id AND a.accepted_by = d.delegate_user_id
+          AND isfinite(a.accepted_at) AND a.accepted_at <= checked_at))
+      AND EXISTS (
+        SELECT FROM public.ue_authority_mandates m
+        WHERE m.organization_id = d.organization_id AND m.principal_user_id = d.delegator_user_id
+          AND m.kind = 'executive_office' AND 'approve' = ANY(m.powers)
+          AND m.status = 'active' AND m.revoked_at IS NULL
+          AND isfinite(m.effective_at) AND isfinite(m.expires_at)
+          AND m.effective_at <= checked_at AND m.expires_at > checked_at
+          AND (NOT m.requires_acceptance OR EXISTS (
+            SELECT FROM public.ue_authority_acceptances a
+            WHERE a.organization_id = m.organization_id AND a.instrument_type = 'mandate'
+              AND a.instrument_id = m.id AND a.accepted_by = m.principal_user_id
+              AND isfinite(a.accepted_at) AND a.accepted_at <= checked_at))
+      )
+  ) THEN
+    RAISE EXCEPTION 'DELEGATION_INVALID: a live accepted delegation and executive office are required' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+`
 export const AUTHORITY_PHYSICAL_GUARDS = {
   source: 'apps/union-eyes/db/auth/authority-physical-guards.ts',
   references: [
+    {
+      "path": "apps/union-eyes/db/migrations-platform/0027_workaid_union_side_disclosure.sql",
+      "sha256": "9c124c6cb7f6f627566d333ed194e15c619e95b1f1b67f1639a035399859e4a5"
+    },
+    {
+      "path": "apps/union-eyes/db/migrations-platform/0036_workaid_consent_wording_proposals.sql",
+      "sha256": "8eb7b651928314e4e632f5e09f0cd2bfa0904aa8408c1cac2f2d6c0556e9702a"
+    },
+    {
+      "path": "apps/union-eyes/db/migrations-platform/0037_workaid_referral_scope.sql",
+      "sha256": "521c8f96d3bbe8872ef1a639ab2d4e4de3a2d407a611c1b0bdadec03ed45b603"
+    },
     {
       path: 'apps/union-eyes/db/migrations-platform/0013_authority_kernel_storage.sql',
       sha256: '906ea28fb67b0f30b44ee7f7c3cfe6a7fdb1dd820c895259a0e093d580da045a',
@@ -19,8 +110,23 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       path: 'apps/union-eyes/db/migrations-platform/0035_election_supersession_authority_scope.sql',
       sha256: 'e16d811997ee4f571ef1fd25ab499d696c131e77469831fa69eefb29100c47b7',
     },
+    {
+      path: 'apps/union-eyes/db/migrations-platform/0082_platform_staff_mandate_kind.sql',
+      sha256: 'f0ff8784157a9247676b52958b6acb413fd61d5dd32890626abbb1a1ba6aaaef',
+    },
   ],
   tables: [
+    'ue_authority_counsel_engagements',
+    'ue_authority_counsel_nonces',
+    'ue_authority_financial_steps',
+    'ue_authority_requests',
+    'ue_authority_workaid_consent_grants',
+    'ue_authority_workaid_consent_text_proposals',
+    'ue_authority_workaid_consent_texts',
+    'ue_authority_workaid_counsel_access',
+    'ue_authority_workaid_document_auths',
+    'ue_authority_workaid_matters',
+    'ue_authority_workaid_shares',
     'ue_authority_acceptances',
     'ue_authority_approval_decisions',
     'ue_authority_approval_requests',
@@ -34,6 +140,99 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
     'ue_authority_reviews',
   ],
   functions: [
+    // Exact source-owned lifecycle bodies; immutable references are validation only.
+    {
+      "name": "ue_authority_guard_engagement",
+      "body": "\nDECLARE\n  m ue_authority_workaid_matters%ROWTYPE;\nBEGIN\n  SELECT * INTO m FROM ue_authority_workaid_matters WHERE id = NEW.matter_id;\n  IF NOT FOUND OR m.organization_id <> NEW.organization_id THEN\n    RAISE EXCEPTION 'ENGAGEMENT_MATTER_INVALID: the matter does not exist in this organization' USING ERRCODE = '23514';\n  END IF;\n  IF NEW.counsel_user_id IN (m.member_user_id, m.referred_by) OR NEW.recorded_by IN (m.member_user_id, NEW.counsel_user_id) THEN\n    RAISE EXCEPTION 'ENGAGEMENT_PARTY_CONFLICT: counsel and the recorder must be independent of the member and the referrer' USING ERRCODE = '23514';\n  END IF;\n  IF m.withdrawn_at IS NOT NULL THEN\n    RAISE EXCEPTION 'ENGAGEMENT_MATTER_INVALID: the referral was withdrawn' USING ERRCODE = '23514';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_guard_financial_step",
+      "body": "\nDECLARE\n  reg ue_authority_financial_steps%ROWTYPE;\n  prep text; executor text; approvers text[]; n integer; has_exec boolean; has_void boolean;\nBEGIN\n  IF NEW.step = 'registered' THEN RETURN NEW; END IF;\n  -- Serialise per transaction subject without needing UPDATE privilege (the ledger is append-only).\n  PERFORM pg_advisory_xact_lock(hashtextextended('ue_authority_fin:' || NEW.organization_id::text || ':' || NEW.subject_id::text, 0));\n  SELECT * INTO reg FROM ue_authority_financial_steps\n    WHERE organization_id = NEW.organization_id AND subject_type = NEW.subject_type AND subject_id = NEW.subject_id AND step = 'registered';\n  IF NOT FOUND THEN RAISE EXCEPTION 'STATE_NOT_ELIGIBLE: transaction is not registered' USING ERRCODE = '42501'; END IF;\n  SELECT actor INTO prep FROM ue_authority_financial_steps WHERE organization_id = NEW.organization_id AND subject_type = NEW.subject_type AND subject_id = NEW.subject_id AND step = 'prepared';\n  SELECT actor INTO executor FROM ue_authority_financial_steps WHERE organization_id = NEW.organization_id AND subject_type = NEW.subject_type AND subject_id = NEW.subject_id AND step = 'executed';\n  SELECT COALESCE(array_agg(actor), '{}'::text[]) INTO approvers FROM ue_authority_financial_steps WHERE organization_id = NEW.organization_id AND subject_type = NEW.subject_type AND subject_id = NEW.subject_id AND step = 'approved';\n  n := cardinality(approvers);\n  has_exec := executor IS NOT NULL;\n  SELECT EXISTS (SELECT 1 FROM ue_authority_financial_steps WHERE organization_id = NEW.organization_id AND subject_type = NEW.subject_type AND subject_id = NEW.subject_id AND step = 'voided') INTO has_void;\n  IF has_void THEN RAISE EXCEPTION 'STATE_NOT_ELIGIBLE: transaction is void' USING ERRCODE = '42501'; END IF;\n\n  IF NEW.step = 'prepared' THEN\n    RETURN NEW;\n  ELSIF NEW.step = 'approved' THEN\n    IF prep IS NULL OR has_exec THEN RAISE EXCEPTION 'STATE_NOT_ELIGIBLE: cannot approve in this state' USING ERRCODE = '42501'; END IF;\n    IF NEW.actor = prep THEN RAISE EXCEPTION 'SEGREGATION_OF_DUTIES: the preparer cannot approve' USING ERRCODE = '42501'; END IF;\n  ELSIF NEW.step = 'executed' THEN\n    IF prep IS NULL OR n < reg.required_approvals THEN RAISE EXCEPTION 'STATE_NOT_ELIGIBLE: required approvals not met' USING ERRCODE = '42501'; END IF;\n    IF NEW.actor = prep OR NEW.actor = ANY (approvers) THEN RAISE EXCEPTION 'SEGREGATION_OF_DUTIES: the executor must be independent of the preparer and approvers' USING ERRCODE = '42501'; END IF;\n  ELSIF NEW.step = 'reconciled' THEN\n    IF NOT has_exec THEN RAISE EXCEPTION 'STATE_NOT_ELIGIBLE: not executed' USING ERRCODE = '42501'; END IF;\n    IF NEW.actor = prep OR NEW.actor = executor OR NEW.actor = ANY (approvers) THEN RAISE EXCEPTION 'SEGREGATION_OF_DUTIES: the reconciler must be independent of every other participant' USING ERRCODE = '42501'; END IF;\n  ELSIF NEW.step = 'voided' THEN\n    IF has_exec THEN RAISE EXCEPTION 'STATE_NOT_ELIGIBLE: an executed transaction cannot be voided' USING ERRCODE = '42501'; END IF;\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_guard_request_result",
+      "body": "\nBEGIN\n  IF OLD.result IS NOT NULL OR (to_jsonb(OLD) - 'result') IS DISTINCT FROM (to_jsonb(NEW) - 'result') THEN\n    RAISE EXCEPTION 'an idempotency record may only receive its result once' USING ERRCODE = '42501';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_guard_workaid_docauth",
+      "body": "\nDECLARE\n  g ue_authority_workaid_consent_grants%ROWTYPE;\n  c ue_authority_disclosure_consents%ROWTYPE;\nBEGIN\n  SELECT * INTO g FROM ue_authority_workaid_consent_grants WHERE consent_id = NEW.consent_id;\n  IF NOT FOUND OR g.organization_id <> NEW.organization_id OR g.matter_id <> NEW.matter_id OR g.member_user_id <> NEW.authorised_by THEN\n    RAISE EXCEPTION 'WORKAID_DOCAUTH_INVALID: only the consenting member may authorise a document for this matter' USING ERRCODE = '23514';\n  END IF;\n  SELECT * INTO c FROM ue_authority_disclosure_consents WHERE id = NEW.consent_id;\n  IF c.revoked_at IS NOT NULL OR c.expires_at <= now() OR NOT ('documents' = ANY (c.categories)) OR NEW.expires_at > c.expires_at THEN\n    RAISE EXCEPTION 'WORKAID_DOCAUTH_INVALID: the consent is not live, does not cover documents, or expires before this authorisation' USING ERRCODE = '23514';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_guard_workaid_grant",
+      "body": "\nDECLARE\n  c ue_authority_disclosure_consents%ROWTYPE;\n  t ue_authority_workaid_consent_texts%ROWTYPE;\nBEGIN\n  SELECT * INTO c FROM ue_authority_disclosure_consents WHERE id = NEW.consent_id;\n  IF NOT FOUND OR c.organization_id <> NEW.organization_id OR c.matter_id <> NEW.matter_id\n     OR c.member_user_id <> NEW.member_user_id OR c.direction <> 'union_to_workaid' OR c.issuer <> 'member' THEN\n    RAISE EXCEPTION 'WORKAID_GRANT_INVALID: the grant must reference the member''s own union_to_workaid consent for this matter' USING ERRCODE = '23514';\n  END IF;\n  SELECT * INTO t FROM ue_authority_workaid_consent_texts WHERE id = NEW.text_id;\n  IF NOT FOUND OR t.organization_id <> NEW.organization_id OR t.version <> NEW.text_version OR t.body_sha256 <> NEW.text_sha256 OR t.retired_at IS NOT NULL THEN\n    RAISE EXCEPTION 'WORKAID_GRANT_INVALID: the consent wording is not a current recorded version with this hash' USING ERRCODE = '23514';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_guard_workaid_share",
+      "body": "\nDECLARE\n  m ue_authority_workaid_matters%ROWTYPE;\n  c ue_authority_disclosure_consents%ROWTYPE;\n  a ue_authority_workaid_document_auths%ROWTYPE;\nBEGIN\n  SELECT * INTO m FROM ue_authority_workaid_matters WHERE id = NEW.matter_id;\n  IF NOT FOUND OR m.organization_id <> NEW.organization_id OR m.withdrawn_at IS NOT NULL THEN\n    RAISE EXCEPTION 'WORKAID_SHARE_INVALID: the matter is unknown or withdrawn' USING ERRCODE = '23514';\n  END IF;\n  SELECT * INTO c FROM ue_authority_disclosure_consents WHERE id = NEW.consent_id;\n  IF NOT FOUND OR c.organization_id <> NEW.organization_id OR c.matter_id <> NEW.matter_id OR c.direction <> 'union_to_workaid'\n     OR c.revoked_at IS NOT NULL OR c.expires_at <= now() OR NOT (NEW.categories <@ c.categories) THEN\n    RAISE EXCEPTION 'WORKAID_SHARE_INVALID: the consent is not live or does not cover every category' USING ERRCODE = '23514';\n  END IF;\n  IF NEW.document_auth_id IS NOT NULL THEN\n    SELECT * INTO a FROM ue_authority_workaid_document_auths WHERE id = NEW.document_auth_id;\n    IF NOT FOUND OR a.organization_id <> NEW.organization_id OR a.matter_id <> NEW.matter_id OR a.consent_id <> NEW.consent_id\n       OR a.revoked_at IS NOT NULL OR a.expires_at <= now() THEN\n      RAISE EXCEPTION 'WORKAID_SHARE_INVALID: the document is not authorised for this matter' USING ERRCODE = '23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_guard_workaid_wording_proposal",
+      "body": "\nBEGIN\n  IF OLD.adopted_at IS NOT NULL OR OLD.withdrawn_at IS NOT NULL THEN\n    RAISE EXCEPTION 'wording proposal % is terminal', OLD.id USING ERRCODE = '42501';\n  END IF;\n  IF (to_jsonb(OLD) - ARRAY['adopted_at','adopted_by','adopted_text_id','withdrawn_at','withdrawn_by'])\n     IS DISTINCT FROM (to_jsonb(NEW) - ARRAY['adopted_at','adopted_by','adopted_text_id','withdrawn_at','withdrawn_by']) THEN\n    RAISE EXCEPTION 'wording proposal % may only be adopted or withdrawn', OLD.id USING ERRCODE = '42501';\n  END IF;\n  IF NEW.adopted_at IS NOT NULL AND NEW.withdrawn_at IS NOT NULL THEN\n    RAISE EXCEPTION 'wording proposal % cannot be both adopted and withdrawn', OLD.id USING ERRCODE = '23514';\n  END IF;\n  IF NEW.adopted_by IS NOT NULL AND NEW.adopted_by = OLD.proposed_by THEN\n    RAISE EXCEPTION 'WORDING_ADOPTION_SEGREGATION: the proposer cannot adopt the wording' USING ERRCODE = '42501';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    {
+      "name": "ue_authority_workaid_require_referral_scope",
+      "body": "\nBEGIN\n  IF NEW.referred_categories IS NULL\n     OR cardinality(NEW.referred_categories) < 1\n     OR cardinality(NEW.referred_categories) > 8\n     OR '*' = ANY (NEW.referred_categories)\n     OR EXISTS (SELECT 1 FROM unnest(NEW.referred_categories) AS u(c) GROUP BY c HAVING count(*) > 1) THEN\n    RAISE EXCEPTION 'REFERRAL_SCOPE_REQUIRED: a referral must record the categories that were referred' USING ERRCODE = '23514';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      "returns": "trigger",
+      "args": "",
+      "volatility": "v",
+      "language": "plpgsql",
+      "path": "pg_catalog,public,pg_temp",
+      "callable": false
+    },
+    { name:'ue_authority_scope_valid',body:MANDATE_SCOPE_VALID_BODY,returns:'boolean',args:'scope jsonb',volatility:'i',language:'sql',path:'pg_catalog,pg_temp',callable:true },
+    {
+      name: 'ue_authority_guard_initial_state', body: INITIAL_LIFECYCLE_STATE_BODY,
+      returns: 'trigger', args: '', volatility: 'v', language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp', callable: false,
+    },
+    {
+      name: 'ue_authority_guard_lifecycle_decision',
+      body: LIFECYCLE_DECISION_GUARD_BODY,
+      returns: 'trigger', args: '', volatility: 'v', language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp', callable: false,
+    },
     {
       name: 'ue_authority_block_mutation',
       body: "\nBEGIN\n  RAISE EXCEPTION 'authority records are append-only: % on % is not permitted', TG_OP, TG_TABLE_NAME USING ERRCODE = '42501';\nEND;\n",
@@ -166,6 +365,230 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
     },
   ],
   constraints: [
+    {
+      "table_name": "ue_authority_requests",
+      "name": "ue_authority_req_key_chk",
+      "type": "c",
+      "definition": "CHECK (((length(idempotency_key) >= 8) AND (length(idempotency_key) <= 200)))"
+    },
+    {
+      "table_name": "ue_authority_requests",
+      "name": "ue_authority_req_key_uq",
+      "type": "u",
+      "definition": "UNIQUE (organization_id, idempotency_key)"
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_fin_subject_chk",
+      "type": "c",
+      "definition": "CHECK ((subject_type = 'payment'::text))"
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_fin_step_chk",
+      "type": "c",
+      "definition": "CHECK ((step = ANY (ARRAY['registered'::text, 'prepared'::text, 'approved'::text, 'executed'::text, 'reconciled'::text, 'voided'::text])))"
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_fin_shape_chk",
+      "type": "c",
+      "definition": "CHECK ((((step = 'registered'::text) AND (account_id IS NOT NULL) AND (required_approvals >= 1) AND (amount_minor >= 0) AND (length(currency) = 3)) OR ((step <> 'registered'::text) AND (account_id IS NULL) AND (required_approvals IS NULL) AND (amount_minor IS NULL) AND (currency IS NULL))))"
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_workaid_acceptor_chk",
+      "type": "c",
+      "definition": "CHECK ((((counsel_accepted_at IS NULL) = (counsel_accepted_by IS NULL)) AND ((counsel_accepted_by IS NULL) OR (((counsel_accepted_by)::text <> (member_user_id)::text) AND ((counsel_accepted_by)::text <> (referred_by)::text)))))"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_engagement_capacity_chk",
+      "type": "c",
+      "definition": "CHECK ((capacity = ANY (ARRAY['external_counsel'::text, 'member_counsel'::text])))"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_engagement_member_chk",
+      "type": "c",
+      "definition": "CHECK (((capacity <> 'member_counsel'::text) OR (information_barrier AND (expires_at IS NOT NULL))))"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_engagement_term_chk",
+      "type": "c",
+      "definition": "CHECK (((expires_at IS NULL) OR (expires_at > effective_at)))"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_engagement_recorder_chk",
+      "type": "c",
+      "definition": "CHECK (((counsel_user_id)::text <> (recorded_by)::text))"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_engagement_revoked_chk",
+      "type": "c",
+      "definition": "CHECK (((revoked_at IS NULL) = (revoked_by IS NULL)))"
+    },
+    {
+      "table_name": "ue_authority_counsel_nonces",
+      "name": "ue_authority_nonce_hash_chk",
+      "type": "c",
+      "definition": "CHECK ((nonce_hash ~ '^[0-9a-f]{64}$'::text))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_wa_text_version_chk",
+      "type": "c",
+      "definition": "CHECK ((version ~ '^[A-Za-z0-9._-]{1,64}$'::text))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_wa_text_body_chk",
+      "type": "c",
+      "definition": "CHECK ((length(btrim(body)) > 0))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_wa_text_hash_chk",
+      "type": "c",
+      "definition": "CHECK ((body_sha256 = encode(sha256(convert_to(body, 'UTF8'::name)), 'hex'::text)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_wa_text_retired_chk",
+      "type": "c",
+      "definition": "CHECK (((retired_at IS NULL) = (retired_by IS NULL)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_wa_text_version_uq",
+      "type": "u",
+      "definition": "UNIQUE (organization_id, version)"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_wa_grant_consent_uq",
+      "type": "u",
+      "definition": "UNIQUE (consent_id)"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_wa_grant_matter_uq",
+      "type": "u",
+      "definition": "UNIQUE (organization_id, matter_id)"
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_wa_docauth_class_chk",
+      "type": "c",
+      "definition": "CHECK ((classification = ANY (ARRAY['member_submission'::text, 'member_disclosable'::text])))"
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_wa_docauth_term_chk",
+      "type": "c",
+      "definition": "CHECK ((expires_at > authorised_at))"
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_wa_docauth_revoked_chk",
+      "type": "c",
+      "definition": "CHECK (((revoked_at IS NULL) = (revoked_by IS NULL)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_wa_share_kind_chk",
+      "type": "c",
+      "definition": "CHECK ((kind = ANY (ARRAY['categories'::text, 'document'::text])))"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_wa_share_cats_chk",
+      "type": "c",
+      "definition": "CHECK (((cardinality(categories) > 0) AND (NOT ('*'::text = ANY (categories)))))"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_wa_share_doc_chk",
+      "type": "c",
+      "definition": "CHECK ((((kind = 'document'::text) = (document_auth_id IS NOT NULL)) AND ((kind <> 'document'::text) OR (categories = ARRAY['documents'::text]))))"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_wa_share_invalid_chk",
+      "type": "c",
+      "definition": "CHECK ((((invalidated_at IS NULL) = (invalidated_by IS NULL)) AND ((invalidated_at IS NULL) = (invalidation_reason IS NULL))))"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_wa_share_reason_chk",
+      "type": "c",
+      "definition": "CHECK (((invalidation_reason IS NULL) OR (invalidation_reason = ANY (ARRAY['consent_revoked'::text, 'document_authorisation_revoked'::text]))))"
+    },
+    {
+      "table_name": "ue_authority_workaid_counsel_access",
+      "name": "ue_authority_wa_access_count_chk",
+      "type": "c",
+      "definition": "CHECK ((shares_served >= 0))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_version_chk",
+      "type": "c",
+      "definition": "CHECK ((version ~ '^[A-Za-z0-9._-]{1,64}$'::text))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_body_chk",
+      "type": "c",
+      "definition": "CHECK ((length(btrim(body)) > 0))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_hash_chk",
+      "type": "c",
+      "definition": "CHECK ((body_sha256 = encode(sha256(convert_to(body, 'UTF8'::name)), 'hex'::text)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_adopted_chk",
+      "type": "c",
+      "definition": "CHECK ((((adopted_at IS NULL) = (adopted_by IS NULL)) AND ((adopted_at IS NULL) = (adopted_text_id IS NULL))))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_withdrawn_chk",
+      "type": "c",
+      "definition": "CHECK (((withdrawn_at IS NULL) = (withdrawn_by IS NULL)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_terminal_chk",
+      "type": "c",
+      "definition": "CHECK (((adopted_at IS NULL) OR (withdrawn_at IS NULL)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_segregation_chk",
+      "type": "c",
+      "definition": "CHECK (((adopted_by IS NULL) OR ((adopted_by)::text <> (proposed_by)::text)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_wa_proposal_withdrawer_chk",
+      "type": "c",
+      "definition": "CHECK (((withdrawn_by IS NULL) OR ((withdrawn_by)::text = (proposed_by)::text)))"
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_workaid_referred_categories_chk",
+      "type": "c",
+      // Emit the exact pinned 0037 expression: deparsed NOT/ANY is not a stable SQL round trip.
+      "createDefinition": "CHECK (referred_categories IS NULL OR (cardinality(referred_categories) BETWEEN 1 AND 8 AND NOT ('*' = ANY (referred_categories))))",
+      "definition": "CHECK (((referred_categories IS NULL) OR (((cardinality(referred_categories) >= 1) AND (cardinality(referred_categories) <= 8)) AND (NOT ('*'::text = ANY (referred_categories))))))"
+    },
     {
       table_name: 'ue_authority_acceptances',
       name: 'ue_authority_accept_once_uq',
@@ -380,7 +803,7 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       name: 'ue_authority_rule_domain_chk',
       type: 'c',
       definition:
-        "CHECK ((domain = ANY (ARRAY['supervisory'::text, 'financial'::text, 'governance_review'::text, 'executive_office'::text, 'emergency_access'::text, 'delegation'::text, 'case_assignment'::text, 'recusal'::text])))",
+        "CHECK ((domain = ANY (ARRAY['supervisory'::text, 'financial'::text, 'governance_review'::text, 'executive_office'::text, 'emergency_access'::text, 'platform_staff'::text, 'delegation'::text, 'case_assignment'::text, 'recusal'::text])))",
     },
     {
       table_name: 'ue_authority_issuance_rules',
@@ -429,6 +852,15 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       type: 'c',
       definition: "CHECK ((status = ANY (ARRAY['draft'::text, 'active'::text, 'retired'::text])))",
     },
+    // Active supervisory rules cannot grant a power inherent in a primary case relationship.
+    // Retired or inactive historical drafts remain preservable and can never authorize issuance.
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_primary_handler_ceiling_chk',
+      type: 'c',
+      definition:
+        "CHECK (((status <> 'active'::text) OR (domain <> 'supervisory'::text) OR (operation <> ALL (ARRAY['issue'::text, 'amend'::text])) OR (NOT (allowed_powers && ARRAY['disclose_to_member'::text, 'export_sealed_evidence'::text, 'close'::text, 'case:disclose_to_member'::text, 'case:export_sealed_evidence'::text, 'case:close'::text]))))",
+    },
     {
       table_name: 'ue_authority_issuance_rules',
       name: 'ue_authority_rule_term_chk',
@@ -472,7 +904,7 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       name: 'ue_authority_mandates_kind_chk',
       type: 'c',
       definition:
-        "CHECK ((kind = ANY (ARRAY['supervisory'::text, 'financial'::text, 'governance_review'::text, 'executive_office'::text, 'emergency_access'::text])))",
+        "CHECK ((kind = ANY (ARRAY['supervisory'::text, 'financial'::text, 'governance_review'::text, 'executive_office'::text, 'emergency_access'::text, 'platform_staff'::text])))",
     },
     {
       table_name: 'ue_authority_mandates',
@@ -486,6 +918,15 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       name: 'ue_authority_mandates_powers_chk',
       type: 'c',
       definition: 'CHECK ((cardinality(powers) > 0))',
+    },
+    // Active mandates and resumptions must meet the same nondelegable ceiling.
+    // Existing suspended or revoked history is preserved; a conflicting active row fails installation closed.
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_primary_handler_ceiling_chk',
+      type: 'c',
+      definition:
+        "CHECK (((status <> 'active'::text) OR (kind <> 'supervisory'::text) OR (NOT (powers && ARRAY['disclose_to_member'::text, 'export_sealed_evidence'::text, 'close'::text, 'case:disclose_to_member'::text, 'case:export_sealed_evidence'::text, 'case:close'::text]))))",
     },
     {
       table_name: 'ue_authority_mandates',
@@ -815,8 +1256,653 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       definition:
         "CHECK (((opened_by IS NULL) OR ((length((opened_by)::text) >= 1) AND (length((opened_by)::text) <= 255) AND ((opened_by)::text = btrim((opened_by)::text)) AND ((opened_by)::text !~ '[[:cntrl:]]'::text))))",
     },
+    {
+      table_name: 'ue_authority_acceptances', name: 'ue_authority_acceptance_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(accepted_at) AND (accepted_at <= clock_timestamp())))',
+    },
+    {
+      table_name: 'ue_authority_delegations', name: 'ue_authority_deleg_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(effective_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name:'ue_authority_mandates',name:'ue_authority_mandates_scope_shape_chk',type:'c',
+      definition:"CHECK (((status <> 'active'::text) OR ue_authority_scope_valid(scope)))",
+    },
+    {
+      table_name: 'ue_authority_mandates', name: 'ue_authority_mandates_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(effective_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships', name: 'ue_authority_rel_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(effective_at) AND ((expires_at IS NULL) OR isfinite(expires_at)) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships', name: 'ue_authority_rel_primary_origin_chk', type: 'c',
+      definition: "CHECK (((status <> 'active'::text) OR (resource_type <> 'case'::text) OR (relation <> ALL (ARRAY['owner'::text, 'assignee'::text])) OR ((origin = 'explicit'::text) AND (granted_by IS NOT NULL) AND ((granted_by)::text <> (principal_user_id)::text) AND (issuance_rule_id IS NOT NULL))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents', name: 'ue_authority_consent_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(granted_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_recusals', name: 'ue_authority_recusal_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(declared_at) AND ((lifted_at IS NULL) OR (isfinite(lifted_at) AND (lifted_at >= declared_at) AND (lifted_at <= clock_timestamp())))))',
+    },
   ],
   triggers: [
+    {
+      "table_name": "ue_authority_requests",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_requests",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_requests FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_financial_steps FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_financial_steps FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_financial_steps FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_matters FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_counsel_engagements FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_nonces",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_counsel_nonces FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_nonces",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_counsel_nonces FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_nonces",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_counsel_nonces FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_requests",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_request_result",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_request_result()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_financial_steps FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_guard_insert",
+      "function_name": "ue_authority_guard_financial_step",
+      "tgtype": 7,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON ue_authority_financial_steps FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_financial_step()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_update",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('withdrawn_at', 'counsel_accepted_at,counsel_accepted_by,withdrawn_at')",
+      "args_hex": "77697468647261776e5f617400636f756e73656c5f61636365707465645f61742c636f756e73656c5f61636365707465645f62792c77697468647261776e5f617400"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_update",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'revoked_at,revoked_by')",
+      "args_hex": "7265766f6b65645f6174007265766f6b65645f61742c7265766f6b65645f627900"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_guard_insert",
+      "function_name": "ue_authority_guard_engagement",
+      "tgtype": 7,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_engagement()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_counsel_nonces",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_counsel_nonces FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_requests",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('actor', '')",
+      "args_hex": "6163746f720000"
+    },
+    {
+      "table_name": "ue_authority_financial_steps",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_financial_steps FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('actor', '')",
+      "args_hex": "6163746f720000"
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('referred_by', 'counsel_accepted_by')",
+      "args_hex": "72656665727265645f627900636f756e73656c5f61636365707465645f627900"
+    },
+    {
+      "table_name": "ue_authority_counsel_engagements",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_counsel_engagements FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('recorded_by', 'revoked_by')",
+      "args_hex": "7265636f726465645f6279007265766f6b65645f627900"
+    },
+    {
+      "table_name": "ue_authority_counsel_nonces",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_counsel_nonces FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('consumed_by', '')",
+      "args_hex": "636f6e73756d65645f62790000"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_consent_texts FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_consent_texts FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_consent_texts FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_consent_grants FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_consent_grants FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_consent_grants FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_document_auths FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_document_auths FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_document_auths FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_shares FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_shares FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_shares FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_counsel_access",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_counsel_access FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_counsel_access",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_counsel_access FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_counsel_access",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_counsel_access FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_update",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_consent_texts FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('retired_at', 'retired_at,retired_by')",
+      "args_hex": "726574697265645f617400726574697265645f61742c726574697265645f627900"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_consent_grants FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_guard_insert",
+      "function_name": "ue_authority_guard_workaid_grant",
+      "tgtype": 7,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON ue_authority_workaid_consent_grants FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_workaid_grant()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_update",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_document_auths FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'revoked_at,revoked_by')",
+      "args_hex": "7265766f6b65645f6174007265766f6b65645f61742c7265766f6b65645f627900"
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_guard_insert",
+      "function_name": "ue_authority_guard_workaid_docauth",
+      "tgtype": 7,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON ue_authority_workaid_document_auths FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_workaid_docauth()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_update",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_shares FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('invalidated_at', 'invalidated_at,invalidated_by,invalidation_reason')",
+      "args_hex": "696e76616c6964617465645f617400696e76616c6964617465645f61742c696e76616c6964617465645f62792c696e76616c69646174696f6e5f726561736f6e00"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_guard_insert",
+      "function_name": "ue_authority_guard_workaid_share",
+      "tgtype": 7,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON ue_authority_workaid_shares FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_workaid_share()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_counsel_access",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_counsel_access FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_texts",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_consent_texts FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('recorded_by', 'retired_by')",
+      "args_hex": "7265636f726465645f627900726574697265645f627900"
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_grants",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_consent_grants FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('member_user_id', '')",
+      "args_hex": "6d656d6265725f757365725f69640000"
+    },
+    {
+      "table_name": "ue_authority_workaid_document_auths",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_document_auths FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('authorised_by', 'revoked_by')",
+      "args_hex": "617574686f72697365645f6279007265766f6b65645f627900"
+    },
+    {
+      "table_name": "ue_authority_workaid_shares",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_shares FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('created_by', 'invalidated_by')",
+      "args_hex": "637265617465645f627900696e76616c6964617465645f627900"
+    },
+    {
+      "table_name": "ue_authority_workaid_counsel_access",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_counsel_access FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('counsel_user_id', '')",
+      "args_hex": "636f756e73656c5f757365725f69640000"
+    },
+    {
+      "table_name": "ue_authority_workaid_matters",
+      "name": "ue_authority_workaid_require_referral_scope",
+      "function_name": "ue_authority_workaid_require_referral_scope",
+      "tgtype": 7,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_workaid_require_referral_scope BEFORE INSERT ON ue_authority_workaid_matters FOR EACH ROW EXECUTE FUNCTION ue_authority_workaid_require_referral_scope()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_no_delete",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 11,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON ue_authority_workaid_consent_text_proposals FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_no_truncate",
+      "function_name": "ue_authority_block_mutation",
+      "tgtype": 34,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON ue_authority_workaid_consent_text_proposals FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_record_event",
+      "function_name": "ue_authority_record_event",
+      "tgtype": 21,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON ue_authority_workaid_consent_text_proposals FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_guard_update",
+      "function_name": "ue_authority_guard_workaid_wording_proposal",
+      "tgtype": 19,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON ue_authority_workaid_consent_text_proposals FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_workaid_wording_proposal()",
+      "args_hex": ""
+    },
+    {
+      "table_name": "ue_authority_workaid_consent_text_proposals",
+      "name": "ue_authority_guard_actor",
+      "function_name": "ue_authority_guard_actor",
+      "tgtype": 23,
+      "tgdeferrable": false,
+      "tginitdeferred": false,
+      "definition": "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON ue_authority_workaid_consent_text_proposals FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('proposed_by', 'adopted_by,withdrawn_by')",
+      "args_hex": "70726f706f7365645f62790061646f707465645f62792c77697468647261776e5f627900"
+    },
+    ...['ue_authority_issuance_rules', 'ue_authority_approval_requests'].map(table => ({
+      table_name: table, name: 'ue_authority_guard_initial_state', function_name: 'ue_authority_guard_initial_state',
+      tgtype: 7, tgdeferrable: false, tginitdeferred: false,
+      definition: `CREATE TRIGGER ue_authority_guard_initial_state BEFORE INSERT ON public.${table} FOR EACH ROW EXECUTE FUNCTION public.ue_authority_guard_initial_state()`,
+      args_hex: '',
+    })),
+    {
+      table_name: 'ue_authority_approval_decisions', name: 'ue_authority_guard_lifecycle_decision',
+      function_name: 'ue_authority_guard_lifecycle_decision', tgtype: 7,
+      tgdeferrable: false, tginitdeferred: false,
+      definition: 'CREATE TRIGGER ue_authority_guard_lifecycle_decision BEFORE INSERT ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_lifecycle_decision()',
+      args_hex: '',
+    },
     {
       table_name: 'ue_authority_acceptances',
       name: 'ue_authority_guard_actor',

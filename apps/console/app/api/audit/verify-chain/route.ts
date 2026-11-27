@@ -1,3 +1,4 @@
+import { verifyOrganizationChain } from '@/lib/services/audit-inspection-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Chain Verification
@@ -7,10 +8,7 @@
  * hash chains for tamper detection.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { auditEvents, shareLedgerEntries } from '@nzila/db/schema'
-import { eq, asc } from 'drizzle-orm'
-import { verifyChain } from '@nzila/os-core/hash'
+
 import { z } from 'zod'
 import { requireOrgAccess } from '@/lib/api-guards'
 
@@ -22,8 +20,7 @@ const VerifyChainSchema = z.object({
 export async function POST(req: NextRequest) {
   const body = await req.json()
   const parsed = VerifyChainSchema.safeParse(body)
-  if (!parsed.success)
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   const { orgId, chainType } = parsed.data
 
@@ -33,79 +30,6 @@ export async function POST(req: NextRequest) {
   })
   if (!guard.ok) return guard.response
 
-  if (chainType === 'audit') {
-    const entries = await platformDb
-      .select()
-      .from(auditEvents)
-      .where(eq(auditEvents.orgId, orgId))
-      .orderBy(asc(auditEvents.createdAt))
-
-    if (entries.length === 0) {
-      return NextResponse.json({
-        chainType: 'audit',
-        orgId,
-        entryCount: 0,
-        valid: true,
-        message: 'No audit entries to verify.',
-      })
-    }
-
-    const result = verifyChain(entries, (e) => ({
-      orgId: e.orgId,
-      actorClerkUserId: e.actorClerkUserId,
-      actorRole: e.actorRole,
-      action: e.action,
-      targetType: e.targetType,
-      targetId: e.targetId,
-      beforeJson: e.beforeJson,
-      afterJson: e.afterJson,
-    }))
-
-    return NextResponse.json({
-      chainType: 'audit',
-      orgId,
-      entryCount: entries.length,
-      ...result,
-    })
-  }
-
-  if (chainType === 'ledger') {
-    const entries = await platformDb
-      .select()
-      .from(shareLedgerEntries)
-      .where(eq(shareLedgerEntries.orgId, orgId))
-      .orderBy(asc(shareLedgerEntries.createdAt))
-
-    if (entries.length === 0) {
-      return NextResponse.json({
-        chainType: 'ledger',
-        orgId,
-        entryCount: 0,
-        valid: true,
-        message: 'No ledger entries to verify.',
-      })
-    }
-
-    const result = verifyChain(entries, (e) => ({
-      orgId: e.orgId,
-      entryType: e.entryType,
-      classId: e.classId,
-      fromShareholderId: e.fromShareholderId,
-      toShareholderId: e.toShareholderId,
-      quantity: e.quantity.toString(),
-      pricePerShare: e.pricePerShare,
-      currency: e.currency,
-      effectiveDate: e.effectiveDate,
-      notes: e.notes,
-    }))
-
-    return NextResponse.json({
-      chainType: 'ledger',
-      orgId,
-      entryCount: entries.length,
-      ...result,
-    })
-  }
-
-  return NextResponse.json({ error: 'Invalid chain type' }, { status: 400 })
+  const result = await verifyOrganizationChain(orgId, chainType)
+  return NextResponse.json(result.body, { status: result.status })
 }

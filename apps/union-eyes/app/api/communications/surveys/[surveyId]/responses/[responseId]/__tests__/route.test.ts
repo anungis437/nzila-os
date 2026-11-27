@@ -46,7 +46,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_ctx: unknown, fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
-vi.mock('@/db/schema', () => ({
+vi.mock('@/db/schema', async () => ({
+  // The real schema for every table this route does not stub (withApi's entitlement guard reads orgEntitlements at load).
+  ...(await vi.importActual<Record<string, unknown>>('@/db/schema')),
   surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', userId: 'userId', responseTokenHash: 'responseTokenHash' },
   surveyQuestionnaireVersions: { __name: 'questionnaireVersions', id: 'versionId', surveyId: 'versionSurveyId', organizationId: 'versionOrganizationId', questions: 'questions' },
   surveyAnswers: { questionId: 'questionId', responseId: 'responseId', organizationId: 'organizationId' },

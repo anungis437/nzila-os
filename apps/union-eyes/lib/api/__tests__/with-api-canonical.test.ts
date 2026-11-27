@@ -10,10 +10,9 @@ const mocks = vi.hoisted(() => ({
   legacyRole: vi.fn(),
   requestScope: vi.fn(),
 }))
-vi.mock('@/lib/api-auth-guard', () => ({
+vi.mock('@/lib/api-auth-guard', async importOriginal => ({
+  ...await importOriginal<typeof import('@/lib/api-auth-guard')>(),
   getCurrentUser: mocks.user,
-  normalizeRole: (role: string) => role,
-  ROLE_HIERARCHY: { member: 20, admin: 140, app_owner: 300 },
 }))
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: mocks.rls,
@@ -39,6 +38,10 @@ vi.mock('@/lib/logger', () => ({
 
 import { withApi } from '../with-api'
 import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding'
+import { normalizeRole, PLATFORM_ELEVATED_ROLES } from '@/lib/api-auth-guard'
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access'
+import { UserRole } from '@/lib/auth/roles'
+import { CORRESPONDENCE_STAFF_ROLES } from '@/lib/correspondence/roles'
 
 describe('opt-in canonical API authority', () => {
   const user = {
@@ -114,6 +117,38 @@ describe('opt-in canonical API authority', () => {
     expect(handler).not.toHaveBeenCalled()
     expect(mocks.legacyRole).not.toHaveBeenCalled()
   })
+
+  it('preserves Clerk for an explicit letter-role gate while its generic rank guard remains closed', async () => {
+    expect(normalizeRole('clerk')).toBe('member')
+    mocks.user.mockResolvedValue({ ...user, role: 'clerk' })
+    const handler = vi.fn(async () => ({ draft: true }))
+    expect((await withApi({ auth: { roles: CORRESPONDENCE_STAFF_ROLES } }, handler)(request())).status).toBe(200)
+    expect(handler).toHaveBeenCalledOnce()
+    expect((await withApi({ auth: { minRole: 'steward' } }, handler)(request())).status).toBe(403)
+    expect(handler).toHaveBeenCalledOnce()
+    expect(mocks.legacyRole).not.toHaveBeenCalled()
+  })
+
+  it.each(['member', ...PLATFORM_ELEVATED_ROLES, 'unknown_role'])('denies %s on the explicit local letter gate', async role => {
+    mocks.user.mockResolvedValue({ ...user, role })
+    const handler = vi.fn()
+    expect((await withApi({ auth: { roles: CORRESPONDENCE_STAFF_ROLES } }, handler)(request())).status).toBe(403)
+    expect(handler).not.toHaveBeenCalled()
+    expect(mocks.legacyRole).not.toHaveBeenCalled()
+  })
+
+  it.each([...Object.values(UserRole), 'unknown_role', '__proto__'])(
+    'admits the canonical case-handler surface for %s only through explicit eligibility', async role => {
+      mocks.user.mockResolvedValue({ ...user, role })
+      const handler = vi.fn(async () => ({ surface: true }))
+      const response = await withApi({ auth: { required: true, roles: CASE_HANDLER_ROLES } }, handler)(request())
+      const eligible = (CASE_HANDLER_ROLES as readonly string[]).includes(role)
+      expect(response.status).toBe(eligible ? 200 : 403)
+      expect(handler).toHaveBeenCalledTimes(eligible ? 1 : 0)
+      expect(mocks.legacyRole).not.toHaveBeenCalled()
+      expect(mocks.legacyOrganization).not.toHaveBeenCalled()
+    },
+  )
 
   it('denies organization administrators on platform-only routes', async () => {
     mocks.user.mockResolvedValueOnce({ ...user, role: 'admin' })

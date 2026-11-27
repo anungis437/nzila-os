@@ -335,7 +335,6 @@ const envSchema = z.object({
   SHOPIFY_SHOP_DOMAIN: z.string().optional(),
   SHOPIFY_STOREFRONT_TOKEN: z.string().optional(),
   SHOPIFY_ADMIN_TOKEN: z.string().optional(),
-  SHOPIFY_WEBHOOK_SECRET: z.string().optional(),
 
   // Accessibility Testing
   ACCESSIBILITY_AXE_ENABLED: z.string().transform(val => val === 'true').prefault('true').optional(),

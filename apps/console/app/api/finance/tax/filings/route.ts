@@ -1,3 +1,8 @@
+import {
+  resolveTaxYearOrganization,
+  listTaxFilings,
+  createTaxFiling,
+} from '@/lib/services/finance-tax-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Tax Filings
@@ -11,17 +16,9 @@
  *  • Hash-chained audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { taxFilings, taxYears, financeGovernanceLinks } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
-import { requireOrgAccess } from '@/lib/api-guards'
+
+import { requireOrgAccess, authenticateUser } from '@/lib/api-guards'
 import { CreateTaxFilingInput } from '@nzila/tax/types'
-import { enforceSoD, validateDividendGovernanceLink } from '@nzila/tax/validation'
-import type { FinanceRole } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const taxYearId = req.nextUrl.searchParams.get('taxYearId')
@@ -32,12 +29,12 @@ export async function GET(req: NextRequest) {
   }
 
   // For entity-scoped access, we need orgId. If only taxYearId, resolve entity.
-  let resolvedEntityId = orgId
-  if (!resolvedEntityId && taxYearId) {
-    const [ty] = await platformDb.select().from(taxYears).where(eq(taxYears.id, taxYearId))
-    resolvedEntityId = ty?.orgId ?? null
-  }
-
+  const identity = await authenticateUser()
+  if (!identity.ok) return identity.response
+  const resolved = await resolveTaxYearOrganization(taxYearId, orgId)
+  if (resolved.mismatch)
+    return NextResponse.json({ error: 'Tax year does not belong to organization' }, { status: 403 })
+  const resolvedEntityId = resolved.orgId
   if (!resolvedEntityId) {
     return NextResponse.json({ error: 'Could not resolve entity' }, { status: 400 })
   }
@@ -45,12 +42,8 @@ export async function GET(req: NextRequest) {
   const access = await requireOrgAccess(resolvedEntityId)
   if (!access.ok) return access.response
 
-  const filter = taxYearId
-    ? eq(taxFilings.taxYearId, taxYearId)
-    : eq(taxFilings.orgId, resolvedEntityId)
-
-  const rows = await platformDb.select().from(taxFilings).where(filter)
-  return NextResponse.json(rows)
+  const result = await listTaxFilings(taxYearId, resolvedEntityId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -65,69 +58,6 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  // ── Segregation of duties: reviewer ≠ preparer ──
-  if (parsed.data.reviewedBy) {
-    const actorRole = (access.context.membership?.role ?? 'org_viewer') as FinanceRole
-    const sodCheck = enforceSoD(
-      access.context.userId,
-      actorRole,
-      parsed.data.preparedBy,
-    )
-    if (!sodCheck.allowed) {
-      return NextResponse.json(
-        { error: sodCheck.reason },
-        { status: 403 },
-      )
-    }
-
-    // Also enforce basic preparer ≠ reviewer
-    if (parsed.data.preparedBy === parsed.data.reviewedBy) {
-      return NextResponse.json(
-        { error: 'Segregation of duties: reviewer cannot be the same person as the preparer.' },
-        { status: 403 },
-      )
-    }
-  }
-
-  // ── Dividend governance link gate for T5 / RL-3 ──
-  if (parsed.data.filingType === 'T5' || parsed.data.filingType === 'RL-3') {
-    const links = await platformDb
-      .select()
-      .from(financeGovernanceLinks)
-      .where(eq(financeGovernanceLinks.orgId, parsed.data.orgId))
-
-    const linkCheck = validateDividendGovernanceLink(
-      parsed.data.filingType,
-      links.map((l) => ({
-        governanceType: l.governanceType,
-        governanceId: l.governanceId,
-      })),
-    )
-
-    if (!linkCheck.valid) {
-      return NextResponse.json(
-        { error: linkCheck.reason },
-        { status: 422 },
-      )
-    }
-  }
-
-  const [row] = await platformDb.insert(taxFilings).values(parsed.data).returning()
-
-  await recordFinanceAuditEvent({
-    orgId: parsed.data.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.TAX_FILING_UPLOAD,
-    targetType: 'tax_filing',
-    targetId: row.id,
-    afterJson: {
-      filingType: parsed.data.filingType,
-      taxYearId: parsed.data.taxYearId,
-      preparedBy: parsed.data.preparedBy,
-      reviewedBy: parsed.data.reviewedBy,
-    },
-  })
-
-  return NextResponse.json(row, { status: 201 })
+  const result = await createTaxFiling(parsed.data, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

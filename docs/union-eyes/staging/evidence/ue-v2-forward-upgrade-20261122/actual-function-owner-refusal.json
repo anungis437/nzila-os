@@ -1,0 +1,75 @@
+{
+  "evidenceClass": "ACTUAL_LIVE_REHEARSAL_FAILURE_AND_INDEPENDENT_READ_ONLY_ROLLBACK_CHECK",
+  "recordedAt": "2026-11-23T03:06:57.743751+00:00",
+  "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "operatorWorkflowSourceSha": "464205ace986a07951dc95af3336edb4a4e127a2",
+  "runId": "45101930240",
+  "operationReceipt": {
+    "status": "FAIL",
+    "code": "UNKNOWN",
+    "operation": "rehearse",
+    "operatorSourceSha": "464205ace986a07951dc95af3336edb4a4e127a2",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "executionRunId": "45101930240",
+    "executionJobName": "ue-v2-forward-45101930240",
+    "failure": "UE_UPGRADE_STATEMENT_FAILED:1924:function:message_assignment_guard():42501",
+    "failureStage": "operator-transaction",
+    "changesQualified": false,
+    "changesCommitted": false,
+    "productionDeployment": false
+  },
+  "jobControl": {
+    "status": "FAIL",
+    "runId": "45101930240",
+    "operatorSourceSha": "464205ace986a07951dc95af3336edb4a4e127a2",
+    "applicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "operation": "rehearse",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:bd581ec339a33673652ebeaeff8761acfa7715179d6319f53693af561f0ef586",
+    "job": "ue-v2-forward-45101930240",
+    "productionDeployment": false,
+    "execution": "ue-v2-forward-45101930240-8ngetck",
+    "executionStatus": "Failed",
+    "failure": "AZURE_JOB_DID_NOT_SUCCEED",
+    "ownedJobAndSecretRemoved": true
+  },
+  "independentAfterFailureObservation": {
+    "catalogObjects": 26449,
+    "baselineQueryCatalogBytesExactlyEqual": true,
+    "baselineCatalogSha256": "dd8d3343bd5cec2ecb23af9a12a88a7ec0ec564b1ab42f7946960b1e820a48c5",
+    "afterFailureCatalogSha256": "dd8d3343bd5cec2ecb23af9a12a88a7ec0ec564b1ab42f7946960b1e820a48c5",
+    "fullSuccessfulRehearsalClaimed": false,
+    "businessRowReadbackClaimed": false,
+    "oldServingRevisionHealthyAt100Percent": true,
+    "candidateTrafficPercent": 0,
+    "ownedAzureJobExists": false
+  },
+  "rootCause": "Four existing guard routines have the original migration administrator as owner while the qualified target declares ue_v2_owner. Replacing their bodies as the target owner before ownership handoff produces PostgreSQL42501. The old native fixture restored every routine under its target owner and missed this historical ownership family.",
+  "completeFunctionOwnershipTransitionFamily": [
+    {
+      "id": "message_assignment_guard()",
+      "beforeOwner": "uev2admin",
+      "qualifiedTargetOwner": "ue_v2_owner"
+    },
+    {
+      "id": "message_threads_assignment_requires_history()",
+      "beforeOwner": "uev2admin",
+      "qualifiedTargetOwner": "ue_v2_owner"
+    },
+    {
+      "id": "message_threads_guard_update()",
+      "beforeOwner": "uev2admin",
+      "qualifiedTargetOwner": "ue_v2_owner"
+    },
+    {
+      "id": "triage_guard()",
+      "beforeOwner": "uev2admin",
+      "qualifiedTargetOwner": "ue_v2_owner"
+    }
+  ],
+  "sourceCorrection": "Transfer only a pre-existing, target-declared zero-argument guard from uev2admin to ue_v2_owner with an exact executor-validated ALTER FUNCTION statement. Replace application code as the canonical owner. Other ownership transitions and injected handoff SQL fail closed.",
+  "nativeProofRequired": "Reproduce all four historical administrator owners and legacy PUBLIC execution, then verify both administrator BYPASS profiles, failure rollback, full rehearsal rollback, committed target admission, original data/receipt/sequence preservation and temporary privilege removal.",
+  "applyLaunched": false,
+  "fullBaseAcceptance": "NOT_PROVEN",
+  "productionDeployment": false,
+  "financeImplementation": false
+}

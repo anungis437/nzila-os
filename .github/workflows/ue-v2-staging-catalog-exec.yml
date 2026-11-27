@@ -1,0 +1,66 @@
+name: Union Eyes V2 — Staging read-only catalog
+
+# One read-only PostgreSQL catalogue through the existing ue-staging deploy
+# identity. It runs only from main, and only after that environment's
+# founder approval. It does not deploy, create a job, change a firewall,
+# grant a role, or print a connection string. Pull requests cannot start it.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ue-v2-staging-catalog-exec
+  cancel-in-progress: false
+
+jobs:
+  catalog:
+    name: Read-only staging catalog
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the admitted workflow
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Assert the deploy identity is configured
+        env:
+          C: ${{ secrets.AZURE_CLIENT_ID }}
+          T: ${{ secrets.AZURE_TENANT_ID }}
+          S: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$C" ] || [ -z "$T" ] || [ -z "$S" ]; then
+            echo "::error::No deploy identity on the ue-staging environment."
+            exit 1
+          fi
+
+      - name: Azure Login (OIDC, deploy identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Inspect the catalogue through one revision exec
+        env:
+          UE_CATALOG_EXEC_LIVE: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/catalog"
+          node tooling/scripts/ue-v2-staging-catalog-exec.mjs --out "$RUNNER_TEMP/catalog"
+
+      - name: Upload the sanitized catalogue
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-catalog-${{ github.run_id }}
+          path: ${{ runner.temp }}/catalog/
+          retention-days: 30
+          if-no-files-found: error

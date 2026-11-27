@@ -186,6 +186,17 @@ jobs:
           UE_0108_MIGRATION_TEST_URL: postgresql://postgres:postgres@localhost:5432/test_db
           AUTH_SECRET: ci_test_placeholder_secret_32chars_xxxx
 
+      - name: Union Eyes frontend and storage authority censuses
+        if: matrix.lane == 'union-eyes'
+        working-directory: apps/union-eyes
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
+          TSX_TSCONFIG_PATH: ${{ github.workspace }}/apps/union-eyes/tsconfig.json
+        run: |
+          set -euo pipefail
+          pnpm exec vitest run --config vitest.census.config.ts --maxWorkers=1
+          pnpm exec vitest run --config vitest.heavy.config.ts scripts/__tests__/generate-public-schema-grant-census.test.ts --maxWorkers=1
+
       - name: Union Eyes staging evidence and release-control regressions
         if: matrix.lane == 'shared'
         run: |
@@ -196,6 +207,17 @@ jobs:
           node --test tooling/scripts/lib/ue-v2-client-assets.test.mjs
           node --test tooling/scripts/lib/ue-v2-staging-log-alerts.test.mjs
           node --test tooling/scripts/lib/ue-v2-staging-identity-contract.test.cjs
+          node --test tooling/scripts/ue-v2-staging-readonly-inventory.test.mjs
+          node --test tooling/scripts/ue-v2-staging-catalog-exec.test.mjs
+          # This checkout may be shallow. Supply the declared immutable source
+          # object without changing the proposed application's working tree.
+          node - <<'NODE'
+          const fs = require('node:fs'), assert = require('node:assert/strict'), {spawnSync, execFileSync} = require('node:child_process')
+          const source = JSON.parse(fs.readFileSync('tooling/scripts/lib/ue-v2-staging-candidate.json', 'utf8')).applicationSourceSha
+          assert.match(source, /^[a-f0-9]{40}$/)
+          if (spawnSync('git', ['cat-file', '-e', source + '^{commit}']).status !== 0)
+            execFileSync('git', ['fetch', '--no-tags', '--depth=1', 'origin', source], {stdio:'inherit'})
+          NODE
           pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check
           node --test tooling/scripts/lib/ue-guarded-postgres-dump.test.mjs
           node --test tooling/scripts/lib/ue-managed-pg16-catalog.test.mjs

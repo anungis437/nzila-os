@@ -1,3 +1,4 @@
+import { createAiPromptVersion } from '@/lib/services/ai-prompt-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — AI Prompt Versions (Admin)
@@ -6,9 +7,7 @@
  * PATCH /api/ai/prompts/versions               → activate a version
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { aiPromptVersions } from '@nzila/db/schema'
-import { eq, desc } from 'drizzle-orm'
+
 import { z } from 'zod'
 import { requirePlatformRole } from '@/lib/api-guards'
 import { activatePromptVersion, listPromptVersions } from '@nzila/ai-core'
@@ -19,11 +18,13 @@ const CreateVersionSchema = z.object({
   systemTemplate: z.string().optional(),
   outputSchema: z.record(z.string(), z.unknown()).optional(),
   allowedFeatures: z.array(z.string()).optional(),
-  defaultParams: z.object({
-    temperature: z.number().optional(),
-    maxTokens: z.number().optional(),
-    topP: z.number().optional(),
-  }).optional(),
+  defaultParams: z
+    .object({
+      temperature: z.number().optional(),
+      maxTokens: z.number().optional(),
+      topP: z.number().optional(),
+    })
+    .optional(),
 })
 
 const ActivateVersionSchema = z.object({
@@ -53,31 +54,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  // Get next version number
-  const [latest] = await platformDb
-    .select({ version: aiPromptVersions.version })
-    .from(aiPromptVersions)
-    .where(eq(aiPromptVersions.promptId, parsed.data.promptId))
-    .orderBy(desc(aiPromptVersions.version))
-    .limit(1)
-
-  const nextVersion = (latest?.version ?? 0) + 1
-
-  const [row] = await platformDb
-    .insert(aiPromptVersions)
-    .values({
-      promptId: parsed.data.promptId,
-      version: nextVersion,
-      template: parsed.data.template,
-      systemTemplate: parsed.data.systemTemplate ?? null,
-      outputSchema: parsed.data.outputSchema ?? null,
-      allowedFeatures: parsed.data.allowedFeatures ?? [],
-      defaultParams: parsed.data.defaultParams ?? {},
-      createdBy: auth.userId,
-    })
-    .returning()
-
-  return NextResponse.json(row, { status: 201 })
+  return NextResponse.json(await createAiPromptVersion(parsed.data, auth.userId), { status: 201 })
 }
 
 export async function PATCH(req: NextRequest) {

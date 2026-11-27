@@ -1,0 +1,62 @@
+{
+  "status": "LOCAL_IMPLEMENTATION_STAGING_NOT_PROVEN",
+  "baseHeadSha": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "requirements": {
+    "memberDirectory": "New canonical invitees require their own contact projection and business FK anchor; authentication membership remains authoritative.",
+    "approvedLetters": "Founder explicitly requires in-app email sending."
+  },
+  "sourceChanges": [
+    "Own-session member profile creation and mandatory audit in the same tenant transaction; concurrent retry and inactive/deleted-profile refusal.",
+    "A sealed summary is recorded when the assigned signer signs; private signature images and profiles stay private.",
+    "Existing durable notification queue and ledger carry frozen signed envelopes, stable provider keys, attempted/accepted audit and explicit reconciliation.",
+    "Email dispatch remains queued until all provider receipts settle. Provider acceptance, delivery and human receipt remain distinct.",
+    "Only correspondence INSERT/UPDATE participant-attribution checks change: referenced active same-org participants replace private-profile visibility checks; FKs, grants, SELECT/USING geometry and FORCE RLS remain.",
+    "The browser validates member identity/creation and email state/counts before displaying success. All new queue and correspondence writes carry an explicit organization condition."
+  ],
+  "limits": [
+    "Plain text plus signer attribution; email attachments are refused, never silently omitted.",
+    "Automatic replay stops at23h, before the provider24h idempotency boundary; uncertain or exhausted tasks require reconciliation.",
+    "Existing signed letters need a verified signer summary through their approval/signing workflow.",
+    "The current app is still source cccfc8c311a1017f80241bf089c00ef0c6828751 plus the qualified B19 email-address database repair.",
+    "PR1265 is draft and held; no application deployment for this repair has occurred."
+  ],
+  "actualLocalNative": {
+    "command": "UE_V2_NATIVE_MANIFEST=1 pnpm exec vitest run --project union-eyes-heavy apps/union-eyes/scripts/bootstrap-v2/member-letter-delivery.native.test.ts",
+    "testsPassed": 13,
+    "logSha256": "11adee29e8dc57718daac65daf9bd3d912d16d1b53c618ab913fb3fad9233953",
+    "realDatabase": "Disposable canonical PostgreSQL16 with actual runtime and SYSTEM roles",
+    "emailProvider": "Mocked provider seam; no actual email receipt claimed",
+    "originalFailuresPreserved": [
+      "member-letter-native-v1.log",
+      "member-letter-native-v2.log",
+      "member-letter-native-v3.log",
+      "member-letter-native-v6.log",
+      "member-letter-required-checks-v1.json",
+      "member-letter-required-checks-v2.json",
+      "member-letter-focused-v8.log"
+    ],
+    "concurrentQueueRequestsAndWorkers": true
+  },
+  "pending": [
+    "All five required repository checks for the frozen final input set",
+    "Exact-source trusted CI and normal merge",
+    "Retained-copy and primary qualification of the two known policy checks",
+    "Fresh native source qualification, immutable build, preview and authorized staging rollout",
+    "Actual controlled recipient email, linked-case access refusal and full base runtime criteria"
+  ],
+  "changeRecord": "CHG-2026-0114",
+  "fullBaseStagingGo": false,
+  "productionDeploymentAuthorized": false,
+  "financeFeatureImplementationInScope": false,
+  "focusedTests": {
+    "testsPassed": 119,
+    "files": 12,
+    "logSha256": "f5de035042e895956b64a76f12f3d0f6e2822ef96c0e7f508318f8a3e96ac575"
+  },
+  "responseCensus": {
+    "testsPassed": 51,
+    "files": 2,
+    "logSha256": "6d74f4f58299c4b04c40d47a3fb3e970a97dd8232c764caa405b00716fc616e2",
+    "ceilingsOrAcceptancesChanged": false
+  }
+}

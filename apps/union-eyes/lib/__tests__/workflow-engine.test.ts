@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   mockEventBusEmit: vi.fn(),
   mockSendNotification: vi.fn(),
   mockCreateSatisfactionSurvey: vi.fn(),
+  batch:vi.fn(),actor: vi.fn(), findReadable: vi.fn(), requireAction: vi.fn(), decideCase: vi.fn(), audit: vi.fn(), queueMail: vi.fn(),
 }));
 
 function chain(resolveValue: any): any {
@@ -63,12 +64,16 @@ vi.mock('@/db/schema/organization-members-schema', () => ({
 vi.mock('@/db/schema/user-management-schema', () => ({
   users: {},
 }));
-vi.mock('@/lib/claim-notifications', () => ({
-  sendClaimStatusNotification: (...a: any[]) => mocks.mockSendNotification(...a),
-}));
 vi.mock('@/lib/services/claim-workflow-fsm', () => ({
   validateClaimTransition: (...a: any[]) => mocks.mockValidateTransition(...a),
   getAllowedClaimTransitions: (...a: any[]) => mocks.mockGetAllowedTransitions(...a),
+}));
+// The core mutator now shares the canonical lifecycle policy with the route.
+// Full real-policy guards are covered by claim-transition-policy and the
+// primary-handler/capacity suite; these tests isolate persistence failures.
+vi.mock('@/lib/workflow/claim-transition-policy', async original => ({
+  ...(await original<typeof import('@/lib/workflow/claim-transition-policy')>()),
+  validateClaimCaseTransition: (...args: unknown[]) => mocks.mockValidateTransition(...args),
 }));
 vi.mock('@/lib/services/lro-signals', () => ({
   detectAllSignals: (...a: any[]) => mocks.mockDetectSignals(...a),
@@ -78,9 +83,6 @@ vi.mock('@/lib/services/defensibility-pack', () => ({
 }));
 vi.mock('@/db/schema/defensibility-packs-schema', () => ({
   defensibilityPacks: {},
-}));
-vi.mock('@/lib/integrations/timeline-integration', () => ({
-  addTimelineEntry: (...a: any[]) => mocks.mockAddTimeline(...a),
 }));
 vi.mock('@/lib/events/event-bus', () => ({
   eventBus: { emit: (...a: any[]) => mocks.mockEventBusEmit(...a), on: vi.fn() },
@@ -94,6 +96,12 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(), and: vi.fn(), relations: vi.fn(() => ({})),
 }));
 
+vi.mock('@/lib/cases/case-authorization', () => ({ getCaseActor: mocks.actor, findReadableCase: mocks.findReadable,
+  caseReadScope: vi.fn(), requireKernelCaseAction: mocks.requireAction }));
+vi.mock('@/lib/authority/store/route-adapter', () => ({ decideCase: mocks.decideCase,decideCaseCapabilitiesBatch:mocks.batch }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
+vi.mock('@/lib/workflow/case-status-delivery', () => ({ queueCaseStatusEmailOrRecordRefusal: mocks.queueMail }));
+
 /* ── imports ───────────────────────────────────────────────────────────────── */
 import {
   isValidTransition,
@@ -104,10 +112,8 @@ import {
   getClaimWorkflowStatus,
   updateClaimStatus,
   updateClaimStatusById,
-  assignClaim,
   getOverdueClaims,
   getClaimsApproachingDeadline,
-  addClaimNote,
   STATUS_TRANSITIONS,
   STATUS_DEADLINES,
   PRIORITY_MULTIPLIERS,
@@ -117,6 +123,12 @@ import {
 describe('workflow-engine', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.batch.mockImplementation(async(_tx,input)=>new Map(input.caseIds.map((id:string)=>[id,{'case:read':{effect:'allow',scope:{visibility:'internal'}}}])));
+    mocks.actor.mockResolvedValue({userId:'user1',organizationId:'org1',role:'steward'});
+    mocks.findReadable.mockResolvedValue({claimId:'uuid-1',visibility:'internal'});
+    mocks.requireAction.mockResolvedValue(undefined); mocks.decideCase.mockResolvedValue({effect:'allow'});
+    mocks.audit.mockResolvedValue(undefined); mocks.queueMail.mockResolvedValue('task');
+    mocks.mockWithRLS.mockImplementation(async fn => fn({select:(...args:unknown[])=>mocks.mockSelect(...args),update:mocks.mockUpdate,insert:mocks.mockInsert}));
     mocks.mockSendNotification.mockResolvedValue(undefined);
     mocks.mockAddTimeline.mockResolvedValue(undefined);
     mocks.mockUpdate.mockReturnValue(chain(undefined));
@@ -243,75 +255,6 @@ describe('workflow-engine', () => {
     });
   });
 
-  // ── assignClaim ───────────────────────────────────────────────────────────
-  describe('assignClaim', () => {
-    it('assigns claim to steward', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
-        const mockTx = {
-          select: vi.fn(() => chain([{ claimId: 'c1', status: 'submitted', organizationId: 'org-1' }])),
-          update: vi.fn(() => chain(undefined)),
-          insert: vi.fn(() => chain(undefined)),
-        };
-        return fn(mockTx);
-      });
-      mocks.mockValidateTransition.mockReturnValueOnce({ allowed: true });
-      const result = await assignClaim('c1', 'steward1', 'admin1', 'org-1');
-      expect(result).toEqual({ success: true });
-    });
-
-    it('rejects assignment when FSM blocks the transition', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
-        const mockTx = {
-          select: vi.fn(() => chain([{ claimId: 'c1', status: 'closed', organizationId: 'org-1' }])),
-          update: vi.fn(() => chain(undefined)),
-          insert: vi.fn(() => chain(undefined)),
-        };
-        return fn(mockTx);
-      });
-      mocks.mockValidateTransition.mockReturnValueOnce({ allowed: false, reason: 'closed claims cannot be reassigned' });
-      const result = await assignClaim('c1', 'steward1', 'admin1', 'org-1');
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/FSM rejection/);
-    });
-
-    it('returns error when claim not found in organization', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
-        const mockTx = {
-          select: vi.fn(() => chain([])),
-          update: vi.fn(() => chain(undefined)),
-          insert: vi.fn(() => chain(undefined)),
-        };
-        return fn(mockTx);
-      });
-      const result = await assignClaim('missing', 's1', 'a1', 'org-1');
-      expect(result).toEqual({ success: false, error: 'Claim not found in organization' });
-    });
-
-    it('returns error on db failure', async () => {
-      mocks.mockWithRLS.mockImplementationOnce(async () => {
-        throw new Error('DB fail');
-      });
-      const result = await assignClaim('c1', 's1', 'a1', 'org-1');
-      expect(result).toEqual({ success: false, error: 'DB fail' });
-    });
-
-    it('denies access when claim belongs to a different organization', async () => {
-      // org-2 submits a request for a claim that belongs to org-1 → claim not found
-      mocks.mockWithRLS.mockImplementationOnce(async (fn: (tx: any) => unknown) => {
-        const mockTx = {
-          // Query is org-scoped — returns empty when org does not match
-          select: vi.fn(() => chain([])),
-          update: vi.fn(() => chain(undefined)),
-          insert: vi.fn(() => chain(undefined)),
-        };
-        return fn(mockTx);
-      });
-      const result = await assignClaim('c1-from-org1', 'steward2', 'admin2', 'org-2');
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Claim not found in organization');
-    });
-  });
-
   // ── getOverdueClaims ──────────────────────────────────────────────────────
   describe('getOverdueClaims', () => {
     it('filters overdue claims', async () => {
@@ -324,10 +267,9 @@ describe('workflow-engine', () => {
       expect(result).toHaveLength(1);
     });
 
-    it('returns empty on error', async () => {
+    it('propagates an outage rather than fabricating an empty success', async () => {
       mocks.mockSelect.mockImplementationOnce(() => { throw new Error('fail'); });
-      const result = await getOverdueClaims();
-      expect(result).toEqual([]);
+      await expect(getOverdueClaims()).rejects.toThrow('fail');
     });
 
     it('skips claims with no dates', async () => {
@@ -355,60 +297,9 @@ describe('workflow-engine', () => {
       expect(result).toHaveLength(1);
     });
 
-    it('returns empty on error', async () => {
+    it('propagates an outage rather than fabricating an empty success', async () => {
       mocks.mockSelect.mockImplementationOnce(() => { throw new Error('fail'); });
-      const result = await getClaimsApproachingDeadline();
-      expect(result).toEqual([]);
-    });
-  });
-
-  // ── addClaimNote ──────────────────────────────────────────────────────────
-  describe('addClaimNote', () => {
-    it('adds note when tx provided', async () => {
-      const mockTx = {
-        select: vi.fn(() => chain([{ claimId: 'c1', claimNumber: 'CLM-001' }])),
-        insert: vi.fn(() => chain(undefined)),
-        update: vi.fn(() => chain(undefined)),
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await addClaimNote('CLM-001', 'Test note', 'user1', true, mockTx as any);
-      expect(result).toEqual({ success: true });
-    });
-
-    it('returns error when claim not found', async () => {
-      const mockTx = {
-        select: vi.fn(() => chain([])),
-        insert: vi.fn(() => chain(undefined)),
-        update: vi.fn(() => chain(undefined)),
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await addClaimNote('MISSING', 'msg', 'u1', true, mockTx as any);
-      expect(result).toEqual({ success: false, error: 'Claim not found' });
-    });
-
-    it('wraps in RLS context when no tx', async () => {
-      mocks.mockWithRLS.mockImplementation(async (fn: (...args: any[]) => unknown) => {
-        const mockTx = {
-          select: vi.fn(() => chain([{ claimId: 'c1', claimNumber: 'CLM-001' }])),
-          insert: vi.fn(() => chain(undefined)),
-          update: vi.fn(() => chain(undefined)),
-        };
-        return fn(mockTx);
-      });
-      const result = await addClaimNote('CLM-001', 'Note', 'user1');
-      expect(result).toEqual({ success: true });
-      expect(mocks.mockWithRLS).toHaveBeenCalled();
-    });
-
-    it('returns error on db failure', async () => {
-      const mockTx = {
-        select: vi.fn(() => { throw new Error('DB fail'); }),
-        insert: vi.fn(() => chain(undefined)),
-        update: vi.fn(() => chain(undefined)),
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await addClaimNote('CLM-001', 'msg', 'u1', true, mockTx as any);
-      expect(result).toEqual({ success: false, error: 'DB fail' });
+      await expect(getClaimsApproachingDeadline()).rejects.toThrow('fail');
     });
   });
 
@@ -422,14 +313,45 @@ describe('workflow-engine', () => {
       progress: 10, closedAt: null, claimType: 'grievance', id: 1,
     };
 
+    it.each([
+      ['filed', 'submitted', 10],
+      ['acknowledged', 'under_review', 25],
+      ['assigned', 'under_review', 25],
+      ['investigating', 'investigation', 50],
+      ['response_due', 'pending_documentation', 60],
+      ['settled', 'resolved', 90],
+      ['denied', 'rejected', 100],
+      ['withdrawn', 'closed', 100],
+    ] as const)('persists %s as %s consistently in state, history, audit and notice intent', async (alias, persisted, progress) => {
+      mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
+      mocks.mockDetectSignals.mockReturnValue([]);
+      mocks.decideCase.mockResolvedValue({ effect: 'deny' });
+      const values = vi.fn();
+      const set = vi.fn((update: Record<string, unknown>) => ({
+        where: () => ({ returning: async () => [{ ...baseClaim, ...update }] }),
+      }));
+      const tx = {
+        select: () => chain([baseClaim]),
+        update: () => ({ set }),
+        insert: () => ({ values }),
+      };
+      const result = await updateClaimStatus('CLM-001', alias as Parameters<typeof updateClaimStatus>[1], 'user1', 'Synthetic alias qualification', tx as unknown as NonNullable<Parameters<typeof updateClaimStatus>[4]>);
+      expect(result.success).toBe(true);
+      expect(result.claim?.status).toBe(persisted);
+      expect(set).toHaveBeenCalledWith(expect.objectContaining({ status: persisted, progress }));
+      expect(values).toHaveBeenCalledWith(expect.objectContaining({ metadata: { previousStatus: 'submitted', newStatus: persisted } }));
+      expect(mocks.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ details: expect.objectContaining({ to: persisted }) }));
+      expect(mocks.queueMail).toHaveBeenCalledWith(tx, expect.objectContaining({ newStatus: persisted }));
+      if (['rejected', 'closed'].includes(persisted)) expect(mocks.requireAction).toHaveBeenCalledWith(tx, expect.anything(), 'uuid-1', 'case:close');
+    });
+
     it('transitions to under_review', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
       const updatedClaim = { ...baseClaim, status: 'under_review', progress: 25 };
       const mockTx = {
         select: vi.fn()
-          .mockReturnValueOnce(chain([baseClaim]))
-          .mockReturnValueOnce(chain([{ role: 'steward' }])),
+          .mockReturnValueOnce(chain([baseClaim])),
         update: vi.fn(() => chain([updatedClaim])),
         insert: vi.fn(() => chain(undefined)),
       };
@@ -445,22 +367,21 @@ describe('workflow-engine', () => {
         insert: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatus('MISSING', 'under_review' as any, 'u1', '', mockTx as any);
+      const result = await updateClaimStatus('MISSING', 'under_review' as any, 'user1', '', mockTx as any);
       expect(result).toEqual({ success: false, error: 'Claim not found' });
     });
 
     it('returns error when FSM rejects transition', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: false, reason: 'Not allowed' });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
       const mockTx = {
         select: vi.fn()
-          .mockReturnValueOnce(chain([baseClaim]))
-          .mockReturnValueOnce(chain([{ role: 'member' }])),
+          .mockReturnValueOnce(chain([baseClaim])),
         update: vi.fn(() => chain(undefined)),
         insert: vi.fn(() => chain(undefined)),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await updateClaimStatus('CLM-001', 'closed' as any, 'u1', '', mockTx as any);
+      const result = await updateClaimStatus('CLM-001', 'closed' as any, 'user1', '', mockTx as any);
       expect(result.success).toBe(false);
       expect(result.error).toBe('Not allowed');
     });
@@ -468,12 +389,12 @@ describe('workflow-engine', () => {
     it('wraps in RLS context when no tx', async () => {
       mocks.mockWithRLS.mockImplementation(async (fn: (...args: any[]) => unknown) => {
         mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-        mocks.mockDetectSignals.mockResolvedValue([]);
+        mocks.mockDetectSignals.mockReturnValue([]);
         const updatedClaim = { ...baseClaim, status: 'under_review' };
         const mockTx = {
           select: vi.fn()
             .mockReturnValueOnce(chain([baseClaim]))
-            .mockReturnValueOnce(chain([{ role: 'steward' }])),
+            ,
           update: vi.fn(() => chain([updatedClaim])),
           insert: vi.fn(() => chain(undefined)),
         };
@@ -486,7 +407,7 @@ describe('workflow-engine', () => {
 
     it('generates defensibility pack on resolved', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
       const claim = { ...baseClaim, status: 'under_review', assignedTo: 'steward1' };
       const updatedClaim = { ...claim, status: 'resolved', progress: 90, updatedAt: new Date() };
 
@@ -500,7 +421,7 @@ describe('workflow-engine', () => {
       const mockTx = {
         select: vi.fn()
           .mockReturnValueOnce(chain([claim]))                 // find claim
-          .mockReturnValueOnce(chain([{ role: 'steward' }]))   // user role
+             // user role
           .mockReturnValueOnce(chain([]))                       // claimUpdates
           .mockReturnValueOnce(chain([{ displayName: 'Jane' }])), // getMemberName
         update: vi.fn(() => chain([updatedClaim])),
@@ -509,7 +430,7 @@ describe('workflow-engine', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await updateClaimStatus('CLM-001', 'resolved' as any, 'user1', 'done', mockTx as any);
       expect(result.success).toBe(true);
-      expect(mocks.mockGenerateDefPack).toHaveBeenCalled();
+      expect(mocks.mockGenerateDefPack).toHaveBeenCalledWith(expect.anything(),expect.anything(),expect.anything(),expect.anything(),expect.objectContaining({requestedBy:'user1',generatedBy:'user1'}));
     });
   });
 
@@ -550,14 +471,13 @@ describe('workflow-engine', () => {
 
     it('delegates to FSM-enforced updateClaimStatus when claimNumber exists', async () => {
       mocks.mockValidateTransition.mockReturnValue({ allowed: true, metadata: {} });
-      mocks.mockDetectSignals.mockResolvedValue([]);
+      mocks.mockDetectSignals.mockReturnValue([]);
 
       const updatedClaim = { ...baseClaim, status: 'under_review', progress: 25 };
       const mockTx = {
         select: vi.fn()
           .mockReturnValueOnce(chain([{ claimNumber: 'CLM-001' }]))
-          .mockReturnValueOnce(chain([baseClaim]))
-          .mockReturnValueOnce(chain([{ role: 'steward' }])),
+          .mockReturnValueOnce(chain([baseClaim])),
         update: vi.fn(() => chain([updatedClaim])),
         insert: vi.fn(() => chain(undefined)),
       };
@@ -567,4 +487,39 @@ describe('workflow-engine', () => {
       expect(result.success).toBe(true);
     });
   });
+  describe('transitive action and atomicity regressions', () => {
+    const claim={claimId:'uuid-1',id:'internal',claimNumber:'CLM-1',organizationId:'org1',memberId:'member',
+      status:'submitted',priority:'medium',description:'Synthetic description long enough',createdAt:new Date(),updatedAt:new Date()};
+    const storedHistory=vi.fn();
+    const tx=()=>({select:vi.fn(()=>chain([claim])),update:vi.fn(()=>chain([{...claim,status:'under_review'}])),insert:vi.fn(()=>({values:(value:unknown)=>{storedHistory(value);return Promise.resolve([])}}))});
+    it('refuses a forged caller before any query or write', async()=>{
+      const db=tx(); await expect(updateClaimStatus('CLM-1','under_review','forged',undefined,db as never)).rejects.toThrow('live session');
+      expect(db.select).not.toHaveBeenCalled();expect(db.update).not.toHaveBeenCalled();expect(mocks.queueMail).not.toHaveBeenCalled();
+    });
+    it('does not widen a denied kernel transition in a downstream service', async()=>{
+      const db=tx();mocks.findReadable.mockRejectedValue(new Error('Kernel denied'));
+      await expect(updateClaimStatus('CLM-1','under_review','user1',undefined,db as never)).rejects.toThrow('Kernel denied');
+      expect(db.update).not.toHaveBeenCalled();expect(mocks.queueMail).not.toHaveBeenCalled();
+    });
+    it('propagates mandatory audit failure without queue or provider effects', async()=>{
+      const db=tx();mocks.mockDetectSignals.mockReturnValue([]);mocks.mockValidateTransition.mockReturnValue({allowed:true});
+      mocks.audit.mockRejectedValue(new Error('audit failed'));
+      await expect(updateClaimStatus('CLM-1','under_review','user1','staff-only reason',db as never)).rejects.toThrow('audit failed');
+      expect(mocks.queueMail).not.toHaveBeenCalled();expect(mocks.mockSendNotification).not.toHaveBeenCalled();
+    });
+    it('writes a generic member event and durable state-only notice while auditing the private reason', async()=>{
+      const db=tx();mocks.mockDetectSignals.mockReturnValue([]);mocks.mockValidateTransition.mockReturnValue({allowed:true});
+      mocks.mockValidateTransition.mockReturnValue({allowed:true,warnings:['private FSM warning'],metadata:{slaCompliant:false,daysInState:4,nextDeadline:new Date('2026-11-18T00:00:00Z')}});
+      await updateClaimStatus('CLM-1','under_review','user1','staff-only reason',db as never);
+      expect(storedHistory).toHaveBeenLastCalledWith({claimId:'internal',updateType:'status_change',message:"Status changed from 'submitted' to 'under_review'",createdBy:'user1',isInternal:false,visibilityScope:'member',metadata:{previousStatus:'submitted',newStatus:'under_review'}});
+      expect(mocks.audit).toHaveBeenCalledWith(db,expect.objectContaining({details:expect.objectContaining({reason:'staff-only reason',fsmValidation:expect.objectContaining({warnings:['private FSM warning']})})}));
+      expect(mocks.queueMail).toHaveBeenCalledWith(db,{organizationId:'org1',caseId:'uuid-1',queuedBy:'user1',recipientId:'member',previousStatus:'submitted',newStatus:'under_review'});
+      expect(mocks.mockSendNotification).not.toHaveBeenCalled();expect(mocks.mockAddTimeline).not.toHaveBeenCalled();
+    });
+    it('does not enumerate a candidate whose live kernel scope was revoked', async()=>{
+      mocks.mockSelect.mockReturnValue(chain([{...claim,createdAt:new Date('2024-01-01'),statusChangedAt:new Date('2024-01-01')}]));
+      mocks.batch.mockResolvedValue(new Map([['uuid-1',{'case:read':{effect:'deny',scope:{}}}]]));expect(await getOverdueClaims()).toEqual([]);
+    });
+  });
+
 });

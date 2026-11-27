@@ -189,6 +189,9 @@ export async function proveAuthExecutionBoundary(clients: AuthProofClients) {
     await scoped(authSystem, context, async client => {
       assert.equal((await client.query('UPDATE user_management.user_sessions SET is_active=false')).rowCount, 1)
     })
+    for (const state of [true, null])
+      await denied(() => scoped(authSystem, context, client => client.query('UPDATE user_management.user_sessions SET is_active=$1', [state])))
+    assert.deepEqual((await owner.query("SELECT is_active FROM user_management.user_sessions WHERE user_id='auth-proof-b'")).rows, [{ is_active: false }])
     await denied(() => scoped(authSystem, context, client => client.query('SELECT * FROM user_management.users')))
     const membership = { ...context, operation: 'membership-state' as const, organizationId: '22222222-2222-4222-8222-222222222222' }
     await scoped(authSystem, membership, async client => {

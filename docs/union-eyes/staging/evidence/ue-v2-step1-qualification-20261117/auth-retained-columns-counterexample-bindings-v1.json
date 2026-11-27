@@ -1,0 +1,28 @@
+{
+  "proof": "RESTRICTED_AUTH_SQL_ACCESS_TO_RETAINED_NONCANONICAL_COLUMNS",
+  "environment": "Owned disposable PGlite SQL engine; no native, deployed or normal API response disclosure claim",
+  "candidateIsFinal": false,
+  "artifacts": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-v1.json",
+      "sha256": "d5c532a8026dbfa71d59a1612674be38d082758863af8253e96c8a20f3f4ab5c",
+      "bytes": 6037
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/auth-retained-columns-counterexample-v1.txt",
+      "sha256": "a4cf548f7addf25c08d2902ffb05cc160be1f5f906cc605a27b04bdd60b2fcdf",
+      "bytes": 292
+    }
+  ],
+  "privateReproducerSha256": "9c5a6bcdddafb392247bf50c896a9b999293620becf79dd62e0f2f4da5ed1895",
+  "rawSensitiveValuesPersisted": false,
+  "finding": "12 retained-field SELECTs allowed across identity-own-user and exact-email lookup, 2 canonical positive controls, 0 foreign rows",
+  "sqlEngineClosed": true,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "1bbce380b6f2e5e9b452772f5c556d05484c7b2b3d3db57eb47eb7052e0ec45b",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/auth-retained-columns-counterexample-bindings-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

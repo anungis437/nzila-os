@@ -1,378 +1,43 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest'
+import * as service from '../wallet-service'
+import { RewardsInstitutionalAuthorityUnavailable } from '@/lib/rewards/credit-authority'
 
-/* ---------- hoisted mocks ---------- */
-const mocks = vi.hoisted(() => ({
-  mockInsert: vi.fn(),
-  mockUpdate: vi.fn(),
-  mockDelete: vi.fn(),
-  mockTransaction: vi.fn(),
-  mockValues: vi.fn(),
-  mockReturning: vi.fn(),
-  mockSet: vi.fn(),
-  mockDeleteWhere: vi.fn(),
-  mockExecute: vi.fn(),
-}));
+const io = vi.hoisted(() =>
+  vi.fn(() => {
+    throw new Error('unexpected business IO')
+  }),
+)
+vi.mock('@/db', () => ({ db: new Proxy({}, { get: () => io }) }))
 
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: any[]) => args),
-  and: vi.fn((...args: any[]) => args),
-  or: vi.fn((...args: any[]) => args),
-  desc: vi.fn(),
-  asc: vi.fn(),
-  sql: vi.fn(),
-  gt: vi.fn(),
-  lt: vi.fn(),
-  gte: vi.fn(),
-  lte: vi.fn(),
-  inArray: vi.fn(),
-  isNull: vi.fn(),
-  between: vi.fn(),
-  like: vi.fn(),
-  ilike: vi.fn(),
-  not: vi.fn(),
-  ne: vi.fn((...a: any[]) => a),
-  count: vi.fn(),
-  sum: vi.fn(),
-  avg: vi.fn(),
-  min: vi.fn(),
-  max: vi.fn(),
-  relations: vi.fn(() => ({})),
-}));
-
-vi.mock('drizzle-orm/pg-core', () => ({}));
-vi.mock('drizzle-orm/postgres-js', () => ({}));
-
-vi.mock('@/db', () => {
-  const mockUpdateWhere = vi.fn().mockReturnValue({ returning: mocks.mockReturning });
-  mocks.mockSet.mockReturnValue({ where: mockUpdateWhere });
-  mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
-
-  mocks.mockReturning.mockResolvedValue([]);
-  mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
-  mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
-
-  mocks.mockDeleteWhere.mockResolvedValue(undefined);
-  mocks.mockDelete.mockReturnValue({ where: mocks.mockDeleteWhere });
-
-  const mockOffset = vi.fn().mockResolvedValue([]);
-  const mockLimit = vi.fn().mockReturnValue({ offset: mockOffset });
-  const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-  const mockSelectWhere = vi.fn().mockReturnValue({
-    orderBy: mockOrderBy,
-    limit: mockLimit,
-  });
-  const mockSelectFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
-  const mockSelect = vi.fn().mockReturnValue({ from: mockSelectFrom });
-
-  return {
-    db: {
-      select: mockSelect,
-      insert: mocks.mockInsert,
-      update: mocks.mockUpdate,
-      delete: mocks.mockDelete,
-      execute: mocks.mockExecute,
-      transaction: mocks.mockTransaction,
-    },
-  };
-});
-
-vi.mock('@/db/schema/domains/infrastructure/rewards', () => ({
-  rewardWalletLedger: {
-    id: 'id',
-    orgId: 'orgId',
-    userId: 'userId',
-    eventType: 'eventType',
-    amountCredits: 'amountCredits',
-    balanceAfter: 'balanceAfter',
-    createdAt: 'createdAt',
-  },
-}));
-
-import {
-  getBalance,
-  listLedger,
-  applyLedgerEntry,
-  adminAdjustBalance,
-  getLedgerSummary,
-  getBulkBalances,
-} from '../wallet-service';
-
-describe('wallet-service', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  /* ============================= getBalance ============================= */
-  describe('getBalance', () => {
-    it('returns 0 when no ledger entries exist', async () => {
-      const { db } = await import('@/db');
-      const mockLimit = vi.fn().mockResolvedValue([]);
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-
-      const result = await getBalance('org-1', 'user-1');
-
-      expect(result).toBe(0);
-    });
-
-    it('returns latest balance when entry exists', async () => {
-      const { db } = await import('@/db');
-      const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 500 }]);
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-
-      const result = await getBalance('org-1', 'user-1');
-
-      expect(result).toBe(500);
-    });
-  });
-
-  /* ============================= listLedger ============================= */
-  describe('listLedger', () => {
-    it('returns entries and total count', async () => {
-      const entries = [{ id: 'e-1' }, { id: 'e-2' }];
-      const { db } = await import('@/db');
-
-      // First call: entries
-      const mockOffset = vi.fn().mockResolvedValue(entries);
-      const mockLimit = vi.fn().mockReturnValue({ offset: mockOffset });
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-
-      // Second call: count
-      const mockCountWhere = vi.fn().mockResolvedValue([{ count: 42 }]);
-      const mockCountFrom = vi.fn().mockReturnValue({ where: mockCountWhere });
-
-      vi.mocked(db.select)
-        .mockReturnValueOnce({ from: mockFrom })
-        .mockReturnValueOnce({ from: mockCountFrom });
-
-      const result = await listLedger('org-1', 'user-1');
-
-      expect(result.entries).toEqual(entries);
-      expect(result.total).toBe(42);
-    });
-  });
-
-  /* ============================= applyLedgerEntry ============================= */
-  describe('applyLedgerEntry', () => {
-    it('inserts ledger entry with correct balance', async () => {
-      const { db } = await import('@/db');
-
-      // Mock select for latest entry
-      const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 100 }]);
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-
-      // Mock insert
-      const newEntry = { id: 'le-1', balanceAfter: 150, amountCredits: 50 };
-      mocks.mockReturning.mockResolvedValueOnce([newEntry]);
-      const expiresAt = new Date('2027-01-01T00:00:00Z');
-
-      const result = await applyLedgerEntry(db, {
-        orgId: 'org-1',
-        userId: 'user-1',
-        eventType: 'earn',
-        amountCredits: 50,
-        sourceType: 'award',
-        expiresAt,
-      });
-
-      expect(result).toEqual(newEntry);
-      expect(mocks.mockInsert).toHaveBeenCalled();
-      expect(mocks.mockValues).toHaveBeenCalledWith(expect.objectContaining({
-        orgId: 'org-1', userId: 'user-1', eventType: 'earn',
-        amountCredits: 50, balanceAfter: 150, expiresAt,
-      }));
-    });
-
-    it('rejects expiration metadata on a debit before reading or writing the ledger', async () => {
-      const { db } = await import('@/db');
-      await expect(applyLedgerEntry(db, {
-        orgId: 'org-1', userId: 'u-1', eventType: 'spend',
-        amountCredits: -50, sourceType: 'redemption', expiresAt: new Date(),
-      })).rejects.toThrow('Expiration requires');
-      expect(db.select).not.toHaveBeenCalled();
-      expect(mocks.mockInsert).not.toHaveBeenCalled();
-    });
-
-    it('throws when balance would go negative', async () => {
-      const { db } = await import('@/db');
-
-      const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 30 }]);
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-
-      await expect(
-        applyLedgerEntry(db, {
-          orgId: 'org-1',
-          userId: 'user-1',
-          eventType: 'spend',
-          amountCredits: -50,
-          sourceType: 'redemption',
-        })
-      ).rejects.toThrow('Insufficient balance');
-    });
-
-    it('does not claim an override can bypass the canonical non-negative constraint', async () => {
-      const { db } = await import('@/db');
-
-      const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 10 }]);
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-
-      await expect(applyLedgerEntry(
-        db,
-        {
-          orgId: 'org-1',
-          userId: 'u-1',
-          eventType: 'adjust',
-          amountCredits: -50,
-          sourceType: 'admin_adjustment',
-        },
-        true
-      )).rejects.toThrow('Negative balances are prohibited');
-      expect(mocks.mockInsert).not.toHaveBeenCalled();
-    });
-
-    it('handles first-time user with no entries', async () => {
-      const { db } = await import('@/db');
-
-      const mockLimit = vi.fn().mockResolvedValue([]);
-      const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-
-      const newEntry = { id: 'le-1', balanceAfter: 100 };
-      mocks.mockReturning.mockResolvedValueOnce([newEntry]);
-
-      const result = await applyLedgerEntry(db, {
-        orgId: 'org-1',
-        userId: 'new-user',
-        eventType: 'earn',
-        amountCredits: 100,
-        sourceType: 'award',
-      });
-
-      expect(result.balanceAfter).toBe(100);
-    });
-  });
-
-  /* ============================= adminAdjustBalance ============================= */
-  describe('adminAdjustBalance', () => {
-    it('creates adjustment through transaction', async () => {
-      const entry = { id: 'le-1', balanceAfter: 200 };
-
-      mocks.mockTransaction.mockImplementation(async (cb: (tx: any) => unknown) => {
-        // Mock the TX with select and insert chains
-        const mockLimit = vi.fn().mockResolvedValue([{ balanceAfter: 100 }]);
-        const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit });
-        const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
-        const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-
-        const tx = {
-          select: vi.fn().mockReturnValue({ from: mockFrom }),
-          insert: vi.fn().mockReturnValue({
-            values: vi.fn().mockReturnValue({
-              returning: vi.fn().mockResolvedValue([entry]),
-            }),
-          }),
-        };
-        return cb(tx);
-      });
-
-      const result = await adminAdjustBalance('org-1', 'u-1', 100, 'admin-1', 'Correction');
-
-      expect(result).toEqual(entry);
-    });
-  });
-
-  /* ============================= getLedgerSummary ============================= */
-  describe('getLedgerSummary', () => {
-    it('returns summary with totals', async () => {
-      const { db } = await import('@/db');
-
-      const mockWhere = vi.fn().mockResolvedValue([
-        { totalIssued: 5000, totalSpent: 2000, activeMembers: 15 },
-      ]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-      mocks.mockExecute.mockResolvedValue([{ total: 3000 }]);
-
-      const result = await getLedgerSummary('org-1');
-
-      expect(result.totalCreditsIssued).toBe(5000);
-      expect(result.totalCreditsSpent).toBe(2000);
-      expect(result.activeMembers).toBe(15);
-    });
-
-    it('applies date range when startDate and endDate are provided', async () => {
-      const { db } = await import('@/db');
-
-      const mockWhere = vi.fn().mockResolvedValue([
-        { totalIssued: 1000, totalSpent: 200, activeMembers: 3 },
-      ]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-      mocks.mockExecute.mockResolvedValue([{ total: 800 }]);
-
-      const start = new Date('2026-01-01');
-      const end = new Date('2026-03-31');
-      const result = await getLedgerSummary('org-1', start, end);
-
-      expect(result.totalCreditsIssued).toBe(1000);
-      expect(result.activeMembers).toBe(3);
-    });
-  });
-
-  /* ============================= getBulkBalances ============================= */
-  describe('getBulkBalances', () => {
-    it('returns empty map for empty user list', async () => {
-      const result = await getBulkBalances('org-1', []);
-
-      expect(result.size).toBe(0);
-    });
-
-    it('returns balance map and fills zeroes for missing', async () => {
-      mocks.mockExecute.mockResolvedValue([
-        { user_id: 'u-1', balance_after: 300 },
-      ]);
-
-      const result = await getBulkBalances('org-1', ['u-1', 'u-2']);
-
-      expect(result.get('u-1')).toBe(300);
-      expect(result.get('u-2')).toBe(0);
-    });
-  });
-
-  /* ── Batch 33: branch gap-fill ── */
-
-  describe('getLedgerSummary (partial date range)', () => {
-    it('skips date filter when only startDate provided (endDate undefined)', async () => {
-      const { db } = await import('@/db');
-      const mockWhere = vi.fn().mockResolvedValue([
-        { totalIssued: 500, totalSpent: 100, activeMembers: 2 },
-      ]);
-      const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
-      vi.mocked(db.select).mockReturnValue({ from: mockFrom });
-      mocks.mockExecute.mockResolvedValue([{ total: 400 }]);
-
-      const start = new Date('2026-01-01');
-      const result = await getLedgerSummary('org-1', start);
-
-      expect(result.totalCreditsIssued).toBe(500);
-    });
-  });
-});
+describe('deferred wallet reward authority', () => {
+  it.each([
+    'getBalance',
+    'listLedger',
+    'getWalletSnapshot',
+    'applyLedgerEntry',
+    'adminAdjustBalance',
+    'getLedgerSummary',
+    'getBulkBalances',
+  ])('%s refuses before any business effect', async (name) => {
+    io.mockClear()
+    const entry = service[name as keyof typeof service] as (...args: unknown[]) => unknown
+    let error: unknown
+    try {
+      await entry(
+        new Proxy(
+          {},
+          {
+            get() {
+              throw new Error('input reached deferred implementation')
+            },
+          },
+        ),
+      )
+    } catch (caught) {
+      error = caught
+    }
+    expect(error).toBeInstanceOf(RewardsInstitutionalAuthorityUnavailable)
+    expect(error).toMatchObject({ status: 501, code: 'NOT_IMPLEMENTED' })
+    expect(io).not.toHaveBeenCalled()
+  })
+})

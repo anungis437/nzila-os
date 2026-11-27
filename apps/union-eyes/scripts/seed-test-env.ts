@@ -7,14 +7,26 @@ assertNotProduction('seed-test-env')
 import { organizations } from '@/db/schema-organizations'
 import { claims, claimUpdates } from '@/db/schema'
 import { organizationMembers } from '@/db/schema/organization-members-schema'
-import { organizationUsers } from '@/db/schema/domains/member/user-management'
 import { profiles } from '@/db/schema/profiles-schema'
-import { authOrgPolicies, authOrganizationUsers, authUserSessions, authUsers } from '@nzila/db/schema'
+import {
+  authOrgPolicies,
+  authOrganizationUsers,
+  authUserSessions,
+  authUsers,
+  authMfaTotp,
+} from '@nzila/db/schema'
 import { hashPassword } from '@nzila/platform-auth/password'
+import { encryptSecret } from '@nzila/platform-auth/mfa'
+import {
+  createRuntimeFixtureAuth,
+  readRuntimeFixtureAuth,
+  writeRuntimeFixtureAuth,
+} from './runtime/fixture-auth'
 import { UE_TEST_ORGS } from '@/tests/fixtures/test-orgs'
 import { UE_TEST_USERS, UE_TEST_USER_PASSWORD } from '@/tests/fixtures/test-users'
 import { UE_TEST_CASES } from '@/tests/fixtures/test-cases'
-import { seedQaCaseAssignments } from './seed-test-env-kernel'
+import { runQaRuntimeActor, seedQaCaseAssignments } from './seed-test-env-kernel'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { PLATFORM_MODULES } from '@/services/platform-economics/entitlement-guard'
 
 /** Synthetic grants for the QA organizations only; idempotent and marked so they can never be mistaken for a contract. */
@@ -61,40 +73,6 @@ function assertSafeRuntime(): void {
   }
 }
 
-
-/** Soft-skip helper for non-RBAC seed tables (claim_updates). */
-function isNonCriticalSeedSchemaDrift(error: any): boolean {
-  if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string }; code?: string }).cause
-  const code = cause?.code ?? (error as { code?: string }).code
-  // 42703 undefined_column is schema drift. A 23502 or 23503 here is a fixture bug, not drift.
-  return code === '42703'
-}
-
-function isMissingRelationError(error: any): boolean {
-  if (!error || typeof error !== 'object') return false
-  const cause = (error as { cause?: { code?: string } }).cause
-  return cause?.code === '42P01'
-}
-
-// Per docs/nzila-runtime-integrity/full-seeded-persona-legitimacy-hardening.md and
-// docs/nzila-runtime-integrity/full-dashboard-runtime-failure-integrity.md, silent
-// collapse must become observable evidence — log the underlying PG error code,
-// message, and (if available) the offending column so the next CI run reveals the
-// actual schema-drift cause rather than masking it behind a generic warning.
-function describePgError(error: any): string {
-  if (!error || typeof error !== 'object') return String(error)
-  const cause = (error as { cause?: { code?: string; message?: string; column?: string; detail?: string; table?: string } }).cause
-  if (!cause) return (error as { message?: string }).message ?? String(error)
-  const parts: string[] = []
-  if (cause.code) parts.push(`code=${cause.code}`)
-  if (cause.table) parts.push(`table=${cause.table}`)
-  if (cause.column) parts.push(`column=${cause.column}`)
-  if (cause.message) parts.push(`message=${cause.message}`)
-  if (cause.detail) parts.push(`detail=${cause.detail}`)
-  return parts.join(' ')
-}
-
 function assertDeterministicInputs(): void {
   const orgIds = Object.values(UE_TEST_ORGS).map((o) => o.id)
   const userIds = Object.values(UE_TEST_USERS).map((u) => u.userId)
@@ -122,88 +100,58 @@ async function seed(): Promise<void> {
   // One row id per fixture claim, shared by the claims insert and the claim_updates foreign key.
   const claimRowIds = new Map(casesFixture.map((c) => [c.claimId, randomUUID()] as const))
 
-  // Main transaction: wipe and reseed core tables
+  const operatorUrl = process.env.UE_RUNTIME_OPERATOR_DATABASE_URL
+  const runtimeUrl = process.env.UE_RUNTIME_DATABASE_URL
+  if (
+    !operatorUrl ||
+    operatorUrl !== process.env.DATABASE_URL ||
+    !runtimeUrl ||
+    process.env.UE_CANONICAL_BOOTSTRAP_V2 !== '1'
+  )
+    throw new Error('Explicit operator fixture setup and canonical runtime credentials required')
+  const operatorTarget = new URL(operatorUrl)
+  if (
+    operatorTarget.hostname !== '127.0.0.1' ||
+    operatorTarget.username !== 'uev2admin' ||
+    operatorTarget.pathname !== '/ue_runtime'
+  )
+    throw new Error('Owned local fixture operator required')
+  const priorAuth = readRuntimeFixtureAuth(operatorUrl)
+  const present = await db
+    .select({ userId: authUsers.userId, email: authUsers.email })
+    .from(authUsers)
+    .where(inArray(authUsers.userId, userIds))
+  if (present.length) {
+    if (
+      present.length !== usersFixture.length ||
+      !priorAuth ||
+      present.some(
+        (row) => usersFixture.find((user) => user.userId === row.userId)?.email !== row.email,
+      ) ||
+      usersFixture.some(
+        (user) =>
+          priorAuth.users[user.userId]?.email !== user.email ||
+          priorAuth.users[user.userId]?.organizationId !== user.orgId,
+      )
+    )
+      throw new Error(
+        'Partial or conflicting owned fixture requires a new runtime or explicit fresh setup',
+      )
+    await seedQaCaseAssignments(operatorUrl, {
+      runtimeUrl,
+      sessions: Object.fromEntries(
+        Object.entries(priorAuth.users).map(([id, person]) => [id, person.sessionToken]),
+      ),
+    })
+    console.log(
+      '[ue:seed:test-env] Existing owned core fixtures preserved; canonical case authority verified',
+    )
+    return
+  }
+  const authFixture = createRuntimeFixtureAuth(operatorUrl, usersFixture)
+  // Initial trusted fixture data only. Existing identities, history and audit
+  // records are never deleted to make a repeat execution pass.
   await db.transaction(async (tx) => {
-    const safeCleanup = async (label: string, fn: () => Promise<void>): Promise<void> => {
-      try {
-        await fn()
-      } catch (error) {
-        if (isMissingRelationError(error)) {
-          console.warn(`[ue:seed:test-env] cleanup skipped, relation missing: ${label}`)
-          return
-        }
-        throw error
-      }
-    }
-
-    const tableExists = async (qualifiedName: string): Promise<boolean> => {
-      const result = await tx.execute(sql`select to_regclass(${qualifiedName}) as regclass`)
-      const row = (result as any as Array<{ regclass?: string | null }>)[0]
-      return Boolean(row?.regclass)
-    }
-
-    // Wipe deterministic test footprint only.
-    if (await tableExists('claim_updates')) {
-      await safeCleanup('claim_updates', async () => {
-        // claim_updates.claim_id references claims.id, not the fixture's claim_id business key.
-        const seededClaims = tx.select({ id: claims.id }).from(claims).where(inArray(claims.claimId, claimIds))
-        await tx.delete(claimUpdates).where(inArray(claimUpdates.claimId, seededClaims))
-      })
-    }
-    if (await tableExists('claims')) {
-      await safeCleanup('claims', async () => {
-        await tx.delete(claims).where(inArray(claims.claimId, claimIds))
-      })
-    }
-
-    await safeCleanup('auth_user_sessions', async () => {
-      await tx.delete(authUserSessions).where(inArray(authUserSessions.userId, userIds))
-    })
-    await safeCleanup('auth_organization_users', async () => {
-      await tx.delete(authOrganizationUsers).where(inArray(authOrganizationUsers.userId, userIds))
-    })
-    await safeCleanup('auth_org_policies', async () => {
-      await tx.delete(authOrgPolicies).where(inArray(authOrgPolicies.organizationId, orgIds))
-    })
-
-    await safeCleanup('organization_members', async () => {
-      await tx.delete(organizationMembers).where(inArray(organizationMembers.userId, userIds))
-    })
-    await safeCleanup('user_management.organization_users', async () => {
-      await tx.delete(organizationUsers).where(inArray(organizationUsers.userId, userIds))
-    })
-    const profilesAvailable = await tableExists('profiles')
-    if (profilesAvailable) {
-      await safeCleanup('profiles', async () => {
-        await tx.delete(profiles).where(inArray(profiles.userId, userIds))
-      })
-    } else {
-      console.warn('[ue:seed:test-env] profiles table absent in this environment; skipping profile seed')
-    }
-
-    // Deterministic QA reset: clear audit/security tables entirely so no FK residue blocks user cleanup.
-    // Canonical PG15 snapshot may omit audit_security (legacy-lineage only).
-    // Pre-check with to_regclass — a failed DELETE aborts the surrounding transaction,
-    // so catch-based safeCleanup alone is insufficient here.
-    if (await tableExists('audit_security.security_events')) {
-      await safeCleanup('audit_security.security_events', async () => {
-        await tx.execute(sql`delete from audit_security.security_events`)
-      })
-    } else {
-      console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.security_events')
-    }
-    if (await tableExists('audit_security.audit_logs')) {
-      await safeCleanup('audit_security.audit_logs', async () => {
-        await tx.execute(sql`delete from audit_security.audit_logs`)
-      })
-    } else {
-      console.warn('[ue:seed:test-env] cleanup skipped, relation missing: audit_security.audit_logs')
-    }
-
-    // Remove existing QA orgs and recreate deterministically. The synthetic entitlements reference them (ON DELETE RESTRICT).
-    await tx.execute(sql`DELETE FROM org_entitlements WHERE organization_id IN (${sql.join(orgIds.map((id) => sql`${id}::uuid`), sql`, `)})`)
-    await tx.delete(organizations).where(inArray(organizations.id, orgIds))
-
     await tx.insert(organizations).values(
       orgs.map((org) => ({
         id: org.id,
@@ -298,11 +246,11 @@ async function seed(): Promise<void> {
         },
       })
 
-    // Seed one deterministic localhost session per user to keep risk scoring
-    // in low tier for QA E2E password logins.
+    // Opaque private setup bearers are validated through the real auth gateway
+    // for governance setup. Browser journeys obtain different sessions by password and MFA.
     await tx.insert(authUserSessions).values(
       usersFixture.map((u) => {
-        const rawToken = `ue-seed-session-${u.userId}`
+        const rawToken = authFixture.users[u.userId]!.sessionToken
         return {
           userId: u.userId,
           organizationId: u.orgId,
@@ -310,13 +258,26 @@ async function seed(): Promise<void> {
           sessionTokenHash: createHash('sha256').update(rawToken).digest('hex'),
           ipAddress: '127.0.0.1',
           userAgent: 'playwright-e2e-auth',
-          expiresAt: new Date('2099-01-01T00:00:00.000Z'),
-          isActive: true,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          isActive: u.status === 'active',
           createdAt: NOW,
           lastUsedAt: NOW,
         }
       }),
     )
+
+    await tx
+      .insert(authMfaTotp)
+      .values(
+        usersFixture.map((user) => ({
+          userId: user.userId,
+          secretEncrypted: encryptSecret(authFixture.users[user.userId]!.mfaSecret),
+          enabledAt: new Date(),
+          recoveryCodesHashed: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+      )
 
     await tx.insert(authOrgPolicies).values(
       orgs.map((org) => ({
@@ -339,7 +300,7 @@ async function seed(): Promise<void> {
     // resolves on the first request. Without this, the layout takes the
     // auto-create branch which races dashboard/page.tsx in parallel and can
     // leave the role redirect un-issued (institutional identity substrate gap).
-    if (profilesAvailable) {
+    {
       await tx
         .insert(profiles)
         .values(
@@ -429,47 +390,56 @@ async function seed(): Promise<void> {
     )
   })
 
-  // Separate transaction for claim_updates. Only an undefined column (real drift against an
-  // older snapshot) is skipped. A foreign key or NOT NULL violation is a bug in this fixture.
-  try {
-    await db.transaction(async (tx) => {
-      await tx.insert(claimUpdates).values(
-        casesFixture.map((c, index) => ({
-          // Snapshot claim_updates.id/update_id often NOT NULL without server DEFAULT.
+  // Case authority is relationship-based: give the QA steward the QA cases (synthetic fixture, audited by the store).
+  writeRuntimeFixtureAuth(authFixture)
+  const qaContext = {
+    runtimeUrl,
+    sessions: Object.fromEntries(
+      Object.entries(authFixture.users).map(([id, person]) => [id, person.sessionToken]),
+    ),
+  }
+  // Initial synthetic history: each case's member adds one note to their own case through the
+  // application's path (bearer-bound runtime session, the note and its audit record in one transaction),
+  // exactly as POST /api/cases/[caseId]/notes does. The deferred history-audit guard refuses history
+  // written any other way, including by the operator.
+  for (const [index, c] of casesFixture.entries()) {
+    const message = `Deterministic QA baseline #${index + 1}`
+    await runQaRuntimeActor(qaContext, c.memberId, async (tx) => {
+      const [note] = await tx
+        .insert(claimUpdates)
+        .values({
+          // Snapshot claim_updates.id/update_id are NOT NULL without a server DEFAULT.
           id: randomUUID(),
           updateId: randomUUID(),
-          // The FK targets claims.id, which is the row id inserted above.
+          // The FK targets claims.id, the row id inserted above.
           claimId: claimRowIds.get(c.claimId)!,
-          updateType: 'seed_baseline',
-          message: `Deterministic QA baseline #${index + 1}`,
+          updateType: 'note',
+          message,
           createdBy: c.memberId,
           isInternal: false,
-          visibilityScope: 'member' as const,
-          metadata: {
-            seed: true,
-            narRequired: true,
-            decisionRequired: true,
-          },
-          createdAt: NOW,
-          updatedAt: NOW,
-        })),
-      )
+          visibilityScope: 'member',
+        })
+        .returning()
+      if (!note?.updateId) throw new Error('QA baseline history row was not written')
+      await persistAtomicAudit(tx, {
+        organizationId: c.organizationId,
+        userId: c.memberId,
+        action: 'case.note.add',
+        resourceType: 'claim_updates',
+        resourceId: note.updateId,
+        details: { event: 'CASE_NOTE_ADDED', caseId: c.claimId, isInternal: false, contentLength: message.length },
+      })
     })
-  } catch (error) {
-    // claim_updates is not load-bearing for RBAC/role-nav E2E; soft-skip drift.
-    if (!isNonCriticalSeedSchemaDrift(error)) throw error
-    console.warn(
-      `[ue:seed:test-env] claim_updates insert skipped due schema drift: ${describePgError(error)}`,
-    )
   }
-
-  // Case authority is relationship-based: give the QA steward the QA cases (synthetic fixture, audited by the store).
-  const assignments = await seedQaCaseAssignments(process.env.DATABASE_URL as string)
+  const assignments = await seedQaCaseAssignments(operatorUrl, qaContext)
   console.log(`[ue:seed:test-env] QA case assignments created: ${assignments}`)
 
   // Module entitlements are institutional grants. The QA organizations get synthetic, clearly marked grants for every module
   // so the application can be exercised end to end; no production organization is ever touched (see assertSafeRuntime).
-  const entitlementCount = await seedQaEntitlements([UE_TEST_ORGS.primary.id, UE_TEST_ORGS.secondary.id])
+  const entitlementCount = await seedQaEntitlements([
+    UE_TEST_ORGS.primary.id,
+    UE_TEST_ORGS.secondary.id,
+  ])
   console.log(`[ue:seed:test-env] QA module entitlements granted: ${entitlementCount}`)
 
   // Required containment artifacts for external UX tester access.
@@ -484,7 +454,6 @@ async function seed(): Promise<void> {
         externalTesterUser: UE_TEST_USERS.restrictedUxTester.userId,
         suspendedUser: UE_TEST_USERS.suspendedMember.userId,
         productionLikeOrgGuardrail: UE_TEST_ORGS.productionLike.id,
-        qaPassword: UE_TEST_USER_PASSWORD,
       },
       null,
       2,
@@ -493,6 +462,16 @@ async function seed(): Promise<void> {
 }
 
 seed().catch((error) => {
-  console.error('[ue:seed:test-env] Failed', error)
+  const failure = error as {
+    name?: string
+    code?: string
+    cause?: { code?: string; table?: string; column?: string }
+  }
+  console.error('[ue:seed:test-env] Failed', {
+    name: failure.name,
+    code: failure.cause?.code ?? failure.code,
+    table: failure.cause?.table,
+    column: failure.cause?.column,
+  })
   process.exit(1)
 })

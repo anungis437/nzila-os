@@ -247,14 +247,15 @@ describe('the platform settings', () => {
 describe('the data-source overview', () => {
   it('counts every organization as the system role, in one system context and no organization context', async () => {
     txDouble.queue(
-      [{ c: 10 }], [{ c: 20 }], [{ c: 30 }], [{ c: 40 }],
+      [{ c: 10 }], [{ c: 20 }], [{ c: 30 }],
       [{ c: 1 }], [{ c: 2 }], [{ c: 3 }], [{ c: 4 }],
       [{ id: 's1', source: 'statcan', status: 'completed' }],
     );
 
     const overview = await loadDataSourceOverview();
 
-    expect(overview.internalCounts).toEqual({ claims: 10, organization_members: 20, claim_deadlines: 30, dues_assignments: 40 });
+    // Dues are kept in an external system (lib/dues/member-dues-flag.ts): the overview counts no dues table.
+    expect(overview.internalCounts).toEqual({ claims: 10, organization_members: 20, claim_deadlines: 30 });
     expect(overview.externalCounts).toEqual({ wage_benchmarks: 1, union_density: 2, cost_of_living_data: 3, contribution_rates: 4 });
     expect(overview.totalExternalRecords).toBe(10);
     expect(overview.syncLogs).toEqual([{ id: 's1', source: 'statcan', status: 'completed' }]);
@@ -275,7 +276,7 @@ describe('the data-source overview', () => {
 
   it.each([
     ['a count', [[{ c: 1 }], new Error('permission denied for table claim_deadlines')]],
-    ['the sync history', [[{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], new Error('permission denied for table external_data_sync_log')]],
+    ['the sync history', [[{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], [{ c: 1 }], new Error('permission denied for table external_data_sync_log')]],
   ])('rejects, instead of showing zero records and an empty history, when %s cannot be read', async (_case, results) => {
     txDouble.queue(...results);
 

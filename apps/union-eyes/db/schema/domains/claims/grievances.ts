@@ -91,6 +91,7 @@ export const grievances = pgTable("grievances", {
   
   // Parties
   grievantId: uuid("grievant_id"),
+  representedMemberUserId: varchar("represented_member_user_id", { length: 255 }),
   grievantName: varchar("grievant_name", { length: 255 }),
   grievantEmail: varchar("grievant_email", { length: 255 }),
   unionRepId: uuid("union_rep_id"),

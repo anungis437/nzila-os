@@ -13,6 +13,7 @@ import { stewardAssignments } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { matchingRepresentativeEligible } from '@/lib/cases/assignment-eligibility';
 import { drizzleExecutor } from '@/lib/authority/store/route-adapter';
+import { ACTIVE_RECUSAL_SQL } from '@/lib/authority/common';
 import { representativeWorkloads } from '@/lib/cases/assignment-capacity';
 import { matchingExpertise, rankMatchingProfiles } from '@/lib/cases/assignment-ranking';
 import { eq, and, asc, sql } from "drizzle-orm";
@@ -156,7 +157,7 @@ export async function recommendSteward(
   const workloads = await representativeWorkloads(tx, orgId, activeStewards.map(profile => profile.userId));
   const recused = new Set((await drizzleExecutor(tx).query<{ principal_user_id: string }>(
     `SELECT principal_user_id FROM ue_authority_recusals WHERE organization_id=$1::uuid
-      AND resource_type='case' AND resource_id=$2::uuid AND lifted_at IS NULL`, [orgId, grievanceId],
+      AND resource_type='case' AND resource_id=$2::uuid AND ${ACTIVE_RECUSAL_SQL}`, [orgId, grievanceId],
   )).rows.map(row => row.principal_user_id));
   const ranked = rankMatchingProfiles(activeStewards.map(profile => ({
     id: profile.id, userId: profile.userId, specialization: profile.specialization,

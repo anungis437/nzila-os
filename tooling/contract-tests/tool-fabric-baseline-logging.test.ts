@@ -10,7 +10,7 @@ vi.mock('../../packages/os-core/src/telemetry/index', async (original) => ({
   ...await original<typeof import('../../packages/os-core/src/telemetry/index')>(),
   createLogger: () => state.logger,
 }))
-vi.mock('../../apps/nzila-hq/server/db/client', () => ({ getHqDb: state.getDb }))
+vi.mock('../../apps/nzila-hq/lib/db/client', () => ({ getHqDb: state.getDb }))
 vi.mock('../../apps/nzila-hq/server/db/schema', () => ({ auditLog: { occurredAt: 'time' } }))
 vi.mock('../../packages/agri-events/src/index', () => ({
   createAgriEventBus: () => ({ on: state.on, onAny: state.onAny, emit: state.emit }),

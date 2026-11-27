@@ -18,6 +18,11 @@
  * A profile is never relinked to another person by e-mail: the system role holds no UPDATE on profiles, dozens of tables reference
  * profiles.user_id, and an e-mail is not the identity. The same holds for a membership, except for the one pilot and demo convenience
  * described at linkSeededMemberships, which is off unless explicitly switched on and can never be on in production.
+ *
+ * All of the profile and membership bootstrap is the legacy lineage's. In canonical mode the canonical membership is live authority: the
+ * dashboard layout reads it (getCanonicalOrganizationContext) and never calls these, an e-mail never relinks a profile or a membership, and
+ * nothing is provisioned from a sign-in. So in canonical mode loadOrCreateProfile and ensureOrganizationMembership refuse before any
+ * statement (LegacyDashboardBootstrapRefused) rather than run a legacy path the canonical database does not admit.
  */
 import { and, asc, eq, isNull, ne, sql } from 'drizzle-orm';
 import { profiles } from '@/db/schema';
@@ -25,11 +30,26 @@ import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { escapeHatchActive } from '@/lib/runtime/production-guard';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
+
+/** The legacy profile and membership bootstrap, refused in canonical mode (see the module comment). */
+export class LegacyDashboardBootstrapRefused extends Error {
+  readonly code = 'LEGACY_DASHBOARD_BOOTSTRAP_REFUSED';
+  constructor() {
+    super('The legacy dashboard bootstrap is refused in canonical mode: the canonical membership is live authority, and a sign-in never creates or relinks a profile or a membership');
+    this.name = 'LegacyDashboardBootstrapRefused';
+  }
+}
+
+function refuseInCanonicalMode(): void {
+  if (currentStateContextEnabled()) throw new LegacyDashboardBootstrapRefused();
+}
 
 export type DashboardProfile = typeof profiles.$inferSelect;
 
 /** The profile of the signed-in person, created on their first visit; null only when it can neither be found nor created. */
-export function loadOrCreateProfile(input: { userId: string; email: string }): Promise<DashboardProfile | null> {
+export async function loadOrCreateProfile(input: { userId: string; email: string }): Promise<DashboardProfile | null> {
+  refuseInCanonicalMode();
   const { userId, email } = input;
   // 'system' keeps the authenticated user context and clears the organization: a profile belongs to a person, not to an organization.
   return withRLSContext({ organizationId: 'system', userId }, async (tx) => {
@@ -159,6 +179,7 @@ export async function ensureOrganizationMembership(input: {
   /** Pass isSeedMembershipLinkingAllowed(). Ignored in production, whatever it says. */
   linkSeededMemberships?: boolean;
 }): Promise<MembershipOutcome> {
+  refuseInCanonicalMode();
   const { userId, email } = input;
 
   if (await hasOwnMembership(userId)) return 'existing';

@@ -74,15 +74,6 @@ interface RecordedReferral {
   counselAccepted: boolean
 }
 
-interface WordingProposal {
-  id: string
-  version: string
-  body: string
-  bodySha256: string
-  ownProposal: boolean
-  proposedAt: string
-}
-
 /**
  * What a workaid route answered. A request that never reached the server is a refusal like any other (code NETWORK_ERROR), not an exception thrown into
  * an event handler or an effect, and a body that is not JSON is an empty answer whose status is the reason.
@@ -144,18 +135,12 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
   const [scopeChoice, setScopeChoice] = useState<Record<string, string[]>>({})
   const [releaseChoice, setReleaseChoice] = useState<Record<string, string[]>>({})
   const [releaseConfirmed, setReleaseConfirmed] = useState<Record<string, boolean>>({})
-  const [proposals, setProposals] = useState<WordingProposal[]>([])
-  const [wordingVersion, setWordingVersion] = useState('')
-  const [wordingBody, setWordingBody] = useState('')
-  const [wordingUnavailable, setWordingUnavailable] = useState(false)
 
-  const loadMember = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    const [textRes, listRes] = await Promise.all([
+
+  const loadMember = useCallback(() => Promise.all([
       readJson(fetch('/api/workaid/consent-text')),
       readJson(fetch('/api/workaid/consents')),
-    ])
+    ]).then(([textRes, listRes]) => {
     if (textRes.status === 409 && textRes.data.code === 'CONSENT_TEXT_UNAVAILABLE') {
       setConsentText(null)
       setTextUnavailable(true)
@@ -173,32 +158,17 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       setError(reasonOf(listRes))
     }
     setLoading(false)
-  }, [])
+  }), [])
 
-  const loadProposals = useCallback(async () => {
-    const result = await readJson(fetch('/api/workaid/consent-text/proposals'))
-    if (result.status === 501 && result.data.code === 'STORE_UNAPPLIED') {
-      setProposals([])
-      setWordingUnavailable(true)
-      return
-    }
-    setWordingUnavailable(false)
-    if (!result.ok) {
-      setError(reasonOf(result))
-      return
-    }
-    const rows = listOf<WordingProposal>(result.data.proposals)
-    if (rows === null) {
-      setError(UNEXPECTED_ANSWER)
-      return
-    }
-    setProposals(rows)
-  }, [])
+  async function refreshMember() {
+    setLoading(true)
+    setError(null)
+    await loadMember()
+  }
 
   useEffect(() => {
     if (audience === 'member') void loadMember()
-    if (audience === 'staff') void loadProposals()
-  }, [audience, loadMember, loadProposals])
+  }, [audience, loadMember])
 
   async function grantConsent() {
     if (!consentText || !acknowledged) return
@@ -221,7 +191,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       return
     }
     setNotice(t('recordedUnionSide'))
-    await loadMember()
+    await refreshMember()
   }
 
   async function revokeConsent(consentId: string) {
@@ -232,7 +202,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       return
     }
     setNotice(t('revoked'))
-    await loadMember()
+    await refreshMember()
   }
 
   async function revokeDocument(authorisationId: string) {
@@ -243,7 +213,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       return
     }
     setNotice(t('revoked'))
-    await loadMember()
+    await refreshMember()
   }
 
   async function authoriseDocument() {
@@ -258,7 +228,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       return
     }
     setNotice(t('recordedUnionSide'))
-    await loadMember()
+    await refreshMember()
   }
 
   async function loadReferable(options: { clearNotice?: boolean } = {}) {
@@ -325,49 +295,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
       return
     }
     setNotice(t('recordedUnionSide'))
-    await loadMember()
-  }
-
-  async function proposeWording() {
-    setNotice(null)
-    setError(null)
-    const result = await readJson(fetch('/api/workaid/consent-text/proposals', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ version: wordingVersion, body: wordingBody }),
-    }))
-    if (!result.ok || result.data.adopted !== false) {
-      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
-      return
-    }
-    setWordingVersion('')
-    setWordingBody('')
-    setNotice(t('wordingProposed'))
-    await loadProposals()
-  }
-
-  async function adoptWording(proposalId: string) {
-    setNotice(null)
-    setError(null)
-    const result = await readJson(fetch(`/api/workaid/consent-text/proposals/${proposalId}/adopt`, { method: 'POST' }))
-    if (!result.ok || result.data.current !== true) {
-      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
-      return
-    }
-    setNotice(t('wordingAdopted'))
-    await loadProposals()
-  }
-
-  async function withdrawWording(proposalId: string) {
-    setNotice(null)
-    setError(null)
-    const result = await readJson(fetch(`/api/workaid/consent-text/proposals/${proposalId}/withdraw`, { method: 'POST' }))
-    if (!result.ok || result.data.current !== false) {
-      setError(result.ok ? UNEXPECTED_ANSWER : reasonOf(result))
-      return
-    }
-    setNotice(t('wordingWithdrawn'))
-    await loadProposals()
+    await refreshMember()
   }
 
   async function refer(row: Referable) {
@@ -568,25 +496,7 @@ export function WorkAidJourney({ audience }: { audience: Audience }) {
           ) : null}
           <section className="flex flex-col gap-3" data-testid="wording-adoption">
             <h2 className="text-lg font-medium">{t('wordingTitle')}</h2>
-            <p className="text-sm text-muted-foreground">{t('wordingIntro')}</p>
-            {wordingUnavailable ? <p data-testid="wording-store-unapplied">{t('wordingUnavailable')}</p> : null}
-            <form className="flex flex-col gap-3" onSubmit={(event) => { event.preventDefault(); void proposeWording() }}>
-              <label className="flex flex-col gap-1 text-sm">{t('wordingVersion')}<input className="rounded border p-2" value={wordingVersion} onChange={(event) => setWordingVersion(event.target.value)} required /></label>
-              <label className="flex flex-col gap-1 text-sm">{t('wordingBody')}<textarea className="min-h-28 rounded border p-2" value={wordingBody} onChange={(event) => setWordingBody(event.target.value)} required /></label>
-              <Button type="submit" className="w-full sm:w-auto">{t('wordingPropose')}</Button>
-            </form>
-            {proposals.length === 0 && !wordingUnavailable ? <p>{t('wordingEmpty')}</p> : null}
-            {proposals.map((row) => (
-              <article key={row.id} className="flex flex-col gap-2 rounded-md border p-3">
-                <p className="text-sm">{row.version}</p>
-                <p className="text-sm whitespace-pre-wrap">{row.body}</p>
-                {row.ownProposal ? (
-                  <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => void withdrawWording(row.id)}>{t('wordingWithdraw')}</Button>
-                ) : (
-                  <Button type="button" className="w-full sm:w-auto" onClick={() => void adoptWording(row.id)}>{t('wordingAdopt')}</Button>
-                )}
-              </article>
-            ))}
+            <p data-testid="wording-store-unapplied">{t('wordingUnavailable')}</p>
           </section>
         </section>
       )}

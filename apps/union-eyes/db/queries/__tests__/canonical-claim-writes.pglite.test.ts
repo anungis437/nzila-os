@@ -22,6 +22,9 @@ let db: ReturnType<typeof drizzle>
 beforeAll(async () => {
   pg=new PGlite()
   await pg.exec(fs.readFileSync(new URL('./fixtures/canonical-claim-write.sql',import.meta.url),'utf8'))
+  // Apply the current additive history-origin column to the preserved M3 fixture.
+  // The actual FK and sole writer are qualified separately by native domain tests.
+  await pg.exec('ALTER TABLE claim_updates ADD COLUMN transition_id uuid UNIQUE')
   await pg.exec(`CREATE ROLE claim_test_runtime;
     GRANT SELECT, INSERT, UPDATE ON claims, claim_updates TO claim_test_runtime;
     ALTER TABLE claims ENABLE ROW LEVEL SECURITY;
@@ -38,7 +41,7 @@ beforeEach(async () => { mode.canonical=true; await pg.exec('TRUNCATE claims, cl
 afterAll(async () => { await pg?.close() })
 
 describe('claim writes against canonical Django column defaults', () => {
-  it('encodes claim-number date boundaries before passing them to the PostgreSQL driver', async () => {
+  it('binds the UTC claim-number series and organization without raw Date parameters', async () => {
     const queries: { query: string; params: unknown[] }[] = []
     const driverBoundaryDb=drizzle(pg, { logger: { logQuery(query,params) {
       queries.push({query,params})
@@ -47,16 +50,12 @@ describe('claim writes against canonical Django column defaults', () => {
       if (params.some(value=>value instanceof Date)) throw new Error('UNENCODED_DRIVER_DATE')
     } } })
     const created=await driverBoundaryDb.transaction(tx=>createClaim({organizationId:org,memberId:member},tx as unknown as RLSTx))
-    const countQuery=queries.find(({query})=>query.startsWith('select count(*) from "claims"'))
-    expect(countQuery).toBeDefined()
-    expect(countQuery!.params).toHaveLength(2)
-    expect(countQuery!.params.every(value=>typeof value==='string')).toBe(true)
-    const [start,end]=countQuery!.params.map(value=>new Date(value as string))
-    expect(start.getTime()).toBeLessThanOrEqual(created.createdAt.getTime())
-    expect(end.getTime()).toBeGreaterThan(created.createdAt.getTime())
-    expect(start.getHours()).toBe(0)
-    expect(end.getHours()).toBe(0)
-    expect(end.getDate()).toBe(new Date(start.getFullYear(),start.getMonth(),start.getDate()+1).getDate())
+    const prefix=`CASE-${created.createdAt.toISOString().slice(0,10).replaceAll('-','')}-`
+    const allocation=queries.find(({query})=>query.includes('coalesce(max(CASE'))
+    expect(allocation).toBeDefined()
+    expect(allocation!.params).toContain(`^${prefix}[0-9]+$`)
+    expect(allocation!.params).toContain(org)
+    expect(created.claimNumber).toBe(prefix+'0001')
   })
 
   it('creates a claim when required UUID, timestamp, boolean and state columns have no SQL defaults', async () => {
@@ -82,6 +81,28 @@ describe('claim writes against canonical Django column defaults', () => {
     expect(second.id).not.toBe(first.id)
     expect(second.claimId).not.toBe(first.claimId)
     expect(second.claimNumber).not.toBe(first.claimNumber)
+  })
+
+  it('does not reuse a surviving claim number after a gap in the daily series', async () => {
+    const created=await db.transaction(async tx=>{
+      const result=[]
+      for(let index=0;index<3;index++)result.push(await createClaim({organizationId:org,memberId:member},tx as unknown as RLSTx))
+      return result
+    })
+    await pg.query('DELETE FROM claims WHERE claim_id=$1',[created[1].claimId])
+    const next=await db.transaction(tx=>createClaim({organizationId:org,memberId:member},tx as unknown as RLSTx))
+    expect(next.claimNumber).toBe(created[0].claimNumber!.slice(0,-4)+'0004')
+    expect(created.some(claim=>claim.claimNumber===next.claimNumber)).toBe(false)
+  })
+
+  it('allocates each organization series without counting another organization cases', async () => {
+    const other='33333333-3333-4333-8333-333333333333'
+    const [own,foreign]=await db.transaction(async tx=>[
+      await createClaim({organizationId:org,memberId:member},tx as unknown as RLSTx),
+      await createClaim({organizationId:other,memberId:member},tx as unknown as RLSTx),
+    ])
+    expect(own.claimNumber).toBe(foreign.claimNumber)
+    expect(own.organizationId).not.toBe(foreign.organizationId)
   })
 
   it('supplies history timestamps when Django owns the required timestamp defaults', async () => {

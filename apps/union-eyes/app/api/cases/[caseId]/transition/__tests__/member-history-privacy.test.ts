@@ -14,7 +14,7 @@ describe('case transition reason privacy boundary', () => {
   it('keeps the public status history but never copies the staff reason into the public row', () => {
     expect(history).not.toBe('');
     expect(history).toContain("visibilityScope: 'member'");
-    expect(history).toContain('message: `Status changed: ${fromStatus} → ${toDbStatus}`');
+    expect(history).toContain("message: `Status changed from '${fromStatus}' to '${toDbStatus}'`");
     expect(history).not.toMatch(/Reason:|\breason\s*:\s*reason\b|\$\{reason\}/);
   });
 

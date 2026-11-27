@@ -1,3 +1,4 @@
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
 /**
  * Workflow Engine for Claims Management
  * 
@@ -14,22 +15,19 @@
  * Handles status transitions, validation, and deadline tracking
  */
 
-import { withRLSContext, withSystemRLSContext, type RLSTx } from "./db/with-rls-context";
+import { withRLSContext, type RLSTx } from "./db/with-rls-context";
 import { slaClockStart } from '@/lib/workflow/sla-clock';
 import { claims, claimUpdates } from "../db/schema/claims-schema";
 import { organizationMembers } from "../db/schema/organization-members-schema";
-import { users } from "../db/schema/user-management-schema";
 import { eq, and } from "drizzle-orm";
-import { sendClaimStatusNotification } from "./claim-notifications";
 import { 
-  validateClaimTransition, 
   getAllowedClaimTransitions,
   type ClaimStatus,
   type ClaimPriority 
 } from './services/claim-workflow-fsm';
-import { detectAllSignals, type CaseForSignals } from './services/lro-signals';
-import { toLegacyCaseState, toLifecycleState } from './workflow/state-bridge';
-import { claimHistoryReference } from './cases/claim-history-reference';
+import { toLifecycleState } from './workflow/state-bridge';
+import { claimTransitionFacts } from './workflow/claim-transition-facts';
+import { claimTransitionTarget, validateClaimCaseTransition } from './workflow/claim-transition-policy';
 import { 
   generateDefensibilityPack,
   type TimelineEvent,
@@ -37,9 +35,12 @@ import {
   type StateTransition 
 } from './services/defensibility-pack';
 import { defensibilityPacks } from '../db/schema/defensibility-packs-schema';
-import { addTimelineEntry } from './integrations/timeline-integration';
-import { eventBus } from '@/lib/events/event-bus';
 import { logger } from '@/lib/logger';
+import { getCaseActor, findReadableCase, caseReadScope, requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { ApiError } from '@/lib/api/errors';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { decideCase } from '@/lib/authority/store/route-adapter';
+import { queueCaseStatusEmailOrRecordRefusal } from '@/lib/workflow/case-status-delivery';
 
 // Define valid status transitions
 export const STATUS_TRANSITIONS = {
@@ -84,24 +85,14 @@ async function getMemberName(
   tx: RLSTx
 ): Promise<string> {
   try {
+    // The tenant's own member row carries the name. The identity relations (user_management.users) are not readable by the
+    // runtime role under V2; reading them here aborted the caller's transaction (permission denied) even though this was caught.
     const result = await tx
-      .select({
-        displayName: users.displayName,
-        firstName: users.firstName,
-        lastName: users.lastName,
-      })
+      .select({ name: organizationMembers.name })
       .from(organizationMembers)
-      .leftJoin(users, eq(organizationMembers.userId, users.userId))
       .where(eq(organizationMembers.userId, memberId))
       .limit(1);
-    
-    const displayName = result[0]?.displayName;
-    const firstName = result[0]?.firstName;
-    const lastName = result[0]?.lastName;
-
-    if (displayName) return displayName;
-    if (firstName || lastName) return `${firstName || ''} ${lastName || ''}`.trim();
-    return 'Member';
+    return result[0]?.name?.trim() || 'Member';
   } catch (_error) {
 return 'Member';
   }
@@ -201,12 +192,15 @@ export async function updateClaimStatus(
     });
   }
 
-  try {
+  const actor = await getCaseActor();
+  if (actor.userId !== userId) throw ApiError.forbidden('The workflow actor must match the live session.');
+  const authorized = await findReadableCase(tx, actor, claimNumber, true, 'case:transition');
+  if (!authorized) return { success: false, error: 'Claim not found' };
     // Get current claim using provided transaction (row-locked to prevent TOCTOU race)
     const [claim] = await tx
       .select()
       .from(claims)
-      .where(eq(claims.claimNumber, claimNumber))
+      .where(and(eq(claims.claimId, authorized.claimId), eq(claims.organizationId, actor.organizationId)))
       .limit(1)
       .for('update');
 
@@ -215,62 +209,22 @@ export async function updateClaimStatus(
     }
 
     const currentStatus = claim.status as ClaimStatus;
-    const priority = (claim.priority as ClaimPriority) || 'medium';
+    const target = claimTransitionTarget(newStatus);
+    if (!target) return { success: false, error: 'Unknown claim transition target' };
 
     // Detect LRO signals for this case (PR-7 integration)
-    const claimCreatedAt = claim.createdAt ?? new Date();
-    const signalCase: CaseForSignals = {
-      id: claim.claimId,
-      title: claim.description?.slice(0, 120) ?? claim.claimNumber ?? claim.claimId,
-      memberId: claim.memberId ?? '',
-      memberName: claim.memberId ?? '',
-      currentState: toLegacyCaseState(toLifecycleState('claim', currentStatus) ?? 'submitted'),
-      priority: priority as CaseForSignals['priority'],
-      createdAt: claimCreatedAt,
-      lastUpdated: claim.updatedAt ?? claimCreatedAt,
-      // A claim carries its submission instant; later milestones are not recorded on the claim row itself.
-      timeline: [{ type: 'submitted', timestamp: claimCreatedAt }],
-      assignedOfficerId: claim.assignedTo || undefined,
-    };
-    const signals = await detectAllSignals([signalCase]);
+    const transitionFacts = claimTransitionFacts(claim, notes);
+    const { hasUnresolvedCriticalSignals } = transitionFacts;
 
-    const hasUnresolvedCriticalSignals = signals.some(
-      signal => signal.severity === 'critical' && signal.actionable
-    );
+    // The verified membership role only narrows the FSM; it never authorizes this mutation.
+    const userRole = actor.role;
+    if (toLifecycleState('claim', target) === 'closed' || toLifecycleState('claim', currentStatus) === 'closed') {
+      await requireKernelCaseAction(tx, actor, claim.claimId, 'case:close');
+    }
 
-    const hasRequiredDocumentation = Boolean(
-      (claim.description && claim.description.length > 20) ||
-      (notes && notes.length > 20)
-    );
-
-    // Get user role for FSM validation
-    const userRoleResult = await tx
-      .select({ role: organizationMembers.role })
-      .from(organizationMembers)
-      .where(
-        and(
-          eq(organizationMembers.userId, userId),
-          eq(organizationMembers.status, 'active')
-        )
-      )
-      .limit(1);
-    
-    const userRole = userRoleResult[0]?.role || 'member';
-
-    // FSM VALIDATION (PR-11 ENFORCEMENT LAYER)
-    // This makes bad practice IMPOSSIBLE
-    const validation = validateClaimTransition({
-      claimId: claim.claimId,
-      currentStatus,
-      targetStatus: newStatus,
-      userId,
-      userRole,
-      priority,
-      statusChangedAt: slaClockStart(claim, new Date()).startedAt,
-      hasUnresolvedCriticalSignals,
-      hasRequiredDocumentation,
-      notes,
-    });
+    // Both live claim mutation entrypoints use the same stored facts and policy.
+    // Normalize accepted aliases once; state, history, audit and the durable notice use the same persisted target.
+    const validation = validateClaimCaseTransition(claim, userRole, target, notes);
 
     if (!validation.allowed) {
       return {
@@ -281,12 +235,12 @@ export async function updateClaimStatus(
 
     // Update claim status and timestamps
     const updateData: Record<string, unknown> = {
-      status: newStatus,
+      status: target,
       updatedAt: new Date(),
     };
 
     // Set closed timestamp
-    if (newStatus === "closed" && !claim.closedAt) {
+    if (target === "closed" && !claim.closedAt) {
       updateData.closedAt = new Date();
     }
 
@@ -301,7 +255,7 @@ export async function updateClaimStatus(
       rejected: 100,
       closed: 100,
     };
-    updateData.progress = progressMap[newStatus];
+    updateData.progress = progressMap[target];
 
     // Perform the update using provided transaction
     const [updatedClaim] = await tx
@@ -311,33 +265,25 @@ export async function updateClaimStatus(
       .returning();
 
     // Create audit trail entry with FSM metadata
-    const auditMessage = validation.warnings && validation.warnings.length > 0
-      ? `Status changed from '${currentStatus}' to '${newStatus}'. WARNINGS: ${validation.warnings.join('; ')}`
-      : notes || `Status changed from '${currentStatus}' to '${newStatus}'`;
-    
+    const auditMessage = `Status changed from '${currentStatus}' to '${target}'`;
+
     await tx.insert(claimUpdates).values({
       claimId: claim.id, // history rows reference the internal primary key (Django FK)
       updateType: "status_change",
       message: auditMessage,
       createdBy: userId,
       isInternal: false,
+      visibilityScope: 'member',
       metadata: {
         previousStatus: currentStatus,
-        newStatus,
-        transitionAllowed: true,
-        fsmValidation: {
-          slaCompliant: validation.metadata?.slaCompliant,
-          daysInState: validation.metadata?.daysInState,
-          warnings: validation.warnings,
-          hasUnresolvedCriticalSignals,
-          nextDeadline: validation.metadata?.nextDeadline,
-        },
+        newStatus: target,
       },
     });
 
     // AUTO-GENERATE DEFENSIBILITY PACK (PR-12 complete integration)
     // When claim is resolved or closed, automatically generate immutable export
-    if (newStatus === 'resolved' || newStatus === 'closed') {
+    if (target === 'resolved' || target === 'closed') {
+      if ((await decideCase(tx, {...actor,caseId:claim.claimId,action:'case:export_sealed_evidence'})).effect === 'allow') {
       try {
 // Fetch complete timeline (all claim updates)
         const updates = await tx
@@ -366,7 +312,7 @@ export async function updateClaimStatus(
           type,
           description: update.message ?? '',
           actorId: update.createdBy ?? 'system',
-          actorRole: update.isInternal ? 'staff' : 'member',
+          actorRole: 'unknown', // Historical visibility does not establish the actor's capacity.
           visibilityScope: update.isInternal ? ('staff' as const) : ('member' as const),
           metadata: update.metadata as Record<string, unknown> | undefined,
           };
@@ -401,7 +347,7 @@ export async function updateClaimStatus(
               timestamp: u.createdAt ?? new Date(),
               fromState: meta.previousStatus || 'unknown',
               toState: meta.newStatus || 'unknown',
-              actorRole: u.isInternal ? 'staff' : 'member',
+              actorRole: 'unknown',
               reason: u.message ?? undefined,
               validationPassed: meta.fsmValidation?.slaCompliant !== false,
             };
@@ -415,15 +361,15 @@ export async function updateClaimStatus(
           stateTransitions,
           {
             purpose: 'arbitration',
-            requestedBy: 'system',
+            requestedBy: actor.userId,
             exportFormat: 'json',
             includeSensitiveData: false,
-            generatedBy: 'system',
+            generatedBy: actor.userId,
             caseSummary: {
               title: claim.description?.slice(0, 80) || `Claim ${claim.claimNumber}`,
               memberId: claim.memberId!,
               memberName: await getMemberName(claim.memberId!, tx),
-              currentState: newStatus,
+              currentState: target,
               createdAt: claim.createdAt ?? new Date(),
               lastUpdated: updatedClaim.updatedAt ?? new Date(),
               grievanceType: claim.claimType || 'general',
@@ -453,25 +399,24 @@ export async function updateClaimStatus(
           fileSizeBytes: JSON.stringify(pack).length,
         });
 } catch (_error) {
-// Don&apos;t fail the status update if pack generation fails
+// A failed optional pack is never represented as an accepted export.
+      }
       }
 
       // AUTO-CREATE SATISFACTION SURVEY ("Rate My LRO")
-      // When a claim is resolved or closed with an assigned LRO, send
-      // the member a satisfaction survey to rate their experience
-      if (claim.memberId && claim.assignedTo) {
+      // When a claim is resolved or closed, resolve the governed primary before creating
+      // the member's satisfaction survey. The legacy assignment mirror is not attribution.
+      if (claim.memberId) {
         try {
           const { createSatisfactionSurvey } = await import('@/lib/services/satisfaction-service');
           await createSatisfactionSurvey({
             organizationId: claim.organizationId!,
             claimId: claim.id,
             memberId: claim.memberId,
-            lroId: claim.assignedTo,
-          });
+          },actor.userId);
           logger.info('Satisfaction survey created on case closure', {
             claimId: claim.claimId,
             memberId: claim.memberId,
-            lroId: claim.assignedTo,
           });
         } catch (_satisfactionError) {
           // Don't fail the status update if satisfaction survey creation fails
@@ -480,54 +425,17 @@ export async function updateClaimStatus(
       }
     }
 
-    // Send email notification (async, don&apos;t block on email sending)
-    sendClaimStatusNotification(claim.claimId, currentStatus, newStatus, notes).catch((_error) => {
-// Don&apos;t fail the status update if email fails
-    });
-    // EMIT CLAIM EVENT (staging hardening — all transitions emit to claim_events)
-    eventBus.emit('claim_events', {
-      claim_id: claim.claimId,
-      event_type: `transition:${currentStatus}→${newStatus}`,
-      actor: userId,
-      timestamp: new Date().toISOString(),
-      payload: {
-        previousStatus: currentStatus,
-        newStatus,
-        claimNumber: claim.claimNumber,
-        organizationId: claim.organizationId,
-        priority,
-        slaCompliant: validation.metadata?.slaCompliant,
-        daysInState: validation.metadata?.daysInState,
-        notes: notes ?? null,
-      },
-    }, {
-      organizationId: claim.organizationId ?? undefined,
-      userId,
-      source: 'workflow-engine',
-    });
-    // SPRINT 7: Auto-create timeline entry (FSM → Timeline integration)
-    // Every status change automatically appears in member's case timeline
-    addTimelineEntry(
-      claim.claimId,
-      claim.organizationId,
-      currentStatus,
-      newStatus,
-      userId,
-      userRole,
-      notes,
-      validation.metadata
-    ).catch((error) => {
-      // Don&apos;t fail the status update if timeline integration fails
-      // This is OK - timeline is supplementary to the main workflow
-      logger.error('Timeline integration failed:', error);
-    });
+    // The state, its restricted reason, the durable notice intent and their audits
+    // commit together. Provider I/O is performed only by the bounded outbox worker.
+    await persistAtomicAudit(tx, { organizationId: actor.organizationId, userId: actor.userId,
+      action: 'case.transition', resourceType: 'claims', resourceId: claim.claimId,
+      details: { from: currentStatus, to: target, reason: notes ?? null, actorRole: actor.role, fsmValidation: {
+        slaCompliant: validation.metadata?.slaCompliant ?? null, daysInState: validation.metadata?.daysInState ?? null,
+        warnings: validation.warnings ?? [], hasUnresolvedCriticalSignals,
+        nextDeadline: validation.metadata?.nextDeadline?.toISOString() ?? null } } });
+    if (claim.memberId) await queueCaseStatusEmailOrRecordRefusal(tx, { organizationId: actor.organizationId,
+      caseId: claim.claimId, queuedBy: actor.userId, recipientId: claim.memberId, previousStatus: currentStatus, newStatus: target });
     return { success: true, claim: updatedClaim };
-  } catch (error) {
-return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
 }
 
 /**
@@ -551,7 +459,6 @@ export async function updateClaimStatusById(
     });
   }
 
-  try {
     const [claimRef] = await tx
       .select({
         claimNumber: claims.claimNumber,
@@ -569,86 +476,19 @@ export async function updateClaimStatusById(
     }
 
     return updateClaimStatus(claimRef.claimNumber, newStatus, userId, notes, tx);
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to update claim status by ID',
-    };
-  }
 }
 
-/**
- * Assign claim to a steward — org-scoped to prevent cross-org mutation.
- * organizationId is mandatory; the function wraps all DB operations in withRLSContext.
- */
-export async function assignClaim(
-  claimId: string,
-  stewardId: string,
-  assignedBy: string,
-  organizationId: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    return await withRLSContext(async (tx) => {
-      const [claim] = await tx
-        .select()
-        .from(claims)
-        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)))
-        .limit(1);
-
-      if (!claim) {
-        return { success: false, error: "Claim not found in organization" };
-      }
-
-      // Validate via FSM before mutating status — prevents invalid "assigned" transitions
-      const fsmResult = validateClaimTransition({
-        claimId,
-        currentStatus: claim.status as ClaimStatus,
-        targetStatus: "assigned" as ClaimStatus,
-        userId: assignedBy,
-        userRole: "steward",
-        priority: (claim.priority ?? "medium") as ClaimPriority,
-        statusChangedAt: slaClockStart(claim, new Date()).startedAt,
-      });
-      if (fsmResult && !fsmResult.allowed) {
-        return {
-          success: false,
-          error: `FSM rejection: cannot transition '${claim.status}' → 'assigned': ${fsmResult.reason ?? 'invalid transition'}`,
-        };
-      }
-
-      // Update claim assignment — org-scoped WHERE prevents cross-org mutation
-      await tx
-        .update(claims)
-        .set({
-          assignedTo: stewardId,
-          assignedAt: new Date(),
-          status: "assigned",
-          updatedAt: new Date(),
-          progress: 30,
-        })
-        .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)));
-
-      // Create audit trail
-      await tx.insert(claimUpdates).values({
-        claimId: claimHistoryReference(claimId),
-        updateType: "assignment",
-        message: `Claim assigned to steward`,
-        createdBy: assignedBy,
-        isInternal: true,
-        metadata: {
-          stewardId,
-          previousStatus: claim.status,
-        },
-      });
-
-      return { success: true };
+/** Every workflow reader keeps the initiating tenant and rechecks each candidate through the kernel. */
+async function readableWorkflowClaims(): Promise<Array<typeof claims.$inferSelect>> {
+  return withRLSContext(async tx => {
+    const actor = await getCaseActor();
+    const candidates = await tx.select().from(claims).where(caseReadScope(actor));
+    const decisions = await decideCaseCapabilitiesBatch(tx, {...actor,caseIds:candidates.map(row=>row.claimId)});
+    return candidates.filter(row => {
+      const read=decisions.get(row.claimId)?.['case:read'];
+      return read?.effect==='allow' && read.scope.visibility==='internal';
     });
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
+  });
 }
 
 /**
@@ -656,7 +496,7 @@ export async function assignClaim(
  */
 export async function getOverdueClaims(): Promise<Array<typeof claims.$inferSelect>> {
   try {
-    const allClaims = await withSystemRLSContext('background-job: overdue-claims-scan', async (tx) => tx.select().from(claims));
+    const allClaims = await readableWorkflowClaims();
     
     const overdueClaims = allClaims.filter((claim) => {
       // Don&apos;t check closed claims
@@ -676,8 +516,8 @@ export async function getOverdueClaims(): Promise<Array<typeof claims.$inferSele
     });
 
     return overdueClaims;
-  } catch (_error) {
-return [];
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -686,7 +526,7 @@ return [];
  */
 export async function getClaimsApproachingDeadline(): Promise<Array<typeof claims.$inferSelect>> {
   try {
-    const allClaims = await withSystemRLSContext('background-job: approaching-deadline-scan', async (tx) => tx.select().from(claims));
+    const allClaims = await readableWorkflowClaims();
     
     const approachingDeadline = allClaims.filter((claim) => {
       if (claim.status === "closed") return false;
@@ -706,72 +546,8 @@ export async function getClaimsApproachingDeadline(): Promise<Array<typeof claim
     });
 
     return approachingDeadline;
-  } catch (_error) {
-return [];
-  }
-}
-
-/**
- * Add internal note to claim
- * 
- * @param claimNumber - Claim number to add note to
- * @param message - Note message content
- * @param userId - User adding the note
- * @param isInternal - Whether note is internal only (default true)
- * @param tx - Optional transaction for RLS context (auto-created if not provided)
- */
-export async function addClaimNote(
-  claimNumber: string,
-  message: string,
-  userId: string,
-  isInternal: boolean = true,
-   
-  tx?: RLSTx
-): Promise<{ success: boolean; error?: string }> {
-  // If no transaction provided, wrap in withRLSContext
-  if (!tx) {
-     
-    return withRLSContext(async (transaction: RLSTx) => {
-      return addClaimNote(claimNumber, message, userId, isInternal, transaction);
-    });
-  }
-
-  try {
-    // Get claim to get UUID using provided transaction
-    const [claim] = await tx
-      .select()
-      .from(claims)
-      .where(eq(claims.claimNumber, claimNumber))
-      .limit(1);
-
-    if (!claim) {
-      return { success: false, error: "Claim not found" };
-    }
-
-    // Create note entry
-    await tx.insert(claimUpdates).values({
-      claimId: claim.id,
-      updateType: "note",
-      message,
-      createdBy: userId,
-      isInternal,
-      metadata: {},
-    });
-
-    // Update last activity timestamp
-    await tx
-      .update(claims)
-      .set({
-        updatedAt: new Date(),
-      })
-      .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, claim.organizationId)));
-
-    return { success: true };
   } catch (error) {
-return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    throw error;
   }
 }
 

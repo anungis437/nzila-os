@@ -1,0 +1,101 @@
+{
+  "schema": "ue-step1-component-qualification-v2",
+  "component": "legacy-current-security-installer-with-source-identity-materialization",
+  "recordedAt": "2026-11-18T00:38:21.731941+00:00",
+  "head": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "dirtyWorktree": true,
+  "finalCandidateSha": null,
+  "source": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "d0186dec7088ea89d6a0dc2b95744f2e75e6ab744247e86e39378f61a9e16747"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.mjs",
+      "sha256": "0b21eeb2d53254ff2003c329fe97fef9f0384d0850be8d6f39a3bfc89e9f3c9f"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-bootstrap-stages.test.mjs",
+      "sha256": "a070a844ab98ae88179397c50908f42f607eb51b843a845b48248c5f123095a7"
+    },
+    {
+      "path": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs",
+      "sha256": "1a2dd924aab35c4d6fecc3b90679f8dc3a7edf5a0605090464ee480f4e96310a"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "sha256": "6ae6f172e5f9dde3cc3e2fbd3c0dc9813e38130cd079b1b39543d78257c1c80a"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "a1502b4d307cf8ff9d36b7207dfb3d829c6c1ec3af3cbc9d12067ad077acb9ac"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+      "sha256": "510feb8c9107079f4932d7de90b91a9dfc8d1715dec9f3190a9e242d1d034a54"
+    }
+  ],
+  "checks": {
+    "focusedInstallerCases": {
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-installer-unit-v5.log"
+    },
+    "unchangedAtomicStageCases": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-stage-unit-v3.log"
+    },
+    "focusedChangedSourceLint": {
+      "exitCode": 0,
+      "log": "current-security-installer-lint-v7.log",
+      "note": "Existing Next Pages-path diagnostic is present; no lint rule ignored or configuration changed."
+    }
+  },
+  "native": {
+    "status": "FAILED_BEFORE_THIS_REPAIR",
+    "v1Counts": {
+      "numTotalTests": 3,
+      "numPassedTests": 0,
+      "numFailedTests": 3,
+      "numPendingTests": 0
+    },
+    "rawPrivateArtifact": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v1.json",
+    "rawSha256": "05c0f0fb41d25bf225d57860cf06cbabcea85aab6ccca506368313cfe65dc4d0",
+    "counterexample": "Only absent current shared platform_identity_bindings; strict prerequisite stopped all3cases before convergence. Source repair not yet natively rerun.",
+    "counterexampleReceipt": "current-security-missing-relations-v1.json",
+    "nextRequired": "Regenerate committed source plan/profile then execute same3cases on clones of untouched historical template."
+  },
+  "repair": {
+    "singleProducer": "buildCurrentPlatformIdentitySource in source.ts is shared by buildPlan and installer; exact canonical IDs/DDL/tablemetadata parity tested",
+    "permittedMissing": [
+      "platform_identity_bindings"
+    ],
+    "otherMissing": "DENIED",
+    "unknownOrPartialPresentIdentity": "DENIED",
+    "typeIndexRelationNameConflicts": "DENIED",
+    "sqlSubstitution": "Exact current producer byte comparison plus parsed CREATE-table/FK/index scope",
+    "security": "Exact compileSecurity ENABLE/FORCE/deny before dedicated auth/grants",
+    "data": "No INSERT/UPDATE/DELETE/backfill; actual preserved prior user/session/case/history proof still pending native rerun"
+  },
+  "semanticTypecheck": {
+    "status": "RERUN_REQUIRED_FOR_THIS_BATCH",
+    "note": "Parent separately proved pre-repair tooling DAG TSCv2; permanent CI graph extended by parent. This receipt does not attribute that older pass to this new source."
+  },
+  "artifacts": {
+    "current-security-installer-unit-v5.log": "95f04d14f4669442152dc8affa34231eda144d31aec141ee16f5c7a66924ff68",
+    "current-security-installer-lint-v7.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45",
+    "current-security-missing-relations-v1.json": "4ee8a0550d9041bc4483af5ef15af7a438e2bccfc0135a49ade18acfb19ba922"
+  },
+  "releaseReadiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "55172a5ebddf231a8f70f93db56e2c3c442ff3566dfe3a1ebf8cf0895e067278",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v2.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

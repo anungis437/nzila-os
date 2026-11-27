@@ -1,0 +1,304 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-18T00:11:36.325665+00:00",
+  "state": "LOCAL_LOCK_AUDIT_AND_FINANCE_DENIAL_COMPONENTS_VERIFIED",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "dirtyIntegrationSource": true,
+  "sourceHashes": [
+    {
+      "path": ".github/workflows/dependency-audit.yml",
+      "sha256": "a1244c285c32bc5055104e578f192d3621db6149ec770386840473109378b2f0"
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock",
+      "sha256": "bfc18894b8be6d7d373d1f03c9732ecb99875c1b95d4dd32e28ff1cc15449979"
+    },
+    {
+      "path": "apps/union-eyes/backend/requirements.lock.metadata.json",
+      "sha256": "bc6f92ffc55a04173cb5d6dce8e113156f337d04c8a6c4c2e2017bf26211e4a4"
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/test_base_release_boundary.py",
+      "sha256": "d249f131f51c070bb0737daa61139c53b81108393e12a88393398a9018481a0f"
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/views.py",
+      "sha256": "47a54379c1d89c3a36a94d7e07aba4ff5e1f1a8be4ea4a04b95b45f3f045d0aa"
+    },
+    {
+      "path": "apps/union-eyes/backend/billing/isolation.py",
+      "sha256": "9a076cd51ac74ae6dab0a414b0bab9edcf48a42542309c2529b2763a72d71b6c"
+    },
+    {
+      "path": "apps/union-eyes/backend/config/settings.py",
+      "sha256": "f3218cbfcfb64a0f907f5ec5c6bbf4d5744074b357ca0dc9fa5e1684b0697906"
+    },
+    {
+      "path": "apps/union-eyes/backend/auth_core/mixins.py",
+      "sha256": "acf443a7136a4fd54b0ec7f5b9a75f128c614dbf50ef41480289d4e9ca5073f1"
+    }
+  ],
+  "pythonDependencyAudit": {
+    "verdict": "PASS",
+    "toolVersion": "pip-audit 2.10.1",
+    "pythonVersion": "3.11.17",
+    "command": [
+      "/usr/local/bin/python",
+      "-m",
+      "pip_audit",
+      "--require-hashes",
+      "--disable-pip",
+      "--strict",
+      "--progress-spinner",
+      "off",
+      "-r",
+      "/workspace/repo/apps/union-eyes/backend/requirements.lock",
+      "--format=json",
+      "--output=/workspace/python-lock-audit.json"
+    ],
+    "dependencyCount": 87,
+    "vulnerabilities": 0,
+    "skipped": 0,
+    "ignoreFlags": [],
+    "exitCode": 0,
+    "allNamesAndVersionsMatchExactLock": true,
+    "liveAdvisoryLookup": "PyPI default audit service; only package names/versions, not application credentials or database data"
+  },
+  "offlineLockedInstall": {
+    "verdict": "PASS",
+    "network": "none",
+    "pythonVersion": "3.11.17",
+    "djangoVersion": "5.2.18",
+    "distributionCount": 87,
+    "allVersionsAndArtifactHashesMatchLock": true,
+    "measuredEnvironment": {
+      "implementation_name": "cpython",
+      "implementation_version": "3.11.17",
+      "os_name": "posix",
+      "platform_machine": "x86_64",
+      "platform_release": "6.12.76-linuxkit",
+      "platform_system": "Linux",
+      "platform_version": "#1 SMP Wed May 13 14:27:36 UTC 2026",
+      "python_full_version": "3.11.17",
+      "platform_python_implementation": "CPython",
+      "python_version": "3.11",
+      "sys_platform": "linux"
+    }
+  },
+  "crossTargetResolver": {
+    "verdict": "PASS",
+    "hostPython": "3.12.13",
+    "pipVersion": "26.1.1",
+    "targetPythonVersionFlag": "3.11.14",
+    "implementation": "cp",
+    "abi": "cp311",
+    "platform": "manylinux2014_x86_64",
+    "dryRun": true,
+    "ignoreInstalled": true,
+    "noIndex": true,
+    "requireHashes": true,
+    "onlyBinary": true,
+    "exitCode": 0,
+    "distributionCount": 87,
+    "allVersionsAndArtifactHashesMatchLock": true,
+    "measuredEnvironment": {
+      "implementation_name": "cpython",
+      "implementation_version": "3.12.13",
+      "os_name": "posix",
+      "platform_machine": "arm64",
+      "platform_release": "27.0.0",
+      "platform_system": "Darwin",
+      "platform_version": "Darwin Kernel Version 27.0.0: Tue Aug 11 21:05:41 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T8122",
+      "python_full_version": "3.12.13",
+      "platform_python_implementation": "CPython",
+      "python_version": "3.12",
+      "sys_platform": "darwin"
+    },
+    "markerScope": "Foreign wheel target flags retain the host marker environment; this does not represent execution on Python3.11.14. The separate actual Linux cp311 offline install runs Python3.11.17, and the original metadata retains its explicit target-marker reconciliation."
+  },
+  "financialBoundary": {
+    "verdict": "PASS",
+    "environment": "Pinned Linux amd64 CPython3.11.17 image with current Django5.2.18/config.settings, exact hash-locked install, networknone, no mounted host source or env files",
+    "testModule": "billing.test_base_release_boundary",
+    "testsRun": 1,
+    "skipped": 0,
+    "endpointClasses": 80,
+    "roles": [
+      "member",
+      "steward",
+      "officer",
+      "executive",
+      "admin"
+    ],
+    "actions": [
+      "list",
+      "create",
+      "retrieve",
+      "update",
+      "partial_update",
+      "destroy"
+    ],
+    "actualModelViewSetDispatches": 2400,
+    "allResponses403": true,
+    "businessSQLExecutions": 0,
+    "databaseConnectionAttempts": 0,
+    "envFileReadAttempts": 0,
+    "authenticationScope": "Existing APIRequestFactory/force_authenticate test identities exercise real DRF dispatch/permission denial. This is not end-to-end authentication qualification.",
+    "databaseGuard": "BaseDatabaseWrapper.connect raises on any attempt; SimpleTestCase forbids database use; each actual dispatch asserts mocked CursorWrapper.execute was not called."
+  },
+  "containers": [
+    {
+      "name": "ue-step1-billing-f9065858a42e44a5a757f40dd7cf9463",
+      "mode": "billing",
+      "image": "python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce",
+      "platform": "linux/amd64",
+      "memoryBytes": 1610612736,
+      "workspaceTmpfsBytes": 805306368,
+      "network": "none",
+      "started": true,
+      "cleanupConfirmed": true,
+      "executionExitCode": 0
+    },
+    {
+      "name": "ue-step1-audit-61f6fce5ea30438683d74b79c1a5487b",
+      "mode": "audit",
+      "image": "python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce",
+      "platform": "linux/amd64",
+      "memoryBytes": 1610612736,
+      "workspaceTmpfsBytes": 805306368,
+      "network": "bridge",
+      "started": true,
+      "cleanupConfirmed": true,
+      "executionExitCode": 0,
+      "missingOutputs": []
+    }
+  ],
+  "preflightAttempts": [
+    {
+      "mode": "billing",
+      "attempt": "v1",
+      "status": "HARNESS_SYNTAX_ERROR_BEFORE_TEST_EXECUTION",
+      "cleanupConfirmed": true,
+      "corrected": "Nested runner string was made raw and syntax-compiled before container start; v2 executed the unchanged repository test."
+    },
+    {
+      "mode": "audit",
+      "attempt": "v1",
+      "status": "AUDIT_NOT_EXECUTED_CACHE_DIRECTORY_READ_ONLY",
+      "cleanupConfirmed": true,
+      "corrected": "Set XDG_CACHE_HOME to owned tmpfs; v2 executed unchanged strict flags and no ignores."
+    }
+  ],
+  "artifacts": [
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-audit-raw-v1.json",
+      "sha256": "dd0a325bebe1b3ee6268b143d6373075111e64df28a9b9e8763dc259435eac2c",
+      "bytes": 5003,
+      "originalBytes": 5003,
+      "originalSha256": "dd0a325bebe1b3ee6268b143d6373075111e64df28a9b9e8763dc259435eac2c",
+      "compression": null
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-audit-command-v1.json",
+      "sha256": "76b6f4699b7c9c4f4f387cafe7a08ff58c714071327d1ad8c6f05be8516c1f3e",
+      "bytes": 427,
+      "originalBytes": 427,
+      "originalSha256": "76b6f4699b7c9c4f4f387cafe7a08ff58c714071327d1ad8c6f05be8516c1f3e",
+      "compression": null
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-billing-boundary-result-v1.json",
+      "sha256": "d5f8afcd364a7a8d03f1e8e9c6cd21ae3ddcac0cf529371ddcd9852485da8365",
+      "bytes": 3341,
+      "originalBytes": 3341,
+      "originalSha256": "d5f8afcd364a7a8d03f1e8e9c6cd21ae3ddcac0cf529371ddcd9852485da8365",
+      "compression": null
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-offline-install-raw-v1.json.gz",
+      "sha256": "072160b7d3e9d3185bf9d047a36cd84025393709886c6c988ed0eae3784223fa",
+      "bytes": 394724,
+      "originalBytes": 1444251,
+      "originalSha256": "aed19cbb5e31717fccbd2d907a9d31d9298079e291e763e626c392dfebb4506b",
+      "compression": "gzip"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-cp311-target-resolver-raw-v1.json.gz",
+      "sha256": "76e87437ccca8eec3ba0f5b0c72958203089d141c4d04fa7dcc2e97a1501ba71",
+      "bytes": 395224,
+      "originalBytes": 1452794,
+      "originalSha256": "22c90be4248ab1f2d98bed0e4323b35edc58fcc8d81618a10ca2d8f5ef180b3b",
+      "compression": "gzip"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-audit-tool-install-raw-v1.json.gz",
+      "sha256": "e46b110bb12fcdf1605d974a9647993c9bba20b23bfd26500769ae893bb0f09b",
+      "bytes": 89593,
+      "originalBytes": 308928,
+      "originalSha256": "89baba55f63ba2b035fb44c0bef210c5a64401d92eda30c19334356a96888833",
+      "compression": "gzip"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-billing-boundary-raw-v1.txt.gz",
+      "sha256": "1d70875293f33dd48e28065c81c6dad972127feb9c76aa1b1a008e58bb1bc774",
+      "bytes": 396396,
+      "originalBytes": 1450932,
+      "originalSha256": "61b372074cac590df382bcc01e68f67406262af102261ce87e274770389687f2",
+      "compression": "gzip"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-audit-raw-v1.txt.gz",
+      "sha256": "22e669215d6776922f6e4da433f2afb827b37f5d877901d88770bf8b496dc249",
+      "bytes": 90777,
+      "originalBytes": 314480,
+      "originalSha256": "99887e9fdc3367dbb3142463893c6b0d3b75872764b83498ec2d759a3ef4f354",
+      "compression": "gzip"
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-cp311-target-resolver-v1.txt",
+      "sha256": "7ce42ffcdadd83f495c66bfa29becaf242f99f7ce74374b4eb36221b051f459c",
+      "bytes": 15333,
+      "originalBytes": 15333,
+      "originalSha256": "7ce42ffcdadd83f495c66bfa29becaf242f99f7ce74374b4eb36221b051f459c",
+      "compression": null
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-lock-wheel-inventory-v1.json",
+      "sha256": "a936b5c554082b5e567c54432a5247fd88a2a6ddf4583b1cbadc2c6d868ff80f",
+      "bytes": 14782,
+      "originalBytes": 14782,
+      "originalSha256": "a936b5c554082b5e567c54432a5247fd88a2a6ddf4583b1cbadc2c6d868ff80f",
+      "compression": null
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-component-qualification-runner-v1.py.txt",
+      "sha256": "2604e61678f6252620a9bb3ca108a8918525646480b7c709a46c9f1233a1d474",
+      "bytes": 10530,
+      "originalBytes": 10530,
+      "originalSha256": "2604e61678f6252620a9bb3ca108a8918525646480b7c709a46c9f1233a1d474",
+      "compression": null
+    },
+    {
+      "file": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/python-billing-copied-source-inventory-v1.json",
+      "sha256": "65dc528db0980cd47e6be9080551afd3972f9377871256c42669deed8bb46ccc",
+      "bytes": 48619
+    }
+  ],
+  "remaining": [
+    "This is bounded source/component qualification, not final candidate CI, application image/runtime inventory or container vulnerability qualification.",
+    "Finance/dues implementation remains excluded; this verifies only unconditional denied access before SQL.",
+    "Step2 live acceptance, staging promotion, production deployment and new release gates were not performed."
+  ],
+  "sourceChanges": [],
+  "dockerLeaseReleased": true,
+  "stagingPromoted": false,
+  "productionPromoted": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "57aa59cb1ec5e71ea6e3e76d9468c995787f1c9552e837060e0ced0823a02823",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/python-lock-and-billing-recapture-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

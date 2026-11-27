@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { decide } from '@/lib/authority/kernel'
+import { ACTIVE_RECUSAL_SQL } from '@/lib/authority/common'
 import { capacitiesForRole } from '@/lib/authority/capacity'
 import type { AuthorityFacts, Membership, Recusal } from '@/lib/authority/ontology'
 import { conversationAssigneeAttested, readOrganizationMembership, type StoredMembership } from '@/lib/messaging/staff-liveness'
@@ -55,7 +56,7 @@ async function loadRecusals(
       resource_id::text AS resource_id, reason, declared_at
     FROM public.ue_authority_recusals
     WHERE organization_id=${actor.organizationId}::uuid AND principal_user_id=${actor.userId}
-      AND resource_type='message_thread' AND lifted_at IS NULL`))
+      AND resource_type='message_thread' AND ${sql.raw(ACTIVE_RECUSAL_SQL)}`))
   return {
     unreadable: false,
     recusals: loaded.map((row) => ({

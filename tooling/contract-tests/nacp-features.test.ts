@@ -250,9 +250,23 @@ describe('NACP-09 — Action files export correct functions', () => {
 
 // ── NACP-10: No-Console Exception ───────────────────────────────────────────
 
-describe('NACP-10 — No-console governance exception', () => {
-  it('no-console.json has exception for nacp-exams error boundary', () => {
-    const src = readSafe(join(ROOT, 'governance', 'exceptions', 'no-console.json'))
-    expect(src).toContain('nacp-exams')
+// The time-boxed no-console exception for the dashboard error boundary (expired
+// 2026-11-17) was retired by its real fix: the boundary reports through
+// @nzila/os-core/browser-diagnostics instead of console.error. The contract is now
+// that no exception is needed and none is held.
+describe('NACP-10 — No-console governance exception retired by the real fix', () => {
+  const boundary = readSafe(join(DASH, 'error.tsx'))
+
+  it('no-console.json holds no exception for nacp-exams', () => {
+    const exceptions = JSON.parse(readSafe(join(ROOT, 'governance', 'exceptions', 'no-console.json'))) as {
+      entries: { path: string }[]
+    }
+    expect(exceptions.entries.filter((entry) => entry.path.includes('nacp-exams'))).toEqual([])
+  })
+
+  it('the dashboard error boundary reports through browser diagnostics, not console', () => {
+    expect(boundary).toContain("from '@nzila/os-core/browser-diagnostics'")
+    expect(boundary).toMatch(/recordBrowserError\s*\(/)
+    expect(boundary).not.toMatch(/\bconsole\s*\./)
   })
 })

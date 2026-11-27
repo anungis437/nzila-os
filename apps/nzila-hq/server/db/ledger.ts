@@ -16,7 +16,7 @@ import { cache } from 'react'
 import { and, desc, gt, isNull, sql } from 'drizzle-orm'
 import type { CashEvent, Invoice, InvoiceStatus, CashEventCategory, CashEventKind } from '@nzila/hq-domain'
 import { createLogger } from '@nzila/os-core/telemetry'
-import { getHqDb } from '../db/client'
+import { getHqDb } from '../../lib/db/client'
 import { invoices as invoicesTable, cashEvents as cashEventsTable } from '../db/schema'
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000

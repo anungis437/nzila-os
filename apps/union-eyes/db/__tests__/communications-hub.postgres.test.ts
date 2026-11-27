@@ -15,6 +15,7 @@ import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -41,6 +42,8 @@ describe.skipIf(!URL)('the communications hub read on the combined schema, as th
   beforeAll(async () => {
     admin = await harness.start(URL!)
     for (const id of [ORG_A, ORG_B, EMPTY]) await insertOrganization(admin, tag, { id })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B, EMPTY]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
 
     await campaign(ORG_A, 'draft', 'draft', '2026-01-01T00:00:00Z')
     await campaign(ORG_A, 'scheduled', 'scheduled', '2026-01-02T00:00:00Z')

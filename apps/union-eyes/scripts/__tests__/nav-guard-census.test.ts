@@ -5,7 +5,7 @@
  * a security destination offered to three roles the page refuses.
  */
 import { describe, expect, it } from 'vitest'
-import { redirectingGuards } from '../lib/nav-census/page-guards'
+import { redirectingGuards, redirectsWithoutCaseHandlerRole } from '../lib/nav-census/page-guards'
 import { applicationNavigation, countByKind, runCensus, type NavOracle } from '../runtime/nav-guard-census'
 
 describe('the guards a page redirects a caller for', () => {
@@ -32,6 +32,14 @@ describe('the guards a page redirects a caller for', () => {
   it('reads a call that refuses by itself', () => {
     expect(redirectingGuards(`export default async function P() { await requireMinRole('admin'); return null }`)).toEqual(['admin'])
   })
+
+  it('reads the imported explicit case-handler denial, including an alias, but not a presentation filter', () => {
+    const policy = `import { isCaseHandlerRole as eligible } from '@/lib/cases/case-role-access';`
+    expect(redirectsWithoutCaseHandlerRole(policy + `const role = user.roles.find(eligible); if (!role) redirect('/dashboard')`)).toBe(true)
+    expect(redirectsWithoutCaseHandlerRole(policy + `if (!user.roles.some(eligible)) notFound()`)).toBe(true)
+    expect(redirectsWithoutCaseHandlerRole(policy + `const role = user.roles.find(eligible); return <Menu role={role} />`)).toBe(false)
+    expect(redirectsWithoutCaseHandlerRole(`const role = user.roles.find(eligible); if (!role) redirect('/dashboard')`)).toBe(false)
+  })
 })
 
 describe('the navigation against the guards of the pages it offers', () => {
@@ -48,24 +56,29 @@ describe('the navigation against the guards of the pages it offers', () => {
     expect(countByKind(report.findings)).toEqual({ NAV_PAGE_REFUSES_ROLE: 0, LANDING_REFUSES_ROLE: 0, NAV_PAGE_MISSING: 0 })
   })
 
-  it('can fail: a workbench offered to a role below steward, and landed on, is found', () => {
+  it('can fail: a workbench offered to a non-handler, and landed on, is found', () => {
     const careless: NavOracle = {
       ...applicationNavigation,
-      roles: ['health_safety_rep', 'steward'],
+      roles: ['member', 'health_safety_rep', 'bargaining_committee', 'steward'],
       visible: (_experience, _role) => [{ href: '/dashboard/inbox' }, { href: '/dashboard/workbench' }],
       landing: () => '/dashboard/workbench',
     }
     const found = runCensus(undefined, careless).findings
     expect(found.map((finding) => `${finding.kind} ${finding.role} ${finding.href}`).sort()).toEqual([
-      'LANDING_REFUSES_ROLE health_safety_rep /dashboard/workbench',
-      'NAV_PAGE_REFUSES_ROLE health_safety_rep /dashboard/workbench',
+      'LANDING_REFUSES_ROLE member /dashboard/workbench',
+      'NAV_PAGE_REFUSES_ROLE member /dashboard/workbench',
     ])
-    expect(found[0].guardedBy).toContain('workbench/page.tsx requires steward')
+    expect(found[0].guardedBy).toContain('workbench/page.tsx requires case handler')
   })
 
   it('can fail: a destination with no page is found', () => {
     const dangling: NavOracle = { ...applicationNavigation, roles: ['steward'], visible: () => [{ href: '/dashboard/does-not-exist' }], landing: () => '/dashboard' }
     expect(runCensus(undefined, dangling).findings.map((finding) => finding.kind)).toEqual(['NAV_PAGE_MISSING'])
+  })
+
+  it('finds Clerk redirects using explicit case-handler eligibility', () => {
+    const careless: NavOracle = { ...applicationNavigation, roles: ['clerk'], visible: () => [{ href: '/dashboard/workbench' }], landing: () => '/dashboard/workbench' }
+    expect(runCensus(undefined, careless).findings.map(finding => finding.kind).sort()).toEqual(['LANDING_REFUSES_ROLE', 'NAV_PAGE_REFUSES_ROLE'])
   })
 
   it('takes the layouts above a page into account', () => {

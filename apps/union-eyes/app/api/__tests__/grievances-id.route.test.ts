@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   toGovernanceLabel: vi.fn(),
   trackPilotEvent: vi.fn(),
   requireKernelCaseAction: vi.fn(),
+  getCaseActor: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
@@ -30,7 +31,7 @@ vi.mock('@/lib/services/document-governance-service', () => ({
   toGovernanceLabel: m.toGovernanceLabel,
 }));
 vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
-vi.mock('@/lib/cases/case-authorization',()=>({requireKernelCaseAction:m.requireKernelCaseAction}));
+vi.mock('@/lib/cases/case-authorization',()=>({requireKernelCaseAction:m.requireKernelCaseAction,getCaseActor:m.getCaseActor}));
 
 const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
@@ -52,6 +53,7 @@ describe('grievances/[id] route', () => {
     m.toGovernanceLabel.mockReturnValue('internal');
     m.trackPilotEvent.mockResolvedValue(undefined);
     m.requireKernelCaseAction.mockResolvedValue(undefined);
+    m.getCaseActor.mockResolvedValue({ userId: 'u1', organizationId: 'org_1', role: 'steward' });
 
     const createSelectChain = () => {
       const chain: any = {
@@ -123,6 +125,18 @@ describe('grievances/[id] route', () => {
     expect(m.trackPilotEvent).not.toHaveBeenCalled();
   });
 
+  it('projects live authorized actions using stored facts and prevents caching that authority', async () => {
+    const { GET } = await loadRoute();
+    const old = new Date(Date.now() - 9 * 86400000);
+    m.getEffectiveCaseAccess.mockResolvedValue({ canViewCase: true, canTransition: true, ownerOnly: { canCloseCase: true } });
+    m.selectQueue = [[{ id: G, status: 'settled', createdAt: old, updatedAt: new Date(), priority: 'medium',
+      description: 'Recorded synthetic resolution documentation.', unionRepId: 'u1' }], [], [], []];
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
+    expect(response.status).toBe(200);
+    expect((await response.json()).data.allowedStatuses).toContain('closed');
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
   it('returns forbidden for a steward-level user with no ownership, grant or authorship', async () => {
     const { GET } = await loadRoute();
 
@@ -134,6 +148,8 @@ describe('grievances/[id] route', () => {
       canViewPrivateDocuments: false,
     });
     m.selectQueue = [[{ id: G, createdBy: 'other_user', unionRepId: 'u2', organizationId: 'org_1' }]];
+    const {ApiError}=await import('@/lib/api/errors');
+    m.requireKernelCaseAction.mockRejectedValueOnce(ApiError.forbidden());
 
     const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
 

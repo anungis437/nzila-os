@@ -1,0 +1,48 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ❯ |contract-tests| no-console.test.ts (2 tests | 1 failed) 5038ms
+   ❯ NO_CONSOLE_001 — No console in runtime code (2)
+     × no governance exceptions are expired 8ms
+     ✓ no runtime code uses console.* (unless excepted) 5028ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |contract-tests| no-console.test.ts > NO_CONSOLE_001 — No console in runtime code > no governance exceptions are expired
+AssertionError: Expired NO_CONSOLE_001 exceptions:
+  apps/union-eyes/lib/console-wrapper.ts expired 2026-11-17 (owner: platform-team)
+  apps/cfo/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/cfo/app/*/dashboard/*/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/cfo/app/*/dashboard/*/*/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/zonga/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/zonga/app/*/dashboard/*/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/partners/app/**/admin/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/partners/app/**/portal/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/nacp-exams/app/*/dashboard/error.tsx expired 2026-11-17 (owner: platform-team)
+  apps/console/components/ui/ErrorPanel.tsx expired 2026-11-17 (owner: platform-team)
+  apps/nzila-hq/components/primitives/ErrorPanel.tsx expired 2026-11-17 (owner: platform-core)
+  apps/union-eyes/instrumentation.ts expired 2026-11-17 (owner: platform-team): expected [ { …(4) }, { …(4) }, { …(4) }, …(9) ] to have a length of +0 but got 12
+
+- Expected
++ Received
+
+- 0
++ 12
+
+ ❯ no-console.test.ts:81:7
+     79|         .map((e) => `  ${e.path} expired ${e.expiresOn} (owner: ${e.ow…
+     80|         .join('\n')}`,
+     81|     ).toHaveLength(0)
+       |       ^
+     82|   })
+     83|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  20:54:16
+   Duration  5.57s (tests 92%, import 6%, transform 2%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/console-governance-current-gate-v1.json

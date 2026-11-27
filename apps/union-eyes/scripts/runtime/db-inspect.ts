@@ -1,3 +1,6 @@
+import { appendFileSync, mkdirSync } from 'node:fs'
+import path from 'node:path'
+import { ownedRuntimeOperatorUrl, runtimeFixtureAuthPath } from './fixture-auth'
 import pg from 'pg'
 
 /**
@@ -7,26 +10,48 @@ import pg from 'pg'
  */
 export interface FilingEvidence {
   claim: { status: string; member_id: string; organization_id: string } | undefined
-  audit: Array<{ storage_type: string | null; immutable: boolean | null; previous_hash: string | null }>
+  audit: Array<{
+    storage_type: string | null
+    immutable: boolean | null
+    previous_hash: string | null
+  }>
+  /** V2: the signed decision proofs in the canonical tenant audit chain (canonical-nar-proof.ts). */
+  canonicalProofs: Array<{ proof_storage: string | null; seal_hash: string | null; signature: string | null }>
 }
 
-export async function inspectFiling(claimId: string, organizationId: string): Promise<FilingEvidence> {
-  const appUrl = process.env.DATABASE_URL
+export async function inspectFiling(
+  claimId: string,
+  organizationId: string,
+): Promise<FilingEvidence> {
+  const appUrl = ownedRuntimeOperatorUrl()
   const platformUrl = process.env.PLATFORM_DATABASE_URL
-  if (!appUrl || !platformUrl) throw new Error('DATABASE_URL and PLATFORM_DATABASE_URL are required to inspect persistence')
+  if (!appUrl || !platformUrl)
+    throw new Error('DATABASE_URL and PLATFORM_DATABASE_URL are required to inspect persistence')
   const app = new pg.Client({ connectionString: appUrl })
   const platform = new pg.Client({ connectionString: platformUrl })
   await app.connect()
   await platform.connect()
   try {
-    const claim = (await app.query('SELECT status, member_id, organization_id FROM claims WHERE claim_id = $1', [claimId])).rows[0]
+    const claim = (
+      await app.query('SELECT status, member_id, organization_id FROM claims WHERE claim_id = $1', [
+        claimId,
+      ])
+    ).rows[0]
     const audit = (
       await platform.query(
         'SELECT storage_type, immutable, previous_hash FROM audit_records WHERE organization_id = $1 AND payload::text LIKE $2',
         [organizationId, `%${claimId}%`],
       )
     ).rows
-    return { claim, audit }
+    const canonicalProofs = (
+      await app.query(
+        `SELECT details->>'proofStorage' AS proof_storage, details->'narRecord'->'seal'->>'hash' AS seal_hash,
+                details->'narRecord'->'seal'->>'signature' AS signature
+           FROM public.audit_logs WHERE organization_id = $1 AND action = 'nar.decision.proof' AND details::text LIKE $2`,
+        [organizationId, `%${claimId}%`],
+      )
+    ).rows
+    return { claim, audit, canonicalProofs }
   } finally {
     await app.end()
     await platform.end()
@@ -34,8 +59,7 @@ export async function inspectFiling(claimId: string, organizationId: string): Pr
 }
 
 async function withApp<T>(work: (client: pg.Client) => Promise<T>): Promise<T> {
-  const url = process.env.DATABASE_URL
-  if (!url) throw new Error('DATABASE_URL is required')
+  const url = ownedRuntimeOperatorUrl()
   const client = new pg.Client({ connectionString: url })
   await client.connect()
   try {
@@ -51,14 +75,25 @@ const QA_CASE = /^aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa[12]$/
 export async function resetQaCase(claimId: string): Promise<void> {
   if (!QA_CASE.test(claimId)) throw new Error('resetQaCase only touches the seeded QA cases')
   await withApp(async (db) => {
-    await db.query(
-      `DELETE FROM grievance_events WHERE grievance_id IN (SELECT (metadata->>'escalatedGrievanceId')::uuid FROM claims WHERE claim_id = $1 AND metadata ? 'escalatedGrievanceId')`,
-      [claimId],
+    const owned = (
+      await db.query(
+        `SELECT metadata FROM public.claims WHERE claim_id=$1 AND organization_id='11111111-1111-4111-8111-111111111111' AND member_id='ue-qa-member-primary'`,
+        [claimId],
+      )
+    ).rows
+    if (owned.length !== 1) throw new Error('Exact represented member fixture case required')
+    if (
+      owned[0].metadata?.escalatedGrievanceId ||
+      (
+        await db.query(
+          'SELECT 1 FROM public.case_authority_scopes WHERE case_id=$1 AND grievance_mirror_id IS NOT NULL',
+          [claimId],
+        )
+      ).rowCount
     )
-    await db.query(
-      `DELETE FROM grievances WHERE id IN (SELECT (metadata->>'escalatedGrievanceId')::uuid FROM claims WHERE claim_id = $1 AND metadata ? 'escalatedGrievanceId')`,
-      [claimId],
-    )
+      throw new Error(
+        'Protected escalation history is preserved; use a new owned runtime or explicit fresh setup',
+      )
     await db.query(
       `UPDATE claims SET status = 'submitted', assigned_to = NULL, assigned_at = NULL, resolution_outcome = NULL, closed_at = NULL,
               metadata = metadata - 'escalatedGrievanceId' - 'escalatedGrievanceNumber', updated_at = created_at
@@ -78,43 +113,77 @@ export async function resetQaCase(claimId: string): Promise<void> {
  *
  * The write is read back: a journey is never reported as aged when the persisted clock does not say so (for example a connection that is not
  * allowed to switch triggers off), because acceptance would then pass or fail for the wrong reason. The boundary is the designated QA
- * organization, not a list of seeded cases: a journey also ages the case it filed itself.
+ * organization and exact fixture member, not a list of seeded cases: a journey also ages the case it filed itself.
+ * This privileged data preparation does not prove an ordinary caller can alter the clock.
  */
 export async function ageQaCase(claimId: string, hours: number): Promise<void> {
-  if (!Number.isSafeInteger(hours) || hours < 1 || hours > 8760) throw new Error('Invalid QA case age');
+  if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(claimId))
+    throw new Error('Exact fixture case UUID required')
+  if (!Number.isSafeInteger(hours) || hours < 1 || hours > 8760)
+    throw new Error('Invalid QA case age')
+  const state = path.dirname(runtimeFixtureAuthPath())
+  mkdirSync(state, { recursive: true, mode: 0o700 })
   await withApp(async (db) => {
-    await db.query('BEGIN');
+    await db.query('BEGIN')
     try {
-      await db.query('SET LOCAL session_replication_role = replica');
+      await db.query('SET LOCAL session_replication_role = replica')
       const result = await db.query(
         `UPDATE claims SET status_changed_at = now() - make_interval(hours => $2::int)
-          WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111'
+          WHERE claim_id = $1 AND organization_id = '11111111-1111-4111-8111-111111111111' AND member_id='ue-qa-member-primary'
           RETURNING claim_id, id, status_changed_at`,
         [claimId, hours],
-      );
-      if (result.rowCount !== 1) throw new Error('QA case not found in the designated QA organization');
-      const observed = new Date(result.rows[0]?.status_changed_at).getTime();
-      const target = Date.now() - hours * 60 * 60 * 1000;
+      )
+      if (result.rowCount !== 1 || result.rows[0]?.claim_id !== claimId)
+        throw new Error('QA case not found in the designated QA organization')
+      const observed = new Date(result.rows[0]?.status_changed_at).getTime()
+      const target = Date.now() - hours * 60 * 60 * 1000
       if (!Number.isFinite(observed) || Math.abs(observed - target) > 120_000) {
-        throw new Error('QA status clock was not backdated: database trigger preserved the authoritative clock; lifecycle acceptance remains unverified');
+        throw new Error(
+          'QA status clock was not backdated: database trigger preserved the authoritative clock; lifecycle acceptance remains unverified',
+        )
       }
       await db.query(
         `UPDATE claim_status_transitions SET changed_at = now() - make_interval(hours => $2::int)
           WHERE id = (SELECT id FROM claim_status_transitions WHERE claim_id = $1 ORDER BY changed_at DESC LIMIT 1)`,
         [result.rows[0].id, hours],
-      );
-      await db.query('COMMIT');
+      )
+      await db.query('SET LOCAL session_replication_role = origin')
+      await db.query('COMMIT')
+      appendFileSync(
+        path.join(state, 'privileged-state-preparation.jsonl'),
+        JSON.stringify({
+          setup: 'PRIVILEGED_HISTORICAL_STATUS_DURATION',
+          scope: 'DATA_PREPARATION_ONLY',
+          claimId,
+          organizationId: '11111111-1111-4111-8111-111111111111',
+          hours,
+          observedStatusChangedAt: new Date(observed).toISOString(),
+          operator: 'uev2admin',
+          transactionLocal: true,
+          ordinaryClockImmutabilityProven: false,
+          at: new Date().toISOString(),
+        }) + '\n',
+        { mode: 0o600 },
+      )
     } catch (error) {
-      await db.query('ROLLBACK').catch(() => undefined);
-      throw error;
+      await db.query('ROLLBACK').catch(() => undefined)
+      throw error
     }
-  });
+  })
 }
 
 /** The audit details recorded for the assignments of one case, newest first. */
-export async function assignmentAudit(claimId: string): Promise<Array<{ action: string; user_id: string | null; metadata: Record<string, unknown> }>> {
-  return withApp(async (db) =>
-    (await db.query(`SELECT action, user_id, metadata FROM audit_security.audit_logs WHERE metadata->>'caseId' = $1 AND action = 'case.assign' ORDER BY created_at DESC`, [claimId])).rows,
+export async function assignmentAudit(
+  claimId: string,
+): Promise<Array<{ action: string; user_id: string | null; metadata: Record<string, unknown> }>> {
+  return withApp(
+    async (db) =>
+      (
+        await db.query(
+          `SELECT action, user_id, details AS metadata FROM public.audit_logs WHERE resource_id = $1 AND action = 'case.assign' ORDER BY created_at DESC`,
+          [claimId],
+        )
+      ).rows,
   )
 }
 
@@ -126,27 +195,55 @@ export async function inspectCase(claimId: string): Promise<{
   grievanceEvents: number
 }> {
   return withApp(async (db) => {
-    const claim = (await db.query('SELECT status, assigned_to, resolution_outcome, metadata FROM claims WHERE claim_id = $1', [claimId])).rows[0]
+    const claim = (
+      await db.query(
+        'SELECT status, assigned_to, resolution_outcome, metadata FROM claims WHERE claim_id = $1',
+        [claimId],
+      )
+    ).rows[0]
     const grievanceId: string | undefined = claim?.metadata?.escalatedGrievanceId
-    const grievances = grievanceId ? Number((await db.query('SELECT count(*) FROM grievances WHERE id = $1', [grievanceId])).rows[0].count) : 0
-    const events = grievanceId ? Number((await db.query('SELECT count(*) FROM grievance_events WHERE grievance_id = $1', [grievanceId])).rows[0].count) : 0
-    return { status: claim?.status ?? null, assignedTo: claim?.assigned_to ?? null, resolutionOutcome: claim?.resolution_outcome ?? null, grievances, grievanceEvents: events }
+    const grievances = grievanceId
+      ? Number(
+          (await db.query('SELECT count(*) FROM grievances WHERE id = $1', [grievanceId])).rows[0]
+            .count,
+        )
+      : 0
+    const events = grievanceId
+      ? Number(
+          (
+            await db.query('SELECT count(*) FROM grievance_events WHERE grievance_id = $1', [
+              grievanceId,
+            ])
+          ).rows[0].count,
+        )
+      : 0
+    const primary = (
+      await db.query(
+        "SELECT principal_user_id FROM public.ue_authority_resource_relationships WHERE resource_type='case' AND resource_id=$1 AND organization_id=(SELECT organization_id FROM public.claims WHERE claim_id=$1) AND relation='assignee' AND origin='explicit' AND status='active' AND revoked_at IS NULL AND effective_at<=clock_timestamp() AND (expires_at IS NULL OR expires_at>clock_timestamp())",
+        [claimId],
+      )
+    ).rows
+    if (primary.length > 1) throw new Error('Conflicting governed fixture primary handlers')
+    return {
+      status: claim?.status ?? null,
+      assignedTo: primary[0]?.principal_user_id ?? null,
+      resolutionOutcome: claim?.resolution_outcome ?? null,
+      grievances,
+      grievanceEvents: events,
+    }
   })
 }
 
 /** Counts every grievance in the QA organization, to prove a refused escalation left nothing behind. */
 export async function countGrievances(organizationId: string): Promise<number> {
-  return withApp(async (db) => Number((await db.query('SELECT count(*) FROM grievances WHERE organization_id = $1', [organizationId])).rows[0].count))
-}
-
-export async function financeRows(remittanceId: string): Promise<Array<Record<string, unknown>>> {
-  return withApp(async (db) => (await db.query('SELECT * FROM employer_remittances WHERE id = $1', [remittanceId])).rows)
-}
-
-/** Audit actions recorded for one finance record. */
-export async function financeAudit(resourceId: string): Promise<Array<{ action: string; user_id: string | null }>> {
   return withApp(async (db) =>
-    (await db.query(`SELECT action, user_id FROM audit_security.audit_logs WHERE resource_id::text = $1 ORDER BY created_at`, [resourceId])).rows,
+    Number(
+      (
+        await db.query('SELECT count(*) FROM grievances WHERE organization_id = $1', [
+          organizationId,
+        ])
+      ).rows[0].count,
+    ),
   )
 }
 
@@ -162,7 +259,9 @@ export async function seedTestimonial(id: string): Promise<void> {
   })
 }
 
-export async function testimonialState(id: string): Promise<{ exists: boolean; visibility: string | null }> {
+export async function testimonialState(
+  id: string,
+): Promise<{ exists: boolean; visibility: string | null }> {
   return withApp(async (db) => {
     const row = (await db.query('SELECT visibility FROM testimonials WHERE id = $1', [id])).rows[0]
     return { exists: Boolean(row), visibility: row?.visibility ?? null }

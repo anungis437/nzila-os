@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -20,6 +21,8 @@ async function loadRoute() {
   return import('../dues/arrears/route');
 }
 
+const REFUSAL = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
+
 describe('dues/arrears route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,13 +40,11 @@ describe('dues/arrears route', () => {
     await expect(GET({ organizationId: null })).rejects.toMatchObject({ status: 400 });
   });
 
-  it('returns arrears members for organization', async () => {
+  it('is refused with 501 and reads nothing, even for a valid organization', async () => {
     const { GET } = await loadRoute();
 
-    const result = await GET({ organizationId: 'org_1' });
-
-    expect(result).toEqual({ members: [{ id: 'a1', memberId: 'm1', amountOwed: '250.00' }] });
-    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
-    expect(m.db.execute).toHaveBeenCalledTimes(1);
+    await expect(GET({ organizationId: 'org_1' })).rejects.toMatchObject(REFUSAL);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.db.execute).not.toHaveBeenCalled();
   });
 });

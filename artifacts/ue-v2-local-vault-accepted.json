@@ -1,7 +1,7 @@
 {
   "mode": "accepted",
   "nodeEnvironment": "production",
-  "sourceDigest": "0e7d048a2c0ccbe801210531a126e0913a5f368d93a8c23179f71715440c4847",
+  "sourceDigest": "50442237a2e45011ceaea61ece9172bf775da11cf60f1191fcdba220a5da8547",
   "exitCode": 0,
   "sdkMocked": false,
   "certificateValidationDisabled": false,
@@ -19,23 +19,23 @@
   },
   "networkObservations": [
     {
-      "pid": 48300,
+      "pid": 70497,
       "transport": "PIPE",
-      "targetDigest": "df1813b569bfe93701d51fa5b5a6df1897b6bef543f35c2074b723d35ba13be6",
+      "targetDigest": "064af2c837c3edf8a5b9be87546fa00f439daa754a0e184bf1565f83ff1b589f",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 48300,
+      "pid": 70497,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 56477,
+      "port": 60861,
       "allowed": true
     },
     {
-      "pid": 48300,
+      "pid": 70497,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
@@ -43,31 +43,31 @@
       "allowed": true
     },
     {
-      "pid": 48300,
+      "pid": 70497,
       "transport": "TCP",
       "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
       "targetClass": "LOOPBACK",
-      "port": 56476,
+      "port": 60860,
       "allowed": true
     },
     {
-      "pid": 36828,
+      "pid": 70504,
       "transport": "PIPE",
-      "targetDigest": "df1813b569bfe93701d51fa5b5a6df1897b6bef543f35c2074b723d35ba13be6",
+      "targetDigest": "064af2c837c3edf8a5b9be87546fa00f439daa754a0e184bf1565f83ff1b589f",
       "targetClass": "NON_LOOPBACK",
       "port": null,
       "allowed": false
     },
     {
-      "pid": 36828,
+      "pid": 70504,
       "transport": "TCP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
-      "port": 56477,
+      "port": 60861,
       "allowed": true
     },
     {
-      "pid": 36828,
+      "pid": 70504,
       "transport": "DNS_LOOKUP",
       "targetDigest": "e68d7e12d9776348d462de5ee22f2686672cf11f6926af7b627ffc0ffa18b73f",
       "targetClass": "LOOPBACK",
@@ -75,11 +75,11 @@
       "allowed": true
     },
     {
-      "pid": 36828,
+      "pid": 70504,
       "transport": "TCP",
       "targetDigest": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
       "targetClass": "LOOPBACK",
-      "port": 56476,
+      "port": 60860,
       "allowed": true
     }
   ],

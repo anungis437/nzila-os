@@ -253,9 +253,21 @@ export type {
 export {
   DATA_VERSIONS,
   STALENESS_THRESHOLD_DAYS,
+  parseVerificationDate,
+  verificationAgeDays,
   isModuleStale,
+  selectStaleModules,
   getStaleModules,
   getModuleVersion,
   getLatestVerificationDate,
 } from './data-versions'
 export type { DataModuleVersion } from './data-versions'
+export { auditTaxReferenceData } from './freshness-audit'
+export type {
+  TaxFreshnessClassification,
+  TaxFreshnessModuleFinding,
+  TaxReferenceCurrentness,
+  TaxReferenceFreshnessAudit,
+  TaxReleaseDisposition,
+  TaxReleaseEligibility,
+} from './freshness-audit'

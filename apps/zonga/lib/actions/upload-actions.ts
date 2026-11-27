@@ -7,7 +7,9 @@
  */
 'use server'
 
-import { resolveOrgContext } from '@/lib/resolve-org'
+import { resolveOrgContext, ZongaScopeError } from '@/lib/resolve-org'
+import { zongaRows } from '@/queries/action-context'
+import { audioBlobPath } from '@/lib/services/listener-resources'
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
@@ -44,9 +46,7 @@ export interface AudioUploadActionResult {
  * Upload an audio file for a content asset.
  * Accepts FormData with the audio file + metadata fields.
  */
-export async function uploadAudio(
-  formData: FormData,
-): Promise<AudioUploadActionResult> {
+export async function uploadAudio(formData: FormData): Promise<AudioUploadActionResult> {
   const ctx = await resolveOrgContext()
 
   try {
@@ -143,9 +143,7 @@ export interface CoverUploadResult {
  * Upload cover art for a content asset.
  * Accepts FormData with the image file + metadata fields.
  */
-export async function uploadCover(
-  formData: FormData,
-): Promise<CoverUploadResult> {
+export async function uploadCover(formData: FormData): Promise<CoverUploadResult> {
   const ctx = await resolveOrgContext()
 
   try {
@@ -162,11 +160,17 @@ export async function uploadCover(
     // Validate cover art size (max 10 MB) and content type before loading into memory
     const COVER_MAX_BYTES = 10 * 1024 * 1024
     if (file.size > COVER_MAX_BYTES) {
-      return { ok: false, error: `Cover art too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum is 10 MB.` }
+      return {
+        ok: false,
+        error: `Cover art too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum is 10 MB.`,
+      }
     }
     const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      return { ok: false, error: `Invalid image type: ${file.type}. Allowed: ${ALLOWED_IMAGE_TYPES.join(', ')}` }
+      return {
+        ok: false,
+        error: `Invalid image type: ${file.type}. Allowed: ${ALLOWED_IMAGE_TYPES.join(', ')}`,
+      }
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
@@ -205,9 +209,16 @@ export async function uploadCover(
  * Generate a new time-limited streaming URL for an existing audio file.
  */
 export async function getStreamUrl(blobPath: string): Promise<string> {
-  const _ctx = await resolveOrgContext()
-
-  return getAudioStreamUrl(blobPath)
+  return resolveOrgContext('organization', {}, async (context) => {
+    if (!context.permissions.includes('zonga:catalog:list')) throw new ZongaScopeError()
+    const [asset] = zongaRows<{ id: string; creatorId: string; storageUrl: string; orgId: string }>(
+      await context.db.execute(
+        sql`SELECT a.id,a.creator_id AS "creatorId",a.storage_url AS "storageUrl",a.org_id AS "orgId" FROM public.zonga_content_assets a JOIN public.zonga_creators c ON c.id=a.creator_id WHERE a.org_id=${context.orgId}::uuid AND a.storage_url=${`blob://${blobPath}`} AND(c.org_id IS NULL OR c.org_id=a.org_id) FOR SHARE OF a,c`,
+      ),
+    )
+    if (!asset) throw new ZongaScopeError('Stored organization audio is unavailable')
+    return getAudioStreamUrl(audioBlobPath({ ...asset, kind: 'asset' }))
+  })
 }
 
 // ── Bulk Upload (Label Plan Required — S2 Guard) ────────────────────────────
@@ -223,9 +234,7 @@ export interface BulkUploadResult {
  * Upload multiple audio files at once. Requires label plan or above (S2 guard).
  * Accepts FormData with multiple files + a creatorId field.
  */
-export async function bulkUploadAudio(
-  formData: FormData,
-): Promise<BulkUploadResult> {
+export async function bulkUploadAudio(formData: FormData): Promise<BulkUploadResult> {
   const ctx = await resolveOrgContext()
   const creatorId = formData.get('creatorId') as string
 
@@ -237,7 +246,12 @@ export async function bulkUploadAudio(
   const planInfo = await getCreatorPlan(creatorId, ctx.orgId)
   const guard = guardCreatorFeature(planInfo.plan, 'bulk_upload')
   if (!guard.passed) {
-    return { ok: false, uploaded: [], failed: [], error: guard.details ?? 'Label plan required for bulk uploads' }
+    return {
+      ok: false,
+      uploaded: [],
+      failed: [],
+      error: guard.details ?? 'Label plan required for bulk uploads',
+    }
   }
 
   const files = formData.getAll('files') as File[]
@@ -248,11 +262,24 @@ export async function bulkUploadAudio(
   // Limit batch size to prevent memory exhaustion
   const MAX_BULK_FILES = 50
   if (files.length > MAX_BULK_FILES) {
-    return { ok: false, uploaded: [], failed: [], error: `Too many files (${files.length}). Maximum is ${MAX_BULK_FILES} per batch.` }
+    return {
+      ok: false,
+      uploaded: [],
+      failed: [],
+      error: `Too many files (${files.length}). Maximum is ${MAX_BULK_FILES} per batch.`,
+    }
   }
 
   const AUDIO_MAX_BYTES = 500_000_000 // 500 MB per file
-  const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp4', 'audio/aac', 'audio/wav', 'audio/flac', 'audio/ogg', 'audio/webm']
+  const ALLOWED_AUDIO_TYPES = [
+    'audio/mpeg',
+    'audio/mp4',
+    'audio/aac',
+    'audio/wav',
+    'audio/flac',
+    'audio/ogg',
+    'audio/webm',
+  ]
 
   const uploaded: BulkUploadResult['uploaded'] = []
   const failed: BulkUploadResult['failed'] = []
@@ -260,7 +287,10 @@ export async function bulkUploadAudio(
   for (const file of files) {
     // Validate per-file size and content type before loading into memory
     if (file.size > AUDIO_MAX_BYTES) {
-      failed.push({ fileName: file.name, error: `File too large (${(file.size / 1024 / 1024).toFixed(0)} MB). Maximum is 500 MB.` })
+      failed.push({
+        fileName: file.name,
+        error: `File too large (${(file.size / 1024 / 1024).toFixed(0)} MB). Maximum is 500 MB.`,
+      })
       continue
     }
     if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
@@ -300,7 +330,10 @@ export async function bulkUploadAudio(
 
       logger.info('Bulk upload: file processed', { assetId, fileName: file.name, sha256 })
     } catch (err) {
-      failed.push({ fileName: file.name, error: err instanceof Error ? err.message : 'Upload failed' })
+      failed.push({
+        fileName: file.name,
+        error: err instanceof Error ? err.message : 'Upload failed',
+      })
       logger.warn('Bulk upload: file failed', { fileName: file.name, error: String(err) })
     }
   }
@@ -312,7 +345,12 @@ export async function bulkUploadAudio(
     action: ZongaAuditAction.CONTENT_UPLOAD,
     entityType: ZongaEntityType.CONTENT_ASSET,
     targetId: creatorId,
-    metadata: { bulkUpload: true, totalFiles: files.length, succeeded: uploaded.length, failed: failed.length },
+    metadata: {
+      bulkUpload: true,
+      totalFiles: files.length,
+      succeeded: uploaded.length,
+      failed: failed.length,
+    },
   })
   await platformDb.execute(
     sql`INSERT INTO audit_log (entity_id, actor_id, action, metadata, org_id)

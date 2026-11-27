@@ -1,0 +1,28 @@
+{
+  "evidenceClass": "READ_ONLY_LIVE_STAGING_OBSERVATION_NOT_BASE_ACCEPTANCE",
+  "recordedAt": "2026-11-22T20:02:49.387835+00:00",
+  "applicationVersion": {
+    "status": 200,
+    "body": {
+      "app": "union-eyes",
+      "gitSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "buildTimestamp": "2026-11-17T03:42:01Z",
+      "appVersion": "0.0.0",
+      "releaseId": "UE-V2-STAGING-cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "artifactId": "cccfc8c311a1017f80241bf089c00ef0c6828751"
+    }
+  },
+  "health": {
+    "status": 200,
+    "reportedStatus": "healthy",
+    "applicationReady": null
+  },
+  "proposedApplicationSourceSha": "57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3",
+  "failedRolloutRunId": 44962785190,
+  "failedRolloutWorkflowSha": "6bba9465f9c99ca7559a24c19f5a11c9e41c353c",
+  "mainImageBuildRunId": 44949770898,
+  "mainImageDigest": "sha256:7b6c8ebfed04a70d69283e31480c39a1989e93b283b24eed48c784e6000d590e",
+  "fullBaseAcceptance": "NOT_PROVEN",
+  "liveDataModified": false,
+  "productionDeployment": false
+}

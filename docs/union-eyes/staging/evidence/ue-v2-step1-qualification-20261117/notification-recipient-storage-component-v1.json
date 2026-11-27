@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-11-18T13:24:07.238932+00:00",
+  "scope": "ZONGA_SHARED_NOTIFICATION_RECIPIENT_STORAGE_ONLY",
+  "status": "COMPONENT_VERIFIED",
+  "sourceBindings": [
+    {
+      "path": "packages/db/src/schema/zonga.ts",
+      "sha256": "aa67eb1e1c08af6190d542b8d335d1f076a5a23a2aff7560b3a44ade3e63b7b7"
+    },
+    {
+      "path": "packages/db/drizzle/0042_zonga_notification_recipient_identity.sql",
+      "sha256": "cf474189a29baeaa66ead5bf54d709ff4b55503f1ff1b68a0d5c34dc2b314f95"
+    },
+    {
+      "path": "apps/zonga/lib/__tests__/notification-recipient-migration.test.ts",
+      "sha256": "db2c3611ea2c319afcc460bc85610ffdf14e6f903d2227db0579fe243ca35ea1"
+    }
+  ],
+  "checks": {
+    "actualSqlEngineTests": 10,
+    "failed": 0,
+    "skipped": 0,
+    "boundedSemanticEntrypoints": 2,
+    "boundedSemanticExitCode": 0,
+    "scopedLintFiles": 2,
+    "scopedLintExitCode": 0
+  },
+  "change": "Separate nullable canonical opaque-text recipient from retained nullable legacy UUID; require exactly one nonblank namespace; preserve every legacy field/value without identity inference or backfill",
+  "migrationAppliedToLiveEnvironment": false,
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/zonga-recipient-migration-v2.json",
+      "sha256": "6a50f1521f2abd5e6673e6e0ba5f1ccd148891a9a50fcb8f27f8527d842454cf"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/zonga-recipient-migration-v2.log",
+      "sha256": "c62e45da83fe43c9de2dc64b359a8e31fee68364577c7b1912555017db253607"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/zonga-recipient-semantic-v1.tsconfig.json",
+      "sha256": "edf6591932131363ef50d3d5ce1d3011639d8d09912e7bec99951bc20062c2fd"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/zonga-recipient-semantic-v2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/zonga-recipient-lint-v1.log",
+      "sha256": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+    }
+  ],
+  "limits": [
+    "SQL engine is PGlite, not native PostgreSQL15/16",
+    "Connected application actions remain under repair/qualification",
+    "No notification delivery or whole-candidate proof"
+  ],
+  "candidateSha": null,
+  "step2Started": false,
+  "stagingOrProductionPromoted": false
+}

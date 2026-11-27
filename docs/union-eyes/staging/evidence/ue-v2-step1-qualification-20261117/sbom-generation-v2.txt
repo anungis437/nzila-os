@@ -1,0 +1,12 @@
+
+> nzila-os@1.0.3 generate:sbom /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+> tsx scripts/generate-sbom.ts --refresh-metadata
+
+
+━━━ Nzila OS — SBOM Generation (CycloneDX) ━━━
+
+  ✔ SBOM generated: /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/ops/security/sbom.json
+  ✔ Components: 2493
+  ✔ SBOM hash: b999c11aba12ee01…
+  ✔ Format: CycloneDX 1.5
+

@@ -12,17 +12,25 @@ import pg from 'pg'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { installNativeBusinessContext, withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
+import { seedDeclaredCanonicalActor } from './native-declared-actor'
+import type { AuthenticatedOrgBinding } from '../../../../packages/platform-auth/src/org-binding'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 const state = vi.hoisted(() => ({ db: null as unknown }))
 
 type Tx = { execute: (q: unknown) => Promise<unknown> }
+// The organization the members belong to: a member's own runtime action runs in their verified business session there, as the
+// location-consent route does under lib/api/with-api.ts in canonical mode (ue_v2_verified_business_session admits nothing else).
+const ORG = randomUUID()
 async function inRole<T>(role: 'union_eyes_runtime' | 'union_eyes_system', user: string, work: (tx: unknown) => Promise<T>): Promise<T> {
-  return (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
+  const run = (binding?: AuthenticatedOrgBinding) => (state.db as { transaction: (f: (tx: Tx) => Promise<T>) => Promise<T> }).transaction(async (tx) => {
     await tx.execute(sql.raw(`SET LOCAL ROLE ${role}`))
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${user}, true), set_config('app.current_org_id', '', true)`)
+    if (binding) await installNativeBusinessContext((statement) => tx.execute(statement), binding)
     return work(tx)
   })
+  return role === 'union_eyes_runtime' && user ? withNativeCanonicalActor(user, ORG, run) : run()
 }
 
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -60,6 +68,10 @@ describe.skipIf(!URL)('member location retention on the combined deployed schema
     await admin.connect()
     pool = new pg.Pool({ connectionString: URL, max: 4 })
     state.db = drizzle(pool)
+    await admin.query(
+      `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+       VALUES ($1,$2,$2,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`, [ORG, `loc-${ORG.slice(0, 8)}`])
+    for (const user of [USER_A, USER_B]) await seedDeclaredCanonicalActor(admin, user, ORG, 'member')
     await admin.query(`CREATE TABLE IF NOT EXISTS ue_location_log_faults (armed boolean)`)
     await admin.query(`GRANT SELECT ON ue_location_log_faults TO PUBLIC`)
     await admin.query(`CREATE OR REPLACE FUNCTION ue_location_log_fault() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN

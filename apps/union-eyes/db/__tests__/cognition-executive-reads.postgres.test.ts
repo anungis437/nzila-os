@@ -21,6 +21,7 @@ import { memory as cognitionMemory } from '@nzila/platform-cognition-core'
 import { setUeCognitionStoreRoot } from '@nzila/ue-cognition'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -60,6 +61,8 @@ describe.skipIf(!URL)('the cognition and executive dashboard reads on the combin
     admin = await harness.start(URL!)
     await insertOrganization(admin, tag, { id: ORG_A })
     await insertOrganization(admin, tag, { id: ORG_B })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
 
     ids.stewardRowA = (await admin.query(`INSERT INTO stewards (org_id, user_id, active, max_caseload, current_caseload) VALUES ($1, $2, true, 10, 4) RETURNING id::text AS id`, [ORG_A, repUserA])).rows[0].id
     await admin.query(`INSERT INTO stewards (org_id, user_id, active, max_caseload, current_caseload) VALUES ($1, $2, false, 10, 9), ($3, $4, true, 8, 8)`, [ORG_A, stewardA, ORG_B, randomUUID()])
@@ -138,9 +141,17 @@ describe.skipIf(!URL)('the cognition and executive dashboard reads on the combin
       expect(empty.compliance.alerts).toEqual([])
     })
 
-    it('counts the executive figures from the organization\'s own members and grievances', async () => {
-      const executive = await kpi!.getExecutiveMetrics({ organizationId: ORG_A, timeframe: 'monthly' })
-      expect(executive.activeGrievances).toBe(2)
+    it('refuses the executive figures 501: they count employer remittances, which the canonical source contains', async () => {
+      // employer_remittances has no runtime or system grant (CONTAINED_NO_AUTHORITY): the figures are refused with the reason before the
+      // cache or any statement, rather than served without the remittances they claim to count.
+      const { cacheGet } = await import('@/lib/services/cache-service')
+      const cacheReads = vi.mocked(cacheGet).mock.calls.length
+      const refused = await kpi!.getExecutiveMetrics({ organizationId: ORG_A, timeframe: 'monthly' }).then(() => null, (error: unknown) => error)
+      expect(refused).toMatchObject({ name: 'ContainedStorageUnavailable', code: 'NOT_IMPLEMENTED', status: 501, storage: 'employer_remittances' })
+      expect(vi.mocked(cacheGet).mock.calls.length).toBe(cacheReads)
+      const denied = await harness.tenant(RUNTIME_ROLE, ORG_A, null, (tx) => tx.select().from(schema!.employerRemittances))
+        .then(() => '', (error: { message?: string; cause?: { message?: string } }) => `${error.message} ${error.cause?.message ?? ''}`)
+      expect(denied).toMatch(/permission denied for table employer_remittances/)
     })
   })
 

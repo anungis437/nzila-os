@@ -1,0 +1,15 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup
+
+ ✓ |union-eyes| scripts/evidence/__tests__/evidence-cli.test.ts (19 tests) 4546ms
+   ✓ actual Union Eyes evidence CLI integrity (19)
+     ✓ collects explicit nested proof files alongside defaults and verifies their real bytes through sealing 495ms
+     ✓ rejects explicit parent traversal and absolute paths before writing the manifest 328ms
+     ✓ requires a configured production signing key for both seal and verify 458ms
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  17:50:27
+   Duration  4.69s (tests 99%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-cli-include-results-v2.json

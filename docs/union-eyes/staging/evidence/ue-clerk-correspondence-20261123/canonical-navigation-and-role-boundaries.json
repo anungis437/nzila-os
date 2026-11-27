@@ -1,0 +1,94 @@
+{
+  "status": "TARGETED_TESTED_WORKING_TREE_NOT_STAGING",
+  "recordedAt": "2026-11-23T05:00:46.126795+00:00",
+  "baselineApplicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+  "sourceHeadBeforeCommit": "36e68c95622edfbce9f8fb6625b016c7e0e421ef",
+  "rootCause": "The canonical V2 hasMinRole page guard delegates to hasRole and normalizes unlisted Clerk to Member; legacy mode uses the canonical role catalogue instead. Navigation previously compared only the catalogue level70 and offered a rejected workbench landing. Explicit local letter roles also require matching menu filtering.",
+  "directGuardProof": "Real getCurrentUser and hasMinRole are executed with only the trusted canonical context/provider/storage boundaries mocked. Clerk identity remains clerk, member-level guard allows, steward/officer guards refuse. No real browser or staging request is claimed.",
+  "repair": "Model canonical page-guard refusals in the existing menu and census. Clerk lands at Inbox, retains explicit letter navigation, and is not advertised numeric-guarded workbench/member/clause pages. All other numeric role authority remains unchanged. Platform/national/federation titles are not offered local correspondence.",
+  "focusedTests": {
+    "applicationPassed": 167,
+    "failed": 0,
+    "pending": 0,
+    "actualGuardRoleValues": 34,
+    "minimumGuardLevelsPerRole": 4,
+    "correspondenceNavigationStoredRoleValues": 39,
+    "authAndPersonaContractsPassed": 389,
+    "providerResidualClassificationTestsPassed": 5
+  },
+  "providerResidualRepair": "Existing domain_role/test_fixture classifications now account for exact legitimate union-role files. The provider-authentication-input and retired-export guards are unchanged; the separate auth-reality guard still rejects SDK/variables/provider components and descriptions in the new union-role files.",
+  "sourcePlan": {
+    "baselineApplicationSourceSha": "aa545415cfe4b172733000cfc6510712d4de0cba",
+    "sourceHeadBeforeNavigationCommit": "36e68c95622edfbce9f8fb6625b016c7e0e421ef",
+    "workingTreeProof": true,
+    "recordedAt": "2026-11-23T05:00:07.556543+00:00",
+    "generatorsPassed": true,
+    "sourceCommitmentsUpdated": [
+      "apps/union-eyes/lib/api/with-api.ts",
+      "packages/platform-auth/src/identity-provider-residuals.ts"
+    ],
+    "sqlStatementsUnchanged": 6326,
+    "statementMetadataChanges": {
+      "sourceDigest": 252
+    },
+    "baselineSourcePlanDigest": "b7a2170cd1400e8ecfa55c5c80294ff99e40b5ffda8ff7792a95c5e7033acac4",
+    "currentSourcePlanDigest": "7d010442aee62b7689553f79417849305a53d78fe851c8b17430abe826dfe877",
+    "catalogOverlayOnlyPlanDigestChanged": true,
+    "sqlPrivilegesChanged": false,
+    "stagingAcceptance": false
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "sha256": "c03d663fc9b17643923a59db765f7d0eef14eb65b9714a12668e87c23835e952"
+    },
+    {
+      "path": "apps/union-eyes/lib/dashboard/__tests__/role-experience.test.ts",
+      "sha256": "58537224833d85b3daa0c1319319222de1556735937d2026044c533c584c19ec"
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/api-auth-guard-canonical.test.ts",
+      "sha256": "9df5cd0f8b9fcc846337e8bb4c5076db53581d66041d0a3fbda3c2f4faa4afca"
+    },
+    {
+      "path": "apps/union-eyes/scripts/runtime/nav-guard-census.ts",
+      "sha256": "37fadbb8b986cc8f9f5a009c0616ec6a9545f9dfe72c05b6c48b5982720c8b1e"
+    },
+    {
+      "path": "apps/union-eyes/scripts/__tests__/nav-guard-census.test.ts",
+      "sha256": "6a7967ee0006ff628cd3f399ff723a38f09ee8570a34f8cfd0e656689d712f52"
+    },
+    {
+      "path": "packages/platform-auth/src/identity-provider-residuals.ts",
+      "sha256": "a77d75a08245e5687605eb8907af252a8035adadcc7c2ddfc3b55cb1175297ac"
+    },
+    {
+      "path": "tooling/contract-tests/ue-auth-reality.test.ts",
+      "sha256": "27c3976e0d188330a858dfac7658bc65739b4f6ffc40b6bb0ceeab18f9d3ac69"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "806eb78a17f62cb8d429c3a70150802a316d0022c34f8b301038c57274581b65"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-v2-decisions.json",
+      "sha256": "7ef40e3b42fd6989e6a636e518e62fd6f7690225f955ee69afbe652a4f1e7644"
+    }
+  ],
+  "testReportSha256": "30b3ddb305537e693acb3f3842820b344d604257de22301ca8b1c268d66ac114",
+  "fullPersonaDenominator": {
+    "stakeholderFamilies": 35,
+    "required": 26,
+    "deferred": 9,
+    "storedRoleValues": 39,
+    "requiredBoundaries": 34,
+    "deprecatedOrExcluded": 5,
+    "lifecycleStages": 16,
+    "sevenNavigationProfilesAreCompleteAcceptance": false
+  },
+  "finalIntegratedRepositoryChecks": "PENDING",
+  "exactSourceCI": "PENDING",
+  "actualStagingAcceptance": false,
+  "liveDataChanged": false,
+  "productionAuthorized": false
+}

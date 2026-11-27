@@ -11,7 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
-import { resolveEntitlements, resolveEntitlementsBulk } from '@/server/authority/entitlements'
+import { resolveEntitlements, resolveEntitlementsBulk } from '@/lib/services/authority/entitlements'
 import { createLogger } from '@nzila/os-core'
 
 export const dynamic = 'force-dynamic'

@@ -12,8 +12,9 @@
  * the exact issuance); this module additionally checks what only facts can show
  * (issuer capacity and mandate, membership, conflicts, segregation of duties).
  */
-import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity } from './common'
+import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower, validInstant, validStringArray } from './common'
 import { dutyConflicts } from './policies/finance'
+import { isPlatformOrganization, PLATFORM_CAPABILITIES } from './platform-organization'
 import {
   POLICY_VERSION,
   type AuthorityFacts,
@@ -43,6 +44,11 @@ export const ISSUANCE_DOMAINS: readonly IssuanceDomain[] = [
 export const ISSUANCE_OPERATIONS: readonly IssuanceOperation[] = ['issue', 'amend', 'suspend', 'revoke', 'lift']
 
 export const PLACEHOLDER_INSTRUMENT = 'PENDING_INSTITUTIONAL_SOURCE'
+
+/** Platform-wide authority belongs to the platform organization alone, and the platform organization confers nothing else. */
+export function issuanceDomainApplies(domain: IssuanceDomain, organizationId: string): boolean {
+  return (domain === 'platform_staff') === isPlatformOrganization(organizationId)
+}
 
 /** Mirrors the ue_authority_deleg_nondelegable_chk CHECK constraint (asserted by a test). */
 export const NON_DELEGABLE_ACTIONS: readonly string[] = [
@@ -144,10 +150,9 @@ const HOLDER_CAPACITIES: Readonly<Record<IssuanceDomain, readonly Capacity[]>> =
   governance_review: ['member'],
   executive_office: ['executive'],
   emergency_access: ['steward', 'chief_steward', 'officer', 'executive', 'financial_officer'],
-  // Empty on purpose: no customer-organization capacity is eligible to hold a platform-wide mandate (./capacity.ts).
-  // hasCapacity() on an empty wanted list is always false, so this domain always denies until a platform-officer
-  // capacity is institutionally defined - see platform-staff-mandate-decision-record.md.
-  platform_staff: [],
+  // Platform capacities exist only in the platform organization (./platform-organization.ts); evaluate() refuses this domain
+  // anywhere else, so no customer-organization officer or executive can ever hold or confer a platform-wide mandate.
+  platform_staff: ['officer', 'executive'],
   delegation: ['officer', 'executive'],
   case_assignment: ['steward', 'chief_steward', 'officer'],
   recusal: ['member'],
@@ -162,8 +167,10 @@ function result(
   effect: 'allow' | 'deny',
   reasons: Reason[],
 ): IssuanceDecision {
+  const clockValid = validInstant(now)
+  const allowed = effect === 'allow' && clockValid
   return {
-    effect,
+    effect: allowed ? 'allow' : 'deny',
     domain: req.domain,
     operation: req.operation,
     issuerUserId: req.issuerUserId,
@@ -171,15 +178,24 @@ function result(
     organizationId: req.organizationId,
     ruleId: rule?.id ?? null,
     ruleVersion: rule?.version ?? null,
-    requiresAcceptance: effect === 'allow' ? !!rule?.requiresAcceptance : false,
-    reasons,
-    evaluatedAt: now.toISOString(),
+    requiresAcceptance: allowed ? !!rule?.requiresAcceptance : false,
+    reasons: clockValid ? reasons : [{ code: 'FACTS_CONTRADICTORY', detail: 'evaluation clock is invalid' }],
+    evaluatedAt: clockValid ? now.toISOString() : 'INVALID_CLOCK',
     policyVersion: POLICY_VERSION,
   }
 }
 
 function ruleIntegrityProblem(rule: IssuanceRule): string | null {
   if (rule.status !== 'active') return `rule is ${rule.status}`
+  if (!validStringArray(rule.allowedPowers) || !validStringArray(rule.issuerCapacities) || !validStringArray(rule.approvedBy)
+    || (!rule.issuerCapacities.length && !rule.issuerMandateKind)
+    || ((rule.issuerMandateKind == null) !== (rule.issuerMandatePower == null))
+    || !Number.isSafeInteger(rule.requiredIndependentApprovals) || rule.requiredIndependentApprovals < 0
+    || (rule.maxTermDays !== null && (!Number.isSafeInteger(rule.maxTermDays) || rule.maxTermDays <= 0))) return 'rule authority, ceilings or approval provenance is malformed'
+  if (rule.domain === 'supervisory' && (rule.operation === 'issue' || rule.operation === 'amend') &&
+      hasPrimaryCaseHandlerOnlyPower(rule.allowedPowers)) {
+    return 'supervisory issuance rule exceeds the primary case-handler-only ceiling'
+  }
   if (!rule.sourceInstrument || rule.sourceInstrument.trim() === '' || rule.sourceInstrument === PLACEHOLDER_INSTRUMENT) {
     return 'rule has no real institutional source instrument'
   }
@@ -222,6 +238,11 @@ function evaluate(
     return deny({ code: 'FOREIGN_TENANT', detail: 'facts include another organization' })
   }
 
+  // 0. Platform-wide authority is conferred only inside the platform organization, and that organization confers nothing else.
+  if (!issuanceDomainApplies(req.domain, org)) {
+    return deny({ code: 'FOREIGN_TENANT', detail: 'platform_staff authority exists only in the platform organization, which issues no other domain' })
+  }
+
   // 1. An active, matching, organization-owned rule is the only source of issuing authority.
   if (!rule) return deny({ code: 'NO_ACTIVE_ISSUANCE_RULE', detail: `no rule for ${req.domain}/${req.operation}` })
   if (rule.organizationId !== org) return deny({ code: 'FOREIGN_TENANT', detail: 'rule belongs to another organization', ref: rule.id })
@@ -255,7 +276,7 @@ function evaluate(
 
   // 3. Conflicts.
   if (req.resource) {
-    const recusal = activeRecusal(facts.recusals, req.issuerUserId, req.resource, org)
+    const recusal = activeRecusal(facts.recusals, req.issuerUserId, req.resource, org, now)
     if (recusal) return deny({ code: 'RECUSED', detail: 'issuer is recused from this matter', ref: recusal.id })
     if ((req.adverseUserIds ?? []).includes(req.issuerUserId)) return deny({ code: 'ADVERSE_PARTY', detail: 'issuer is a party to the matter' })
   }
@@ -282,7 +303,7 @@ function evaluate(
     return deny({ code: 'CAPACITY_NOT_ELIGIBLE', detail: `the holder's capacity is not eligible for ${req.domain}` })
   }
   if ((req.adverseUserIds ?? []).includes(req.holderUserId)) return deny({ code: 'ADVERSE_PARTY', detail: 'the holder is a party to the matter' })
-  if (req.resource && activeRecusal(facts.recusals, req.holderUserId, req.resource, org)) {
+  if (req.resource && activeRecusal(facts.recusals, req.holderUserId, req.resource, org, now)) {
     return deny({ code: 'RECUSED', detail: 'the holder is recused from this matter' })
   }
 
@@ -291,11 +312,15 @@ function evaluate(
     return deny({ code: 'EXCEEDS_RULE_CEILING', detail: 'requested powers exceed the rule ceiling', ref: rule.id })
   }
   if (req.domain !== 'case_assignment' && req.domain !== 'recusal') {
-    if (!req.expiresAt || !req.effectiveAt) return deny({ code: 'INSTRUMENT_INVALID', detail: 'an effective date and an expiry are required' })
+    if (!validInstant(req.expiresAt) || !validInstant(req.effectiveAt)) return deny({ code: 'INSTRUMENT_INVALID', detail: 'finite effective and expiry timestamps are required' })
     if (rule.maxTermDays !== null && req.expiresAt.getTime() - req.effectiveAt.getTime() > rule.maxTermDays * DAY_MS) {
       return deny({ code: 'EXCEEDS_RULE_CEILING', detail: `term exceeds ${rule.maxTermDays} day(s)`, ref: rule.id })
     }
     if (req.expiresAt.getTime() <= req.effectiveAt.getTime()) return deny({ code: 'INSTRUMENT_INVALID', detail: 'expiry must follow the effective date' })
+  }
+  if ((req.effectiveAt !== undefined && !validInstant(req.effectiveAt)) ||
+      (req.expiresAt != null && !validInstant(req.expiresAt))) {
+    return deny({ code: 'INSTRUMENT_INVALID', detail: 'authority validity timestamps must be finite' })
   }
 
   // 5. Independent approval, bound to the exact issuance, excluding issuer and holder.
@@ -329,6 +354,12 @@ function evaluate(
       if (operating) return deny({ code: 'SEGREGATION_OF_DUTIES', detail: 'a governance reviewer cannot also hold executive or financial authority' })
       break
     }
+    case 'executive_office':
+    case 'financial':
+      if ((req.holderMandates ?? []).some(m => m.kind === 'governance_review' && assessMandate(m, org, now).effective)) {
+        return deny({ code: 'SEGREGATION_OF_DUTIES', detail: 'operational authority cannot coexist with independent oversight' })
+      }
+      break
     default:
       break
   }
@@ -404,6 +435,9 @@ export const DEFAULT_ISSUANCE_TEMPLATES: readonly IssuanceRuleTemplate[] = [
   { domain: 'financial', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Revocation is immediate.' },
   { domain: 'governance_review', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Revocation is immediate.' },
   { domain: 'emergency_access', operation: 'revoke', issuerCapacities: ['executive', 'officer'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Emergency access can always be withdrawn.' },
+  { domain: 'platform_staff', operation: 'issue', issuerCapacities: ['executive'], allowedPowers: [...PLATFORM_CAPABILITIES], maxTermDays: 90, requiresAcceptance: true, requiredIndependentApprovals: 1, rationale: 'Platform organization only: a platform executive confers named platform actions on a platform officer for a bounded term, independently approved and accepted. Adoption needs the institutional instrument and two independent platform executives.' },
+  { domain: 'platform_staff', operation: 'revoke', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Platform-wide authority can always be withdrawn at once.' },
+  { domain: 'platform_staff', operation: 'suspend', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Suspend or resume platform-wide authority.' },
   { domain: 'recusal', operation: 'lift', issuerCapacities: ['executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Never by the recused person; the kernel enforces that.' },
   // Suspension also governs resumption, and must be at least as available as revocation.
   { domain: 'supervisory', operation: 'suspend', issuerCapacities: ['officer', 'executive'], allowedPowers: [], maxTermDays: null, requiresAcceptance: false, requiredIndependentApprovals: 0, rationale: 'Suspend or resume a supervisory mandate.' },

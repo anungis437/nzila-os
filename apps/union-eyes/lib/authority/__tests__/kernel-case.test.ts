@@ -411,7 +411,7 @@ describe('case policy — emergency access (explicit, justified, time-boxed, rea
 })
 
 describe('case policy — executive delegation', () => {
-  const office = mandate({ id: '00000000-0000-4000-8000-0000000a0001', principalUserId: U.president, kind: 'executive_office', powers: ['read'], scope: {}, grantedBy: U.other })
+  const office = mandate({ id: '00000000-0000-4000-8000-0000000a0001', principalUserId: U.president, kind: 'executive_office', powers: ['read'], scope: { resourceIds: [CASE_ID] }, grantedBy: U.other })
   const dlg = delegation({ actions: ['case:read'], resourceTypes: ['case'] })
   const base = (over = {}) => facts(U.delegate, ['officer'], {
     memberships: [membership(U.delegate, ['officer']), membership(U.president, ['executive'])],

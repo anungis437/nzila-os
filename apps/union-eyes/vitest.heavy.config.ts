@@ -1,5 +1,6 @@
 import { defineProject } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
 import { censusTests, heavyTests, sharedExclude, sharedResolve, sharedSetupFiles } from "./vitest.shared";
 
 // Container-, child-process- and repository-scan tests (see vitest.shared.ts). They run after the main project,
@@ -9,7 +10,7 @@ export default defineProject({
   resolve: sharedResolve,
   test: {
     name: "union-eyes-heavy",
-    setupFiles: sharedSetupFiles,
+    setupFiles: [...sharedSetupFiles, path.resolve(__dirname, "scripts/runtime/heavy-native-test-isolation.ts")],
     include: heavyTests,
     exclude: [...sharedExclude, ...censusTests],
     testTimeout: 240_000,

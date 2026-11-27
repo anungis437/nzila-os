@@ -30,6 +30,7 @@ const detail = (overrides: Record<string, unknown> = {}) => ({
   grievanceNumber: 'GR-2026-014',
   type: 'discipline',
   status: 'filed',
+  allowedStatuses: overrides.status === 'closed' ? [] : overrides.status === 'acknowledged' ? ['investigating'] : ['acknowledged'],
   priority: 'high',
   title: 'Unjust suspension',
   description: 'The member was suspended without notice.',
@@ -42,7 +43,7 @@ const detail = (overrides: Record<string, unknown> = {}) => ({
   documents: [],
   governedDocuments: [],
   collaborators: [],
-  effectiveAccess: { canViewInternal: true, isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
+  effectiveAccess: { canTransition: true, ownerOnly: {canCloseCase:true}, canViewInternal: true, isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
   ...overrides,
 });
 
@@ -183,6 +184,20 @@ describe('GrievanceDetailConsole: the status', () => {
     expect(statusButtons()).toEqual(['Move to Acknowledged']);
     // The older screen offered statuses the database does not have, which the route refuses every time.
     expect(document.body.textContent).not.toMatch(/→ (triage|investigation|negotiation|resolved)/);
+  });
+
+  it('does not infer actions when the server projection is missing', async () => {
+    current = detail({ allowedStatuses: undefined });
+    renderConsole();
+    await loaded();
+    expect(statusButtons()).toEqual([]);
+  });
+
+  it('offers closure only when the server advertises it for the current case', async () => {
+    current = detail({ status: 'settled', allowedStatuses: ['closed'] });
+    renderConsole();
+    await loaded();
+    expect(statusButtons()).toEqual(['Move to Closed']);
   });
 
   it('sends the chosen status with the note, reads the grievance again, and clears the note', async () => {
@@ -471,7 +486,7 @@ describe('GrievanceDetailConsole: access for other representatives', () => {
   it('offers neither the grant form nor a revoke to someone who may not manage access', async () => {
     current = detail({
       collaborators: [withCollaborator()],
-      effectiveAccess: { canViewInternal: true, isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'secondary_lro', canManageAssignments: false, canUploadDocuments: true },
+      effectiveAccess: { canViewInternal: true, isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'secondary_lro', canTransition: true, canManageAssignments: false, canUploadDocuments: true },
     });
     renderConsole();
     await loaded();

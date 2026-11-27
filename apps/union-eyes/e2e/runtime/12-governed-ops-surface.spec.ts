@@ -1,3 +1,4 @@
+import { runtimeRequestAs } from '../helpers/runtime-auth'
 /** Real HTTP acceptance for privileged OpenAPI and two removed organization-row facades. */
 import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
 import { UE_TEST_USERS } from '../../tests/fixtures/test-users'
@@ -5,15 +6,16 @@ import { UE_TEST_ORGS } from '../../tests/fixtures/test-orgs'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3002'
 const as = (actor: { userId: string; orgId: string }): Promise<APIRequestContext> =>
-  pwRequest.newContext({
-    baseURL: BASE,
-    extraHTTPHeaders: { cookie: `nzila_session=ue-seed-session-${actor.userId}; selected_org_id=${actor.orgId}` },
-  })
+  runtimeRequestAs(actor.userId, actor.orgId)
 
 test('Gate 0: privileged OpenAPI and organization facade containment over actual HTTP', async ({}, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'API authorization journey runs once at desktop')
-  test.skip(!process.env.DATABASE_URL || process.env.QA_TEST_ENV !== 'true' ||
-    process.env.UE_ENVIRONMENT !== 'local', 'requires disposable native QA runtime')
+  test.skip(
+    !process.env.DATABASE_URL ||
+      process.env.QA_TEST_ENV !== 'true' ||
+      process.env.UE_ENVIRONMENT !== 'local',
+    'requires disposable native QA runtime',
+  )
 
   const admin = await as(UE_TEST_USERS.adminPrimary)
   const steward = await as(UE_TEST_USERS.stewardPrimary)

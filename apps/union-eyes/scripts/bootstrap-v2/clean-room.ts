@@ -1,3 +1,4 @@
+import { nativePostgres16Image } from './native-postgres-image'
 import { execFileSync } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -18,6 +19,7 @@ import {
 } from './installer'
 import { compileSecurity } from './security'
 import { proveRuntimeSecurity } from './runtime-security'
+import { openRuntimeSessionFactory } from './runtime-column-fixtures'
 import { openNativeRuntimeFixture } from './native-runtime-fixture'
 import { systemMutationContracts } from './system-mutation-contracts'
 import { beginManifestTrace } from './manifest-trace'
@@ -31,12 +33,13 @@ import { proveFrameworkApplication } from './framework-application'
 import { qualifyNativePrivileges } from './manifest-security'
 import {
   compileMinimumRoleProvisioningSql,
+  currentPlanRequiresVector,
   INSTALLER_FUNCTION_OWNER_ROLES,
   VECTOR_FUNCTION_ACL_SQL,
 } from './minimum-installer'
+import { compileExternalReadInstallerBridge } from './external-read-installer-bridge'
 
-const image =
-  'pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337'
+const image = nativePostgres16Image()
 const docker = (args: string[], env?: NodeJS.ProcessEnv) =>
   execFileSync('docker', args, {
     encoding: 'utf8',
@@ -58,6 +61,10 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
     'apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts',
     'apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.ts',
     'apps/union-eyes/scripts/bootstrap-v2/fee-adjustment-native-proof.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-session-proof.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-column-fixtures.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/runtime-column-security.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/module-admission-runtime-security.ts',
   ])
     assert.equal(
       plan.sourceCommitments[file],
@@ -65,10 +72,13 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
       `UE_V2_SYSTEM_PRODUCER_SOURCE_NOT_BOUND:${file}`,
     )
   const contracts = systemMutationContracts(plan)
-  const fixture = await openNativeRuntimeFixture(plan)
+  const fixture = await openNativeRuntimeFixture(plan, { auth: true })
+  let sessions: ReturnType<typeof openRuntimeSessionFactory> | undefined
   let proofFailed = false
   let proofError: unknown
   try {
+    assert(fixture.authUrl, 'UE_V2_OWNED_AUTH_URL_REQUIRED')
+    sessions = openRuntimeSessionFactory(fixture.seed, fixture.authUrl, fixture.authSystemUrl)
     return await proveRuntimeSecurity(
       fixture.seed,
       fixture.runtime,
@@ -78,6 +88,7 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
       undefined,
       contracts,
       fixture.systemWriter,
+      sessions,
     )
   } catch (error) {
     proofFailed = true
@@ -85,7 +96,21 @@ export async function proveIntegratedSystemMutations(plan: Awaited<ReturnType<ty
     throw error
   } finally {
     try {
-      await fixture.dispose()
+      const cleanup = await Promise.allSettled([sessions?.dispose()])
+      try {
+        await fixture.dispose()
+      } catch (error) {
+        cleanup.push({ status: 'rejected', reason: error })
+      }
+      const failed = cleanup.filter(
+        (entry): entry is PromiseRejectedResult => entry.status === 'rejected',
+      )
+      if (failed.length === 1) throw failed[0].reason
+      if (failed.length)
+        throw new AggregateError(
+          failed.map((entry) => entry.reason),
+          'SYSTEM_FIXTURE_SESSION_OR_DATABASE_CLEANUP_FAILED',
+        )
     } catch (error) {
       if (proofFailed)
         throw new AggregateError(
@@ -103,7 +128,8 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
   if (!wheelhouse && !planOverride) throw new Error('UE_V2_WHEELHOUSE_REQUIRED')
   const plan = bindApplicationStartupSources(planOverride ?? (await buildPlan(wheelhouse!)))
   const security = compileSecurity(plan)
-  const name = `ue-v2-clean-${randomUUID()}`
+  const ownership = randomUUID()
+  const name = `ue-v2-clean-${ownership}`
   const password = randomBytes(24).toString('hex')
   const evidence: Record<string, unknown> = {
     architecture: 'CANONICAL_CURRENT_STATE_V2',
@@ -120,6 +146,21 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
   let containerId: string | null = null
   let admin: pg.Client | null = null
   const clients: pg.Client[] = []
+  const connectionFailures: { message: string; code?: string }[] = []
+  const observeClient = (client: pg.Client) => {
+    client.on('error', (error: Error & { code?: string }) => {
+      connectionFailures.push({
+        message: error.message,
+        ...(error.code ? { code: error.code } : {}),
+      })
+    })
+    return client
+  }
+  const connect = async (config: Parameters<typeof connectLocalV2>[0]) => {
+    const client = observeClient(await connectLocalV2(config))
+    clients.push(client)
+    return client
+  }
   let failure: unknown
   try {
     try {
@@ -152,8 +193,10 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
         name,
         '--label',
         'nzila.mission=UE_BOOTSTRAP_V2_CLEANROOM',
+        '--label',
+        `nzila.qualification-owner=${ownership}`,
         '--memory',
-        '1g',
+        '2g',
         '--cpus',
         '2',
         '--tmpfs',
@@ -181,7 +224,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       try {
         await probe.connect()
         await probe.query('SELECT 1')
-        admin = probe
+        admin = observeClient(probe)
         ready = true
         break
       } catch (error: unknown) {
@@ -196,9 +239,21 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
     const database = async (suffix: string) => {
       const db = `ue_v2_clean_${suffix}`
       await admin!.query(`CREATE DATABASE ${quote(db)} OWNER ue_v2_owner`)
-      const client = await connectLocalV2({ ...config, database: db })
-      clients.push(client)
+      const client = await connect({ ...config, database: db })
       return client
+    }
+    // Each proof retains its measured digest, then releases its disposable clone.
+    // Keeping every 780-table clone and idle backend alive exceeded the former
+    // one-gigabyte fixture limit (tmpfs pages count against container memory).
+    const releaseDatabase = async (suffix: string, ...connections: pg.Client[]) => {
+      assert.match(suffix, /^[a-z_]+$/)
+      for (const client of connections) {
+        await client.end()
+        const index = clients.indexOf(client)
+        assert.notEqual(index, -1, 'UE_V2_UNTRACKED_FIXTURE_CLIENT')
+        clients.splice(index, 1)
+      }
+      await admin!.query(`DROP DATABASE ${quote(`ue_v2_clean_${suffix}`)}`)
     }
     const reference = await database('reference')
     await reference.query('BEGIN')
@@ -233,6 +288,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
     )
     await assert.rejects(applyV2(fresh, plan, expected), /UE_V2_PRESENT_DRIFTED_OR_PARTIAL_DENIED/)
     evidence.driftDenial = 'PASS'
+    await releaseDatabase('fresh', fresh)
     const partial = await database('partial')
     await partial.query('CREATE TABLE public.partial_state(id integer)')
     const partialBefore = catalogDigest(await inspectCatalog(partial))
@@ -242,6 +298,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
     )
     assert.equal(catalogDigest(await inspectCatalog(partial)), partialBefore)
     evidence.partialStateDenial = 'PASS'
+    await releaseDatabase('partial', partial)
     const rollbacks: Record<string, string> = {}
     for (const fault of ['verify', 'receipt', 'commit'] as const) {
       const client = await database(`rollback_${fault}`)
@@ -249,14 +306,13 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       await assert.rejects(applyV2(client, plan, expected, fault))
       assert.equal(catalogDigest(await inspectCatalog(client)), before)
       rollbacks[fault] = 'PASS'
+      await releaseDatabase(`rollback_${fault}`, client)
     }
     evidence.rollback = rollbacks
     const recreated = await database('recreated')
     await applyV2(recreated, plan, expected)
     const firstCatalog = catalogDigest(await inspectCatalog(recreated))
-    await recreated.end()
-    clients.splice(clients.indexOf(recreated), 1)
-    await admin.query('DROP DATABASE ue_v2_clean_recreated')
+    await releaseDatabase('recreated', recreated)
     const recreatedAgain = await database('recreated')
     evidence.recreate = await applyV2(recreatedAgain, plan, expected)
     assert.equal(catalogDigest(await inspectCatalog(recreatedAgain)), firstCatalog)
@@ -267,6 +323,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       sameNativeCatalog: true,
     }
     evidence.determinism = 'PASS'
+    await releaseDatabase('recreated', recreatedAgain)
     const delegationDriftDenials: string[] = []
     for (const [name, sql] of [
       ['missingOwner', `REVOKE ${quote(INSTALLER_FUNCTION_OWNER_ROLES[0])} FROM ue_v2_owner`],
@@ -297,14 +354,17 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
     const minimumExpected = await inspectCatalog(reference)
     const minimumDatabase = async (suffix: string) => {
       const operator = await database(`minimum_${suffix}`)
-      await operator.query("CREATE EXTENSION vector WITH VERSION '0.8.1'")
-      await operator.query(VECTOR_FUNCTION_ACL_SQL)
-      const installer = await connectLocalV2({
+      if (currentPlanRequiresVector(plan)) {
+        await operator.query("CREATE EXTENSION vector WITH VERSION '0.8.1'")
+        await operator.query(VECTOR_FUNCTION_ACL_SQL)
+      }
+      const bridge = await compileExternalReadInstallerBridge(`ue_v2_clean_minimum_${suffix}`)
+      await operator.query(bridge.provisionSql)
+      const installer = await connect({
         ...config,
         user: 'ue_v2_fixture_installer',
         database: `ue_v2_clean_minimum_${suffix}`,
       })
-      clients.push(installer)
       return { operator, installer }
     }
     const minimumOptions = { profile: 'PREPROVISIONED_NON_SUPERUSER' } as const
@@ -353,6 +413,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       applyV2(minimum.installer, plan, minimumExpected, undefined, minimumOptions),
       /UE_V2_PRESENT_DRIFTED_OR_PARTIAL_DENIED/,
     )
+    await releaseDatabase('minimum_fresh', minimum.installer, minimum.operator)
     const minimumPartial = await minimumDatabase('partial')
     await minimumPartial.operator.query('CREATE TABLE public.partial_state(id integer)')
     const minimumPartialBefore = catalogDigest(await inspectCatalog(minimumPartial.operator))
@@ -361,6 +422,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       /UE_V2_PRESENT_DRIFTED_OR_PARTIAL_DENIED/,
     )
     assert.equal(catalogDigest(await inspectCatalog(minimumPartial.operator)), minimumPartialBefore)
+    await releaseDatabase('minimum_partial', minimumPartial.installer, minimumPartial.operator)
     const minimumRollbacks: Record<string, string> = {}
     for (const fault of ['verify', 'receipt', 'commit'] as const) {
       const target = await minimumDatabase(`rollback_${fault}`)
@@ -373,15 +435,16 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       )
       assert.equal(catalogDigest(await inspectCatalog(target.operator)), before)
       minimumRollbacks[fault] = 'PASS'
+      await releaseDatabase(`minimum_rollback_${fault}`, target.installer, target.operator)
     }
     const minimumRecreated = await minimumDatabase('recreated')
     await applyV2(minimumRecreated.installer, plan, minimumExpected, undefined, minimumOptions)
     const minimumFirstCatalog = catalogDigest(await inspectCatalog(minimumRecreated.operator))
-    for (const client of [minimumRecreated.installer, minimumRecreated.operator]) {
-      await client.end()
-      clients.splice(clients.indexOf(client), 1)
-    }
-    await admin.query('DROP DATABASE ue_v2_clean_minimum_recreated')
+    await releaseDatabase(
+      'minimum_recreated',
+      minimumRecreated.installer,
+      minimumRecreated.operator,
+    )
     const minimumRecreatedAgain = await minimumDatabase('recreated')
     await applyV2(minimumRecreatedAgain.installer, plan, minimumExpected, undefined, minimumOptions)
     assert.equal(
@@ -389,6 +452,11 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       minimumFirstCatalog,
     )
     assert.equal(minimumFirstCatalog, catalogDigest(minimumExpected))
+    await releaseDatabase(
+      'minimum_recreated',
+      minimumRecreatedAgain.installer,
+      minimumRecreatedAgain.operator,
+    )
     evidence.minimumInstaller = {
       result: 'PASS',
       profile: minimumOptions.profile,
@@ -396,8 +464,8 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
       operatorPreparedPrerequisites: {
         rolesAndExactMemberships: true,
         databaseOwner: 'ue_v2_owner',
-        extension: 'vector@0.8.1',
-        extensionFunctionAcls: true,
+        extension: currentPlanRequiresVector(plan) ? 'vector@0.8.1' : 'NOT_REQUIRED_BY_SOURCE_PLAN',
+        extensionFunctionAcls: currentPlanRequiresVector(plan) ? true : 'NOT_APPLICABLE',
         installerFunctionOwnerDelegations: INSTALLER_FUNCTION_OWNER_ROLES,
         installerDelegationAdminOption: false,
       },
@@ -418,17 +486,16 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
     await admin.query(
       `CREATE ROLE ue_v2_fixture_actor LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '${password}'; CREATE ROLE ue_v2_fixture_system LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '${password}'; GRANT union_eyes_runtime TO ue_v2_fixture_actor; GRANT union_eyes_system TO ue_v2_fixture_system`,
     )
-    const runtimeActor = await connectLocalV2({
+    const runtimeActor = await connect({
       ...config,
       user: 'ue_v2_fixture_actor',
       database: 'ue_v2_clean_reference',
     })
-    const systemActor = await connectLocalV2({
+    const systemActor = await connect({
       ...config,
       user: 'ue_v2_fixture_system',
       database: 'ue_v2_clean_reference',
     })
-    clients.push(runtimeActor, systemActor)
     if (plan.authExecution) {
       await admin.query(`
         CREATE ROLE ue_v2_fixture_auth_ordinary LOGIN INHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE PASSWORD '${password}';
@@ -441,8 +508,7 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
         GRANT ${quote(AUTH_EXECUTION_ROLES.systemGateway)} TO ue_v2_fixture_auth_system;
       `)
       const authClient = async (user: string) => {
-        const client = await connectLocalV2({ ...config, user, database: 'ue_v2_clean_reference' })
-        clients.push(client)
+        const client = await connect({ ...config, user, database: 'ue_v2_clean_reference' })
         return client
       }
       const ordinary = await authClient('ue_v2_fixture_auth_ordinary')
@@ -471,17 +537,16 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
             GRANT ${quote(FRAMEWORK_ROLES.gateway)} TO ue_v2_fixture_framework_request WITH INHERIT FALSE, SET TRUE;
             GRANT ${quote(FRAMEWORK_ROLES.workerGateway)} TO ue_v2_fixture_framework_worker WITH INHERIT FALSE, SET TRUE;
           `)
-          const request = await connectLocalV2({
+          const request = await connect({
             ...config,
             user: 'ue_v2_fixture_framework_request',
             database: 'ue_v2_clean_reference',
           })
-          const worker = await connectLocalV2({
+          const worker = await connect({
             ...config,
             user: 'ue_v2_fixture_framework_worker',
             database: 'ue_v2_clean_reference',
           })
-          clients.push(request, worker)
           const beforeFramework = catalogDigest(await inspectCatalog(reference))
           const proof = await proveFrameworkBoundary(
             {
@@ -525,16 +590,45 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
         })()
       : undefined
     evidence.frameworkExecutionBoundary = frameworkProof ?? { result: 'NOT_CONFIGURED' }
-    evidence.runtimeSecurityComponentMatrix = await proveRuntimeSecurity(
+    const runtimeSessions = openRuntimeSessionFactory(
       reference,
-      runtimeActor,
-      systemActor,
-      plan,
-      security.rules,
-      frameworkProof,
+      `postgresql://ue_v2_fixture_auth:${encodeURIComponent(password)}@127.0.0.1:${config.port}/ue_v2_clean_reference`,
+      `postgresql://ue_v2_fixture_auth_system:${encodeURIComponent(password)}@127.0.0.1:${config.port}/ue_v2_clean_reference`,
     )
+    let runtimeFailed = false
+    let runtimeFailure: unknown
+    try {
+      evidence.runtimeSecurityComponentMatrix = await proveRuntimeSecurity(
+        reference,
+        runtimeActor,
+        systemActor,
+        plan,
+        security.rules,
+        frameworkProof,
+        undefined,
+        undefined,
+        runtimeSessions,
+      )
+    } catch (error) {
+      runtimeFailed = true
+      runtimeFailure = error
+      throw error
+    } finally {
+      try {
+        await runtimeSessions.dispose()
+      } catch (error) {
+        if (runtimeFailed)
+          throw new AggregateError(
+            [runtimeFailure, error],
+            'RUNTIME_MATRIX_AND_SESSION_CLEANUP_FAILED',
+            { cause: runtimeFailure },
+          )
+        throw error
+      }
+    }
     evidence.systemMutationComponentMatrix = await proveIntegratedSystemMutations(plan)
     evidence.systemMutationFixtureRemoved = true
+    assert.deepEqual(connectionFailures, [], 'UE_V2_CLEANROOM_CONNECTION_FAILURE')
     evidence.rlsRuntime = 'FAIL_FULL_CURRENT_TABLE_AND_ACTOR_QUALIFICATION_NOT_PROVEN'
     evidence.tenantIsolation = 'FAIL_FULL_CURRENT_TABLE_AND_ACTOR_QUALIFICATION_NOT_PROVEN'
     evidence.engineeringReadiness = 'FAIL'
@@ -543,21 +637,61 @@ export async function runCleanRoom(planOverride?: Awaited<ReturnType<typeof buil
   } catch (error: unknown) {
     failure = error
     evidence.failure = error instanceof Error ? error.message : String(error)
+    if (
+      error instanceof Error &&
+      error.message === 'UE_V2_PARTIAL_PREINSTALL_DENIED' &&
+      error.cause &&
+      typeof error.cause === 'object' &&
+      'unexpectedObjects' in error.cause
+    )
+      evidence.failureDetails = error.cause
     evidence.engineeringReadiness = 'FAIL'
     evidence.productionSecurityReadiness = 'FAIL'
   } finally {
-    for (const client of clients) await client.end()
-    if (admin) await admin.end()
+    const cleanupFailures: string[] = []
+    const ended = await Promise.allSettled(
+      [...clients, ...(admin ? [admin] : [])].map((client) => client.end()),
+    )
+    for (const result of ended)
+      if (result.status === 'rejected') cleanupFailures.push(String(result.reason))
     if (containerId) {
-      const label = docker([
-        'inspect',
-        '--format',
-        '{{index .Config.Labels "nzila.mission"}}',
-        containerId,
-      ])
-      assert.equal(label, 'UE_BOOTSTRAP_V2_CLEANROOM')
-      docker(['rm', '-f', containerId])
-      evidence.cleanRoomContainerRemoved = true
+      try {
+        const inspected = JSON.parse(docker(['inspect', containerId])) as {
+          Id: string
+          Name: string
+          State: { OOMKilled: boolean }
+          Config: { Labels: Record<string, string> }
+        }[]
+        assert.equal(inspected[0].Id, containerId)
+        assert.equal(inspected[0].Name, `/${name}`)
+        assert.equal(inspected[0].Config.Labels['nzila.mission'], 'UE_BOOTSTRAP_V2_CLEANROOM')
+        assert.equal(inspected[0].Config.Labels['nzila.qualification-owner'], ownership)
+        evidence.cleanRoomContainerOomKilled = inspected[0].State.OOMKilled
+        assert.equal(inspected[0].State.OOMKilled, false, 'UE_V2_CLEANROOM_CONTAINER_OOM')
+      } catch (error) {
+        cleanupFailures.push(String(error))
+      }
+      // Ownership is checked again independently: a resource failure must not
+      // skip cleanup, while an ownership failure must never authorize removal.
+      try {
+        const labels = JSON.parse(
+          docker(['inspect', '--format', '{{json .Config.Labels}}', containerId]),
+        ) as Record<string, string>
+        assert.equal(labels['nzila.mission'], 'UE_BOOTSTRAP_V2_CLEANROOM')
+        assert.equal(labels['nzila.qualification-owner'], ownership)
+        docker(['rm', '-f', '-v', containerId])
+        evidence.cleanRoomContainerRemoved = true
+      } catch (error) {
+        cleanupFailures.push(String(error))
+      }
+    }
+    evidence.connectionFailures = connectionFailures
+    evidence.cleanupFailures = cleanupFailures
+    if (connectionFailures.length || cleanupFailures.length) {
+      failure ??= new Error('UE_V2_CLEANROOM_RESOURCE_OR_CLEANUP_FAILURE')
+      evidence.failure ??= String(failure)
+      evidence.engineeringReadiness = 'FAIL'
+      evidence.productionSecurityReadiness = 'FAIL'
     }
     await emit('UE_BOOTSTRAP_V2_RUNTIME_EVIDENCE.json', evidence)
   }

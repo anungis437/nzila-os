@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, pgEnum, decimal, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, jsonb, pgEnum, decimal, index, bigint } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { organizations } from '../schema-organizations';
 
@@ -143,6 +143,8 @@ export const claimStatusTransitions = pgTable("claim_status_transitions", {
   toStatus: varchar("to_status", { length: 50 }).notNull(),
   changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
   changedBy: varchar("changed_by", { length: 255 }),
+  // Historical events stay NULL; the sole current trigger stamps new events.
+  transactionId: bigint("transaction_id", { mode: "bigint" }),
 }, (table) => [
   index("claim_status_transitions_claim_idx").on(table.claimId, table.changedAt),
   index("claim_status_transitions_org_idx").on(table.organizationId, table.changedAt),
@@ -154,6 +156,7 @@ export const claimUpdates = pgTable("claim_updates", {
   updateId: uuid("update_id").unique().defaultRandom(),
   // Django's physical FK points to the internal PK; ORM deletion handles cascades.
   claimId: uuid("claim_id").notNull().references(() => claims.id),
+  transitionId: uuid("transition_id").unique().references(() => claimStatusTransitions.id),
   updateType: varchar("update_type", { length: 50 }),
   message: text("message"),
   createdBy: varchar("created_by", { length: 255 }),

@@ -1,3 +1,4 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Manual Reconciliation Match
  *
@@ -5,38 +6,46 @@
  *
  * Body: { remittanceId: string; memberId: string }
  */
-import { withApi, ApiError, z } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
-import { eq, and } from 'drizzle-orm';
+import { withApi, ApiError, z } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { remittanceLineItems } from '@/db/schema/dues-finance-schema'
+import { eq, and } from 'drizzle-orm'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 const schema = z.object({
   remittanceId: z.guid(),
   memberId: z.guid(),
-});
+})
 
 export const POST = withApi(
   {
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'Manually match a line item to a member' },
   },
   async ({ request, organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
 
-    const body = await request.json();
-    const parsed = schema.safeParse(body);
-    if (!parsed.success) throw ApiError.badRequest('Invalid request body');
+    const body = await request.json()
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) throw ApiError.badRequest('Invalid request body')
 
-    const { remittanceId, memberId } = parsed.data;
+    const { remittanceId, memberId } = parsed.data
+
+    requireBaseFinancialAuthority()
 
     const updated = await withRLSContext({ organizationId, userId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', resourceId: remittanceId });
+      await requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:reconcile',
+        resourceId: remittanceId,
+      })
       const rows = await tx
         .update(remittanceLineItems)
         .set({
@@ -52,8 +61,8 @@ export const POST = withApi(
             eq(remittanceLineItems.organizationId, organizationId),
           ),
         )
-        .returning();
-      if (rows.length === 0) throw ApiError.notFound('Line item not found');
+        .returning()
+      if (rows.length === 0) throw ApiError.notFound('Line item not found')
       await persistAtomicAudit(tx, {
         organizationId,
         userId: userId!,
@@ -61,10 +70,10 @@ export const POST = withApi(
         resourceType: 'remittance_line_items',
         resourceId: remittanceId,
         details: { memberId, lineItems: rows.length },
-      });
-      return rows;
-    });
+      })
+      return rows
+    })
 
-    return { success: true, updated: updated[0] };
+    return { success: true, updated: updated[0] }
   },
-);
+)

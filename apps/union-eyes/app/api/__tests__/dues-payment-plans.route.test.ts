@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -32,6 +33,8 @@ const body = {
   nextPaymentDue: new Date('2026-02-01'),
 };
 
+const REFUSAL = { status: 501, code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' };
+
 describe('dues/payment-plans POST', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -40,18 +43,17 @@ describe('dues/payment-plans POST', () => {
     m.audit.mockResolvedValue(undefined);
   });
 
-  it('creates the plan and its audit record on the same transaction', async () => {
+  it('POST is refused with 501: no plan is inserted and no audit record is written', async () => {
     const { POST } = await import('../dues/payment-plans/route');
-    await expect((POST as any)({ body, organizationId: 'org_1', userId: 'u1' })).resolves.toEqual({ id: 'plan_1' });
-    expect(m.audit).toHaveBeenCalledWith(
-      m.tx,
-      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'dues.payment_plan.create', resourceId: 'plan_1' }),
-    );
+    await expect((POST as any)({ body, organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject(REFUSAL);
+    expect(m.tx.insert).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
-  it('does not succeed when the audit write fails', async () => {
+  it('POST refusal does not depend on the audit write: the 501 is raised before audit is reached', async () => {
     m.audit.mockRejectedValue(new Error('audit down'));
     const { POST } = await import('../dues/payment-plans/route');
-    await expect((POST as any)({ body, organizationId: 'org_1', userId: 'u1' })).rejects.toThrow('audit down');
+    await expect((POST as any)({ body, organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject(REFUSAL);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });

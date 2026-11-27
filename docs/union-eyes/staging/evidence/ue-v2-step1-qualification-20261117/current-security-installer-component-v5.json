@@ -1,0 +1,142 @@
+{
+  "schema": "ue-step1-component-qualification-v5",
+  "recordedAt": "2026-11-18T01:38:24.981902+00:00",
+  "finalCandidateSha": null,
+  "dirtyIntegrationSource": true,
+  "nativeV4": {
+    "status": "FAILED_BEFORE_THIS_REPAIR",
+    "counts": {
+      "numTotalTests": 3,
+      "numPassedTests": 2,
+      "numFailedTests": 1,
+      "numPendingTests": 0
+    },
+    "privateRawPath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v4.json",
+    "sha256": "ca6fa06c44b9289bfc0c95373dc5af063f0a5c101b52de577e8928d1ab4af348",
+    "sourceChangedDuringRun": false,
+    "meaning": "Policy preimage denial and forced actual DDL failure both preserved the full prior state/history. Positive transition failed at missing auth columns; those earlier results are not candidate-wide proof of this repair."
+  },
+  "readOnlyAuthDiscovery": {
+    "currentAuthTables": 11,
+    "currentColumns": 134,
+    "actualColumns": 137,
+    "missing": [
+      {
+        "table": "user_management.magic_links",
+        "name": "consumed_ip",
+        "type": "varchar(45)",
+        "notNull": false
+      },
+      {
+        "table": "user_management.magic_links",
+        "name": "requested_ip",
+        "type": "varchar(45)",
+        "notNull": false
+      },
+      {
+        "table": "user_management.magic_links",
+        "name": "requested_user_agent",
+        "type": "text",
+        "notNull": false
+      }
+    ],
+    "retainedLegacyFields": [
+      {
+        "table": "users",
+        "column": "phone_verified_at"
+      },
+      {
+        "table": "users",
+        "column": "two_factor_secret"
+      },
+      {
+        "table": "users",
+        "column": "two_factor_backup_codes"
+      },
+      {
+        "table": "users",
+        "column": "encrypted_sin"
+      },
+      {
+        "table": "users",
+        "column": "encrypted_ssn"
+      },
+      {
+        "table": "users",
+        "column": "encrypted_bank_account"
+      }
+    ],
+    "existingColumnTypeNullabilityDefaultIdentityGeneratedMismatches": [],
+    "rawPrivateMetadataSha256": "64f2fe66777c912b96f030353399ca026f8190dda2e899791494c655a2f8b708",
+    "databaseWrites": false
+  },
+  "repair": [
+    "The existing canonical auth DDL producer is exported once and reused by buildPlan and the additive installer. Plan SQL/table metadata must equal the actual current producer.",
+    "Every declared/retained legacy column is checked against current source or the exact pinned legacy reference. Unknown, missing, partial, type/nullability/default/generated/identity drift refuses.",
+    "Only source-owned nullable fields with no default, constraint, identity, generated or collation expression can be added. ALTER ADD COLUMN uses the exact parsed source fragment and must reparse to the same column AST.",
+    "No IF NOT EXISTS, type/default rewrite, row backfill, retained-field removal or grant inference is emitted."
+  ],
+  "nativeAssertionsAddedButNotYetExecuted": [
+    "Seed a nonempty synthetic pre-upgrade magic-link row.",
+    "Hash every prior column of every prior ordinary table explicitly and require the same counts and values after the transition.",
+    "Require all three new metadata columns NULL across every existing magic-link row.",
+    "Capture the new fields too before the second-run NOOP and require the complete resulting data unchanged."
+  ],
+  "checks": {
+    "installer": {
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-installer-unit-v9.log"
+    },
+    "stagesAndActualFreshNodeLoader": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-stage-unit-v8.log"
+    },
+    "focusedLint": {
+      "exitCode": 0,
+      "log": "current-security-installer-lint-v11.log"
+    }
+  },
+  "source": [
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "sha256": "3509dfe507736039cd693d4dc643c83e0c9256d6d14e485f5d32a6b91bd68ab3"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "295acd814ef52ac4ac2adc3dfc7b5f5107282d3aacd79e55137b5fa82830d720"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "bca852d2d8f9d37d894b70d9dde8c52be33a5422dc73ef11a009203f927fd1ac"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.native.test.ts",
+      "sha256": "1c2351c248c8576e02714fb13bb35f9d852e96efd48394be97fdcde4c5615539"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/fixtures/current-security-legacy-auth-columns.json",
+      "sha256": "d470f614fa606aa421265157ee1e116c23f63a64c31227b62c7307330d3bcfdd"
+    }
+  ],
+  "artifacts": {
+    "current-security-installer-unit-v9.log": "37091609eabcf67071446a5225eb05aefbc32bdf5903dea73d8c544bebde9ea4",
+    "current-security-stage-unit-v8.log": "912d1a488778516fecefee7c980c69ad3ffb27eb19306759a824f3fd655b0871",
+    "current-security-installer-lint-v11.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+  },
+  "testFixtureBoundary": "Observed disposable metadata is adversarial test input only; it supplies no expected type/default/DDL authority. Expected schema comes from current declarations and immutable source. No row values are in the fixture.",
+  "coordination": "Operational agent separately confines auth privileges to declared columns; retained-field exposure is not waived by this additive schema repair.",
+  "required": "Regenerate source plan/profile after the source extraction and operational privilege repair, then run semantic checks and actual native qualification.",
+  "readiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "16cf7d677df87817694890d3ee4213a325e3798353fd9405b5aae55c7e2230d9",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v5.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

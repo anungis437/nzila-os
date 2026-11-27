@@ -7,7 +7,7 @@
  * contradiction yields a deny Decision (fail closed). The clock is an explicit
  * argument so every decision is reproducible from its inputs.
  */
-import { deny } from './common'
+import { deny, withAppointmentCapacities } from './common'
 import type {
   AuthorityFacts,
   AuthorityRequest,
@@ -65,6 +65,8 @@ function evaluate(
     })
   }
 
+  if (facts.sourceMemberships) facts = { ...facts, memberships: withAppointmentCapacities(facts.sourceMemberships, facts.mandates, req.principalUserId, req.organizationId, now) }
+
   if (!facts.principal.authenticated) return deny(req, now, { code: 'PRINCIPAL_NOT_AUTHENTICATED' })
   if (facts.principal.userId !== req.principalUserId) return deny(req, now, { code: 'PRINCIPAL_MISMATCH' })
 
@@ -86,9 +88,9 @@ function evaluate(
   const org = req.organizationId
   const foreign =
     facts.mandates.some((m) => m.organizationId !== org) ||
-    facts.relationships.some((r) => r.organizationId !== org) ||
+    facts.relationships.some((r) => r.organizationId !== org || r.resource?.organizationId !== org) ||
     facts.delegations.some((d) => d.organizationId !== org) ||
-    facts.recusals.some((r) => r.organizationId !== org) ||
+    facts.recusals.some((r) => r.organizationId !== org || r.resource?.organizationId !== org) ||
     facts.consents.some((c) => c.organizationId !== org)
   if (foreign) {
     return deny(req, now, { code: 'FACTS_CONTRADICTORY', detail: 'facts include rows from another organization' })

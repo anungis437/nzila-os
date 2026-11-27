@@ -250,16 +250,29 @@ describe('Union Eyes E2E shard authority', () => {
     expect(entries.map((entry: { shard: number }) => entry.shard)).toEqual([1, 2, 3, 4])
     expect(entries.every((entry: { shards: number }) => entry.shards === 4)).toBe(true)
     expect(worker.strategy['fail-fast']).toBe(false)
+    // Each shard provisions its own runner-local canonical runtime (owned disposable container, fresh database,
+    // deterministic fixtures, production app), exactly as the production-build HTTP QA job does.
     const bootstrap = worker.steps.find((step: { name?: string }) =>
-      step.name?.startsWith('Bootstrap Union Eyes'),
+      step.name?.startsWith('Start the canonical synthetic Union Eyes runtime'),
     )
-    expect(bootstrap.env.DATABASE_URL).toBe('postgresql://ci:ci@localhost:5432/ci_e2e')
-    expect(bootstrap.run).toContain('docker run --name ci-e2e-postgres')
+    expect(bootstrap.id).toBe('ue-runtime')
+    expect(bootstrap.if).toBe("matrix.app == 'union-eyes'")
+    expect(bootstrap.run).toContain("test -z \"$(docker ps -aq --filter name='^/ue-runtime-pg$')\"")
+    expect(bootstrap.run).toContain('node tooling/scripts/ue-runtime-up.mjs up --prod --fresh --rebuild')
+    expect(bootstrap.run).toContain('Synthetic Union Eyes E2E received privileged credentials')
+    expect(JSON.stringify(bootstrap.env ?? {})).not.toMatch(/DATABASE_URL|PLAYWRIGHT_TEST_AUTH|UE_E2E_RISK_BYPASS/)
+    const pointer = worker.steps.find((step: { name?: string }) =>
+      step.name === 'Point Playwright at the owned canonical runtime without printing credentials',
+    )
+    expect(pointer.run).toContain("console.log('::add-mask::' + new URL(operator).password)")
+    expect(pointer.run).toContain("'PLAYWRIGHT_TEST_AUTH=false'")
+    expect(pointer.run).toContain("'UE_CANONICAL_BOOTSTRAP_V2=1'")
     expect(read('apps/union-eyes/playwright.config.ts')).toContain('workers: 1')
     expect(read('apps/union-eyes/playwright.config.ts')).toContain('fullyParallel: false')
-    const command = worker.steps.find(
-      (step: { name?: string }) => step.name === 'Run Playwright tests',
-    ).run
+    const ueRun = worker.steps.find((step: { id?: string }) => step.id === 'ue-playwright')
+    expect(ueRun.if).toBe("matrix.app == 'union-eyes'")
+    expect(JSON.stringify(ueRun.env)).not.toMatch(/PLAYWRIGHT_TEST_AUTH|UE_E2E_RISK_BYPASS/)
+    const command = ueRun.run
     expect(command).toContain('--shard=${{ matrix.shard }}/${{ matrix.shards }}')
     expect(command).not.toContain('--no-deps')
     expect(command).not.toContain('--grep')
@@ -284,10 +297,11 @@ describe('Union Eyes E2E shard authority', () => {
     expect(canonical.permissions).toEqual({ contents: 'read' })
     expect(canonical.steps.some((step: { uses?: string }) => step.uses === 'azure/login@v3')).toBe(false)
     expect(JSON.stringify(canonical)).not.toContain('secrets.')
-    const prBootstrap = worker.steps.find((step: { name?: string }) => step.name === 'Bootstrap Union Eyes E2E database (synthetic)')
-    const canonicalBootstrap = canonical.steps.find((step: { name?: string }) => step.name === 'Bootstrap Union Eyes E2E database (synthetic)')
-    expect(canonicalBootstrap.run).toBe(prBootstrap.run)
-    expect(canonicalBootstrap.env).toEqual(prBootstrap.env)
+    const runtimeStep = (job: { steps: Array<{ id?: string }> }) => job.steps.find((step) => step.id === 'ue-runtime') as { run: string; env: unknown }
+    expect(runtimeStep(canonical).run).toBe(runtimeStep(worker).run)
+    expect(runtimeStep(canonical).env).toEqual(runtimeStep(worker).env)
+    const playwrightStep = (job: { steps: Array<{ id?: string }> }) => job.steps.find((step) => step.id === 'ue-playwright') as { run: string; env: unknown }
+    expect(playwrightStep(canonical).run).toBe(playwrightStep(worker).run)
     expect(gate.if).toBe('always()')
     expect(gate.permissions).toEqual({ contents: 'read', actions: 'read' })
     expect(worker.steps).toEqual(workflow.jobs.e2e.steps)
@@ -304,8 +318,9 @@ describe('Union Eyes E2E shard authority', () => {
     const outcome = worker.steps.find((step: { name?: string }) => step.name === 'Record Union Eyes shard outcome')
     expect(outcome.if).toBe("always() && matrix.app == 'union-eyes'")
     expect(outcome.env.UE_JOB_STATUS).toBe('${{ job.status }}')
-    expect(outcome.env.UE_BUILD_OUTCOME).toBe('${{ steps.app-build.outcome }}')
-    expect(outcome.env.UE_PLAYWRIGHT_OUTCOME).toBe('${{ steps.playwright.outcome }}')
+    // The canonical runtime step builds the production app (--prod --rebuild); its outcome is the build outcome.
+    expect(outcome.env.UE_BUILD_OUTCOME).toBe('${{ steps.ue-runtime.outcome }}')
+    expect(outcome.env.UE_PLAYWRIGHT_OUTCOME).toBe('${{ steps.ue-playwright.outcome }}')
     for (const job of [worker, canonical]) {
       const install = job.steps.find((step: { name?: string }) => step.name === 'Install Playwright browsers')
       const dependencies = job.steps.find((step: { name?: string }) => step.name === 'Install Playwright operating system dependencies')

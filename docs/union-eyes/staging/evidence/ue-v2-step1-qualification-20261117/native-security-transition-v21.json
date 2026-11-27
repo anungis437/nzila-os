@@ -1,0 +1,41 @@
+{
+  "recordedAt": "2026-11-18T12:10:57.495906+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "FOUR_ACTUAL_PG15_CURRENT_SOURCE_TRANSITION_TESTS_WITH_UUID_DEFAULT_AND_COLUMN_REPAIRS",
+  "result": "PASS_SELECTED_COMPONENT",
+  "counts": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceBindings": 1283,
+  "dependencyClosureFiles": 966,
+  "sourceChangedDuringRun": false,
+  "sourcePlanSha256": "ffcdb4fa75306940d341cfab0cae2ce153953d34535087a4ce95c8e9d484d090",
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v21.json",
+      "sha256": "ab1f3a5fe58f8dc1dfa280b2567fd9dfb601ab865cf899a19e68b03570f7abea",
+      "bytes": 2742
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v21-source.json",
+      "sha256": "9a987c3ee08336c2367283252472ed18ae2033b50e5e90933cedba1629ac842a",
+      "bytes": 164166
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v21.txt",
+      "sha256": "33e0900bc6bf8cba10be8fe454bbd2be7a9aa3802e2f57c4012fb5d3fd4dba2f",
+      "bytes": 1294
+    }
+  ],
+  "limits": [
+    "Owned synthetic released-schema clones; not live staging or production.",
+    "Exact captured source only; runtime-column matrix integration and final candidate checks remain outstanding.",
+    "Rollback/history preservation, full current catalog, exact new UUID default binding and second security-stage NOOP are tested; no complete application claim."
+  ]
+}

@@ -8,11 +8,12 @@
  *   - digest surfacing (incident reference)
  *   - retry + secondary action
  *   - copy-incident-ID for support handoff
- *   - `console.error` logging for RUM
+ *   - bounded local diagnostics, with no remote-delivery claim
  *
  * Keeps individual `error.tsx` files trivial.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { browserErrorReference, recordBrowserError } from '@nzila/os-core/browser-diagnostics'
 import {
   ExclamationTriangleIcon,
   ShieldExclamationIcon,
@@ -30,7 +31,6 @@ const TONE: Record<ErrorSeverity, { wrap: string; icon: string; btn: string }> =
 }
 
 export function ErrorPanel({
-  scope,
   error,
   reset,
   title,
@@ -39,7 +39,7 @@ export function ErrorPanel({
   severity,
   fullPage,
 }: {
-  /** Short scope tag for log lines, e.g. 'console:intelligence'. */
+  /** Existing caller scope; diagnostic storage uses the fixed error-panel surface. */
   scope: string
   error: Error & { digest?: string }
   reset?: () => void
@@ -51,12 +51,15 @@ export function ErrorPanel({
   /** When true, fills viewport height; otherwise inline section panel. */
   fullPage?: boolean
 }) {
+  const localReference = useId()
+  const diagnosticReference = browserErrorReference(error.digest, localReference)
   useEffect(() => {
-    console.error(`[${scope}:error]`, { message: error.message, digest: error.digest })
-  }, [scope, error])
+    recordBrowserError({ app: 'console', surface: 'error-panel', code: 'CLIENT_BOUNDARY_ERROR',
+      reference: diagnosticReference.value, referenceOrigin: diagnosticReference.origin })
+  }, [error, diagnosticReference.value, diagnosticReference.origin])
 
   const [copied, setCopied] = useState(false)
-  const incidentId = error.digest ?? null
+  const incidentId = diagnosticReference.value
 
   const handleCopy = () => {
     if (!incidentId || typeof navigator === 'undefined') return
@@ -99,10 +102,10 @@ export function ErrorPanel({
           <div className={cn('flex-1', fullPage && 'text-center')}>
             <h2 className="text-base font-semibold text-gray-900">{headline}</h2>
             <p className="mt-1 text-sm text-gray-700">{body}</p>
-            {error.digest ? (
+            {incidentId ? (
               <div className="mt-2 flex items-center gap-2">
                 <p className="font-mono text-xs text-gray-500">
-                  Reference: <span className="select-all">{error.digest}</span>
+                  {diagnosticReference.origin === 'local' ? 'Local reference' : 'Reference'}: <span className="select-all">{incidentId}</span>
                 </p>
                 <button
                   type="button"

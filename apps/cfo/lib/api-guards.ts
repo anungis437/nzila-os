@@ -8,18 +8,15 @@
  * Aligned with console reference implementation.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import {
-  createScopedDb,
-  createAuditedScopedDb,
-  withAudit,
-  type AuditedScopedDb,
-} from '@nzila/db'
+import { createScopedDb, createAuditedScopedDb, withAudit, type AuditedScopedDb } from '@nzila/db'
 import { platformDb } from '@nzila/db/platform'
 import { orgMembers } from '@nzila/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { auth } from '@nzila/platform-auth/entra/server'
 import { getUserRole, type NzilaRole } from '@/lib/rbac'
 import { createRequestContext, runWithContext } from '@nzila/os-core'
+import { CfoScopeError } from '@/lib/resolve-org'
+import { CfoCapabilityUnavailableError } from '@/lib/services/capability-unavailable'
 
 // ── Re-exports for route convenience ────────────────────────────────────────
 export { withAudit, createAuditedScopedDb, createScopedDb }
@@ -41,8 +38,7 @@ export interface AuthContext {
  * Authenticate the user and resolve their platform role.
  */
 export async function authenticateUser(): Promise<
-  | { ok: true; userId: string; platformRole: NzilaRole }
-  | { ok: false; response: NextResponse }
+  { ok: true; userId: string; platformRole: NzilaRole } | { ok: false; response: NextResponse }
 > {
   const { userId } = await auth()
   if (!userId) {
@@ -83,10 +79,7 @@ export async function requireOrgAccess(
     minRole?: 'org_admin' | 'org_secretary'
     platformBypass?: NzilaRole[]
   },
-): Promise<
-  | { ok: true; context: AuthContext }
-  | { ok: false; response: NextResponse }
-> {
+): Promise<{ ok: true; context: AuthContext } | { ok: false; response: NextResponse }> {
   const authResult = await authenticateUser()
   if (!authResult.ok) return authResult
 
@@ -142,8 +135,7 @@ export async function requireOrgAccess(
 export async function requirePlatformRole(
   ...allowed: NzilaRole[]
 ): Promise<
-  | { ok: true; userId: string; platformRole: NzilaRole }
-  | { ok: false; response: NextResponse }
+  { ok: true; userId: string; platformRole: NzilaRole } | { ok: false; response: NextResponse }
 > {
   const authResult = await authenticateUser()
   if (!authResult.ok) return authResult
@@ -172,7 +164,18 @@ export async function requirePlatformRole(
 export async function withRequestContext<T>(
   req: NextRequest | Request,
   handler: () => Promise<T>,
-): Promise<T> {
+): Promise<T | NextResponse> {
   const ctx = createRequestContext(req, { appName: 'cfo' })
-  return runWithContext(ctx, handler)
+  try {
+    return await runWithContext(ctx, handler)
+  } catch (error) {
+    if (error instanceof CfoScopeError)
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === 'Unauthorized' ? 401 : 403 },
+      )
+    if (error instanceof CfoCapabilityUnavailableError)
+      return NextResponse.json({ error: error.code, message: error.message }, { status: 501 })
+    throw error
+  }
 }

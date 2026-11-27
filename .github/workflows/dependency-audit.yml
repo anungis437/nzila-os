@@ -6,11 +6,27 @@ on:
     paths:
       - '**/package.json'
       - 'pnpm-lock.yaml'
+      - '**/requirements*.txt'
+      - '**/requirements*.lock'
+      - 'tooling/security/**'
+      - 'patches/**'
+      - 'scripts/generate-sbom.ts'
+      - 'packages/automation/generators/infra/.env.migration'
+      - 'reports/security/gitleaks-report.json'
+      - '.github/workflows/dependency-audit.yml'
   pull_request:
     branches: [main]
     paths:
       - '**/package.json'
       - 'pnpm-lock.yaml'
+      - '**/requirements*.txt'
+      - '**/requirements*.lock'
+      - 'tooling/security/**'
+      - 'patches/**'
+      - 'scripts/generate-sbom.ts'
+      - 'packages/automation/generators/infra/.env.migration'
+      - 'reports/security/gitleaks-report.json'
+      - '.github/workflows/dependency-audit.yml'
   schedule:
     # Daily audit at 06:00 UTC
     - cron: '0 6 * * *'
@@ -30,6 +46,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-monorepo
+      - name: Verify supply-chain security regressions
+        run: >-
+          node --test
+          tooling/security/picomatch-repeated-extglob.test.mjs
+          tooling/security/npm-bulk-audit.test.mjs
+          tooling/security/historical-secret-containment.test.mjs
+      - name: Verify SBOM and policy evidence regressions
+        run: pnpm exec vitest run --config tooling/security/vitest.audit.config.ts
       # Audit at critical level — capture report for waiver evaluation.
       # Exit code is intentionally suppressed here; the waiver policy step
       # is the authoritative gate (it accounts for accepted/waived CVEs).
@@ -79,7 +103,17 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
 
+      # The deployed bootstrap consumes this exact hash-locked graph. Auditing
+      # only requirements.txt resolves newer transitives and can miss a stale
+      # vulnerable artifact retained by requirements.lock.
+      - name: Audit Union Eyes deployed Python lock without waivers
+        run: |
+          pip-audit --require-hashes --disable-pip --strict --progress-spinner off \
+            -r apps/union-eyes/backend/requirements.lock \
+            --format=json --output=python-lock-audit.json
+
       - name: Audit Python requirements files
+        if: ${{ !cancelled() }}
         run: |
           EXIT_CODE=0
           # PYSEC-2025-183: pyjwt — disputed by supplier (key length chosen by application).
@@ -91,3 +125,12 @@ jobs:
             pip-audit -r "$req" --desc $IGNORE_FLAGS || EXIT_CODE=1
           done
           exit $EXIT_CODE
+
+      - name: Upload exact Python lock audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-lock-audit-${{ github.run_id }}
+          path: python-lock-audit.json
+          if-no-files-found: error
+          retention-days: 90

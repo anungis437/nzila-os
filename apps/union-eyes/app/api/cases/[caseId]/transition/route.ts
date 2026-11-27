@@ -10,13 +10,13 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
-import {
-  validateTransition,
-  getAllowedTransitions,
-  type ActorRole,
-  type CasePriority,
-} from '@/lib/workflow/case-lifecycle';
 import { toLifecycleState } from '@/lib/workflow/state-bridge';
+import {
+  allowedClaimCaseTransitions,
+  claimResponseStatus,
+  claimTransitionTarget,
+  validateClaimCaseTransition,
+} from '@/lib/workflow/claim-transition-policy';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { claims, claimUpdates, claimStatusEnum } from '@/db/schema/claims-schema';
 import { inAppNotifications } from '@/db/schema';
@@ -24,6 +24,8 @@ import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { loadClaimTransitionSource } from '@/lib/cases/claim-transition-source';
+import { decideCaseCapabilitiesBatch } from '@/lib/authority/store/route-adapter';
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
 import { inAppNoticeAllowed } from '@/lib/notifications/in-app-preferences';
 import { memberCaseUrl } from '@/lib/notifications/links';
@@ -77,7 +79,7 @@ export async function PATCH(
     }
 
     const { reason } = parsed.data;
-    const targetStatus = normalizeTargetStatus(parsed.data.targetStatus);
+    const targetStatus = claimTransitionTarget(parsed.data.targetStatus);
 
     // 3. Load claim in RLS context (with row lock to prevent TOCTOU race)
     const result = await withRLSContext(async (tx) => {
@@ -89,15 +91,15 @@ export async function PATCH(
       }
 
       // 5. Validate FSM transition via canonical case-lifecycle.ts
-      const cupeCurrentStatus = mapDbStatusToCupe(claim.status);
-      const currentLifecycleState = toLifecycleState('cupe', cupeCurrentStatus) ?? 'submitted';
-      const targetLifecycleState = toLifecycleState('cupe', targetStatus);
+      const cupeCurrentStatus = claimResponseStatus(claim.status);
+      const currentLifecycleState = toLifecycleState('claim', claim.status);
+      const targetLifecycleState = targetStatus && toLifecycleState('claim', targetStatus);
 
-      if (!targetLifecycleState) {
+      if (!currentLifecycleState || !targetLifecycleState || !targetStatus) {
         return {
           found: true as const,
           allowed: false as const,
-          reason: `Unknown or invalid target status: ${targetStatus}`,
+          reason: `Unknown or unsupported claim status: ${parsed.data.targetStatus}`,
           nextAllowedStatuses: [] as string[],
         };
       }
@@ -107,30 +109,33 @@ export async function PATCH(
         if (!closer) return { found: false as const };
       }
 
-      const normalizedRole = normalizeActorRole(actor.role);
-      const validation = validateTransition({
-        caseId,
-        currentState: currentLifecycleState,
-        targetState: targetLifecycleState,
-        actorRole: normalizedRole,
-        assignedTo: claim.assignedTo,
-        priority: (claim.priority as CasePriority) ?? 'medium',
-        notes: reason,
-      });
+      // The authorization projection deliberately has no narrative or clock
+      // fields. Read these only after the kernel permits the action, inside
+      // the same transaction that still holds the claim's row lock.
+      const stored = await loadClaimTransitionSource(tx, orgId, claim.claimId);
+      if (!stored) return { found: false as const };
+
+      const validation = validateClaimCaseTransition(stored, actor.role, targetStatus, reason);
 
       if (!validation.allowed) {
-        const allowedLifecycleStates = getAllowedTransitions(currentLifecycleState, normalizedRole);
+        const powers = (await decideCaseCapabilitiesBatch(tx, {
+          userId: actor.userId, organizationId: orgId, caseIds: [claim.claimId],
+        })).get(claim.claimId);
         return {
           found: true as const,
           allowed: false as const,
           reason: validation.reason,
-          nextAllowedStatuses: allowedLifecycleStates.map(toCupeVocabulary),
+          nextAllowedStatuses: allowedClaimCaseTransitions(stored, actor.role, {
+            canTransition: powers?.['case:transition'].effect === 'allow',
+            canClose: powers?.['case:close'].effect === 'allow',
+          }, reason)
+            .map(claimResponseStatus),
         };
       }
 
       // 5. Apply transition
       const fromStatus = claim.status;
-      const toDbStatus = mapCupeToDbStatus(targetStatus);
+      const toDbStatus = targetStatus;
 
       const now = new Date();
       await tx
@@ -139,7 +144,7 @@ export async function PATCH(
           status: toDbStatus as typeof claimStatusEnum.enumValues[number],
           updatedAt: now,
           ...(targetStatus === 'closed' ? { closedAt: now } : {}),
-          ...(targetStatus === 'settled' || targetStatus === 'denied'
+          ...(targetStatus === 'resolved' || targetStatus === 'rejected'
             ? { resolvedAt: now }
             : {}),
         })
@@ -149,20 +154,15 @@ export async function PATCH(
       await tx.insert(claimUpdates).values({
         claimId: claimHistoryReference(claim.claimId),
         updateType: 'status_change',
-        // Member-visible history must not contain the staff's transition reason:
-        // it may include confidential evidence, third-party identity or legal strategy.
-        // The reason remains in the restricted atomic audit. The separate evidence-pack
-        // bridge currently does not ingest its supplied artifacts and is not
-        // relied upon as proof of this confidential reason.
-        message: `Status changed: ${fromStatus} → ${toDbStatus}`,
+        // The member-visible history contains only persisted states. The restricted
+        // atomic audit below retains the reason and CUPE/FSM projections.
+        message: `Status changed from '${fromStatus}' to '${toDbStatus}'`,
         createdBy: userId,
         isInternal: false,
         visibilityScope: 'member',
         metadata: {
-          fromStatus,
-          toStatus: toDbStatus,
-          cupeFromStatus: cupeCurrentStatus,
-          cupeToStatus: targetStatus,
+          previousStatus: fromStatus,
+          newStatus: toDbStatus,
         },
       });
 
@@ -193,7 +193,7 @@ export async function PATCH(
           from: fromStatus,
           to: toDbStatus,
           cupeFrom: cupeCurrentStatus,
-          cupeTo: targetStatus,
+          cupeTo: claimResponseStatus(targetStatus),
           reason: reason ?? null,
         },
       });
@@ -204,7 +204,7 @@ export async function PATCH(
         fromStatus,
         toStatus: toDbStatus,
         cupeFromStatus: cupeCurrentStatus,
-        cupeToStatus: targetStatus,
+        cupeToStatus: claimResponseStatus(targetStatus),
         claimId: claim.claimId,
       };
     });
@@ -245,7 +245,7 @@ export async function PATCH(
       actionType: 'CASE_TRANSITIONED',
       orgId: orgId,
       actorId: userId,
-      artifacts: [{ type: 'case_transition', data: { caseId: result.claimId, from: result.cupeFromStatus, to: result.cupeToStatus, reason } }],
+      artifacts: [{ type: 'case_transition', data: { caseId: result.claimId, from: result.cupeFromStatus, to: result.cupeToStatus } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_TRANSITIONED' }))
 
     return NextResponse.json({
@@ -263,89 +263,4 @@ export async function PATCH(
       { status: 500 },
     );
   }
-}
-
-// ─── FSM Role Normalization ───────────────────────────────────────────────────
-
-/**
- * Normalize DB/org role strings to canonical ActorRole for case-lifecycle FSM.
- * Maps legacy role names to the unified vocabulary.
- */
-function normalizeActorRole(role: string): ActorRole {
-  const map: Record<string, ActorRole> = {
-    platform_admin: 'system_admin',
-    business_agent: 'chief_steward',
-    union_admin: 'admin',
-    union_staff: 'steward',
-  };
-  return (map[role] ?? role) as ActorRole;
-}
-
-/**
- * Convert a LifecycleState back to the CUPE vocabulary ID for API responses.
- */
-function toCupeVocabulary(state: string): string {
-  const map: Record<string, string> = {
-    draft: 'draft',
-    submitted: 'filed',
-    triage: 'acknowledged',
-    investigation: 'investigating',
-    pending_docs: 'response_due',
-    negotiation: 'response_due',
-    mediation: 'mediation',
-    arbitration: 'escalated',
-    resolved: 'settled',
-    closed: 'closed',
-  };
-  return map[state] ?? state;
-}
-
-// ─── Status Mapping ───────────────────────────────────────────────────────────
-
-/**
- * Map DB claim_status enum values to CUPE vocabulary status IDs.
- */
-function mapDbStatusToCupe(dbStatus: string): string {
-  const mapping: Record<string, string> = {
-    submitted: 'filed',
-    under_review: 'acknowledged',
-    assigned: 'acknowledged',
-    investigation: 'investigating',
-    pending_documentation: 'response_due',
-    resolved: 'settled',
-    rejected: 'denied',
-    closed: 'closed',
-  };
-  return mapping[dbStatus] ?? dbStatus;
-}
-
-/**
- * Callers send either a CUPE vocabulary id or a claim_status name (the workbench and the next-actions route use the
- * claim vocabulary). A claim name that is not itself a CUPE id is translated; anything else stays unknown and is refused.
- */
-function normalizeTargetStatus(requested: string): string {
-  if (toLifecycleState('cupe', requested)) return requested;
-  const claimToCupe = mapDbStatusToCupe(requested);
-  return toLifecycleState('cupe', claimToCupe) ? claimToCupe : requested;
-}
-
-/**
- * Map CUPE vocabulary status IDs back to DB claim_status enum values.
- */
-function mapCupeToDbStatus(cupeStatus: string): string {
-  const mapping: Record<string, string> = {
-    draft: 'submitted',
-    filed: 'submitted',
-    acknowledged: 'under_review',
-    investigating: 'investigation',
-    response_due: 'pending_documentation',
-    escalated: 'under_review',
-    mediation: 'investigation',
-    arbitration: 'investigation',
-    settled: 'resolved',
-    denied: 'rejected',
-    withdrawn: 'closed',
-    closed: 'closed',
-  };
-  return mapping[cupeStatus] ?? cupeStatus;
 }

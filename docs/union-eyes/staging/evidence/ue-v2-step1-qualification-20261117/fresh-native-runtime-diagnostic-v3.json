@@ -1,0 +1,124 @@
+{
+  "recordedAt": "2026-11-18T14:01:57.883749+00:00",
+  "scope": "OWNED_FRESH_NATIVE_ARM64_PG16_DIAGNOSTIC_MATRIX",
+  "status": "INTERRUPTED_WITH_INITIALIZATION_FIXTURE_AND_AGGREGATE_TIMEOUT_FAILURES",
+  "sourcePlanSha256": "ba18cfa518d81ca38378408d4696575c9f6ba4881185eb7bc40d75514dfb2f46",
+  "sourceBindingCount": 1208,
+  "sourceChangedDuringRun": [],
+  "execution": {
+    "command": [
+      "pnpm",
+      "--dir",
+      "apps/union-eyes",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.heavy.config.ts",
+      "scripts/bootstrap-v2/runtime-security-native.test.ts",
+      "--maxWorkers=1",
+      "--reporter=verbose",
+      "--reporter=json",
+      "--outputFile=/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v3.json"
+    ],
+    "startedAt": "2026-11-18T13:44:08.036659+00:00",
+    "finishedAt": "2026-11-18T13:54:57.116181+00:00",
+    "exitCode": -2,
+    "resourceStop": false,
+    "logSha256": "4d3e82c728c93d6d644d2def47c31ded12caff14b8a5e16f53d017b6dd06cce7"
+  },
+  "completeRun": false,
+  "finalJsonReportProduced": false,
+  "observedPassingLinesOnly": 45,
+  "observedFailingLinesOnly": 11,
+  "observedFailures": [
+    {
+      "case": "current tenant positive writes with genuine restricted execution > maps the actual Next application context to the canonical non-owner role and isolated rows",
+      "failure": "\u2192 Missing required environment variable: DATABASE_URL"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_authority_scopes: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_documents: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_respondents: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > case_scope_proposals: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > claim_status_transitions: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > claim_updates: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > claims: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 SOURCE_GUARDED_CASE_FIXTURE_FAILED:claims:PostgresError:23514:sha256=2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7: expected 'FAIL' to be 'PASS' // Object.is equality"
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > commercial_contracts: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 Test timed out in 120000ms."
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > committee_action_items: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 Test timed out in 120000ms."
+    },
+    {
+      "case": "current tenant positive writes with genuine restricted execution > committee_documents: qualifies every source-authorized actor operation and constraints",
+      "failure": "\u2192 Test timed out in 120000ms."
+    }
+  ],
+  "matchedPrivateServerDiagnostic": {
+    "sqlState": "23514",
+    "constraint": "ue_authority_rule_unapproved_domains_chk",
+    "messageSha256": "2fcaddd602f01c14dca06de3308c6af9ce92852e02e229a6214d7851338858c7",
+    "wholeMessagePublished": false
+  },
+  "rootCauses": [
+    "Qualification imports capture undefined default DATABASE_URL before genuine application setup",
+    "Synthetic case_assignment amendment fixture requests2rule-level independent approvals where retained physical contract requires0; actual adoption and scope proposals independently require2votes",
+    "First table eagerly executes all783seven-column probes under one120second test; roughly30000SQL statements and no cooperative producer cancellation cause following queued test timeouts"
+  ],
+  "remediationState": "IN_PROGRESS_NO_FIXED_NATIVE_PASS_CLAIM",
+  "artifacts": [
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v3-source.json",
+      "sha256": "d27a3b51733a5c2545cdb43b711fa341f92f8eff2e173db69cba4ae116401d8b"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v3-intentional-stop.json",
+      "sha256": "1a434b2c9ab644bc13eb6dc3c609058c4b5651bb1f84f466b78062077618a027"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/native-runtime-matrix-v3-owned-cleanup.json",
+      "sha256": "5c85127f6f626c4b93f8f9ef2230418ffbda5f2fbad012abd81cf0368b3f6948"
+    },
+    {
+      "privatePath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/runtime-integration/seven-column-runtime-cost-readonly-v1.json",
+      "sha256": "a3007efb05a7f65ba92c592a20b772ab60779ff27414bb435b0ed37664265ae1"
+    }
+  ],
+  "cleanup": {
+    "ownedDiagnosticContainerRemoved": true,
+    "priorInventoryRestored": true,
+    "liveAzureDataTouched": false
+  },
+  "limits": [
+    "Observed lines are not full suite results",
+    "Queued timeouts are not separately proven permission defects",
+    "Preserve all probes, required table coverage and existing timeout in the corrected runner",
+    "No final candidate readiness or environment acceptance"
+  ],
+  "candidateSha": null,
+  "step2Started": false,
+  "stagingOrProductionPromoted": false
+}

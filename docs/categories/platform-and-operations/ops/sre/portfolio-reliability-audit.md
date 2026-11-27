@@ -1,20 +1,22 @@
 # Portfolio Reliability Audit
 
-Generated: 2026-05-04T02:02:46.702Z
+Generated: 2026-11-17T21:42:28.296Z
 
-## Scores (0-10)
+Scores establish source and configuration presence; they do not establish live reliability, SLO attainment, alert delivery or recovery.
+
+## Source and Configuration Scores (0-10)
 
 - Reliability Score: 10
 - Observability Score: 10
-- Incident Readiness Score: 10
+- Incident Procedure Score: 10
 - Cost Governance Score: 10
-- MTTR Readiness Score: 10
+- Recovery Procedure Score: 10
 
-## Endpoint Contract Coverage
+## Endpoint Source Contract Coverage
 
 - Apps scanned: 14
-- Apps missing one or more required endpoints: 0
+- Apps missing one or more required endpoint source files: 0
 
-## Missing Endpoint Contracts
+## Missing Endpoint Source Contracts
 
 - none

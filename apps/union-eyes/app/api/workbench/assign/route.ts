@@ -57,7 +57,7 @@ export const POST = withApi(
 
         await tx
           .update(claims)
-          .set({ assignedTo: assigneeId, assignedAt: new Date(), status: 'assigned', updatedAt: new Date() })
+          .set({ assignedTo: assigneeId, assignedAt: new Date(), updatedAt: new Date() })
           .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, actor.organizationId)));
         await tx.insert(claimUpdates).values({
           claimId: claimHistoryReference(claim.claimId),

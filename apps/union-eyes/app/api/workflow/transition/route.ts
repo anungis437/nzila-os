@@ -15,8 +15,8 @@ import {
   getCaseActor,
 } from '@/lib/cases/case-authorization'
 import { updateClaimStatus } from '@/lib/workflow-engine'
-import { getAllowedTransitions } from '@/lib/workflow/case-lifecycle'
-import { toLifecycleState, toLegacyClaimStatus } from '@/lib/workflow/state-bridge'
+import { allowedClaimCaseTransitions, claimTransitionTarget, validateClaimCaseTransition } from '@/lib/workflow/claim-transition-policy'
+import { CASE_HANDLER_ROLES } from '@/lib/cases/case-role-access'
 
 // Local alias for DB claim status values — decoupled from deprecated FSM module
 type ClaimStatus =
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await requireApiAuth({
       orgScoped: true,
-      roles: ['steward', 'admin'],
+      roles: [...CASE_HANDLER_ROLES],
     })
 
     if (!userId) {
@@ -88,9 +88,6 @@ export async function POST(request: NextRequest) {
       // The kernel decides the actor may move this case (and close it, when the target closes it) before it is locked.
       const mayMove = await findReadableCase(tx, actor, claimNumber, true, 'case:transition');
       if (!mayMove) return NextResponse.json({ success: false, error: 'Claim not found' }, { status: 404 });
-      if (['closed', 'resolved'].includes(targetStatus) && !(await findReadableCase(tx, actor, claimNumber, true, 'case:close'))) {
-        return NextResponse.json({ success: false, error: 'Claim not found' }, { status: 404 });
-      }
       const claimConditions = [eq(claims.claimNumber, claimNumber), eq(claims.organizationId, actor.organizationId)];
 
       const [claim] = await wrapSchemaQuery(
@@ -110,13 +107,23 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      if (['closed','rejected'].includes(targetStatus) || ['closed','rejected'].includes(claim.status)) {
+        const mayClose=await findReadableCase(tx,actor,claimNumber,true,'case:close');
+        if(!mayClose)return NextResponse.json({success:false,error:'Claim not found'},{status:404});
+      }
+
       const currentStatus = claim.status as ClaimStatus
 
-      // Pre-flight FSM guard via canonical lifecycle bridge
-      const currentLifecycle = toLifecycleState('claim', currentStatus) ?? 'submitted'
-      const allowedLifecycle = getAllowedTransitions(currentLifecycle, 'steward')
-      const allowed = [...new Set(allowedLifecycle.map(toLegacyClaimStatus))]
-      if (!allowed.includes(targetStatus as ClaimStatus)) {
+      // Evaluate the actual actor and stored facts; the downstream mutation
+      // repeats this validation and kernel admission in the same transaction.
+      const target = claimTransitionTarget(targetStatus)
+      const validation = target && validateClaimCaseTransition(claim, actor.role, target, notes)
+      if (!validation || !validation.allowed) {
+        const mayClose = await findReadableCase(tx, actor, claimNumber, true, 'case:close')
+          .catch(error => { if (error?.code === 'FORBIDDEN') return null; throw error })
+        const allowed = allowedClaimCaseTransitions(claim, actor.role, {
+          canTransition: true, canClose: Boolean(mayClose),
+        }, notes)
         recordUnionEyesWorkflowTransitionFailure(
           organizationId || claim.organizationId,
           claim.claimId,

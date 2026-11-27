@@ -1,13 +1,14 @@
 /**
  * What the platform data-source dashboard reads: record counts of the internal and external data sources and the recent sync history.
  *
- * This is a platform view: the counts are over every organization (claims, members, deadlines and dues assignments of all of them), so it is read as
+ * This is a platform view: the counts are over every organization (claims, members and deadlines of all of them), so it is read as
  * the system role, and only after the page has checked platform authority (isSystemAdmin). Nothing here is swallowed: a table the system role may not
  * read, or one that does not exist, rejects and the caller shows the error state; the page used to turn each such failure into a zero and an empty
  * sync history, which is how a missing grant looked like "no data".
  */
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { SYNC_LOG_OVERVIEW_COLUMNS } from './data-source-contract';
 
 export interface SyncLogEntry {
   id: string;
@@ -39,7 +40,6 @@ const INTERNAL_COUNTS = {
   claims: sql`SELECT COUNT(*)::int AS c FROM claims`,
   organization_members: sql`SELECT COUNT(*)::int AS c FROM organization_members`,
   claim_deadlines: sql`SELECT COUNT(*)::int AS c FROM claim_deadlines`,
-  dues_assignments: sql`SELECT COUNT(*)::int AS c FROM dues_assignments`,
 } as const;
 
 const EXTERNAL_COUNTS = {
@@ -69,11 +69,7 @@ export function loadDataSourceOverview(): Promise<DataSourceOverview> {
     // Recent sync logs (last 20)
     const syncLogs = Array.from(
       (await tx.execute(sql`
-        SELECT id, source, source_type, sync_id,
-               started_at, completed_at, status,
-               records_processed, records_inserted,
-               records_updated, records_failed,
-               error_message, sync_type
+        SELECT ${sql.join(SYNC_LOG_OVERVIEW_COLUMNS.map(name => sql.identifier(name)), sql`, `)}
         FROM external_data_sync_log
         ORDER BY started_at DESC
         LIMIT 20

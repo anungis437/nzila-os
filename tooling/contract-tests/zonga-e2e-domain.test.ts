@@ -19,6 +19,7 @@ const ROOT = join(__dirname, '../..')
 const ZONGA = join(ROOT, 'apps', 'zonga')
 const ACTIONS = join(ZONGA, 'lib', 'actions')
 const MARKETING = join(ZONGA, 'app', '(marketing)')
+const SERVICES = join(ZONGA, 'lib', 'services')
 
 // ── ZNG-E2E-01: Domain table pattern ──────────────────────────────────────
 
@@ -59,9 +60,19 @@ describe('ZNG-E2E-01 — Action files use domain tables, not audit_log for reads
   })
 
   it('social-actions uses zonga_listener_follows and zonga_listener_favorites', () => {
+    // Raw SQL moved out of the action file (NO_RAW_DB_IN_ACTIONS_001) into the
+    // listener-social service the actions delegate to.
     const content = readFileSync(join(ACTIONS, 'social-actions.ts'), 'utf-8')
-    expect(content).toContain('zonga_listener_follows')
-    expect(content).toContain('zonga_listener_favorites')
+    expect(content).toContain("from '@/lib/services/listener-social'")
+    expect(content).toContain(
+      "resolveOrgContext('personal', (context) => follow(context, creatorId))",
+    )
+    expect(content).toContain(
+      "resolveOrgContext('personal', (context) => favorite(context, entityType, targetEntityId))",
+    )
+    const svc = readFileSync(join(SERVICES, 'listener-social.ts'), 'utf-8')
+    expect(svc).toContain('public.zonga_listener_follows')
+    expect(svc).toContain('public.zonga_listener_favorites')
   })
 
   it('notification-actions uses zonga_notifications', () => {
@@ -71,10 +82,16 @@ describe('ZNG-E2E-01 — Action files use domain tables, not audit_log for reads
 
   it('search-actions queries domain tables for global search', () => {
     const content = readFileSync(join(ACTIONS, 'search-actions.ts'), 'utf-8')
-    expect(content).toContain('zonga_content_assets')
-    expect(content).toContain('zonga_creators')
-    expect(content).toContain('zonga_events')
-    expect(content).toContain('zonga_playlists')
+    expect(content).toContain("resolveOrgContext('published', (context) => search(context, query))")
+    expect(content).toContain("from '@/lib/services/published-catalog'")
+    const svc = readFileSync(join(SERVICES, 'published-catalog.ts'), 'utf-8')
+    const searchBody = svc.split('export async function search(')[1]?.split('\nexport ')[0] ?? ''
+    expect(searchBody).toContain('public.zonga_content_assets')
+    expect(searchBody).toContain('public.zonga_creators')
+    expect(searchBody).toContain('public.zonga_events')
+    expect(searchBody).toContain('public.zonga_playlists')
+    // Operational data, not audit_log, backs search.
+    expect(searchBody).not.toContain('audit_log')
   })
 })
 
@@ -117,9 +134,28 @@ describe('ZNG-E2E-02 — New action files exist with expected exports', () => {
 
   it('listener-actions uses zonga_listeners domain table', () => {
     const content = readFileSync(join(ACTIONS, 'listener-actions.ts'), 'utf-8')
-    expect(content).toContain('zonga_listeners')
-    expect(content).toContain('zonga_listener_activity')
-    expect(content).toContain('zonga_listener_playlist_saves')
+    expect(content).toContain("from '@/lib/services/listener-library'")
+    for (const fn of [
+      'getListenerProfile',
+      'ensureListenerProfile',
+      'getListenerFeed',
+      'recordActivity',
+      'savePlaylist',
+      'unsavePlaylist',
+    ])
+      expect(content).toMatch(
+        new RegExp(`export async function ${fn}[\\s\\S]*?resolveOrgContext\\('personal'`),
+      )
+    const svc = readFileSync(join(SERVICES, 'listener-library.ts'), 'utf-8')
+    expect(svc).toContain('public.zonga_listeners')
+    expect(svc).toContain('public.zonga_listener_activity')
+    expect(svc).toContain('public.zonga_listener_playlist_saves')
+    // Listener profile row is resolved/created by the actor-bound resolver.
+    const resolver = readFileSync(join(ZONGA, 'lib', 'resolve-org.ts'), 'utf-8')
+    expect(resolver).toContain('FROM public.zonga_listeners WHERE user_id=${context.actorId}')
+    expect(resolver).toContain(
+      'INSERT INTO public.zonga_listeners(user_id,org_id,display_name,email)',
+    )
   })
 })
 
@@ -150,7 +186,7 @@ describe('ZNG-E2E-03 — Public marketing routes exist', () => {
     expect(content).not.toContain('resolveOrgContext')
   })
 
-it('proxy allows /events as public route', () => {
+  it('proxy allows /events as public route', () => {
     const content = readFileSync(join(ZONGA, 'proxy.ts'), 'utf-8')
     expect(content).toContain("'/events(.*)'")
   })
@@ -234,17 +270,12 @@ describe('ZNG-E2E — Dashboard pages exist', () => {
 
   for (const [dir, file] of dashboardPages) {
     it(`dashboard/${dir}/${file} exists`, () => {
-      expect(
-        existsSync(join(ZONGA, 'app', '[locale]', 'dashboard', dir, file)),
-      ).toBe(true)
+      expect(existsSync(join(ZONGA, 'app', '[locale]', 'dashboard', dir, file))).toBe(true)
     })
   }
 
   it('layout.tsx has Listener and Moderation sidebar links', () => {
-    const content = readFileSync(
-      join(ZONGA, 'app', '[locale]', 'dashboard', 'layout.tsx'),
-      'utf-8',
-    )
+    const content = readFileSync(join(ZONGA, 'app', '[locale]', 'dashboard', 'layout.tsx'), 'utf-8')
     expect(content).toContain('My Music')
     expect(content).toContain('Moderation')
   })

@@ -38,6 +38,27 @@ const SEARCH_PATTERNS = [
   /clerk\/nextjs/,
 ]
 
+// These files exercise the union's Clerk occupation, not the removed identity
+// provider. Keep provider-specific checks active even in these domain files.
+const UNION_ROLE_FILES = new Set([
+  'apps/union-eyes/app/api/__tests__/correspondence-cancel.route.test.ts',
+  'apps/union-eyes/app/api/__tests__/correspondence-clerk-auth.route.test.ts',
+  'apps/union-eyes/app/api/__tests__/correspondence-id.route.test.ts',
+  'apps/union-eyes/app/api/__tests__/correspondence-submit.route.test.ts',
+  'apps/union-eyes/lib/api/__tests__/with-api-canonical.test.ts',
+  'apps/union-eyes/lib/api/with-api.ts',
+  'apps/union-eyes/lib/correspondence/access.test.ts',
+  'apps/union-eyes/lib/correspondence/roles.ts',
+  'apps/union-eyes/lib/dashboard/__tests__/role-experience.test.ts',
+  'apps/union-eyes/lib/__tests__/api-auth-guard-canonical.test.ts',
+  'apps/union-eyes/lib/reality/capability-registry.ts',
+])
+const PROVIDER_PATTERNS = [
+  ...SEARCH_PATTERNS.slice(3),
+  /\b(?:ClerkProvider|clerkMiddleware|clerkClient|ClerkExpressRequireAuth)\b/,
+  /\bClerk\s+(?:auth(?:entication)?|identity|provider|SDK)\b/i,
+]
+
 /**
  * Files/directories that are allowed to contain Clerk references.
  * These are intentional: historical docs, DB schema legacy columns,
@@ -164,11 +185,16 @@ function scanFile(filePath: string): Violation[] {
     return []
   }
 
+  return scanContent(rel, content)
+}
+
+function scanContent(rel: string, content: string): Violation[] {
+  const patterns = UNION_ROLE_FILES.has(rel) ? PROVIDER_PATTERNS : SEARCH_PATTERNS
   const violations: Violation[] = []
   const lines = content.split('\n')
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!
-    for (const pattern of SEARCH_PATTERNS) {
+    for (const pattern of patterns) {
       if (pattern.test(line)) {
         violations.push({
           file: rel,
@@ -184,6 +210,23 @@ function scanFile(filePath: string): Violation[] {
 }
 
 describe('UE_AUTH_REALITY_001 — Clerk stale reference regression guard', () => {
+  it('accepts the union occupation only in declared domain files', () => {
+    const text = "const role = 'clerk'; // Clerk prepares union correspondence"
+    expect(scanContent('apps/union-eyes/lib/correspondence/roles.ts', text)).toEqual([])
+    expect(scanContent('apps/union-eyes/lib/unclassified.ts', text)).toHaveLength(1)
+  })
+
+  it.each([
+    "import { auth } from '@clerk/nextjs'",
+    'const secret = process.env.CLERK_SECRET_KEY',
+    'const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    'export default clerkMiddleware()',
+    'return <ClerkProvider>{children}</ClerkProvider>',
+    '// Clerk authentication provider handles sign in',
+  ])('still rejects provider use in a union-role file: %s', (text) => {
+    expect(scanContent('apps/union-eyes/lib/api/with-api.ts', text)).toHaveLength(1)
+  })
+
   it('finds no Clerk references in active UE runtime files', () => {
     const violations: Violation[] = []
 

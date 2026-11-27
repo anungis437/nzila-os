@@ -1,3 +1,4 @@
+import { loginRuntimeRequest } from '../../e2e/helpers/runtime-auth'
 import { expect, type APIRequestContext } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { createServer } from 'node:http'
@@ -43,14 +44,25 @@ export async function seedOrVerifyTestState(request: APIRequestContext): Promise
 }
 
 export async function loginAsTestUser(request: APIRequestContext, email: string): Promise<void> {
+  if (process.env.UE_CANONICAL_BOOTSTRAP_V2 === '1') {
+    const fixture = Object.values(UE_TEST_USERS).find((user) => user.email === email)
+    if (!fixture || fixture.status !== 'active')
+      throw new Error('Active owned runtime fixture required')
+    await loginRuntimeRequest(request, fixture.userId)
+    return
+  }
   if ((process.env.PLAYWRIGHT_TEST_AUTH ?? '').toLowerCase() === 'true') {
-    const fixture = Object.values(UE_TEST_USERS).find(user => user.email === email)
+    const fixture = Object.values(UE_TEST_USERS).find((user) => user.email === email)
     if (!fixture || fixture.status !== 'active') {
       throw new Error(`[ue:e2e] Unknown or inactive seeded fixture user: ${email}`)
     }
     const target = new URL(getBaseUrl())
-    if (target.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(target.hostname)
-      || target.username || target.password) {
+    if (
+      target.protocol !== 'http:' ||
+      !['localhost', '127.0.0.1'].includes(target.hostname) ||
+      target.username ||
+      target.password
+    ) {
       throw new Error('[ue:e2e] Seed session setup requires a loopback HTTP target')
     }
     // APIRequestContext has no public cookie mutator. A temporary loopback
@@ -62,8 +74,10 @@ export async function loginAsTestUser(request: APIRequestContext, email: string)
         response.writeHead(404).end()
         return
       }
-      response.setHeader('Set-Cookie',
-        `nzila_session=ue-seed-session-${fixture.userId}; Path=/; HttpOnly; SameSite=Lax`)
+      response.setHeader(
+        'Set-Cookie',
+        `nzila_session=ue-seed-session-${fixture.userId}; Path=/; HttpOnly; SameSite=Lax`,
+      )
       response.writeHead(204).end()
     })
     await new Promise<void>((resolve, reject) => {
@@ -72,7 +86,8 @@ export async function loginAsTestUser(request: APIRequestContext, email: string)
     })
     try {
       const address = issuer.address()
-      if (!address || typeof address === 'string') throw new Error('[ue:e2e] Cookie fixture failed to bind')
+      if (!address || typeof address === 'string')
+        throw new Error('[ue:e2e] Cookie fixture failed to bind')
       const url = new URL(target.origin)
       url.port = String(address.port)
       url.pathname = nonce
@@ -80,7 +95,7 @@ export async function loginAsTestUser(request: APIRequestContext, email: string)
       if (response.status() !== 204) throw new Error('[ue:e2e] Cookie fixture setup failed')
     } finally {
       await new Promise<void>((resolve, reject) => {
-        issuer.close(error => error ? reject(error) : resolve())
+        issuer.close((error) => (error ? reject(error) : resolve()))
       })
     }
     return
@@ -164,12 +179,12 @@ export const UE_E2E_USERS = {
 /**
  * Cleanup helper to release database connections
  * Should be called after each test to prevent connection pool exhaustion
- * 
+ *
  * In E2E tests, each test may leave connections open that aren't
  * properly closed by the Next.js server. This helper ensures
  * graceful cleanup to prevent "The operation was canceled" errors
  * caused by connection pool exhaustion.
- * 
+ *
  * Usage: Add to test.afterEach() in your spec files
  */
 export async function cleanupDatabaseConnections(request: APIRequestContext): Promise<void> {

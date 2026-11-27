@@ -1,0 +1,170 @@
+[bootstrap] Legacy lineage freeze respected. Skipping any replay of db/migrations/.
+[bootstrap] Production bootstrap order: extensions -> snapshot_or_qa_baseline -> scoped_foundation -> runtime_privilege_quarantine -> platform_sql -> scoped_rls_closure -> runtime_grant_activation
+[bootstrap] Ensuring required extensions...
+[bootstrap] extension OK: uuid-ossp
+[bootstrap] extension OK: pgcrypto
+[bootstrap] extension OK: pg_trgm
+[bootstrap] extension OK: btree_gin
+[bootstrap] extension optional/unavailable: vector (extension "vector" is not available)
+[bootstrap] UE_DB_RESTORE_SNAPSHOT_URL not set — skipping canonical snapshot restore. In demo/pilot environments this MUST be set per docs/architecture/orm-governance/environment-bootstrap-strategy.md.
+[bootstrap] Migration ledger integrity verified (before apply): 87 row(s).
+[bootstrap] Applying scoped foundation migrations through 0013_workbook_credential_payment_authority ...
+[bootstrap] scoped migration already applied: 0000_outstanding_viper
+[bootstrap] scoped migration already applied: 0001_lean_iron_man
+[bootstrap] scoped migration already applied: 0002_certain_juggernaut
+[bootstrap] scoped migration already applied: 0003_dizzy_alex_wilder
+[bootstrap] scoped migration already applied: 0004_hesitant_chameleon
+[bootstrap] scoped migration already applied: 0005_add_icra_assessment_capability_token
+[bootstrap] scoped migration already applied: 0006_external_specialist_runtime_privilege_closure
+[bootstrap] scoped migration already applied: 0007_auth_bootstrap_runtime_remediation
+[bootstrap] scoped migration already applied: 0008_runtime_acceptance_closure
+[bootstrap] scoped migration already applied: 0009_baseline_runtime_role_grants
+[bootstrap] scoped migration already applied: 0010_tenant_isolation_rls_foundation
+[bootstrap] scoped migration already applied: 0011_storage_authority_rls_completion
+[bootstrap] scoped migration already applied: 0012_storage_authority_rls_final_closure
+[bootstrap] scoped migration already applied: 0013_workbook_credential_payment_authority
+[bootstrap] Quarantining runtime DML on public relations without FORCE RLS. 0009 is unchanged. Exact grants wait for the scoped RLS closures.
+[bootstrap] Applying post-freeze PLATFORM_SQL migrations from db/migrations-platform/ ...
+[bootstrap] platform migration already applied: 0001_billing_subscriptions
+[bootstrap] platform migration already applied: 0002_employer_execution_and_related_a
+[bootstrap] platform migration already applied: 0003_integration_partners_and_security_posture
+[bootstrap] platform migration already applied: 0004_audit_gap_canonical_tables
+[bootstrap] platform migration already applied: 0005_organization_members_deleted_at
+[bootstrap] platform migration already applied: 0006_documents_runtime_columns
+[bootstrap] platform migration already applied: 0007_claim_updates_runtime_columns
+[bootstrap] platform migration already applied: 0008_strike_fund_disbursements_canonical
+[bootstrap] platform migration already applied: 0008_strike_fund_uuid_membership_provenance
+[bootstrap] platform migration already applied: 0008_dapl_enum_label_evolution
+[bootstrap] platform migration already applied: 0008_fee_adjustment_enum_label_evolution
+[bootstrap] platform migration already applied: 0008_django_stub_relation_evolution
+[bootstrap] platform migration already applied: 0009_canonical_lineage_relations
+[bootstrap] platform migration already applied: 0010_billing_relation_shape_authority
+[bootstrap] platform migration already applied: 0011_strike_fund_deletion_guard
+[bootstrap] platform migration already applied: 0012_knowledge_transfer_runtime_relations
+[bootstrap] platform migration already applied: 0013_authority_kernel_storage
+[bootstrap] platform migration already applied: 0014_message_thread_triage
+[bootstrap] platform migration already applied: 0015_payments_transaction_source
+[bootstrap] platform migration already applied: 0016_documents_org_id_mirror
+[bootstrap] platform migration already applied: 0017_dues_transactions_ledger_shape
+[bootstrap] platform migration already applied: 0018_declared_shape_tranche_1
+[bootstrap] platform migration already applied: 0019_declared_shape_tranche_2
+[bootstrap] platform migration already applied: 0020_declared_shape_tranche_3
+[bootstrap] platform migration already applied: 0021_employer_execution_integrity
+[bootstrap] platform migration already applied: 0022_document_intake_and_transcription
+[bootstrap] platform migration already applied: 0023_signature_provider_acknowledgment
+[bootstrap] platform migration already applied: 0025_message_thread_lifecycle_and_retention
+[bootstrap] platform migration already applied: 0027_workaid_union_side_disclosure
+[bootstrap] platform migration already applied: 0028_location_deletion_log_shape
+[bootstrap] platform migration already applied: 0029_message_thread_authority_scope
+[bootstrap] platform migration already applied: 0030_message_retention_authority_scope
+[bootstrap] platform migration already applied: 0031_reachable_stub_shape
+[bootstrap] platform migration already applied: 0032_notification_callback_identity
+[bootstrap] platform migration already applied: 0033_election_certificate_successions
+[bootstrap] platform migration already applied: 0034_election_organization_ownership
+[bootstrap] platform migration already applied: 0035_election_supersession_authority_scope
+[bootstrap] platform migration already applied: 0036_workaid_consent_wording_proposals
+[bootstrap] platform migration already applied: 0037_workaid_referral_scope
+[bootstrap] platform migration already applied: 0038_gate0_integrity_columns
+[bootstrap] platform migration already applied: 0039_committee_memberships_shape
+[bootstrap] platform migration already applied: 0040_gate0_integrity_enforcement
+[bootstrap] platform migration already applied: 0041_room_bookings_shape
+[bootstrap] platform migration already applied: 0042_tenant_scoped_uniqueness
+[bootstrap] platform migration already applied: 0043_knowledge_transfer_owner
+[bootstrap] platform migration already applied: 0044_anti_scab_author
+[bootstrap] platform migration already applied: 0045_contact_submissions
+[bootstrap] platform migration already applied: 0046_row_integrity
+[bootstrap] platform migration already applied: 0047_ml_prediction_feedback
+[bootstrap] platform migration already applied: 0048_sso_scim_shape
+[bootstrap] platform migration already applied: 0049_claim_status_transitions
+[bootstrap] platform migration already applied: 0050_survey_anonymity
+[bootstrap] platform migration already applied: 0051_arbitration_decision_owner
+[bootstrap] platform migration already applied: 0052_shared_clause_versions
+[bootstrap] platform migration already applied: 0053_email_address_suppressions
+[bootstrap] platform migration already applied: 0054_public_intake_audit_events
+[bootstrap] platform migration already applied: 0055_workbook_holder_notice
+[bootstrap] platform migration already applied: 0056_workbook_capability
+[bootstrap] platform migration already applied: 0057_workbook_holder_notice_evidence
+[bootstrap] platform migration already applied: 0058_pilot_fixture_rows
+[bootstrap] platform migration already applied: 0059_scim_provisioned_users
+[bootstrap] platform migration already applied: 0060_reachable_stub_shape_2
+[bootstrap] platform migration already applied: 0061_declared_absent_relations
+[bootstrap] platform migration already applied: 0062_declared_enum_convergence
+[bootstrap] platform migration already applied: 0063_declared_shape_convergence
+[bootstrap] platform migration already applied: 0064_declared_unique_keys
+[bootstrap] platform migration already applied: 0065_declared_absent_relations_2
+[bootstrap] platform migration already applied: 0066_declared_indexes
+[bootstrap] platform migration already applied: 0067_declared_checks
+[bootstrap] platform migration already applied: 0068_declared_foreign_keys
+[bootstrap] platform migration already applied: 0069_declared_not_null
+[bootstrap] platform migration already applied: 0070_unambiguous_constraints
+[bootstrap] platform migration already applied: 0071_conservative_consent_defaults
+[bootstrap] applying platform migration: 0072_declared_not_null_2
+[bootstrap] applying platform migration: 0073_declared_defaults
+[bootstrap] applying platform migration: 0074_model_defaults_physical
+[bootstrap] applying platform migration: 0075_enhanced_rbac_relations
+[bootstrap] applying platform migration: 0076_enhanced_rbac_catalog
+[bootstrap] applying platform migration: 0077_ingestion_traceability
+[bootstrap] applying platform migration: 0078_staging_proof_ledger
+[bootstrap] applying platform migration: 0079_deadline_reminders_pending_partial
+[bootstrap] applying platform migration: 0080_document_intake_matter_binding
+[bootstrap] applying platform migration: 0081_location_data_organization
+[bootstrap] applying platform migration: 0082_platform_staff_mandate_kind
+[bootstrap] applying platform migration: 0083_reward_wallet_ledger_drop_legacy_columns
+[bootstrap] applying platform migration: 0084_ml_predictions_relax_legacy_not_null
+[bootstrap] applying platform migration: 0085_verified_dependency_evidence
+[bootstrap] applying platform migration: 0086_graph_evidence_integrity_and_identity
+[bootstrap] applying platform migration: 0087_verified_dependency_evidence_binding
+[bootstrap] applying platform migration: 0088_gate0_checkout_and_payroll_integrity
+[bootstrap] 0014 physical preflight: all 100 targets and 14 parents exist.
+[bootstrap] Applying scoped RLS closures after 0013_workbook_credential_payment_authority ...
+[bootstrap] applying scoped migration: 0014_lineage_restoration_rls_closure
+[bootstrap] applying scoped migration: 0015_deadline_engine_rls_fail_closed_closure
+[bootstrap] applying scoped migration: 0016_catalog_rls_authority_closure
+[bootstrap] applying scoped migration: 0017_snapshot_authority_reconciliation
+[bootstrap] applying scoped migration: 0018_knowledge_transfer_rls_closure
+[bootstrap] applying scoped migration: 0019_deadline_reassignment_convergence
+[bootstrap] applying scoped migration: 0020_authority_kernel_rls_closure
+[bootstrap] applying scoped migration: 0021_message_thread_triage_rls_closure
+[bootstrap] applying scoped migration: 0022_document_intake_and_transcription_rls_closure
+[bootstrap] applying scoped migration: 0024_message_thread_lifecycle_and_retention_rls_closure
+[bootstrap] applying scoped migration: 0026_workaid_union_side_rls_closure
+[bootstrap] applying scoped migration: 0028_workaid_consent_wording_proposal_rls
+[bootstrap] applying scoped migration: 0029_election_succession_rls_closure
+[bootstrap] applying scoped migration: 0030_precedent_explicit_share_select
+[bootstrap] applying scoped migration: 0031_feature_flags_attribution_columns
+[bootstrap] applying scoped migration: 0032_grievance_events_actor_text
+[bootstrap] applying scoped migration: 0033_external_authority_principals_text
+[bootstrap] applying scoped migration: 0034_remaining_principal_columns_text
+[bootstrap] applying scoped migration: 0035_room_bookings_rls_closure
+[bootstrap] applying scoped migration: 0036_contact_submissions_rls_closure
+[bootstrap] applying scoped migration: 0037_ml_prediction_feedback_rls_closure
+[bootstrap] applying scoped migration: 0038_scim_configurations_rls_closure
+[bootstrap] applying scoped migration: 0039_claim_status_transitions_rls_closure
+[bootstrap] applying scoped migration: 0040_satisfaction_survey_responded_rls_closure
+[bootstrap] applying scoped migration: 0041_arbitration_decisions_owner_rls
+[bootstrap] applying scoped migration: 0042_shared_clause_versions_rls_closure
+[bootstrap] applying scoped migration: 0043_email_address_suppressions_rls_closure
+[bootstrap] applying scoped migration: 0044_public_intake_audit_events_rls_closure
+[bootstrap] applying scoped migration: 0045_audit_security_runtime_read
+[bootstrap] applying scoped migration: 0046_pilot_fixture_rows_rls_closure
+[bootstrap] applying scoped migration: 0047_authority_reviews_visibility_rls
+[bootstrap] applying scoped migration: 0048_clause_library_sharing_rls
+[bootstrap] applying scoped migration: 0049_scim_provisioning_functions
+[bootstrap] applying scoped migration: 0050_clause_library_sharing_functions_retired
+[bootstrap] applying scoped migration: 0051_scim_provisioned_users_rls_closure
+[bootstrap] applying scoped migration: 0052_declared_absent_relations_rls_closure
+[bootstrap] applying scoped migration: 0053_enhanced_rbac_rls_closure
+[bootstrap] applying scoped migration: 0054_staging_proof_ledger_rls_closure
+[bootstrap] applying scoped migration: 0055_census_ctx3_promoted_relations_rls_closure
+[bootstrap] applying scoped migration: 0056_external_authority_principal_precheck
+[bootstrap] applying scoped migration: 0057_pilot_demo_seeds_row_ids
+[bootstrap] applying scoped migration: 0058_survey_response_capability
+[bootstrap] applying scoped migration: 0059_verified_dependency_evidence_rls_closure
+[bootstrap] applying scoped migration: 0060_graph_node_alias_rls_closure
+[bootstrap] Authority reconciliation fresh: HISTORICAL_MIGRATION_RECORDED PHYSICAL_SCHEMA_VERIFIED SECURITY_EFFECTS_VERIFIED RESTORE_RECONCILIATION_COMPLETE
+[bootstrap] Activating exact storage-authority grants after catalog verification.
+[bootstrap] Runtime grant activation failed: Catalog privilege preflight failed:
+public.case_authority_scopes lacks FORCE RLS
+public.case_respondents lacks FORCE RLS
+public.case_scope_proposals lacks FORCE RLS
+public.case_territories lacks FORCE RLS

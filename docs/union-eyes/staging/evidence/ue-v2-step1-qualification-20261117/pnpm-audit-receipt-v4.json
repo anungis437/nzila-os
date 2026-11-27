@@ -1,0 +1,38 @@
+{
+  "startedAt": "2026-11-18T00:21:42.089728+00:00",
+  "finishedAt": "2026-11-18T00:21:43.403652+00:00",
+  "command": [
+    "pnpm",
+    "audit",
+    "--json"
+  ],
+  "exitCode": 1,
+  "ignoresSupplied": false,
+  "pnpmAuditConfig": null,
+  "rawPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/pnpm-audit-raw-v4.json",
+  "rawSha256": "f68a9d210d8af8056573a98998bca5d7c1ea6eb291f5e96b0d0577eb43973df5",
+  "stderrPath": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/pnpm-audit-stderr-v4.log",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 1,
+      "critical": 0
+    },
+    "dependencies": 2804,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 2804
+  },
+  "advisoryCount": 1,
+  "source": {
+    "package.json": "70ff115bedfe230bf2540e22f6d3a1858825802f09460723bb0a76cc18449a9f",
+    "pnpm-lock.yaml": "2881c70f4aabc29e2b29ca3c0239c93cee2fa8fa688e830edb00fc5c6ccc83e0",
+    "pnpm-workspace.yaml": "fff0872a9545b082532ca890eb75072f8cf5715a9f6e54bf38a20653f18c424d"
+  },
+  "status": "FAILED",
+  "finalCandidateSha": null,
+  "dirtyWorktree": true
+}

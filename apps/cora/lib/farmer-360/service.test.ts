@@ -226,7 +226,7 @@ describe('Farmer 360 service boundary', () => {
       ],
       loadFreshnessPolicies: async () => [
         ...['agrimo:crop-yield', 'weighbridge:crop-yield', 'agrimo:price'].map((key) => ({
-          id: `test-freshness:${key.replace(':', ':')}`,
+          id: `test-freshness:${key}`,
           version: '1.0.0',
           maxAgeMs: 365 * 24 * 60 * 60 * 1000,
           evidenceRef: `test-evidence:freshness:${key}`,

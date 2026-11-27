@@ -31,7 +31,8 @@ describe.skipIf(!TEMPLATE || !CLONE)('per-file native database isolation', () =>
 
   it('runs this file in its own clone, never in the template', async () => {
     expect(name(CLONE!)).not.toBe(name(TEMPLATE!))
-    expect(name(CLONE!)).toMatch(/^ue_native_\d+_[a-z0-9]+_[0-9a-f]{6}$/)
+    // The clone name nativeCloneConfiguration (scripts/runtime/native-canonical-fixture.ts) gives it: pid, time, 6 random bytes in hex.
+    expect(name(CLONE!)).toMatch(/^ue_native_\d+_[a-z0-9]+_[0-9a-f]{12}$/)
     expect((await clone.query('SELECT current_database() AS db')).rows[0].db).toBe(name(CLONE!))
   })
 

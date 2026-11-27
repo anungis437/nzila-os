@@ -1,7 +1,7 @@
 {
   "_meta": {
     "schema_version": "2.0.0",
-    "generated_at": "2026-11-14T05:14:37.426Z",
+    "generated_at": "2026-11-21T05:20:28.405Z",
     "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
     "window_days": 30,
@@ -14,13 +14,13 @@
       "source_needed": "Committed input was collected 2026-08-25 and does not measure the current reporting window; collect a current export."
     },
     "build_success_rate_30d": {
-      "value": 6.06,
-      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 66)",
+      "value": 51.28,
+      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 39)",
       "source_needed": null
     },
     "median_build_minutes": {
-      "value": 20.65,
-      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 66)",
+      "value": 18.28,
+      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 39)",
       "source_needed": null
     },
     "change_failure_rate_30d": {

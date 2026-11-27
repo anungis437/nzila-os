@@ -1,28 +1,28 @@
 # NzilaOS Documentation Consistency Audit
 
-> Generated: 2026-11-09T12:12:42.731Z
+> Generated: 2026-11-18T13:22:37.839Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
-| Files Scanned | 2784 |
-| Total Findings | 2994 |
+| Files Scanned | 2814 |
+| Total Findings | 3060 |
 | Errors | 0 |
-| Warnings | 1171 |
-| Info | 1823 |
+| Warnings | 1225 |
+| Info | 1835 |
 
 ## Findings by Rule
 
 | Rule | Count |
 |------|-------|
-| naming-inconsistency | 1776 |
-| stale-reference | 976 |
+| naming-inconsistency | 1790 |
+| stale-reference | 1030 |
 | missing-package-readme | 111 |
 | stale-package-ref | 84 |
-| stale-date | 47 |
+| stale-date | 45 |
 
-## stale-reference (976)
+## stale-reference (1030)
 
 - 🟡 `ARCHITECTURE.md:120` — Possible broken link: [docs/platform/APP_LIFECYCLE_PROCESS.md](./docs/platform/APP_LIFECYCLE_PROCESS.md)
 - 🟡 `ARCHITECTURE.md:124` — Possible broken link: [docs/platform/COMMAND_CATALOG.md](./docs/platform/COMMAND_CATALOG.md)
@@ -475,6 +475,7 @@
 - 🟡 `docs/categories/platform-and-operations/index/doc-map.md:340` — Possible broken link: [INDEX.md](../../apps/union-eyes/docs/INDEX.md)
 - 🟡 `docs/categories/platform-and-operations/index/doc-map.md:341` — Possible broken link: [INDEX.md](../../apps/flow/docs/INDEX.md)
 - 🟡 `docs/categories/platform-and-operations/index/glossary.md:56` — Possible broken link: [Terminology Alignment Matrix](../../apps/union-eyes/docs/TERMINOLOGY_ALIGNMENT.md)
+- 🟡 `docs/categories/platform-and-operations/migration/app-alignment/union-eyes.md:47` — Possible broken link: [app/api/health/route.ts](../../../apps/union-eyes/app/api/health/route.ts)
 - 🟡 `docs/categories/platform-and-operations/ops/EXECUTIVE_OS.md:26` — Possible broken link: [`packages/db/src/schema/executive.ts`](../../packages/db/src/schema/executive.ts)
 - 🟡 `docs/categories/platform-and-operations/ops/EXECUTIVE_OS.md:36` — Possible broken link: [`packages/db/src/org-registry.ts`](../../packages/db/src/org-registry.ts)
 - 🟡 `docs/categories/platform-and-operations/ops/EXECUTIVE_OS.md:44` — Possible broken link: [`@nzila/executive-os`](../../packages/executive-os/src/contract.ts)
@@ -550,6 +551,7 @@
 - 🟡 `docs/categories/products-and-market/README.md:28` — Possible broken link: [Commercial](../../commercial/)
 - 🟡 `docs/categories/products-and-market/README.md:29` — Possible broken link: [GTM](../../gtm/)
 - 🟡 `docs/categories/products-and-market/README.md:30` — Possible broken link: [Investor](../../investor/)
+- 🟡 `docs/categories/products-and-market/agri/CORA_AUTHORIZATION_COMPOSITION.md:121` — Possible broken link: [`0041_platform_authorization_authority.sql`](../../../packages/db/drizzle/0041_platform_authorization_authority.sql)
 - 🟡 `docs/categories/products-and-market/agri/CORA_C1_AUTHORITY_CASE_F360_ACCEPTANCE_001.md:191` — Possible broken link: [`acceptance.integration.test.ts`](../../../../apps/cora/lib/farmer-360/acceptance.integration.test.ts)
 - 🟡 `docs/categories/products-and-market/agri/CORA_SOURCE_DISCLOSURE_AUTHORIZATION_PACKET.md:60` — Possible broken link: [acceptance.integration.test.ts](../../../../apps/cora/lib/farmer-360/acceptance.integration.test.ts)
 - 🟡 `docs/categories/products-and-market/agri/CORA_SOURCE_DISCLOSURE_AUTHORIZATION_PACKET.md:68` — Possible broken link: [acceptance.integration.test.ts](../../../../apps/cora/lib/farmer-360/acceptance.integration.test.ts)
@@ -560,6 +562,9 @@
 - 🟡 `docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md:112` — Possible broken link: [docs/governance/PLATFORM_VS_APP_DECISION_RULE.md](../../governance/PLATFORM_VS_APP_DECISION_RULE.md)
 - 🟡 `docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md:113` — Possible broken link: [docs/governance/PACKAGE_OWNERSHIP.md](../../governance/PACKAGE_OWNERSHIP.md)
 - 🟡 `docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md:114` — Possible broken link: [docs/governance/PACKAGE_LIFECYCLE_POLICY.md](../../governance/PACKAGE_LIFECYCLE_POLICY.md)
+- 🟡 `docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md:116` — Possible broken link: [tooling/contract-tests/platform-api-surface.test.ts](../../../tooling/contract-tests/platform-api-surface.test.ts)
+- 🟡 `docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md:117` — Possible broken link: [apps/flow/scripts/flow-lockdown-check.ts](../../../apps/flow/scripts/flow-lockdown-check.ts)
+- 🟡 `docs/categories/products-and-market/commerce/ADR/ADR-PE-002-engine-product-separation.md:118` — Possible broken link: [governance/portfolio/product-catalog.json](../../../governance/portfolio/product-catalog.json)
 - 🟡 `docs/categories/products-and-market/commerce/IRAP_TECHNICAL_DESIGN.md:253` — Possible broken link: [ARCHITECTURE.md](../../ARCHITECTURE.md)
 - 🟡 `docs/categories/products-and-market/commerce/IRAP_TECHNICAL_DESIGN.md:254` — Possible broken link: [Commerce Engine README](../../docs/commerce/README.md)
 - 🟡 `docs/categories/products-and-market/commerce/IRAP_TECHNICAL_DESIGN.md:255` — Possible broken link: [Legacy Review](../../docs/commerce/LEGACY_REVIEW.md)
@@ -652,12 +657,29 @@
 - 🟡 `docs/categories/products-and-market/union-eyes/README.md:63` — Possible broken link: [Developer Index](../../apps/union-eyes/docs/INDEX.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/README.md:68` — Possible broken link: [Platform Architecture](../../ARCHITECTURE.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/README.md:69` — Possible broken link: [Security Policy](../../SECURITY.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:145` — Possible broken link: [`artifacts/ue-pilot-launch/launch-evidence-pack.md`](../../../artifacts/ue-pilot-launch/launch-evidence-pack.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:146` — Possible broken link: [`infrastructure/gitops/environments/production.yml`](../../../infrastructure/gitops/environments/production.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:147` — Possible broken link: [`ops/environments/prod.env`](../../../ops/environments/prod.env)
+- 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:148` — Possible broken link: [`scripts/validate-prod-region.ts`](../../../scripts/validate-prod-region.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:149` — Possible broken link: [`scripts/ue-prod-canadacentral-dry-run.ts`](../../../scripts/ue-prod-canadacentral-dry-run.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:150` — Possible broken link: [`reports/sre-reliability-audit.json`](../../../reports/sre-reliability-audit.json)
 - 🟡 `docs/categories/products-and-market/union-eyes/deployment/cupe-pilot-to-prod-transition.md:151` — Possible broken link: [`reports/ue-go-live-decision.md`](../../../reports/ue-go-live-decision.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/dr/blob-recovery.md:169` — Possible broken link: [Platform DR Plan](../../../docs/ops/disaster-recovery.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/blob-recovery.md:170` — Possible broken link: [Bicep Postgres Module](../../../infrastructure/bicep/modules/postgres.bicep)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/blob-recovery.md:171` — Possible broken link: [Ops DR README](../../../ops/disaster-recovery/README.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/dr/continuity-matrix.md:136` — Possible broken link: [Platform DR Plan](../../../docs/ops/disaster-recovery.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/continuity-matrix.md:137` — Possible broken link: [Ops Business Continuity](../../../ops/business-continuity/README.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/continuity-matrix.md:138` — Possible broken link: [Ops DR README](../../../ops/disaster-recovery/README.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/database-restore.md:244` — Possible broken link: [Bicep Postgres Module](../../../infrastructure/bicep/modules/postgres.bicep)
 - 🟡 `docs/categories/products-and-market/union-eyes/dr/database-restore.md:245` — Possible broken link: [Platform DR Plan](../../../docs/ops/disaster-recovery.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/database-restore.md:246` — Possible broken link: [Rollback Script](../../../scripts/rollback.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/database-restore.md:247` — Possible broken link: [Restore Drill Script](../../../scripts/db/restore-drill.ts)
 - 🟡 `docs/categories/products-and-market/union-eyes/dr/restore-drill-runbook.md:201` — Possible broken link: [Platform DR Plan](../../../docs/ops/disaster-recovery.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/restore-drill-runbook.md:202` — Possible broken link: [Ops DR README](../../../ops/disaster-recovery/README.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/restore-drill-runbook.md:203` — Possible broken link: [Drill Script](../../../scripts/db/restore-drill.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/rollback-procedure.md:151` — Possible broken link: [Rollback Script](../../../scripts/rollback.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/rollback-procedure.md:152` — Possible broken link: [Release Rollback Script](../../../scripts/release/rollback-prod.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/dr/rollback-procedure.md:153` — Possible broken link: [Pilot Runbook](../../../ops/runbooks/ue-pilot.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/README.md:56` — Possible broken link: [Institutional Operational Cognition Doctrine](../../nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/README.md:57` — Possible broken link: [Final Full Maturity Review](../../nzila-final-convergence/final-full-maturity-review.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/README.md:58` — Possible broken link: [Master Maturity Index](../../nzila-maturity-elevation/master-maturity-index.md)
@@ -673,9 +695,39 @@
 - 🟡 `docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/full-procurement-sales-motion-refactor.md:69` — Possible broken link: [Procurement Maturity Elevation](../../nzila-maturity-elevation/procurement-maturity-elevation.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/ue-operating-system-reclassification.md:51` — Possible broken link: [Institutional Operational Cognition Doctrine](../../nzila-cognition-doctrine/institutional-operational-cognition-doctrine.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/institutional-operating-infrastructure/ue-operating-system-reclassification.md:51` — Possible broken link: [Procurement & Governance Positioning Refactor](../../nzila-cognition-doctrine/procurement-governance-positioning-refactor.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/navigation-monetization-matrix/README.md:31` — Possible broken link: [tooling/scripts/validate-navigation-monetization.mjs](../../../tooling/scripts/validate-navigation-monetization.mjs)
 - 🟡 `docs/categories/products-and-market/union-eyes/partner-overview.md:49` — Possible broken link: [Security Policy](../../SECURITY.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/partner-overview.md:86` — Possible broken link: [Security Policy](../../SECURITY.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/pilot-overview.md:77` — Possible broken link: [Pilot Scope (technical)](../../apps/union-eyes/docs/PILOT_SCOPE.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:33` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:135` — Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:145` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.ts](../../../apps/union-eyes/lib/runtime/production-guard.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:146` — Possible broken link: [apps/union-eyes/lib/runtime/production-guard.mjs](../../../apps/union-eyes/lib/runtime/production-guard.mjs)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:147` — Possible broken link: [apps/union-eyes/lib/runtime/environment.ts](../../../apps/union-eyes/lib/runtime/environment.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:154` — Possible broken link: [apps/union-eyes/infra/environments/union-eyes-env.bicep](../../../apps/union-eyes/infra/environments/union-eyes-env.bicep)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/environment-topology-audit.md:155` — Possible broken link: [apps/union-eyes/infra/environments/provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:41` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:93` — Possible broken link: [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:114` — Possible broken link: [seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:163` — Possible broken link: [feature-flags/route.ts](../../../apps/union-eyes/app/api/feature-flags/route.ts#L27)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:164` — Possible broken link: [pilot/demo-data/route.ts](../../../apps/union-eyes/app/api/pilot/demo-data/route.ts#L43)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:164` — Possible broken link: [pilot-demo-runtime.ts](../../../apps/union-eyes/lib/config/pilot-demo-runtime.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:165` — Possible broken link: [role-experience.ts](../../../apps/union-eyes/lib/dashboard/role-experience.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:166` — Possible broken link: [role-fixtures.ts](../../../apps/union-eyes/e2e/helpers/role-fixtures.ts#L203)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:166` — Possible broken link: [role-experience-guard.tsx](../../../apps/union-eyes/components/dashboard/role-experience-guard.tsx#L37)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:168` — Possible broken link: [seed-clc-demo-environment.ts](../../../apps/union-eyes/scripts/seed-clc-demo-environment.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:239` — Possible broken link: [role-experience.ts](../../../apps/union-eyes/lib/dashboard/role-experience.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:254` — Possible broken link: [deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml#L74)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:292` — Possible broken link: [deployment-inventory.json](../../../governance/release/deployment-inventory.json#L21)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:307` — Possible broken link: [deployment-inventory.json](../../../governance/release/deployment-inventory.json)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/final-environment-go-no-go.md:323` — Possible broken link: [README](../../../apps/union-eyes/db/migrations/README.md)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:70` — Possible broken link: [.github/workflows/deploy-union-eyes.yml](../../../.github/workflows/deploy-union-eyes.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:187` — Possible broken link: [seed-cupe-pilot.mjs](../../../apps/union-eyes/scripts/seed-cupe-pilot.mjs)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/phase-a-remediation-report.md:241` — Possible broken link: [provision-all.ps1](../../../apps/union-eyes/infra/environments/provision-all.ps1)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:55` — Possible broken link: [`apps/union-eyes/lib/runtime/environment.ts`](../../../apps/union-eyes/lib/runtime/environment.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:86` — Possible broken link: [`apps/union-eyes/.github/workflows/deploy-union-eyes.yml`](../../../.github/workflows/deploy-union-eyes.yml)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/release-governance-standard.md:94` — Possible broken link: [`apps/union-eyes/lib/runtime/production-guard.ts`](../../../apps/union-eyes/lib/runtime/production-guard.ts)
+- 🟡 `docs/categories/products-and-market/union-eyes/release/schema-parity-report.md:59` — Possible broken link: [`apps/union-eyes/db/migrations/README.md`](../../../apps/union-eyes/db/migrations/README.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/revenue-profile.md:96` — Possible broken link: [Procurement Pack](../governance/procurement-pack.md)
 - 🟡 `docs/categories/products-and-market/union-eyes/runtime-authority-audit/wave10-platform-ontology-stabilization-review.md:43` — Possible broken link: [app/page.tsx](../../../../../apps/union-eyes/app/page.tsx#L1)
 - 🟡 `docs/categories/products-and-market/union-eyes/user-guide.md:107` — Possible broken link: [Glossary](../index/glossary.md)
@@ -703,6 +755,8 @@
 - 🟡 `docs/categories/stakeholders/commercial/NZILA_AI_MOAT.md:156` — Possible broken link: [`packages/platform-decision-engine/README.md`](../../packages/platform-decision-engine/README.md)
 - 🟡 `docs/categories/stakeholders/commercial/NZILA_GROWTH_MOAT.md:102` — Possible broken link: [docs/runbooks/growthos-operator-runbook.md](../runbooks/growthos-operator-runbook.md)
 - 🟡 `docs/categories/stakeholders/commercial/UNION_EYES_SECURITY_ONE_PAGER.md:155` — Possible broken link: [`../security/UNION_EYES_AUTH_MODEL.md`](../security/UNION_EYES_AUTH_MODEL.md)
+- 🟡 `docs/categories/stakeholders/commercial/close-package/TRUST_VISUAL_PACK.md:18` — Possible broken link: [packages/platform-auth/mfa](../../../packages/platform-auth/src/mfa/)
+- 🟡 `docs/categories/stakeholders/commercial/close-package/TRUST_VISUAL_PACK.md:22` — Possible broken link: [packages/platform-auth/risk](../../../packages/platform-auth/src/risk/)
 - 🟡 `docs/categories/stakeholders/commercial/sales-kit/AUTH_PROCUREMENT_QA.md:157` — Possible broken link: [`docs/runbooks/union-eyes-auth-operations.md`](../../runbooks/union-eyes-auth-operations.md)
 - 🟡 `docs/categories/stakeholders/commercial/sales-kit/AUTH_PROCUREMENT_QA.md:228` — Possible broken link: [`../../security/UNION_EYES_AUTH_MODEL.md`](../../security/UNION_EYES_AUTH_MODEL.md)
 - 🟡 `docs/categories/stakeholders/commercial/sales-kit/AUTH_PROCUREMENT_QA.md:229` — Possible broken link: [`../../security/UNION_EYES_MFA_AND_PASSWORDLESS.md`](../../security/UNION_EYES_MFA_AND_PASSWORDLESS.md)
@@ -1088,7 +1142,7 @@
 - 🟡 `docs/union-eyes/reality-remediation/deadline-engine/00-charter.md:39` — References @nzila/union-eyes-demo but package does not exist
 - 🟡 `governance/business/investor-materials/one-pager-abr.md:7` — References @nzila/abr but package does not exist
 
-## naming-inconsistency (1776)
+## naming-inconsistency (1790)
 
 - ℹ️ `AGENTS.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `ARCHITECTURE.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
@@ -1106,12 +1160,12 @@
 - ℹ️ `README.business.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.business.md:6` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:24` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:30` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:39` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:127` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:215` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `README.business.md:285` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:26` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:32` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:41` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:129` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:217` — "Nzila OS" should be "NzilaOS" (platform name)
+- ℹ️ `README.business.md:287` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/INDEX.md:3` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/INDEX.md:102` — "nzila-os" should be "NzilaOS" (platform name)
@@ -1486,9 +1540,9 @@
 - ℹ️ `docs/categories/platform-and-operations/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md:64` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/SAAS_ENABLEMENT_ARCHITECTURE.md:83` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:78` — "organizationId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:97` — "orgId" should be "org_id" (tenant identifier)
-- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:98` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:79` — "organizationId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:136` — "orgId" should be "org_id" (tenant identifier)
+- ℹ️ `docs/categories/platform-and-operations/architecture/STACK_AUTHORITY.md:137` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_FRAGMENTATION_MATRIX.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_FRAGMENTATION_MATRIX.md:13` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/categories/platform-and-operations/architecture/STACK_FRAGMENTATION_MATRIX.md:89` — "orgId" should be "org_id" (tenant identifier)
@@ -2312,7 +2366,7 @@
 - ℹ️ `docs/doctrine/whitepapers/README.md:1` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:9` — "Nzila OS" should be "NzilaOS" (platform name)
 - ℹ️ `docs/doctrine/whitepapers/README.md:14` — "Nzila OS" should be "NzilaOS" (platform name)
-- ℹ️ `docs/documentation-index.md:1162` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/documentation-index.md:1171` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/engineering-convergence/2026-09-25_P0_2_REPOSITORY_TOPOLOGY.md:127` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/engineering-convergence/2026-09-25_P0_2_REPOSITORY_TOPOLOGY.md:238` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/engineering-convergence/2026-09-25_P0_2_REPOSITORY_TOPOLOGY.md:477` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2711,14 +2765,15 @@
 - ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:78` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:81` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:111` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:227` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:228` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:229` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:230` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:232` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:235` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:281` — "nzila-os" should be "NzilaOS" (platform name)
-- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:326` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:257` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:258` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:259` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:260` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:262` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:265` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:311` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:356` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/production/RUNBOOK_UE_STAGING_WORKLOAD_IDENTITY.md:362` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/production/TEST_BYPASS_SWITCHES.md:5` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/production/UE_LEGACY_PRODUCTION_EXPOSURE_ASSESSMENT_20261104.md:14` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/production/UE_LEGACY_PRODUCTION_EXPOSURE_ASSESSMENT_20261104.md:17` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2781,6 +2836,19 @@
 - ℹ️ `docs/union-eyes/reality-remediation/deadline-engine/01-current-state-inventory.md:99` — "organizationId" should be "org_id" (tenant identifier)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-demo-pilot-experience-reconvergence.md:11` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/runtime-convergence/full-live-runtime-experience-certification.md:28` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_STAGING_APPLY_42774059371.md:6` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_STAGING_APPLY_42774059371.md:8` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_STAGING_APPLY_42774059371.md:9` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_V2_BASE_RELEASE_REMAINING_WORK.md:46` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_V2_CI_BROWSER_DEPENDENCIES.md:24` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md:3` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_V2_JOB_NAME_PROVIDER_REPAIR.md:3` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_V2_MANAGED_TELEMETRY.md:36` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/UE_V2_REAL_ENTRA_RUNTIME_REPAIR.md:3` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/evidence/ue-v2-document-runtime-packaging-20261116/README.md:7` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/evidence/ue-v2-privacy-self-service-20261116/README.md:9` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md:20` — "nzila-os" should be "NzilaOS" (platform name)
+- ℹ️ `docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/engineering-continuation-v4.md:72` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md:9` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md:10` — "nzila-os" should be "NzilaOS" (platform name)
 - ℹ️ `docs/union-eyes/visual-acceptance/UE_VISUAL_ACCEPTANCE_DISPOSITION.md:13` — "nzila-os" should be "NzilaOS" (platform name)
@@ -2867,55 +2935,53 @@
 - ℹ️ `governance/security/THREAT_MODEL.md:144` — "orgId" should be "org_id" (tenant identifier)
 - ℹ️ `governance/security/design-reviews/2026-09-23-ue-rbac-system-context.md:10` — "organizationId" should be "org_id" (tenant identifier)
 
-## stale-date (47)
+## stale-date (45)
 
-- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 204 days old — may be stale
-- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 203 days old — may be stale
-- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 215 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 203 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 203 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 203 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-04" is 189 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/portfolio-reliability-audit.md:3` — Document date "2026-05-04" is 189 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 203 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 210 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 186 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 209 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 199 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 199 days old — may be stale
-- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 200 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 192 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 192 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 192 days old — may be stale
-- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 192 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 206 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 206 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 206 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 206 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 206 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 206 days old — may be stale
-- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 200 days old — may be stale
-- ℹ️ `docs/compliance/soc2/vendor-assurance-index.md:5` — Document date "2026-06-07" is 155 days old — may be stale
-- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 168 days old — may be stale
-- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 168 days old — may be stale
-- ℹ️ `governance/ai/AI_REMEDIATION_CHECKLIST.md:3` — Document date "2026-06-07" is 155 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `governance/ai/README.md:318` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `governance/ai/UE_RELEASE_READINESS.md:3` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/WORLD_CLASS_SCORECARD.md:3` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/platform-cognition/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/platform-cognition/kill-switch-drill.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/platform-cognition/monitoring-plan.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/human-oversight.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/kill-switch-drill.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/ai/world-class/ue/monitoring-plan.md:4` — Document date "2026-06-08" is 154 days old — may be stale
-- ℹ️ `governance/business/README.md:4` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "2026-07-03" is 129 days old — may be stale
-- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "2026-07-03" is 129 days old — may be stale
+- ℹ️ `AWS_ZONGA_SETUP.md:432` — Document date "2026-04-19" is 213 days old — may be stale
+- ℹ️ `docs/INDEX.md:179` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/historical-archive/archive/audit-reports/EXECUTIVE_INTELLIGENCE_AUDIT_2026-04-08.md:343` — Document date "2026-04-08" is 224 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/architecture/MONETIZATION_ARCHITECTURE.md:4` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/ownership-registry.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/release-governance/release-governance-audit.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/ops/sre/staging-recovery-dashboard.md:3` — Document date "2026-04-20" is 212 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/AUTH_MIGRATION_STATUS.md:3` — Document date "2026-04-13" is 219 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/portfolio-matrix.md:5` — Document date "2026-05-07" is 195 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/platform/runtime-adoption-matrix.md:10` — Document date "2026-04-14" is 218 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/runbooks/union-eyes-identity-lifecycle.md:3` — Document date "2026-04-24" is 208 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/UNION_EYES_MFA_AND_PASSWORDLESS.md:3` — Document date "2026-04-24" is 208 days old — may be stale
+- ℹ️ `docs/categories/platform-and-operations/security/static-analysis-suppressions.md:3` — Document date "2026-04-23" is 209 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/external-tester-containment.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/qa-readiness-model.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/rbac-reality-map.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/products-and-market/union-eyes/qa/user-story-coverage-matrix.md:3` — Document date "2026-05-01" is 201 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/buyer-faq.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/deployment-models.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/integration-readiness-matrix.md:6` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/pilot-readiness-checklist.md:6` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/product-capability-matrix.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/buyers/sla-support-model.md:5` — Document date "2026-04-17" is 215 days old — may be stale
+- ℹ️ `docs/categories/stakeholders/commercial/TOP_15_PURSUIT_LIST.md:475` — Document date "April 23, 2026" is 209 days old — may be stale
+- ℹ️ `docs/compliance/soc2/vendor-assurance-index.md:5` — Document date "2026-06-07" is 164 days old — may be stale
+- ℹ️ `docs/ops/finops/WORLD_CLASS_PORTFOLIO_FINOPS_SYSTEM.md:3` — Document date "2026-05-25" is 177 days old — may be stale
+- ℹ️ `docs/ops/sre/executive-reliability-dashboard.md:3` — Document date "2026-05-25" is 177 days old — may be stale
+- ℹ️ `governance/ai/AI_REMEDIATION_CHECKLIST.md:3` — Document date "2026-06-07" is 164 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_ENGINE_ARCHITECTURE.md:662` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/COMPANION_INTEGRATION_GUIDE.md:625` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/PROMPT_ENGINEERING_STANDARDS.md:403` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/README.md:318` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/ai/UE_RELEASE_READINESS.md:3` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/WORLD_CLASS_SCORECARD.md:3` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/platform-cognition/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/platform-cognition/kill-switch-drill.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/platform-cognition/monitoring-plan.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/human-oversight.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/incident-playbook-addendum.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/kill-switch-drill.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/ai/world-class/ue/monitoring-plan.md:4` — Document date "2026-06-08" is 163 days old — may be stale
+- ℹ️ `governance/business/README.md:4` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/business/investor-materials/README.md:4` — Document date "2026-07-03" is 138 days old — may be stale
+- ℹ️ `governance/corporate/finance/GOVERNMENT_FUNDING_STRATEGY.md:515` — Document date "2026-07-03" is 138 days old — may be stale
 
 ## missing-package-readme (111)
 

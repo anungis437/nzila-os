@@ -11,15 +11,17 @@ const m = vi.hoisted(() => ({
   sql: vi.fn(),
   badRequest: vi.fn(),
   requireCaseFilingCapacity: vi.fn(),
+  batch:vi.fn(),
 }));
 
+vi.mock('@/lib/authority/store/route-adapter',()=>({decideCaseCapabilitiesBatch:m.batch}));
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditLog }));
 vi.mock('@/lib/pilot-metrics', () => ({ recordUnionEyesCaseCreated: m.recordUnionEyesCaseCreated }));
-vi.mock('drizzle-orm', () => ({ sql: m.sql }));
+vi.mock('drizzle-orm', () => ({ sql: Object.assign(m.sql,{raw:(value:string)=>({raw:value})}) }));
 
 vi.mock('@/lib/cases/case-authorization', () => ({
   getCaseActor: vi.fn().mockResolvedValue({ userId: 'u1', organizationId: 'org_1', role: 'member' }),
@@ -36,6 +38,9 @@ describe('cases route', () => {
   beforeEach(() => {
     vi.unstubAllEnvs();
     vi.clearAllMocks();
+    m.withRLSContext.mockReset();
+    m.batch.mockReset();
+    m.batch.mockImplementation(async(_tx,input)=>new Map(input.caseIds.map((id:string)=>[id,{'case:read':{effect:'allow',scope:{visibility:'internal'}}}])));
     m.withApi.mockImplementation((_cfg: unknown, handler: any) => (ctx: any = {}) => handler(ctx));
     m.badRequest.mockImplementation((msg: string) => {
       const err = new Error(msg) as Error & { status: number };
@@ -47,7 +52,8 @@ describe('cases route', () => {
     m.auditLog.mockResolvedValue(undefined);
     m.requireCaseFilingCapacity.mockResolvedValue(undefined);
     m.recordUnionEyesCaseCreated.mockResolvedValue(undefined);
-    m.withRLSContext.mockImplementation(async (fn: any) => {
+    m.withRLSContext.mockImplementation(async (a: any,b?:any) => {
+      const fn=typeof a==='function'?a:b;
       const tx = { execute: vi.fn(async () => [{ claimId: 'c1', claimNumber: 'CLM-20260101-0001', status: 'open' }]) };
       return fn(tx);
     });
@@ -73,7 +79,7 @@ describe('cases route', () => {
       vi.fn(async () => [{ claimId: 'c1', triageOnly: true }, { claimId: 'c2', triageOnly: true }]),
     ];
     m.withRLSContext
-      .mockImplementationOnce(async (fn: any) => fn({ execute: executes[0] }))
+      .mockImplementationOnce(async (_ctx:unknown,fn: any) => fn({ execute: executes[0] }))
       .mockImplementationOnce(async (fn: any) => fn({ execute: executes[1] }));
     const result = await GET({ request: new NextRequest('http://localhost/api/cases'), organizationId: 'org_1', userId: 'u1' });
     expect(result.data).toEqual([{ claimId: 'c1', description: 'full' }, { claimId: 'c2', triageOnly: true }]);
@@ -88,6 +94,26 @@ describe('cases route', () => {
 
     expect(Array.isArray(result.data)).toBe(true);
     expect(m.withRLSContext).toHaveBeenCalledTimes(2);
+  });
+
+  it('omits a broad-filter match whose canonical authority is denied, and projects a member allow without private assessments',async()=>{
+    m.withRLSContext.mockImplementationOnce(async(_ctx:unknown,fn:any)=>fn({execute:async()=>[
+      {claimId:'denied',description:'another member private file'},
+      {claimId:'mine',description:'own submission',aiScore:99,meritConfidence:85,complexityScore:70,aiAnalysis:{private:'advice'},futurePrivateAssessment:'secret'},
+    ]})).mockImplementationOnce(async(fn:any)=>fn({execute:async()=>[]}));
+    m.batch.mockResolvedValue(new Map([
+      ['denied',{'case:read':{effect:'deny',scope:{}}}],
+      ['mine',{'case:read':{effect:'allow',scope:{visibility:'member_visible'}}}],
+    ]));
+    const {GET}=await loadRoute();
+    const {data}=await GET({request:new NextRequest('http://localhost/api/cases')});
+    expect(data).toHaveLength(1);expect(data[0]).toMatchObject({claimId:'mine',description:'own submission'});
+    for(const key of ['aiScore','meritConfidence','complexityScore','aiAnalysis','futurePrivateAssessment'])expect(data[0]).not.toHaveProperty(key);
+  });
+
+  it('propagates unavailable canonical facts instead of returning an empty success',async()=>{
+    m.batch.mockRejectedValue(new Error('canonical facts unavailable'));
+    const {GET}=await loadRoute();await expect(GET({request:new NextRequest('http://localhost/api/cases')})).rejects.toThrow('unavailable');
   });
 
   it('POST returns 400 for invalid payload', async () => {

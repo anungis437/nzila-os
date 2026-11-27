@@ -4,11 +4,10 @@
  * transaction binding the acting principal and organization as the application does. Not a staging pass.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { drizzle } from 'drizzle-orm/pglite'
 import { sql } from 'drizzle-orm'
 import type { PGlite } from '@electric-sql/pglite'
 import { newUuid, ORG, ORG_B, seedMembership, U } from '../../db/__tests__/authority-kernel-harness'
-import { freshDb, kit, minutesAgo } from '../../db/__tests__/authority-kernel-testkit'
+import { appDrizzle, freshDb, kit, minutesAgo } from '../../db/__tests__/authority-kernel-testkit'
 import { assignCase, declareOwnRecusal, reassignCase, revokeCaseAssignment } from '../authority/store/lifecycle'
 import { TRIAGE_DESIGNATIONS_DDL, designate } from '@/lib/triage/__tests__/fixture'
 import type { RLSTx } from '@/lib/db/with-rls-context'
@@ -42,7 +41,7 @@ async function as<T>(userId: string, fn: (tx: RLSTx) => Promise<T>, org = ORG): 
   await pg.exec('BEGIN')
   try {
     await pg.query(`SELECT set_config('app.current_org_id', $1, true), set_config('app.current_user_id', $2, true)`, [org, userId])
-    const out = await fn(drizzle(pg) as unknown as RLSTx)
+    const out = await fn(appDrizzle(pg) as unknown as RLSTx)
     await pg.exec('COMMIT')
     return out
   } catch (error) {

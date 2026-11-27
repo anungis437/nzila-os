@@ -42,6 +42,11 @@ jobs:
 
       - uses: ./.github/actions/setup-monorepo
 
+      - name: Typecheck canonical bootstrap and current security upgrade producers
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: pnpm exec tsc --noEmit --project apps/union-eyes/scripts/bootstrap-v2/manifest-typecheck.json
+
       - name: Build the hash-locked Linux x86_64 cp311 wheelhouse in the pinned interpreter image
         shell: bash
         run: |
@@ -64,7 +69,9 @@ jobs:
         working-directory: apps/union-eyes
         env:
           DOCKER_DEFAULT_PLATFORM: linux/amd64
-        run: pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test --check
+        run: |
+          pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test --check
+          pnpm exec tsx ../../tooling/scripts/write-union-eyes-current-catalog.ts
 
       - name: Source-bound SYSTEM mutation contracts and plan compiler boundaries
         env:
@@ -107,8 +114,8 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
-      # The plan installs into a fresh container per suite. runtime-security-native (378 cases, over ten minutes
-      # locally) is not run here.
+      # Each suite uses a fresh container. The complete 363-case runtime matrix
+      # runs in its own parallel job below, including on relevant pull requests.
       - name: Native SYSTEM mutation, audit chain, launch-defect, organization-selection and manifest proofs
         env:
           UE_V2_NATIVE_MANIFEST: '1'
@@ -121,6 +128,26 @@ jobs:
           apps/union-eyes/scripts/bootstrap-v2/local-vault-fixture.test.ts
           apps/union-eyes/scripts/bootstrap-v2/organization-selection-native.test.ts
           apps/union-eyes/scripts/bootstrap-v2/manifest-native.test.ts
+
+      - name: Native correspondence delivery and daily audit seals (none skipped)
+        env:
+          UE_V2_NATIVE_MANIFEST: '1'
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: |
+          set -euo pipefail
+          pnpm exec vitest run --project union-eyes-heavy --maxWorkers=1 \
+            apps/union-eyes/scripts/bootstrap-v2/member-letter-delivery.native.test.ts \
+            apps/union-eyes/scripts/bootstrap-v2/daily-audit-seal-native.test.ts \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/ue-native-mail-audit.json"
+          node -e 'const r=require(process.argv[1]); if (!r.success || r.numFailedTests || r.numPendingTests || !r.numPassedTests) process.exit(1)' "$RUNNER_TEMP/ue-native-mail-audit.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ue-native-mail-audit-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/ue-native-mail-audit.json
+          if-no-files-found: warn
+          retention-days: 30
 
       # local-vault-fixture.test.ts unconditionally rewrites its 5 ue-v2-local-vault-*.json /
       # ue-v2-production-key-authority-*.json evidence files on every run, as genuine (not
@@ -135,3 +162,124 @@ jobs:
           git diff --exit-code -- .
           ':(exclude)artifacts/ue-v2-local-vault-*.json'
           ':(exclude)artifacts/ue-v2-production-key-authority-*.json'
+
+  invitation-concurrency:
+    name: Native invitation redemption and revocation races
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+        env:
+          POSTGRES_PASSWORD: synthetic-${{ github.run_id }}-${{ github.run_attempt }}
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Run the real empty-database invitation concurrency fixture
+        env:
+          UE_AUTH_CONCURRENCY_PROOF: '1'
+          UE_AUTH_OWNER_PORT: ${{ job.services.postgres.ports[5432] }}
+          UE_AUTH_FIXTURE_PASSWORD: synthetic-${{ github.run_id }}-${{ github.run_attempt }}
+          NODE_OPTIONS: --max-old-space-size=3072
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { spawnSync } from 'node:child_process';
+          const target = new URL('postgresql://127.0.0.1/postgres');
+          target.username = 'postgres';
+          target.password = process.env.UE_AUTH_FIXTURE_PASSWORD;
+          target.port = process.env.UE_AUTH_OWNER_PORT;
+          const result = spawnSync('pnpm', ['exec', 'vitest', 'run', '--project', 'union-eyes-heavy', '--maxWorkers=1',
+            'apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts',
+            '--reporter=default', '--reporter=json', '--outputFile=' + process.env.RUNNER_TEMP + '/ue-native-invitation-concurrency.json'],
+            { stdio: 'inherit', env: { ...process.env, UE_AUTH_OWNER_URL: target.toString() } });
+          process.exit(result.status ?? 1);
+          NODE
+          node -e 'const r=require(process.argv[1]); if (!r.success || r.numFailedTests || r.numPendingTests || !r.numPassedTests) process.exit(1)' "$RUNNER_TEMP/ue-native-invitation-concurrency.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ue-native-invitation-concurrency-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/ue-native-invitation-concurrency.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  # Run the complete matrix alongside the component proofs on every relevant PR.
+  # Check out the candidate head explicitly so the result qualifies those source bytes.
+  runtime-security-native:
+    name: Native runtime security matrix
+    runs-on: ubuntu-24.04 # same image as the other native PostgreSQL jobs
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Build the hash-locked Linux x86_64 cp311 wheelhouse in the pinned interpreter image
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheelhouse="$RUNNER_TEMP/ue-v2-wheelhouse"
+          mkdir -p "$wheelhouse"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$wheelhouse:/wheels" \
+            "$UE_V2_PYTHON_IMAGE" \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+              --require-hashes --no-deps --only-binary=:all: \
+              -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$wheelhouse"/*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$wheelhouse" >> "$GITHUB_ENV"
+
+      - name: Pull the pinned PostgreSQL image the native fixture runs with --pull never
+        run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+
+      - name: Run the full native runtime security matrix
+        working-directory: apps/union-eyes
+        env:
+          NODE_ENV: test
+          NODE_OPTIONS: --max-old-space-size=6144
+          UE_CANONICAL_BOOTSTRAP_V2: '1'
+          UE_V2_NATIVE_MANIFEST: '1'
+          UE_QA_GATE: 'false'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ue-runtime-security-native"
+          pnpm exec vitest run --config vitest.heavy.config.ts scripts/bootstrap-v2/runtime-security-native.test.ts \
+            --maxWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/ue-runtime-security-native/results.json"
+
+      - name: Every native case ran and passed (none skipped)
+        if: always()
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e '
+            const r = require(process.argv[1])
+            const summary = { sha: process.env.SOURCE_SHA, total: r.numTotalTests, passed: r.numPassedTests, failed: r.numFailedTests, pending: r.numPendingTests + (r.numTodoTests || 0) }
+            console.log(JSON.stringify(summary))
+            if (summary.total === 0 || summary.failed !== 0 || summary.pending !== 0 || summary.passed !== summary.total) process.exit(1)
+          ' "$RUNNER_TEMP/ue-runtime-security-native/results.json"
+
+      - name: Preserve the native matrix report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-runtime-security-native-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/ue-runtime-security-native/results.json
+          retention-days: 90
+          if-no-files-found: warn

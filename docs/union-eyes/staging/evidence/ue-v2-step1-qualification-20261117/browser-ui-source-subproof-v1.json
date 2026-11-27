@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-11-17T23:05:32.701Z",
+  "candidateBaseSha": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "workingTreeDirty": true,
+  "state": "SOURCE_IMPLEMENTED_TARGETED_VERIFIED_RUNTIME_UNEXECUTED",
+  "sourceHashes": [
+    {
+      "path": "apps/union-eyes/components/auth/login-form.tsx",
+      "sha256": "07e452ac21723ff4170015d8e9f4cb1a5d3728af74682485196c8b81301102a6"
+    },
+    {
+      "path": "apps/union-eyes/components/auth/__tests__/login-form-flows.test.tsx",
+      "sha256": "2471a1f8029c748bb9dbfee02e1fa7b9e3dff28827b3b17400e7e6a8604e590d"
+    },
+    {
+      "path": "apps/union-eyes/components/auth/__tests__/login-form-sso.test.tsx",
+      "sha256": "cf874ed049d96c3b2f4a9897566fb9e7337221cc5dd6bef30a6a04dcc6083c87"
+    },
+    {
+      "path": "apps/union-eyes/components/claims/new-claim-form.tsx",
+      "sha256": "345a040ea63f09050d23855e9f2486bea4ecd83b5d25cb6f9c5ecb791e6a6d46"
+    },
+    {
+      "path": "apps/union-eyes/components/claims/new-claim-form.test.tsx",
+      "sha256": "a6114da61c6ced6e345a4c1fd11f8864720571dbc017e363b0fda2a62d949f30"
+    },
+    {
+      "path": "apps/union-eyes/messages/en-CA.json",
+      "sha256": "ced2c283543050b8b7415b38df2ce01d8dd021afbe61204179c158e47bf50f02"
+    },
+    {
+      "path": "apps/union-eyes/messages/fr-CA.json",
+      "sha256": "6da04138f8aa9791ebb3d07a06ecd2dcfbd78864172f132ffe14717a6b588387"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/authenticated-casework-load.ts",
+      "sha256": "f01e2dcf1f1aadb297cab2cfe71be980598ea351c7b7b21100eb075b7aa3cdbe"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.ts",
+      "sha256": "05b0e102e8b3c386a0bb95e3c5b9530f96e15a1bc65f68ca56df89d3a57b6019"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.test.ts",
+      "sha256": "b606cfd2e05dad5dff65a6d33f071fcbc891f45c60b2abf2e77ae1802a02bd98"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.ts",
+      "sha256": "ce8b22148c3f165e69fca864dc87bd92fb3637e9b139769731b8ef8d72cf2adf"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts",
+      "sha256": "e4042291f652de4cde481bcd42eaba5bafabc61cc725fa65db84e010179f2313"
+    }
+  ],
+  "localValidation": [
+    {
+      "command": "pnpm exec vitest run --project union-eyes apps/union-eyes/components/auth/__tests__/login-form-flows.test.tsx apps/union-eyes/components/auth/__tests__/login-form-sso.test.tsx apps/union-eyes/components/claims/new-claim-form.test.tsx --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "30_TARGETED_UI_TESTS_ZERO_SKIPS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-focused-v1.txt",
+      "sha256": "d02176103c65f1824aac42222d4ca6502ceee33619fd4fe6741dd875089465ee",
+      "workingDirectory": "."
+    },
+    {
+      "command": "pnpm exec vitest run --project union-eyes-heavy apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.test.ts apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts --maxWorkers=1",
+      "observedExitCode": 0,
+      "scope": "13_HARNESS_CONTRACT_TESTS_ZERO_SKIPS_NO_APPLICATION_BROWSER_LAUNCH",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-harness-contracts-v1.txt",
+      "sha256": "36e62f3b1646082a56ded070c24b9503b6350497040a9f54b2475aab05b32d54",
+      "workingDirectory": "."
+    },
+    {
+      "command": "pnpm exec eslint scripts/bootstrap-v2/browser-acceptance.ts scripts/bootstrap-v2/browser-acceptance.test.ts scripts/bootstrap-v2/next-acceptance.ts scripts/bootstrap-v2/next-acceptance.test.ts scripts/bootstrap-v2/authenticated-casework-load.ts components/auth/login-form.tsx components/auth/__tests__/login-form-flows.test.tsx components/auth/__tests__/login-form-sso.test.tsx components/claims/new-claim-form.tsx components/claims/new-claim-form.test.tsx",
+      "observedExitCode": 0,
+      "scope": "FOCUSED_ESLINT_ZERO_ERRORS_ZERO_WARNINGS",
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/browser-ui-eslint-v1.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workingDirectory": "apps/union-eyes"
+    }
+  ],
+  "browserRuntime": {
+    "status": "UNEXECUTED",
+    "profiles": [
+      "desktop-en",
+      "desktop-fr",
+      "mobile-en",
+      "mobile-fr"
+    ],
+    "driver": "installed Playwright 1.59.1",
+    "cachedEngine": "Chromium revision1217; no download or launch performed in this source batch"
+  },
+  "commandAfterSourcePlanRegeneration": {
+    "workingDirectory": "apps/union-eyes",
+    "command": "UE_V2_BROWSER_ACCEPTANCE=1 UE_V2_AUTHENTICATED_CASEWORK_LOAD=1 pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts"
+  },
+  "canonicalActionSubproofScope": [
+    "C06",
+    "C07",
+    "C08",
+    "C12",
+    "C21",
+    "C22",
+    "O10",
+    "O11",
+    "O12"
+  ],
+  "bounds": [
+    "Actual future browser proof uses the owned disposable production Next/native V2 fixture, actual password/MFA UI, canonical organization binding, live primary authority and one explicit synthetic grievance entitlement.",
+    "No QA session cookies, response fulfillment/stubs, provider email, staging target or production target are used.",
+    "The browser module requires all named checks in all four profiles plus successful cleanup and zero browser/server/external-request errors. Unexecuted checks remain unexecuted.",
+    "Language, accessible control names, visible invalid-MFA feedback, keyboard authentication/case reopening, intake persistence, deadline lifecycle/audit, member read-only behavior, other-member/foreign-tenant/finance denials and revoked sessions are measured when actually run.",
+    "No physical-device, additional-browser-engine, full-WCAG, live inbox, complete stakeholder or whole-release qualification is asserted.",
+    "Next defaults to 4096 MB per Node process; explicit 1024–8192 MB overrides are validated and recorded. This is not a whole-host memory limit.",
+    "Disk admission requires 2 GiB before source copying and build launch. A 5-second watcher cancels the owned process group below 1 GiB and records incomplete proof. Live low-disk cancellation has not been exercised in this source batch.",
+    "Next state/HOME is a uniquely owned sibling outside the copied workspace. Progress output is redacted and retained separately; snapshot/state cleanup remain independent of progress-log write success."
+  ],
+  "step2Started": false,
+  "stagingPromoted": false,
+  "productionPromoted": false,
+  "remaining": "Final integrated type checking, required repository checks, regenerated source commitments and actual production build/HTTP/load/browser execution remain root qualification work.",
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "3b92b92a56d824a2275701e6a7f9ceca928b9368bd08e74a185ef4a63b3c609f",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/browser-ui-source-subproof-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

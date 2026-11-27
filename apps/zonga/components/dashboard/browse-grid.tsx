@@ -120,7 +120,9 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
 
       {/* Mood Chips */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">Browse by Mood</h2>
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
+          Browse by Mood
+        </h2>
         <div className="flex flex-wrap gap-2">
           {moodChips.map((chip) => (
             <Link
@@ -136,7 +138,9 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
 
       {/* Region Chips */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">Explore by Region</h2>
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
+          Explore by Region
+        </h2>
         <div className="flex flex-wrap gap-2">
           {regionChips.map((chip) => (
             <Link
@@ -163,10 +167,16 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
                     <Card>
                       <div className="p-4 text-center hover:bg-muted/50 transition-colors rounded-lg">
                         <div className="relative mx-auto mb-3 h-16 w-16 rounded-full bg-linear-to-br from-electric/20 to-navy/20 flex items-center justify-center">
-                          <span className="text-2xl group-hover:scale-110 transition-transform">🎵</span>
+                          <span className="text-2xl group-hover:scale-110 transition-transform">
+                            🎵
+                          </span>
                         </div>
-                        <p className="text-xs font-medium text-foreground truncate">{track.title ?? 'Untitled'}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground truncate">{track.subtitle ?? '—'}</p>
+                        <p className="text-xs font-medium text-foreground truncate">
+                          {track.title ?? 'Untitled'}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground truncate">
+                          {track.subtitle ?? '—'}
+                        </p>
                       </div>
                     </Card>
                   </Link>
@@ -185,7 +195,10 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground px-1">📀 New Releases</h2>
-            <Link href={`/${locale}/dashboard/catalog`} className="text-xs text-electric hover:underline">
+            <Link
+              href={`/${locale}/dashboard/catalog`}
+              className="text-xs text-electric hover:underline"
+            >
               View all →
             </Link>
           </div>
@@ -199,14 +212,18 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
               })
               return (
                 <div key={asset.id} className="group relative">
-                  <Link href={`/${locale}/dashboard/catalog/${asset.id}`}>
+                  <Link href={`/${locale}/dashboard/tracks/${asset.id}`}>
                     <Card>
                       <div className="p-4 hover:bg-muted/50 transition-colors rounded-lg">
                         <div className="relative mb-3 h-32 rounded-lg bg-linear-to-br from-navy/10 to-electric/10 flex items-center justify-center">
-                          <span className="text-4xl group-hover:scale-110 transition-transform">🎶</span>
+                          <span className="text-4xl group-hover:scale-110 transition-transform">
+                            🎶
+                          </span>
                           <PlayButton track={pt} variant="overlay" />
                         </div>
-                        <p className="text-sm font-medium text-foreground truncate">{asset.title}</p>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {asset.title}
+                        </p>
                         <p className="mt-0.5 text-xs text-muted-foreground truncate">
                           {(asset.metadata?.creatorName as string) ?? '—'}
                         </p>
@@ -218,7 +235,8 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
                           )}
                           {asset.durationSeconds && (
                             <span className="text-xs text-muted-foreground">
-                              {Math.floor(asset.durationSeconds / 60)}:{String(asset.durationSeconds % 60).padStart(2, '0')}
+                              {Math.floor(asset.durationSeconds / 60)}:
+                              {String(asset.durationSeconds % 60).padStart(2, '0')}
                             </span>
                           )}
                         </div>
@@ -237,7 +255,10 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground px-1">📋 Featured Playlists</h2>
-            <Link href={`/${locale}/dashboard/playlists`} className="text-xs text-electric hover:underline">
+            <Link
+              href={`/${locale}/dashboard/playlists`}
+              className="text-xs text-electric hover:underline"
+            >
               View all →
             </Link>
           </div>
@@ -268,7 +289,10 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground px-1">🎪 Upcoming Events</h2>
-            <Link href={`/${locale}/dashboard/events`} className="text-xs text-electric hover:underline">
+            <Link
+              href={`/${locale}/dashboard/events`}
+              className="text-xs text-electric hover:underline"
+            >
               View all →
             </Link>
           </div>
@@ -281,17 +305,19 @@ export function BrowseGrid({ locale, trending, assets, playlists, events }: Brow
                       <div className="shrink-0 rounded-lg bg-purple-500/20 px-3 py-2 text-center">
                         <p className="text-xs font-bold text-purple-400">
                           {event.startsAt
-                            ? new Date(event.startsAt).toLocaleDateString('en-CA', { month: 'short' })
+                            ? new Date(event.startsAt).toLocaleDateString('en-CA', {
+                                month: 'short',
+                              })
                             : '—'}
                         </p>
                         <p className="text-lg font-bold text-purple-300">
-                          {event.startsAt
-                            ? new Date(event.startsAt).getDate()
-                            : '—'}
+                          {event.startsAt ? new Date(event.startsAt).getDate() : '—'}
                         </p>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{event.title}</p>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {event.title}
+                        </p>
                         <p className="text-xs text-muted-foreground truncate">
                           {[event.venue, event.city].filter(Boolean).join(', ')}
                         </p>

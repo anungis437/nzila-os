@@ -1,0 +1,30 @@
+{
+  "candidate": "UNCOMMITTED_WORKING_TREE_NOT_FINAL_CANDIDATE",
+  "baselineSha": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "baselineDeadLib": 376,
+  "observedDeadLibBeforeRetirement": 379,
+  "graphDeltaEvidence": "orphan-graph-before-retirement-v1.json",
+  "reason": "Sole workflow notification/timeline adapters were retired under the transitive authority repair. Current generic state-only durable case mail and canonical claim_updates history remain reachable. Do not add artificial live imports or increase the orphan ceiling. Historical source and test evidence remain in Git history.",
+  "retired": [
+    {
+      "path": "apps/union-eyes/lib/email-templates.tsx",
+      "sha256": "b4f132718f7743bb33e9563defd50d5d5243604c3bc90ce8642873f7ff166fb0"
+    },
+    {
+      "path": "apps/union-eyes/lib/member-experience/human-explainers.ts",
+      "sha256": "8ea0b84e2e2bb2112c627ff5780e474f53edb096be2c686316428c9dcb41f9d7"
+    },
+    {
+      "path": "apps/union-eyes/lib/member-experience/timeline-builder.ts",
+      "sha256": "e9991cf851532313c7c6f108bace9ebb6fb14254e546906e99e57892f12ef6b6"
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/email-templates.test.tsx",
+      "sha256": "8cf45f4ae100761201ee5e83fdc1df9757202194959260a5c8e8191ddcdf444c"
+    },
+    {
+      "path": "apps/union-eyes/lib/member-experience/__tests__/timeline-builder.test.ts",
+      "sha256": "47561cc674eb5ac3885397e596536b478023e8e3a9f7f86d6af7151086f712f1"
+    }
+  ]
+}

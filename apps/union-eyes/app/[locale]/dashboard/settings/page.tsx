@@ -66,11 +66,11 @@ function toPlatformSettingsData({ settings, featuresEnabled, apiKeys, services }
       scopes: key.scopes,
       requestCount: key.requestCount,
     })),
-    integrations: services.map((service) => ({
+    integrations: services?.map((service) => ({
       label: service.serviceName,
       status: service.status as "healthy" | "degraded" | "down",
       detail: service.status,
-    })),
+    })) ?? null,
     featuresEnabled,
   };
 }

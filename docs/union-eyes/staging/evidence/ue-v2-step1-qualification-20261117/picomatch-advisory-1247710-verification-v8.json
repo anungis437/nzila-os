@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-21T12:59:10.155Z",
+  "advisory": {
+    "npmAdvisoryId": 1247710,
+    "ghsa": "GHSA-fc5q-39xc-vjpf",
+    "package": "picomatch",
+    "class": "polynomial backtracking in repeated extglob patterns"
+  },
+  "sourceCommitVerified": "153ca299d911ca254b452e6a8f0e2ece6489ff32",
+  "note": "Verified on the lockfile, patch and installed tree of the source commit above. The lockfile and patch are byte-identical on later commits of this branch until either file changes; the exact-head Dependency Audit CI job re-verifies the delivered commit.",
+  "override": {
+    "manifest": "package.json pnpm.overrides.picomatch",
+    "value": "4.0.7"
+  },
+  "patch": {
+    "path": "patches/picomatch@4.0.7.patch",
+    "sha256": "6a36b929622ce4b86f275680e96d31001b63ce209414fb2b02194a7ec1f7d10d",
+    "lockfilePatchHash": "6a36b929622ce4b86f275680e96d31001b63ce209414fb2b02194a7ec1f7d10d"
+  },
+  "lockfile": {
+    "sha256": "65d5b91a414ce67cc09966242b90b29c0bb1ee12d1ed0dca5f1b4df2b1da21bb",
+    "resolvedSnapshots": {
+      "picomatch@4.0.7(patch_hash=6a36b929...)": "all 32 resolved dependency references",
+      "unpatchedResolvedReferences": 0
+    },
+    "nonResolutionMentions": [
+      "overrides entry picomatch: 4.0.7",
+      "fdir peerDependencies range picomatch: 4.0.7",
+      "package resolution key picomatch@4.0.7 (integrity record)"
+    ],
+    "regeneratedLockfileOnly": "pnpm install --lockfile-only --ignore-scripts produced a byte-identical lockfile (sha256 unchanged)",
+    "frozenInstall": "pnpm install --frozen-lockfile --offline --ignore-scripts exited 0"
+  },
+  "installedTree": {
+    "linker": "hoisted",
+    "copies": [
+      {
+        "path": "node_modules/picomatch",
+        "version": "4.0.7",
+        "patchMarkerPresent": true
+      }
+    ],
+    "otherCopies": 0
+  },
+  "exploitClassRegression": {
+    "test": "tooling/security/picomatch-repeated-extglob.test.mjs (also run by .github/workflows/dependency-audit.yml)",
+    "installedPatched": {
+      "tests": 71,
+      "pass": 71,
+      "fail": 0
+    },
+    "unpatchedUpstreamControl": {
+      "source": "npm pack picomatch@4.0.7 (registry tarball, unpatched)",
+      "tests": 71,
+      "pass": 2,
+      "fail": 69,
+      "meaning": "the test discriminates: it fails the vulnerable build and passes the patched one"
+    }
+  },
+  "dependencyAudit": {
+    "command": "node tooling/security/npm-bulk-audit.mjs --audit-level=high",
+    "packages": 2074,
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "picomatchAdvisories": 0
+  },
+  "waiversOrSuppressions": "none introduced; no audit output altered",
+  "status": "PATCHED_RUNTIME_AND_LOCKFILE_VERIFIED_EXACT_HEAD_CI_AUDIT_PENDING"
+}

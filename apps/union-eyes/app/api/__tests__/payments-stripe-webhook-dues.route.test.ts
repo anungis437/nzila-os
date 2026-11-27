@@ -43,7 +43,7 @@ vi.mock('@/lib/dues/dues-settlement', async (importOriginal) => ({
   recordDuesSettlementDenial: m.denial,
 }))
 
-import { DuesSettlementError } from '@/lib/dues/dues-settlement'
+import { MEMBER_DUES_SETTLEMENT_REFUSAL } from '@/lib/dues/member-dues-flag'
 import { POST } from '../payments/webhooks/stripe/route'
 
 const duesIntent = {
@@ -84,37 +84,26 @@ function request(
 describe('stripe webhook: member dues settlement authority', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('settles a verified dues payment intent and never runs platform billing', async () => {
-    m.settle.mockResolvedValueOnce('settled')
-    const response = await POST(request('payment_intent.succeeded', duesIntent))
-    expect(response.status).toBe(200)
-    expect(await response.json()).toMatchObject({ received: true, status: 'settled' })
-    expect(m.settle).toHaveBeenCalledWith({ tx: true }, duesIntent, 'evt_1')
-    expect(m.platformFee).not.toHaveBeenCalled()
-  })
+  // SYSTEM holds zero authority over dues_transactions and member_dues_ledger. A verified dues event is
+  // authenticated but has no settlement path: 501, nothing settled, recorded or billed.
+  it.each(['payment_intent.succeeded', 'payment_intent.payment_failed', 'payment_intent.canceled'])(
+    'answers 501 for a verified %s dues event with no settlement, outcome or platform billing',
+    async (type) => {
+      const response = await POST(request(type, duesIntent))
+      expect(response.status).toBe(501)
+      expect(await response.json()).toMatchObject({
+        received: false,
+        error: 'NOT_IMPLEMENTED',
+        message: MEMBER_DUES_SETTLEMENT_REFUSAL,
+      })
+      expect(m.settle).not.toHaveBeenCalled()
+      expect(m.providerOutcome).not.toHaveBeenCalled()
+      expect(m.denial).not.toHaveBeenCalled()
+      expect(m.platformFee).not.toHaveBeenCalled()
+    },
+  )
 
-  it('answers a duplicate delivery without a second credit', async () => {
-    m.settle.mockResolvedValueOnce('duplicate')
-    const response = await POST(request('payment_intent.succeeded', duesIntent))
-    expect(await response.json()).toMatchObject({ status: 'duplicate' })
-  })
-
-  it('fails closed on tampered metadata and records the denial', async () => {
-    m.settle.mockRejectedValueOnce(
-      new DuesSettlementError(
-        'AMOUNT_MISMATCH',
-        'Amount mismatch',
-        duesIntent.metadata.organization_id,
-        'p1',
-      ),
-    )
-    const response = await POST(request('payment_intent.succeeded', duesIntent))
-    expect(response.status).toBe(422)
-    expect(await response.json()).toMatchObject({ received: false, code: 'AMOUNT_MISMATCH' })
-    expect(m.denial).toHaveBeenCalled()
-  })
-
-  it('rejects invalid and missing signatures before any settlement', async () => {
+  it('rejects invalid and missing signatures before anything else', async () => {
     expect(
       (await POST(request('payment_intent.succeeded', duesIntent, { signature: 'invalid' })))
         .status,
@@ -123,27 +112,6 @@ describe('stripe webhook: member dues settlement authority', () => {
       (await POST(request('payment_intent.succeeded', duesIntent, { signature: 'missing' })))
         .status,
     ).toBe(400)
-    expect(m.settle).not.toHaveBeenCalled()
-  })
-
-  it('records provider failure and cancellation without crediting', async () => {
-    m.providerOutcome.mockResolvedValue('recorded')
-    await POST(request('payment_intent.payment_failed', duesIntent))
-    await POST(request('payment_intent.canceled', duesIntent))
-    expect(m.providerOutcome).toHaveBeenNthCalledWith(
-      1,
-      { tx: true },
-      duesIntent,
-      'evt_1',
-      'failed',
-    )
-    expect(m.providerOutcome).toHaveBeenNthCalledWith(
-      2,
-      { tx: true },
-      duesIntent,
-      'evt_1',
-      'cancelled',
-    )
     expect(m.settle).not.toHaveBeenCalled()
   })
 })

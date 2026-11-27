@@ -38,3 +38,24 @@ Copy `.env.example` → `.env.local` and fill required values.
 ## Domain
 
 Console is the internal operations hub — providing cross-vertical visibility into governance, compliance, analytics, cost management, and proof artifacts across the entire Nzila platform.
+
+## Request boundaries
+
+API routes authenticate callers, check current platform or organization access,
+validate input and format responses. Operations and database queries live in
+`lib/services/`. Financial records resolve their organization from the stored
+parent, and update inputs reject ownership changes. Public survey submissions
+retain their exact share-token and active-survey checks; survey administration
+requires the existing operator roles.
+
+Both Stripe webhook routes verify the raw request body before storage. The QBO
+callback rechecks organization-admin access before exchanging credentials and
+persists the connection and encrypted tokens in its existing transaction. New
+production token writes require `QBO_TOKEN_ENCRYPTION_KEY` to contain exactly
+32 bytes encoded as 64 hexadecimal characters, including when an Azure Key
+Vault URL is configured. Key Vault wrapping remains unimplemented.
+
+Console voting submissions return `501 VERIFIED_VOTING_SOURCE_UNAVAILABLE`:
+the current model lacks verified canonical voter, electorate and quorum
+bindings. Historical votes and the supported governance read views remain on
+their existing paths.

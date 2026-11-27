@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
 
 const m = vi.hoisted(() => ({
   requireEntitlement: vi.fn(),
@@ -22,6 +23,10 @@ async function loadRoute() {
   return import('../finance/billing/route');
 }
 
+async function expectRefused(response: Response) {
+  expect(response.status).toBe(501);
+  expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: 'Finance and dues persistence are not available in this release.' });
+}
 const ctx = { userId: 'u1', organizationId: 'org_1' };
 const send = (method: string, body: unknown) => new NextRequest('http://localhost/api/finance/billing', {
   method,
@@ -38,47 +43,22 @@ describe('finance/billing route', () => {
     m.updateBillingAccount.mockResolvedValue({ id: 'acct_1', displayName: 'Updated Billing' });
   });
 
-  it('asks the wrapper for the role each handler had, the entitlement, and the organization\'s own tenant transaction', async () => {
+  it('asks the wrapper for the role each handler had; the base release declares no entitlement or tenant transaction because it refuses before any read or write', async () => {
     const { GET, POST, PATCH } = await loadRoute();
-    expect(declaredOptions(GET)).toMatchObject({ auth: { minRole: 'secretary_treasurer' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'officer' } });
-    expect(declaredOptions(POST)).toMatchObject({ auth: { minRole: 'admin' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'admin' } });
-    expect(declaredOptions(PATCH)).toMatchObject({ auth: { minRole: 'admin' }, entitlement: 'financial_intelligence_suite', rlsOrgContext: true, registry: { audience: 'admin' } });
+    expect(declaredOptions(GET)).toMatchObject({ auth: { minRole: 'secretary_treasurer' }, rlsOrgContext: false, registry: { audience: 'officer' } });
+    expect(declaredOptions(POST)).toMatchObject({ auth: { minRole: 'admin' }, rlsOrgContext: false, registry: { audience: 'admin' } });
+    expect(declaredOptions(PATCH)).toMatchObject({ auth: { minRole: 'admin' }, rlsOrgContext: false, registry: { audience: 'admin' } });
+    expect(declaredOptions(GET)).not.toHaveProperty('entitlement');
+    expect(declaredOptions(POST)).not.toHaveProperty('entitlement');
+    expect(declaredOptions(PATCH)).not.toHaveProperty('entitlement');
   });
 
-  it('GET returns forbidden when entitlement check fails, without reading the account', async () => {
+  it('GET is refused as not implemented in this release, without consulting entitlement or reading the account', async () => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new Error('Entitlement missing'));
 
-    const response = await GET(new NextRequest('http://localhost/api/finance/billing'), ctx);
-
-    expect(response.status).toBe(403);
+    await expectRefused(await GET(new NextRequest('http://localhost/api/finance/billing'), ctx));
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
     expect(m.getBillingAccount).not.toHaveBeenCalled();
-  });
-
-  it('GET reads the caller organization\'s account', async () => {
-    const { GET } = await loadRoute();
-    const response = await GET(new NextRequest('http://localhost/api/finance/billing'), ctx);
-
-    expect(response.status).toBe(200);
-    expect(m.getBillingAccount).toHaveBeenCalledWith('org_1');
-  });
-
-  it('GET returns not found when no billing account exists', async () => {
-    const { GET } = await loadRoute();
-    m.getBillingAccount.mockResolvedValueOnce(null);
-
-    const response = await GET(new NextRequest('http://localhost/api/finance/billing'), ctx);
-
-    expect(response.status).toBe(404);
-  });
-
-  it('GET reports a read that failed as a 500, never as a missing account', async () => {
-    const { GET } = await loadRoute();
-    m.getBillingAccount.mockRejectedValueOnce(new Error('db down'));
-
-    const response = await GET(new NextRequest('http://localhost/api/finance/billing'), ctx);
-
-    expect(response.status).toBe(500);
   });
 
   it('POST returns validation error for invalid JSON body', async () => {
@@ -89,34 +69,31 @@ describe('finance/billing route', () => {
     expect(m.createBillingAccount).not.toHaveBeenCalled();
   });
 
-  it('POST creates the account for the caller organization and user, whatever the body says', async () => {
+  it('POST with a valid body is refused as not implemented and creates no account', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(send('POST', {
+
+    await expectRefused(await POST(send('POST', {
       displayName: 'Union Billing',
       billingEmail: 'billing@example.com',
       netTermsDays: 30,
       organizationId: 'org_other',
       createdBy: 'someone-else',
-    }), ctx);
-
-    expect(response.status).toBe(200);
-    expect(m.createBillingAccount).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1', createdBy: 'u1', displayName: 'Union Billing' }));
+    }), ctx));
+    expect(m.createBillingAccount).not.toHaveBeenCalled();
   });
 
-  it('PATCH returns not found when no billing account exists to update', async () => {
+  it('PATCH with a valid body is refused as not implemented and updates no account', async () => {
     const { PATCH } = await loadRoute();
-    m.updateBillingAccount.mockResolvedValueOnce(null);
 
-    const response = await PATCH(send('PATCH', { displayName: 'Updated' }), ctx);
-
-    expect(response.status).toBe(404);
+    await expect(PATCH(send('PATCH', { displayName: 'Updated Billing' }), ctx));
+    expect(m.updateBillingAccount).not.toHaveBeenCalled();
   });
 
-  it('PATCH updates the caller organization\'s account as the caller', async () => {
+  it('PATCH still rejects invalid JSON before the boundary', async () => {
     const { PATCH } = await loadRoute();
-    const response = await PATCH(send('PATCH', { displayName: 'Updated Billing' }), ctx);
+    const response = await PATCH(send('PATCH', '{bad-json'), ctx);
 
-    expect(response.status).toBe(200);
-    expect(m.updateBillingAccount).toHaveBeenCalledWith('org_1', { displayName: 'Updated Billing' }, 'u1');
+    expect(response.status).toBe(400);
+    expect(m.updateBillingAccount).not.toHaveBeenCalled();
   });
 });

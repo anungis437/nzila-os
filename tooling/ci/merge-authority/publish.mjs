@@ -259,16 +259,26 @@ function githubAuth() {
   return { repository, token }
 }
 
-async function githubFetch(url) {
+// Reads are idempotent: a transient GitHub 5xx (observed: 500 while listing a run's jobs) is retried with the same bounded
+// backoff as check writes, instead of failing the whole publication. A non-retryable status is returned to the caller.
+const RETRYABLE_READ_STATUSES = new Set([...RETRYABLE_CHECK_STATUSES, 500])
+
+export async function githubFetch(url, fetchImpl = fetch) {
   const { token } = githubAuth()
-  const response = await fetch(url, {
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${token}`,
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-  })
-  return response
+  const limit = checkAttemptLimit()
+  for (let attempt = 1; ; attempt += 1) {
+    const response = await fetchImpl(url, {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    })
+    if (response.ok || !RETRYABLE_READ_STATUSES.has(response.status) || attempt >= limit) return response
+    const delay = checkRetryDelayMs(attempt, response)
+    process.stderr.write(`retrying GitHub read after HTTP ${response.status} attempt ${attempt}/${limit}\n`)
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay))
+  }
 }
 
 async function listRunJobs(runId) {

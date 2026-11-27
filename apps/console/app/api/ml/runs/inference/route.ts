@@ -1,3 +1,4 @@
+import { listMlInferenceRuns } from '@/lib/services/ml-read-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/runs/inference
@@ -11,9 +12,7 @@
  *   limit       optional — default 20, max 100
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { mlInferenceRuns, mlModels } from '@nzila/db/schema'
-import { eq, and, desc } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { createLogger } from '@nzila/os-core'
 
@@ -36,48 +35,8 @@ export async function GET(req: NextRequest) {
     const access = await requireOrgAccess(orgId)
     if (!access.ok) return access.response
 
-    const rows = await platformDb
-      .select({
-        id: mlInferenceRuns.id,
-        orgId: mlInferenceRuns.orgId,
-        modelId: mlInferenceRuns.modelId,
-        modelKey: mlModels.modelKey,
-        status: mlInferenceRuns.status,
-        startedAt: mlInferenceRuns.startedAt,
-        finishedAt: mlInferenceRuns.finishedAt,
-        inputPeriodStart: mlInferenceRuns.inputPeriodStart,
-        inputPeriodEnd: mlInferenceRuns.inputPeriodEnd,
-        summaryJson: mlInferenceRuns.summaryJson,
-        error: mlInferenceRuns.error,
-        createdAt: mlInferenceRuns.createdAt,
-      })
-      .from(mlInferenceRuns)
-      .innerJoin(mlModels, eq(mlInferenceRuns.modelId, mlModels.id))
-      .where(
-        and(
-          eq(mlInferenceRuns.orgId, orgId),
-          ...(modelId ? [eq(mlInferenceRuns.modelId, modelId)] : []),
-        ),
-      )
-      .orderBy(desc(mlInferenceRuns.startedAt))
-      .limit(limit)
-
-    return NextResponse.json(
-      rows.map((r) => ({
-        id: r.id,
-        orgId: r.orgId,
-        modelId: r.modelId,
-        modelKey: r.modelKey,
-        status: r.status,
-        startedAt: r.startedAt.toISOString(),
-        finishedAt: r.finishedAt?.toISOString() ?? null,
-        inputPeriodStart: r.inputPeriodStart,
-        inputPeriodEnd: r.inputPeriodEnd,
-        summaryJson: r.summaryJson,
-        error: r.error,
-        createdAt: r.createdAt.toISOString(),
-      })),
-    )
+    const result = await listMlInferenceRuns({ orgId, modelId, limit })
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     logger.error('[ML /runs/inference]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

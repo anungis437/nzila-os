@@ -1,0 +1,575 @@
+✖ bounded repeated extglob +(*) {} (141.757042ms)
+✖ bounded repeated extglob +(*) {"maxExtglobRecursion":false} (80.578334ms)
+✖ bounded repeated extglob +(*a) {} (1506.259417ms)
+✖ bounded repeated extglob +(*a) {"maxExtglobRecursion":false} (1505.540416ms)
+✖ bounded repeated extglob *(*a) {} (1504.816042ms)
+✖ bounded repeated extglob *(*a) {"maxExtglobRecursion":false} (1505.079958ms)
+✖ bounded repeated extglob +(*?a) {} (1504.794ms)
+✖ bounded repeated extglob +(*?a) {"maxExtglobRecursion":false} (1504.929792ms)
+✖ bounded repeated extglob +(ab|abab) {} (1508.144667ms)
+✖ bounded repeated extglob +(ab|abab) {"maxExtglobRecursion":false} (1503.707583ms)
+✔ ordinary workspace globs and safe extglobs keep their matching behavior (6.261125ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 1
+ℹ fail 10
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12393.599042
+
+✖ failing tests:
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(*) {} (141.757042ms)
+  AssertionError [ERR_ASSERTION]: node:assert:152
+    throw new AssertionError(obj);
+    ^
+  
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at [eval]:6:16
+      at runScriptInThisContext (node:internal/vm:219:10)
+      at node:internal/process/execution:451:12
+      at [eval]-wrapper:6:24
+      at runScriptInContext (node:internal/process/execution:449:60)
+      at evalFunction (node:internal/process/execution:283:30)
+      at evalTypeScript (node:internal/process/execution:295:3)
+      at node:internal/main/eval_string:71:3 {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+  
+  Node.js v24.16.0
+  
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:24:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(*) {"maxExtglobRecursion":false} (80.578334ms)
+  AssertionError [ERR_ASSERTION]: node:assert:152
+    throw new AssertionError(obj);
+    ^
+  
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at [eval]:6:16
+      at runScriptInThisContext (node:internal/vm:219:10)
+      at node:internal/process/execution:451:12
+      at [eval]-wrapper:6:24
+      at runScriptInContext (node:internal/process/execution:449:60)
+      at evalFunction (node:internal/process/execution:283:30)
+      at evalTypeScript (node:internal/process/execution:295:3)
+      at node:internal/main/eval_string:71:3 {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+  
+  Node.js v24.16.0
+  
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:24:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(*a) {} (1506.259417ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "+(*a)";\n' +
+  +       '        const match = picomatch(pattern, {});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(*a) {"maxExtglobRecursion":false} (1505.540416ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "+(*a)";\n' +
+  +       '        const match = picomatch(pattern, {"maxExtglobRecursion":false});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob *(*a) {} (1504.816042ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "*(*a)";\n' +
+  +       '        const match = picomatch(pattern, {});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob *(*a) {"maxExtglobRecursion":false} (1505.079958ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "*(*a)";\n' +
+  +       '        const match = picomatch(pattern, {"maxExtglobRecursion":false});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(*?a) {} (1504.794ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "+(*?a)";\n' +
+  +       '        const match = picomatch(pattern, {});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(*?a) {"maxExtglobRecursion":false} (1504.929792ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "+(*?a)";\n' +
+  +       '        const match = picomatch(pattern, {"maxExtglobRecursion":false});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(ab|abab) {} (1508.144667ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "+(ab|abab)";\n' +
+  +       '        const match = picomatch(pattern, {});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tooling/security/picomatch-repeated-extglob.test.mjs:13:5
+✖ bounded repeated extglob +(ab|abab) {"maxExtglobRecursion":false} (1503.707583ms)
+  AssertionError [ERR_ASSERTION]: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  + actual - expected
+  
+  + Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+  +     at Object.spawnSync (node:internal/child_process:1143:20)
+  +     at spawnSync (node:child_process:911:24)
+  +     at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+  +     at Test.runInAsyncScope (node:async_hooks:227:14)
+  +     at Test.run (node:internal/test_runner/test:1306:25)
+  +     at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+  +     at Test.postRun (node:internal/test_runner/test:1447:19)
+  +     at Test.run (node:internal/test_runner/test:1372:12)
+  +     at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+  +   code: 'ETIMEDOUT',
+  +   errno: -60,
+  +   path: '/Users/oby/.local/mamba/envs/devtools/bin/node',
+  +   spawnargs: [
+  +     '-e',
+  +     '\n' +
+  +       "        const assert = require('node:assert/strict');\n" +
+  +       '        const picomatch = require("/private/tmp/ue-step1-picomatch-upstream/package/index.js");\n' +
+  +       '        const pattern = "+(ab|abab)";\n' +
+  +       '        const match = picomatch(pattern, {"maxExtglobRecursion":false});\n' +
+  +       "        assert.equal(match('a'.repeat(64) + '!'), false);\n" +
+  +       "        assert.equal(match('ab'.repeat(64) + '!'), false);\n" +
+  +       '        assert.equal(match(pattern), true);\n' +
+  +       '      '
+  +   ],
+  +   syscall: 'spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node'
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:23:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: spawnSync /Users/oby/.local/mamba/envs/devtools/bin/node ETIMEDOUT
+        at Object.spawnSync (node:internal/child_process:1143:20)
+        at spawnSync (node:child_process:911:24)
+        at TestContext.<anonymous> (file:///Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/tooling/security/picomatch-repeated-extglob.test.mjs:14:22)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1306:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+        at Test.postRun (node:internal/test_runner/test:1447:19)
+        at Test.run (node:internal/test_runner/test:1372:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:897:7),
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

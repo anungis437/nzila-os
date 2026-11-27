@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-11-18T00:16:09.439320+00:00",
+  "scope": "OWNED_FIXTURE_PYTHON_ENTRYPOINT_FAILURE",
+  "containerId": "229d91de57bcfa6de9aad7408d59a50b4823e6a4ea8b28fd8f8ace72f2a44be1",
+  "reason": "Private wrapper executed manage.py without __file__; corrected to standard runpy script entrypoint",
+  "testExecuted": false,
+  "qualified": false,
+  "OOMKilled": false,
+  "cleanup": "Only exact newly owned incomplete fixture removed; prior runtime/data untouched"
+}

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type pg from 'pg'
 import {
   bindCreation,
+  declaredConditionalIndexMatches,
   normalizeDeclaredType,
   renderManifestMarkdown,
   verifyDeclaredSource,
@@ -135,9 +136,11 @@ describe('native manifest measured authority', () => {
       .mockResolvedValueOnce({ rows: [] })
     const plan = {
       sourceCommitments: {},
+      decisions: [],
       tables: [
         {
           name: 'example',
+          source: 'synthetic-current-model.py',
           columns: [{ name: 'id', type: 'uuid', notNull: true }],
           foreignKeys: [{ column: 'id', table: 'parent', referencedColumn: 'id' }],
         },
@@ -153,5 +156,47 @@ describe('native manifest measured authority', () => {
       'DECLARED_FOREIGN_KEY_MISMATCH:example.id',
       'CURRENT_MODEL_KEY_MISMATCH:example.id',
     ])
+  })
+  const conditionalSql = 'CREATE UNIQUE INDEX "example_active" ON "example" ("id", "subject_id") WHERE "revoked_at" IS NULL'
+  const nativeConditionalSql = 'CREATE UNIQUE INDEX example_active ON public.example USING btree (id, subject_id) WHERE (revoked_at IS NULL)'
+  const conditionalIdentity = { table: 'example', name: 'example_active', columns: ['id', 'subject_id'] }
+  it('compares source and native conditional indexes using the PostgreSQL parse tree', async () => {
+    expect(await declaredConditionalIndexMatches(conditionalSql, nativeConditionalSql, conditionalIdentity)).toBe(true)
+  })
+  it.each([
+    nativeConditionalSql.replace('IS NULL', 'IS NOT NULL'),
+    nativeConditionalSql.replace('(revoked_at IS NULL)', '(revoked_at IS NULL OR id IS NOT NULL)'),
+    nativeConditionalSql.replace('id, subject_id', 'subject_id, id'),
+    nativeConditionalSql.replace('id, subject_id', 'id'),
+    nativeConditionalSql.replace('id, subject_id', 'id, subject_id DESC'),
+    nativeConditionalSql.replace('id, subject_id', 'id, subject_id NULLS FIRST'),
+    nativeConditionalSql.replace('public.example', 'user_management.example'),
+    nativeConditionalSql.replace('example_active', 'other_index'),
+    nativeConditionalSql.replace('CREATE UNIQUE INDEX', 'CREATE INDEX'),
+    nativeConditionalSql.replace(' WHERE (revoked_at IS NULL)', ''),
+    nativeConditionalSql.replace(' WHERE', ' INCLUDE (revoked_at) WHERE'),
+    `${nativeConditionalSql}; SELECT 1`,
+    'None',
+  ])('rejects a changed index definition %s', async (sql) => {
+    expect(await declaredConditionalIndexMatches(conditionalSql, sql, conditionalIdentity)).toBe(false)
+  })
+  it.each([false, true])('requires the measured conditional predicate to match its current model source (changed=%s)', async (changed) => {
+    const query = vi.fn()
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ table: 'example', name: 'example_active', definition: changed ? nativeConditionalSql.replace('IS NULL', 'IS NOT NULL') : nativeConditionalSql }] })
+      .mockResolvedValueOnce({ rows: [] })
+    const plan = {
+      sourceCommitments: {}, tables: [], decisions: [],
+      currentModels: { models: [{
+        table: 'example', columns: [],
+        constraints: [[[], { name: 'example_active', fields: ['id', 'subject_id'] }]],
+        databaseConstraints: [{ name: 'example_active', kind: 'UniqueConstraint', sql: conditionalSql, deferredUniqueIndex: true }],
+      }] },
+    } as unknown as V2Plan
+    expect((await verifyDeclaredSource({ query } as unknown as pg.Client, plan)).mismatches).toEqual(
+      changed ? ['CURRENT_MODEL_NAMED_CONSTRAINT_MISMATCH:example:example_active'] : [],
+    )
   })
 })

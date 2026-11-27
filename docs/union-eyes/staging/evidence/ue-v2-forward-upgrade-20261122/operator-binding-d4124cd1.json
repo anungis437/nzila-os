@@ -1,0 +1,33 @@
+{
+  "status": "WORKING_STAGING_OPERATOR_BINDING_NOT_ADMITTED",
+  "recordedAt": "2026-11-23T07:29:36.813102+00:00",
+  "applicationSourceSha": "d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366",
+  "applicationMainAdmissionMergeSha": "a82dfa0788a4cdbb6063ea3fe6c284fe4619f10f",
+  "applicationImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:c25666f05287b43887c2a5afb23ea89768062610767ac2cb0a1570f13619eef0",
+  "clamavImage": "nzilaventuresacr.azurecr.io/ue-clamav-http-adapter@sha256:5ecfcba1739c895e291b5c965ec6fe71391e2c6891c074eb6e0fe4947ec7668a",
+  "sourcePlanDigest": "7d010442aee62b7689553f79417849305a53d78fe851c8b17430abe826dfe877",
+  "sourceAdmission": "admitted-app-source-d4124cd1.json",
+  "releaseManifest": "release-manifest-d4124cd1.json",
+  "manifestSha256": "b7ef8b808681cbf2f4ef230bb60ef016c6ad1d2f530dea2e5150e0d3a4aeb1fe",
+  "canonicalCandidate": "tooling/scripts/lib/ue-v2-staging-candidate.json",
+  "typedProjection": "packages/platform-change-management/src/ue-v2-staging-candidate.ts",
+  "sqlStatementsChangedFromAa": 0,
+  "applicationRuntimeFilesChangedInThisBinding": false,
+  "operatorSourceQualification": "PENDING_FIVE_COMMANDS_AND_FRESH_CI",
+  "normalOperatorAdmission": "PENDING",
+  "actualStagingRehearsal": "PENDING",
+  "actualStagingApply": "NOT_LAUNCHED",
+  "fullStagingScope": {
+    "stakeholderFamilies": 35,
+    "requiredFamilies": 26,
+    "requiredRoles": 34,
+    "lifecycleStages": 16,
+    "scopeNodes": 654,
+    "sevenProfilesAreSubsetOnly": true
+  },
+  "currentServingSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "liveDataResetOrDeleted": false,
+  "financeFeaturesAuthorized": false,
+  "productionAuthorized": false,
+  "afterCommitRecovery": "Preserve upgraded database and recover forward to qualifiedD4; CCC is schema-incompatible after commit."
+}

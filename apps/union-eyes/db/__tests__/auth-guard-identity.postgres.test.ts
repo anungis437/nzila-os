@@ -1,17 +1,16 @@
 /**
  * The identity and role lookups of lib/api-auth-guard.ts and lib/organization-utils.ts on real PostgreSQL, as the real roles (UE-CONV-H-019).
  *
- * Who a caller is, which organization they act in and what role they hold are decided BEFORE any organization context exists, so those lookups read
- * the membership tables on the ambient handle. On the runtime role, outside a tenant transaction, row-level security shows those tables as empty:
- * every role came back as 'member', every organization looked unknown, and the platform administrator check failed. The unit tests replace the database
- * and the HTTP runtime connects as a superuser, so nothing noticed. This runs the unmodified functions against the combined Django + Drizzle schema with only the
- * session boundary (who is signed in, the cookie) replaced, and proves that
- *   - the person's role in an organization, their access to it and the organization's type and name are read, by their own id, as the system role;
- *   - a person who is not a member, or whose membership is suspended or removed, is not given the organization's role;
- *   - the claimed organization of a session is validated (an id that is not a uuid names nothing, an unknown organization is cleared, and the cookie's
- *     organization is honoured only for a member or a platform administrator);
- *   - the same reads on a handle with no organization see nothing, which is why they run as the system role;
- *   - a database failure is a failure, not an anonymous caller.
+ * Every native clone runs in canonical mode, where who a caller is, which organization they act in and what role they hold are the canonical
+ * membership read through a live session: the binder establishes one canonical request (lib/auth/canonical-context.ts
+ * withCanonicalApiContext) and every lookup answers from it. The legacy chain (an Entra claim, the picker cookie, organization_members read
+ * as the system role) is not the canonical path, so this proves the canonical one with only the session boundary replaced:
+ *   - a member's request answers their role, their access and their organization; a role in another organization is refused, not guessed;
+ *   - a stranger, a suspended member and a removed member get no request at all (MEMBERSHIP_REQUIRED), so no role, and a lookup outside a
+ *     request is refused rather than answered from a claim or a cookie;
+ *   - a claimed organization or a picker cookie never changes the organization the canonical session is bound to;
+ *   - a platform system administrator is recognized from the canonical user record, a member is not;
+ *   - the organization facts (type, name, existence) are read as the system role, and a handle with no organization sees none of them.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
@@ -69,8 +68,8 @@ describe.skipIf(!URL)('the identity and role lookups on the combined schema, as 
     )
   const newMember = (userId: string, organizationId: string, role: string, status = 'active', deleted = false) =>
     admin.query(
-      `INSERT INTO organization_members (user_id, organization_id, role, status, is_primary, name, email, joined_at, deleted_at, created_at, updated_at)
-       VALUES ($1,$2,$3,$4,false,$1,$1 || '@example.test',now(), ${deleted ? 'now()' : 'NULL'}, now(), now())`,
+      `INSERT INTO organization_members (exempt_from_per_capita, user_id, organization_id, role, status, is_primary, name, email, joined_at, deleted_at, created_at, updated_at)
+       VALUES (false, $1,$2,$3,$4,false,$1,$1 || '@example.test',now(), ${deleted ? 'now()' : 'NULL'}, now(), now())`,
       [userId, organizationId, role, status],
     )
   const signedInAs = (userId: string | null, orgId: string | null = null, cookies: Record<string, string> = {}) => {
@@ -90,8 +89,20 @@ describe.skipIf(!URL)('the identity and role lookups on the combined schema, as 
       `INSERT INTO user_management.users (user_id, email, is_system_admin, created_at, updated_at) VALUES ($1, $2, true, now(), now()), ($3, $4, false, now(), now())`,
       [sysadmin, `${sysadmin}@example.org`, stranger, `${stranger}@example.org`],
     )
-    await admin.query(`INSERT INTO user_management.organization_users (organization_id, user_id, role, is_active) VALUES ($1, $2, 'officer', true)`, [ORG, authOnly])
+    // The canonical memberships: the steward's, a suspended person's and a removed membership; the administrator's, and a membership that
+    // exists only in the platform's own organization-user records. The stranger has a user and no membership.
+    await harness.setRole(steward, ORG, 'steward')
+    await harness.setRole(suspended, ORG, 'steward')
+    await harness.setRole(removed, ORG, 'steward')
+    await harness.setRole(sysadmin, ORG, 'member')
+    await harness.setRole(authOnly, ORG, 'officer')
+    await admin.query(`UPDATE user_management.users SET lifecycle_state = 'suspended' WHERE user_id = $1`, [suspended])
+    await admin.query(`UPDATE user_management.organization_users SET is_active = false WHERE user_id = $1 AND organization_id = $2`, [removed, ORG])
   }, 60_000)
+
+  /** A request of a live member, as production establishes it; anyone else is refused before any scope exists. */
+  const asRequest = <T,>(userId: string, work: () => Promise<T>, organizationId = ORG) => harness.asCanonicalRequest(userId, organizationId, work)
+  const refusedCode = async (work: Promise<unknown>) => work.then(() => 'answered', (error: { code?: string }) => error?.code ?? 'refused')
 
   afterAll(async () => {
     signedInAs(null)
@@ -100,20 +111,26 @@ describe.skipIf(!URL)('the identity and role lookups on the combined schema, as 
   })
 
   describe('the role and the access a person holds in an organization', () => {
-    it('reads a member\'s role, and finds no role for a stranger, a suspended member or a removed one', async () => {
-      expect(await guard!.getUserRole(steward, ORG)).toBe('steward')
-      expect(await guard!.getUserRole(stranger, ORG)).toBeNull()
-      expect(await guard!.getUserRole(suspended, ORG)).toBeNull()
-      expect(await guard!.getUserRole(removed, ORG)).toBeNull()
-      expect(await guard!.getUserRole(steward, OTHER_ORG)).toBeNull()
+    it('reads a member\'s role in their own request, and gives a stranger, a suspended member or a removed one no request and so no role', async () => {
+      expect(await asRequest(steward, () => guard!.getUserRole(steward, ORG))).toBe('steward')
+      // A role in another organization is refused inside the steward\'s request: the binding names one organization only.
+      expect(await asRequest(steward, () => refusedCode(guard!.getUserRole(steward, OTHER_ORG)))).toBe('MEMBERSHIP_REQUIRED')
+      for (const person of [stranger, suspended, removed])
+        expect(await refusedCode(asRequest(person, () => guard!.getUserRole(person, ORG))), person).toBe('MEMBERSHIP_REQUIRED')
+      // Outside a request there is no canonical actor to answer for: the lookup is refused, never answered from a claim.
+      signedInAs(steward, ORG)
+      expect(await refusedCode(guard!.getUserRole(steward, ORG))).not.toBe('answered')
     })
 
     it('answers whether a person holds at least a role in an organization', async () => {
-      expect(await guard!.hasRoleInOrganization(ORG, 'member', steward)).toBe(true)
-      expect(await guard!.hasRoleInOrganization(ORG, 'steward', steward)).toBe(true)
-      expect(await guard!.hasRoleInOrganization(ORG, 'admin', steward)).toBe(false)
-      expect(await guard!.hasRoleInOrganization(ORG, 'member', stranger)).toBe(false)
-      expect(await guard!.hasRoleInOrganization(ORG, 'member', suspended)).toBe(false)
+      await asRequest(steward, async () => {
+        expect(await guard!.hasRoleInOrganization(ORG, 'member', steward)).toBe(true)
+        expect(await guard!.hasRoleInOrganization(ORG, 'steward', steward)).toBe(true)
+        expect(await guard!.hasRoleInOrganization(ORG, 'admin', steward)).toBe(false)
+        // Another person named inside the steward\'s request is never answered with the steward\'s role.
+        expect(await guard!.hasRoleInOrganization(ORG, 'member', stranger)).toBe(false)
+        expect(await guard!.hasRoleInOrganization(ORG, 'member', suspended)).toBe(false)
+      })
     })
 
     it('knows the organization\'s type, name and whether a person may enter it', async () => {
@@ -123,20 +140,23 @@ describe.skipIf(!URL)('the identity and role lookups on the combined schema, as 
       expect(await orgUtils!.getOrganizationInfo(ORG)).toMatchObject({ id: ORG, type: 'local', name: `Identity Local ${tag}` })
       expect(await orgUtils!.validateOrganizationExists(ORG)).toBe(true)
       expect(await orgUtils!.validateOrganizationExists(randomUUID())).toBe(false)
-      expect(await orgUtils!.userHasOrganizationAccess(steward, ORG)).toBe(true)
-      expect(await orgUtils!.userHasOrganizationAccess(stranger, ORG)).toBe(false)
-      expect(await orgUtils!.userHasOrganizationAccess(removed, ORG)).toBe(false)
-      expect(await orgUtils!.getUserRoleInOrganization(steward, ORG)).toBe('steward')
-      expect(await orgUtils!.getUserRoleInOrganization(stranger, ORG)).toBeNull()
+      await asRequest(steward, async () => {
+        expect(await orgUtils!.userHasOrganizationAccess(steward, ORG)).toBe(true)
+        expect(await orgUtils!.userHasOrganizationAccess(stranger, ORG)).toBe(false)
+        expect(await orgUtils!.userHasOrganizationAccess(removed, ORG)).toBe(false)
+        expect(await orgUtils!.getUserRoleInOrganization(steward, ORG)).toBe('steward')
+        expect(await orgUtils!.getUserRoleInOrganization(stranger, ORG)).toBeNull()
+      })
     })
 
-    it('recognizes a platform system administrator and nobody else', async () => {
-      expect(await guard!.isSystemAdmin(sysadmin)).toBe(true)
-      expect(await guard!.isSystemAdmin(stranger)).toBe(false)
-      expect(await guard!.isSystemAdmin(`nobody-${tag}`)).toBe(false)
+    it('recognizes a platform system administrator from the canonical user record, and nobody else', async () => {
+      expect(await asRequest(sysadmin, () => guard!.isSystemAdmin(sysadmin))).toBe(true)
+      expect(await asRequest(steward, () => guard!.isSystemAdmin(steward))).toBe(false)
+      expect(await refusedCode(asRequest(stranger, () => guard!.isSystemAdmin(stranger)))).toBe('MEMBERSHIP_REQUIRED')
+      expect(await refusedCode(asRequest(`nobody-${tag}`, () => guard!.isSystemAdmin(`nobody-${tag}`)))).toBe('MEMBERSHIP_REQUIRED')
     })
 
-    it('is why these lookups run as the system role: a handle with no organization sees none of it', async () => {
+    it('is why the organization facts are read as the system role: a handle with no organization sees none of it', async () => {
       const { organizationMembers, organizations } = await import('@/db/schema')
       const members = await harness.tenant(RUNTIME_ROLE, null, steward, (tx) => tx.select().from(organizationMembers))
       const orgs = await harness.tenant(RUNTIME_ROLE, null, steward, (tx) => tx.select().from(organizations))
@@ -146,53 +166,45 @@ describe.skipIf(!URL)('the identity and role lookups on the combined schema, as 
   })
 
   describe('who the session says the caller is', () => {
-    it('resolves the signed-in person, the organization their session names and the role their membership gives them', async () => {
+    it('resolves the signed-in person, the organization their session is bound to and the role their membership gives them', async () => {
       signedInAs(steward, ORG)
-      const user = await guard!.getCurrentUser()
-      expect(user).toMatchObject({ id: steward, organizationId: ORG, role: 'steward' })
+      expect(await asRequest(steward, () => guard!.getCurrentUser())).toMatchObject({ id: steward, organizationId: ORG, role: 'steward' })
     })
 
-    it('clears an organization that is not a uuid or does not exist, and falls back to the person\'s own membership', async () => {
-      for (const claimed of ['org_not_a_uuid', randomUUID()]) {
+    it('ignores an organization a claim names, valid or not: the canonical session decides it', async () => {
+      for (const claimed of ['org_not_a_uuid', randomUUID(), OTHER_ORG]) {
         signedInAs(steward, claimed)
-        const user = await guard!.getCurrentUser()
+        const user = await asRequest(steward, () => guard!.getCurrentUser())
         expect(user?.organizationId).toBe(ORG)
         expect(user?.role).toBe('steward')
       }
     })
 
-    it('honours the organization picker cookie for a member, and not for someone who does not belong to that organization', async () => {
-      signedInAs(steward, null, { selected_organization_id: ORG })
-      expect((await guard!.getCurrentUser())?.organizationId).toBe(ORG)
-
-      // A stranger with a cookie naming an organization they are not in does not get it: they keep what their own memberships give them (nothing).
+    it('ignores the organization picker cookie: a member stays in their session\'s organization, and a stranger gets no request with it', async () => {
+      signedInAs(steward, null, { selected_organization_id: OTHER_ORG })
+      expect((await asRequest(steward, () => guard!.getCurrentUser()))?.organizationId).toBe(ORG)
       signedInAs(stranger, null, { selected_organization_id: ORG })
-      expect((await guard!.getCurrentUser())?.organizationId).not.toBe(ORG)
-
-      signedInAs(steward, null, { selected_organization_id: 'not-a-uuid' })
-      expect((await guard!.getCurrentUser())?.organizationId).toBe(ORG)
-
-      // A stale cookie from another identity provider names no organization; it must not fail the resolution for the person who carries it.
+      expect(await refusedCode(asRequest(stranger, () => guard!.getCurrentUser()))).toBe('MEMBERSHIP_REQUIRED')
       signedInAs(steward, null, { selected_org_id: 'org_stale_value' })
-      expect(await orgUtils!.getOrganizationIdForUser(steward)).toBe(ORG)
+      expect(await asRequest(steward, () => orgUtils!.getOrganizationIdForUser(steward))).toBe(ORG)
     })
 
-    it('does not give a suspended or removed member the organization\'s role', async () => {
-      signedInAs(suspended, ORG)
-      expect((await guard!.getCurrentUser())?.role).toBe('member')
-      signedInAs(removed, ORG)
-      expect((await guard!.getCurrentUser())?.role).toBe('member')
+    it('gives a suspended person or a removed membership no request, and so not the organization\'s role', async () => {
+      for (const person of [suspended, removed]) {
+        signedInAs(person, ORG)
+        expect(await refusedCode(asRequest(person, () => guard!.getCurrentUser())), person).toBe('MEMBERSHIP_REQUIRED')
+      }
     })
 
-    it('finds the person\'s membership, and their organization, for the unified user context', async () => {
+    it('finds the person\'s membership, and their organization, for the unified user context, and none without a request', async () => {
       signedInAs(steward)
-      expect(await guard!.getUserContext()).toMatchObject({ userId: steward, organizationId: ORG, roles: ['steward'] })
+      expect(await asRequest(steward, () => guard!.getUserContext())).toMatchObject({ userId: steward, organizationId: ORG, roles: ['steward'] })
       signedInAs(null)
-      expect(await guard!.getUserContext()).toBeNull()
+      expect(await refusedCode(guard!.getUserContext())).not.toBe('answered')
     })
 
     it('reads a role granted through the platform\'s own organization-user records', async () => {
-      expect(await guard!.getUserContextForOrganization(ORG, authOnly)).toMatchObject({ userId: authOnly, organizationId: ORG, roles: ['officer'] })
+      expect(await asRequest(authOnly, () => guard!.getUserContextForOrganization(ORG, authOnly))).toMatchObject({ userId: authOnly, organizationId: ORG, roles: ['officer'] })
     })
   })
 })

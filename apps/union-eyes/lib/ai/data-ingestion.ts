@@ -73,6 +73,35 @@ export interface ParsedData {
   metadata?: Record<string, unknown>;
 }
 
+/** Remove HTML markup for plain-text extraction. */
+function stripHtmlMarkup(input: string): string {
+  // Linear scan: every '<' opens markup that is skipped to its closing '>', so no tag can survive or be reassembled,
+  // and <script>/<style> bodies and comments are dropped with their content.
+  const lower = input.toLowerCase()
+  const out: string[] = []
+  let i = 0
+  while (i < input.length) {
+    const open = input.indexOf('<', i)
+    if (open === -1) { out.push(input.slice(i)); break }
+    out.push(input.slice(i, open))
+    if (lower.startsWith('<!--', open)) {
+      const close = lower.indexOf('-->', open + 4)
+      i = close === -1 ? input.length : close + 3
+      continue
+    }
+    const element = ['script', 'style'].find((name) => lower.startsWith(`<${name}`, open) && !/[a-z0-9]/.test(lower.charAt(open + name.length + 1)))
+    if (element) {
+      const closing = lower.indexOf(`</${element}`, open)
+      const end = closing === -1 ? -1 : lower.indexOf('>', closing)
+      i = end === -1 ? input.length : end + 1
+      continue
+    }
+    const end = input.indexOf('>', open)
+    i = end === -1 ? input.length : end + 1
+  }
+  return out.join('').replace(/>/g, '')
+}
+
 export interface TableData {
   headers: string[];
   rows: Record<string, string>[];
@@ -343,12 +372,11 @@ class DOCXParser implements FileParser {
         const result = await mammoth.convertToHtml({ buffer: buffer });
         
         // Simple HTML tag stripping
-        const text = result.value
-          .replace(/<[^>]*>/g, '') // codeql[js/bad-tag-filter, js/incomplete-multi-character-sanitization] - plain-text extraction for AI ingestion
+        const text = stripHtmlMarkup(result.value)
           .replace(/&nbsp;/g, ' ')
-          .replace(/&amp;/g, '&') // codeql[js/double-escaping] - decoding for AI ingestion, not re-rendered as HTML
           .replace(/&lt;/g, '<')
           .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&') // decoded last so "&amp;lt;" becomes "&lt;", not "<"
           .trim();
         
         return {

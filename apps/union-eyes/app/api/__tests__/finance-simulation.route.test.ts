@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { declaredOptions } from './with-api-double';
+import { ErrorCode } from '@/lib/api/errors';
+
+const REFUSAL = 'Finance and dues persistence are not available in this release.';
 
 const m = vi.hoisted(() => {
   class AllocationRunError extends Error {
@@ -18,21 +21,7 @@ const m = vi.hoisted(() => {
 vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/services/platform-economics', () => ({ runAllocation: m.runAllocation, AllocationRunError: m.AllocationRunError }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: {
-    AUTH_REQUIRED: 'AUTH_REQUIRED',
-    FORBIDDEN: 'FORBIDDEN',
-    VALIDATION_ERROR: 'VALIDATION_ERROR',
-    NOT_FOUND: 'NOT_FOUND',
-    CONFLICT: 'CONFLICT',
-    INTERNAL_ERROR: 'INTERNAL_ERROR',
-  },
-  standardErrorResponse: (code: string, message: string, details?: unknown) =>
-    new Response(JSON.stringify({ code, message, details }), {
-      status: code === 'AUTH_REQUIRED' ? 401 : code === 'FORBIDDEN' ? 403 : code === 'NOT_FOUND' ? 404 : code === 'CONFLICT' ? 409 : code === 'INTERNAL_ERROR' ? 500 : 400,
-    }),
-  standardSuccessResponse: (data: unknown) => new Response(JSON.stringify(data), { status: 200 }),
-}));
+vi.mock('@/lib/api/standardized-responses', async () => (await import('./standard-responses-double')).standardResponsesDouble());
 
 const PERIOD = '550e8400-e29b-41d4-a716-446655440000';
 const RULE = '550e8400-e29b-41d4-a716-446655440001';
@@ -58,38 +47,46 @@ describe('finance/simulation route', () => {
     m.runAllocation.mockResolvedValue({ allocated: 100 });
   });
 
-  it('keeps the role floor, the entitlement and the tenant transaction it had as a deprecated wrapper', async () => {
+  it('declares the role floor and the tenant transaction mode it has under the base release boundary', async () => {
     const { POST } = await loadRoute();
-    expect(declaredOptions(POST)).toMatchObject({
+    const options = declaredOptions(POST);
+    expect(options).toMatchObject({
       auth: { minRole: 'secretary_treasurer' },
-      entitlement: 'financial_intelligence_suite',
-      rlsOrgContext: true,
+      rlsOrgContext: false,
     });
+    expect(options.entitlement).toBeUndefined();
   });
 
-  it('returns a simulation payload', async () => {
+  it('refuses a valid simulation with 501 NOT_IMPLEMENTED and runs nothing', async () => {
     const { POST } = await loadRoute();
     const response = await POST(simulation(valid), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ simulation: true, allocated: 100 });
-    expect(m.runAllocation).toHaveBeenCalledWith(expect.objectContaining({ isSimulation: true, organizationId: 'org_1', createdBy: 'u1', billingPeriodId: PERIOD, ruleId: RULE }));
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
-  it('takes the organization from the session, never from the body', async () => {
+  it('refuses with 501 whatever the body names as its organization, and runs nothing', async () => {
     const { POST } = await loadRoute();
-    await POST(simulation({ ...valid, organizationId: 'someone-elses-org' }), { organizationId: 'org_1', userId: 'u1' });
+    const response = await POST(simulation({ ...valid, organizationId: 'someone-elses-org' }), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(m.runAllocation).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org_1' }));
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
-  it('refuses an organization without the financial intelligence module, and runs nothing', async () => {
-    m.requireEntitlement.mockRejectedValue(new Error('not entitled'));
+  it('refuses with 501 whether or not the organization holds the module: no entitlement or allocation work runs', async () => {
     const { POST } = await loadRoute();
-    const response = await POST(simulation(valid), { organizationId: 'org_1', userId: 'u1' });
+    for (const entitled of [true, false]) {
+      m.requireEntitlement.mockReset();
+      if (entitled) m.requireEntitlement.mockResolvedValue(undefined);
+      else m.requireEntitlement.mockRejectedValue(new Error('not entitled'));
+      const response = await POST(simulation(valid), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(403);
-    expect(m.requireEntitlement).toHaveBeenCalledWith('org_1', 'financial_intelligence_suite', 'u1');
+      expect(response.status).toBe(501);
+      expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    }
+    expect(m.requireEntitlement).not.toHaveBeenCalled();
     expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
@@ -103,20 +100,17 @@ describe('finance/simulation route', () => {
     expect(m.runAllocation).not.toHaveBeenCalled();
   });
 
-  it('answers 500, not an empty success, when the allocation fails', async () => {
-    m.runAllocation.mockRejectedValue(new Error('rule not found'));
+  it.each([
+    ['an allocation that fails', () => m.runAllocation.mockRejectedValue(new Error('rule not found'))],
+    ['a period or rule that is not the organization\'s', () => m.runAllocation.mockRejectedValue(new m.AllocationRunError('not_found', 'Billing period x not found'))],
+    ['a rule without an active version', () => m.runAllocation.mockRejectedValue(new m.AllocationRunError('conflict', 'No active version for rule r'))],
+  ])('never reaches the allocation engine, so %s cannot surface: 501 NOT_IMPLEMENTED', async (_label, arrange) => {
+    arrange();
     const { POST } = await loadRoute();
     const response = await POST(simulation(valid), { organizationId: 'org_1', userId: 'u1' });
 
-    expect(response.status).toBe(500);
-  });
-
-  it('answers 404 for a period or rule that is not the organization\'s and 409 for a rule without an active version', async () => {
-    const { POST } = await loadRoute();
-    m.runAllocation.mockRejectedValueOnce(new m.AllocationRunError('not_found', 'Billing period x not found'));
-    expect((await POST(simulation(valid), { organizationId: 'org_1', userId: 'u1' })).status).toBe(404);
-
-    m.runAllocation.mockRejectedValueOnce(new m.AllocationRunError('conflict', 'No active version for rule r'));
-    expect((await POST(simulation(valid), { organizationId: 'org_1', userId: 'u1' })).status).toBe(409);
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ code: ErrorCode.NOT_IMPLEMENTED, message: REFUSAL });
+    expect(m.runAllocation).not.toHaveBeenCalled();
   });
 });

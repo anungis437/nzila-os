@@ -1,3 +1,7 @@
+import {
+  listIndirectTaxAccounts,
+  createIndirectTaxAccount,
+} from '@/lib/services/finance-tax-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Indirect Tax Accounts
@@ -7,15 +11,9 @@
  * PR5 — Org-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { indirectTaxAccounts } from '@nzila/db/schema'
-import { eq } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { CreateIndirectTaxAccountInput } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const orgId = req.nextUrl.searchParams.get('orgId')
@@ -26,12 +24,8 @@ export async function GET(req: NextRequest) {
   const access = await requireOrgAccess(orgId)
   if (!access.ok) return access.response
 
-  const rows = await platformDb
-    .select()
-    .from(indirectTaxAccounts)
-    .where(eq(indirectTaxAccounts.orgId, orgId))
-
-  return NextResponse.json(rows)
+  const result = await listIndirectTaxAccounts(orgId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -46,23 +40,6 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await platformDb
-    .insert(indirectTaxAccounts)
-    .values(parsed.data)
-    .returning()
-
-  await recordFinanceAuditEvent({
-    orgId: parsed.data.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.INDIRECT_TAX_ACCOUNT_CREATE,
-    targetType: 'indirect_tax_account',
-    targetId: row.id,
-    afterJson: {
-      taxType: parsed.data.taxType,
-      accountNumber: parsed.data.programAccountNumber,
-    },
-  })
-
-  return NextResponse.json(row, { status: 201 })
+  const result = await createIndirectTaxAccount(parsed.data, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

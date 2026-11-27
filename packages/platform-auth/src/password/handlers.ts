@@ -32,6 +32,7 @@ import {
   resetPassword,
   getAuthUser,
 } from './auth-service'
+import { clearSessionCookie } from './session'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -164,8 +165,12 @@ export async function handleLogout() {
   try {
     await logout()
     return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json({ success: true })
+  } catch (error) {
+    // Revocation (or its audit) failed, so the server session may still be valid: never report a sign-out that did not
+    // happen. The browser still forgets its cookie, and the caller is told the server-side end could not be confirmed.
+    console.error('[platform-auth] handleLogout failed:', error instanceof Error ? error.name : 'Error')
+    try { await clearSessionCookie() } catch { /* the failure is already reported */ }
+    return NextResponse.json({ error: 'Sign-out could not be confirmed' }, { status: 500 })
   }
 }
 

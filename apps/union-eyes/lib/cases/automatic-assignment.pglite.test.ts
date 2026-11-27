@@ -1,9 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-import { drizzle } from 'drizzle-orm/pglite'
 import { sql } from 'drizzle-orm'
 import type { PGlite } from '@electric-sql/pglite'
 import { newUuid, ORG, U, seedMembership } from '@/db/__tests__/authority-kernel-harness'
-import { freshDb, kit } from '@/db/__tests__/authority-kernel-testkit'
+import { appDrizzle, freshDb, kit } from '@/db/__tests__/authority-kernel-testkit'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { automaticallyAssignRepresentative, rankMatchingProfiles } from './automatic-assignment'
 import { assignPrimaryRepresentative } from '@/lib/services/case-access-service'
@@ -17,7 +16,7 @@ let k: ReturnType<typeof kit>
 let people: string[]
 let cases: string[]
 const actor = { userId: U.officer, organizationId: ORG, role: 'officer' as const }
-const as = <T>(userId: string, fn: (tx: RLSTx) => Promise<T>) => drizzle(pg).transaction(async tx => {
+const as = <T>(userId: string, fn: (tx: RLSTx) => Promise<T>) => appDrizzle(pg).transaction(async tx => {
   await tx.execute(sql`SELECT set_config('app.current_org_id',${ORG},true),set_config('app.current_user_id',${userId},true)`)
   return fn(tx as unknown as RLSTx)
 })

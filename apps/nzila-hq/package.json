@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@nzila/db": "workspace:*",
     "@nzila/hq-domain": "workspace:*",
     "@nzila/os-core": "workspace:*",
     "@nzila/payments-stripe": "workspace:*",
@@ -24,7 +25,7 @@
     "@nzila/qbo": "workspace:*",
     "@nzila/ui": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "postgres": "^3.4.5",
     "react": "19.3.1",
     "react-dom": "19.3.1",

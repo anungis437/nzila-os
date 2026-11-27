@@ -140,6 +140,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'authenticateMetricsService(', // Dedicated read-only metrics machine capability guard (#1118); route-level denial tests
     'authenticateOperationalMetrics(', // Union Eyes fixed-cardinality platform metrics capability; constant-time dedicated-key guard
     'CRON_SECRET',              // Cron route secret verification
+    'cronSecretMatches(',       // union-eyes shared cron-secret check (lib/api/cron-secret.ts): constant-time, unset secret never matches
     'verifyShopifySignature(',  // Shopify webhook signature verification
     'withRoleAuth(',             // Role-based auth guard wrapper
     'withAdminAuth(',            // Admin-only auth guard wrapper
@@ -238,6 +239,17 @@ describe('INV-11 — Every API route has authorization', () => {
   describe('recognizer fails closed', () => {
     const hasAuth = (content: string) => AUTH_PATTERNS.some((pattern) => content.includes(pattern))
     const isPublic = (p: string) => PUBLIC_ROUTE_PATTERNS.some((x) => p.replace(/\\/g, '/').includes(x))
+
+    it('recognizes the cron-secret guard only when invoked, and it is a real guard', () => {
+      expect(hasAuth('if (!(await cronSecretMatches(request.headers))) return deny()')).toBe(true)
+      expect(hasAuth("import { cronSecretMatches } from '@/lib/api/cron-secret'")).toBe(false)
+
+      // cronSecretMatches: an unset secret never matches; comparison is over equal-length digests.
+      const cron = readFileSync(join(APPS_DIR, 'union-eyes', 'lib', 'api', 'cron-secret.ts'), 'utf-8')
+      expect(cron).toMatch(/export async function cronSecretMatches\(/)
+      expect(cron).toMatch(/if \(!expected\) return false/)
+      expect(cron).toMatch(/difference \|= left\[i\] \^ right\[i\]/)
+    })
 
     it('recognizes the canonical case actor guard only when invoked', () => {
       expect(hasAuth('const actor = await getCaseActor()')).toBe(true)

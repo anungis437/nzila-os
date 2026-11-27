@@ -1,53 +1,71 @@
-/**
- * Runtime acceptance helper: ends or restores the QA coordinator's supervisory mandate through the application's own authority
- * store (never raw SQL), so a revocation test exercises the real mandate-state path and its audit.
- *
- *   tsx scripts/runtime/authority-admin.ts revoke-mandate <principalUserId> [supervisory|financial]
- *   tsx scripts/runtime/authority-admin.ts restore-fixtures
- *
- * Dev tooling only. It refuses to run unless QA_TEST_ENV=true, and it only touches supervisory or financial mandates in the QA organization.
- */
+/** Owned fixture setup/revocation through actual canonical bearer-bound governance. */
 import pg from 'pg'
-import { runAuthorityTransaction, type SqlExecutor } from '@/lib/authority/store/executor'
-import { changeMandateState } from '@/lib/authority/store/mutations'
 import { UE_TEST_USERS } from '@/tests/fixtures/test-users'
-import { seedQaCaseAssignments } from './../seed-test-env-kernel'
+import { changeMandate } from '@/lib/authority/store/lifecycle'
+import { activeMembershipSource } from '@/lib/authority/store/active-membership-source'
+import { runtimeFixtureAuthorityContext } from './fixture-auth'
+import {
+  seedQaCaseAssignments,
+  ensureQaCaseSupervision,
+  runQaAuthorityActor,
+} from '../seed-test-env-kernel'
 
-async function main(): Promise<void> {
-  if (process.env.QA_TEST_ENV !== 'true') throw new Error('authority-admin only runs with QA_TEST_ENV=true')
-  const url = process.env.DATABASE_URL
-  if (!url) throw new Error('DATABASE_URL is required')
-  const [command, principal, kindArg = 'supervisory'] = process.argv.slice(2)
-  if (kindArg !== 'supervisory' && kindArg !== 'financial') throw new Error('kind must be supervisory or financial')
-  const organizationId = UE_TEST_USERS.adminPrimary.orgId
-
+async function main() {
+  const context = runtimeFixtureAuthorityContext()
+  const [command, principal, kind = 'supervisory'] = process.argv.slice(2)
   if (command === 'restore-fixtures') {
-    console.log(`restored ${await seedQaCaseAssignments(url)} fixture record(s)`)
+    await seedQaCaseAssignments(context.operatorUrl, context)
+    for (const caseId of process.argv.slice(3))
+      await ensureQaCaseSupervision(context.operatorUrl, context, [caseId])
+    console.log('Verified current base case fixture governance')
     return
   }
-  if (command !== 'revoke-mandate' || !principal) throw new Error('usage: revoke-mandate <principalUserId> | restore-fixtures')
-
-  const client = new pg.Client({ connectionString: url })
-  await client.connect()
-  try {
-    const exec = client as unknown as SqlExecutor
-    const live = await client.query(
-      `SELECT id::text AS id FROM ue_authority_mandates
-        WHERE organization_id = $1 AND principal_user_id = $2 AND kind = $3 AND status = 'active' AND revoked_at IS NULL`,
-      [organizationId, principal, kindArg],
+  if (command === 'scope-case') {
+    if (!principal) throw new Error('Exact returned fixture case required')
+    await ensureQaCaseSupervision(context.operatorUrl, context, [principal])
+    console.log('Recorded exact-case synthetic supervision through independent approval')
+    return
+  }
+  if (
+    command !== 'revoke-mandate' ||
+    kind !== 'supervisory' ||
+    !principal ||
+    ![UE_TEST_USERS.chiefStewardPrimary.userId, UE_TEST_USERS.supervisorPrimary.userId].some(
+      (id) => id === principal,
     )
-    for (const row of live.rows) {
-      await runAuthorityTransaction(exec, { organizationId, userId: UE_TEST_USERS.adminPrimary.userId }, (tx) =>
-        changeMandateState(tx, organizationId, String(row.id), 'revoke', UE_TEST_USERS.adminPrimary.userId),
+  )
+    throw new Error('Only known base supervisory fixture revocation is supported')
+  const operator = new pg.Client({ connectionString: context.operatorUrl })
+  await operator.connect()
+  try {
+    const live = (
+      await operator.query(
+        `SELECT id::text FROM public.ue_authority_mandates WHERE organization_id=$1 AND principal_user_id=$2 AND kind='supervisory' AND status='active' AND revoked_at IS NULL`,
+        [UE_TEST_USERS.executivePrimary.orgId, principal],
       )
-    }
-    console.log(`revoked ${live.rows.length} ${kindArg} mandate(s) for ${principal}`)
+    ).rows
+    for (const row of live)
+      await runQaAuthorityActor(context, UE_TEST_USERS.executivePrimary.userId, (tx) =>
+        changeMandate(
+          tx,
+          { memberships: activeMembershipSource },
+          {
+            organizationId: UE_TEST_USERS.executivePrimary.orgId,
+            mandateId: row.id,
+            issuerUserId: UE_TEST_USERS.executivePrimary.userId,
+            change: 'revoke',
+          },
+        ),
+      )
+    console.log(`Revoked ${live.length} governed supervisory fixture mandate(s)`)
   } finally {
-    await client.end()
+    await operator.end()
   }
 }
-
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error)
-  process.exit(1)
+  console.error('Owned fixture authority operation failed', {
+    name: error?.name,
+    code: error?.code,
+  })
+  process.exitCode = 1
 })

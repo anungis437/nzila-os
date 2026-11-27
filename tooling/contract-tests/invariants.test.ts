@@ -109,6 +109,13 @@ const ML_TABLE_IMPORTS = [
   /mlInferenceRuns/,
 ]
 
+// apps/console/app/api/ml/** routes ARE the ml-sdk HTTP backend — the server-side
+// implementation of the SDK, authorised to read ML tables. Their table reads moved out of
+// the route handlers into this one read service, which is part of that backend only while
+// nothing outside apps/console/app/api/ml/** imports it (asserted below).
+const ML_SDK_BACKEND_ROUTES = '/apps/console/app/api/ml/'
+const ML_SDK_BACKEND_READ_SERVICE = '/apps/console/lib/services/ml-read-service.ts'
+
 describe('INV-02: no-shadow-ml', () => {
   it('no app file directly imports ML tables from @nzila/db/schema', async () => {
     const violations: string[] = []
@@ -116,9 +123,9 @@ describe('INV-02: no-shadow-ml', () => {
       const appSrcDir = resolve(ROOT, `apps/${app}`)
       const files = await findFiles(appSrcDir)
       for (const file of files) {
-        // apps/console/app/api/ml/** routes ARE the ml-sdk HTTP backend — they are
-        // the server-side implementation of the SDK and are authorised to read ML tables.
-        if (file.replace(/\\/g, '/').includes('/apps/console/app/api/ml/')) continue
+        const normalized = file.replace(/\\/g, '/')
+        if (normalized.includes(ML_SDK_BACKEND_ROUTES)) continue
+        if (normalized.endsWith(ML_SDK_BACKEND_READ_SERVICE)) continue
         const content = readContent(file)
         // Only flag files that import from @nzila/db/schema AND reference ML tables
         if (!content.includes('@nzila/db')) continue
@@ -133,6 +140,24 @@ describe('INV-02: no-shadow-ml', () => {
       violations,
       `Shadow ML reads detected:\n${violations.join('\n')}`,
     ).toHaveLength(0)
+  })
+
+  it('the ml-sdk backend read service is reached only through the apps/console/app/api/ml/** routes', async () => {
+    const importers: string[] = []
+    const outside: string[] = []
+    const appDirs = readdirSync(resolve(ROOT, 'apps'), { withFileTypes: true }).filter((entry) => entry.isDirectory())
+    for (const app of appDirs) {
+      for (const file of await findFiles(resolve(ROOT, `apps/${app.name}`))) {
+        const normalized = file.replace(/\\/g, '/')
+        if (normalized.endsWith(ML_SDK_BACKEND_READ_SERVICE)) continue
+        if (!/from\s+['"][^'"]*\/ml-read-service['"]/.test(readContent(file))) continue
+        importers.push(normalized)
+        if (!normalized.includes(ML_SDK_BACKEND_ROUTES)) outside.push(normalized)
+      }
+    }
+    expect(existsSync(resolve(ROOT, ML_SDK_BACKEND_READ_SERVICE.slice(1)))).toBe(true)
+    expect(importers.length).toBeGreaterThan(0)
+    expect(outside, `ML read service imported outside the ml-sdk backend:\n${outside.join('\n')}`).toEqual([])
   })
 })
 

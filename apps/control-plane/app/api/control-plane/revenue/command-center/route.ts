@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
-import { buildCommandCenterSnapshot } from '@/server/revenue-snapshots'
-export type { AlertSeverity, CommandAlert, CommandCenterSnapshot } from '@/server/revenue-snapshots'
+import { buildCommandCenterSnapshot } from '@/lib/services/revenue-service'
+export type { AlertSeverity, CommandAlert, CommandCenterSnapshot } from '@/lib/services/revenue-service'
 
 export async function GET(request: Request) {
   try {

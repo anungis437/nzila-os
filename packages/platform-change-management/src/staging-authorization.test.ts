@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { evaluateChangeRequirements, hasFounderOperatedStagingApproval, hasStagingMissionAuthorization } from './approvals'
 import { isInFreezePeriod, loadCalendarPolicy } from './calendar'
@@ -76,6 +78,10 @@ function founderStaging(): ChangeRecord {
 }
 
 describe('solo-founder Union Eyes V2 staging (CHG-2026-0114)', () => {
+  it('keeps the typed projection bound to the same reviewed candidate as the portable gate', () => {
+    const generator = new URL('../../../tooling/scripts/generate-ue-v2-staging-candidate.mjs', import.meta.url)
+    expect(() => execFileSync(process.execPath, [fileURLToPath(generator), '--check'], { stdio: 'pipe' })).not.toThrow()
+  })
   it('accepts the real owner-directed staging record without claiming a second reviewer', () => {
     const change = founderStaging()
     expect(change.approved_by).toEqual(['anungis437'])
@@ -105,6 +111,10 @@ describe('solo-founder Union Eyes V2 staging (CHG-2026-0114)', () => {
     ['other change', (c: ChangeRecord) => ({ ...c, change_id: 'CHG-2026-0199' })],
     ['other service', (c: ChangeRecord) => ({ ...c, service: 'web' })],
     ['other candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: 'f'.repeat(40) } })],
+    ['unreviewed candidate added to linked commits', (c: ChangeRecord) => ({ ...c, linked_commits: [...c.linked_commits, 'f'.repeat(40)], founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: 'f'.repeat(40) } })],
+    ['superseded F3 held after native defects', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c' } })],
+    ['A9 held for CI packaging defects', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: 'a9c47099242c13e23efc72562ca63f3a6cabcc8b' } })],
+    ['superseded pre-repair candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3' } })],
     ['current observed staging source is not the proposed candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb' } })],
     ['previous deployed candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '2107feeb1c2949042d97bd0606efb18e7aa95beb' } })],
     ['superseded staging candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '80651983dcdf114b488813c64f88ca3aca7ab88d' } })],

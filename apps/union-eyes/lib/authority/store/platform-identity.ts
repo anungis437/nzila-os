@@ -18,6 +18,7 @@
  * session taken from that binding and nowhere else.
  */
 import type { MembershipSource } from './facts'
+import { validInstant } from '../common'
 import { AuthorityStoreError, isPrincipalId, isUuid, runAuthorityTransaction, type SqlExecutor } from './executor'
 import { mapMembershipRows } from './identity'
 
@@ -38,11 +39,12 @@ const refuse = (message: string): never => {
 
 /** Fails closed on anything the supported resolver should never hand over. */
 export function assertVerifiedBinding(binding: VerifiedOrgBinding, now: Date = new Date()): void {
+  if (!validInstant(now)) refuse('binding: the evaluation clock is invalid')
   if (!binding || typeof binding !== 'object') refuse('no authenticated binding')
   if (!isPrincipalId(binding.userId)) refuse('binding: the principal is not a valid internal principal id')
   if (!isUuid(binding.organizationId)) refuse('binding: the organization is not a canonical organization uuid')
   if (typeof binding.sessionToken !== 'string' || binding.sessionToken.length === 0) refuse('binding: no session authority')
-  if (!(binding.expiresAt instanceof Date) || Number.isNaN(binding.expiresAt.getTime()) || binding.expiresAt.getTime() <= now.getTime()) {
+  if (!validInstant(binding.expiresAt) || binding.expiresAt.getTime() <= now.getTime()) {
     refuse('binding: the session has expired')
   }
   if (binding.authority !== 'pg-session' && binding.authority !== 'verified-provider-bridge') {
@@ -154,7 +156,7 @@ export function compileAuthorityMembershipReaderSql(options: { ordinaryRole?: st
     GRANT CREATE ON SCHEMA user_management TO ${q(reader)};
     CREATE FUNCTION user_management.ue_authority_membership_rows(p_org uuid, p_users text[])
     RETURNS TABLE (user_id text, organization_id uuid, role text, member_active boolean, user_active boolean, lifecycle_state text)
-    LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+    LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
       SELECT m.user_id::text, m.organization_id, m.role::text, m.is_active, u.is_active, u.lifecycle_state::text
         FROM user_management.organization_users m
         JOIN user_management.users u ON u.user_id = m.user_id

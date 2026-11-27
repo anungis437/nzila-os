@@ -1,0 +1,1 @@
+runtime-governance/write-evidence: wrote /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/proof-artifacts/evidence/2026-11-17/evidence.att.doctrine-compliance.ue-step1-local-0327fba86786-20261117T214423.1794951865003.json contentHash=sha256-e82a991e7d063545be11f7218c5732676b344c5808800722d2266edda6b086f0

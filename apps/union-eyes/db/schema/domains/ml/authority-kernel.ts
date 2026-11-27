@@ -262,6 +262,9 @@ export const ueAuthorityWorkaidMatters = pgTable('ue_authority_workaid_matters',
   referredBy: principal('referred_by').notNull(),
   referredAt: timestamp('referred_at', { withTimezone: true }).notNull().defaultNow(),
   counselAcceptedAt: timestamp('counsel_accepted_at', { withTimezone: true }),
+  counselAcceptedBy: principal('counsel_accepted_by'),
+  // Historical NULL means unknown. Never infer or backfill referral scope.
+  referredCategories: text('referred_categories').array(),
   withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
@@ -374,3 +377,24 @@ export const ueAuthorityWorkaidCounselAccess = pgTable('ue_authority_workaid_cou
   sharesServed: integer('shares_served').notNull(),
   accessedAt: timestamp('accessed_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Retained 0036 shape only. The base-release current authority override grants
+// no runtime/system/private operation; wording adoption remains unavailable.
+export const ueAuthorityWorkaidConsentTextProposals = pgTable('ue_authority_workaid_consent_text_proposals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  version: text('version').notNull(),
+  body: text('body').notNull(),
+  bodySha256: text('body_sha256').notNull(),
+  proposedBy: principal('proposed_by').notNull(),
+  proposedAt: timestamp('proposed_at', { withTimezone: true }).notNull().defaultNow(),
+  adoptedBy: principal('adopted_by'),
+  adoptedAt: timestamp('adopted_at', { withTimezone: true }),
+  adoptedTextId: uuid('adopted_text_id').references(() => ueAuthorityWorkaidConsentTexts.id),
+  withdrawnBy: principal('withdrawn_by'),
+  withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  openUq: uniqueIndex('ue_authority_wa_proposal_open_uq').on(table.organizationId, table.version)
+    .where(sql`adopted_at IS NULL AND withdrawn_at IS NULL`),
+}));

@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { usePilotTracking } from "@/lib/hooks/use-pilot-tracking";
 import { isRecord, readApiError } from "@/lib/client/api-envelope";
+import { caseIntakeResponse } from "@/lib/client/case-intake-response";
 import { dayOf } from "@/lib/client/day";
 import { incrementPilotCaseCount } from "@/components/pilot/pilot-feedback-widget";
 import Link from "next/link";
@@ -92,7 +93,12 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const disclosure = useVoiceDisclosure();
+  // Members are not offered voice transcription, so they never request its notice.
+  const disclosure = useVoiceDisclosure(canUseVoice);
+  // Until React hydrates, typed values are not in form state and a submit would fail validation silently; keep submission
+  // off until then and expose the state for automated journeys.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
   const disclosureRef = useRef(disclosure);
   useEffect(() => { disclosureRef.current = disclosure; }, [disclosure]);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -268,8 +274,9 @@ export function NewClaimForm({ canUseVoice, landOnSubmittedCase, returnPath }: N
         throw new Error(await readApiError(response, "Failed to create claim"));
       }
 
-      const result = await response.json();
-      const claimId = result.claimId;
+      const result: unknown = await response.json();
+      const receipt = caseIntakeResponse.safeParse(result);
+      const claimId = receipt.success ? receipt.data.claimId : null;
 
       if (!claimId) {
         throw new Error("Case was created but no case ID was returned");
@@ -348,11 +355,10 @@ setIsSubmitting(false);
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <Link href={returnHref}>
-            <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
-              <ArrowLeft size={20} />
-              {t('claims.backToClaims')}
-            </button>
+          {/* One interactive element: a link styled as the back control, not a button nested in a link. */}
+          <Link href={returnHref} className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors">
+            <ArrowLeft size={20} aria-hidden="true" />
+            {t('claims.backToClaims')}
           </Link>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('claims.submitNewCase')}</h1>
           <p className="text-gray-600 text-lg">{t('claims.tellUsWhat')}</p>
@@ -427,13 +433,13 @@ setIsSubmitting(false);
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" data-testid="new-claim-form" data-hydrated={hydrated ? 'true' : 'false'}>
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="new-case-title" className="block text-sm font-semibold text-gray-900 mb-2">
                     {t('forms.caseTitle')} *
                   </label>
-                  <input
+                  <input id="new-case-title"
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
@@ -453,10 +459,10 @@ setIsSubmitting(false);
                 {/* Category and Priority */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-category" className="block text-sm font-semibold text-gray-900 mb-2">
                       {t('forms.category')} *
                     </label>
-                    <select
+                    <select id="new-case-category"
                       value={formData.category}
                       onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                       className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -477,10 +483,10 @@ setIsSubmitting(false);
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-priority" className="block text-sm font-semibold text-gray-900 mb-2">
                       {t('priority.label')} *
                     </label>
-                    <select
+                    <select id="new-case-priority"
                       value={formData.priority}
                       onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as CasePriority }))}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -495,10 +501,10 @@ setIsSubmitting(false);
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="new-case-description" className="block text-sm font-semibold text-gray-900 mb-2">
                     {t('forms.detailedDescription')} *
                   </label>
-                  <textarea
+                  <textarea id="new-case-description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder={t('forms.descriptionPlaceholder')}
@@ -533,11 +539,11 @@ setIsSubmitting(false);
                 {/* Date and Location */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-incident-date" className="block text-sm font-semibold text-gray-900 mb-2">
                       <Calendar size={16} className="inline mr-1" />
                       {t('forms.whenOccurred')} *
                     </label>
-                    <input
+                    <input id="new-case-incident-date"
                       type="date"
                       value={formData.date}
                       onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
@@ -555,11 +561,11 @@ setIsSubmitting(false);
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label htmlFor="new-case-location" className="block text-sm font-semibold text-gray-900 mb-2">
                       <MapPin size={16} className="inline mr-1" />
                       {t('forms.location')}
                     </label>
-                    <input
+                    <input id="new-case-location"
                       type="text"
                       value={formData.location}
                       onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
@@ -571,11 +577,11 @@ setIsSubmitting(false);
 
                 {/* Witnesses */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="new-case-witnesses" className="block text-sm font-semibold text-gray-900 mb-2">
                     <Users size={16} className="inline mr-1" />
                     {t('forms.witnesses')}
                   </label>
-                  <input
+                  <input id="new-case-witnesses"
                     type="text"
                     value={formData.witnesses}
                     onChange={(e) => setFormData(prev => ({ ...prev, witnesses: e.target.value }))}
@@ -638,9 +644,10 @@ setIsSubmitting(false);
                           <button
                             type="button"
                             onClick={() => removeFile(index)}
+                            aria-label={t('claims.removeAttachment', { name: file.name })}
                             className="ml-2 p-1 hover:bg-blue-200 rounded transition-colors"
                           >
-                            <X size={16} className="text-gray-600" />
+                            <X size={16} className="text-gray-600" aria-hidden="true" />
                           </button>
                         </div>
                       ))}
@@ -649,13 +656,13 @@ setIsSubmitting(false);
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:gap-4">
                   <motion.button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !hydrated}
                     whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                     whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                    className="flex-1 px-6 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="min-w-0 flex-1 whitespace-normal px-6 py-4 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -670,16 +677,16 @@ setIsSubmitting(false);
                     )}
                   </motion.button>
 
-                  <Link href={returnHref} className="shrink-0">
+                  <Link href={returnHref} className="w-full sm:w-auto sm:shrink-0">
                     <button
                       type="button"
-                      className="px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                      className="w-full px-6 py-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
                     >
                       {t('common.cancel')}
                     </button>
                   </Link>
                 </div>
-                <p className="text-xs text-gray-400 text-center pt-1">{t('forms.editAnytime')}</p>
+                <p className="text-xs text-gray-600 text-center pt-1">{t('forms.editAnytime')}</p>
               </form>
             </CardContent>
           </Card>

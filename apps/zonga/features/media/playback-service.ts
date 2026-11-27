@@ -7,40 +7,19 @@
  * Resolution order:
  * 1. CloudFront-backed media variants (zonga_media_variants, provider=aws)
  * 2. Blob-backed processed variants (zonga_processed_variants, legacy path)
- * 3. Raw upload fallback (zonga_track_assets)
+ * Unproved raw masters remain unavailable.
  */
 
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
+import { zongaRows, type ZongaActionDb } from '@/queries/action-context'
+import { eligibleQualityTiers, safeMediaKey } from './quality-ceiling'
 import { generateSasUrl } from '@nzila/blob'
 import { logger } from '@/lib/logger'
 import { cloudFrontBreaker, resilientAwsCall } from './resilience'
 import type { QualityTier, PlaybackSource } from './types'
 import { PROCESSING_PROFILES } from './types'
 import { getBestMediaVariant } from './media-job-service'
-
-// ── Quality tier ordering for entitlement enforcement ────────────────────────
-
-const QUALITY_RANK: Record<QualityTier, number> = {
-  preview: 0,
-  free: 1,
-  standard: 2,
-  high: 3,
-  premium: 4,
-  hifi: 5,
-}
-
-/**
- * Clamp a requested quality tier to the maximum allowed by entitlement.
- * Defense-in-depth: even if the caller passes a higher-than-allowed quality,
- * the service enforces the ceiling.
- */
-function clampQuality(requested: QualityTier, maxAllowed?: QualityTier): QualityTier {
-  if (!maxAllowed) return requested
-  return (QUALITY_RANK[requested] ?? 0) <= (QUALITY_RANK[maxAllowed] ?? 0)
-    ? requested
-    : maxAllowed
-}
 
 export interface PlaybackUrlResult {
   ok: boolean
@@ -55,122 +34,115 @@ export interface PlaybackUrlResult {
 
 /**
  * Get the best available streaming URL for a content asset.
- * Prefers CloudFront-backed variants, falls back through blob then raw.
+ * Uses eligible CloudFront/encoded Blob variants; an unproved raw master is unavailable.
  *
  * @param contentAssetId — The content asset to stream.
  * @param preferredQuality — Desired quality tier (may be clamped by entitlement).
  * @param maxQualityTier — Optional quality ceiling from subscription entitlement.
  *   Defense-in-depth: the service enforces this ceiling even if the API route
- *   already performed entitlement gating. Pass undefined to skip enforcement.
+ *   already performed entitlement gating. Omission defaults to the requested ceiling.
  */
 export async function getPlaybackUrl(
   contentAssetId: string,
   preferredQuality: QualityTier = 'high',
-  maxQualityTier?: QualityTier,
+  maxQualityTier: QualityTier = preferredQuality,
+  db: Pick<ZongaActionDb, 'execute'> = platformDb,
 ): Promise<PlaybackUrlResult> {
-  // Defense-in-depth: clamp to entitlement ceiling
-  const effectiveQuality = clampQuality(preferredQuality, maxQualityTier)
-  // ── Priority 1: CloudFront-backed media variant (AWS path) ──
-  try {
-    const awsVariant = await getBestMediaVariant(contentAssetId, effectiveQuality)
-    if (awsVariant) {
-      const { createSignedPlaybackUrl } = await import('@nzila/zonga-streaming-aws/cloudfront-delivery')
+  const tiers = eligibleQualityTiers(preferredQuality, maxQualityTier),
+    effectiveQuality = tiers[0]
+  // Source reads stay on the caller's actual transaction. A provider failure
+  // may fall back; a failed SQL authority/source read is not converted to allow.
+  const awsVariant = await getBestMediaVariant(contentAssetId, effectiveQuality, db)
+  if (awsVariant) {
+    try {
+      const { createSignedPlaybackUrl } =
+        await import('@nzila/zonga-streaming-aws/cloudfront-delivery')
       const { resolveCloudFrontConfig } = await import('@nzila/zonga-streaming-aws')
-
+      const [parent] = zongaRows<{ orgId: string }>(
+        await db.execute(
+          sql`SELECT org_id AS "orgId" FROM public.zonga_content_assets WHERE id=${contentAssetId}::uuid AND status='published' FOR SHARE`,
+        ),
+      )
+      if (!parent) throw new Error('Published source changed')
       const signed = await resilientAwsCall(cloudFrontBreaker, async () =>
         createSignedPlaybackUrl(resolveCloudFrontConfig(), {
           storageKey: awsVariant.storageKey,
-          qualityTier: awsVariant.qualityTier as QualityTier,
-          orgId: '',
+          qualityTier: awsVariant.qualityTier,
+          orgId: parent.orgId,
           assetId: contentAssetId,
           ttlSec: 14400,
         }),
       )
-
+      const fresh = await getBestMediaVariant(contentAssetId, effectiveQuality, db)
+      if (
+        !fresh ||
+        fresh.id !== awsVariant.id ||
+        fresh.storageKey !== awsVariant.storageKey ||
+        fresh.qualityTier !== awsVariant.qualityTier
+      )
+        throw new Error('Processed source changed')
+      const tier = awsVariant.qualityTier as QualityTier
       return {
         ok: true,
         streamUrl: signed.url,
-        qualityTier: awsVariant.qualityTier as QualityTier,
-        bitrate: awsVariant.bitrate ?? PROCESSING_PROFILES[awsVariant.qualityTier as QualityTier]?.bitrate ?? 128,
-        codec: awsVariant.codec ?? 'aac',
+        qualityTier: tier,
+        bitrate: awsVariant.bitrate ?? PROCESSING_PROFILES[tier].bitrate,
+        codec: awsVariant.codec ?? PROCESSING_PROFILES[tier].codec,
         durationSeconds: awsVariant.durationSeconds ?? undefined,
         provider: 'aws_cloudfront',
       }
+    } catch (error) {
+      logger.warn('CloudFront playback unavailable', {
+        contentAssetId,
+        errorName: error instanceof Error ? error.name : 'unknown',
+      })
     }
-  } catch (err) {
-    // AWS path unavailable — fall through to blob
-    logger.warn('CloudFront playback unavailable, falling back', { err, contentAssetId })
   }
-
-  // ── Priority 2: Blob-backed processed variant (legacy path) ──
-  const tiers: QualityTier[] = [effectiveQuality, 'high', 'standard', 'preview']
-  const uniqueTiers = [...new Set(tiers)]
-
-  for (const tier of uniqueTiers) {
-    const rows = await platformDb.execute(sql`
-      SELECT pv.storage_key, pv.quality_tier, pv.bitrate, pv.codec,
-             pv.duration_seconds, pv.format
-      FROM zonga_processed_variants pv
-      JOIN zonga_track_assets ta ON ta.id = pv.track_asset_id
-      WHERE ta.content_asset_id = ${contentAssetId}
-        AND pv.quality_tier = ${tier}
-      LIMIT 1
-    `)
-
-    const variant = (rows as unknown as Array<Record<string, unknown>>)[0]
-    if (variant) {
-      const streamUrl = generateSasUrl(
-        'zonga-encoded',
-        variant.storage_key as string,
-        240, // 4 hours
+  const [availability] = zongaRows<{ variants: string | null; tracks: string | null }>(
+    await db.execute(
+      sql`SELECT pg_catalog.to_regclass('public.zonga_processed_variants')::text AS variants,pg_catalog.to_regclass('public.zonga_track_assets')::text AS tracks`,
+    ),
+  )
+  if (availability?.variants && availability.tracks)
+    for (const tier of tiers) {
+      const [variant] = zongaRows<{
+        id: string
+        storageKey: string
+        qualityTier: QualityTier
+        bitrate: number
+        codec: string
+        durationSeconds: number | null
+      }>(
+        await db.execute(
+          sql`SELECT pv.id,pv.storage_key AS "storageKey",pv.quality_tier AS "qualityTier",pv.bitrate,pv.codec,pv.duration_seconds AS "durationSeconds" FROM public.zonga_processed_variants pv JOIN public.zonga_track_assets ta ON ta.id=pv.track_asset_id JOIN public.zonga_content_assets a ON a.id=ta.content_asset_id JOIN public.zonga_creators c ON c.id=a.creator_id WHERE a.id=${contentAssetId}::uuid AND a.status='published' AND c.status='active' AND(c.org_id IS NULL OR c.org_id=a.org_id) AND ta.org_id=a.org_id AND ta.creator_id=a.creator_id AND ta.upload_status='completed' AND pv.quality_tier=${tier} AND pv.storage_key='processed/'||ta.creator_id::text||'/'||ta.id::text||'/'||pv.quality_tier||'.'||pv.format ORDER BY pv.id LIMIT 1 FOR SHARE OF pv,ta,a,c`,
+        ),
       )
-
+      if (!variant || !safeMediaKey(variant.storageKey)) continue
+      const streamUrl = generateSasUrl('zonga-encoded', variant.storageKey, 240)
+      const [fresh] = zongaRows<{ id: string }>(
+        await db.execute(
+          sql`SELECT pv.id FROM public.zonga_processed_variants pv JOIN public.zonga_track_assets ta ON ta.id=pv.track_asset_id JOIN public.zonga_content_assets a ON a.id=ta.content_asset_id JOIN public.zonga_creators c ON c.id=a.creator_id WHERE pv.id=${variant.id}::uuid AND pv.storage_key=${variant.storageKey} AND pv.quality_tier=${variant.qualityTier} AND a.id=${contentAssetId}::uuid AND a.status='published' AND c.status='active' AND(c.org_id IS NULL OR c.org_id=a.org_id) AND ta.org_id=a.org_id AND ta.creator_id=a.creator_id AND ta.upload_status='completed' AND pv.storage_key='processed/'||ta.creator_id::text||'/'||ta.id::text||'/'||pv.quality_tier||'.'||pv.format FOR SHARE OF pv,ta,a,c`,
+        ),
+      )
+      if (!fresh) throw new Error('Processed source changed')
       return {
         ok: true,
         streamUrl,
-        qualityTier: variant.quality_tier as QualityTier,
-        bitrate: variant.bitrate as number,
-        codec: variant.codec as string,
-        durationSeconds: variant.duration_seconds as number | undefined,
+        qualityTier: variant.qualityTier,
+        bitrate: variant.bitrate,
+        codec: variant.codec,
+        durationSeconds:
+          variant.durationSeconds === null ? undefined : Number(variant.durationSeconds),
         provider: 'blob',
       }
     }
-  }
-
-  // ── Priority 3: Raw upload fallback ──
-  const rawRows = await platformDb.execute(sql`
-    SELECT ta.storage_key, ta.duration_seconds
-    FROM zonga_track_assets ta
-    WHERE ta.content_asset_id = ${contentAssetId}
-      AND ta.upload_status = 'completed'
-    LIMIT 1
-  `)
-
-  const raw = (rawRows as unknown as Array<Record<string, unknown>>)[0]
-  if (raw) {
-    const streamUrl = generateSasUrl(
-      'zonga-audio',
-      raw.storage_key as string,
-      240, // 4 hours
-    )
-    const profile = PROCESSING_PROFILES.standard
-    return {
-      ok: true,
-      streamUrl,
-      qualityTier: 'standard',
-      bitrate: profile.bitrate,
-      codec: profile.codec,
-      durationSeconds: raw.duration_seconds as number | undefined,
-      provider: 'raw',
-    }
-  }
-
+  // Raw uploads carry no proved encoded ceiling. Never relabel a master file.
   return {
     ok: false,
     qualityTier: effectiveQuality,
     bitrate: 0,
     codec: 'unknown',
-    error: 'No playable audio available for this track',
+    error: 'No eligible processed audio variant is available',
   }
 }
 

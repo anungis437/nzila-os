@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-11-17T23:59:01.623553+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "scope": "CURRENT_SOURCE_PLAN_GENERATION_ONLY",
+  "command": "UE_V2_WHEELHOUSE=<hash-locked retained wheelhouse> DOCKER_DEFAULT_PLATFORM=linux/amd64 NODE_OPTIONS=--max-old-space-size=3072 pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test",
+  "exitCode": 0,
+  "deterministicRepeatedGeneration": true,
+  "tables": 780,
+  "statements": 6315,
+  "decisions": 300,
+  "exclusions": 35,
+  "securityBlockers": 0,
+  "sourcePlanSha256": "a9c693f062c417bea8d5fd18c6d9dec651d6c7ce22a92560c5c2137a7490eb1d",
+  "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/source-plan-generation-v6.txt",
+  "logSha256": "c92d7d99bb15405ded03cb41ff8309ca979fe2895158c5dac6ef80ddcd48e0fe",
+  "fullReadiness": "NOT_YET_PROVEN",
+  "limitations": [
+    "Not native installation, full regression, browser or deployed proof.",
+    "Recheck source commitments after remaining integration changes."
+  ]
+}

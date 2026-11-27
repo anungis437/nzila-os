@@ -27,6 +27,7 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { NextRequest } from 'next/server'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import catalogDecisions from '../../lib/operations/catalog-v2-decisions.json'
 
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 vi.hoisted(() => {
@@ -165,12 +166,20 @@ describe.skipIf(!URL)('SCIM provisioning on the combined schema, as a session-le
     await expect(systemRows(sql`DELETE FROM scim_provisioned_users WHERE organization_id = ${ORG_A}::uuid`)).rejects.toSatisfy((error) => codeOf(error) === '42501')
     await expect(systemRows(sql`UPDATE scim_events_log SET status = 'error'`)).rejects.toSatisfy((error) => codeOf(error) === '42501')
     await expect(systemRows(sql`DELETE FROM scim_events_log`)).rejects.toSatisfy((error) => codeOf(error) === '42501')
+    // The only definer functions an application role (or PUBLIC) may execute are the ones canonical V2 declares, with that execute grant
+    // (currentSecurity.currentFunctions: the case-domain, external-read and queued case-mail checks); none of them is a way into SCIM.
+    const declaredDefiners = (catalogDecisions as { currentSecurity: { currentFunctions: Array<{ schema: string; name: string; definer: boolean; executeAcl: Array<{ role: string }> }> } })
+      .currentSecurity.currentFunctions
+      .filter((f) => f.schema === 'public' && f.definer && f.executeAcl.some((a) => ['union_eyes_runtime', 'union_eyes_system', 'PUBLIC', 'public'].includes(a.role)))
+      .map((f) => f.name)
+      .sort()
     const definers = (await admin.query(
-      `SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+      `SELECT p.proname, p.prosrc FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
         WHERE p.prosecdef AND n.nspname = 'public'
           AND (has_function_privilege('union_eyes_runtime', p.oid, 'EXECUTE') OR has_function_privilege('union_eyes_system', p.oid, 'EXECUTE') OR has_function_privilege('public', p.oid, 'EXECUTE'))`,
-    )).rows
-    expect(definers).toEqual([])
+    )).rows as Array<{ proname: string; prosrc: string }>
+    expect(definers.map((d) => d.proname).sort()).toEqual(declaredDefiners)
+    for (const definer of definers) expect(definer.prosrc, definer.proname).not.toMatch(/scim/i)
     expect((await admin.query(`SELECT proname FROM pg_proc WHERE proname LIKE 'ue\\_scim\\_%'`)).rows).toEqual([])
   })
 

@@ -51,9 +51,9 @@ export default async function CertificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Certifications</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Training progress</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Complete learning tracks to earn badges, unlock tier advancement, and specialise.
+            Record your personal learning progress. Course completion does not issue a certification or change your partner tier.
           </p>
         </div>
         <div className="text-right">
@@ -65,7 +65,7 @@ export default async function CertificationsPage() {
       {/* Overall progress */}
       <div className="mt-6 bg-white rounded-xl border border-slate-200 p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-slate-700">Overall Certification Progress</span>
+          <span className="text-sm font-medium text-slate-700">Overall Training Progress</span>
           <span className="text-sm font-bold text-slate-900">
             {completedModules} / {totalModules} modules
           </span>

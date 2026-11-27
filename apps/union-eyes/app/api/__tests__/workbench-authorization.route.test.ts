@@ -13,6 +13,7 @@ const m = vi.hoisted(() => ({
   auditLog: vi.fn(),
   persistAtomicAudit: vi.fn(),
   execute: vi.fn(),
+  assignmentSet:vi.fn(),
 }));
 
 class TestApiError extends Error {
@@ -106,7 +107,7 @@ describe('POST /api/workbench/assign', () => {
     vi.clearAllMocks();
     m.getCaseActor.mockResolvedValue(steward);
     m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => unknown) => fn({
-      update: () => ({ set: () => ({ where: vi.fn() }) }),
+      update: () => ({ set: (values:unknown) => {m.assignmentSet(values);return { where: vi.fn() }} }),
       insert: () => ({ values: vi.fn() }),
     }));
     m.findReadableCase.mockResolvedValue({ claimId, assignedTo: null, visibility: 'internal' });
@@ -158,6 +159,18 @@ describe('POST /api/workbench/assign', () => {
     expect(result.claim).toEqual({ claimId, assignedTo: 'steward-2' });
     expect(m.assignPrimaryRepresentative).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ organizationId: 'org-1', grievanceId: claimId, issuerUserId: 'chief-1', assigneeUserId: 'steward-2' }));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'case.assign', organizationId: 'org-1', userId: 'chief-1', resourceId: claimId }));
+  });
+
+  it('preserves the lifecycle when an assign-only supervisor records the governed assignment',async()=>{
+    m.getCaseActor.mockResolvedValue(chief);
+    m.findReadableCase.mockResolvedValue({claimId,assignedTo:null,status:'under_review',visibility:'internal'});
+    const {POST}=await import('../workbench/assign/route');
+    const response=await POST(ctx({claimId,assignTo:'steward-2'}));
+    expect(response).toEqual({claim:{claimId,assignedTo:'steward-2'}});
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(),chief,claimId,true,'case:assign');
+    expect(m.assignmentSet).toHaveBeenCalledWith({assignedTo:'steward-2',assignedAt:expect.any(Date),updatedAt:expect.any(Date)});
+    expect(m.assignmentSet.mock.calls[0][0]).not.toHaveProperty('status');
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(),expect.objectContaining({action:'case.assign'}));
   });
 
   it('fails the assignment when the in-transaction audit cannot be written', async () => {

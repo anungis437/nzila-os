@@ -33,16 +33,20 @@ const verify = (threadId: string) => as(handler, tx => respondToPrivacyRequest(t
 
 describe.skipIf(!URL)('privacy requests on real PostgreSQL and installed runtime grants', () => {
   beforeAll(async () => {
-    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     admin = await harness.start(URL!)
     for (const id of [org, foreign]) await admin.query(`INSERT INTO organizations
       (id,name,slug,organization_type,hierarchy_path,hierarchy_level,sectors,clc_affiliated,member_count,active_member_count,settings,features_enabled,status,created_at,updated_at,remittance_day)
       VALUES($1,'Privacy regression',$2,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`, [id, 'privacy-' + id])
-    await admin.query("INSERT INTO organization_members(organization_id,user_id,role,status,name,email) VALUES($1,$2,'steward','active','Synthetic privacy handler','privacy-handler@example.test')", [org, handler.userId])
+    await admin.query("INSERT INTO organization_members(exempt_from_per_capita, organization_id,user_id,role,status,name,email) VALUES(false, $1,$2,'steward','active','Synthetic privacy handler','privacy-handler@example.test')", [org, handler.userId])
     await admin.query(`INSERT INTO triage_designations(organization_id,scope,user_id,granted_by,granted_at,expires_at)
       VALUES($1,'messages',$2,'native-test',now()-interval '1 day',now()+interval '1 day')`, [org, handler.userId])
+    await harness.setRole(user.userId, org, 'member')
+    await harness.setRole(handler.userId, org, 'steward')
+    await harness.setRole(other.userId, org, 'member')
+    // The subject also belongs to the foreign organization: acting there, with a live session, still reads nothing of org's request.
+    await harness.setRole(user.userId, foreign, 'member')
   }, 60_000)
-  afterAll(async () => { await admin?.end(); await harness.stop(); vi.unstubAllEnvs() })
+  afterAll(async () => { await admin?.end(); await harness.stop() })
 
   it('persists a self-owned request using the installed physical columns and only the runtime role', async () => {
     const made = await make()

@@ -160,7 +160,7 @@ export function proveFrameworkApplication(target: FrameworkApplicationTarget) {
       ]).trim()
       if (actual !== 'UE_BOOTSTRAP_V2_FRAMEWORK_APPLICATION')
         throw new Error('UE_FRAMEWORK_APPLICATION_CLEANUP_LABEL_MISMATCH')
-      invoke(['rm', '-f', name])
+      invoke(['rm', '-f', '-v', name])
     }
   }
 }

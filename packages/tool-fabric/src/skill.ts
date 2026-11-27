@@ -81,23 +81,36 @@ function splitFrontmatter(raw: string): { front: Record<string, string>; body: s
   if (!match) return { front: {}, body: raw }
   const front: Record<string, string> = {}
   for (const line of (match[1] ?? '').split(/\r?\n/)) {
-    const m = /^([A-Za-z0-9_-]+)\s*:\s*(.*)$/.exec(line)
-    if (m?.[1]) front[m[1].toLowerCase()] = (m[2] ?? '').replace(/^["']|["']$/g, '')
+    const colon = line.indexOf(':')
+    if (colon <= 0) continue
+    const key = line.slice(0, colon).trimEnd()
+    const value = line.slice(colon + 1).trimStart()
+    if (!/^[A-Za-z0-9_-]+$/.test(key) || /[\r\u2028\u2029]/.test(value)) continue
+    front[key.toLowerCase()] = value.replace(/^["']|["']$/g, '')
   }
   return { front, body: raw.slice(match[0].length) }
+}
+
+/** Text after `prefix` + whitespace, or undefined when the line is not that heading level. Linear. */
+function headingText(line: string, prefix: string): string | undefined {
+  if (!line.startsWith(prefix)) return undefined
+  const rest = line.slice(prefix.length)
+  if (rest.length === 0 || rest.trimStart().length === rest.length) return undefined
+  if (/[\r\u2028\u2029]/.test(rest)) return undefined
+  return rest.trimStart()
 }
 
 function commandGroups(body: string): string[] {
   const groups: string[] = []
   let inSection = false
   for (const line of body.split(/\r?\n/)) {
-    const h2 = /^##\s+(.*)$/.exec(line)
-    if (h2) {
-      inSection = /command groups?/i.test(h2[1] ?? '')
+    const h2 = headingText(line, '##')
+    if (h2 !== undefined) {
+      inSection = /command groups?/i.test(h2)
       continue
     }
-    const h3 = /^###\s+(.*)$/.exec(line)
-    if (inSection && h3?.[1]) groups.push(stripControl(h3[1]).slice(0, 80))
+    const h3 = headingText(line, '###')
+    if (inSection && h3) groups.push(stripControl(h3).slice(0, 80))
   }
   return groups.slice(0, 50)
 }

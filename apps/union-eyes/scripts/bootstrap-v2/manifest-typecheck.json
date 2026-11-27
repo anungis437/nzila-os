@@ -6,6 +6,12 @@
     "incremental": false
   },
   "include": ["manifest*.ts", "installer.ts", "clean-room.ts"],
-  "files": [],
+  "files": [
+    "../../../../tooling/scripts/lib/union-eyes-current-security-contract.ts",
+    "../../../../tooling/scripts/lib/union-eyes-current-security-preimage.ts",
+    "../../../../tooling/scripts/lib/union-eyes-current-security-programs.ts",
+    "../../../../tooling/scripts/lib/union-eyes-current-security-installer.ts",
+    "../../../../tooling/scripts/write-union-eyes-current-catalog.ts"
+  ],
   "exclude": []
 }

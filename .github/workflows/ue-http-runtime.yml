@@ -4,6 +4,16 @@ on:
   pull_request:
     paths:
       - 'apps/union-eyes/**'
+      - 'packages/**'
+      - 'patches/**'
+      - 'docs/union-eyes/bootstrap-v2/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.json'
+      - '.github/actions/setup-monorepo/**'
+      - 'tooling/ci/configure-ubuntu-archives.py'
+      - 'tooling/ci/test_configure_ubuntu_archives.py'
       - 'tooling/scripts/ue-runtime-up.mjs'
       - 'tooling/scripts/lib/ue-disposable-container-ownership*.mjs'
       - 'tooling/scripts/lib/ue-runtime-restart-handoff*.mjs'
@@ -18,9 +28,103 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  v2-engineering-runtime:
+    name: V2 production build, real login, four browser profiles and full casework load
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
+    timeout-minutes: 90
+    env:
+      UE_V2_PYTHON_IMAGE: python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-monorepo
+        with:
+          node-version: '24'
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.11'
+
+      - name: Build and verify the pinned Linux cp311 wheelhouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          wheelhouse="$RUNNER_TEMP/ue-v2-http-wheelhouse"
+          mkdir -p "$wheelhouse"
+          docker run --rm --platform linux/amd64 --memory 1536m --cpus 2 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$wheelhouse:/wheels" \
+            "$UE_V2_PYTHON_IMAGE" \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+              --require-hashes --no-deps --only-binary=:all: \
+              -r /req/requirements.lock -d /wheels
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$wheelhouse"/*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$wheelhouse" >> "$GITHUB_ENV"
+
+      - name: Verify the committed V2 source plan twice without source drift
+        working-directory: apps/union-eyes
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
+        run: pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test --check
+
+      - name: Install the locked cryptography runtime for the owned local vault
+        run: python -m pip install --no-index --find-links="$UE_V2_WHEELHOUSE" --require-hashes -r apps/union-eyes/backend/requirements.lock
+
+      - name: Verify official Ubuntu archive bootstrap and install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tooling/ci -p test_configure_ubuntu_archives.py -v
+          sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" python3 tooling/ci/configure-ubuntu-archives.py
+          pnpm --filter @nzila/union-eyes exec playwright install --with-deps chromium
+
+      - name: Pull the exact PostgreSQL 16 fixture image
+        run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+      - name: Pull the exact Redis fixture image for production rate limiting
+        run: docker pull redis:7.4-alpine@sha256:7f7d30b7fdd09467bac58198a1f166dd69789d348d4fe859cccb20e0cf287fbe
+
+      - name: Verify the component evidence parser fails closed
+        env:
+          NODE_OPTIONS: --max-old-space-size=2048
+        run: >-
+          pnpm exec vitest run --project union-eyes-heavy --maxWorkers=1
+          apps/union-eyes/scripts/bootstrap-v2/next-acceptance.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/browser-acceptance.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/authenticated-casework-load.test.ts
+
+      # The default CLI must retain its real exit 1 and global acceptance-unproven status.
+      # This wrapper preserves that raw result and only accepts every explicit engineering
+      # component, exact candidate provenance, safe observations and completed cleanup.
+      - name: Execute and verify actual V2 build, HTTP, browser and unchanged full load components
+        working-directory: apps/union-eyes
+        timeout-minutes: 75
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
+          UE_V2_EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          UE_V2_BROWSER_ACCEPTANCE: '1'
+          UE_V2_AUTHENTICATED_CASEWORK_LOAD: '1'
+          UE_V2_NEXT_MAX_HEAP_MB: '6144' # the production build exceeds 4 GB; the HTTP QA job builds at 6 GB on the same runner
+          NODE_OPTIONS: --max-old-space-size=2048
+        run: pnpm exec tsx scripts/bootstrap-v2/next-acceptance.ts --ci-engineering-components
+
+      - name: Preserve source-bound sanitized raw component evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-next-engineering-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: artifacts/ue-v2-next-ci/
+          if-no-files-found: error
+          retention-days: 14
+
   synthetic-browser-runtime:
     name: Production-build HTTP, cross-tenant and restart QA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest moved to 26.04, where Playwright Chromium and setup-python 3.11.14 are unavailable
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
@@ -126,6 +230,8 @@ jobs:
             .ue-runtime/playwright-restart-pre-mandates.json
             .ue-runtime/playwright-restart-persistence.json
             artifacts/ue-http-runtime/receipt.json
+            apps/union-eyes/test-results/runtime/**/error-context.md
+            apps/union-eyes/test-results/runtime/**/test-failed-*.png
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7

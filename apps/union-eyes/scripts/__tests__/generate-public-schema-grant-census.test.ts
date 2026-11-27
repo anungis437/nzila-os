@@ -37,6 +37,8 @@ describe('generate-public-schema-grant-census', () => {
     expect(existsSync(REPORT_MD)).toBe(true)
 
     const report = JSON.parse(readFileSync(REPORT_JSON, 'utf8'))
+    expect(report.authorityRegistry).toBe('CURRENT_CANONICAL_PROJECTION')
+    expect(report.authorityRegistryDigest).toMatch(/^[a-f0-9]{64}$/)
     expect(report.canonicalDeclaredPublicTableCount).toBeGreaterThan(0)
     expect(report.canonicalDeclaredPublicTableCount).toBe(report.publicTablesWithAuthorityEntry)
     // PERMANENT INVARIANT (PR #752 round 7): every canonical public-schema

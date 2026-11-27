@@ -44,9 +44,9 @@ const state = vi.hoisted(() => ({
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
 vi.mock('@/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
-vi.mock('@/db/tenant-context-storage', async () => {
+vi.mock('@/db/tenant-context-storage', async (importOriginal) => {
   const { ambientDb } = await import('./native-route-harness')
-  return { getActiveTenantDb: () => ambientDb }
+  return { ...(await importOriginal<typeof import('@/db/tenant-context-storage')>()), getActiveTenantDb: () => ambientDb }
 })
 vi.mock('@/lib/db/with-rls-context', async () => {
   const { rlsContextModule, harness, RUNTIME_ROLE } = await import('./native-route-harness')
@@ -61,8 +61,15 @@ vi.mock('@/lib/db/with-rls-context', async () => {
   // As in production, the user a tenant transaction is bound to is the authenticated session's, not something the caller passes.
   const sessionUser = () => state.session.userId || state.caller.userId
   return {
-    withRLSContext: (context: { organizationId: string; userId?: string }, work: never) =>
-      counted(() => rlsContextModule.withRLSContext({ ...context, userId: context.userId ?? sessionUser() }, work)),
+    // Production's single-argument form binds the transaction to the authenticated session's own organization and principal
+    // (lib/db/with-rls-context.ts); the canonical external reader uses it (lib/external-resource-read/reader.ts).
+    withRLSContext: (context: { organizationId: string; userId?: string } | ((tx: never) => Promise<unknown>), work?: never) =>
+      typeof context === 'function'
+        ? (state.session.userId
+          ? counted(() => rlsContextModule.withRLSContext({ organizationId: state.session.organizationId ?? '', userId: state.session.userId! } as never, context as never))
+          // No authenticated session: the production binder refuses before any statement (AuthOrgBindingError UNAUTHENTICATED).
+          : import('../../../../packages/platform-auth/src/org-binding').then(({ AuthOrgBindingError }) => { throw new AuthOrgBindingError('UNAUTHENTICATED') }))
+        : counted(() => rlsContextModule.withRLSContext({ ...context, userId: context.userId ?? sessionUser() }, work as never)),
     withSystemContext: (work: never) => counted(() => rlsContextModule.withSystemContext(work)),
     withExplicitUserContext: (userId: string, work: () => Promise<unknown>, organizationId?: string) =>
       counted(() => harness.tenant(RUNTIME_ROLE, organizationId ?? null, userId, () => work())),
@@ -255,7 +262,12 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
     admin = await harness.start(URL!)
     await newOrganization(ORG_A, `Documents A ${tag}`)
     await newOrganization(ORG_B, `Documents B ${tag}`)
+    // The representative signs in to their own organization: canonical external reads start from that own-organization session.
+    await newOrganization(repOrganization, `Representative firm ${tag}`)
+    harness.setRole(representative, repOrganization, 'member')
     for (const [user, org, role] of [[memberA, ORG_A, 'member'], [stewardA, ORG_A, 'steward'], [memberB, ORG_B, 'member'], [stewardB, ORG_B, 'steward'], [peerA, ORG_A, 'steward'], [peerB, ORG_B, 'steward']] as const) harness.setRole(user, org, role)
+    // The workbook claimant is a member of the claiming organization: their own user context is a real canonical session.
+    harness.setRole(claimant, ORG_A, 'member')
     state.userOrganization.set(claimant, ORG_A)
     state.userOrganization.set(peerA, ORG_A)
     state.userOrganization.set(peerB, ORG_B)
@@ -305,11 +317,14 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
       const seen = await harness.tenant(RUNTIME_ROLE, null, memberA, async (tx) => ({
         documents: await tx.select().from(documents),
         versions: await tx.select().from(documentVersions),
-        authorities: await tx.select().from(representationAuthorities),
-        grants: await tx.select().from(externalMatterAccessGrants),
         workbooks: await tx.select().from(workbooks),
       }))
-      expect(Object.values(seen).map((rows) => rows.length)).toEqual([0, 0, 0, 0, 0])
+      expect(Object.values(seen).map((rows) => rows.length)).toEqual([0, 0, 0])
+      // The external authority and grant relations are contained in canonical V2 (CONTAINED_NO_AUTHORITY: only the qualified external
+      // reader functions reach them), so the runtime role is refused them outright, in no organization and in its own alike.
+      for (const organization of [null, ORG_A])
+        for (const table of [representationAuthorities, externalMatterAccessGrants])
+          await expect(harness.tenant(RUNTIME_ROLE, organization, memberA, (tx) => tx.select().from(table))).rejects.toMatchObject({ cause: { code: '42501' } })
       const seenByOwner = await harness.tenant(RUNTIME_ROLE, ORG_A, memberA, (tx) => tx.select().from(documents))
       expect(seenByOwner.map((row) => row.id)).toContain(id)
       // The ambient handle outside any scope is the runtime role with no organization: the same empty answer.
@@ -507,15 +522,24 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
       )
     })
 
-    it('reads the matter for the representative in the organization they name, and records the read with its decision', async () => {
+    // Canonical V2 reads an external matter only through a separately qualified institutional authority (ue_external_resource_read_v1:
+    // independent approval, member consent and an exact qualification, proven positively in external-resource-read.postgres.test.ts).
+    // The rows this fixture writes are the legacy grant model, which canonical V2 does not qualify ("does not qualify legacy active grants or
+    // member consent without exact institutional approval"). So through every route the representative, a stranger and another organization
+    // alike are refused with 403 (never 503), no projection, document or byte leaves, storage is never read, and no release is recorded.
+    const releaseActions = ['external.resource.read', 'document.external_download']
+    const released = (before: number) => harness.audits.slice(before).filter((entry) => releaseActions.includes(entry.action))
+    const refusedBody = async (response: Response) => {
+      expect(response.status).toBe(403)
+      const text = await response.text()
+      for (const secret of [`Counsel copy ${tag}`, grievance, document]) expect(text).not.toContain(secret)
+    }
+
+    it('refuses the matter to its legacy-granted representative in the organization they name, and records no read', async () => {
       state.session = external()
       const before = harness.audits.length
-      const response = await getMatter(ORG_A, grievance)
-      expect(response.status).toBe(200)
-      expect(((await json(response)).data as { id: string }).id).toBe(grievance)
-      const recorded = harness.audits.slice(before).filter((entry) => entry.action === 'external.resource.read')
-      expect(recorded).toHaveLength(1)
-      expect(recorded[0]).toMatchObject({ organizationId: ORG_A, userId: representative, resourceId: grievance })
+      await refusedBody(await getMatter(ORG_A, grievance))
+      expect(released(before)).toEqual([])
     })
 
     it('gives a stranger, another organization and a malformed identifier nothing', async () => {
@@ -525,69 +549,68 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
       state.session = external()
       // The representative names the other organization: they hold no authority there.
       expect((await getMatter(ORG_B, grievance)).status).toBe(403)
-      expect((await getMatter('not-a-uuid', grievance)).status).toBe(400)
+      // The canonical reader answers a malformed identifier as it answers every refusal (no oracle): 403.
+      expect((await getMatter('not-a-uuid', grievance)).status).toBe(403)
       state.session = { userId: null, organizationId: undefined }
       expect((await getMatter(ORG_A, grievance)).status).toBe(401)
       // A refusal for someone with no authority is not a row in the named organization's audit trail.
       expect(harness.audits.slice(before).filter((entry) => entry.organizationId === ORG_B)).toEqual([])
+      expect(released(before)).toEqual([])
     })
 
-    it('lists only the documents the representative holds a grant on', async () => {
+    it('lists no document to a representative who holds only legacy grants', async () => {
       await newDocument(ORG_A, `Not granted ${tag}`, { grievanceId: grievance })
       state.session = external()
+      const before = harness.audits.length
       const response = await (externalDocuments!.GET as (request: Request, context: unknown) => Promise<Response>)(
         request(`/api/external/grievances/${grievance}/documents?organizationId=${ORG_A}`, 'GET'),
         routeParams({ id: grievance }),
       )
-      expect(response.status).toBe(200)
-      expect(((await json(response)).data as Row[]).map((row) => row.id)).toEqual([document])
+      await refusedBody(response)
+      expect(released(before)).toEqual([])
     })
 
-    it('reads one granted document, refuses a malformed identifier and a document without a grant', async () => {
+    it('reads no document, granted or not, and refuses a malformed identifier', async () => {
       state.session = external()
       const get = (id: string) =>
         (externalDocument!.GET as (request: Request, context: unknown) => Promise<Response>)(
           request(`/api/external/documents/${id}?organizationId=${ORG_A}&matterId=${grievance}`, 'GET'),
           routeParams({ id }),
         )
-      expect((await get(document)).status).toBe(200)
-      expect((await get('not-a-uuid')).status).toBe(404)
+      await refusedBody(await get(document))
+      expect([403, 404]).toContain((await get('not-a-uuid')).status)
       const ungranted = await newDocument(ORG_A, `Ungranted ${tag}`, { grievanceId: grievance })
       expect((await get(ungranted)).status).toBe(403)
     })
 
-    it('serves the bytes of the granted version with no transaction open, and records what was delivered before they leave', async () => {
+    it('serves no bytes: storage is never read and no delivery is recorded', async () => {
       state.session = external()
       const before = harness.audits.length
+      const storageReads = state.transactionsDuringStorageRead.length
       const response = await (externalDownload!.GET as (request: Request, context: unknown) => Promise<Response>)(
         request(`/api/external/documents/${document}/download?organizationId=${ORG_A}&matterId=${grievance}`, 'GET'),
         routeParams({ id: document }),
       )
-      expect(response.status).toBe(200)
-      // The grant is pinned to version 1: that is the file released, not the later version.
-      expect(Buffer.from(await response.arrayBuffer()).toString()).toBe(`Counsel copy ${tag} v1`)
-      expect(state.transactionsDuringStorageRead).toEqual([0])
-      const recorded = harness.audits.slice(before).filter((entry) => entry.action === 'document.external_download')
-      expect(recorded).toHaveLength(1)
-      expect(recorded[0]).toMatchObject({ organizationId: ORG_A, userId: representative, resourceId: document, details: expect.objectContaining({ versionNo: 1, delivery: 'served_by_route' }) })
+      await refusedBody(response)
+      expect(state.transactionsDuringStorageRead.length).toBe(storageReads)
+      expect(released(before)).toEqual([])
     })
 
-    it('releases nothing when the access cannot be recorded, and nothing after the grant is revoked', async () => {
+    it('stays refused before and after the legacy grant is revoked, releasing nothing', async () => {
       state.session = external()
       const download = () =>
         (externalDownload!.GET as (request: Request, context: unknown) => Promise<Response>)(
           request(`/api/external/documents/${document}/download?organizationId=${ORG_A}&matterId=${grievance}`, 'GET'),
           routeParams({ id: document }),
         )
-      // The decision to allow is itself recorded first; the next record after it is the delivery record.
+      // A refusal writes no release record, so there is no audit to make fail here (an armed fault would outlive this test).
       const armed = harness.audits.length
-      harness.failNextAudit()
       expect((await download()).status).toBe(403)
-      expect(harness.audits.length).toBe(armed)
-
+      expect(released(armed)).toEqual([])
       await admin.query(`UPDATE external_document_access_grants SET status = 'revoked', revoked_at = now() WHERE document_id = $1`, [document])
       expect((await download()).status).toBe(403)
       await admin.query(`UPDATE external_document_access_grants SET status = 'active', revoked_at = NULL WHERE document_id = $1`, [document])
+      expect(released(armed)).toEqual([])
     })
 
     const uploadAs = (blobPath: string) =>
@@ -596,7 +619,7 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
         routeParams({ id: grievance }),
       )
 
-    it('leaves nothing behind when the grant row of an upload cannot be written (the document, its version, its link and its grant are one unit)', async () => {
+    it('refuses an external upload before the write and leaves no document or release audit', async () => {
       state.session = external()
       const blobPath = `documents/${ORG_A}/external-${randomUUID()}.pdf`
       state.storage.set(blobPath, Buffer.from('from counsel'))
@@ -604,37 +627,34 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
 
       const response = await uploadAs(blobPath)
 
-      // KNOWN DEFECT, see the test below: the route's current contract requires an intakeId this fixture does not open, so the request
-      // never reaches the grant insert the row-level-security defect described below is about; it is refused at schema validation
-      // instead. Previously masked by an unrelated withPrincipalOnlyContext wiring gap that 403'd every external request before this
-      // one ran; now that the request reaches the route, 400 is the real, currently-produced refusal. The fixture still proves the
-      // write is refused and nothing is left behind either way.
-      expect(response.status).toBe(400)
+      // Canonical V2 admits no external write at all: the canonical external boundary answers every non-read request 403 before the
+      // route runs (lib/external-resource-middleware.ts). The fixture still proves the write is refused and nothing is left behind.
+      expect(response.status).toBe(403)
       expect((await admin.query(`SELECT 1 FROM documents WHERE blob_path = $1`, [blobPath])).rows).toEqual([])
       expect((await admin.query(`SELECT 1 FROM document_versions WHERE storage_key = $1`, [blobPath])).rows).toEqual([])
       expect(harness.audits.slice(before).filter((entry) => entry.action === 'document.external_upload')).toEqual([])
     })
 
-    // KNOWN DEFECT (reported to the lead, needs a policy migration): the INSERT policy of external_document_access_grants
-    // (ue_external_document_grants_insert_self) requires granted_by = app.current_user_id, i.e. the representative themselves. The upload route records the
-    // grant as the matter grant's issuer made it (deriveExternalUploadGrant refuses a self-issued one, so granted_by is a member of staff), which that policy
-    // rejects. The upload therefore cannot succeed on the real runtime role, whoever the wrapper is. The unit tests replace the database and never saw it.
-    // When the policy admits a grant derived from the representative's own active matter grant, this test starts failing: drop `.fails` then.
-    it.fails('stores an upload in the matter\'s organization with its grant and its record, and refuses a file another record holds', async () => {
+    it('refuses repeated external uploads and a foreign blob without writing any part of the document graph', async () => {
       state.session = external()
-      const blobPath = `documents/${ORG_A}/external-${randomUUID()}.pdf`
-      state.storage.set(blobPath, Buffer.from('from counsel'))
-      const response = await uploadAs(blobPath)
-      expect(response.status).toBe(201)
-      const created = ((await json(response)).data as { id: string }).id
-      const stored = await admin.query(`SELECT organization_id, uploaded_by FROM documents WHERE id = $1`, [created])
-      expect(stored.rows).toEqual([{ organization_id: ORG_A, uploaded_by: representative }])
-      const link = await admin.query(`SELECT linked_entity_id FROM document_links WHERE document_id = $1`, [created])
-      expect(link.rows).toEqual([{ linked_entity_id: grievance }])
-      const grant = await admin.query(`SELECT user_id, document_version_no FROM external_document_access_grants WHERE document_id = $1`, [created])
-      expect(grant.rows).toEqual([{ user_id: representative, document_version_no: 1 }])
-      expect(auditsFor('document.external_upload', ORG_A).map((entry) => entry.resourceId)).toContain(created)
-      expect((await uploadAs(blobPath)).status).toBe(409)
+      const counts = async () => {
+        const { rows } = await admin.query(`SELECT
+          (SELECT count(*)::int FROM documents) AS documents,
+          (SELECT count(*)::int FROM document_versions) AS versions,
+          (SELECT count(*)::int FROM document_links) AS links,
+          (SELECT count(*)::int FROM external_document_access_grants) AS grants`)
+        return rows[0]
+      }
+      const before = await counts()
+      const auditStart = harness.audits.length
+      const ownBlob = `documents/${ORG_A}/external-${randomUUID()}.pdf`
+      const foreignBlob = `documents/${ORG_B}/external-${randomUUID()}.pdf`
+      for (const blobPath of [ownBlob, ownBlob, foreignBlob]) {
+        state.storage.set(blobPath, Buffer.from('from counsel'))
+        expect((await uploadAs(blobPath)).status).toBe(403)
+        expect(await counts()).toEqual(before)
+      }
+      expect(harness.audits.slice(auditStart).filter(entry => entry.action === 'document.external_upload')).toEqual([])
     })
   })
 

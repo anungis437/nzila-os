@@ -31,6 +31,7 @@
 
 import { db } from '@/db';
 import { organizations, perCapitaRemittances } from '@/db/schema';
+import { requireContainedStorageAuthority } from '@/lib/reality/contained-storage';
 import { eq, and, sql, inArray } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
@@ -210,6 +211,7 @@ export interface StatCanMembershipData {
  * Generate comprehensive annual compliance report
  */
 export async function generateAnnualComplianceReport(year: number, organizationId: string): Promise<AnnualComplianceReport> {
+  requireContainedStorageAuthority('per_capita_remittances');
   if (!organizationId) throw new Error('Organization context is mandatory for remittance reports');
   // Fetch all remittances for the year
   const remittances = await db
@@ -251,6 +253,7 @@ export async function generateAnnualComplianceReport(year: number, organizationI
  * Generate StatCan LAB-05302 annual report for fiscal year
  */
 export async function generateStatCanAnnualReport(fiscalYear: number): Promise<StatCanAnnualReport> {
+  requireContainedStorageAuthority('per_capita_remittances');
   // Fiscal year typically runs April 1 - March 31
   // Query spans two calendar years: fiscalYear (Apr-Dec) and fiscalYear+1 (Jan-Mar)
   const remittances = await db
@@ -308,6 +311,7 @@ export async function analyzeMultiYearTrends(options: {
   endYear?: number;
   organizationId: string;
 }): Promise<MultiYearTrendAnalysis> {
+  requireContainedStorageAuthority('per_capita_remittances');
   if (!options.organizationId) throw new Error('Organization context is mandatory for trend reports');
   const endYear = options.endYear || new Date().getFullYear();
   const startYear = endYear - options.years + 1;
@@ -460,6 +464,7 @@ export async function analyzeOrganizationPerformance(
   remittances: PerCapitaRemittanceRow[],
   year: number
 ): Promise<OrganizationPerformance[]> {
+  requireContainedStorageAuthority('per_capita_remittances');
   // Group remittances by organization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orgMap = new Map<string, any[]>();
@@ -1146,6 +1151,7 @@ export const detectAnomalies = detectComplianceAnomalies;
 // Simple forecast using historical per-capita remittance data
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function forecastRemittances(months: number, organizationId: string): Promise<any[]> {
+  requireContainedStorageAuthority('per_capita_remittances');
   if (!organizationId) throw new Error('Organization context is mandatory for forecasts');
   // Fetch last 12 months of historical remittance data for a moving-average forecast
   const historicalData = await db

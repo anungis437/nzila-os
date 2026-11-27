@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-11-18T12:10:57.495906+00:00",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "finalCandidateQualified": false,
+  "step2Started": false,
+  "promotionsPerformed": false,
+  "scope": "FAILED_ACTUAL_FINANCE_NATIVE_ROUTE_COHORT_ORACLE_RECONCILIATION",
+  "result": "FAIL_REPAIR_AND_RERUN_REQUIRED",
+  "counts": {
+    "passed": 2,
+    "failed": 5,
+    "skipped": 0
+  },
+  "actualFailures": [
+    {
+      "name": "returns explicit501/403 for every current finance operation as canonical member with no persisted effect",
+      "firstLine": "AssertionError: expected undefined to be false // Object.is equality"
+    },
+    {
+      "name": "returns explicit501/403 for every current finance operation as canonical secretary_treasurer with no persisted effect",
+      "firstLine": "AssertionError: expected undefined to be false // Object.is equality"
+    },
+    {
+      "name": "returns explicit501/403 for every current finance operation as canonical admin with no persisted effect",
+      "firstLine": "AssertionError: expected undefined to be false // Object.is equality"
+    },
+    {
+      "name": "does not reveal foreign/nonexistent invoice data through a disabled export",
+      "firstLine": "AssertionError: expected { code: 'NOT_IMPLEMENTED', \u2026(3) } to match object { success: false, \u2026(1) }"
+    },
+    {
+      "name": "refuses a genuinely revoked bearer before any route callback can execute",
+      "firstLine": "Error: expected AuthOrgBindingError: SESSION_AUTHORITY_RE\u2026 { code: '\u2026' } to match object { code: 'UNAUTHENTICATED' }"
+    }
+  ],
+  "rootCause": "Test assertions assumed a success:false/nested error envelope, while the unchanged standardized producer uses flat code/message/timestamp/traceId. The revoked real bearer fails with the source-defined SESSION_AUTHORITY_REQUIRED code, not the asserted UNAUTHENTICATED code.",
+  "repairBoundary": "Reconcile assertions to each exact existing producer, retaining strict501/403, role floors, no effects and revoked-before-callback control. Do not change production response schemas or broaden accepted statuses.",
+  "artifacts": [
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-routes-v1.json",
+      "sha256": "52e17fff8d21e91c635256166fb54311a485024046b0121caf55babb7e142f5e",
+      "bytes": 7393
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-routes-v1.log",
+      "sha256": "6e98cbd53ad1d6e16280bb28131d9f264358bc133a140a0ecaf5482d765c2882",
+      "bytes": 9374
+    },
+    {
+      "path": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/finance-routes-v1-source.json",
+      "sha256": "9d2081f3efcbe4873793f331dc56d6d9399787a8cdc3ecc48f227c86b92bd96b",
+      "bytes": 192299
+    }
+  ],
+  "limits": [
+    "The69-handler sweep stopped at its first body assertion and is not qualified.",
+    "Two other finance native files have not run yet on this corrected template; all17cases remain pending as a combined cohort."
+  ]
+}

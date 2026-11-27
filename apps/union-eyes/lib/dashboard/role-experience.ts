@@ -1,4 +1,6 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
+import { isCorrespondenceStaffRole } from '../correspondence/roles';
+import { isCaseHandlerRole } from '../cases/case-role-access';
 import {
   EXECUTIVE_ALLOWED_PREFIXES,
   EXECUTIVE_HOME_HREF,
@@ -191,7 +193,7 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
       { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
       { label: 'Governance Continuity Overview', href: '/dashboard/governance', group: 'Governance Continuity' },
       { label: 'Governance Trust & Explainability', href: '/dashboard/trust', group: 'Governance Continuity' },
-      { label: 'Governance Continuity Review', href: '/dashboard/workbench', group: 'Governance Continuity' },
+      { label: 'Governance Continuity Review', href: '/dashboard/governance/reviews', group: 'Governance Continuity' },
       { label: 'OCRA Continuity Signals', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
       { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
       { label: 'Governance Audit & Evidence', href: '/dashboard/audits', group: 'Governance Continuity' },
@@ -299,7 +301,12 @@ export function getAllowedPrefixesByExperience(): Record<DashboardExperience, st
   return ALLOWED_PREFIXES_BY_EXPERIENCE;
 }
 
-export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean): boolean {
+export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean, role?: string | null): boolean {
+  // A navigation experience cannot remove a locally authorized letter route or
+  // lend it to a platform title. Match the page and API's explicit role policy.
+  if (role != null && (pathname === '/dashboard/correspondence' || pathname.startsWith('/dashboard/correspondence/'))) {
+    return isCorrespondenceStaffRole(role.toLowerCase());
+  }
   // Every authenticated account can request its own information. The request
   // APIs enforce subject ownership and explicit conversation assignment.
   if (pathname === '/dashboard/privacy') return true;
@@ -349,15 +356,24 @@ export const DESTINATION_MIN_ROLE: Readonly<Record<string, UserRole>> = {
   '/dashboard/admin/members': UserRole.ADMIN,
   '/dashboard/workbench': UserRole.STEWARD,
   '/dashboard/members': UserRole.STEWARD,
-  '/dashboard/correspondence': UserRole.STEWARD,
   // The clause library page redirects below steward; do not advertise it to those roles.
   '/dashboard/clause-library': UserRole.STEWARD,
   '/dashboard/audits': UserRole.ADMIN,
 };
 
+/** Canonical V2 numeric page guards normalize the unlisted Clerk role to Member.
+ * Explicit correspondence roles use their own policy; this grants no authority. */
+export function canonicalPageGuardRoleLevel(role: string): number {
+  return getRoleLevel((role === UserRole.CLERK ? UserRole.MEMBER : role) as UserRole);
+}
+
 function meetsDestinationRole(pathname: string, role: string, experience: DashboardExperience): boolean {
+  if (pathname === '/dashboard/workbench' || pathname === '/dashboard/grievances') {
+    return isCaseHandlerRole(role) && (experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role));
+  }
+  if (pathname === '/dashboard/correspondence' && !isCorrespondenceStaffRole(role)) return false;
   const min = DESTINATION_MIN_ROLE[pathname];
-  if (min && getRoleLevel(role as UserRole) < getRoleLevel(min)) return false;
+  if (min && canonicalPageGuardRoleLevel(role) < getRoleLevel(min)) return false;
   // The executive table states the executive menu's own requirement for a href that other experiences list under their own guard.
   return experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role);
 }
@@ -381,7 +397,7 @@ export function getVisibleNavigationForExperience(
     const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
     if (platformRoles && !platformRoles.includes(role)) return false;
     if (!meetsDestinationRole(pathname, role, experience)) return false;
-    return canAccessDashboardPath(pathname, experience, isPilotMode);
+    return canAccessDashboardPath(pathname, experience, isPilotMode, role);
   });
 }
 

@@ -189,12 +189,39 @@ class Claims(BaseModel):
         return str(self.claim_number)
 
 
+class ClaimStatusTransitions(models.Model):
+    """Protected status journal: the claim FK is the internal Claims.id, not claim_id.
+
+    Historical transaction identifiers remain unknown. The current database writer
+    stamps only new events; this model does not infer or backfill past authority.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization_id = models.UUIDField()
+    claim = models.ForeignKey("Claims", on_delete=models.PROTECT)
+    from_status = models.CharField(max_length=50, null=True, blank=True)
+    to_status = models.CharField(max_length=50)
+    changed_at = models.DateTimeField(default=timezone.now)
+    changed_by = models.CharField(max_length=255, null=True, blank=True)
+    transaction_id = models.BigIntegerField(null=True, blank=True, editable=False)
+
+    class Meta:
+        db_table = "claim_status_transitions"
+        indexes = [
+            models.Index(fields=["claim", "changed_at"], name="claim_status_trans_claim_idx"),
+            models.Index(fields=["organization_id", "changed_at"], name="claim_status_trans_org_idx"),
+        ]
+
+
 class ClaimUpdates(BaseModel):
     """Migrated from drizzle: claims-schema.ts"""
 
     update_id = models.UUIDField(default=uuid.uuid4, unique=True)
     claim = models.ForeignKey(
         "Claims", on_delete=models.CASCADE, related_name="claim_updates_claim_set"
+    )
+    transition = models.OneToOneField(
+        "ClaimStatusTransitions", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="public_projection",
     )
     update_type = models.CharField(max_length=50, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
@@ -421,6 +448,8 @@ class Grievances(BaseModel):
 
     # Parties
     grievant_id = models.UUIDField(null=True, blank=True)
+    # Canonical internal principal (may be non-UUID); never inferred from contact/profile data.
+    represented_member_user_id = models.CharField(max_length=255, null=True, blank=True)
     grievant_name = models.CharField(max_length=255, null=True, blank=True)
     grievant_email = models.CharField(max_length=255, null=True, blank=True)
     union_rep_id = models.UUIDField(null=True, blank=True)
@@ -987,3 +1016,93 @@ class GrievanceApprovals(BaseModel):
     class Meta:
         db_table = "grievance_approvals"
         verbose_name = "GrievanceApprovals"
+
+
+class CaseTerritories(BaseModel):
+    """Institution-defined representation territory; never inferred from geography/worksites."""
+
+    organization_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    source_instrument = models.TextField()
+    recorded_by = models.CharField(max_length=255)
+    retired_at = models.DateTimeField(null=True, blank=True)
+    retired_by = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        db_table = 'case_territories'
+        constraints = [
+            models.UniqueConstraint(fields=['organization_id', 'id'], name='case_territories_org_id_uniq'),
+        ]
+
+
+class CaseAuthorityScopes(BaseModel):
+    """One governed scope for a logical kernel case, even when both case models mirror it.
+
+    The parent is immutable provenance, not an alternate source of scope. No rows or
+    institutional facts are backfilled by installing these declarations.
+    """
+
+    organization_id = models.UUIDField()
+    case_id = models.UUIDField()
+    claim = models.ForeignKey('Claims', to_field='claim_id', on_delete=models.PROTECT, null=True, blank=True)
+    grievance = models.ForeignKey('Grievances', on_delete=models.PROTECT, null=True, blank=True)
+    grievance_mirror = models.ForeignKey('Grievances', on_delete=models.PROTECT, null=True, blank=True, related_name='canonical_claim_mirrors')
+    mirror_recorded_at = models.DateTimeField(null=True, blank=True)
+    mirror_recorded_by = models.CharField(max_length=255, null=True, blank=True)
+    unit = models.ForeignKey('unions.BargainingUnits', on_delete=models.PROTECT, null=True, blank=True)
+    territory = models.ForeignKey('CaseTerritories', on_delete=models.PROTECT, null=True, blank=True)
+    revision = models.PositiveIntegerField(default=0)
+    last_proposal_id = models.UUIDField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'case_authority_scopes'
+        constraints = [
+            models.UniqueConstraint(fields=['organization_id', 'case_id'], name='case_scope_org_case_uniq'),
+            models.UniqueConstraint(fields=['organization_id', 'id'], name='case_scope_org_id_uniq'),
+            models.CheckConstraint(condition=(models.Q(claim__isnull=False, grievance__isnull=True) | models.Q(claim__isnull=True, grievance__isnull=False)), name='case_scope_exact_parent_chk'),
+            models.CheckConstraint(condition=(models.Q(claim__isnull=False, claim=models.F('case_id')) | models.Q(grievance__isnull=False, grievance=models.F('case_id'))), name='case_scope_parent_key_chk'),
+        ]
+
+
+class CaseScopeProposals(BaseModel):
+    """Immutable exact proposed scope/party snapshot; canonical approval is separate."""
+
+    organization_id = models.UUIDField()
+    scope = models.ForeignKey('CaseAuthorityScopes', on_delete=models.PROTECT)
+    expected_revision = models.PositiveIntegerField()
+    unit = models.ForeignKey('unions.BargainingUnits', on_delete=models.PROTECT, null=True, blank=True)
+    territory = models.ForeignKey('CaseTerritories', on_delete=models.PROTECT, null=True, blank=True)
+    respondent_user_ids = ArrayField(models.CharField(max_length=255), default=list)
+    proposed_by = models.CharField(max_length=255)
+    issuance_rule_id = models.UUIDField()
+    approval_request_id = models.UUIDField(unique=True)
+    applied_at = models.DateTimeField(null=True, blank=True)
+    applied_by = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        db_table = 'case_scope_proposals'
+        constraints = [
+            models.UniqueConstraint(fields=['organization_id', 'id'], name='case_scope_proposal_org_id_uniq'),
+            models.CheckConstraint(condition=(models.Q(applied_at__isnull=True, applied_by__isnull=True) | models.Q(applied_at__isnull=False, applied_by__isnull=False)), name='case_scope_proposal_applied_pair_chk'),
+        ]
+
+
+class CaseRespondents(BaseModel):
+    """Verified canonical principals who are adverse to a logical case; history retained."""
+
+    organization_id = models.UUIDField()
+    scope = models.ForeignKey('CaseAuthorityScopes', on_delete=models.PROTECT)
+    respondent_user_id = models.CharField(max_length=255)
+    proposal = models.ForeignKey('CaseScopeProposals', on_delete=models.PROTECT, related_name='recorded_respondents')
+    recorded_by = models.CharField(max_length=255)
+    recorded_at = models.DateTimeField(default=timezone.now)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.CharField(max_length=255, null=True, blank=True)
+    revoked_proposal = models.ForeignKey('CaseScopeProposals', on_delete=models.PROTECT, null=True, blank=True, related_name='revoked_respondents')
+
+    class Meta:
+        db_table = 'case_respondents'
+        constraints = [
+            models.UniqueConstraint(fields=['organization_id', 'scope', 'respondent_user_id'], condition=models.Q(revoked_at__isnull=True), name='case_respondent_active_uniq'),
+            models.CheckConstraint(condition=(models.Q(revoked_at__isnull=True, revoked_by__isnull=True, revoked_proposal__isnull=True) | models.Q(revoked_at__isnull=False, revoked_by__isnull=False, revoked_proposal__isnull=False)), name='case_respondent_revoked_pair_chk'),
+        ]

@@ -263,7 +263,7 @@ export function GrievanceDetailConsole() {
   }
 
   const statusLabel = (status: string) => labelOf("statuses", STATUSES, status);
-  const followingStatuses = nextStatuses(grievance.status, grievance.primaryLroId);
+  const followingStatuses = nextStatuses(grievance.status, grievance.allowedStatuses);
   const internal = grievance.effectiveAccess.canViewInternal;
   const mayChangeStatus = internal && maySetStatus(grievance);
   const owner = grievance.primaryLroId ?? t("assignedRepresentative");

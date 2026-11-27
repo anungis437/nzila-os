@@ -87,7 +87,7 @@ export function decideApproval(
     }
     // The delegator's own conflicts pass through to the delegate.
     if (a.adverseUserIds.includes(d.delegatorUserId)) return deny(req, now, { code: 'ADVERSE_PARTY', detail: 'delegator is conflicted', ref: d.id })
-    if (activeRecusal(facts.recusals, d.delegatorUserId, req.resource, orgId)) {
+    if (activeRecusal(facts.recusals, d.delegatorUserId, req.resource, orgId, now)) {
       return deny(req, now, { code: 'RECUSED', detail: 'delegator is recused', ref: d.id })
     }
     if (d.delegatorUserId === a.proposedBy || d.delegatorUserId === a.subjectAuthorId) {
@@ -106,7 +106,7 @@ export function decideApproval(
   }
 
   if (a.adverseUserIds.includes(me)) return deny(req, now, { code: 'ADVERSE_PARTY' })
-  const recusal = activeRecusal(facts.recusals, me, req.resource, orgId)
+  const recusal = activeRecusal(facts.recusals, me, req.resource, orgId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id, detail: recusal.reason })
   if (me === a.proposedBy || me === a.subjectAuthorId) {
     return deny(req, now, { code: 'SELF_APPROVAL', detail: 'the proposer or author cannot approve their own subject' })
@@ -178,13 +178,16 @@ export function decideReview(
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
   if (rv.adverseUserIds.includes(me)) return deny(req, now, { code: 'ADVERSE_PARTY', detail: 'respondent cannot exercise oversight' })
   if (rv.complainantUserId === me) return deny(req, now, { code: 'ADVERSE_PARTY', detail: 'complainant cannot review their own complaint' })
-  const recusal = activeRecusal(facts.recusals, me, req.resource, orgId)
+  const recusal = activeRecusal(facts.recusals, me, req.resource, orgId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
   if (req.action === 'review:verify_remediation' && rv.remediationOwnerUserId === me) {
     return deny(req, now, { code: 'SEGREGATION_OF_DUTIES', detail: 'an owner cannot verify their own remediation' })
   }
   if (!hasCapacity(membership, ['governance_reviewer'])) {
     return deny(req, now, { code: 'CAPACITY_NOT_ELIGIBLE', detail: 'a recorded oversight appointment is required' })
+  }
+  if (facts.mandates.some(m => m.principalUserId === me && (m.kind === 'executive_office' || m.kind === 'financial') && assessMandate(m, orgId, now).effective)) {
+    return deny(req, now, { code: 'SEGREGATION_OF_DUTIES', detail: 'independent oversight cannot be exercised while holding operational authority' })
   }
   // Privileged material needs separately authorised counsel scope; no oversight
   // mandate reaches it.

@@ -27,6 +27,8 @@ import {
   hasCapacity,
   instrumentOf,
   isLive,
+  PRIMARY_CASE_HANDLER_ONLY_ACTIONS,
+  validStringArray,
 } from '../common'
 import type {
   Action,
@@ -62,8 +64,7 @@ const MEMBER_ACTIONS: readonly Action[] = ['case:read', 'case:comment']
 // power named. Role, label or seniority never imply it.
 // Disclosing to a member, exporting sealed evidence and closing the case belong to the primary handler alone: a
 // collaborator grant can never carry them, whatever permission names it lists.
-const PRIMARY_ONLY_ACTIONS: readonly Action[] = ['case:disclose_to_member', 'case:export_sealed_evidence', 'case:close']
-const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted', ...PRIMARY_ONLY_ACTIONS]
+const PRIMARY_HANDLER_ACTIONS: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted', ...PRIMARY_CASE_HANDLER_ONLY_ACTIONS]
 const COLLABORATOR_CEILING: readonly Action[] = [...HANDLER_ACTIONS, 'case:read_third_party_restricted']
 
 interface Candidate {
@@ -96,7 +97,7 @@ export function decideCase(
   if (c.adverseUserIds.includes(principalId)) {
     return deny(req, now, { code: 'ADVERSE_PARTY', detail: 'principal is a respondent in this matter' })
   }
-  const recusal = activeRecusal(facts.recusals, principalId, req.resource, orgId)
+  const recusal = activeRecusal(facts.recusals, principalId, req.resource, orgId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id, detail: recusal.reason })
 
   const action = req.action
@@ -177,10 +178,15 @@ export function decideCase(
   }
 
   // 2 ── supervisory & emergency mandates (never privileged) ──────────────
+  const primaryOnly = PRIMARY_CASE_HANDLER_ONLY_ACTIONS.includes(action)
   const mandateBlocked = privilegedMatter && action !== 'case:assign'
   for (const m of facts.mandates) {
     if (m.principalUserId !== principalId) continue
     if (m.kind !== 'supervisory' && m.kind !== 'emergency_access') continue
+    if (primaryOnly) {
+      misses.push({ code: 'ACTION_NOT_COVERED', ref: m.id, detail: 'this power requires a live primary case-handler relationship' })
+      continue
+    }
     const verdict = assessMandate(m, orgId, now)
     if (!verdict.effective) {
       misses.push(...verdict.reasons)
@@ -235,7 +241,8 @@ export function decideCase(
   if (req.delegationId) {
     const d = facts.delegations.find((x) => x.id === req.delegationId)
     const bad = (detail: string): Reason => ({ code: 'DELEGATION_INVALID', ref: req.delegationId ?? undefined, detail })
-    if (!d) misses.push(bad('delegation not found'))
+    if (primaryOnly) misses.push(bad('primary case-handler-only powers are not delegable'))
+    else if (!d) misses.push(bad('delegation not found'))
     else if (d.delegateUserId !== principalId) misses.push(bad('principal is not the delegate'))
     else {
       const dv = assessDelegation(d, orgId, now)
@@ -244,7 +251,7 @@ export function decideCase(
       else if (privilegedMatter || action === 'case:read_privileged') misses.push({ code: 'PRIVILEGED_MATTER', ref: d.id, detail: 'delegations do not reach privileged matters' })
       else if (!activeMembership(facts, orgId, d.delegatorUserId)) misses.push(bad('delegator no longer holds an active membership'))
       else if (c.adverseUserIds.includes(d.delegatorUserId)) misses.push({ code: 'ADVERSE_PARTY', ref: d.id, detail: 'delegator is a respondent' })
-      else if (activeRecusal(facts.recusals, d.delegatorUserId, req.resource, orgId)) misses.push({ code: 'RECUSED', ref: d.id, detail: 'delegator is recused' })
+      else if (activeRecusal(facts.recusals, d.delegatorUserId, req.resource, orgId, now)) misses.push({ code: 'RECUSED', ref: d.id, detail: 'delegator is recused' })
       else {
         const office = facts.mandates.find(
           (m) =>
@@ -252,9 +259,10 @@ export function decideCase(
             m.kind === 'executive_office' &&
             m.sourceInstrument.length > 0 &&
             m.powers.includes(power) &&
-            assessMandate(m, orgId, now).effective,
+            assessMandate(m, orgId, now).effective &&
+            scopeCoversCase(m.scope, c),
         )
-        if (!office) misses.push(bad('delegator holds no live office mandate carrying this power'))
+        if (!office) misses.push(bad('delegator holds no live in-scope office mandate carrying this power'))
         else {
           candidates.push({
             source: { kind: 'delegation', id: d.id, instrument: `delegation of ${d.office} (office mandate ${office.id})` },
@@ -297,6 +305,7 @@ interface RelationshipGrant {
 
 /** What a relationship, combined with the holder's CAPACITY, permits. */
 function relationshipGrant(r: ResourceRelationship, capacities: readonly Capacity[]): RelationshipGrant {
+  if (!validStringArray(r.permissions)) return { actions: [], visibility: 'internal', miss: { code: 'INSTRUMENT_INVALID', detail: 'relationship permissions are malformed' } }
   const handler = HANDLER_CAPACITIES.some((c) => capacities.includes(c))
   switch (r.relation) {
     case 'represented_member':
@@ -304,6 +313,9 @@ function relationshipGrant(r: ResourceRelationship, capacities: readonly Capacit
       return { actions: MEMBER_ACTIONS, visibility: 'member_visible' }
     case 'owner':
     case 'assignee':
+      if (r.origin !== 'explicit' || !r.grantedBy || r.grantedBy === r.principalUserId) {
+        return { actions: [], visibility: 'internal', miss: { code: 'INSTRUMENT_INVALID', detail: 'primary assignment is not an independent explicit grant' } }
+      }
       return handler
         ? { actions: PRIMARY_HANDLER_ACTIONS, visibility: 'internal' }
         : { actions: [], visibility: 'internal', miss: { code: 'CAPACITY_NOT_ELIGIBLE', detail: `${r.relation} requires a representation capacity` } }

@@ -1,45 +1,50 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Member Arrears Calculation Route
  *
  * GET  /api/dues/arrears/calculate — List current arrears for the org
  * POST /api/dues/arrears/calculate — Calculate/summarize arrears status for org members
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { db } from '@/db';
-import { memberArrears } from '@/db/schema/dues-finance-schema';
-import { eq, sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { db } from '@/db'
+import { memberArrears } from '@/db/schema/dues-finance-schema'
+import { eq, sql } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'List current arrears for the organization' },
   },
   async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId) throw ApiError.badRequest('Organization context required')
+
+    requireBaseFinancialAuthority()
 
     const rows = await db
       .select()
       .from(memberArrears)
-      .where(eq(memberArrears.organizationId, organizationId));
+      .where(eq(memberArrears.organizationId, organizationId))
 
-    return { data: rows };
+    return { data: rows }
   },
-);
+)
 
 export const POST = withApi(
   {
-    rlsOrgContext: true,
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Calculate arrears summary for organization' },
   },
   async ({ organizationId, userId: _userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId) throw ApiError.badRequest('Organization context required')
+
+    requireBaseFinancialAuthority()
 
     const [summary] = await db
       .select({
@@ -54,10 +59,10 @@ export const POST = withApi(
         totalOver90: sql<string>`coalesce(sum(${memberArrears.over90Days}), '0')`,
       })
       .from(memberArrears)
-      .where(eq(memberArrears.organizationId, organizationId));
+      .where(eq(memberArrears.organizationId, organizationId))
 
-    logger.info('Arrears summary calculated', { organizationId });
+    logger.info('Arrears summary calculated', { organizationId })
 
-    return { data: summary };
+    return { data: summary }
   },
-);
+)

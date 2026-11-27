@@ -17,7 +17,9 @@
  * canonical PUBLIC-schema table declaration (scripts/schema-duplicate-table-scan.ts's
  * scanSchemaDeclarations() — the same canonical scanner used for schema-
  * conflict analysis, not a second independent table list), does it have
- * exactly one entry in db/rls-storage-authority-manifest.ts?
+ * exactly one entry in the current canonical authority projection? Historical
+ * registry data is retained; current isolated storage is classified by the
+ * packaged source projection that the runtime actually enforces.
  *
  * Usage: tsx scripts/generate-public-schema-grant-census.ts
  * Output: reports/union-eyes-public-schema-grant-census.{json,md}
@@ -25,7 +27,8 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { scanSchemaDeclarations, scanAdditionalDeclarationFiles } from './schema-duplicate-table-scan'
-import { storageAuthorityManifest } from '../db/rls-storage-authority-manifest'
+import { canonicalCatalogContract } from '../lib/operations/canonical-catalog-admission'
+import { catalogContractDigest } from '../lib/operations/catalog-admission-core.mjs'
 
 const REPO_ROOT = resolve(__dirname, '..', '..', '..')
 const APP_ROOT = resolve(__dirname, '..')
@@ -54,7 +57,15 @@ function main() {
     const existing = declarations.get(key) ?? []
     declarations.set(key, [...existing, ...decls])
   }
-  const manifestTables = new Set(storageAuthorityManifest.map((e) => e.table))
+  // The current source projection supersedes the historical registry, including
+  // isolated external-read storage. Never rewrite the historical registry or
+  // infer a grant merely because a new table was declared.
+  const authority = canonicalCatalogContract()
+  if (catalogContractDigest(authority.payload) !== authority.digest)
+    throw new Error('Current storage-authority projection digest is invalid')
+  const manifestTables = new Set(authority.payload.entries.map((entry) => entry.table))
+  if (manifestTables.size !== authority.payload.entries.length)
+    throw new Error('Current storage-authority projection contains duplicate table entries')
 
   const publicTables: string[] = []
   const nonPublicTables: Array<{ table: string; schema: string }> = []
@@ -77,6 +88,8 @@ function main() {
 
   const summary = {
     generatedAt: new Date().toISOString(),
+    authorityRegistry: 'CURRENT_CANONICAL_PROJECTION',
+    authorityRegistryDigest: authority.digest,
     note:
       'PR #752 round 8 terminology correction: scanSchemaDeclarations() (+ the ' +
       'ADDITIONAL_PUBLIC_SCHEMA_FILES merge below, for sibling files outside ' +

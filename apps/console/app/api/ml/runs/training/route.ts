@@ -1,3 +1,4 @@
+import { listMlTrainingRuns } from '@/lib/services/ml-read-service'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * GET /api/ml/runs/training
@@ -11,9 +12,7 @@
  *   limit       optional — default 20, max 100
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { mlTrainingRuns } from '@nzila/db/schema'
-import { eq, and, desc } from 'drizzle-orm'
+
 import { requireOrgAccess } from '@/lib/api-guards'
 import { createLogger } from '@nzila/os-core'
 
@@ -36,31 +35,8 @@ export async function GET(req: NextRequest) {
     const access = await requireOrgAccess(orgId)
     if (!access.ok) return access.response
 
-    const rows = await platformDb
-      .select()
-      .from(mlTrainingRuns)
-      .where(
-        and(
-          eq(mlTrainingRuns.orgId, orgId),
-          ...(modelKey ? [eq(mlTrainingRuns.modelKey, modelKey)] : []),
-        ),
-      )
-      .orderBy(desc(mlTrainingRuns.startedAt))
-      .limit(limit)
-
-    return NextResponse.json(
-      rows.map((r) => ({
-        id: r.id,
-        orgId: r.orgId,
-        modelKey: r.modelKey,
-        datasetId: r.datasetId,
-        status: r.status,
-        startedAt: r.startedAt.toISOString(),
-        finishedAt: r.finishedAt?.toISOString() ?? null,
-        error: r.error,
-        createdAt: r.createdAt.toISOString(),
-      })),
-    )
+    const result = await listMlTrainingRuns({ orgId, modelKey, limit })
+    return NextResponse.json(result.body, { status: result.status })
   } catch (err) {
     logger.error('[ML /runs/training]', err instanceof Error ? err : { detail: err })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

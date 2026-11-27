@@ -300,9 +300,15 @@ test('CLI fails closed on a missing change record and a tag manifest', () => {
 
 test('CHG-2026-0114 founder direction accepts only the exact candidate and preserves staging boundaries', () => {
   const approved = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
-  const sha = 'cccfc8c311a1017f80241bf089c00ef0c6828751'
+  const sha = '6a60c95c9de17e9343e0414bb51766afbc190054'
   const opts = { changeId: 'CHG-2026-0114', sourceSha: sha, nowMs: Date.parse('2026-11-10T12:00:00Z') }
   assert.deepEqual(changeRecordDefects(approved, opts), [])
+  for (const candidate of ['d4124cd1b9e3fa28ff9b5fa3f72e3cdafb000366', 'aa545415cfe4b172733000cfc6510712d4de0cba', '57728a2a750b28ee3dfd4b9eb82c54e03ad0bed3', 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c', 'a9c47099242c13e23efc72562ca63f3a6cabcc8b', 'f'.repeat(40)]) {
+    const changed = { ...approved, linked_commits: [...approved.linked_commits, candidate],
+      founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: candidate } }
+    assert.ok(changeRecordDefects(changed, { ...opts, sourceSha: candidate }).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  }
+  assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: 'cccfc8c311a1017f80241bf089c00ef0c6828751' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '41dba402dd53fec280091f11f46a99077dd91465' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '7d939bf5399ef768cc71a837730a6ff143d079d1' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '78301eecc968ff3a21b602a9c9307c50f73cd5f8' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
@@ -320,4 +326,88 @@ test('CHG-2026-0114 founder direction accepts only the exact candidate and prese
   assert.ok(changeRecordDefects(approved, { ...opts, sourceSha: 'f'.repeat(40) }).includes('FOUNDER_STAGING_CANDIDATE_MISMATCH'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, technical_gates_required: false } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects(approved, { ...opts, nowMs: Date.parse('2028-01-01T00:00:00Z') }).includes('CHANGE_RECORD_OUTSIDE_WINDOW'))
+})
+
+test('registry attestation selects the single linux/amd64 image manifest from an OCI index and fails closed otherwise', () => {
+  const select = path.join(REPO, 'tooling/scripts/union-eyes-select-image-manifest.sh')
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-select-'))
+  const d = (c) => `sha256:${c.repeat(64)}`
+  const run = (doc) => {
+    const file = path.join(dir, 'doc.json')
+    fs.writeFileSync(file, JSON.stringify(doc))
+    return spawnSync('bash', [select, file], { encoding: 'utf8' })
+  }
+  const image = { schemaVersion: 2, mediaType: 'application/vnd.oci.image.manifest.v1+json', config: { digest: d('c') }, layers: [] }
+  const amd64 = { mediaType: 'application/vnd.oci.image.manifest.v1+json', digest: d('a'), platform: { os: 'linux', architecture: 'amd64' } }
+  const attestation = {
+    mediaType: 'application/vnd.oci.image.manifest.v1+json', digest: d('b'), platform: { os: 'unknown', architecture: 'unknown' },
+    annotations: { 'vnd.docker.reference.type': 'attestation-manifest', 'vnd.docker.reference.digest': d('a') },
+  }
+  const index = (manifests) => ({ schemaVersion: 2, mediaType: 'application/vnd.oci.image.index.v1+json', manifests })
+  // A single image manifest needs no selection.
+  assert.equal(run(image).status, 0)
+  assert.equal(run(image).stdout.trim(), '')
+  // BuildKit image + attestation index (current runner Docker push).
+  assert.equal(run(index([amd64, attestation])).stdout.trim(), d('a'))
+  // Multi-architecture upstream index (digest-pinned mirror) and a Docker manifest list.
+  const arm64 = { ...amd64, digest: d('e'), platform: { os: 'linux', architecture: 'arm64', variant: 'v8' } }
+  assert.equal(run(index([arm64, amd64, attestation])).stdout.trim(), d('a'))
+  assert.equal(run({ ...index([arm64, amd64]), mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json' }).stdout.trim(), d('a'))
+  // Fail closed: no amd64 image, an attestation dressed as amd64, two candidates, unknown documents.
+  assert.notEqual(run(index([arm64, attestation])).status, 0)
+  assert.notEqual(run(index([{ ...attestation, platform: { os: 'linux', architecture: 'amd64' } }])).status, 0)
+  assert.notEqual(run(index([amd64, { ...amd64, digest: d('f') }])).status, 0)
+  assert.notEqual(run(index([{ ...amd64, digest: 'sha256:short' }])).status, 0)
+  assert.notEqual(run({ schemaVersion: 2 }).status, 0)
+  fs.rmSync(dir, { recursive: true, force: true })
+})
+
+
+test('candidate projection check refuses stale output without rewriting it, and regeneration is deterministic', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-reviewed-candidate-'))
+  try {
+    const script = 'tooling/scripts/generate-ue-v2-staging-candidate.mjs'
+    const binding = 'tooling/scripts/lib/ue-v2-staging-candidate.json'
+    const projection = 'packages/platform-change-management/src/ue-v2-staging-candidate.ts'
+    for (const name of [script, binding, projection]) {
+      fs.mkdirSync(path.dirname(path.join(directory, name)), { recursive: true })
+      fs.copyFileSync(path.join(REPO, name), path.join(directory, name))
+    }
+    const target = path.join(directory, projection)
+    fs.writeFileSync(target, 'stale candidate projection\n')
+    const run = mode => spawnSync(process.execPath, [path.join(directory, script), mode], { encoding: 'utf8' })
+    assert.notEqual(run('--check').status, 0)
+    assert.equal(fs.readFileSync(target, 'utf8'), 'stale candidate projection\n')
+    assert.equal(run('--write').status, 0)
+    assert.equal(fs.readFileSync(target, 'utf8'), fs.readFileSync(path.join(REPO, projection), 'utf8'))
+    assert.equal(run('--check').status, 0)
+    const before = fs.readFileSync(target, 'utf8')
+    assert.equal(run('--write').status, 0)
+    assert.equal(fs.readFileSync(target, 'utf8'), before)
+  } finally { fs.rmSync(directory, { recursive: true, force: true }) }
+})
+
+test('the workflow-style portable gate copy keeps its reviewed candidate after the application source changes', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-portable-candidate-'))
+  try {
+    fs.cpSync(path.join(REPO, 'tooling/scripts'), path.join(directory, 'scripts'), { recursive: true })
+    const changes = path.join(directory, 'changes')
+    fs.mkdirSync(changes)
+    const record = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
+    const file = path.join(changes, 'CHG-2026-0114.json')
+    fs.writeFileSync(file, JSON.stringify(record))
+    const cli = path.join(directory, 'scripts/union-eyes-v2-staging-gate-cli.mjs')
+    const run = source => spawnSync(process.execPath, [cli, '--gate', 'change-record', '--change-id', 'CHG-2026-0114',
+      '--source-sha', source, '--change-dir', changes, '--now', '2026-11-23T00:00:00Z'], { cwd: directory, encoding: 'utf8' })
+    const admitted = run('6a60c95c9de17e9343e0414bb51766afbc190054')
+    assert.equal(admitted.status, 0, admitted.stdout + admitted.stderr)
+    assert.deepEqual(JSON.parse(admitted.stdout).defects, [])
+    const stale = 'f3aad7ffb41b9f5a673f41f1509a3e23b30dca1c'
+    record.linked_commits.push(stale)
+    record.founder_staging_authorization.candidate_sha = stale
+    fs.writeFileSync(file, JSON.stringify(record))
+    const refused = run(stale)
+    assert.equal(refused.status, 1)
+    assert.ok(JSON.parse(refused.stdout).defects.includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  } finally { fs.rmSync(directory, { recursive: true, force: true }) }
 })

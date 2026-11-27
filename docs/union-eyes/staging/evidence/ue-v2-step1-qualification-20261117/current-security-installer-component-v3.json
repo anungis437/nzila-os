@@ -1,0 +1,54 @@
+{
+  "schema": "ue-step1-component-qualification-v3",
+  "recordedAt": "2026-11-18T00:52:34.579542+00:00",
+  "finalCandidateSha": null,
+  "dirtyIntegrationSource": true,
+  "discovery": "Native v2 actually executed 3 cases: altered legacy policy rejection with unchanged complete security/data snapshots passed; the other 2 stopped before convergence at a combined policy parse failure.",
+  "nativeV2": {
+    "counts": {
+      "numTotalTests": 3,
+      "numPassedTests": 1,
+      "numFailedTests": 2,
+      "numPendingTests": 0
+    },
+    "privateRawPath": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v2.json",
+    "rawSha256": "3839c765a7f1c19d4bc4186c2c5a5ba06da45e49d67c3f8cfa3e176571a81ab1"
+  },
+  "repair": "Delimiter assembly now appends a newline and SQL terminator outside each original source program. Every source body byte is retained; no producer, predicate or grant changed. A regression using the full compiled framework and metadata policies reproduces the old failure and validates the corrected combined source through the actual preimage planners.",
+  "source": [
+    {
+      "path": "tooling/scripts/lib/union-eyes-current-security-installer.ts",
+      "sha256": "e16dcc400bfe03ef0015d58f6108f48fd05942d95eb197c6fa3fd0fcc3d1900d"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/current-security-installer.test.ts",
+      "sha256": "1e09de10ddc277b88c56dfc17b268d86c9153faac214abd048e23ff9285131ac"
+    }
+  ],
+  "checks": {
+    "focused": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "log": "current-security-installer-unit-v6.log"
+    },
+    "focusedLint": {
+      "exitCode": 0,
+      "log": "current-security-installer-lint-v8.log"
+    }
+  },
+  "artifacts": {
+    "current-security-installer-unit-v6.log": "f58976d593dfd84832cd18558c89aa6b8875e328e6a27f37d130e6d377e90c87",
+    "current-security-installer-lint-v8.log": "20049995c87b54a5bdade4f78719ec69fade63b51d77824947f3bde2f5a25a45"
+  },
+  "required": "Rerun the actual 3 native cases before claiming transition qualification. Final source provenance and semantic checks remain parent-owned.",
+  "readiness": "UNQUALIFIED",
+  "stagingOrProductionChanges": false,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "d5887b9e20e2af1635dd645c1f000cf00fb5865b2a88055cb9c6e0b955c52aed",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/current-security-installer-component-v3.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

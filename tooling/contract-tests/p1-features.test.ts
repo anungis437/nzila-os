@@ -109,8 +109,20 @@ describe('P1-03 — CFO create pages exist', () => {
 
     it(`${label} page is auth-gated`, () => {
       const src = readSafe(fullPath)
-      expect(src).toContain("from '@nzila/platform-auth/entra/server'")
       expect(src).toContain('redirect')
+      // Either the page authenticates directly, or it routes through the CFO scope
+      // resolver, which authenticates (platform-auth) and checks a permission —
+      // asserted at that real location below.
+      if (src.includes("from '@/lib/resolve-org'")) {
+        expect(src).toMatch(/resolveOrgContext\s*\(\s*'[a-z]+',\s*\{\s*permission:\s*'[^']+'/)
+        expect(src).toMatch(/message\s*===\s*'Unauthorized'\)\s*redirect\('\/sign-in'\)/)
+        const resolver = readSafe(join(CFO_LIB, 'resolve-org.ts'))
+        expect(resolver).toContain("import { auth } from '@nzila/platform-auth/entra/server'")
+        expect(resolver).toMatch(/throw new CfoScopeError\('Unauthorized'\)/)
+        expect(resolver).toMatch(/requirePermission\(options\.permission, userId\)/)
+      } else {
+        expect(src).toContain("from '@nzila/platform-auth/entra/server'")
+      }
     })
 
     it(`${label} page imports a form component`, () => {

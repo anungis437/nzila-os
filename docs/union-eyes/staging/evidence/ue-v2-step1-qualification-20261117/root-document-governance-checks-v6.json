@@ -1,0 +1,32 @@
+{
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "workingTreeChanges": true,
+  "scope": "INTERIM_PRESCRIBED_CHECKS",
+  "checks": [
+    {
+      "name": "validate-docs",
+      "command": [
+        "pnpm",
+        "validate:docs"
+      ],
+      "startedAt": "2026-11-18T00:05:21.993171+00:00",
+      "finishedAt": "2026-11-18T00:05:27.832256+00:00",
+      "exitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-validate-docs-v6.txt",
+      "sha256": "d30a873c5415d0628ec86b38f8b24026c190df24c851cc8c137fb6ecd2d2edf2"
+    },
+    {
+      "name": "governance-audit",
+      "command": [
+        "pnpm",
+        "governance:audit"
+      ],
+      "startedAt": "2026-11-18T00:05:27.851837+00:00",
+      "finishedAt": "2026-11-18T00:06:07.565539+00:00",
+      "exitCode": 0,
+      "log": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/root-governance-audit-v6.txt",
+      "sha256": "e1129457df8e84ba72fe1b818a37ba6824b77200880ec1ec6e260c9b4455c105"
+    }
+  ],
+  "finalCandidateQualified": false
+}

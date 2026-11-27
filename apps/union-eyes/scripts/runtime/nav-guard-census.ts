@@ -3,7 +3,7 @@
  *
  * The sidebar is built per role (lib/dashboard/role-experience.ts) and every non-member is sent from the dashboard root to its landing, so a destination whose page or layout
  * redirects the role it was offered to is a link that goes nowhere, and a landing that redirects its own role to the root is a loop that never ends. The roles a page refuses are read from
- * the guards in the page and in every layout above it (see lib/nav-census/page-guards.ts for which guards count), compared at the levels lib/auth/roles.ts gives the roles.
+ * the guards in the page and in every layout above it (see lib/nav-census/page-guards.ts for which guards count), compared at the canonical V2 numeric guard levels.
  * A finding is fixed in DESTINATION_MIN_ROLE (or the executive and platform tables) in lib/dashboard/role-experience.ts, so the menu and the guard say the same thing. Read-only: it reads source files and
  * needs no database.
  *
@@ -12,9 +12,10 @@
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { getDashboardExperience, getRoleLandingPath, getVisibleNavigationForExperience, type DashboardExperience } from '../../lib/dashboard/role-experience'
+import { canonicalPageGuardRoleLevel, getDashboardExperience, getRoleLandingPath, getVisibleNavigationForExperience, type DashboardExperience } from '../../lib/dashboard/role-experience'
 import { UserRole, getRoleLevel } from '../../lib/auth/roles'
-import { redirectingGuards } from '../lib/nav-census/page-guards'
+import { redirectingGuards, redirectsWithoutCaseHandlerRole } from '../lib/nav-census/page-guards'
+import { isCaseHandlerRole } from '../../lib/cases/case-role-access'
 import { APP_ROOT } from './frontend-api-census'
 
 export type NavGuardKind = 'NAV_PAGE_REFUSES_ROLE' | 'LANDING_REFUSES_ROLE' | 'NAV_PAGE_MISSING'
@@ -51,7 +52,7 @@ export interface NavOracle {
 export const applicationNavigation: NavOracle = {
   // A guest is not signed in to a dashboard: the dashboard layout sends it to the login before any destination is offered.
   roles: (Object.values(UserRole) as string[]).filter((role) => role !== UserRole.GUEST),
-  levelOf: (role) => getRoleLevel(role as UserRole),
+  levelOf: canonicalPageGuardRoleLevel,
   experienceOf: (role) => getDashboardExperience(role),
   visible: (experience, role) => getVisibleNavigationForExperience(experience, false, role),
   landing: (role) => getRoleLandingPath(role),
@@ -82,6 +83,7 @@ function guardingFiles(root: string, pageFile: string): string[] {
 
 export function runCensus(root: string = APP_ROOT, navigation: NavOracle = applicationNavigation): NavGuardReport {
   const guardCache = new Map<string, string[]>()
+  const explicitHandlerGuards = new Map<string, boolean>()
   const guardsOf = (file: string): string[] => {
     if (!guardCache.has(file)) guardCache.set(file, redirectingGuards(readFileSync(file, 'utf8'), file))
     return guardCache.get(file)!
@@ -109,6 +111,13 @@ export function runCensus(root: string = APP_ROOT, navigation: NavOracle = appli
       return
     }
     guarded.add(page)
+    for (const file of guardingFiles(root, page)) {
+      if (!explicitHandlerGuards.has(file)) explicitHandlerGuards.set(file, redirectsWithoutCaseHandlerRole(readFileSync(file, 'utf8'), file))
+      if (explicitHandlerGuards.get(file) && !isCaseHandlerRole(role)) {
+        findings.push({ kind, role, href, guardedBy: `${path.relative(root, file).replace(/\\/g, '/')} requires case handler`, roleLevel: navigation.levelOf(role), guardLevel: 0 })
+        return
+      }
+    }
     const guard = strictest(page)
     const level = navigation.levelOf(role)
     if (guard && guard.level > level) {

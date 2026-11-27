@@ -1,9 +1,15 @@
+import {
+  membershipCatalogProjectionSql,
+  compileCanonicalMembershipGrant,
+  type CanonicalPostgresMajor,
+} from '../../../../packages/db/src/auth-storage-authority/membership-semantics'
 import pg from 'pg'
 import { AUTH_EXECUTION_ROLES, AUTH_ROLE_MEMBERSHIP_EXPECTATIONS } from './auth-sql'
 import { CANONICAL_BOOTSTRAP_ROLES, INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 import { FRAMEWORK_MEMBERSHIPS, FRAMEWORK_ROLES } from './framework-contract'
-import { quote } from './source'
+import { quote, type V2Plan } from './source'
 import { compileRolePrerequisiteAssertions } from '../../../../packages/db/src/auth-storage-authority/role-prerequisites'
+import { EXTERNAL_READ_OWNER } from '../../lib/external-resource-read/source'
 
 export { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 
@@ -15,10 +21,13 @@ export const VECTOR_FUNCTION_ACL_SQL = `DO $ue_v2$ DECLARE entry record; BEGIN
         EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO union_eyes_runtime,union_eyes_system',entry.signature);
       END LOOP; END $ue_v2$`
 
-export function compileMinimumRoleProvisioningSql(): string {
+export function compileMinimumRoleProvisioningSql(
+  options: { postgresMajor?: CanonicalPostgresMajor } = {},
+): string {
   const dedicated: readonly string[] = [
     ...Object.values(AUTH_EXECUTION_ROLES),
     ...Object.values(FRAMEWORK_ROLES),
+    EXTERNAL_READ_OWNER,
   ]
   return [
     ...CANONICAL_BOOTSTRAP_ROLES.map(
@@ -28,23 +37,44 @@ export function compileMinimumRoleProvisioningSql(): string {
     ...Object.entries({
       ...AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
       ...FRAMEWORK_MEMBERSHIPS,
-    }).map(
-      ([member, targets]) =>
-        `GRANT ${targets.map(quote).join(',')} TO ${quote(member)} WITH ADMIN FALSE, INHERIT FALSE, SET TRUE;`,
+    }).map(([member, targets]) =>
+      compileCanonicalMembershipGrant(
+        member,
+        targets,
+        { inherit: false, set: true, memberRoleInherit: false },
+        options.postgresMajor,
+      ),
     ),
-    `GRANT ${INSTALLER_FUNCTION_OWNER_ROLES.map(quote).join(',')} TO ue_v2_owner WITH ADMIN FALSE, INHERIT TRUE, SET TRUE;`,
+    compileCanonicalMembershipGrant(
+      'ue_v2_owner',
+      INSTALLER_FUNCTION_OWNER_ROLES,
+      { inherit: true, set: true, memberRoleInherit: true },
+      options.postgresMajor,
+    ),
   ].join('\n')
 }
 
-export async function assertMinimumInstaller(client: pg.Client): Promise<void> {
+export const currentPlanRequiresVector = (plan: Pick<V2Plan, 'statements'>): boolean =>
+  plan.statements.some((statement) => statement.canonicalId === 'CURRENT_EXTENSION:vector')
+
+export async function assertMinimumInstaller(
+  client: pg.Client,
+  options: { vectorRequired?: boolean; postgresMajor?: CanonicalPostgresMajor } = {},
+): Promise<void> {
+  const membership = membershipCatalogProjectionSql(options.postgresMajor)
   await client.query(
     compileRolePrerequisiteAssertions(
       Object.values(AUTH_EXECUTION_ROLES),
       AUTH_ROLE_MEMBERSHIP_EXPECTATIONS,
+      options,
     ),
   )
   await client.query(
-    compileRolePrerequisiteAssertions(Object.values(FRAMEWORK_ROLES), FRAMEWORK_MEMBERSHIPS),
+    compileRolePrerequisiteAssertions(
+      Object.values(FRAMEWORK_ROLES),
+      FRAMEWORK_MEMBERSHIPS,
+      options,
+    ),
   )
   await client.query(`DO $minimum_installer$ BEGIN
     IF current_user NOT IN (session_user,'ue_v2_owner') OR session_user<>'ue_v2_fixture_installer' OR NOT EXISTS (
@@ -56,7 +86,7 @@ export async function assertMinimumInstaller(client: pg.Client): Promise<void> {
       SELECT FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member
         JOIN pg_roles target ON target.oid=m.roleid
       WHERE member.rolname=session_user AND target.rolname='ue_v2_owner'
-        AND NOT m.admin_option AND NOT m.inherit_option AND m.set_option
+        AND NOT m.admin_option AND NOT ${membership.inheritOption} AND ${membership.setOption}
     ) THEN RAISE EXCEPTION 'UE_V2_INSTALLER_LOGIN_MEMBERSHIP_DRIFT'; END IF;
     IF (SELECT count(*) FROM pg_roles WHERE rolname IN
       ('ue_v2_owner','union_eyes_runtime','union_eyes_system') AND NOT
@@ -73,19 +103,23 @@ export async function assertMinimumInstaller(client: pg.Client): Promise<void> {
         JOIN pg_roles target ON target.oid=m.roleid
       WHERE member.rolname='ue_v2_owner' AND (target.rolname NOT IN
         (${INSTALLER_FUNCTION_OWNER_ROLES.map((role) => `'${role}'`).join(',')})
-        OR m.admin_option OR NOT m.inherit_option OR NOT m.set_option)
+        OR m.admin_option OR NOT ${membership.inheritOption} OR NOT ${membership.setOption})
     ) THEN RAISE EXCEPTION 'UE_V2_INSTALLER_FUNCTION_OWNER_DELEGATION_DRIFT'; END IF;
     IF EXISTS (SELECT FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member
       WHERE member.rolname IN ('union_eyes_runtime','union_eyes_system')) THEN
       RAISE EXCEPTION 'UE_V2_INSTALLER_APPLICATION_MEMBERSHIP_DRIFT';
     END IF;
-    IF NOT EXISTS (SELECT FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace
+    IF ${options.vectorRequired === false ? 'false' : 'true'} AND NOT EXISTS (SELECT FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace
       JOIN pg_roles owner ON owner.oid=e.extowner
       WHERE e.extname='vector' AND e.extversion='0.8.1' AND n.nspname='public'
         AND owner.rolname='postgres') THEN
       RAISE EXCEPTION 'UE_V2_OPERATOR_PREPROVISIONED_VECTOR_REQUIRED';
     END IF;
+    IF ${options.vectorRequired === false ? 'true' : 'false'} AND EXISTS(SELECT FROM pg_extension WHERE extname='vector') THEN
+      RAISE EXCEPTION 'UE_V2_UNDECLARED_VECTOR_PREINSTALL_DENIED';
+    END IF;
   END $minimum_installer$`)
+  await client.query(compileRolePrerequisiteAssertions([EXTERNAL_READ_OWNER], {}, options))
 }
 
 export async function inspectVectorObjectIds(client: pg.Client): Promise<Set<string>> {

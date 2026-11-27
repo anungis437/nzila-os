@@ -6349,6 +6349,10 @@
     },
     "staff": {
       "title": "CLC Staff Operations",
+      "releaseScope": {
+        "title": "Release scope",
+        "description": "CLC remittances and national sync reporting are not included in this release."
+      },
       "workflow": {
         "title": "Approval Workflow",
         "description": "Review and approve pending remittances"
@@ -11784,7 +11788,7 @@
     "wordingProposed": "The proposal was recorded. It is not consent wording until another executive adopts it.",
     "wordingAdopted": "The wording is now the current consent text.",
     "wordingWithdrawn": "The proposal was withdrawn. It is not consent wording.",
-    "wordingUnavailable": "Wording adoption is not installed on this database.",
+    "wordingUnavailable": "Wording proposal and adoption are unavailable in this base release.",
     "openJourney": "WorkAid consent and referral"
   },
   "financialAuthorityPage": {
@@ -11863,5 +11867,10 @@
     "accessChanged": "Your case access changed. Reload the case to check your access.",
     "savedRefreshFailed": "The change was saved, but the current deadline list could not be loaded. Retry to see the latest record.",
     "truncated": "The first 200 deadlines are shown."
+  },
+  "memberDirectoryBootstrap": {
+    "pending": "Finishing your member profile…",
+    "failed": "Your sign-in succeeded, but your member profile could not be finished. Try again using this session.",
+    "retry": "Try again"
   }
 }

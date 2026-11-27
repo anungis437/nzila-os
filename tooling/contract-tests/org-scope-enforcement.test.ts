@@ -93,6 +93,58 @@ function isExemptRoute(filePath: string): boolean {
   return [...EXEMPT_ROUTES].some((r) => rel.includes(`/api/${r}`) || rel.includes(`/${r}/`))
 }
 
+/**
+ * The `@/lib/services/*` functions a route imports and calls, with their own body text.
+ * Returns null when the route imports a service function it cannot resolve.
+ */
+function calledServiceFunctions(appDir: string, content: string): { name: string; body: string }[] | null {
+  const imports = [...content.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"]@\/lib\/services\/([^'"]+)['"]/g)]
+  const called: { name: string; body: string }[] = []
+  for (const [, names, modulePath] of imports) {
+    const file = [`${modulePath}.ts`, `${modulePath}/index.ts`]
+      .map((candidate) => join(appDir, 'lib', 'services', candidate))
+      .find((candidate) => existsSync(candidate))
+    if (!file) return null
+    const source = readFileSync(file, 'utf-8')
+    for (const raw of names.split(',')) {
+      const name = raw.trim().replace(/^type\s+/, '').split(/\s+as\s+/).pop()!.trim()
+      const original = raw.trim().split(/\s+as\s+/)[0].trim()
+      if (!name || !new RegExp(`\\b${name}\\s*\\(`).test(content)) continue
+      const start = source.search(new RegExp(`export\\s+(?:async\\s+)?function\\s+${original}\\s*\\(`))
+      if (start < 0) return null
+      // Skip the parameter list (balanced parentheses) and any generic return type, then take the balanced body.
+      let cursor = source.indexOf('(', start)
+      for (let parens = 0; cursor < source.length; cursor++) {
+        if (source[cursor] === '(') parens++
+        else if (source[cursor] === ')' && --parens === 0) break
+      }
+      let open = cursor
+      for (let angles = 0; open < source.length; open++) {
+        if (source[open] === '<') angles++
+        else if (source[open] === '>' && source[open - 1] !== '=') angles--
+        else if (source[open] === '{' && angles === 0) break
+      }
+      let end = open
+      for (let braces = 0; end < source.length; end++) {
+        if (source[end] === '{') braces++
+        else if (source[end] === '}' && --braces === 0) break
+      }
+      called.push({ name, body: source.slice(open, end + 1) })
+    }
+  }
+  return called
+}
+
+/** True only when the route calls at least one service function and every one it calls is org-aware in its own body. */
+function delegatesOnlyToOrgAwareServices(
+  appDir: string,
+  content: string,
+  isOrgAware: (text: string) => boolean,
+): boolean {
+  const called = calledServiceFunctions(appDir, content)
+  return !!called && called.length > 0 && called.every(({ body }) => isOrgAware(body))
+}
+
 describe('Org-scope enforcement patterns', () => {
   const orgScopeApps = APP_REGISTRY.filter(
     (a) => a.requiresOrgScope,
@@ -155,6 +207,19 @@ describe('Org-scope enforcement patterns', () => {
     // Only enforce for PRODUCTION tier — PILOT/INCUBATING apps are migrating progressively
     const productionOrgApps = orgScopeApps.filter(a => a.tier === 'PRODUCTION')
 
+    const ORG_AWARE_TOKENS = [
+      'withOrgScope',
+      'requireOrgAccess',
+      'resolveOrgContext',
+      'getDbContext',
+      'withRequestContext',
+      'requirePlatformRole',
+      'orgId',
+      'org_id',
+      'organizationId',
+    ]
+    const isOrgAware = (text: string) => ORG_AWARE_TOKENS.some((token) => text.includes(token))
+
     for (const app of productionOrgApps) {
       const appDir = join(APPS_DIR, app.id)
       if (!existsSync(appDir)) continue
@@ -163,18 +228,14 @@ describe('Org-scope enforcement patterns', () => {
       for (const route of routes) {
         if (isExemptRoute(route)) continue
         const content = readFileSync(route, 'utf-8')
-        // If route uses authenticateUser but not any org-aware guard, it's a warning
+        // If route uses authenticateUser but not any org-aware guard, it's a warning.
+        // Raw DB access moved out of route handlers into lib/services: when the route
+        // delegates every query to service functions, the org scoping is asserted at its
+        // real location — each called service function body must itself be org-aware.
         if (
           content.includes('authenticateUser') &&
-          !content.includes('withOrgScope') &&
-          !content.includes('requireOrgAccess') &&
-          !content.includes('resolveOrgContext') &&
-          !content.includes('getDbContext') &&
-          !content.includes('withRequestContext') &&
-          !content.includes('requirePlatformRole') &&
-          !content.includes('orgId') &&
-          !content.includes('org_id') &&
-          !content.includes('organizationId')
+          !isOrgAware(content) &&
+          !delegatesOnlyToOrgAwareServices(appDir, content, isOrgAware)
         ) {
           const rel = route.replace(APPS_DIR, '').replace(/\\/g, '/')
           warnings.push(`${app.id}: ${rel} — uses authenticateUser without org guard`)

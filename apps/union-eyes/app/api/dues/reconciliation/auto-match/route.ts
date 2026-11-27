@@ -1,32 +1,41 @@
+import { requireBaseFinancialAuthority } from '@/lib/finance/base-release-boundary'
 /**
  * Auto-Match Reconciliation
  *
  * POST /api/dues/reconciliation/auto-match — Run automatic member matching
  * for pending remittance line items using employee number and name heuristics.
  */
-import { withApi, ApiError } from '@/lib/api/framework';
-import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
-import { remittanceLineItems } from '@/db/schema/dues-finance-schema';
-import { eq, and, isNull, sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
-import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { withApi, ApiError } from '@/lib/api/framework'
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority'
+import { remittanceLineItems } from '@/db/schema/dues-finance-schema'
+import { eq, and, isNull, sql } from 'drizzle-orm'
+import { logger } from '@/lib/logger'
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate'
+import { withRLSContext } from '@/lib/db/with-rls-context'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const POST = withApi(
   {
+    rlsOrgContext: false,
     auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
-    entitlement: 'financial_intelligence_suite',
+
     openapi: { tags: ['Dues'], summary: 'Run automatic remittance line-item matching' },
   },
   async ({ organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required')
 
     // Matching, the hand-off of the rest to manual review, and the audit record commit together.
+    requireBaseFinancialAuthority()
+
     return withRLSContext({ organizationId, userId }, async (tx) => {
-      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true });
+      await requireLiveFinancialMandate(tx, {
+        organizationId,
+        userId,
+        action: 'finance:reconcile',
+        requiresLedger: true,
+      })
       const pending = await tx
         .select()
         .from(remittanceLineItems)
@@ -36,32 +45,32 @@ export const POST = withApi(
             eq(remittanceLineItems.lineStatus, 'pending'),
             isNull(remittanceLineItems.userId),
           ),
-        );
+        )
 
       if (pending.length === 0) {
-        return { matched: 0, unmatched: 0, message: 'No pending items to match' };
+        return { matched: 0, unmatched: 0, message: 'No pending items to match' }
       }
 
-      let matched = 0;
-      let ambiguous = 0;
+      let matched = 0
+      let ambiguous = 0
 
       // Exact employee-number match against organization_members. A number that names more than one member is
       // ambiguous and goes to manual review: a payroll line is never attributed to a member on a guess.
       for (const item of pending) {
-        if (!item.employeeNumber) continue;
+        if (!item.employeeNumber) continue
 
         const memberRows = await tx.execute(
           sql`SELECT user_id FROM organization_members
               WHERE organization_id = ${organizationId}::uuid
                 AND membership_number = ${item.employeeNumber}
               LIMIT 2`,
-        );
-        const candidates = Array.from(memberRows as unknown as Array<{ user_id?: string }>);
+        )
+        const candidates = Array.from(memberRows as unknown as Array<{ user_id?: string }>)
         if (candidates.length > 1) {
-          ambiguous++;
-          continue;
+          ambiguous++
+          continue
         }
-        const memberId = candidates[0]?.user_id;
+        const memberId = candidates[0]?.user_id
 
         if (memberId) {
           await tx
@@ -73,12 +82,17 @@ export const POST = withApi(
               lineStatus: 'matched',
               updatedAt: new Date(),
             })
-            .where(and(eq(remittanceLineItems.id, item.id), eq(remittanceLineItems.organizationId, organizationId)));
-          matched++;
+            .where(
+              and(
+                eq(remittanceLineItems.id, item.id),
+                eq(remittanceLineItems.organizationId, organizationId),
+              ),
+            )
+          matched++
         }
       }
 
-      const unmatched = pending.length - matched;
+      const unmatched = pending.length - matched
 
       if (unmatched > 0) {
         await tx
@@ -90,7 +104,7 @@ export const POST = withApi(
               eq(remittanceLineItems.lineStatus, 'pending'),
               isNull(remittanceLineItems.userId),
             ),
-          );
+          )
       }
 
       await persistAtomicAudit(tx, {
@@ -100,9 +114,9 @@ export const POST = withApi(
         resourceType: 'remittance_line_items',
         resourceId: organizationId,
         details: { matched, unmatched, ambiguous },
-      });
-      logger.info('Auto-match completed', { organizationId, matched, unmatched, ambiguous });
-      return { matched, unmatched };
-    });
+      })
+      logger.info('Auto-match completed', { organizationId, matched, unmatched, ambiguous })
+      return { matched, unmatched }
+    })
   },
-);
+)

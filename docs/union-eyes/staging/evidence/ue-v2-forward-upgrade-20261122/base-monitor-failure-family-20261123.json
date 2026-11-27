@@ -1,0 +1,112 @@
+{
+  "schema": "UE_BASE_ACCESS_AND_MONITOR_FAILURE_FAMILY_V2",
+  "observedApplicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+  "observedDeploymentOperatorSha": "8b2583405b5265f78d5b627fafa79fe508f33b02",
+  "observedQaWorkflowSha": "ddd813360fac155203b67d39b0b3df774be89222",
+  "observedRuntime": {
+    "sourceMatchedMonitorHttpStatus": 500,
+    "measurementsPassed": 9,
+    "measurementsFailed": 2,
+    "failedScopes": [
+      "sigexp",
+      "mail"
+    ],
+    "signatureCause": "Canonical generic e-signature audit storage is contained; the scheduled expiry job answers 501. Approved-letter signing and evidence sealing are separate required base capabilities.",
+    "mailCause": "The existing configured sender credential returns 401 restricted_api_key for a receipt read; no delivery or inbox claim is made."
+  },
+  "scopeAuthority": [
+    "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json#historicalCapabilities/UE-OMIT-PKI-SIGNING-WORKFLOW",
+    "UE_V2_BASE_PRODUCT_SCOPE_RECONCILIATION.json#historicalCapabilities/UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS"
+  ],
+  "sourceRemediation": {
+    "workerScope": "The scheduled job manifest owns active base cadences for both infrastructure and runtime monitoring; all five active worker limits remain enforced.",
+    "genericSignatureStagingJob": "Retain the existing job and execution history with a manual trigger; no storage authority or generic signature implementation added.",
+    "databaseSchemaChanges": false,
+    "liveBusinessDataChanges": false,
+    "mailSenderAuthentication": "Use the existing send-only RESEND_API_KEY for a deliberately empty-recipient sending API request. Accept only the qualified 422 missing_required_field rejection without a message id. This checks sender API authentication only; delivery and human inbox receipt remain required separate final release proofs.",
+    "credentialProvisioning": "Existing staging Key Vault reference retained; direct Azure CLI discovery found no receipt-reading key. No new credential, permission or owner setup required.",
+    "requestIdentity": "Bind and read the verified actor profile before opening a canonical tenant transaction; reuse its callback-scoped authority for evidence sealing and nested authorization, retaining actor/organization/role checks and post-return expiry.",
+    "authWaitBounds": "Install transaction-local 5-second lock and 15-second statement limits on the dedicated auth executor, preserving roles and pool sizes.",
+    "clientRoleBoundary": "Pass the verified role to the client route guard and apply the same explicit local correspondence-role predicate as the page/API. A menu experience neither removes this authorized route nor lends it to a platform title. Other route restrictions and server authority remain in force."
+  },
+  "ownedTestPrerequisite": {
+    "expiredSyntheticModuleAdmissionObserved": true,
+    "originalRowRetained": true,
+    "expiryOnlyRenewalRollbackVerified": true,
+    "boundedUntil": "2026-11-24T03:00:00Z",
+    "commercialOrInstitutionalContractCreated": false,
+    "financialAuthorityGranted": false,
+    "note": "This is controlled technical QA admission; it is not customer adoption or commercial license evidence."
+  },
+  "validation": {
+    "previousDraftSourceSha": "69cd89074a20f7a0bc6a8efd30f55771320d6e0a",
+    "previousDraftFastSuite": {
+      "passed": 41645,
+      "failed": 1,
+      "skipped": 1624,
+      "pending": 13,
+      "failure": "Undeclared optional receipt-reading credential; the new credential has been removed, not exempted or given a larger drift ceiling."
+    },
+    "deadlockRegressionOldSourceFailed": 5,
+    "deadlockRegressionCurrentSourcePassed": 5,
+    "currentFocusedReentryAndEnvironmentAssertionsPassed": 20,
+    "fiveRequiredRepositoryCommands": "PENDING_CORRECTED_EXACT_COMMIT",
+    "ci": "PENDING_CORRECTED_EXACT_COMMIT",
+    "qualifiedRollout": "PENDING",
+    "actualPostRepairMonitor": "PENDING",
+    "nativeAuthBlockedLockAndStatementRecoveryAssertionsPassed": 1,
+    "nativeSelectionExcludedTests": 19,
+    "physicalSqlStatementsUnchanged": 6326,
+    "physicalCatalogAuthorityUnchanged": true,
+    "sourcePlanMetadataRegenerated": true,
+    "localBicepCompilation": "PASS",
+    "previousIntegratedDraftSourceSha": "289d3c9d956d35da784756863f4af32ea8e7f817",
+    "previousIntegratedDraftFastSuite": {
+      "passed": 41649,
+      "failed": 1,
+      "skipped": 1625,
+      "pending": 13,
+      "failure": "Auth pool SQL expectation omitted the newly added transaction-local timeout settings. Correct the expected complete bound parameter set; retain the one-query and cleared-selector checks."
+    },
+    "navigationRegressionsOldSourceFailed": 20,
+    "historicalPrecommitNavigationAndAuthPoolFocusedAssertionsPassed": 179,
+    "currentSourceProviderGuardNavigationAndAuthPoolFocusedTestsPassed": 149,
+    "roleMatrixCoverage": "The existing independent domain-role matrix checks both menu and route admission for every role value. Component scenarios use the shared local correspondence-role list; identity-provider detection stays enforced without a new exception.",
+    "previousNavigationDraftSourceSha": "9079730e9446ec48cb6f9cde2885270066390977",
+    "previousNavigationDraftContractSuite": {
+      "passed": 10172,
+      "failed": 1,
+      "failure": "New component test repeated a local occupation identifier in a file outside the declared domain tests. Keep the independent matrix in the existing domain test and consume the shared role list in component scenarios.",
+      "testFast": "INTERRUPTED_AFTER_KNOWN_CONTRACT_FAILURE_NOT_A_PASS",
+      "otherFourRequiredLocalCommands": "NOT_EXECUTED"
+    }
+  },
+  "fullBaseReleaseAccepted": false,
+  "productionDeployment": false,
+  "financeFeatureImplementation": false,
+  "observedRequestFailure": {
+    "workflowRunId": 45252695686,
+    "route": "POST /api/cases",
+    "cause": "A case transaction held its principal advisory lock and requested a second auth bridge through evidence sealing; the auth pool waited on that same principal while the runtime transaction waited on auth.",
+    "recovery": "Cancelled only the exactly identified blocked synthetic auth query; the request rolled back. Original committed claims, audit and evidence digests were unchanged. No backend was terminated and no live data, roles, ACLs or schema were reset."
+  },
+  "directProviderControl": {
+    "configuredSendingKeyHttpStatus": 422,
+    "invalidKeyHttpStatus": 401,
+    "recipients": 0,
+    "emailAccepted": false,
+    "deliveryVerified": false,
+    "humanInboxVerified": false
+  },
+  "observedNavigationFailure": {
+    "applicationSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+    "actor": "Controlled local administrator",
+    "requestedPath": "/en-CA/dashboard/correspondence",
+    "initialHttpStatus": 200,
+    "settledPath": "/en-CA/dashboard/admin/organizations",
+    "memberDirectoryBootstrapStatus": 200,
+    "clientLetterListRequested": false,
+    "cause": "The client experience allowlist redirects a locally authorized letter role even though the existing page and API admit that role.",
+    "officerRenderedLetterList": "PASS_ACTUAL_STAGING_WITHOUT_CREATION_OR_SENDING"
+  }
+}

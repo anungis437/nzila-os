@@ -1,0 +1,43 @@
+
+ RUN  v5.0.5 /Users/oby/.codex/worktrees/ue-privacy-self-service-20261116/pr1163-followup/apps/union-eyes
+
+ ❯ |union-eyes-native| db/__tests__/current-security-installer.native.test.ts (3 tests | 2 failed) 4296ms
+   ❯ actual released-to-current security transaction on owned native PostgreSQL (3)
+     ✓ refuses an altered legacy policy and preserves the entire security state and history 2083ms
+     × rolls back roles, owners, ACLs and functions after a real database failure during the transition 1133ms
+     × qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP 1079ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |union-eyes-native| db/__tests__/current-security-installer.native.test.ts > actual released-to-current security transaction on owned native PostgreSQL > rolls back roles, owners, ACLs and functions after a real database failure during the transition
+AssertionError: expected [Function] to throw error including 'UE_NATIVE_FORCED_CURRENT_SECURITY_FAI…' but got 'Mixed or partial current security ins…'
+
+Expected: "UE_NATIVE_FORCED_CURRENT_SECURITY_FAILURE"
+Received: "Mixed or partial current security installation refused"
+
+ ❯ db/__tests__/current-security-installer.native.test.ts:165:114
+    163|     await admin!.query("CREATE EVENT TRIGGER ue_native_forced_security…
+    164|     const before = await securityDigest(admin!), history = await histo…
+    165|     await expect(runCurrentSecurityBootstrapStage(operator!, installUn…
+       |                                                                                                                  ^
+    166|     expect(await securityDigest(admin!)).toBe(before)
+    167|     expect(await historyDigest(admin!, history.tables)).toEqual(histor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |union-eyes-native| db/__tests__/current-security-installer.native.test.ts > actual released-to-current security transaction on owned native PostgreSQL > qualifies the real current source catalog, preserves history and proves a second installation is a read-only NOOP
+Error: Mixed or partial current security installation refused
+ ❯ installUnionEyesCurrentSecurity ../../tooling/scripts/lib/union-eyes-current-security-installer.ts:306:179
+
+ ❯ runCurrentSecurityBootstrapStage ../../tooling/scripts/lib/union-eyes-bootstrap-stages.mjs:59:20
+ ❯ db/__tests__/current-security-installer.native.test.ts:172:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  19:52:29
+   Duration  4.83s (tests 91%, import 5%, transform 3%, setup 1%)
+
+JSON report written to /Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/current-security-installer-native-v3.json

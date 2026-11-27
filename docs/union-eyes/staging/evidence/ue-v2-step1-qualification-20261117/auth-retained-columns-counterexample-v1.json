@@ -1,0 +1,174 @@
+{
+  "collectedAt": "2026-11-18T01:29:38.632Z",
+  "proof": "RETAINED_NONCANONICAL_AUTH_USERS_COLUMNS",
+  "environment": "Owned disposable PGlite SQL engine; not native server, deployed database, HTTP or normal Drizzle API proof.",
+  "baseCommit": "0327fba8678600f4ecf84ebb3f723086cea0078b",
+  "candidateIsFinal": false,
+  "sourceFiles": [
+    {
+      "file": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "181dd2428baea5607eee417017a88d4632be54ceb3d8f6cb866c7f7ebd2448e1"
+    },
+    {
+      "file": "packages/db/src/auth-storage-authority/entries.ts",
+      "sha256": "79fc5aa02df0e7a0d67d783e38322b4eeee93b857e2e5b02cb39874449353983"
+    },
+    {
+      "file": "packages/db/src/auth-storage-authority/privilege-expectations.ts",
+      "sha256": "210c313c933678833cde69723c99e9c5472c495fb35ad55ba216569f860e29b1"
+    },
+    {
+      "file": "packages/db/src/schema/auth.ts",
+      "sha256": "04a0b11d1edc2729e9eb2e1eebe80d860fc3e49268f34af8066da26043cd12e6"
+    },
+    {
+      "file": "apps/union-eyes/scripts/bootstrap-v2/auth-fixture.ts",
+      "sha256": "89dd4e9ec8a203b1a0d3d11fd7254d1ca67614feff74193d09f16fcc6f0bce7f"
+    }
+  ],
+  "compiledArtifact": {
+    "producerPath": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+    "producerExport": "compileAuthBootstrapSql",
+    "algorithm": "SHA-256",
+    "value": "fb1b5970ba8d0db5fa4dde151366ea479126271b8a1ab662b0f8fc3e34faf03a",
+    "digestOf": "Generated SQL text, not the producer source file bytes"
+  },
+  "rawLegacyOrPasswordValuesPersisted": false,
+  "results": [
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "projection": "canonical-user-id-and-password",
+      "allowed": true
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "column": "phone_verified_at",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "column": "two_factor_secret",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "column": "two_factor_backup_codes",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "column": "encrypted_sin",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "column": "encrypted_ssn",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "column": "encrypted_bank_account",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "identity-own-user",
+      "role": "nzila_auth_identity",
+      "projection": "foreign-row-control",
+      "allowed": false
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "projection": "canonical-user-id-and-password",
+      "allowed": true
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "column": "phone_verified_at",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "column": "two_factor_secret",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "column": "two_factor_backup_codes",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "column": "encrypted_sin",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "column": "encrypted_ssn",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "column": "encrypted_bank_account",
+      "canonicalDeclarationContainsColumn": false,
+      "allowed": true,
+      "sqlState": null
+    },
+    {
+      "purpose": "lookup-exact-email",
+      "role": "nzila_auth_lookup",
+      "projection": "foreign-row-control",
+      "allowed": false
+    }
+  ],
+  "sourceCanonicalUsersExcludedAllSixFields": true,
+  "persistedRowsUnchangedAfterProbes": true,
+  "retainedColumnReadsAllowed": 12,
+  "canonicalProjectionControlsAllowed": 2,
+  "foreignRowControlsAllowed": 0,
+  "finding": "CONFIRMED_RESTRICTED_AUTH_SQL_ACCESS_TO_RETAINED_NONCANONICAL_COLUMNS",
+  "interpretation": "Table-level SELECT grants cover retained physical columns even when the current canonical Drizzle declaration omits them. Descriptor wildcard interpretation needs review; this probe does not establish a normal API response leak.",
+  "sqlEngineClosed": true,
+  "publication": {
+    "form": "PUBLISHED_DERIVATIVE",
+    "derivationManifest": "docs/union-eyes/staging/evidence/ue-v2-step1-qualification-20261117/evidence-publication-v1.json",
+    "originalSha256": "e8af561909f0d9790e95ce6ea8b75a9dd1740a9080ee63fd8df71b73f29cacd6",
+    "originalPrivateArchive": "/Users/oby/.codex/private-evidence/nzila-os/20261117/step1-work/evidence-publication-archive-v1/auth-retained-columns-counterexample-v1.json",
+    "meaning": "Publication formatting/redaction and published artifact references only; original test outcomes and source digests are preserved"
+  }
+}

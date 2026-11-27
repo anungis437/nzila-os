@@ -160,15 +160,21 @@ describe.skipIf(!URL_)('migration 0033 on native PostgreSQL', () => {
     await db.query('ALTER TABLE public.external_document_access_grants_moved RENAME TO external_document_access_grants')
   })
 
-  it('holds on the combined database: nine text columns, four policies, the runtime role keeps its privileges', async () => {
+  it('holds on the combined database: nine text columns, four policies, and the canonical containment (no raw runtime or system privilege)', async () => {
     const combined = new pg.Client({ connectionString: URL_ })
     await combined.connect()
     try {
       for (const [table, column] of COLUMNS) expect(await typeOf(combined, table, column), `${table}.${column}`).toBe('text')
       const policies = (await combined.query(`SELECT policyname FROM pg_policies WHERE schemaname='public' AND policyname = ANY($1)`, [POLICIES])).rows.map((r) => r.policyname)
       expect(policies.sort()).toEqual([...POLICIES].sort())
-      const grants = (await combined.query(`SELECT has_table_privilege('union_eyes_runtime','public.representation_authorities','SELECT') AS a, has_table_privilege('union_eyes_runtime','public.external_matter_access_grants','SELECT') AS m, has_table_privilege('union_eyes_runtime','public.external_document_access_grants','INSERT') AS d`)).rows[0]
-      expect(grants).toEqual({ a: true, m: true, d: true })
+      // Canonical V2 classifies all three tables CONTAINED_NO_AUTHORITY (lib/operations/catalog-v2-decisions.json): external reads go
+      // only through the inspected consent/qualification functions (ue_external_read_reader), never a raw runtime or system privilege.
+      for (const role of ['union_eyes_runtime', 'union_eyes_system']) {
+        const grants = (await combined.query(`SELECT has_any_column_privilege($1,'public.representation_authorities','SELECT') AS a, has_any_column_privilege($1,'public.external_matter_access_grants','SELECT') AS m, has_any_column_privilege($1,'public.external_document_access_grants','INSERT') AS d`, [role])).rows[0]
+        expect(grants, role).toEqual({ a: false, m: false, d: false })
+      }
+      const reader = (await combined.query(`SELECT has_any_column_privilege('ue_external_read_reader','public.representation_authorities','SELECT') AS a, has_any_column_privilege('ue_external_read_reader','public.external_matter_access_grants','SELECT') AS m, has_any_column_privilege('ue_external_read_reader','public.external_document_access_grants','SELECT') AS d`)).rows[0]
+      expect(reader).toEqual({ a: true, m: true, d: true })
     } finally {
       await combined.end()
     }

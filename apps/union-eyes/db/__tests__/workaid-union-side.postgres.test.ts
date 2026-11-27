@@ -13,8 +13,10 @@ import pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { ORG, ORG_B, newUuid, seedMembership, seedUser, U, type Db } from './authority-kernel-harness'
 import { daysAhead, kit, minutesAgo } from './authority-kernel-testkit'
-import { insertRelationship } from '../../lib/authority/store/mutations'
-import { membershipSourceVia } from '../../lib/authority/store/identity'
+import { assignCase } from '../../lib/authority/store/lifecycle'
+import { activeMembershipSource } from '../../lib/authority/store/active-membership-source'
+import { runAuthorityTransaction } from '../../lib/authority/store/executor'
+import { withNativeCanonicalActor } from '../../scripts/runtime/native-canonical-fixture'
 import type { SqlExecutor } from '../../lib/authority/store/executor'
 import {
   authoriseWorkAidDocument,
@@ -63,12 +65,15 @@ describe.skipIf(!URL)('union-side WorkAid disclosure on the combined deployed sc
     await admin.query(`INSERT INTO document_links (organization_id, document_id, linked_entity_type, linked_entity_id, linked_by) VALUES ($1,$2,'grievance',$3,$4)`, [ORG, id, caseId, uploadedBy])
     return id
   }
+  // The representative is made the case's assignee by the real ceremony: canonical V2 admits no hand-written derived relationship
+  // (insertRelationship: derived subject relationships come only from canonical case source records). An officer receives a
+  // supervisory mandate over the case (issued, approved, accepted), then assigns the representative through assignCase.
+  const ASSIGNER = 'user_wa_assigner'
   const newRep = async (caseId: string) => {
     const user = `user_wa_rep_${newUuid().slice(0, 8)}`
     await seedMembership(adapt(admin), user, ORG, 'steward')
-    await k.as(U.president)((t) =>
-      insertRelationship(t, { organizationId: ORG, principalUserId: user, resourceType: 'case', resourceId: caseId, relation: 'assignee', origin: 'derived', effectiveAt: minutesAgo() }),
-    )
+    await k.grantMandate('supervisory', ASSIGNER, ['read', 'assign'], { scope: { resourceIds: [caseId] } })
+    await k.as(ASSIGNER)((t) => assignCase(t, k.deps, { organizationId: ORG, issuerUserId: ASSIGNER, caseId, assigneeUserId: user, effectiveAt: minutesAgo() }))
     return user
   }
   const grant = (caseId: string, member: string = U.member, org = ORG) =>
@@ -105,13 +110,21 @@ describe.skipIf(!URL)('union-side WorkAid disclosure on the combined deployed sc
     for (const [u, r] of Object.entries(roles)) await seedMembership(d, u, ORG, r)
     await seedUser(d, 'user_wa_other_org')
     await seedMembership(d, 'user_wa_other_org', ORG_B, 'member')
+    await seedMembership(d, 'user_wa_assigner', ORG, 'officer')
     runtime = new pg.Client({ connectionString: URL })
     await runtime.connect()
     await runtime.query('SET ROLE union_eyes_runtime')
     identityReader = new pg.Client({ connectionString: URL })
     await identityReader.connect()
     await identityReader.query('SET ROLE union_eyes_system')
-    k = kit(adapt(runtime), membershipSourceVia(identityReader as unknown as SqlExecutor))
+    // Canonical V2: each actor works in their own verified business session (ue_v2_verified_business_session), and membership facts
+    // come from the reader-owned definer the topology answers (activeMembershipSource); the system role reads no identity relation.
+    k = kit(adapt(runtime), activeMembershipSource, (user, org, operation) =>
+      withNativeCanonicalActor(user, org, (binding) => runAuthorityTransaction(runtime as unknown as SqlExecutor,
+        { organizationId: binding.organizationId, userId: binding.userId, sessionToken: binding.sessionToken }, async (tx) => {
+          await tx.query('SET LOCAL ROLE union_eyes_runtime')
+          return operation(tx)
+        })))
     await k.adoptDefaultRules()
     await k.grantOffice(U.vp, U.president, U.treasurer)
 

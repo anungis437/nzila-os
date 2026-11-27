@@ -5,18 +5,13 @@
  * collaborators and the caller's effective access. A body that lacks a part the screen reads is an error to show, never a grievance
  * with an empty timeline or an empty document list.
  *
- * The status the screen offers next is what the server's own lifecycle rules allow: PATCH /api/grievances/:id/status accepts the
- * grievance_status members, translates both statuses through the state bridge and asks validateTransition (lib/workflow/case-lifecycle)
- * with the actor's role and the assigned representative. The same functions answer here, so a button is offered only for a change the
- * server can accept. The caller's role is not known to the screen: it asks as a steward, the lowest role that can change a status, so
- * a transition only a higher role may make is not offered here (the server stays the authority either way). Who is assigned is read from
- * the case-access kernel (primaryLroId): the representative column on the grievance row is mutable and not an authority source.
+ * GET projects allowedStatuses using the caller's live authority and the same stored facts and lifecycle validator as the locked PATCH.
+ * The browser offers only that projection. It never invents a role, omits time/document guards, or derives authority from an assignment label.
+ * PATCH checks the live authority and current stored facts again; a stale projection never authorizes a write.
  */
 import type { GrievanceStatus } from '@/db/schema/domains/claims/grievances';
 import { canTransitionGrievance } from '@/lib/cases/grievance-transition-authority';
 import { ApiShapeError, envelopeData, isRecord } from '@/lib/client/api-envelope';
-import { validateTransition } from '@/lib/workflow/case-lifecycle';
-import { toLifecycleState } from '@/lib/workflow/state-bridge';
 
 export interface GrievanceEvent {
   id: string;
@@ -45,6 +40,8 @@ export interface CollaboratorAccess {
 
 export interface EffectiveAccess {
   canViewInternal: boolean;
+  canTransition?: boolean;
+  canCloseCase?: boolean;
   isPrimaryOwner: boolean;
   isSecondaryCollaborator: boolean;
   accessRole: string | null;
@@ -57,6 +54,7 @@ export interface GrievanceDetail {
   grievanceNumber: string;
   type: string;
   status: string;
+  allowedStatuses: GrievanceStatus[];
   priority: string;
   title: string;
   description: string | null;
@@ -102,27 +100,16 @@ export const DOCUMENT_TYPES = ['evidence', 'witness_statement', 'correspondence'
 
 export const ACCESS_ROLES = ['secondary_lro', 'reviewer', 'read_only'] as const;
 
-const lifecycleOf = (status: string) => toLifecycleState('grievance', status) ?? toLifecycleState('cupe', status);
-
-/** The statuses the server's lifecycle rules allow from `current`, for a steward and the assigned representative. */
-export function nextStatuses(current: string, assignedTo: string | null): GrievanceStatus[] {
-  const from = lifecycleOf(current);
-  if (!from) return [];
-  return GRIEVANCE_STATUSES.filter((target) => {
-    if (target === current) return false;
-    const to = lifecycleOf(target);
-    return to !== null && validateTransition({ actorRole: 'steward', caseId: 'client', currentState: from, targetState: to, assignedTo }).allowed;
-  });
+/** Only server-projected actions are offered. Missing/malformed authority enables nothing. */
+export function nextStatuses(current: string, advertised: readonly string[] = []): GrievanceStatus[] {
+  if (!isKnownStatus(current) || new Set(advertised).size !== advertised.length ||
+    advertised.some(target => !isKnownStatus(target) || target === current)) return [];
+  return [...advertised] as GrievanceStatus[];
 }
 
 /** Whether the caller has authority over this matter to change its status: the rule the status route applies. */
 export const maySetStatus = (grievance: Pick<GrievanceDetail, 'status' | 'primaryLroId' | 'effectiveAccess'>): boolean =>
-  canTransitionGrievance({
-    isPrimaryOwner: grievance.effectiveAccess.isPrimaryOwner,
-    accessRole: grievance.effectiveAccess.isSecondaryCollaborator ? grievance.effectiveAccess.accessRole : null,
-    grievanceStatus: grievance.status,
-    primaryRepresentativeId: grievance.primaryLroId,
-  });
+  canTransitionGrievance({ canTransition: grievance.effectiveAccess.canTransition });
 
 const MIME_TYPES: Record<string, string> = {
   pdf: 'application/pdf',
@@ -196,6 +183,8 @@ export function readGrievanceDetail(body: unknown): GrievanceDetail {
     grievanceNumber: mustBeText(data.grievanceNumber, 'a number'),
     type: text(data.type) ?? '',
     status: mustBeText(data.status, 'a status'),
+    allowedStatuses: nextStatuses(mustBeText(data.status, 'a status'),
+      Array.isArray(data.allowedStatuses) ? data.allowedStatuses : []),
     priority: text(data.priority) ?? '',
     title: text(data.title) ?? '',
     description: text(data.description),
@@ -228,6 +217,8 @@ export function readGrievanceDetail(body: unknown): GrievanceDetail {
     effectiveAccess: {
       // Missing authority never enables internal tools.
       canViewInternal: access.canViewInternal === true,
+      canTransition: access.canTransition === true,
+      canCloseCase: access.ownerOnly !== null && typeof access.ownerOnly === 'object' && !Array.isArray(access.ownerOnly) && (access.ownerOnly as Record<string, unknown>).canCloseCase === true,
       isPrimaryOwner: access.isPrimaryOwner,
       isSecondaryCollaborator: access.isSecondaryCollaborator === true,
       accessRole: text(access.accessRole),

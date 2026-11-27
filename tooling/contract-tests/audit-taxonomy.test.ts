@@ -27,6 +27,38 @@ function read(rel: string): string {
   try { return readFileSync(abs, 'utf-8') } catch { return '' }
 }
 
+/** Source of one exported (async) function, from its declaration to the next top-level export. */
+function exportedFunctionBody(src: string, name: string): string {
+  const start = src.search(new RegExp(`export\\s+(?:async\\s+)?function\\s+${name}\\s*\\(`))
+  if (start < 0) return ''
+  const rest = src.slice(start + 1)
+  const next = rest.search(/\nexport\s/)
+  return next < 0 ? src.slice(start) : src.slice(start, start + 1 + next)
+}
+
+/**
+ * A route that delegated its mutation to a service: the route imports `fn` from
+ * `servicePath`, calls it inside `method`, and carries no DB client of its own,
+ * so the service function is the route's only path to the write it audits.
+ * Returns the service function's source for the audit assertions.
+ */
+function delegatedAuditSource(
+  routePath: string,
+  method: string,
+  servicePath: string,
+  fn: string,
+): string {
+  const route = read(routePath)
+  expect(route, `${routePath} must exist`).not.toBe('')
+  const importPath = '@/' + servicePath.replace(/^apps\/[^/]+\//, '').replace(/\.ts$/, '')
+  expect(route).toMatch(new RegExp(`import\\s*\\{[^}]*\\b${fn}\\b[^}]*\\}\\s*from\\s*['"]${importPath}['"]`))
+  expect(exportedFunctionBody(route, method), `${routePath} ${method} must call ${fn}()`).toContain(`${fn}(`)
+  expect(route, `${routePath} must not hold its own DB client`).not.toMatch(/from\s+['"]@nzila\/db(?:\/[^'"]*)?['"]/)
+  const body = exportedFunctionBody(read(servicePath), fn)
+  expect(body, `${servicePath} must export ${fn}`).not.toBe('')
+  return body
+}
+
 // ── Subject files ─────────────────────────────────────────────────────────────
 
 const AUDIT_DB = 'apps/console/lib/audit-db.ts'
@@ -35,6 +67,11 @@ const VERIFY_CHAIN_ROUTE = 'apps/console/app/api/audit/verify-chain/route.ts'
 const STRIPE_REPORT_ROUTE = 'apps/console/app/api/stripe/reports/generate/route.ts'
 const YEAR_END_PACK = 'apps/console/app/api/finance/year-end-pack/route.ts'
 const AI_STRIPE_ROUTE = 'apps/console/app/api/ai/actions/finance/stripe-monthly-reports/route.ts'
+// Raw DB access moved out of these routes into service functions (governance
+// exceptions removed); the audit emission moved with the write.
+const YEAR_END_PACK_SERVICE = 'apps/console/lib/services/year-end-pack-service.ts'
+const AI_PROPOSAL_SERVICE = 'apps/console/lib/services/ai-proposal-service.ts'
+const ORG_ADMIN_SERVICE = 'apps/console/lib/services/organization-admin-service.ts'
 const FINANCE_AUDIT = 'apps/console/lib/finance-audit.ts'
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -96,24 +133,21 @@ describe('Audit Taxonomy — REM-04 contract', () => {
   })
 
   it('finance/year-end-pack route calls a finance audit function on export', () => {
-    const content = read(YEAR_END_PACK)
-    expect(content).not.toBe('')
-    // Must call some form of audit recording
-    expect(
-      content.includes('recordAuditEvent') ||
-      content.includes('recordFinanceAuditEvent') ||
-      content.includes('EVIDENCE_PACK_GENERATED')
-    ).toBe(true)
+    // POST builds the pack only through buildAndAuditYearEndPack, which records
+    // EVIDENCE_PACK_GENERATED via the finance audit wrapper.
+    const content = delegatedAuditSource(YEAR_END_PACK, 'POST', YEAR_END_PACK_SERVICE, 'buildAndAuditYearEndPack')
+    expect(content).toContain('recordFinanceAuditEvent(')
+    expect(content).toContain('EVIDENCE_PACK_GENERATED')
   })
 
   it('AI stripe monthly reports route emits an audit event', () => {
-    const content = read(AI_STRIPE_ROUTE)
-    expect(content).not.toBe('')
-    expect(
-      content.includes('appendAiAuditEvent') ||
-      content.includes('recordAuditEvent') ||
-      content.includes('ai.action_proposed')
-    ).toBe(true)
+    // POST proposes/executes only through generateStripeMonthlyReportsAction,
+    // which appends ai.action_proposed right after creating the action row.
+    const content = delegatedAuditSource(AI_STRIPE_ROUTE, 'POST', AI_PROPOSAL_SERVICE, 'generateStripeMonthlyReportsAction')
+    expect(content).toContain('appendAiAuditEvent(')
+    expect(content).toContain('ai.action_proposed')
+    expect(content.indexOf('.insert(aiActions)')).toBeGreaterThan(-1)
+    expect(content.indexOf('appendAiAuditEvent(')).toBeGreaterThan(content.indexOf('.insert(aiActions)'))
   })
 
   // ── Hash chain integrity ────────────────────────────────────────────────────
@@ -173,20 +207,30 @@ describe('Audit Call-site — REM-09 member management', () => {
     expect(existsSync(resolve(ROOT, PEOPLE_ROUTE))).toBe(true)
   })
 
+  // The member insert moved from the route into organization-admin-service
+  // (governance exceptions removed); the route reaches it only through
+  // addOrganizationMember, which carries the audit emission.
+
   it('people route imports recordAuditEvent', () => {
-    const content = read(PEOPLE_ROUTE)
-    expect(content).not.toBe('')
-    expect(content).toContain('recordAuditEvent')
+    delegatedAuditSource(PEOPLE_ROUTE, 'POST', ORG_ADMIN_SERVICE, 'addOrganizationMember')
+    expect(read(ORG_ADMIN_SERVICE)).toMatch(
+      /import\s*\{[^}]*\brecordAuditEvent\b[^}]*\}\s*from\s*['"]@\/lib\/audit-db['"]/,
+    )
   })
 
   it('people route imports AUDIT_ACTIONS', () => {
-    const content = read(PEOPLE_ROUTE)
-    expect(content).toContain('AUDIT_ACTIONS')
+    expect(read(ORG_ADMIN_SERVICE)).toMatch(
+      /import\s*\{[^}]*\bAUDIT_ACTIONS\b[^}]*\}\s*from\s*['"]@\/lib\/audit-db['"]/,
+    )
   })
 
   it('people route POST emits AUDIT_ACTIONS.MEMBER_ADD on person creation', () => {
-    const content = read(PEOPLE_ROUTE)
-    expect(content).toContain('AUDIT_ACTIONS.MEMBER_ADD')
+    const content = delegatedAuditSource(PEOPLE_ROUTE, 'POST', ORG_ADMIN_SERVICE, 'addOrganizationMember')
+    const insert = content.indexOf('.insert(orgMembers)')
+    const audit = content.indexOf('AUDIT_ACTIONS.MEMBER_ADD')
+    expect(insert).toBeGreaterThan(-1)
+    expect(content).toContain('recordAuditEvent(')
+    expect(audit).toBeGreaterThan(insert)
   })
 
   it('AUDIT_ACTIONS.MEMBER_ADD is defined in taxonomy', () => {

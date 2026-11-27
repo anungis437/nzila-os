@@ -83,7 +83,7 @@ def _is_rate_limited(bucket: str, identifier: str, limit: int, window: int) -> b
         logger.warning(
             "Rate limit exceeded: bucket=%s id=%s count=%d",
             bucket,
-            identifier[:8],  # codeql[py/clear-text-logging-sensitive-data] - truncated to 8 chars, not a full identifier
+            _cache_key("log", identifier).rsplit(":", 1)[-1][:8],  # hashed, never the raw identifier
             count,
         )
         return True

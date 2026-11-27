@@ -1,0 +1,36 @@
+{
+  "recordedAt": "2026-11-18T00:56:46.339Z",
+  "environment": "owned pristine historical loopback template; READ ONLY metadata transaction",
+  "sourcePlanDigest": "6876b1dd3ef17d4ad935d607f40de3aae2bac7ac4a93f19fc09d801e7630ba3f",
+  "qualifiedPreimageAdoptedNames": [
+    "public.ue_authority_block_mutation",
+    "public.ue_authority_distinct_text",
+    "public.ue_authority_guard_acceptance",
+    "public.ue_authority_guard_actor",
+    "public.ue_authority_guard_decision",
+    "public.ue_authority_guard_event_insert",
+    "public.ue_authority_guard_issuance",
+    "public.ue_authority_guard_request_update",
+    "public.ue_authority_guard_rule_update",
+    "public.ue_authority_guard_update",
+    "public.ue_authority_record_event",
+    "public.ue_authority_require_canonical_audit"
+  ],
+  "refusedByCurrentInstaller": [
+    "public.ue_authority_block_mutation",
+    "public.ue_authority_distinct_text",
+    "public.ue_authority_guard_acceptance",
+    "public.ue_authority_guard_actor",
+    "public.ue_authority_guard_decision",
+    "public.ue_authority_guard_event_insert",
+    "public.ue_authority_guard_issuance",
+    "public.ue_authority_guard_request_update",
+    "public.ue_authority_guard_rule_update",
+    "public.ue_authority_guard_update",
+    "public.ue_authority_record_event",
+    "public.ue_authority_require_canonical_audit"
+  ],
+  "refusedAfterUsingAlreadyQualifiedAdoptionNames": [],
+  "diagnosis": "Known exact-preimage helper returns already-qualified public function identities; caller incorrectly prefixes public a second time.",
+  "databaseWrites": false
+}

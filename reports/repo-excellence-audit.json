@@ -1,10 +1,11 @@
 {
-  "generatedAt": "2026-11-09T12:12:45.673Z",
-  "overallScore": 7.6,
+  "generatedAt": "2026-11-18T00:05:32.619Z",
+  "overallScore": 7.2,
   "categories": {
     "runtime_proof": {
-      "score": 8,
+      "score": 6,
       "findings": [
+        "Deploy success rate is not yet backfilled from production telemetry.",
         "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
       ]
     },
@@ -23,8 +24,13 @@
       ]
     },
     "hidden_fragility": {
-      "score": 8,
-      "findings": []
+      "score": 6.4,
+      "findings": [
+        "Verify live synthetic probes; configured targets alone do not establish endpoint availability.",
+        "Verify live alert delivery; routing configuration alone does not establish delivery.",
+        "Backfill actual deployment outcomes and rollback events; CI workflow conclusions are not deployment or rollback receipts.",
+        "Integrate a current runtime incident feed; vulnerability remediation metrics do not establish incident MTTR or incident counts."
+      ]
     },
     "docs_truth": {
       "score": 9,
@@ -39,11 +45,11 @@
       "findings": [
         "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml",
         "App-specific workflows are demoted to emergency/manual only: deploy-console.yml, deploy-partners.yml, deploy-web.yml",
-        "Effective active workflow count is 66 (total 69, emergency/manual 3)."
+        "Effective active workflow count is 69 (total 72, emergency/manual 3)."
       ]
     },
     "overengineering": {
-      "score": 4.4,
+      "score": 4.1,
       "findings": [
         "Effective workflow surface remains larger than ideal for a disciplined canonical release path."
       ]
@@ -61,6 +67,10 @@
   },
   "gateBlockers": [],
   "improvementBacklog": [
+    {
+      "category": "runtime_proof",
+      "finding": "Deploy success rate is not yet backfilled from production telemetry."
+    },
     {
       "category": "runtime_proof",
       "finding": "Only 0 monthly evidence pack(s) exist, so real 30/60/90-day proof trends are not yet available."
@@ -82,6 +92,22 @@
       "finding": "Root command surface is still dense and benefits from continued pruning."
     },
     {
+      "category": "hidden_fragility",
+      "finding": "Verify live synthetic probes; configured targets alone do not establish endpoint availability."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "Verify live alert delivery; routing configuration alone does not establish delivery."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "Backfill actual deployment outcomes and rollback events; CI workflow conclusions are not deployment or rollback receipts."
+    },
+    {
+      "category": "hidden_fragility",
+      "finding": "Integrate a current runtime incident feed; vulnerability remediation metrics do not establish incident MTTR or incident counts."
+    },
+    {
       "category": "ci_efficiency",
       "finding": "Emergency/manual app-specific deploy workflows still exist: deploy-union-eyes.yml"
     },
@@ -91,7 +117,7 @@
     },
     {
       "category": "ci_efficiency",
-      "finding": "Effective active workflow count is 66 (total 69, emergency/manual 3)."
+      "finding": "Effective active workflow count is 69 (total 72, emergency/manual 3)."
     },
     {
       "category": "overengineering",

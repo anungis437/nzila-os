@@ -1,0 +1,53 @@
+name: Union Eyes V2 — Staging read-only inventory
+
+# Manual control-plane inventory for the Union Eyes V2 staging Container App.
+# It runs only from main in anungis437/nzila-os, through the existing
+# ue-staging-plan OIDC identity. main is already the environment's only
+# deployment branch, so this workflow needs no environment-policy exception.
+# Pull requests cannot start it. It does not deploy, change traffic, open
+# SQL, or create Azure resources.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ue-v2-staging-readonly-inventory
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    name: Read-only staging inventory
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging-plan
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the admitted workflow
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Azure Login (OIDC, plan identity)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read the pinned staging control plane
+        env:
+          UE_INVENTORY_LIVE: '1'
+        run: node tooling/scripts/ue-v2-staging-readonly-inventory.mjs --out "$RUNNER_TEMP/inventory"
+
+      - name: Upload sanitized inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-staging-readonly-inventory-${{ github.run_id }}
+          path: ${{ runner.temp }}/inventory/
+          retention-days: 30
+          if-no-files-found: error

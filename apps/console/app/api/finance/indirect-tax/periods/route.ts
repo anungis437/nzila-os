@@ -1,3 +1,10 @@
+import {
+  listIndirectTaxPeriods,
+  createIndirectTaxPeriod,
+  loadIndirectTaxPeriod,
+  updateIndirectTaxPeriod,
+} from '@/lib/services/finance-tax-service'
+import { IndirectTaxPeriodPatchSchema } from '@/lib/validation/finance-patch-schemas'
 // Observability: @nzila/os-core/telemetry — structured logging and request tracing available via os-core.
 /**
  * API — Indirect Tax Periods
@@ -8,15 +15,9 @@
  * PR5 — Org-scoped auth + audit events
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { platformDb } from '@nzila/db/platform'
-import { indirectTaxPeriods } from '@nzila/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { requireOrgAccess } from '@/lib/api-guards'
+
+import { requireOrgAccess, authenticateUser } from '@/lib/api-guards'
 import { CreateIndirectTaxPeriodInput } from '@nzila/tax/types'
-import {
-  recordFinanceAuditEvent,
-  FINANCE_AUDIT_ACTIONS,
-} from '@/lib/finance-audit'
 
 export async function GET(req: NextRequest) {
   const orgId = req.nextUrl.searchParams.get('orgId')
@@ -29,12 +30,8 @@ export async function GET(req: NextRequest) {
   const access = await requireOrgAccess(orgId)
   if (!access.ok) return access.response
 
-  const conditions = accountId
-    ? and(eq(indirectTaxPeriods.orgId, orgId), eq(indirectTaxPeriods.accountId, accountId))
-    : eq(indirectTaxPeriods.orgId, orgId)
-
-  const rows = await platformDb.select().from(indirectTaxPeriods).where(conditions)
-  return NextResponse.json(rows)
+  const result = await listIndirectTaxPeriods(orgId, accountId)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function POST(req: NextRequest) {
@@ -49,41 +46,20 @@ export async function POST(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await platformDb
-    .insert(indirectTaxPeriods)
-    .values(parsed.data)
-    .returning()
-
-  await recordFinanceAuditEvent({
-    orgId: parsed.data.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: FINANCE_AUDIT_ACTIONS.INDIRECT_TAX_PERIOD_CREATE,
-    targetType: 'indirect_tax_period',
-    targetId: row.id,
-    afterJson: {
-      taxType: parsed.data.taxType,
-      startDate: parsed.data.startDate,
-      endDate: parsed.data.endDate,
-    },
-  })
-
-  return NextResponse.json(row, { status: 201 })
+  const result = await createIndirectTaxPeriod(parsed.data, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }
 
 export async function PATCH(req: NextRequest) {
-  const body = await req.json()
-  const { id, ...updates } = body
-
-  if (!id) {
-    return NextResponse.json({ error: 'id required' }, { status: 400 })
-  }
+  const parsedPatch = IndirectTaxPeriodPatchSchema.safeParse(await req.json())
+  if (!parsedPatch.success)
+    return NextResponse.json({ error: parsedPatch.error.flatten() }, { status: 400 })
+  const { id, ...updates } = parsedPatch.data
 
   // Fetch existing to get orgId + previous status
-  const [existing] = await platformDb
-    .select()
-    .from(indirectTaxPeriods)
-    .where(eq(indirectTaxPeriods.id, id))
+  const identity = await authenticateUser()
+  if (!identity.ok) return identity.response
+  const existing = await loadIndirectTaxPeriod(id)
 
   if (!existing) {
     return NextResponse.json({ error: 'Period not found' }, { status: 404 })
@@ -94,30 +70,6 @@ export async function PATCH(req: NextRequest) {
   })
   if (!access.ok) return access.response
 
-  const [row] = await platformDb
-    .update(indirectTaxPeriods)
-    .set({ ...updates, updatedAt: new Date() })
-    .where(eq(indirectTaxPeriods.id, id))
-    .returning()
-
-  // Pick audit action based on status transition
-  const auditAction =
-    updates.status === 'filed'
-      ? FINANCE_AUDIT_ACTIONS.INDIRECT_TAX_PERIOD_FILE
-      : updates.status === 'paid'
-        ? FINANCE_AUDIT_ACTIONS.INDIRECT_TAX_PERIOD_PAY
-        : FINANCE_AUDIT_ACTIONS.INDIRECT_TAX_PERIOD_CREATE
-
-  await recordFinanceAuditEvent({
-    orgId: existing.orgId,
-    actorClerkUserId: access.context.userId,
-    actorRole: access.context.membership?.role ?? access.context.platformRole,
-    action: auditAction,
-    targetType: 'indirect_tax_period',
-    targetId: id,
-    beforeJson: { status: existing.status },
-    afterJson: updates as Record<string, unknown>,
-  })
-
-  return NextResponse.json(row)
+  const result = await updateIndirectTaxPeriod(id, updates, existing, access.context)
+  return NextResponse.json(result.body, { status: result.status })
 }

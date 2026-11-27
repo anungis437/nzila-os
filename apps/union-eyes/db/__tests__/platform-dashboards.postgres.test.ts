@@ -22,6 +22,7 @@ import type pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { insertOrganization } from './page-reads-seed'
 
+import { nativeTenantReaderId } from './native-declared-actor'
 const URL = process.env.UE_AUTHORITY_COMBINED_URL
 
 vi.mock('@/db/db', async () => ({ db: (await import('./native-route-harness')).ambientDb }))
@@ -65,6 +66,8 @@ describe.skipIf(!URL)('the platform dashboards\' reads on the combined schema, a
     await insertOrganization(admin, tag, { id: ORG_A, name: `Alpha ${tag}`, memberCount: 40 })
     await insertOrganization(admin, tag, { id: ORG_B, name: `Beta ${tag}`, memberCount: 60 })
     await insertOrganization(admin, tag, { id: PLATFORM_ORG, name: `Platform ${tag}`, type: 'congress' })
+    // The administrator who opens each organization's pages: a real canonical member acting through a real session.
+    for (const organizationId of [ORG_A, ORG_B, PLATFORM_ORG]) await harness.declareCaller(nativeTenantReaderId(organizationId, 'admin'), organizationId, 'admin')
 
     const grievance = async (organizationId: string, number: string, status: string) =>
       (await admin.query(`INSERT INTO grievances (grievance_number, description, organization_id, title, type, status) VALUES ($1, 'd', $2, 't', 'grievance', $3) RETURNING id::text AS id`, [`${number}-${tag}`, organizationId, status])).rows[0].id as string
@@ -84,12 +87,12 @@ describe.skipIf(!URL)('the platform dashboards\' reads on the combined schema, a
     await admin.query(`INSERT INTO customer_nps_surveys (organization_id, respondent_name, score, feedback) VALUES ($1, $2, 10, 'great'), ($3, $4, 3, 'poor')`, [ORG_A, `Ann ${tag}`, ORG_B, `Bob ${tag}`])
     await admin.query(`INSERT INTO customer_onboarding_milestones (organization_id, milestone, status) VALUES ($1, $2, 'completed'), ($3, $4, 'pending')`, [ORG_A, `kickoff-${tag}`, ORG_B, `training-${tag}`])
 
-    const plan = (await admin.query(`INSERT INTO subscription_plans (code, name, base_fee) VALUES ($1, $2, 199.00) RETURNING id::text AS id`, [`plan-${tag}`, `Plan ${tag}`])).rows[0].id as string
+    const plan = (await admin.query(`INSERT INTO subscription_plans (code, name, base_fee, pricing_model, effective_from) VALUES ($1, $2, 199.00, 'flat', current_date) RETURNING id::text AS id`, [`plan-${tag}`, `Plan ${tag}`])).rows[0].id as string
     for (const [organizationId, label] of [[ORG_A, 'A'], [ORG_B, 'B']]) {
       const account = (await admin.query(`INSERT INTO billing_accounts (organization_id, display_name, billing_email) VALUES ($1, $2, 'b@example.test') RETURNING id::text AS id`, [organizationId, `Account ${label} ${tag}`])).rows[0].id as string
-      await admin.query(`INSERT INTO org_subscriptions (billing_account_id, plan_id, organization_id) VALUES ($1, $2, $3)`, [account, plan, organizationId])
-      await admin.query(`INSERT INTO platform_invoices (billing_account_id, organization_id, invoice_number) VALUES ($1, $2, $3)`, [account, organizationId, `INV-${label}-${tag}`])
-      await admin.query(`INSERT INTO platform_payments (billing_account_id, organization_id, amount) VALUES ($1, $2, 99)`, [account, organizationId])
+      await admin.query(`INSERT INTO org_subscriptions (billing_account_id, plan_id, organization_id, start_date) VALUES ($1, $2, $3, current_date)`, [account, plan, organizationId])
+      await admin.query(`INSERT INTO platform_invoices (billing_account_id, organization_id, invoice_number, issue_date, due_date, subtotal, total_amount) VALUES ($1, $2, $3, current_date, current_date + 30, 99, 99)`, [account, organizationId, `INV-${label}-${tag}`])
+      await admin.query(`INSERT INTO platform_payments (billing_account_id, organization_id, amount, method) VALUES ($1, $2, 99, 'wire')`, [account, organizationId])
     }
   }, 120_000)
 

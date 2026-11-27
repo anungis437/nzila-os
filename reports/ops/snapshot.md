@@ -1,13 +1,13 @@
 # Operational Evidence Snapshot
 
-> Generated: 2026-11-14T05:14:37.426Z
+> Generated: 2026-11-21T05:20:28.405Z
 > GitHub build metrics were queried now. Historical August DORA and cost inputs are excluded; unmeasured fields remain null.
 
 | Metric | Value | Source |
 |---|---:|---|
 | deploy_frequency_30d | null | ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week) |
-| build_success_rate_30d | 6.06 | GitHub Actions API ci.yml runs on main (30d window, completed runs: 66) |
-| median_build_minutes | 20.65 | GitHub Actions API ci.yml runs on main (30d window, completed runs: 66) |
+| build_success_rate_30d | 51.28 | GitHub Actions API ci.yml runs on main (30d window, completed runs: 39) |
+| median_build_minutes | 18.28 | GitHub Actions API ci.yml runs on main (30d window, completed runs: 39) |
 | change_failure_rate_30d | null | ops/outputs/dora-metrics.json: metrics.change_failure_rate.value |
 | mttr_minutes | null | ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes) |
 | uptime_30d | null | Azure Monitor / Application Insights uptime SLO exporter |
