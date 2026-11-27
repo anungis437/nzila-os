@@ -22,11 +22,26 @@ The forward-upgrade job was not reused as the operator. It exposes DDL and the a
 - Revision and image are rechecked. A mismatch is `REVISION_BINDING_CHANGED`.
 - The operator image must be the catalog repository digest, not the application digest.
 - The app must already have a secret named `database-url`. The value is not read.
-- Job name is `ue-s202-cat-<run id>`. Deletion requires that exact name plus matching purpose, run id, and source tags, and it requires a terminal execution. A running execution is stopped before deletion. If it is still running, the job is kept and the receipt says `JOB_CLEANUP_UNPROVEN`.
-- Counts stay inside the existing 15s / 45s / 250 budget. Continuation tokens expire in 24 hours and are not a second authorization.
-- Evidence is a hashed chunk frame that fits Azure CLI `--tail` 0–300 and the runner's 1 MiB stdout limit: 2400-character payloads, 280 chunks, 672,000 byte maximum. A larger body is `EVIDENCE_TRANSPORT_EXCEEDED`. Incomplete frames do not become `CATALOG_COMPLETE`.
+- Job name is `ue-s202-cat-<run id>`. Deletion requires all of: that name, the tags `purpose`, `owner`, `runId` and `source`, this managed environment, the exact operator image, and the staging identity. Executions must be proven terminal (live ones are stopped), and absence must be proven by an explicit not-found. Otherwise the job is kept and the receipt says `JOB_CLEANUP_UNPROVEN` and carries an incident. An `always()` cleanup step covers interrupted runs.
+- Counts stay inside the existing 15 s / 45 s / 250 budget. Continuation tokens expire in 24 hours and are not a second authorization.
+- The operator acts as `union_eyes_runtime` through `-c role=`. The evidence must show that role, the `ue_staging_runtime` login, a read-only transaction, and `ROLLBACK`.
+- Evidence travels through the environment's own Log Analytics workspace, in frame `UE_CATALOG_V2`:
+  - base64 of 6,000-byte chunks, bound to a nonce, run and source, with SHA-256 over exact bytes;
+  - queried with the existing Monitoring Contributor grant;
+  - filtered to this job, execution, container and image digest.
 
-The local operator image test builds the Dockerfile on a stand-in base. It does not prove the private application digest. The manual workflow runs that probe on the image built `FROM` the qualified digest and does not push the catalog image when `pg` fails to resolve.
+  Capacity is 32 MiB. The measured canonical catalogue is 1,306,708 bytes. Incomplete, mixed or tampered frames never become `CATALOG_COMPLETE`.
+
+## Corrections in this revision
+
+| Defect | Evidence | Correction |
+| --- | --- | --- |
+| `job logs show` couldn't carry the evidence | It needs a live replica after completion. It shares the console proxy that returned 404. Its default JSON output escapes the frame. The 672,000-byte cap was below the measured catalogue (1,306,708 bytes) | Log Analytics transport, frame v2, 32 MiB ceiling |
+| The session never acted as the runtime role | `ue_staging_runtime` has `INHERIT FALSE`; locally, all 250 counts failed with `permission denied for schema public` | `-c role=union_eyes_runtime`; identity and login verified |
+| A superuser login acting as the role read as `LIMITED_RUNTIME` | The privilege query checked `current_user` only | Login and role are both classified |
+| A failed show after delete counted as deleted | Any non-zero exit was treated as absence | Explicit not-found, retries, incident |
+| Ownership relied on name and tags | — | Environment, image, container and identity are also required |
+| The controller tests never ran in CI | `ci.yml` ran only the exec test | Job and Docker operator tests are added to CI |
 
 ## Release holds
 

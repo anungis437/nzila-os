@@ -26,9 +26,17 @@ export const CATALOG_SCHEMA = 'ue-v2-staging-catalog/v2'
 export const COUNT_WALL_BUDGET_MS = 45000
 export const COUNT_MAX_STATEMENTS = 250
 export const SOURCE_TABLE_DECLARATIONS = 1224
-export const EVIDENCE_CHUNK_CHARS = 2400
-export const EVIDENCE_MAX_CHUNKS = 280
-export const EVIDENCE_MAX_BYTES = EVIDENCE_MAX_CHUNKS * EVIDENCE_CHUNK_CHARS
+// The application's runtime login holds its role with INHERIT FALSE, so a session
+// only carries runtime privileges after `-c role=`. The catalogue inspects exactly
+// that role, as the application and the forward-upgrade preflight do.
+export const RUNTIME_ROLE = 'union_eyes_runtime'
+export const RUNTIME_LOGIN = 'ue_staging_runtime'
+// Private-job evidence frame v2: exact UTF-8 bytes, base64 per line. 6000 bytes is
+// 8000 base64 characters, well under the 16384-character container log line split.
+export const EVIDENCE_FRAME = 'UE_CATALOG_V2'
+export const EVIDENCE_CHUNK_BYTES = 6000
+export const EVIDENCE_MAX_BYTES = 32 * 1024 * 1024
+export const EVIDENCE_MAX_CHUNKS = Math.ceil(EVIDENCE_MAX_BYTES / EVIDENCE_CHUNK_BYTES)
 export const EXEC_ACTION = 'Microsoft.App/containerApps/exec/action'
 export const GROUP_ID = `/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}`
 
@@ -76,6 +84,10 @@ const SCHEMA = ${JSON.stringify(CATALOG_SCHEMA)}
 const COUNT_WALL_BUDGET_MS = ${COUNT_WALL_BUDGET_MS}
 const COUNT_MAX_STATEMENTS = ${COUNT_MAX_STATEMENTS}
 const SOURCE_TABLE_DECLARATIONS = ${SOURCE_TABLE_DECLARATIONS}
+const RUNTIME_ROLE = ${JSON.stringify(RUNTIME_ROLE)}
+const FRAME = ${JSON.stringify(EVIDENCE_FRAME)}
+const CHUNK_BYTES = ${EVIDENCE_CHUNK_BYTES}
+const MAX_BYTES = ${EVIDENCE_MAX_BYTES}
 function redact(value) {
   return String(value)
     .replace(/postgres(?:ql)?:\\/\\/[^\\s'"]+/gi, 'postgresql://[redacted]')
@@ -113,18 +125,20 @@ async function main() {
     let pg
     try { pg = require('pg') } catch { pg = null }
     out.client = { module: 'pg', resolved: Boolean(pg), psql: false }
+    out.runtime = { uid: typeof process.getuid === 'function' ? process.getuid() : null, node: process.version, entry: __filename,
+      pgPath: pg ? require.resolve('pg') : null, pgVersion: pg ? (() => { try { return require('pg/package.json').version } catch { return null } })() : null }
     if (!pg) { out.blocker = 'NO_IN_CONTAINER_PG_CLIENT'; return }
     if (!process.env.DATABASE_URL) { out.blocker = 'DATABASE_URL_ABSENT'; return }
-    client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 10000, statement_timeout: 15000, query_timeout: 15000, application_name: 'ue-s202-catalog' })
+    client = new pg.Client({ connectionString: process.env.DATABASE_URL, options: '-c role=' + RUNTIME_ROLE, connectionTimeoutMillis: 10000, statement_timeout: 15000, query_timeout: 15000, application_name: 'ue-s202-catalog' })
     await client.connect()
     await client.query('BEGIN READ ONLY')
     await client.query("SET LOCAL statement_timeout = '15s'")
     await client.query("SET LOCAL lock_timeout = '2s'")
-    const identity = await query(client, 'identity', "SELECT version() AS version, current_database() AS database, current_user AS \\"user\\", current_setting('transaction_read_only') AS transaction_read_only")
+    const identity = await query(client, 'identity', "SELECT version() AS version, current_database() AS database, current_user AS \\"user\\", session_user AS session_user, current_setting('transaction_read_only') AS transaction_read_only")
     out.queries.push(identity)
     const row = identity.rows && identity.rows[0]
     out.identity = row ?? null
-    if (!row || row.transaction_read_only !== 'on' || row.database !== 'ue_v2_staging') { out.blocker = 'IDENTITY_REFUSED'; return }
+    if (!row || row.transaction_read_only !== 'on' || row.database !== 'ue_v2_staging' || row.user !== RUNTIME_ROLE) { out.blocker = 'IDENTITY_REFUSED'; return }
     out.observedAt = new Date().toISOString()
     out.readOnlyCredential = false
     out.transport = process.env.UE_CATALOG_TRANSPORT || 'not-recorded'
@@ -135,10 +149,13 @@ async function main() {
       out.sessionKind = 'continuation'
       out.baselineSessionId = continuation.baselineSessionId
     } else out.sessionKind = 'baseline'
-    const privilege = await query(client, 'privilege', 'SELECT rolname, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname = current_user')
+    // Classify both the acting role and the login: a privileged login can RESET ROLE at will.
+    const privilege = await query(client, 'privilege', 'SELECT rolname, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolname = current_user AS acting FROM pg_roles WHERE rolname IN (current_user, session_user) ORDER BY rolname')
     out.queries.push(privilege)
-    const privilegeRow = privilege.rows && privilege.rows[0]
-    out.privilege = privilegeRow ? { user: privilegeRow.rolname, rolsuper: privilegeRow.rolsuper === true, rolbypassrls: privilegeRow.rolbypassrls === true, classification: (privilegeRow.rolsuper === true || privilegeRow.rolbypassrls === true || privilegeRow.rolcreatedb === true || privilegeRow.rolcreaterole === true) ? 'ELEVATED' : 'LIMITED_RUNTIME', readOnlyCredential: false } : { classification: 'UNREADABLE', readOnlyCredential: false }
+    const privilegeRows = Array.isArray(privilege.rows) ? privilege.rows : []
+    const actingRow = privilegeRows.find((item) => item.acting === true)
+    const elevated = privilegeRows.some((item) => item.rolsuper === true || item.rolbypassrls === true || item.rolcreatedb === true || item.rolcreaterole === true)
+    out.privilege = actingRow ? { user: actingRow.rolname, login: (privilegeRows.find((item) => item.acting !== true) || actingRow).rolname, rolsuper: privilegeRows.some((item) => item.rolsuper === true), rolbypassrls: privilegeRows.some((item) => item.rolbypassrls === true), classification: elevated ? 'ELEVATED' : 'LIMITED_RUNTIME', readOnlyCredential: false } : { classification: 'UNREADABLE', readOnlyCredential: false }
     const statements = continuation ? [] : [
       ['migration_relations', "SELECT n.nspname AS schema, c.relname AS name FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = 'r' AND c.relname IN ('__drizzle_migrations','drizzle_migrations','schema_migrations','django_migrations') AND n.nspname NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2"],
       ['migration_columns', "SELECT table_schema, table_name, column_name, data_type FROM information_schema.columns WHERE table_name IN ('__drizzle_migrations','drizzle_migrations','schema_migrations','django_migrations') AND table_schema NOT IN ('pg_catalog','information_schema') ORDER BY 1, 2, 3"],
@@ -203,24 +220,23 @@ async function main() {
     const body = JSON.stringify(out)
     const digest = crypto.createHash('sha256').update(body).digest('hex')
     if (process.env.UE_CATALOG_TRANSPORT === 'private-job') {
-      const chunkChars = ${EVIDENCE_CHUNK_CHARS}
-      const maxBytes = ${EVIDENCE_MAX_BYTES}
-      const maxChunks = ${EVIDENCE_MAX_CHUNKS}
-      if (body.length > maxBytes) {
-        process.stdout.write('UE_CATALOG_FRAME v1 chunks=0 sha256=' + digest + ' bytes=' + String(body.length) + ' overflow=1\\n')
+      // v2 frame: exact UTF-8 bytes, base64 per line, one nonce per session. The
+      // controller accepts only lines bound to this job, execution, container and image.
+      const bytes = Buffer.from(body, 'utf8')
+      const sha = crypto.createHash('sha256').update(bytes).digest('hex')
+      const nonce = crypto.randomBytes(16).toString('hex')
+      const run = String(process.env.UE_CATALOG_RUN_ID || '').replace(/[^0-9]/g, '')
+      const source = String(process.env.UE_CATALOG_SOURCE_SHA || '').replace(/[^a-f0-9]/g, '')
+      if (bytes.length > MAX_BYTES) {
+        process.stdout.write(FRAME + ' OVERFLOW ' + nonce + ' bytes=' + bytes.length + ' sha256=' + sha + '\\n')
       } else {
-        const count = Math.max(1, Math.ceil(body.length / chunkChars))
-        if (count > maxChunks) {
-          process.stdout.write('UE_CATALOG_FRAME v1 chunks=0 sha256=' + digest + ' bytes=' + String(body.length) + ' overflow=1\\n')
-        } else {
-          for (let index = 0; index < count; index += 1) {
-            process.stdout.write('UE_CATALOG_CHUNK ' + String(index + 1) + '/' + String(count) + ' ' + body.slice(index * chunkChars, (index + 1) * chunkChars) + '\\n')
-          }
-          process.stdout.write('UE_CATALOG_FRAME v1 chunks=' + String(count) + ' sha256=' + digest + ' bytes=' + String(body.length) + '\\n')
+        const count = Math.max(1, Math.ceil(bytes.length / CHUNK_BYTES))
+        process.stdout.write(FRAME + ' BEGIN ' + nonce + ' schema=' + SCHEMA + ' run=' + run + ' source=' + source + ' bytes=' + bytes.length + ' sha256=' + sha + ' chunks=' + count + ' chunkBytes=' + CHUNK_BYTES + '\\n')
+        for (let index = 0; index < count; index += 1) {
+          process.stdout.write(FRAME + ' CHUNK ' + nonce + ' ' + (index + 1) + '/' + count + ' ' + bytes.subarray(index * CHUNK_BYTES, (index + 1) * CHUNK_BYTES).toString('base64') + '\\n')
         }
+        process.stdout.write(FRAME + ' END ' + nonce + ' sha256=' + sha + '\\n')
       }
-      process.stdout.write(END + '\\n')
-      process.stdout.write('UE_CATALOG_SHA256 ' + digest + '\\n')
     } else {
       process.stdout.write(BEGIN + '\\n' + body + '\\n' + END + '\\n')
       process.stdout.write('UE_CATALOG_SHA256 ' + digest + '\\n')
@@ -311,6 +327,9 @@ export function evaluateCatalogCompleteness(catalog, contract = CATALOG_CONTRACT
   if (catalog.blocker === 'IDENTITY_REFUSED' || !identity || identity.transaction_read_only !== 'on' || identity.database !== EXPECTED_DATABASE) {
     return refused('IDENTITY_REFUSED')
   }
+  // Privileges and preservation counts describe the application's runtime role only
+  // when the session actually acted as it; a login-only session is not that evidence.
+  if (identity.user !== RUNTIME_ROLE) return refused('RUNTIME_ROLE_NOT_ASSUMED')
   const identityRow = findQuery(catalog, 'identity')?.rows?.[0]
   if (identityRow && (identityRow.database !== identity.database || identityRow.transaction_read_only !== identity.transaction_read_only)) {
     return refused('IDENTITY_INCONSISTENT')
