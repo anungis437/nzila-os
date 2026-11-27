@@ -4,10 +4,26 @@ name: Union Eyes V2 — Staging private catalog job
 # Apps exec console and it does not grant roles. Evidence returns through the
 # environment's Log Analytics workspace (existing Monitoring Contributor grant).
 # Dispatch is manual, from main, and still requires the ue-staging approval.
+#
+# plane=runtime (default): Plane A, the application's runtime role (posture).
+# plane=privileged: Plane B, the existing uev2admin login, read-only, REPEATABLE
+# READ, ROLLBACK, for migration history and exact global counts. Its values are
+# sealed in the container to the founder's X25519 key (repository variable
+# UE_V2_STAGING_CATALOG_RECIPIENT); without that key nothing is created. Plane B
+# runs only with separate founder authorization: see
+# docs/union-eyes/step2/evidence/s2.02-private-catalog-job/PLANE_B_DECISION_RECORD.md.
 
 on:
   workflow_dispatch:
     inputs:
+      plane:
+        description: Evidence plane (runtime = application role posture; privileged = founder-authorized global totals, sealed)
+        required: true
+        type: choice
+        options:
+          - runtime
+          - privileged
+        default: runtime
       continuation_run_id:
         description: Run id of a previous catalog job whose artifact holds a continuation token (leave empty for a baseline session)
         required: false
@@ -57,6 +73,11 @@ jobs:
             -e UE_CATALOG_TRANSPORT=private-job -e UE_CATALOG_RUN_ID="$GITHUB_RUN_ID" -e UE_CATALOG_SOURCE_SHA="$GITHUB_SHA" \
             nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" > "$RUNNER_TEMP/operator-smoke.txt"
           node tooling/scripts/ue-v2-staging-catalog-job.mjs --verify-image-smoke "$RUNNER_TEMP/operator-smoke.txt"
+          # The privileged plane in the same image refuses to connect without the sealing key.
+          docker run --rm --user 1001:1001 -e NODE_PATH= -e UE_CATALOG_PLANE=privileged \
+            -e UE_CATALOG_TRANSPORT=private-job -e UE_CATALOG_RUN_ID="$GITHUB_RUN_ID" -e UE_CATALOG_SOURCE_SHA="$GITHUB_SHA" \
+            nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" > "$RUNNER_TEMP/operator-privileged-smoke.txt"
+          node tooling/scripts/ue-v2-staging-catalog-job.mjs --verify-image-smoke "$RUNNER_TEMP/operator-privileged-smoke.txt" --expect-blocker EVIDENCE_RECIPIENT_MISSING
           docker push nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA"
           DIGEST=$(az acr manifest show-metadata -r nzilaventuresacr -n nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" --query digest -o tsv)
           echo "reference=nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog@$DIGEST" >> "$GITHUB_OUTPUT"
@@ -100,6 +121,11 @@ jobs:
         env:
           UE_CATALOG_JOB_LIVE: '1'
           OPERATOR_IMAGE: ${{ needs.build.outputs.image }}
+          UE_CATALOG_PLANE: ${{ inputs.plane }}
+          UE_CATALOG_EVIDENCE_RECIPIENT: ${{ vars.UE_V2_STAGING_CATALOG_RECIPIENT }}
+          # The existing admin credential exists in this step only for the privileged plane;
+          # the controller refuses it on the runtime plane and keeps it out of every output.
+          PG_ADMIN_PASSWORD: ${{ inputs.plane == 'privileged' && secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD || '' }}
         run: node tooling/scripts/ue-v2-staging-catalog-job.mjs --out "$RUNNER_TEMP/catalog"
       # An interrupted or cancelled run leaves its job behind; this removes only
       # the job owned by this run, after its executions are terminal.
@@ -108,6 +134,7 @@ jobs:
         env:
           UE_CATALOG_JOB_LIVE: '1'
           OPERATOR_IMAGE: ${{ needs.build.outputs.image }}
+          UE_CATALOG_PLANE: ${{ inputs.plane }}
         run: node tooling/scripts/ue-v2-staging-catalog-job.mjs --cleanup-only --out "$RUNNER_TEMP/catalog"
       - uses: actions/upload-artifact@v4
         if: always()

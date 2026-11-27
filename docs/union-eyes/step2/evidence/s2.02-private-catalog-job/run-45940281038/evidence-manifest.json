@@ -1,0 +1,159 @@
+{
+  "schema": "ue-v2-staging-catalog-evidence/v1",
+  "catalogSchema": "ue-v2-staging-catalog/v2",
+  "execution": {
+    "githubRunId": "45940281038",
+    "sourceSha": "9803777de84f7e106f7d2f4985dc48a3ec898573",
+    "job": "ue-s202-cat-45940281038",
+    "execution": "ue-s202-cat-45940281038-psolkdz",
+    "replica": "ue-s202-cat-45940281038-psolkdz-8k9vr"
+  },
+  "environment": {
+    "subscription": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+    "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+    "resourceGroup": "nzila-canada-staging-rg",
+    "managedEnvironment": "nzila-ue-v2-staging-env",
+    "database": "ue_v2_staging",
+    "revision": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+    "servingImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef"
+  },
+  "operatorImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog@sha256:5b43f1273fa19667849b7777d0b0040b3643c1666b456855282b30d1df018e44",
+  "transport": {
+    "channel": "log-analytics",
+    "workspace": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+    "frame": "UE_CATALOG_V2",
+    "nonce": "5f22b158176b62607339f0527414d812",
+    "chunks": 218,
+    "bytes": 1306121,
+    "duplicatesIgnored": 0
+  },
+  "observedIdentity": {
+    "database": "ue_v2_staging",
+    "role": "union_eyes_runtime",
+    "login": "ue_staging_runtime",
+    "transactionReadOnly": "on",
+    "version": "PostgreSQL 16.15 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 13.2.0, 64-bit"
+  },
+  "observedAt": "2026-11-27T04:33:18.567Z",
+  "capturedAt": "2026-11-27T04:33:39.090Z",
+  "sha256": "cad6c54571fd8d2fd7e8f018292bea2c899da851c1a886fb9acbe2b3f323012c",
+  "categories": [
+    {
+      "id": "database_identity",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "migration_discovery",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "migration_history",
+      "accepted": false,
+      "observations": 2,
+      "captured": 1,
+      "missing": 1
+    },
+    {
+      "id": "roles_and_memberships",
+      "accepted": true,
+      "observations": 2,
+      "captured": 2,
+      "missing": 0
+    },
+    {
+      "id": "relation_ownership_acl",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "rls_configuration",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "rls_policies",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "function_topology",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "security_definer",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "event_triggers",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "audit_permissions",
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "audit_grants",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "sequences",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "business_tables",
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "preservation_counts",
+      "accepted": false,
+      "observations": 790,
+      "captured": 103,
+      "missing": 687
+    }
+  ],
+  "categoryInventory": {
+    "required": 15,
+    "accepted": 12
+  },
+  "counts": {
+    "tables": 790,
+    "observed": 103,
+    "notAttempted": 540,
+    "timedOut": 0,
+    "unreadable": 147
+  },
+  "verdict": "CATALOG_PARTIAL"
+}

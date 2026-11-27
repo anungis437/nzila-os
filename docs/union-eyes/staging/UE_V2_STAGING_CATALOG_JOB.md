@@ -104,6 +104,24 @@ Each continuation is a separate, separately approved dispatch, with `continuatio
 
 The number of sessions follows from the live table count. Intermediate sessions report `CATALOG_PARTIAL`.
 
+## Evidence planes
+
+The workflow input `plane` selects one of two sessions. They are reconciled offline into one preimage.
+
+- **`runtime` (default, Plane A).**
+  - Acts as `union_eyes_runtime`. Records posture: roles, ownership and ACLs, RLS, policies, functions, event triggers, audit permissions, sequences, and a per-table privilege matrix.
+  - Its counts are role-visible and are never accepted as totals.
+  - Alone it is at most `CATALOG_PARTIAL` with `planeVerdict = PLANE_ACCEPTED`. The run exits 0 when its share is complete.
+- **`privileged` (Plane B).**
+  - Runs only with separate founder authorization.
+  - Uses the existing `uev2admin` login and its existing environment secret, which reaches only this step and only on this plane. Read-only, `REPEATABLE READ`, `ROLLBACK`, with the same time and statement bounds.
+  - Reads the migration ledger and exact global counts. Those values are sealed in the container to the founder's key (`UE_V2_STAGING_CATALOG_RECIPIENT`). Without the key, nothing is created.
+  - A complete run reports `PLANE_CAPTURED_SEALED`, which is not acceptance.
+
+Only `--assemble`, run offline by the founder with the private key, can produce `CATALOG_COMPLETE`. It needs both planes, every artifact verified against its `SHA256SUMS`, and matching inventory, structure and migration discovery. Continuation chains never cross planes.
+
+See [the decision record](../step2/evidence/s2.02-private-catalog-job/PLANE_B_DECISION_RECORD.md).
+
 ## Not done in this change
 
 No image was pushed and no Azure job was created. Log Analytics ingestion timing, and the exact `database-url` login, are first observed on an approved dispatch; both fail closed.

@@ -29,7 +29,16 @@ import {
   principalFromAccessToken,
   roleCoversExec,
   writeReport,
+  PLANE_RESPONSIBILITY,
+  classifyCount,
+  generateRecipientKeyPair,
+  openSealedCatalog,
+  reconcilePlanes,
+  reconcileCatalogSessions,
+  buildContinuationToken,
+  sealForRecipient,
 } from './ue-v2-staging-catalog-exec.mjs'
+import { FIXTURE_COUNTS, FIXTURE_LEDGER, fixtureQuery, privilegedCatalog, runtimeCatalog, sealPrivileged } from './ue-v2-staging-catalog.fixtures.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const require = createRequire(path.join(REPO, 'package.json'))
@@ -69,32 +78,9 @@ function query(id, rows) {
   return { id, rowCount: rows.length, rows }
 }
 
+// Plane A as staging is: every runtime-plane category observable, no global totals.
 function completeCatalog() {
-  const queries = [
-    query('identity', [{ version: 'PostgreSQL 16', database: 'ue_v2_staging', user: 'union_eyes_runtime', transaction_read_only: 'on' }]),
-    query('migration_relations', [{ schema: 'drizzle', name: '__drizzle_migrations' }]),
-    query('migration_columns', [{ table_schema: 'drizzle', table_name: '__drizzle_migrations', column_name: 'hash', data_type: 'text' }]),
-    query('drizzle_rows', [{ id: 1, hash: 'abc', created_at: '2026-01-01' }]),
-    query('roles', [{ rolname: 'union_eyes_runtime', rolsuper: false, rolbypassrls: false, rolcanlogin: true }]),
-    query('memberships', []),
-    query('relations', [{ schema: 'public', name: 'members', relkind: 'r' }]),
-    query('rls', [{ schema: 'public', name: 'members', relrowsecurity: true, relforcerowsecurity: true }]),
-    query('policies', []),
-    query('function', [{ schema: 'user_management', name: 'auth_business_org_authorized', args: 'uuid, text[]' }]),
-    query('security_definer', []),
-    query('event_trigger', [{ evtname: 'ue_guard_deadline_reassignment_convergence_policy', evtenabled: 'O' }]),
-    query('audit', [{ rel: 'audit_security.audit_logs', current_select: false, current_insert: false }]),
-    query('audit_grants', []),
-    query('sequences', []),
-    query('tables', [{ schema: 'public', name: 'members' }]),
-  ]
-  return {
-    schema: CATALOG_SCHEMA,
-    rolledBack: true,
-    identity: { version: 'PostgreSQL 16', database: 'ue_v2_staging', user: 'union_eyes_runtime', transaction_read_only: 'on' },
-    queries,
-    counts: [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '1' }],
-  }
+  return runtimeCatalog()
 }
 
 function verdictOf(body) {
@@ -171,12 +157,14 @@ test('one accepted binding builds one pseudo-terminal exec and parses the catalo
   const stdout = `noise\nUE_CATALOG_BEGIN\n${JSON.stringify(catalog)}\nUE_CATALOG_END\n`
   const { calls, spawn, token } = harness({ catalogStdout: stdout })
   const result = await executeCatalog(liveEnv(), spawn)
-  assert.equal(result.exitCode, 0)
+  // A runtime session alone is never a complete preimage: totals need the privileged plane.
+  assert.equal(result.exitCode, 5)
   assert.equal(result.report.execPermission, 'EFFECTIVE_ALLOW_OBSERVED')
   assert.equal(result.report.execAttempted, true)
   assert.equal(result.report.catalog.identity.user, 'union_eyes_runtime')
-  assert.equal(result.report.verdict, 'CATALOG_COMPLETE')
-  assert.equal(result.report.catalog.evaluation.verdict, 'CATALOG_COMPLETE')
+  assert.equal(result.report.verdict, 'CATALOG_PARTIAL')
+  assert.equal(result.report.catalog.evaluation.reason, 'OTHER_PLANE_REQUIRED')
+  assert.equal(result.report.catalog.evaluation.planeVerdict, 'PLANE_ACCEPTED')
   assert.equal(result.report.S2_02_PREIMAGE_COMPLETE, 'NO')
   assert.equal(result.report.S2_02_LEGACY_GATE, 'INDETERMINATE')
   assert.equal(result.report.catalog.evaluation.categories.length, CATALOG_CONTRACT.categories.length)
@@ -298,8 +286,8 @@ printf '%s\\n' 'UE_CATALOG_END'
     env: { ...process.env, ...liveEnv(), PATH: `${bin}:${process.env.PATH}`, UE_FAKE_TOKEN: token, UE_FAKE_CATALOG_FILE: catalogFile },
     encoding: 'utf8',
   })
-  assert.equal(run.status, 0, run.stderr)
-  assert.match(run.stdout, /catalog=CATALOG_COMPLETE/)
+  assert.equal(run.status, 5, run.stderr)
+  assert.match(run.stdout, /catalog=CATALOG_PARTIAL/)
   assert.equal(run.stdout.includes('catalog=OBSERVED'), false)
   assert.match(run.stdout, /S2_02_PREIMAGE_COMPLETE=NO/)
   assert.match(run.stdout, /S2_02_LEGACY_GATE=INDETERMINATE/)
@@ -322,14 +310,19 @@ printf '%s\\n' 'UE_CATALOG_END'
 
 test('the catalogue contract rejects incomplete evidence and keeps a complete session distinct from S2.02', async () => {
   const marked = (body) => `UE_CATALOG_BEGIN\n${JSON.stringify(body)}\nUE_CATALOG_END\n`
-  const withQuery = (id, replacement) => {
-    const body = completeCatalog()
+  const withQuery = (id, replacement, base = completeCatalog()) => {
+    const body = structuredClone(base)
     body.queries = body.queries.map((item) => item.id === id ? replacement : item)
     return body
   }
   const classification = (body, id) => evaluateCatalogCompleteness(body).categories.flatMap((category) => category.queries ?? []).find((item) => item.id === id)?.classification
+  const accepted = (body, id) => evaluateCatalogCompleteness(body).categories.find((category) => category.id === id)?.accepted
 
-  assert.equal(verdictOf(completeCatalog()), 'CATALOG_COMPLETE')
+  const plane = evaluateCatalogCompleteness(completeCatalog())
+  assert.equal(plane.verdict, 'CATALOG_PARTIAL')
+  assert.equal(plane.planeVerdict, 'PLANE_ACCEPTED')
+  assert.equal(plane.reason, 'OTHER_PLANE_REQUIRED')
+  assert.deepEqual(plane.categories.filter((category) => category.classification === 'NOT_IN_PLANE').map((category) => category.id), ['migration_history', 'preservation_counts'])
 
   const empty = completeCatalog()
   empty.queries = []
@@ -339,29 +332,30 @@ test('the catalogue contract rejects incomplete evidence and keeps a complete se
   assert.equal(emptyRun.report.S2_02_PREIMAGE_COMPLETE, 'NO')
 
   const omitted = completeCatalog()
-  omitted.queries = omitted.queries.filter((item) => !['policies', 'security_definer', 'event_trigger', 'migration_columns'].includes(item.id))
-  assert.equal(verdictOf(omitted), 'CATALOG_PARTIAL')
+  omitted.queries = omitted.queries.filter((item) => !['policies', 'security_definer', 'event_trigger'].includes(item.id))
+  assert.equal(evaluateCatalogCompleteness(omitted).planeVerdict, 'PLANE_INCOMPLETE')
 
-  const verifiedLedger = withQuery('drizzle_rows', { id: 'drizzle_rows', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_DISCOVERY' })
-  verifiedLedger.queries = verifiedLedger.queries.map((item) => item.id === 'migration_relations' ? query('migration_relations', []) : item)
+  const privileged = privilegedCatalog()
+  const verifiedLedger = withQuery('drizzle_rows', { id: 'drizzle_rows', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_DISCOVERY' }, privileged)
+  verifiedLedger.queries = verifiedLedger.queries.map((item) => item.id === 'migration_relations' ? fixtureQuery('migration_relations', []) : item.id === 'migration_columns' ? fixtureQuery('migration_columns', []) : item)
   assert.equal(classification(verifiedLedger, 'drizzle_rows'), 'ABSENT_VERIFIED')
-  assert.equal(verdictOf(verifiedLedger), 'CATALOG_COMPLETE')
+  assert.equal(evaluateCatalogCompleteness(verifiedLedger).planeVerdict, 'PLANE_ACCEPTED')
 
-  const ledgerError = withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' })
+  const ledgerError = withQuery('drizzle_rows', { id: 'drizzle_rows', error: 'relation "drizzle.__drizzle_migrations" does not exist' }, privileged)
   assert.equal(classification(ledgerError, 'drizzle_rows'), 'UNREADABLE')
-  assert.equal(verdictOf(ledgerError), 'CATALOG_PARTIAL')
+  assert.equal(evaluateCatalogCompleteness(ledgerError).planeVerdict, 'PLANE_INCOMPLETE')
 
   const audit = await executeCatalog(liveEnv(), harness({ catalogStdout: marked(withQuery('audit', { id: 'audit', error: 'permission denied for relation audit_logs' })) }).spawn)
   assert.equal(audit.exitCode, 5)
   assert.equal(audit.report.verdict, 'CATALOG_PARTIAL')
   assert.equal(classification(audit.report.catalog, 'audit'), 'UNREADABLE')
 
-  assert.equal(verdictOf(withQuery('rls', { id: 'rls', error: 'permission denied for table pg_class' })), 'CATALOG_PARTIAL')
-  assert.equal(verdictOf(withQuery('event_trigger', { id: 'event_trigger', error: 'permission denied for table pg_event_trigger' })), 'CATALOG_PARTIAL')
+  assert.equal(accepted(withQuery('rls', { id: 'rls', error: 'permission denied for table pg_class' }), 'rls_configuration'), false)
+  assert.equal(accepted(withQuery('event_trigger', { id: 'event_trigger', error: 'permission denied for table pg_event_trigger' }), 'event_triggers'), false)
 
   const absentFunction = withQuery('function', { id: 'function', rowCount: 0, rows: [] })
   const absentEvaluation = evaluateCatalogCompleteness(absentFunction)
-  assert.equal(absentEvaluation.verdict, 'CATALOG_COMPLETE')
+  assert.equal(absentEvaluation.planeVerdict, 'PLANE_ACCEPTED')
   assert.equal(classification(absentFunction, 'function'), 'ABSENT_VERIFIED')
   assert.equal(absentEvaluation.legacyObservation, 'LEGACY_TRANSITION_REQUIRED')
   assert.equal(absentEvaluation.S2_02_LEGACY_GATE, 'INDETERMINATE')
@@ -372,15 +366,15 @@ test('the catalogue contract rejects incomplete evidence and keeps a complete se
   assert.equal(verdictOf(wrongSchema), 'CATALOG_REFUSED')
   assert.equal(evaluateCatalogCompleteness(wrongSchema).reason, 'UNEXPECTED_SCHEMA_VERSION')
 
-  const capped = completeCatalog()
-  capped.counts = [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET' }]
+  const capped = privilegedCatalog()
+  capped.counts[0] = { ...capped.counts[0], classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET', n: undefined }
   const cap = evaluateCatalogCompleteness(capped)
-  assert.equal(cap.verdict, 'CATALOG_PARTIAL')
+  assert.equal(cap.planeVerdict, 'PLANE_INCOMPLETE')
   assert.match(cap.additionalProcedure, /NOT_ATTEMPTED/)
 
-  const timedCount = completeCatalog()
-  timedCount.counts = [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'TIMED_OUT', error: 'canceling statement due to statement timeout' }]
-  assert.equal(verdictOf(timedCount), 'CATALOG_PARTIAL')
+  const timedCount = privilegedCatalog()
+  timedCount.counts[0] = { ...timedCount.counts[0], classification: 'TIMED_OUT', error: 'canceling statement due to statement timeout', n: null }
+  assert.equal(evaluateCatalogCompleteness(timedCount).planeVerdict, 'PLANE_INCOMPLETE')
 
   const mismatched = completeCatalog()
   mismatched.identity = { ...mismatched.identity, transaction_read_only: 'off' }
@@ -485,4 +479,218 @@ test('the workflow is manual, pinned to main, and uses the deploy environment on
   const digest = writeReport(directory, { defects: [] })
   assert.equal(readFileSync(path.join(directory, 'SHA256SUMS'), 'utf8').startsWith(digest), true)
   rmSync(directory, { recursive: true, force: true })
+})
+
+const BINDING = { revision: EXPECTED_REVISION, image: EXPECTED_IMAGE, source: 'a'.repeat(40) }
+
+test('role-visible counts are never preservation totals, whatever the operator claims', () => {
+  // Run 45940281038 shape: 103 zeros counted by the runtime role under forced RLS.
+  assert.equal(classifyCount({ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' }), 'ROLE_VISIBLE_ONLY')
+  assert.equal(classifyCount({ schema: 'public', name: 'members', countScope: 'ROLE_VISIBLE', globalTotal: false, classification: 'OBSERVED', n: '0' }), 'ROLE_VISIBLE_ONLY')
+  assert.equal(classifyCount({ schema: 'public', name: 'claims', classification: 'PRIVILEGE_DENIED' }), 'PRIVILEGE_DENIED')
+  // A GLOBAL label the session's own privilege matrix does not support is refused.
+  const overclaimed = privilegedCatalog()
+  overclaimed.privilege = { ...overclaimed.privilege, rolbypassrls: false }
+  overclaimed.queries = overclaimed.queries.map((item) => item.id === 'privilege_matrix' ? fixtureQuery('privilege_matrix', item.rows.map((row) => ({ ...row, acts_as_owner: false }))) : item)
+  const evaluation = evaluateCatalogCompleteness(overclaimed)
+  const counts = evaluation.categories.find((category) => category.id === 'preservation_counts')
+  assert.equal(counts.accepted, false)
+  assert.deepEqual(counts.tally, { SCOPE_UNPROVEN: 2 })
+  // Without a privilege matrix nothing is provably global.
+  const unmapped = privilegedCatalog()
+  unmapped.queries = unmapped.queries.filter((item) => item.id !== 'privilege_matrix')
+  assert.equal(evaluateCatalogCompleteness(unmapped).categories.find((category) => category.id === 'preservation_counts').accepted, false)
+  // The runtime plane cannot supply totals even for a table it can read.
+  assert.equal(PLANE_RESPONSIBILITY.runtime.includes('preservation_counts'), false)
+  assert.equal(PLANE_RESPONSIBILITY.runtime.includes('migration_history'), false)
+})
+
+test('hidden migration metadata is never verified absence', () => {
+  const hidden = privilegedCatalog()
+  // What information_schema returned to the runtime role: no columns for a discovered ledger.
+  hidden.queries = hidden.queries.map((item) => item.id === 'migration_columns' ? fixtureQuery('migration_columns', []) : item)
+  const migration = evaluateCatalogCompleteness(hidden).categories.find((category) => category.id === 'migration_history')
+  assert.equal(migration.queries.find((item) => item.id === 'migration_columns').classification, 'INCONSISTENT')
+  assert.equal(migration.accepted, false)
+  const denied = runtimeCatalog()
+  assert.equal(denied.queries.find((item) => item.id === 'drizzle_rows').classification, 'PRIVILEGE_DENIED')
+  const asPrivileged = privilegedCatalog()
+  asPrivileged.queries = asPrivileged.queries.map((item) => item.id === 'drizzle_rows' ? { id: 'drizzle_rows', classification: 'PRIVILEGE_DENIED', reason: 'MIGRATION_LEDGER_NOT_READABLE_BY_ROLE' } : item)
+  const ledger = evaluateCatalogCompleteness(asPrivileged).categories.find((category) => category.id === 'migration_history').queries.find((item) => item.id === 'drizzle_rows')
+  assert.equal(ledger.classification, 'PRIVILEGE_DENIED')
+  assert.equal(ledger.accepted, false)
+})
+
+test('the privileged plane is refused unless it is the admin login in one repeatable-read, read-only transaction', () => {
+  assert.equal(evaluateCatalogCompleteness(privilegedCatalog()).planeVerdict, 'PLANE_ACCEPTED')
+  const readCommitted = privilegedCatalog()
+  readCommitted.identity = { ...readCommitted.identity, isolation: 'read committed' }
+  assert.equal(evaluateCatalogCompleteness(readCommitted).reason, 'SNAPSHOT_ISOLATION_ABSENT')
+  const otherLogin = privilegedCatalog()
+  otherLogin.identity = { ...otherLogin.identity, user: 'azuresu', session_user: 'azuresu' }
+  assert.equal(evaluateCatalogCompleteness(otherLogin).reason, 'PRIVILEGED_LOGIN_UNEXPECTED')
+  const writable = privilegedCatalog()
+  writable.identity = { ...writable.identity, transaction_read_only: 'off' }
+  assert.equal(evaluateCatalogCompleteness(writable).reason, 'IDENTITY_REFUSED')
+  const notRolledBack = privilegedCatalog({ rolledBack: false })
+  assert.equal(evaluateCatalogCompleteness(notRolledBack).reason, 'ROLLBACK_FAILED')
+  for (const blocker of ['EVIDENCE_RECIPIENT_MISSING', 'PRIVILEGED_CREDENTIAL_ABSENT', 'SEALING_FAILED']) {
+    assert.equal(evaluateCatalogCompleteness(privilegedCatalog({ blocker })).reason, blocker)
+  }
+  const unknown = privilegedCatalog({ plane: 'superuser' })
+  assert.equal(evaluateCatalogCompleteness(unknown).reason, 'UNKNOWN_PLANE')
+})
+
+test('sealed privileged evidence opens only with the founder key, intact and bound to its session', () => {
+  const founder = generateRecipientKeyPair()
+  const stranger = generateRecipientKeyPair()
+  const sealed = sealPrivileged(privilegedCatalog(), founder.publicKey)
+  const text = JSON.stringify(sealed)
+  for (const value of Object.values(FIXTURE_COUNTS)) assert.equal(text.includes(`"n":"${value}"`), false)
+  assert.equal(text.includes(FIXTURE_LEDGER[0].hash + '"'), false)
+  const unopened = evaluateCatalogCompleteness(sealed)
+  assert.equal(unopened.planeVerdict, 'PLANE_CAPTURED_SEALED')
+  assert.equal(unopened.categories.find((category) => category.id === 'preservation_counts').accepted, false)
+  const opened = openSealedCatalog(sealed, founder.privateKeyPem)
+  assert.equal(opened.run, '45999999999')
+  assert.deepEqual(opened.catalog.counts.map((item) => item.n), ['41', '7'])
+  assert.deepEqual(opened.catalog.queries.find((item) => item.id === 'drizzle_rows').rows, FIXTURE_LEDGER)
+  assert.equal(evaluateCatalogCompleteness(opened.catalog).planeVerdict, 'PLANE_ACCEPTED')
+  assert.equal(JSON.stringify(opened.catalog).includes(sealed.sealed.ciphertext), false)
+
+  assert.throws(() => openSealedCatalog(sealed, stranger.privateKeyPem), /SEALED_FOR_ANOTHER_RECIPIENT/)
+  const tampered = structuredClone(sealed)
+  const bytes = Buffer.from(tampered.sealed.ciphertext, 'base64')
+  bytes[0] ^= 1
+  tampered.sealed.ciphertext = bytes.toString('base64')
+  assert.throws(() => openSealedCatalog(tampered, founder.privateKeyPem), /SEALED_EVIDENCE_TAMPERED/)
+  const rebound = structuredClone(sealed)
+  rebound.observedAt = '2026-11-26T12:00:00.000Z'
+  assert.throws(() => openSealedCatalog(rebound, founder.privateKeyPem), /SEALED_EVIDENCE_UNBOUND/)
+  const reAad = structuredClone(sealed)
+  reAad.sealed.aad = reAad.sealed.aad.replace('45999999999', '45999999998')
+  assert.throws(() => openSealedCatalog(reAad, founder.privateKeyPem), /SEALED_EVIDENCE_TAMPERED/)
+  // Editing the clear summary breaks the binding to the clear-summary digest in the AAD.
+  const extraClearRow = structuredClone(sealed)
+  extraClearRow.counts.push({ schema: 'public', name: 'ghost', countScope: 'GLOBAL', globalTotal: true, classification: 'OBSERVED', n: null, sealed: true })
+  assert.throws(() => openSealedCatalog(extraClearRow, founder.privateKeyPem), /SEALED_EVIDENCE_UNBOUND/)
+  // Anyone holding the public key can seal: an envelope whose values disagree with its own
+  // clear summary is refused even when its AAD is well formed.
+  const forged = structuredClone(sealed)
+  forged.sealed = sealForRecipient(JSON.stringify({ counts: [{ schema: 'public', name: 'members', n: '41' }], ledgers: [], modificationCounters: [], settledCounters: [] }), founder.publicKey, sealed.sealed.aad)
+  assert.throws(() => openSealedCatalog(forged, founder.privateKeyPem), /SEALED_(COUNTS|LEDGER|COUNTERS)_INCONSISTENT/)
+  // Truncated tag, IV, salt or ciphertext are refused before any decryption is attempted.
+  for (const [field, cut] of [['tag', 4], ['iv', 8], ['salt', 8]]) {
+    const short = structuredClone(sealed)
+    short.sealed[field] = Buffer.from(sealed.sealed[field], 'base64').subarray(0, cut).toString('base64')
+    assert.throws(() => openSealedCatalog(short, founder.privateKeyPem), /SEALED_EVIDENCE_TAMPERED/, field)
+  }
+  const truncated = structuredClone(sealed)
+  truncated.sealed.ciphertext = Buffer.from(sealed.sealed.ciphertext, 'base64').subarray(0, 32).toString('base64')
+  assert.throws(() => openSealedCatalog(truncated, founder.privateKeyPem), /SEALED_EVIDENCE_TAMPERED/)
+  const badTag = structuredClone(sealed)
+  const tagBytes = Buffer.from(sealed.sealed.tag, 'base64')
+  tagBytes[15] ^= 0x80
+  badTag.sealed.tag = tagBytes.toString('base64')
+  assert.throws(() => openSealedCatalog(badTag, founder.privateKeyPem), /SEALED_EVIDENCE_TAMPERED/)
+  // Swapping one run's envelope into another session is refused by the AAD binding.
+  const other = sealPrivileged(privilegedCatalog({ observedAt: '2026-11-26T11:30:00.000Z', snapshot: '1020:1020:' }), founder.publicKey)
+  const swapped = structuredClone(sealed)
+  swapped.sealed = other.sealed
+  assert.throws(() => openSealedCatalog(swapped, founder.privateKeyPem), /SEALED_EVIDENCE_UNBOUND/)
+  // Fresh ephemeral key, salt and IV for every envelope.
+  const again = sealPrivileged(privilegedCatalog(), founder.publicKey)
+  for (const field of ['ephemeralPublicKey', 'salt', 'iv']) assert.notEqual(again.sealed[field], sealed.sealed[field], field)
+  const counterDrift = sealPrivileged(privilegedCatalog(), founder.publicKey, { counters: [] })
+  assert.throws(() => openSealedCatalog(counterDrift, founder.privateKeyPem), /SEALED_COUNTERS_INCONSISTENT/)
+  assert.throws(() => openSealedCatalog(runtimeCatalog(), founder.privateKeyPem), /NOT_A_PRIVILEGED_SESSION/)
+})
+
+function chain(first, second) {
+  const token = buildContinuationToken(first, { ...BINDING, sessionId: '1' }, Date.parse(first.observedAt))
+  return reconcileCatalogSessions([{ catalog: first, observedAt: first.observedAt }, { catalog: second, token, observedAt: second.observedAt, now: Date.parse(second.observedAt) }], BINDING)
+}
+
+test('privileged sessions merge only when nothing moved between them, and are never called one snapshot', () => {
+  const single = reconcileCatalogSessions([{ catalog: privilegedCatalog(), observedAt: privilegedCatalog().observedAt }], BINDING)
+  assert.equal(single.consistency.atomicSnapshot, true)
+  assert.equal(single.consistency.basis, 'ONE_REPEATABLE_READ_TRANSACTION')
+
+  const baseline = privilegedCatalog()
+  baseline.counts[1] = { ...baseline.counts[1], classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET', n: undefined }
+  const continuation = privilegedCatalog({ observedAt: '2026-11-26T11:05:00.000Z', snapshot: '1010:1010:' })
+  continuation.counts = [continuation.counts[1]]
+  const merged = chain(baseline, continuation)
+  assert.equal(merged.evaluation.planeVerdict, 'PLANE_ACCEPTED')
+  assert.equal(merged.consistency.atomicSnapshot, false)
+  assert.equal(merged.consistency.basis, 'MULTI_SESSION_NO_CHANGE_DETECTED')
+  assert.match(merged.consistency.caveat, /not one atomic snapshot/)
+  assert.match(merged.consistency.caveat, /statistics reset/)
+  const unsettled = structuredClone(continuation)
+  unsettled.statsSettledMs = 1000
+  assert.equal(chain(baseline, unsettled).reason, 'STATS_SETTLE_UNPROVEN')
+  const lateWrite = structuredClone(continuation)
+  lateWrite.settledModificationDigest = 'f'.repeat(64)
+  assert.equal(chain(baseline, lateWrite).reason, 'DATA_DRIFT_BETWEEN_SESSIONS', 'a write visible only after the settle interval is drift')
+  const policyChanged = structuredClone(continuation)
+  policyChanged.queries = policyChanged.queries.map((item) => item.id === 'relation_metadata' ? fixtureQuery('relation_metadata', [{ ...item.rows[0], policy_digest: '0'.repeat(32) }]) : item)
+  assert.equal(chain(baseline, policyChanged).reason, 'RELATION_METADATA_DRIFT')
+
+  const moved = structuredClone(continuation)
+  moved.modificationDigest = 'b'.repeat(64)
+  assert.equal(chain(baseline, moved).reason, 'DATA_DRIFT_BETWEEN_SESSIONS')
+  const migrated = structuredClone(continuation)
+  migrated.queries = migrated.queries.map((item) => item.id === 'drizzle_rows' ? { ...item, rows: [...item.rows, { id: 3, hash: 'ghi', created_at: '1' }], ledgerDigest: 'c'.repeat(64) } : item)
+  assert.equal(chain(baseline, migrated).reason, 'MIGRATION_DRIFT')
+  const altered = structuredClone(continuation)
+  altered.queries = altered.queries.map((item) => item.id === 'structure' ? fixtureQuery('structure', [{ columns: 10, digest: 'e'.repeat(32) }]) : item)
+  assert.equal(chain(baseline, altered).reason, 'STRUCTURE_DRIFT')
+  const crossed = runtimeCatalog({ observedAt: '2026-11-26T11:05:00.000Z' })
+  assert.equal(chain(baseline, crossed).reason, 'CONTINUATION_PLANE_CHANGED')
+})
+
+test('the complete preimage needs both planes, opened, on one inventory; it is never one snapshot', () => {
+  const founder = generateRecipientKeyPair()
+  const runtime = { catalog: runtimeCatalog() }
+  const privileged = { catalog: openSealedCatalog(sealPrivileged(privilegedCatalog(), founder.publicKey), founder.privateKeyPem).catalog }
+  const complete = reconcilePlanes({ runtime, privileged })
+  assert.equal(complete.verdict, 'CATALOG_COMPLETE')
+  assert.equal(complete.categories.length, CATALOG_CONTRACT.categories.length)
+  assert.equal(complete.categories.find((category) => category.id === 'preservation_counts').source, 'privileged')
+  assert.equal(complete.categories.find((category) => category.id === 'rls_policies').source, 'runtime')
+  assert.equal(complete.consistency.crossPlaneAtomic, false)
+  assert.equal(complete.S2_02_PREIMAGE_COMPLETE, 'NO')
+
+  assert.equal(reconcilePlanes({ runtime }).reason, 'PLANE_EVIDENCE_MISSING')
+  assert.equal(reconcilePlanes({ runtime, privileged: { catalog: sealPrivileged(privilegedCatalog(), founder.publicKey) } }).reason, 'PRIVILEGED_EVIDENCE_SEALED')
+  assert.equal(reconcilePlanes({ runtime: privileged, privileged: runtime }).reason, 'PLANE_MISMATCH')
+  const grown = { catalog: privilegedCatalog({ tables: [...privilegedCatalog().queries.find((item) => item.id === 'tables').rows, { schema: 'public', name: 'new_table' }] }) }
+  assert.equal(reconcilePlanes({ runtime, privileged: grown }).reason, 'PLANE_INVENTORY_DRIFT')
+  const reshaped = structuredClone(privileged)
+  reshaped.catalog.queries = reshaped.catalog.queries.map((item) => item.id === 'structure' ? fixtureQuery('structure', [{ columns: 10, digest: 'e'.repeat(32) }]) : item)
+  assert.equal(reconcilePlanes({ runtime, privileged: reshaped }).reason, 'PLANE_STRUCTURE_DRIFT')
+  const partialPosture = { catalog: runtimeCatalog() }
+  partialPosture.catalog.queries = partialPosture.catalog.queries.filter((item) => item.id !== 'policies')
+  const partial = reconcilePlanes({ runtime: partialPosture, privileged })
+  assert.equal(partial.verdict, 'CATALOG_PARTIAL')
+  assert.equal(partial.categories.find((category) => category.id === 'rls_policies').accepted, false)
+  const lostCount = structuredClone(privileged)
+  lostCount.catalog.counts[0] = { ...lostCount.catalog.counts[0], classification: 'TIMED_OUT', n: null }
+  assert.equal(reconcilePlanes({ runtime, privileged: lostCount }).verdict, 'CATALOG_PARTIAL')
+})
+
+test('the operator program reads catalogues without schema access, gates counts on privilege, and never writes', () => {
+  const program = containerSource()
+  assert.equal(program.includes('to_regclass'), false)
+  assert.equal(/information_schema\.columns/.test(program), false)
+  assert.match(program, /BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY/)
+  assert.match(program, /has_table_privilege\(current_user, c\.oid, 'SELECT'\)/)
+  assert.match(program, /PRIVILEGE_DENIED/)
+  assert.match(program, /SET LOCAL statement_timeout = '15s'/)
+  assert.match(program, /client\.query\('ROLLBACK'\)/)
+  assert.equal(/\b(INSERT INTO|UPDATE \w+ SET|DELETE FROM|TRUNCATE|ALTER |GRANT |REVOKE |CREATE |DROP |SET row_security|COPY )/i.test(program.replace(/^\s*\/\/.*$/gm, '').replace(/'(?:[^'\\]|\\.)*'/g, "''").replace(/"(?:[^"\\]|\\.)*"/g, '""')), false)
+  for (const statement of program.match(/"SELECT[^"]*"/g) ?? []) assert.equal(/\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|GRANT|REVOKE|DROP)\b/i.test(statement.replace(/n_tup_(ins|upd|del)|'(INSERT|UPDATE|DELETE)'/g, '')), false, statement)
+  // Privileged values are scrubbed before the frame is written, whatever happened.
+  assert.match(program, /Never emit a privileged value in the clear/)
+  assert.ok(program.indexOf('sensitive.counts.length = 0') < program.indexOf('const body = JSON.stringify(out)'))
 })
