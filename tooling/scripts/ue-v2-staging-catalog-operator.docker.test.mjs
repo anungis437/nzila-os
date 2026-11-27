@@ -131,7 +131,15 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     assert.equal(runtime.identity.user, RUNTIME_ROLE)
     assert.equal(runtime.identity.session_user, RUNTIME_LOGIN)
     assert.equal(runtime.identity.transaction_read_only, 'on')
+    assert.equal(runtime.identity.default_read_only, 'on')
     assert.equal(runtime.rolledBack, true)
+    // Staging's database-url carries its own options= (run 46019964268). With the real pg
+    // driver, the session must still start read-only by default and act as the runtime role.
+    const staged = operate(`${url(RUNTIME_LOGIN, loginPassword)}?options=${encodeURIComponent(`-c role=${RUNTIME_ROLE}`)}`).body
+    assert.equal(staged.blocker, undefined)
+    assert.equal(staged.identity.default_read_only, 'on')
+    assert.equal(staged.identity.user, RUNTIME_ROLE)
+    assert.equal(staged.identity.session_user, RUNTIME_LOGIN)
     assert.equal(runtime.privilege.classification, 'LIMITED_RUNTIME')
     assert.equal(runtime.runtime.uid, 1001)
     assert.match(runtime.runtime.pgPath, /^\/app\/node_modules\/pg\//)

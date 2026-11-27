@@ -101,3 +101,24 @@ Two freezes apply from step 1:
 - **Merges to `main`** are held for the length of each chain. Every session of one chain must run from the same `main` SHA (`CONTINUATION_SOURCE_CHANGED`). Plane A and Plane B may use different SHAs, because plane reconciliation does not bind the source.
 
 Merge this hardening before the Plane A baseline, so both chains run the residual-job guard.
+
+## 8. Plane A baseline, attempt 1: run 46019964268 (refused)
+
+- **Dispatch.** From `main` `1698164d01f04680f6d34f7e89b3c38f8f11ebc6` (merge of PR #1323), with `plane=runtime` and no continuation. The founder authorized it and approved `build` and `ue-staging`. Operator image `…nzila-os-union-eyes-v2-catalog@sha256:7bd952a4…`. Revision binding unchanged (`rel6a60c95c9d`, `sha256:2bf18216…`).
+- **Verdict.** `CATALOG_REFUSED`, with defect `DATABASE_IDENTITY_REFUSED` and operator blocker `IDENTITY_REFUSED`. The execution status was `Succeeded`, but that is not acceptance. No category was captured and no table was counted, so no continuation token was issued. This run starts no chain.
+- **Observed identity.**
+  - `session_user=ue_staging_runtime`, `current_user=union_eyes_runtime`, database `ue_v2_staging`, PostgreSQL 16.15.
+  - The transaction was `BEGIN READ ONLY` (`transaction_read_only=on`) and was rolled back.
+  - `default_transaction_read_only=off`. The operator requires `on`, so it refused before reading any catalogue or data.
+- **Cause.** node-postgres overlays the parsed `DATABASE_URL` query parameters onto the client config. The staging `database-url` carries its own `options=` (the role), which replaced the operator's `options` field. The role was still applied, because the URL carries it too. The read-only default was lost. The fault harness's stand-in driver ignored `connectionString`, so the tests could not see this. Run 45940281038 did not check this setting (`default_read_only: null`).
+- **Correction.**
+  - The operator now appends its settings to the URL's own `options`.
+  - The stand-in driver now overlays URL parameters the way node-postgres does.
+  - A regression test reproduces the run's exact symptom against the previous operator (`-c role=union_eyes_runtime` only).
+  - The Docker proof adds a real-driver case with `options=` in the URL.
+  - The refusal stays as strict as before.
+- **Integrity and cleanup.**
+  - The three artifact entries verify against the run's `SHA256SUMS`. The manifest `sha256` (`95f41524…`) equals the checksum of `catalog-evidence.json`. Only one chunk, from one nonce, was accepted through Log Analytics.
+  - The cleanup receipt reads `deleted: true, absent: true`, and an independent `az containerapp job show` returns `ResourceNotFound`.
+  - The receipts are in `run-46019964268/`. The full artifact is held privately (directories 0700, files 0600).
+- **Next.** Dispatch the Plane A baseline again only after the correction merges, and only with fresh founder authorization. The repeat is a new baseline, not a continuation.

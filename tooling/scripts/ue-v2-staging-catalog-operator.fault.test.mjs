@@ -27,7 +27,15 @@ const spec = JSON.parse(process.env.FAKE_PG || '{}')
 const log = (line) => fs.appendFileSync(process.env.FAKE_PG_LOG, JSON.stringify(line) + '\n')
 const tables = [['public', 'members'], ['public', 'claims'], ['drizzle', '__drizzle_migrations']]
 class Client {
-  constructor(config) { this.config = config; this.open = false; this.readOnly = /default_transaction_read_only=on/.test(String(config.options || '')) }
+  constructor(config) {
+    // As node-postgres does: every query parameter of the connection string overlays the config.
+    if (config.connectionString) {
+      const url = new URL(config.connectionString)
+      const parsed = { user: decodeURIComponent(url.username) }
+      for (const [key, value] of url.searchParams) parsed[key] = value
+      config = Object.assign({}, config, parsed)
+    }
+    this.config = config; this.open = false; this.readOnly = /default_transaction_read_only=on/.test(String(config.options || '')) }
   async connect() { log({ connect: { user: this.config.user ?? null, options: this.config.options ?? null, ssl: this.config.ssl === false ? false : Boolean(this.config.ssl), host: this.config.host ?? null } }); if (spec.connectFail) { const e = new Error('connect ECONNREFUSED ' + spec.connectFail); e.code = 'ECONNREFUSED'; throw e } }
   async end() { log({ end: true }) }
   async query(sql) {
@@ -199,6 +207,29 @@ test('the runtime plane sets the runtime role and a read-only session, and never
     assert.equal(sql.some((statement) => statement.includes('pg_stat_user_tables')), false)
     assert.equal(body.identity.user, RUNTIME_ROLE)
     assert.equal(sessionPlaneDefect(body, 'runtime'), null)
+  } finally { rmSync(directory, { recursive: true, force: true }) }
+})
+
+test('options carried inside DATABASE_URL cannot drop the read-only session default', () => {
+  // Run 46019964268: the staging database-url carries its own options= (the role), which
+  // node-postgres lays over a separate options field, so the session started without
+  // default_transaction_read_only and the identity check refused it.
+  const directory = harness()
+  const password = 'p@ss:w/rd'
+  const withOptions = ['postgres', 'ql://', RUNTIME_LOGIN, ':', encodeURIComponent(password), '@db:5432/ue_v2_staging?sslmode=require&options=-c%20role%3D', RUNTIME_ROLE].join('')
+  try {
+    const { body, statements, result } = operate(directory, { plane: 'runtime', fake: { login: RUNTIME_LOGIN, actingRole: RUNTIME_ROLE }, env: { DATABASE_URL: withOptions } })
+    assert.equal(statements[0].connect.options, `-c role=${RUNTIME_ROLE} -c role=${RUNTIME_ROLE} -c default_transaction_read_only=on`, 'ours follow the URL options, so PostgreSQL applies them last')
+    assert.equal(statements[0].connect.user, RUNTIME_LOGIN)
+    assert.equal(body.blocker, undefined)
+    assert.equal(body.identity.default_read_only, 'on')
+    assert.equal(sessionPlaneDefect(body, 'runtime'), null)
+    assert.equal(`${result.stdout}${result.stderr}`.includes(password) || `${result.stdout}`.includes(encodeURIComponent(password)), false, 'the credential never reaches the evidence')
+
+    const garbled = operate(directory, { plane: 'runtime', fake: { login: RUNTIME_LOGIN, actingRole: RUNTIME_ROLE }, env: { DATABASE_URL: 'not a url' } })
+    assert.equal(garbled.body.blocker, 'DATABASE_URL_UNPARSEABLE')
+    assert.equal(garbled.statements.length, 0, 'nothing connects')
+    assert.equal(sessionPlaneDefect(garbled.body, 'runtime'), 'DATABASE_CONNECTION_REFUSED')
   } finally { rmSync(directory, { recursive: true, force: true }) }
 })
 

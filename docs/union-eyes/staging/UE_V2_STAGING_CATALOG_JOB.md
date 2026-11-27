@@ -51,12 +51,14 @@ The replica log-stream proxy (`az containerapp job logs show`) isn't used. It ne
 
 ### Identity
 
-`DATABASE_URL` is a `secretRef` to the existing `database-url` Key Vault secret. The operator connects with `-c role=union_eyes_runtime`, as the application and forward-upgrade preflight do; the `ue_staging_runtime` login holds that role with `INHERIT FALSE`.
+`DATABASE_URL` is a `secretRef` to the existing `database-url` Key Vault secret. The operator connects with `-c role=union_eyes_runtime -c default_transaction_read_only=on`, as the application and forward-upgrade preflight set the role; the `ue_staging_runtime` login holds that role with `INHERIT FALSE`.
+
+These settings are appended to the URL's own `options` parameter, after anything it already carries. node-postgres lays every query parameter of a connection string over the client config. The staging `database-url` carries its own `options=`, so a separate `options` field was silently dropped: run 46019964268 started without the read-only default and was refused. A `DATABASE_URL` that is not a URL is refused before connecting (`DATABASE_URL_UNPARSEABLE`).
 
 The evidence must show:
 - `current_user=union_eyes_runtime`;
 - `session_user=ue_staging_runtime`;
-- `transaction_read_only=on`;
+- `transaction_read_only=on` and `default_transaction_read_only=on`;
 - `ROLLBACK`.
 
 The session is classified `ELEVATED` when either the login or the role is superuser, bypasses RLS, or can create databases or roles. Only `LIMITED_RUNTIME`, with no superuser and no RLS bypass, is accepted; anything else is `DATABASE_PRIVILEGE_UNEXPECTED`. A read-only transaction doesn't make the account a read-only credential.
