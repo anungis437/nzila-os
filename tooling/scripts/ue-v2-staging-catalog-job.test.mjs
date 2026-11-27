@@ -599,6 +599,7 @@ test('the workflow is manual, private, smoke-tests the real image, and always cl
   assert.equal(text.includes('forward-upgrade'), false)
   assert.equal(text.includes('postgres flexible-server firewall'), false)
   assert.ok(text.indexOf('--verify-image-smoke') > 0 && text.indexOf('--verify-image-smoke') < text.indexOf('docker push'), 'the real image is smoke-tested before it is pushed')
+  assert.ok(text.indexOf('az acr login') > 0 && text.indexOf('az acr login') < text.indexOf('docker build'), 'registry login precedes the build that pulls the private base image')
   const cleanup = workflow.jobs.catalog.steps.find((step) => String(step.run ?? '').includes('--cleanup-only'))
   assert.ok(cleanup, 'an always() cleanup step exists for interrupted runs')
   assert.match(String(cleanup.if), /always\(\)/)

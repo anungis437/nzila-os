@@ -45,7 +45,9 @@ jobs:
           set -euo pipefail
           node --input-type=module -e "import { writeFileSync } from 'node:fs'; import { containerSource } from './tooling/scripts/ue-v2-staging-catalog-exec.mjs'; const source = containerSource(); if (source.includes(['containerapp', 'exec'].join(' ')) || source.includes(['UE', 'UPGRADE', 'OPERATION'].join('_'))) process.exit(2); writeFileSync('operator.cjs', source)"
           node --check operator.cjs
-          docker build -f tooling/docker/ue-v2-catalog-operator.Dockerfile \
+          # The base is the private qualified application image: log in before the build pulls it.
+          az acr login -n nzilaventuresacr
+          docker build --platform linux/amd64 -f tooling/docker/ue-v2-catalog-operator.Dockerfile \
             --build-arg QUALIFIED_APPLICATION_IMAGE=nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef \
             --build-arg OPERATOR_SOURCE_SHA="$GITHUB_SHA" \
             -t nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" .
@@ -55,7 +57,6 @@ jobs:
             -e UE_CATALOG_TRANSPORT=private-job -e UE_CATALOG_RUN_ID="$GITHUB_RUN_ID" -e UE_CATALOG_SOURCE_SHA="$GITHUB_SHA" \
             nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" > "$RUNNER_TEMP/operator-smoke.txt"
           node tooling/scripts/ue-v2-staging-catalog-job.mjs --verify-image-smoke "$RUNNER_TEMP/operator-smoke.txt"
-          az acr login -n nzilaventuresacr
           docker push nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA"
           DIGEST=$(az acr manifest show-metadata -r nzilaventuresacr -n nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" --query digest -o tsv)
           echo "reference=nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog@$DIGEST" >> "$GITHUB_OUTPUT"
