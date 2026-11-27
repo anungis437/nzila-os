@@ -302,8 +302,9 @@ export async function retrieveEvidence(spawn, binding, clock, deadlineMs = INGES
       if (lines.some((line) => line.startsWith(`${EVIDENCE_FRAME} OVERFLOW `))) return { ok: false, defect: 'EVIDENCE_TRANSPORT_EXCEEDED', workspace: channel.workspace, polls }
       const hasEnd = lines.some((line) => line.startsWith(`${EVIDENCE_FRAME} END `))
       if (begin && hasEnd) {
+        // Exact distinct count; dcount() is approximate and could hold a complete frame as missing.
         const counted = await queryWorkspace(spawn, channel.workspace, evidenceQuery(binding,
-          `| where Log_s startswith '${EVIDENCE_FRAME} CHUNK ${begin.nonce} ' | extend i = toint(extract(@'^UE_CATALOG_V2 CHUNK [a-f0-9]{32} ([0-9]+)/', 1, Log_s)) | summarize n = dcount(i)`))
+          `| where Log_s startswith '${EVIDENCE_FRAME} CHUNK ${begin.nonce} ' | extend i = toint(extract(@'^UE_CATALOG_V2 CHUNK [a-f0-9]{32} ([0-9]+)/', 1, Log_s)) | distinct i | summarize n = count()`))
         const distinct = counted.ok ? Number(counted.rows[0]?.n ?? 0) : -1
         polls.push({ at: clock.now(), state: 'FRAME_SEEN', distinct, expected: begin.chunks })
         if (distinct === begin.chunks) {

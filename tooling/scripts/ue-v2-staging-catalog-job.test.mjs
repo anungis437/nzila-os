@@ -232,7 +232,8 @@ function harness(options = {}) {
       }
       const nonce = kql.match(/UE_CATALOG_V2 CHUNK ([a-f0-9]{32}) /)?.[1]
       const chunks = bound(kql).filter((row) => row.Log_s.startsWith(`UE_CATALOG_V2 CHUNK ${nonce} `)).map((row) => ({ ...row, i: Number(row.Log_s.split(' ')[3].split('/')[0]) }))
-      if (kql.includes('summarize n = dcount(i)')) return { code: 0, stdout: JSON.stringify([{ n: new Set(chunks.map((row) => row.i)).size }]), stderr: '' }
+      if (kql.includes('dcount(')) return { code: 1, stdout: '', stderr: 'approximate count refused by the fake' }
+      if (kql.includes('| distinct i | summarize n = count()')) return { code: 0, stdout: JSON.stringify([{ n: new Set(chunks.map((row) => row.i)).size }]), stderr: '' }
       const range = kql.match(/between \((\d+) \.\. (\d+)\)/)
       const page = chunks.filter((row) => row.i >= Number(range[1]) && row.i <= Number(range[2]))
       if (page.length > LOG_PAGE_CHUNKS * 2) return { code: 1, stdout: '', stderr: 'response too large' }
