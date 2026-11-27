@@ -203,7 +203,15 @@ async function main() {
         database: 'ue_v2_staging', ssl: tls, options: '-c default_transaction_read_only=on', connectionTimeoutMillis: 10000, statement_timeout: 15000, query_timeout: 15000, application_name: 'ue-s202-catalog-privileged' })
     } else {
       if (!process.env.DATABASE_URL) { out.blocker = 'DATABASE_URL_ABSENT'; return }
-      client = new pg.Client({ connectionString: process.env.DATABASE_URL, options: '-c role=' + RUNTIME_ROLE + ' -c default_transaction_read_only=on', connectionTimeoutMillis: 10000, statement_timeout: 15000, query_timeout: 15000, application_name: 'ue-s202-catalog' })
+      // node-postgres lays every query parameter of the connection string over the client
+      // config, so an options= in DATABASE_URL would silently replace a separate options
+      // field. The session settings therefore go into the URL's own options, after any it
+      // already carries, so PostgreSQL applies them last.
+      let url
+      try { url = new URL(process.env.DATABASE_URL) } catch { url = null }
+      if (!url) { out.blocker = 'DATABASE_URL_UNPARSEABLE'; return }
+      url.searchParams.set('options', [url.searchParams.get('options'), '-c role=' + RUNTIME_ROLE, '-c default_transaction_read_only=on'].filter(Boolean).join(' '))
+      client = new pg.Client({ connectionString: url.toString(), connectionTimeoutMillis: 10000, statement_timeout: 15000, query_timeout: 15000, application_name: 'ue-s202-catalog' })
     }
     await client.connect()
     // The privileged plane reads one consistent snapshot per session; both planes are read-only.
@@ -548,7 +556,7 @@ export function classifyCount(count, catalog) {
   return 'GLOBAL_OBSERVED'
 }
 
-const PLANE_BLOCKERS = ['NO_IN_CONTAINER_PG_CLIENT', 'DATABASE_URL_ABSENT', 'QUERY_FAILED', 'CONTINUATION_REJECTED', 'SCHEMA_DRIFT', 'EVIDENCE_RECIPIENT_MISSING', 'PRIVILEGED_CREDENTIAL_ABSENT', 'SEALING_FAILED', 'WRONG_TARGET', 'PRIVILEGE_REFUSED', 'STATS_UNTRACKED', 'STATS_UNREADABLE']
+const PLANE_BLOCKERS = ['NO_IN_CONTAINER_PG_CLIENT', 'DATABASE_URL_ABSENT', 'DATABASE_URL_UNPARSEABLE', 'QUERY_FAILED', 'CONTINUATION_REJECTED', 'SCHEMA_DRIFT', 'EVIDENCE_RECIPIENT_MISSING', 'PRIVILEGED_CREDENTIAL_ABSENT', 'SEALING_FAILED', 'WRONG_TARGET', 'PRIVILEGE_REFUSED', 'STATS_UNTRACKED', 'STATS_UNREADABLE']
 
 function identityDefect(catalog, contract) {
   const plane = planeOf(catalog)

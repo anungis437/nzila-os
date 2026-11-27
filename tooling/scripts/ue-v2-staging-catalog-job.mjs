@@ -621,7 +621,7 @@ async function reconcileCreatedJob(spawn, expected, clock) {
 export function sessionPlaneDefect(body, plane, expectedKeyId) {
   if ((body.plane ?? 'runtime') !== plane) return 'CATALOG_PLANE_MISMATCH'
   if (['EVIDENCE_RECIPIENT_MISSING', 'SEALING_FAILED', 'WRONG_TARGET', 'PRIVILEGE_REFUSED', 'STATS_UNTRACKED', 'STATS_UNREADABLE'].includes(body.blocker)) return body.blocker
-  if (body.blocker === 'DATABASE_URL_ABSENT' || body.blocker === 'PRIVILEGED_CREDENTIAL_ABSENT' || /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|28P01|28000|connection refused|password authentication failed/i.test(body.error ?? '')) return 'DATABASE_CONNECTION_REFUSED'
+  if (body.blocker === 'DATABASE_URL_ABSENT' || body.blocker === 'DATABASE_URL_UNPARSEABLE' || body.blocker === 'PRIVILEGED_CREDENTIAL_ABSENT' || /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|28P01|28000|connection refused|password authentication failed/i.test(body.error ?? '')) return 'DATABASE_CONNECTION_REFUSED'
   if (plane === 'runtime') {
     if (body.blocker === 'IDENTITY_REFUSED' || body.identity?.user !== RUNTIME_ROLE || body.identity?.session_user !== RUNTIME_LOGIN) return 'DATABASE_IDENTITY_REFUSED'
   } else if (body.blocker === 'IDENTITY_REFUSED' || body.identity?.user !== PRIVILEGED_LOGIN || body.identity?.session_user !== PRIVILEGED_LOGIN) return 'DATABASE_IDENTITY_REFUSED'
