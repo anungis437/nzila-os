@@ -59,7 +59,7 @@ The evidence must show:
 - `transaction_read_only=on`;
 - `ROLLBACK`.
 
-The session is classified `ELEVATED` when either the login or the role is superuser, bypasses RLS, or can create databases or roles. A read-only transaction doesn't make the account a read-only credential.
+The session is classified `ELEVATED` when either the login or the role is superuser, bypasses RLS, or can create databases or roles. Only `LIMITED_RUNTIME`, with no superuser and no RLS bypass, is accepted; anything else is `DATABASE_PRIVILEGE_UNEXPECTED`. A read-only transaction doesn't make the account a read-only credential.
 
 ### Ownership and cleanup
 
@@ -91,7 +91,18 @@ A job status of `Succeeded` isn't `CATALOG_COMPLETE`, and doesn't set `S2.02_PRE
 
 ## Continuation
 
-Counts keep the 15 second statement timeout, the 45 second wall budget, and the 250 statement ceiling. A partial count receipt can build a continuation token bound to the revision, image, and table-inventory digest. A second session must be dispatched separately. Reconciliation rejects expired tokens, schema drift, overlapping counts, and contradictory values.
+Counts keep the 15-second statement timeout, the 45-second wall budget and the 250-statement ceiling.
+
+A partial run writes a continuation token, bound to the revision, image, operator source SHA and table-inventory digest. It also writes `catalog-merged.json`; both files are listed in `SHA256SUMS`.
+
+Each continuation is a separate, separately approved dispatch, with `continuation_run_id` set to the previous run. The workflow accepts only a run of this workflow dispatched from `main`. The controller verifies the prior hashes and the token before creating any job, and sends only the remaining tables. Reconciliation rejects:
+- expired tokens;
+- a changed revision or source;
+- schema drift;
+- overlapping counts;
+- contradictory values.
+
+The number of sessions follows from the live table count. Intermediate sessions report `CATALOG_PARTIAL`.
 
 ## Not done in this change
 

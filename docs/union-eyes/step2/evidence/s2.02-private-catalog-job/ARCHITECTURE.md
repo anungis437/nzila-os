@@ -42,6 +42,20 @@ The forward-upgrade job was not reused as the operator. It exposes DDL and the a
 | A failed show after delete counted as deleted | Any non-zero exit was treated as absence | Explicit not-found, retries, incident |
 | Ownership relied on name and tags | — | Environment, image, container and identity are also required |
 | The controller tests never ran in CI | `ci.yml` ran only the exec test | Job and Docker operator tests are added to CI |
+| An elevated or RLS-bypassing session was only labelled | The classification was recorded but never enforced | `DATABASE_PRIVILEGE_UNEXPECTED` refuses it |
+| A continuation could merge counts from a different operator source | Tokens were bound to the revision and image only | Tokens carry the source SHA; a mismatch is `CONTINUATION_SOURCE_CHANGED` |
+| The operator's base and the pinned serving image could drift | Two independent literals | A test requires the workflow base to equal `EXPECTED_IMAGE` |
+| The first dispatch would have failed to pull the private base | `docker build` ran before `az acr login` | Login precedes the build; the build pins `linux/amd64`; a test enforces the order |
+
+## Real-image facts (registry read, no container run)
+
+Image `nzila-os-union-eyes-v2@sha256:2bf18216…`, platform linux/amd64 `sha256:d36bb86f…`, OCI revision `6a60c95c9de17e9343e0414bb51766afbc190054`:
+- **Packages:** `pg` 8.20.0 is at `/app/node_modules/pg`, owned by 1001:1001 and world-readable.
+- **User:** `nextjs` is uid 1001.
+- **Environment:** no `NODE_PATH`, and no credential-like variables.
+- **Startup:** the default `ENTRYPOINT`/`CMD` start the app server. The operator Dockerfile replaces both.
+
+The Docker CI proof uses the same `pg` version at the same path and the same uid. One live container start of the real image happens in the build step, before the push.
 
 ## Release holds
 
