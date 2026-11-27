@@ -83,7 +83,7 @@ That requires a session that both holds SELECT and is not filtered by row securi
 | B. `union_eyes_system` | No (117 tables, all RLS-filtered) | — | — | — | — | Insufficient |
 | C. New dedicated `BYPASSRLS` + `pg_read_all_data` login without write | Yes | New role and grants | Yes | None | Same as A | Narrower credential, but needs a grant and a new credential. Founder decision; not done here. |
 | D. Point-in-time restore to an isolated server; one REPEATABLE READ transaction on the copy | Yes | None on staging | Restored server inherits admin | Yes (a new server) | **One atomic snapshot** | Strongest consistency. Needs infra creation and cost. Founder decision. |
-| E. Raise the per-session count ceiling so all 790 fit one transaction | Yes | None | None | None | One snapshot | Not done: the mandate preserves the 15 s / 45 s / 250 bounds. |
+| E. Raise the per-session count ceiling so all 790 fit one transaction | Yes | None | None | None | One snapshot | **Selected 2026-11-27** by founder authorization, after option A's multi-session chain was refused for live writes (`EXECUTION_PREFLIGHT.md` section 10). Ceiling raised from 250 to 1,000; the 15 s / 45 s bounds are unchanged. |
 
 ### Existing credentials
 
@@ -202,7 +202,7 @@ Observed in run 45940281038:
 
 ## 6. Performance implications
 
-- One connection, at most 250 `count(*)` statements per session, each bounded by 15 s, inside a 45 s wall budget. For 790 tables, Plane B needs at least four sessions (250 + 250 + 250 + 40), each dispatched and approved separately, within the 24 h continuation TTL.
+- One connection, at most 1,000 `count(*)` statements per session (250 until 2026-11-27, see option E), each bounded by 15 s, inside a 45 s wall budget. All 790 staging tables fit one session, so Plane B is one `REPEATABLE READ` snapshot. If the tables ever exceed the ceiling or the budget, the remainder becomes a continuation as before.
 - `count(*)` takes `ACCESS SHARE` locks that are **held until `ROLLBACK`**. A concurrent migration's `ACCESS EXCLUSIVE` lock would wait for the session to finish, and queries queued behind it would wait too. Do not run during a staging deploy or migration. The catalogue workflow's concurrency group does not serialise against the deploy workflow; this is an operating rule.
 - Each privileged session then idles, with no transaction and no locks, until 75 s after its snapshot, and reads the statistics once more. That adds about a minute per session, within the job's 300 s replica timeout and the controller's 240 s observation deadline.
 - A REPEATABLE READ transaction holds back the xmin horizon for its duration (under about 60 s), delaying vacuum of rows dead after its snapshot. This is negligible on staging.
@@ -235,10 +235,10 @@ The result is labelled `MULTI_SESSION_NO_CHANGE_DETECTED`, `atomicSnapshot: fals
 
 **Minimum mechanism for true atomicity.** One transaction must count all 790 tables. That needs either:
 
-- a per-session statement ceiling of at least 790 (a change to the 250 bound; needs separate authorization); or
+- a per-session statement ceiling of at least 790 (authorized 2026-11-27 and set to 1,000, option E); or
 - option D, a point-in-time restore counted in one transaction.
 
-Neither is assumed here.
+Neither was assumed when this record was written. Option E was later authorized (see the option table).
 
 ## 7. Adversarial review
 
@@ -316,7 +316,7 @@ Every step below is founder-authorized and is not performed by this change.
    Then set the printed public key as repository variable `UE_V2_STAGING_CATALOG_RECIPIENT`.
 3. **Window.** Confirm no staging deploy or migration is running or scheduled. Hold staging deploys until the chain completes.
 4. **Plane A.** Dispatch `ue-v2-staging-catalog-job.yml` with `plane=runtime` and approve `ue-staging`. Expect `CATALOG_PARTIAL` / `PLANE_ACCEPTED`.
-5. **Plane B.** Dispatch with `plane=privileged` and approve. Repeat with `continuation_run_id=<previous run>` until no tables remain (at least 4 sessions, within 24 h). Each run must exit with `PLANE_CAPTURED_SEALED`, or report remaining tables. Any drift refusal means a new chain from a fresh baseline. Repeated refusal means escalating to option D.
+5. **Plane B.** Dispatch with `plane=privileged` and approve. With the 1,000 ceiling (option E), one session counts all 790 tables and should exit with `PLANE_CAPTURED_SEALED`. If tables remain, repeat with `continuation_run_id=<previous run>` within 24 h. Any drift refusal means a new chain from a fresh baseline.
 6. **Assemble offline.** `gh run download` each run into a private directory, then:
 
    ```bash
