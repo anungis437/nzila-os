@@ -201,3 +201,29 @@ test('the runtime plane sets the runtime role and a read-only session, and never
     assert.equal(sessionPlaneDefect(body, 'runtime'), null)
   } finally { rmSync(directory, { recursive: true, force: true }) }
 })
+
+test('every statement the operator issues parses as PostgreSQL', async () => {
+  // libpg-query is the PostgreSQL parser itself (compiled to WebAssembly), already a
+  // dependency of the Union Eyes app. A scripted driver cannot catch a syntax error.
+  const { createRequire } = await import('node:module')
+  const repository = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..')
+  const parser = createRequire(path.join(repository, 'apps/union-eyes/package.json'))('libpg-query')
+  await parser.loadModule()
+  const directory = harness()
+  try {
+    const statements = new Set([
+      ...operate(directory, { fake: { bypass: true }, recipient: recipient.publicKey, env: settleFast }).sql,
+      ...operate(directory, { plane: 'runtime', fake: { login: RUNTIME_LOGIN, actingRole: RUNTIME_ROLE } }).sql,
+      ...operate(directory, { fake: { bypass: true, failOn: 'count(*)', failCode: '42501' }, recipient: recipient.publicKey, env: settleFast }).sql,
+    ])
+    assert.ok(statements.size >= 25, `only ${statements.size} statements observed`)
+    for (const statement of statements) {
+      assert.doesNotThrow(() => parser.parseSync(statement), statement)
+      const tree = parser.parseSync(statement)
+      assert.equal(tree.stmts.length, 1, `one statement per call: ${statement}`)
+      const kind = Object.keys(tree.stmts[0].stmt)[0]
+      assert.ok(['SelectStmt', 'TransactionStmt', 'VariableSetStmt'].includes(kind), `${kind}: ${statement}`)
+    }
+    assert.throws(() => parser.parseSync("SELECT (SELECT md5('x'))) FROM pg_policy"), 'the parser rejects the defect this test exists for')
+  } finally { rmSync(directory, { recursive: true, force: true }) }
+})
