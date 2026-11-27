@@ -18,6 +18,7 @@ import {
   TENANT_ID,
   EVIDENCE_CHUNK_CHARS,
   EVIDENCE_MAX_BYTES,
+  EVIDENCE_MAX_CHUNKS,
   parseCatalogStdout,
   revisionDefect,
   writeReport,
@@ -30,9 +31,11 @@ export const KEY_VAULT_SECRET = 'https://nzila-ue-v2-staging-kv.vault.azure.net/
 export const IDENTITY = `/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-ue-v2-staging-id`
 export const JOB_PURPOSE = 's202-private-catalog'
 export const OPERATOR_IMAGE_RE = /^nzilaventuresacr\.azurecr\.io\/nzila-os-union-eyes-v2-catalog@sha256:[a-f0-9]{64}$/
-export { EVIDENCE_CHUNK_CHARS, EVIDENCE_MAX_BYTES }
+export { EVIDENCE_CHUNK_CHARS, EVIDENCE_MAX_BYTES, EVIDENCE_MAX_CHUNKS }
+export const AZ_LOG_TAIL_MAX = 300
 export const EVIDENCE_LINE_BUDGET = 4096
-export const EVIDENCE_TAIL_LINES = Math.ceil(EVIDENCE_MAX_BYTES / EVIDENCE_CHUNK_CHARS) + 16
+export const EVIDENCE_TAIL_LINES = AZ_LOG_TAIL_MAX
+export const LOG_STDOUT_MAX_BYTES = 1024 * 1024
 export const OBSERVE_DEADLINE_MS = 240000
 export const OBSERVE_INTERVAL_MS = 5000
 export const STOP_DEADLINE_MS = 30000
@@ -108,17 +111,20 @@ export function jobSpecification(options) {
 export function frameCatalog(body) {
   const json = String(body)
   const digest = createHash('sha256').update(json).digest('hex')
-  if (json.length > EVIDENCE_MAX_BYTES) {
+  if (json.length > EVIDENCE_MAX_BYTES || Math.ceil(json.length / EVIDENCE_CHUNK_CHARS) > EVIDENCE_MAX_CHUNKS) {
     return { text: `UE_CATALOG_FRAME v1 chunks=0 sha256=${digest} bytes=${json.length} overflow=1\n`, digest, overflow: true }
   }
   const count = Math.max(1, Math.ceil(json.length / EVIDENCE_CHUNK_CHARS))
-  const lines = [`UE_CATALOG_FRAME v1 chunks=${count} sha256=${digest} bytes=${json.length}`]
+  const lines = []
   for (let index = 0; index < count; index += 1) {
     const line = `UE_CATALOG_CHUNK ${index + 1}/${count} ${json.slice(index * EVIDENCE_CHUNK_CHARS, (index + 1) * EVIDENCE_CHUNK_CHARS)}`
     if (line.length > EVIDENCE_LINE_BUDGET) throw new Error('EVIDENCE_LINE_BUDGET')
     lines.push(line)
   }
-  lines.push(MARK_END, `UE_CATALOG_SHA256 ${digest}`)
+  lines.push(`UE_CATALOG_FRAME v1 chunks=${count} sha256=${digest} bytes=${json.length}`, MARK_END, `UE_CATALOG_SHA256 ${digest}`)
+  if (lines.length > AZ_LOG_TAIL_MAX) {
+    return { text: `UE_CATALOG_FRAME v1 chunks=0 sha256=${digest} bytes=${json.length} overflow=1\n`, digest, overflow: true }
+  }
   return { text: `${lines.join('\n')}\n`, digest, overflow: false, chunks: count }
 }
 
@@ -128,10 +134,10 @@ export function reassembleCatalog(text) {
   if (frame[4] || Number(frame[3]) > EVIDENCE_MAX_BYTES) return { ok: false, defect: 'EVIDENCE_TRANSPORT_EXCEEDED' }
   const total = Number(frame[1])
   const expected = frame[2]
-  if (!Number.isInteger(total) || total < 1 || total > EVIDENCE_TAIL_LINES) return { ok: false, defect: 'EVIDENCE_TRANSPORT_EXCEEDED' }
+  if (!Number.isInteger(total) || total < 1 || total > EVIDENCE_MAX_CHUNKS) return { ok: false, defect: 'EVIDENCE_TRANSPORT_EXCEEDED' }
   const parts = new Array(total).fill(null)
   for (const line of String(text).split('\n')) {
-    const match = line.match(/^UE_CATALOG_CHUNK (\d+)\/(\d+) (.*)$/)
+    const match = line.match(/UE_CATALOG_CHUNK (\d+)\/(\d+) (.*)$/)
     if (!match) continue
     const index = Number(match[1])
     if (Number(match[2]) !== total || index < 1 || index > total) return { ok: false, defect: 'EVIDENCE_MISSING' }
@@ -288,26 +294,31 @@ export async function executeCatalogJob(env, spawn, options = {}) {
         release = true
         report.phases.observe = 'DONE'
         const logs = await spawn('az', ['containerapp', 'job', 'logs', 'show', '-g', RESOURCE_GROUP, '-n', name, '--execution', execution, '--container', 'catalog-operator', '--tail', String(EVIDENCE_TAIL_LINES)])
-        const assembled = reassembleCatalog(logs.stdout)
-        const parsed = assembled.ok ? parseCatalogStdout(`${MARK_BEGIN}\n${assembled.body}\n${MARK_END}\n`) : null
-        report.phases.capture = parsed?.body ? 'DONE' : 'MISSING'
-        if (assembled.digest) report.evidenceSha256 = assembled.digest
-        if (parsed?.body) report.catalog = parsed.body
-        if (parsed?.verdict) report.diagnostics = parsed.verdict
-        if (observed.status !== 'Succeeded') {
-          if (assembled.defect) report.defects.push(assembled.defect)
-          result = fail(5, 'JOB_EXECUTION_FAILED')
-        } else if (!assembled.ok) {
-          result = fail(5, assembled.defect)
+        if (logs.transport === 'STDOUT_LIMIT' || logs.code !== 0) {
+          if (!report.defects.includes('EVIDENCE_TRANSPORT_EXCEEDED')) report.defects.push('EVIDENCE_TRANSPORT_EXCEEDED')
+          result = fail(5, observed.status === 'Succeeded' ? 'EVIDENCE_TRANSPORT_EXCEEDED' : 'JOB_EXECUTION_FAILED')
         } else {
-          report.verdict = parsed.verdict
-          report.phases.verify = 'DONE'
-          report.catalogAccepted = parsed.verdict === 'CATALOG_COMPLETE'
-          if (parsed.body?.blocker === 'IDENTITY_REFUSED') result = fail(5, 'DATABASE_IDENTITY_REFUSED')
-          else if (parsed.body?.blocker === 'DATABASE_URL_ABSENT' || /ECONNREFUSED|connection refused/i.test(parsed.body?.error ?? '')) result = fail(5, 'DATABASE_CONNECTION_REFUSED')
-          else if (parsed.body?.identity?.transaction_read_only !== 'on' || parsed.body?.rolledBack !== true) result = fail(5, 'READ_ONLY_TRANSACTION_UNPROVEN')
-          else if (!parsed.ok) result = fail(5, parsed.verdict)
-          else result = { exitCode: 0, report }
+          const assembled = reassembleCatalog(logs.stdout)
+          const parsed = assembled.ok ? parseCatalogStdout(`${MARK_BEGIN}\n${assembled.body}\n${MARK_END}\n`) : null
+          report.phases.capture = parsed?.body ? 'DONE' : 'MISSING'
+          if (assembled.digest) report.evidenceSha256 = assembled.digest
+          if (parsed?.body) report.catalog = parsed.body
+          if (parsed?.verdict) report.diagnostics = parsed.verdict
+          if (observed.status !== 'Succeeded') {
+            if (assembled.defect) report.defects.push(assembled.defect)
+            result = fail(5, 'JOB_EXECUTION_FAILED')
+          } else if (!assembled.ok) {
+            result = fail(5, assembled.defect)
+          } else {
+            report.verdict = parsed.verdict
+            report.phases.verify = 'DONE'
+            report.catalogAccepted = parsed.verdict === 'CATALOG_COMPLETE'
+            if (parsed.body?.blocker === 'IDENTITY_REFUSED') result = fail(5, 'DATABASE_IDENTITY_REFUSED')
+            else if (parsed.body?.blocker === 'DATABASE_URL_ABSENT' || /ECONNREFUSED|connection refused/i.test(parsed.body?.error ?? '')) result = fail(5, 'DATABASE_CONNECTION_REFUSED')
+            else if (parsed.body?.identity?.transaction_read_only !== 'on' || parsed.body?.rolledBack !== true) result = fail(5, 'READ_ONLY_TRANSACTION_UNPROVEN')
+            else if (!parsed.ok) result = fail(5, parsed.verdict)
+            else result = { exitCode: 0, report }
+          }
         }
       }
     }
@@ -341,7 +352,11 @@ export async function cleanupOwnedJob(spawn, expected) {
 }
 
 export function launch(executable, args) {
-  const result = spawnSync(executable, args, { encoding: 'utf8' })
+  const result = spawnSync(executable, args, { encoding: 'utf8', maxBuffer: LOG_STDOUT_MAX_BYTES })
+  if (result.error) {
+    const limited = result.error.code === 'ENOBUFS' || result.error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
+    return { code: result.status ?? 1, stdout: '', stderr: limited ? 'STDOUT_LIMIT' : String(result.error.message), transport: limited ? 'STDOUT_LIMIT' : 'SPAWN_ERROR' }
+  }
   return { code: result.status ?? 1, stdout: result.stdout ?? '', stderr: result.stderr ?? '' }
 }
 

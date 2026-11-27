@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -24,13 +24,16 @@ import {
   JOB_PURPOSE,
   STAGING_HOST,
   assertStagingTarget,
+  AZ_LOG_TAIL_MAX,
   EVIDENCE_CHUNK_CHARS,
   EVIDENCE_LINE_BUDGET,
   EVIDENCE_MAX_BYTES,
   EVIDENCE_TAIL_LINES,
+  LOG_STDOUT_MAX_BYTES,
   cleanupOwnedJob,
   executeCatalogJob,
   frameCatalog,
+  launch,
   jobNameForRun,
   jobSpecification,
   operatorImageDefect,
@@ -189,6 +192,8 @@ test('the private job controller does not use the exec console', async () => {
   assert.equal(text.includes("exec/action"), false)
   const fake = harness({ logs: marked(completeCatalog()) })
   const produced = await executeCatalogJob(liveEnv(), fake.spawn)
+  assert.equal(EVIDENCE_TAIL_LINES, AZ_LOG_TAIL_MAX)
+  assert.ok(EVIDENCE_TAIL_LINES <= 300)
   assert.equal(fake.calls.some((call) => call.args.includes(String(EVIDENCE_TAIL_LINES))), true)
   assert.equal(fake.calls.some((call) => call.args.at(-2) === '--tail' && call.args.at(-1) === '200'), false)
   assert.equal(produced.exitCode, 0)
@@ -339,9 +344,11 @@ test('observation waits through pending and running, and a short log tail is not
 
   const overflow = frameCatalog('y'.repeat(EVIDENCE_MAX_BYTES + 1))
   assert.match(overflow.text, /overflow=1/)
+  assert.equal(overflow.text.includes('UE_CATALOG_CHUNK'), false)
   assert.equal(reassembleCatalog(overflow.text).defect, 'EVIDENCE_TRANSPORT_EXCEEDED')
   const refused = await executeCatalogJob(liveEnv(), harness({ logs: overflow.text }).spawn)
   assert.equal(refused.report.defects.includes('EVIDENCE_TRANSPORT_EXCEEDED'), true)
+  assert.equal(refused.report.catalog, null)
   assert.equal(refused.report.catalogAccepted, false)
 })
 
@@ -358,6 +365,124 @@ test('a failed controller run still writes the catalogue receipt', () => {
   rmSync(directory, { recursive: true, force: true })
 })
 
+test('the real process launcher stays inside the Azure CLI tail and stdout limits', async () => {
+  const tables = Array.from({ length: 1224 }, (_, index) => ({ schema: 'public', name: `t${String(index).padStart(4, '0')}`, owner: 'union_eyes_runtime' }))
+  const realistic = completeCatalog()
+  realistic.queries = realistic.queries.map((item) => item.id === 'tables' || item.id === 'relations' || item.id === 'rls' ? query(item.id, tables) : item)
+  realistic.counts = tables.map((table) => ({ schema: table.schema, name: table.name, visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' }))
+  const realisticJson = JSON.stringify(realistic)
+  assert.ok(realisticJson.length <= EVIDENCE_MAX_BYTES)
+  const framed = frameCatalog(realisticJson)
+  assert.equal(framed.overflow, false)
+  assert.ok(framed.text.trim().split('\n').length <= AZ_LOG_TAIL_MAX)
+  assert.ok(Buffer.byteLength(framed.text) < LOG_STDOUT_MAX_BYTES)
+  assert.equal(JSON.parse(reassembleCatalog(framed.text).body).queries.find((item) => item.id === 'tables').rows.length, 1224)
+
+  const directory = mkdtempSync(path.join(tmpdir(), 'ue-fake-az-'))
+  const logFile = path.join(directory, 'logs.txt')
+  const stateFile = path.join(directory, 'state')
+  writeFileSync(logFile, framed.text)
+  const az = path.join(directory, 'az')
+  const emit = (value) => `fs.writeSync(1, ${JSON.stringify(value)})`
+  writeFileSync(az, [
+    '#!/usr/bin/env node',
+    "const fs = require('fs')",
+    'const args = process.argv.slice(2)',
+    "const line = args.join(' ')",
+    "const tailAt = args.indexOf('--tail')",
+    "if (line.includes('logs show')) {",
+    '  const tail = Number(args[tailAt + 1])',
+    '  if (!Number.isInteger(tail) || tail < 0 || tail > 300) {',
+    "    fs.writeSync(2, 'tail out of range\\n')",
+    '    process.exit(2)',
+    '  }',
+    "  if (process.env.UE_FAKE_FLOOD === '1') {",
+    `    fs.writeSync(1, 'x'.repeat(${LOG_STDOUT_MAX_BYTES + 4096}))`,
+    '    process.exit(0)',
+    '  }',
+    "  const text = fs.readFileSync(process.env.UE_FAKE_LOG, 'utf8')",
+    "  const rows = text.split('\\n')",
+    '  fs.writeSync(1, rows.slice(-tail).join(\'\\n\'))',
+    "  if (!text.endsWith('\\n')) fs.writeSync(1, '\\n')",
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('account show')) {",
+    `  ${emit(JSON.stringify({ subscriptionId: SUBSCRIPTION_ID, tenantId: TENANT_ID }))}`,
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('revision show')) {",
+    `  ${emit(JSON.stringify({ name: EXPECTED_REVISION, healthState: 'Healthy', trafficWeight: 100, containers: [{ name: 'union-eyes', image: EXPECTED_IMAGE }] }))}`,
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('secrets[].name')) {",
+    `  ${emit(JSON.stringify(['database-url']))}`,
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('job start')) {",
+    `  ${emit(`ue-s202-cat-${RUN}-exec\n`)}`,
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('execution show')) {",
+    `  ${emit('Succeeded\n')}`,
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('job delete')) {",
+    "  fs.writeFileSync(process.env.UE_FAKE_STATE, 'deleted')",
+    '  process.exit(0)',
+    '}',
+    "if (line.includes('job show')) {",
+    '  if (fs.existsSync(process.env.UE_FAKE_STATE)) {',
+    "    fs.writeSync(2, 'ResourceNotFound\\n')",
+    '    process.exit(3)',
+    '  }',
+    `  ${emit(JSON.stringify({ name: `ue-s202-cat-${RUN}`, tags: { purpose: 's202-private-catalog', runId: RUN, source: SHA } }))}`,
+    '  process.exit(0)',
+    '}',
+    'process.exit(0)',
+    '',
+  ].join('\n'))
+  chmodSync(az, 0o755)
+  const previousLog = process.env.UE_FAKE_LOG
+  const previousFlood = process.env.UE_FAKE_FLOOD
+  const previousState = process.env.UE_FAKE_STATE
+  process.env.UE_FAKE_LOG = logFile
+  process.env.UE_FAKE_STATE = stateFile
+  delete process.env.UE_FAKE_FLOOD
+  const spawn = async (executable, args) => {
+    assert.equal(executable, 'az')
+    return launch(az, args)
+  }
+  try {
+    const refused = launch(az, ['containerapp', 'job', 'logs', 'show', '--tail', '301'])
+    assert.equal(refused.code, 2)
+    const produced = await executeCatalogJob(liveEnv(), spawn)
+    assert.equal(produced.exitCode, 0)
+    assert.equal(produced.report.catalogAccepted, true)
+    assert.equal(produced.report.catalog.queries.find((item) => item.id === 'tables').rows.length, 1224)
+    assert.equal(produced.report.catalog.counts.length, 1224)
+    rmSync(stateFile, { force: true })
+    process.env.UE_FAKE_FLOOD = '1'
+    const flooded = await executeCatalogJob(liveEnv(), spawn)
+    assert.equal(flooded.report.defects.includes('EVIDENCE_TRANSPORT_EXCEEDED'), true)
+    assert.equal(flooded.report.catalogAccepted, false)
+    assert.equal(flooded.report.catalog, null)
+    writeFileSync(logFile, framed.text.trim().split('\n').slice(-50).join('\n'))
+    rmSync(stateFile, { force: true })
+    delete process.env.UE_FAKE_FLOOD
+    const truncated = await executeCatalogJob(liveEnv(), spawn)
+    assert.equal(truncated.report.defects.includes('EVIDENCE_MISSING'), true)
+    assert.equal(truncated.report.catalogAccepted, false)
+  } finally {
+    if (previousLog === undefined) delete process.env.UE_FAKE_LOG
+    else process.env.UE_FAKE_LOG = previousLog
+    if (previousFlood === undefined) delete process.env.UE_FAKE_FLOOD
+    else process.env.UE_FAKE_FLOOD = previousFlood
+    if (previousState === undefined) delete process.env.UE_FAKE_STATE
+    else process.env.UE_FAKE_STATE = previousState
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
 test('the workflow is manual, private, and separate from upgrade and exec', () => {
   const text = readFileSync(WORKFLOW, 'utf8')
   const workflow = YAML.parse(text)
@@ -369,6 +494,8 @@ test('the workflow is manual, private, and separate from upgrade and exec', () =
   assert.equal(text.includes('forward-upgrade'), false)
   assert.equal(text.includes('postgres flexible-server firewall'), false)
   assert.match(text, /if: always\(\)/)
+  assert.ok(text.indexOf('process.getuid()') < text.indexOf('docker push'))
+  assert.match(text, /--user 1001:1001/)
   const docker = readFileSync(path.join(REPO, 'tooling/docker/ue-v2-catalog-operator.Dockerfile'), 'utf8')
   assert.match(docker, /ENTRYPOINT \["node", "\/app\/ue-catalog\/operator.cjs"\]/)
   assert.match(docker, /USER 1001:1001/)

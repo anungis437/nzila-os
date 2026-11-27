@@ -42,6 +42,9 @@ jobs:
             --build-arg QUALIFIED_APPLICATION_IMAGE=nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef \
             --build-arg OPERATOR_SOURCE_SHA="$GITHUB_SHA" \
             -t nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" .
+          docker run --rm --entrypoint node --user 1001:1001 -e NODE_PATH= \
+            nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" \
+            -e 'process.chdir("/app/ue-catalog"); const pg = require("pg"); if (process.getuid() !== 1001 || !pg.Client) process.exit(2);'
           az acr login -n nzilaventuresacr
           docker push nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA"
           DIGEST=$(az acr manifest show-metadata -r nzilaventuresacr -n nzila-os-union-eyes-v2-catalog:catalog-"$GITHUB_SHA" --query digest -o tsv)
