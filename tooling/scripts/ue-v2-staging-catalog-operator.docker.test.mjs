@@ -39,12 +39,14 @@ test('the packaged operator reads staging-shaped PostgreSQL as the runtime role,
   assert.equal(started.status, 0, started.stderr)
   const context = mkdtempSync(path.join(tmpdir(), 'ue-catalog-image-'))
   try {
+    // The image runs a temporary socket-only server during first-time initialisation and then
+    // restarts. Probe over TCP, which only the final server listens on, and require a real query.
     let ready = false
-    for (let attempt = 0; attempt < 60 && !ready; attempt += 1) {
-      ready = docker(['exec', name, 'pg_isready', '-U', 'postgres', '-d', 'ue_v2_staging']).status === 0
+    for (let attempt = 0; attempt < 120 && !ready; attempt += 1) {
+      ready = docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-Atc', 'SELECT 1']).stdout.trim() === '1'
       if (!ready) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500)
     }
-    assert.equal(ready, true)
+    assert.equal(ready, true, 'PostgreSQL did not accept TCP connections')
     const tables = Array.from({ length: 260 }, (_, index) => `t${String(index).padStart(3, '0')}`)
     const setup = [
       `CREATE ROLE ${RUNTIME_ROLE} NOLOGIN NOINHERIT`,
@@ -61,9 +63,9 @@ test('the packaged operator reads staging-shaped PostgreSQL as the runtime role,
         `GRANT SELECT ON public.${table} TO ${RUNTIME_ROLE}`,
       ]),
     ].join(';\n')
-    const applied = docker(['exec', '-i', '-e', `PGPASSWORD=${password}`, name, 'psql', '-q', '-U', 'postgres', '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1'], { input: `${setup};\n` })
+    const applied = docker(['exec', '-i', '-e', `PGPASSWORD=${password}`, name, 'psql', '-q', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1'], { input: `${setup};\n` })
     assert.equal(applied.status, 0, applied.stderr)
-    const before = docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-At', '-U', 'postgres', '-d', 'ue_v2_staging', '-c',
+    const before = docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-At', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-c',
       "SELECT md5(string_agg(c.relname||':'||c.relkind||':'||coalesce(c.relacl::text,''), ',' ORDER BY c.relname)) || ':' || (SELECT sum(n_tup_ins+n_tup_upd+n_tup_del) FROM pg_stat_user_tables) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'"]).stdout.trim()
 
     writeFileSync(path.join(context, 'operator.cjs'), containerSource())
@@ -145,7 +147,7 @@ test('the packaged operator reads staging-shaped PostgreSQL as the runtime role,
     assert.equal(wrong.blocker, 'IDENTITY_REFUSED')
 
     // Nothing was written: relations, ACLs and row-change counters are unchanged.
-    const after = docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-At', '-U', 'postgres', '-d', 'ue_v2_staging', '-c',
+    const after = docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-At', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-c',
       "SELECT md5(string_agg(c.relname||':'||c.relkind||':'||coalesce(c.relacl::text,''), ',' ORDER BY c.relname)) || ':' || (SELECT sum(n_tup_ins+n_tup_upd+n_tup_del) FROM pg_stat_user_tables) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'"]).stdout.trim()
     assert.equal(after, before)
   } finally {

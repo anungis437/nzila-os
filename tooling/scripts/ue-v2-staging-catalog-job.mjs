@@ -536,7 +536,7 @@ export async function executeCatalogJob(env, spawn, options = {}) {
   let continuation = null
   if (options.prior) {
     if (options.prior.defect) return fail(1, options.prior.defect)
-    const defect = continuationDefect(options.prior.token, SESSION_BINDING, clock.now())
+    const defect = continuationDefect(options.prior.token, { ...SESSION_BINDING, source: env.GITHUB_SHA }, clock.now())
     if (defect) return fail(1, defect)
     continuation = slimContinuation(options.prior.token)
     if (Buffer.byteLength(continuation) > CONTINUATION_ENV_MAX_BYTES) return fail(1, 'CONTINUATION_TOO_LARGE')
@@ -637,17 +637,19 @@ export async function executeCatalogJob(env, spawn, options = {}) {
             if (body.blocker === 'IDENTITY_REFUSED' || body.identity?.user !== RUNTIME_ROLE || body.identity?.session_user !== RUNTIME_LOGIN) result = fail(5, 'DATABASE_IDENTITY_REFUSED')
             else if (body.blocker === 'DATABASE_URL_ABSENT' || /ECONNREFUSED|connection refused/i.test(body.error ?? '')) result = fail(5, 'DATABASE_CONNECTION_REFUSED')
             else if (body.identity?.transaction_read_only !== 'on' || body.rolledBack !== true) result = fail(5, 'READ_ONLY_TRANSACTION_UNPROVEN')
+            // The evidence is claimed for the limited runtime role: an elevated login or role, or any RLS bypass, is refused.
+            else if (body.privilege?.classification !== 'LIMITED_RUNTIME' || body.privilege?.rolbypassrls !== false || body.privilege?.rolsuper !== false) result = fail(5, 'DATABASE_PRIVILEGE_UNEXPECTED')
             else if (options.prior) {
               // A continuation session carries only the remaining counts; its verdict is the reconciled chain's.
               const reconciled = reconcileCatalogSessions([
                 { catalog: options.prior.merged, observedAt: options.prior.merged.lastObservedAt ?? options.prior.merged.observedAt },
                 { catalog: body, token: options.prior.token, observedAt: body.observedAt, now: clock.now() },
-              ], SESSION_BINDING)
+              ], { ...SESSION_BINDING, source: source })
               if (!reconciled.catalog) result = fail(5, reconciled.reason ?? 'CONTINUATION_REJECTED')
               else {
                 const merged = { ...reconciled.catalog, lastObservedAt: body.observedAt, sessions: [...(options.prior.merged.sessions ?? [options.prior.merged.observedAt]), body.observedAt] }
                 report.mergedCatalog = merged
-                report.continuationToken = buildContinuationToken(merged, { ...SESSION_BINDING, sessionId: options.prior.token.baselineSessionId }, clock.now())
+                report.continuationToken = buildContinuationToken(merged, { ...SESSION_BINDING, source, sessionId: options.prior.token.baselineSessionId }, clock.now())
                 report.verdict = reconciled.verdict
                 report.catalogAccepted = reconciled.verdict === 'CATALOG_COMPLETE'
                 report.manifest = { ...report.manifest, verdict: reconciled.verdict, chain: { sessions: merged.sessions, baselineSessionId: options.prior.token.baselineSessionId },
@@ -656,7 +658,7 @@ export async function executeCatalogJob(env, spawn, options = {}) {
               }
             } else {
               report.mergedCatalog = { ...body, lastObservedAt: body.observedAt, sessions: [body.observedAt] }
-              report.continuationToken = buildContinuationToken(body, { ...SESSION_BINDING, sessionId: env.GITHUB_RUN_ID }, clock.now())
+              report.continuationToken = buildContinuationToken(body, { ...SESSION_BINDING, source, sessionId: env.GITHUB_RUN_ID }, clock.now())
               report.verdict = parsed.verdict
               report.catalogAccepted = parsed.verdict === 'CATALOG_COMPLETE'
               result = parsed.ok ? { exitCode: 0, report } : fail(5, parsed.verdict)

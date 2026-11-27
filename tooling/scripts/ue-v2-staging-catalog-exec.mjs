@@ -397,12 +397,15 @@ export function buildContinuationToken(catalog, binding, now = Date.now()) {
     expiresAt: new Date(now + CONTINUATION_TTL_MS).toISOString(),
     baselineSessionId: binding.sessionId,
     baselineObservedAt: catalog.observedAt ?? null,
+    ...(binding.source ? { source: binding.source } : {}),
   }
 }
 
 export function continuationDefect(token, binding, now = Date.now()) {
   if (!token || token.schema !== CONTINUATION_SCHEMA || token.database !== EXPECTED_DATABASE) return 'CONTINUATION_REJECTED'
   if (token.revision !== binding.revision || token.image !== binding.image) return 'REVISION_BINDING_CHANGED'
+  // Sessions from a different operator source are different programmes; they are not merged.
+  if (binding.source !== undefined && token.source !== binding.source) return 'CONTINUATION_SOURCE_CHANGED'
   if (!Number.isFinite(Date.parse(token.expiresAt)) || Date.parse(token.expiresAt) <= now) return 'CONTINUATION_EXPIRED'
   if (!/^[a-f0-9]{64}$/.test(token.inventoryDigest ?? '')) return 'CONTINUATION_REJECTED'
   const names = [...(token.completed ?? []), ...(token.remaining ?? [])]

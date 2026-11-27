@@ -408,6 +408,16 @@ test('the job identity, role and read-only session are verified from the evidenc
   const writable = completeCatalog()
   writable.rolledBack = false
   assert.equal((await run({ body: writable })).report.defects.includes('READ_ONLY_TRANSACTION_UNPROVEN'), true)
+  for (const privilege of [
+    { classification: 'ELEVATED', rolsuper: true, rolbypassrls: false },
+    { classification: 'LIMITED_RUNTIME', rolsuper: false, rolbypassrls: true },
+    { classification: 'UNREADABLE' },
+  ]) {
+    const elevated = { ...completeCatalog(), privilege: { user: RUNTIME_ROLE, login: RUNTIME_LOGIN, readOnlyCredential: false, ...privilege } }
+    const refusedRun = await run({ body: elevated })
+    assert.equal(refusedRun.report.defects.includes('DATABASE_PRIVILEGE_UNEXPECTED'), true, JSON.stringify(privilege))
+    assert.equal(refusedRun.report.catalogAccepted, false)
+  }
   const absentUrl = { ...completeCatalog(), blocker: 'DATABASE_URL_ABSENT' }
   assert.equal((await run({ body: absentUrl })).report.catalogAccepted, false)
   const partial = completeCatalog()
@@ -593,6 +603,8 @@ test('the workflow is manual, private, smoke-tests the real image, and always cl
   assert.ok(cleanup, 'an always() cleanup step exists for interrupted runs')
   assert.match(String(cleanup.if), /always\(\)/)
   assert.ok(workflow.jobs.catalog['timeout-minutes'] >= 30)
+  const base = text.match(/QUALIFIED_APPLICATION_IMAGE=(\S+)/)?.[1]
+  assert.equal(base, EXPECTED_IMAGE, 'the operator is built FROM exactly the serving image the controller pins')
   const docker = readFileSync(path.join(REPO, 'tooling/docker/ue-v2-catalog-operator.Dockerfile'), 'utf8')
   assert.match(docker, /ENTRYPOINT \["node", "\/app\/ue-catalog\/operator.cjs"\]/)
   assert.match(docker, /USER 1001:1001/)
@@ -648,6 +660,7 @@ test('continuation sessions chain through hash-verified artifacts to one complet
   const continuation = {
     schema: CATALOG_SCHEMA, rolledBack: true, observedAt: '2026-11-27T03:00:00.000Z', sessionKind: 'continuation',
     identity: { database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on' },
+    privilege: { user: RUNTIME_ROLE, login: RUNTIME_LOGIN, classification: 'LIMITED_RUNTIME', readOnlyCredential: false, rolsuper: false, rolbypassrls: false },
     queries: [query('identity', [{ database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on' }]), query('tables', tables)],
     counts: tables.slice(250).map((table) => ({ ...table, visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' })),
   }
@@ -677,6 +690,10 @@ test('continuation sessions chain through hash-verified artifacts to one complet
   assert.equal(expired.fake.did('job create'), false)
   const moved = await run({ body: continuation, prior: { ...prior, token: { ...prior.token, revision: 'nzila-ue-v2-staging-app--relother' } } })
   assert.equal(moved.report.defects.includes('REVISION_BINDING_CHANGED'), true)
+  assert.equal(prior.token.source, SHA, 'the token carries the operator source')
+  const newSource = await run({ body: continuation, prior, env: { GITHUB_SHA: 'd'.repeat(40) } })
+  assert.equal(newSource.report.defects.includes('CONTINUATION_SOURCE_CHANGED'), true)
+  assert.equal(newSource.fake.did('job create'), false)
 
   const drifted = structuredClone(continuation)
   drifted.queries[1].rows.push({ schema: 'public', name: 'new_table' })
@@ -688,4 +705,22 @@ test('continuation sessions chain through hash-verified artifacts to one complet
   assert.equal((await run({ body: overlap, prior })).report.defects.includes('CONTINUATION_CONTRADICTION'), true)
   rmSync(directory, { recursive: true, force: true })
   rmSync(tamperedDir, { recursive: true, force: true })
+})
+
+test('the full 32 MiB ceiling travels through workspace paging and reassembly intact; one byte more is refused', async () => {
+  const base = JSON.stringify(completeCatalog())
+  const filler = EVIDENCE_MAX_BYTES - Buffer.byteLength(base) - Buffer.byteLength(',"pad":""')
+  const body = `${base.slice(0, -1)},"pad":"${'p'.repeat(filler)}"}`
+  assert.equal(Buffer.byteLength(body), EVIDENCE_MAX_BYTES)
+  const { report, fake } = await run({ body })
+  assert.equal(report.evidence.bytes, EVIDENCE_MAX_BYTES)
+  assert.equal(report.evidence.chunks, Math.ceil(EVIDENCE_MAX_BYTES / EVIDENCE_CHUNK_BYTES))
+  assert.equal(report.evidenceSha256, createHash('sha256').update(Buffer.from(body, 'utf8')).digest('hex'))
+  assert.equal(report.evidenceBody, body)
+  const pages = fake.calls.filter((call) => /between \(\d+ \.\. \d+\)/.test(call.args.join(' '))).length
+  assert.equal(pages, Math.ceil(report.evidence.chunks / LOG_PAGE_CHUNKS))
+  assert.equal(report.verdict, 'CATALOG_COMPLETE', 'the padded catalogue still evaluates; the transport adds nothing and drops nothing')
+  const over = await run({ rows: frameCatalog(`${body} `, { runId: RUN, source: SHA }).lines.map((Log_s) => ({ ...frameRows('{}')[0], Log_s })) })
+  assert.equal(over.report.defects.includes('EVIDENCE_TRANSPORT_EXCEEDED'), true)
+  assert.equal(over.report.catalogAccepted, false)
 })
