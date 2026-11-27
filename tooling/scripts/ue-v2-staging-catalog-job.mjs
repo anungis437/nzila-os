@@ -53,6 +53,7 @@ export const KEY_VAULT_SECRET = 'https://nzila-ue-v2-staging-kv.vault.azure.net/
 export const IDENTITY = `/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-ue-v2-staging-id`
 export const ENVIRONMENT_ID = `/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.App/managedEnvironments/${ENVIRONMENT_NAME}`
 export const JOB_PURPOSE = 's202-private-catalog'
+export const CATALOG_JOB_PREFIX = 'ue-s202-cat-'
 export const JOB_OWNER = 'ue-v2-staging-catalog-job'
 export const OPERATOR_CONTAINER = 'catalog-operator'
 export const OPERATOR_IMAGE_RE = /^nzilaventuresacr\.azurecr\.io\/nzila-os-union-eyes-v2-catalog@sha256:[a-f0-9]{64}$/
@@ -80,7 +81,7 @@ const BASE64 = /^[A-Za-z0-9+/]*={0,2}$/
 
 export function jobNameForRun(runId) {
   if (!/^[0-9]{1,12}$/.test(String(runId ?? ''))) throw new Error('RUN_ID_REFUSED')
-  const name = `ue-s202-cat-${runId}`
+  const name = `${CATALOG_JOB_PREFIX}${runId}`
   if (name.length > 32) throw new Error('JOB_NAME_REFUSED')
   return name
 }
@@ -537,6 +538,26 @@ async function pollExecution(spawn, target, clock, deadlineMs) {
   return { status, observations, timedOut: true }
 }
 
+/**
+ * One catalogue job at a time, across runs. The workflow's concurrency group serialises
+ * dispatches, but a job an earlier run failed to remove outlives that run (a privileged one
+ * still holds the admin secret, which is an incident). Any such job blocks a new session;
+ * it is reported by name and never deleted here: only its own run's cleanup may remove it.
+ */
+export async function residualCatalogJobs(spawn, ownName) {
+  const listed = await spawn('az', ['containerapp', 'job', 'list', '-g', RESOURCE_GROUP, '--query', '[].{name:name,purpose:tags.purpose}', '-o', 'json'])
+  if (listed.code !== 0) return { defect: 'JOB_STATE_UNREADABLE', jobs: [] }
+  let jobs
+  try { jobs = JSON.parse(listed.stdout) } catch { return { defect: 'JOB_STATE_UNREADABLE', jobs: [] } }
+  if (!Array.isArray(jobs)) return { defect: 'JOB_STATE_UNREADABLE', jobs: [] }
+  const residual = jobs
+    .filter((job) => String(job?.name ?? '').startsWith(CATALOG_JOB_PREFIX) || job?.purpose === JOB_PURPOSE)
+    .map((job) => String(job?.name ?? ''))
+    .filter((name) => name !== ownName)
+    .sort()
+  return residual.length ? { defect: 'RESIDUAL_CATALOG_JOB', jobs: residual } : { defect: null, jobs: [] }
+}
+
 async function showJob(spawn, name) {
   const shown = await spawn('az', ['containerapp', 'job', 'show', '-g', RESOURCE_GROUP, '-n', name, '-o', 'json'])
   if (shown.code !== 0) return NOT_FOUND.test(`${shown.stdout}\n${shown.stderr}`) ? { absent: true } : { unreadable: true }
@@ -757,6 +778,9 @@ async function runCatalogJob(env, spawn, options = {}) {
   const name = jobNameForRun(env.GITHUB_RUN_ID)
   const source = env.GITHUB_SHA
   const expectedJob = { name, runId: env.GITHUB_RUN_ID, source, image: env.OPERATOR_IMAGE, plane }
+  const residual = await residualCatalogJobs(spawn, name)
+  if (residual.jobs.length) report.residualJobs = residual.jobs
+  if (residual.defect) return fail(1, residual.defect)
   const preexisting = await showJob(spawn, name)
   if (!preexisting.absent) return fail(1, preexisting.unreadable ? 'JOB_STATE_UNREADABLE' : 'JOB_NAME_CONFLICT')
   const adminPassword = plane === 'privileged' ? env.PG_ADMIN_PASSWORD : undefined
