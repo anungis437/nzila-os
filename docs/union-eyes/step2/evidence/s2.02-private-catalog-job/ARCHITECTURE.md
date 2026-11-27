@@ -23,7 +23,7 @@ The forward-upgrade job was not reused as the operator. It exposes DDL and the a
 - The operator image must be the catalog repository digest, not the application digest.
 - The app must already have a secret named `database-url`. The value is not read.
 - Job name is `ue-s202-cat-<run id>`. Deletion requires all of: that name, the tags `purpose`, `owner`, `runId` and `source`, this managed environment, the exact operator image, and the staging identity. Executions must be proven terminal (live ones are stopped), and absence must be proven by an explicit not-found. Otherwise the job is kept and the receipt says `JOB_CLEANUP_UNPROVEN` and carries an incident. An `always()` cleanup step covers interrupted runs.
-- Counts stay inside the existing 15 s / 45 s / 250 budget. Continuation tokens expire in 24 hours and are not a second authorization.
+- Counts stay inside the 15 s statement timeout and 45 s wall budget, with a per-session statement ceiling (250 at design time; raised to 1,000 on 2026-11-27 by founder decision, see `EXECUTION_PREFLIGHT.md` section 10). Continuation tokens expire in 24 hours and are not a second authorization.
 - The operator acts as `union_eyes_runtime` through `-c role=`. The evidence must show that role, the `ue_staging_runtime` login, a read-only transaction, and `ROLLBACK`.
 - Evidence travels through the environment's own Log Analytics workspace, in frame `UE_CATALOG_V2`:
   - base64 of 6,000-byte chunks, bound to a nonce, run and source, with SHA-256 over exact bytes;

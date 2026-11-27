@@ -94,7 +94,7 @@ A job status of `Succeeded` isn't `CATALOG_COMPLETE`, and doesn't set `S2.02_PRE
 
 ## Continuation
 
-Counts keep the 15-second statement timeout, the 45-second wall budget and the 250-statement ceiling.
+Counts keep the 15-second statement timeout and the 45-second wall budget, with a 1,000-statement ceiling per session. It was 250 until 2026-11-27. On live staging, scheduled jobs insert audit rows every few minutes, so a multi-session privileged chain was refused for drift (run 46072263185). All 790 tables now fit one session, which is one snapshot. Continuations remain for anything the ceiling or budget leaves.
 
 A partial run writes a continuation token, bound to the revision, image, operator source SHA and table-inventory digest. It also writes `catalog-merged.json`; both files are listed in `SHA256SUMS`.
 

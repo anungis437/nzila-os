@@ -1,0 +1,222 @@
+{
+  "schema": "ue-v2-staging-catalog-evidence/v1",
+  "catalogSchema": "ue-v2-staging-catalog/v2",
+  "execution": {
+    "githubRunId": "46038068694",
+    "sourceSha": "2927b25caaa3ad2f6b4c2616acc8352e2dbbf98e",
+    "job": "ue-s202-cat-46038068694",
+    "execution": "ue-s202-cat-46038068694-5vo6jce",
+    "replica": "ue-s202-cat-46038068694-5vo6jce-jx86l"
+  },
+  "environment": {
+    "subscription": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+    "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+    "resourceGroup": "nzila-canada-staging-rg",
+    "managedEnvironment": "nzila-ue-v2-staging-env",
+    "database": "ue_v2_staging",
+    "revision": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+    "servingImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef"
+  },
+  "operatorImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog@sha256:85f711831343116eadb1d838df304610ba8118f62a78e1d2a6da8eb9c762c134",
+  "transport": {
+    "channel": "log-analytics",
+    "workspace": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+    "frame": "UE_CATALOG_V2",
+    "nonce": "5a91d7b59cce5db7895b992a5d0bb093",
+    "chunks": 34,
+    "bytes": 198697,
+    "duplicatesIgnored": 0
+  },
+  "observedIdentity": {
+    "database": "ue_v2_staging",
+    "role": "union_eyes_runtime",
+    "login": "ue_staging_runtime",
+    "transactionReadOnly": "on",
+    "version": "PostgreSQL 16.15 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 13.2.0, 64-bit"
+  },
+  "observedAt": "2026-11-27T17:49:00.987Z",
+  "capturedAt": "2026-11-27T17:49:23.923Z",
+  "sha256": "8661b704b6d1e519aef9c307b0595b7f71afa6cf908ac1c11d76d4b28f9f5c5e",
+  "categories": [
+    {
+      "id": "database_identity",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "migration_discovery",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "migration_history",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "roles_and_memberships",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 2,
+      "captured": 0,
+      "missing": 2
+    },
+    {
+      "id": "relation_ownership_acl",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "rls_configuration",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "rls_policies",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "function_topology",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "security_definer",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "event_triggers",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "audit_permissions",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "audit_grants",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "sequences",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 1,
+      "captured": 0,
+      "missing": 1
+    },
+    {
+      "id": "business_tables",
+      "plane": "runtime",
+      "inPlane": true,
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "preservation_counts",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    }
+  ],
+  "plane": "runtime",
+  "planeVerdict": "PLANE_ACCEPTED",
+  "categoryInventory": {
+    "required": 15,
+    "inPlane": 13,
+    "accepted": 2
+  },
+  "counts": {
+    "tables": 790,
+    "observed": 366,
+    "privilegeDenied": 424,
+    "notAttempted": 0,
+    "timedOut": 0,
+    "unreadable": 0,
+    "globalScope": 0,
+    "roleVisibleScope": 366,
+    "sealed": 0
+  },
+  "snapshot": "281073:281073:",
+  "sessionEndedAt": "2026-11-27T17:49:02.126Z",
+  "consistency": {
+    "plane": "runtime",
+    "sessions": 2,
+    "sessionWindow": {
+      "first": "2026-11-27T16:53:30.489Z",
+      "last": "2026-11-27T17:49:00.987Z"
+    },
+    "snapshots": [
+      "280633:280633:",
+      "281073:281073:"
+    ],
+    "atomicSnapshot": false,
+    "basis": "MULTI_SESSION_STRUCTURE_UNCHANGED",
+    "statsSettleMs": null,
+    "caveat": "Each session counted inside one REPEATABLE READ snapshot. Across sessions, the table inventory, column structure, relation and policy metadata, migration ledger, and per-table cumulative statistics (relid, n_tup_ins, n_tup_upd, n_tup_del, relfilenode) read at the start of every session and again after the statistics flush interval were identical. That detects any insert, update, delete, TRUNCATE, rewrite or table replacement whose statistics were recorded; it does not detect a statistics reset followed by replay to identical values, or statistics lost without a reset. It is a bounded multi-session inventory, not one atomic snapshot."
+  },
+  "sealed": null,
+  "verdict": "CATALOG_PARTIAL",
+  "chain": {
+    "sessions": [
+      "2026-11-27T16:53:30.489Z",
+      "2026-11-27T17:49:00.987Z"
+    ],
+    "baselineSessionId": "46036574426"
+  }
+}

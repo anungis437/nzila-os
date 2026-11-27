@@ -24,7 +24,11 @@ export const EXPECTED_IMAGE = 'nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v
 export const EXPECTED_DATABASE = 'ue_v2_staging'
 export const CATALOG_SCHEMA = 'ue-v2-staging-catalog/v2'
 export const COUNT_WALL_BUDGET_MS = 45000
-export const COUNT_MAX_STATEMENTS = 250
+// Founder-authorized 2026-11-27 (option E): at least the 790 staging tables in one session, so the
+// privileged plane is one REPEATABLE READ snapshot. Staging's 5-minute scheduled writers made every
+// multi-session chain refuse (DATA_DRIFT_BETWEEN_SESSIONS, run 46072263185). The 15 s statement
+// timeout and 45 s wall budget still bound the session; 250 counts took about 2.3 s on staging.
+export const COUNT_MAX_STATEMENTS = 1000
 export const SOURCE_TABLE_DECLARATIONS = 1224
 // The application's runtime login holds its role with INHERIT FALSE, so a session
 // only carries runtime privileges after `-c role=`. The catalogue inspects exactly

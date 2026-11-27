@@ -92,8 +92,8 @@ The operator and controller refuse on each of these before or without accepting 
 
    Expect `CATALOG_PARTIAL` with about 540 tables remaining. A green workflow does not by itself mean `CATALOG_COMPLETE`.
 2. **Plane A continuations.** Dispatch with `plane=runtime` and `continuation_run_id=<immediately preceding Plane A run>`. Each token expires 24 hours after issue. About three continuations are needed at 250 counts per session.
-3. **Plane B baseline.** This needs separate founder authorization to use `uev2admin`. Dispatch with `plane=privileged` and `continuation_run_id` empty. Expect `PLANE_CAPTURED_SEALED` sealed to `bd8fa0572d31b7ce`, and no plaintext totals, ledger rows or counters in the artifact or logs.
-4. **Plane B continuations.** Dispatch with `plane=privileged` and `continuation_run_id=<immediately preceding Plane B run>`. Each one is a separate authorized dispatch, and each token expires 24 hours after issue. Any drift refusal (schema, migration, relation metadata, or modification or settled counters) starts a new chain from a fresh baseline. A chain is a bounded multi-session inventory, never one atomic snapshot.
+3. **Plane B baseline.** This needs separate founder authorization to use `uev2admin`. Dispatch with `plane=privileged` and `continuation_run_id` empty. Only a session that captures every table reports `PLANE_CAPTURED_SEALED`; a partial session reports `PLANE_INCOMPLETE`, exits non-zero by design, and issues a continuation token. (This step first said to expect `PLANE_CAPTURED_SEALED` from the baseline; that held only for the last session of a chain. With the 1,000 ceiling of section 10, one session covers all 790 tables.) Values must stay sealed to `bd8fa0572d31b7ce`, with no plaintext totals, ledger rows or counters in the artifact or logs.
+4. **Plane B continuations.** Needed only if a session leaves tables. Dispatch with `plane=privileged` and `continuation_run_id=<immediately preceding Plane B run>`. Each one is a separate authorized dispatch, and each token expires 24 hours after issue. Any drift refusal (schema, migration, relation metadata, or modification or settled counters) starts a new chain from a fresh baseline. A chain is a bounded multi-session inventory, never one atomic snapshot.
 5. **Assemble offline** with `--assemble` and the founder key. Only `CATALOG_COMPLETE` from assembly counts, and the flags above stay unchanged until the founder accepts S2.02.
 
 Two freezes apply from step 1:
@@ -122,3 +122,39 @@ Merge this hardening before the Plane A baseline, so both chains run the residua
   - The cleanup receipt reads `deleted: true, absent: true`, and an independent `az containerapp job show` returns `ResourceNotFound`.
   - The receipts are in `run-46019964268/`. The full artifact is held privately (directories 0700, files 0600).
 - **Next.** Dispatch the Plane A baseline again only after the correction merges, and only with fresh founder authorization. The repeat is a new baseline, not a continuation.
+
+## 9. Plane A: complete (runs 46036574426 and 46038068694)
+
+Both sessions ran from `main` `2927b25caaa3ad2f6b4c2616acc8352e2dbbf98e` (merge of PR #1324) on revision `rel6a60c95c9d`, after founder authorization and `build` / `ue-staging` approval.
+
+- **Baseline 46036574426.** `CATALOG_PARTIAL`, `PLANE_ACCEPTED`, no defects. Identity: `ue_staging_runtime` acting as `union_eyes_runtime`, with `transaction_read_only` and `default_transaction_read_only` both on, `ROLLBACK`, and `LIMITED_RUNTIME` (not a superuser, no RLS bypass). 13 of 15 categories accepted; `migration_history` and `preservation_counts` belong to Plane B. Of 790 tables, 250 were observed, 424 were `PRIVILEGE_DENIED` (no `SELECT` or no schema `USAGE`), and 116 were not attempted. The continuation token covered those 116.
+- **Continuation 46038068694.** Bound to baseline `46036574426`, from the same source and revision, with the same identity checks. It observed the 116 remaining tables. No token was issued.
+- **Independent checks.**
+  - Every artifact file verifies against its run's `SHA256SUMS`, and each manifest `sha256` equals its `catalog-evidence.json`.
+  - `assemblePlane` rebuilt the chain from the raw session evidence. On all 790 tables it matches the controller's `catalog-merged.json` (classification, value and scope), with 0 differences.
+  - Result: 366 observed, all `ROLE_VISIBLE`, none a global total, and 424 denied. The denied set equals the privilege matrix's unreadable set.
+  - Consistency is `MULTI_SESSION_STRUCTURE_UNCHANGED` (two sessions, not one snapshot).
+  - Without Plane B, plane reconciliation refuses (`PLANE_EVIDENCE_MISSING`).
+- **Posture observation, not a verdict.** Six relations have RLS disabled, and the runtime role cannot select any of them: `drizzle.__drizzle_migrations`, the four `public.ue_governance_job_*` tables, and `public.ue_v2_bootstrap_receipt`.
+- **Cleanup.** Both receipts read `deleted: true, absent: true`. `az containerapp job show` returned `ResourceNotFound` for each job.
+
+## 10. Plane B: multi-session chain refused for live writes; ceiling raised (option E)
+
+- **Baseline 46048025241.** From the same source and revision, founder-authorized. It ran as `uev2admin` in `REPEATABLE READ` with both read-only settings on, then `ROLLBACK`. The session is `ELEVATED`: `rolbypassrls` true, `rolsuper` false.
+  - Values are sealed to `bd8fa0572d31b7ce`. The public artifact has no clear count value and no clear ledger row. `sessionPlaneDefect` and `privilegedClearDefect` return null.
+  - Opened offline with the founder key, the evidence is bound to this run and source.
+  - 250 tables were observed as `GLOBAL` and 540 were not attempted. The 40 migration-ledger rows were captured. Opening and settled counters were equal after 75,093 ms.
+  - No ledger hash appears in the public artifact or the run log.
+  - Verdict `PLANE_INCOMPLETE`, exit non-zero by design, with a token for 540 tables.
+- **Continuation 46072263185.** Refused: `DATA_DRIFT_BETWEEN_SESSIONS`.
+  - Comparing the sealed opening counters offline: of 790 relations, only `public.audit_logs` changed, by inserts only, between 18:17:49Z and 22:11:42Z. Nothing else changed: no update, delete, rewrite or new relation.
+  - Staging runs scheduled jobs every 5 to 30 minutes. In that window, `cron-deadlines` and `basops` ran 47 times each, and nine other schedules ran as well. Every session needs a build and two approvals, so any chain spans several firings. Retrying could not converge.
+  - The job was deleted and proven absent. The chain is void and no value from it is used.
+- **Measured cost.** The 250 counts took about 2.3 s of the 45 s wall budget (transaction start 18:17:49.703Z, session end 18:17:51.993Z). The 250-statement ceiling was the only reason for multiple sessions.
+- **Decision (founder, 2026-11-27).** Option E of the decision record: `COUNT_MAX_STATEMENTS` goes from 250 to 1,000.
+  - All 790 tables fit one `REPEATABLE READ` transaction, which is one atomic snapshot. Concurrent inserts cannot make its counts inconsistent, and the multi-session caveat does not apply.
+  - Unchanged: the 15 s statement timeout, the 45 s wall budget, read-only mode, `ROLLBACK`, and sealing.
+  - The Docker proof now builds 1,020 tables, so the continuation path and the drift refusal stay proven on real PostgreSQL.
+  - Plane B restarts from a fresh baseline on the merged `main`. Plane A stays valid, because plane reconciliation does not bind the source SHA.
+
+Receipts for all four runs (`SHA256SUMS`, `evidence-manifest.json`, `cleanup.json`) are in `run-<id>/`, byte-identical to the artifacts. Full artifacts are held privately (directories 0700, files 0600).

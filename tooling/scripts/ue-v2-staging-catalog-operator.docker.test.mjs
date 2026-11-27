@@ -16,7 +16,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { CATALOG_SCHEMA, PRIVILEGED_LOGIN, RUNTIME_LOGIN, RUNTIME_ROLE, containerSource, evaluateCatalogCompleteness, buildContinuationToken, generateRecipientKeyPair, openSealedCatalog, reconcileCatalogSessions, reconcilePlanes } from './ue-v2-staging-catalog-exec.mjs'
+import { CATALOG_SCHEMA, COUNT_MAX_STATEMENTS, PRIVILEGED_LOGIN, RUNTIME_LOGIN, RUNTIME_ROLE, containerSource, evaluateCatalogCompleteness, buildContinuationToken, generateRecipientKeyPair, openSealedCatalog, reconcileCatalogSessions, reconcilePlanes } from './ue-v2-staging-catalog-exec.mjs'
 import { reassembleCatalog, sessionPlaneDefect, verifyImageSmoke } from './ue-v2-staging-catalog-job.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -49,9 +49,10 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
       if (!ready) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500)
     }
     assert.equal(ready, true, 'PostgreSQL did not accept TCP connections')
-    // 270 tables: 260 the runtime role may read, 10 it may not (as staging, where it lacks SELECT on 424).
-    const tables = Array.from({ length: 270 }, (_, index) => `t${String(index).padStart(3, '0')}`)
-    const hidden = new Set(tables.slice(260))
+    // 1,020 tables: 1,010 the runtime role may read, 10 it may not (as staging, where it lacks SELECT on 424).
+    // More than the 1,000-statement ceiling, so the continuation path is still exercised on real PostgreSQL.
+    const tables = Array.from({ length: 1020 }, (_, index) => `t${String(index).padStart(4, '0')}`)
+    const hidden = new Set(tables.slice(1010))
     const adminPassword = String.fromCharCode(97, 100, 109, 105, 110, 116, 101, 115, 116)
     const setup = [
       `CREATE ROLE ${RUNTIME_ROLE} NOLOGIN NOINHERIT`,
@@ -147,7 +148,7 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     const observed = runtime.counts.filter((item) => item.classification === 'OBSERVED')
     const deferred = runtime.counts.filter((item) => item.classification === 'NOT_ATTEMPTED')
     const denied = runtime.counts.filter((item) => item.classification === 'PRIVILEGE_DENIED')
-    assert.equal(observed.length, 250, 'the 250-statement ceiling is honoured')
+    assert.equal(observed.length, COUNT_MAX_STATEMENTS, 'the 1,000-statement ceiling is honoured')
     assert.equal(deferred.length, 10)
     assert.deepEqual(denied.map((item) => `${item.schema}.${item.name}`), ['audit_security.audit_logs', 'drizzle.__drizzle_migrations', ...[...hidden].map((table) => `public.${table}`)], 'tables without SELECT or schema USAGE are classified from the catalogue, not counted')
     assert.ok(observed.every((item) => item.n === '0' && item.countScope === 'ROLE_VISIBLE' && item.globalTotal === false), 'RLS stays in force: role-visible counts are zero and not totals')
@@ -157,7 +158,7 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     assert.equal(queryOf(runtime, 'drizzle_rows').classification, 'PRIVILEGE_DENIED')
     assert.equal(queryOf(runtime, 'audit').rows.length, 1, 'the audit table is seen in pg_class without schema USAGE')
     assert.equal(queryOf(runtime, 'audit').rows[0].schema_usage, false)
-    assert.equal(queryOf(runtime, 'privilege_matrix').rows.length, 272)
+    assert.equal(queryOf(runtime, 'privilege_matrix').rows.length, 1022)
     const evaluation = evaluateCatalogCompleteness(runtime)
     assert.equal(evaluation.verdict, 'CATALOG_PARTIAL')
     assert.equal(evaluation.planeVerdict, 'PLANE_ACCEPTED')
@@ -199,10 +200,10 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     // The database itself refuses writes from the admin login in the operator's transaction
     // shape and with the operator's session default, though the login can write otherwise.
     const asAdmin = (sql, options = '') => docker(['exec', '-e', `PGPASSWORD=${adminPassword}`, '-e', `PGOPTIONS=${options}`, name, 'psql', '-h', '127.0.0.1', '-U', PRIVILEGED_LOGIN, '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1', '-Atc', sql])
-    const inTransaction = asAdmin("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; INSERT INTO public.t000 VALUES (99, 'x'); COMMIT")
+    const inTransaction = asAdmin("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; INSERT INTO public.t0000 VALUES (99, 'x'); COMMIT")
     assert.notEqual(inTransaction.status, 0)
     assert.match(inTransaction.stderr, /cannot execute INSERT in a read-only transaction/)
-    const sessionDefault = asAdmin("INSERT INTO public.t000 VALUES (99, 'x')", '-c default_transaction_read_only=on')
+    const sessionDefault = asAdmin("INSERT INTO public.t0000 VALUES (99, 'x')", '-c default_transaction_read_only=on')
     assert.notEqual(sessionDefault.status, 0)
     assert.match(sessionDefault.stderr, /read-only transaction/)
 
@@ -229,9 +230,9 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     assert.equal(baseline.run, RUN)
     assert.equal(baseline.source, SHA)
     const globals = baseline.catalog.counts.filter((item) => item.classification === 'OBSERVED')
-    assert.equal(globals.length, 250)
+    assert.equal(globals.length, COUNT_MAX_STATEMENTS)
     assert.ok(globals.every((item) => item.n === (item.schema === 'public' ? '3' : '2')), 'exact global totals: 3 rows per business table where the runtime role saw 0, 2 in the ledger and the forced-RLS audit table')
-    assert.equal(baseline.catalog.counts.filter((item) => item.classification === 'NOT_ATTEMPTED').length, 22, 'bounded: the 15s/45s/250 ceiling is unchanged')
+    assert.equal(baseline.catalog.counts.filter((item) => item.classification === 'NOT_ATTEMPTED').length, 22, 'bounded: the 15s/45s/1000 ceiling')
     assert.deepEqual(queryOf(baseline.catalog, 'drizzle_rows').rows.map((row) => row.hash), ['h-0001', 'h-0002'])
 
     const privilegedToken = buildContinuationToken(sealedBaseline, { ...binding, sessionId: 'b1' })
@@ -256,7 +257,7 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     assert.equal(after, before)
 
     // A change between privileged sessions is detected and the chain is refused.
-    assert.equal(docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-c', "INSERT INTO public.t000 VALUES (4, 'org-a')"]).status, 0)
+    assert.equal(docker(['exec', '-e', `PGPASSWORD=${password}`, name, 'psql', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-c', "INSERT INTO public.t0000 VALUES (4, 'org-a')"]).status, 0)
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1500)
     const { body: sealedDrifted } = operate(null, [...privilegedEnv(), '-e', `UE_CATALOG_CONTINUATION=${JSON.stringify(privilegedToken)}`])
     const drifted = openSealedCatalog(sealedDrifted, founder.privateKeyPem).catalog
