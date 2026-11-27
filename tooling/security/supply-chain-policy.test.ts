@@ -2,7 +2,17 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 import { describe, it, expect } from 'vitest'
-import { checkVulnerabilityPolicy, isCanonicalUtcDate, validateSbomLicenses } from './supply-chain-policy'
+import { checkVulnerabilityPolicy as evaluateWithWaivers, isCanonicalUtcDate, validateSbomLicenses, type VulnerabilityWaiver } from './supply-chain-policy'
+
+// Fixture waivers mirror the retired production records the audit fixtures were
+// written against (xlsx 1108110 and minimatch CVE-2026-26996, both valid
+// 2026-08-26 through 2026-11-26). Keeping them here keeps the matching, approval
+// window and expiry rules exercised without any production waiver.
+const FIXTURE_WAIVERS: VulnerabilityWaiver[] = [
+  { id: 'CVE-2026-26996', package: 'minimatch', reason: 'Fixture waiver for policy tests.', approvedBy: 'platform-lead', approvedAt: '2026-08-26', expiresAt: '2026-11-26', severity: 'high' },
+  { id: '1108110', package: 'xlsx', reason: 'Fixture waiver for policy tests.', approvedBy: 'platform-lead', approvedAt: '2026-08-26', expiresAt: '2026-11-26', severity: 'high' },
+]
+const checkVulnerabilityPolicy = (report: string, now?: Date) => evaluateWithWaivers(report, now, FIXTURE_WAIVERS)
 
 const atApproval = new Date('2026-10-10T12:00:00Z')
 const fixture = (name: string) => `tooling/security/fixtures/${name}`
@@ -194,7 +204,7 @@ describe('security audit policy: fail closed', () => {
   })
 
   it('rejects an expired waiver without extending its validity', () => {
-    // Fixture advisory 1108110 (xlsx, high) is a live waiver valid through 2026-11-26 UTC.
+    // Fixture advisory 1108110 (xlsx, high) has a fixture waiver valid through 2026-11-26 UTC.
     const afterExpiry = new Date('2026-11-27T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
     expect(result.passed).toBe(false)

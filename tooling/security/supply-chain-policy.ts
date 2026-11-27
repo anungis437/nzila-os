@@ -146,48 +146,6 @@ export interface VulnerabilityWaiver {
  * Add waivers via PR — they are code-reviewed and version-controlled.
  */
 export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
-  {
-    // minimatch ReDoS via repeated wildcards (CVE-2026-26996 / GHSA-3ppc-4f35-3m26 / npm advisory 1113371)
-    // Affected paths: devDependency chains only (eslint > minimatch, eslint-config-next > typescript-eslint > minimatch)
-    // No user-controlled input ever reaches minimatch in production — only in local lint tooling.
-    // Upgrade to minimatch >= 10.2.1 would break eslint@8/9 which requires minimatch v3/v9 API.
-    // Risk: local developer DoS only (not production). Accepted until eslint ships with patched minimatch.
-    id: 'CVE-2026-26996',
-    package: 'minimatch',
-    reason: 'Dev-only dependency (eslint toolchain). No user input reaches minimatch in production runtime. Upgrade to minimatch@10.2.1 would break eslint which requires v3/v9 API. Risk confined to local lint tooling DoS only.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
-  {
-    // SheetJS (xlsx) Prototype Pollution — CVE-2023-30533 / npm advisory 1108110
-    // Affected paths: apps/union-eyes > xlsx@0.18.5
-    // The npm package `xlsx` is abandoned — no fix is published to npm.
-    // The upstream fix (v0.19.3+) is only available from cdn.sheetjs.com (not npm).
-    // Union-Eyes uses xlsx for internal admin report exports only; no untrusted files are read.
-    // Migration to cdn.sheetjs.com or an alternative library is planned.
-    id: '1108110',
-    package: 'xlsx',
-    reason: 'SheetJS npm package is abandoned (no npm patch available). Only used for internal admin report exports in union-eyes — no untrusted file input. Migration to cdn.sheetjs.com or alternative planned.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
-  {
-    // SheetJS (xlsx) ReDoS — CVE-2024-22363 / npm advisory 1108111
-    // Same root cause: xlsx npm package abandoned. Same mitigation as above.
-    id: '1108111',
-    package: 'xlsx',
-    reason: 'SheetJS npm package is abandoned (no npm patch available). Only used for internal admin report exports in union-eyes — no untrusted file input. Migration to cdn.sheetjs.com or alternative planned.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
-
-
   // NOTE: protobufjs waivers (1116756, 1116757) removed 2026-07-19 —
   // pnpm overrides on @grpc/proto-loader>protobufjs, google-gax>protobufjs,
   // @google-cloud/firestore>protobufjs, @opentelemetry/otlp-transformer>protobufjs,
@@ -195,60 +153,15 @@ export const ACTIVE_WAIVERS: VulnerabilityWaiver[] = [
   // both GHSA-26hc-5v75-x5xw and GHSA-3xgq-45jh-7f2r. The advisories no longer
   // appear in `pnpm audit --json`, so keeping expired waivers would cause the
   // waiver-integrity check to fail (expired without re-review).
-  {
-    // Axios NO_PROXY bypass — npm advisory 1117576
-    // Affected paths: transitive dependency in dev/build tooling (multiple packages depend on axios).
-    // Production apps do not make outbound requests through user-controlled proxy configurations.
-    // The NO_PROXY bypass only affects environments where proxy env vars are user-controlled.
-    // Upgrade to axios >= 1.8.2 is the fix; pending dependency tree audit.
-    id: '1117576',
-    package: 'axios',
-    reason: 'NO_PROXY bypass. Transitive dep in build/dev tooling. Production apps do not expose user-controlled proxy settings. Upgrade to axios@1.8.2+ pending dep tree audit.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
-  {
-    // Axios prototype pollution (read-side) — npm advisory 1117578
-    // Same root package (axios < 1.8.2). Prototype pollution via crafted response object.
-    // Mitigated by: (1) server-to-server only (no untrusted response bodies in user-controlled paths),
-    // (2) no untrusted JSON deserialized without schema validation.
-    id: '1117578',
-    package: 'axios',
-    reason: 'Prototype pollution read-side. Transitive dep in dev/build tooling and internal service-to-service calls. No untrusted response bodies from user-controlled sources. Upgrade to axios@1.8.2+ pending dep tree audit.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
-  {
-    // Axios prototype pollution (response tampering) — npm advisory 1117591
-    // Same root package (axios < 1.8.2). Response object prototype pollution.
-    // Same mitigations as 1117578.
-    id: '1117591',
-    package: 'axios',
-    reason: 'Prototype pollution response tampering. Same root cause as 1117578. Transitive dep; no untrusted response bodies from user-controlled sources. Upgrade to axios@1.8.2+ pending dep tree audit.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
-  {
-    // Axios header injection — npm advisory 1117593
-    // Same root package (axios < 1.8.2). CRLF header injection via crafted header values.
-    // Mitigated by: all header values are application-controlled (not user-supplied).
-    // No user-controlled strings are passed as HTTP header values in our axios usage.
-    id: '1117593',
-    package: 'axios',
-    reason: 'Header injection via CRLF. Transitive dep; no user-controlled strings passed as HTTP header values in axios calls. Application-controlled headers only. Upgrade to axios@1.8.2+ pending dep tree audit.',
-    approvedBy: 'platform-lead',
-    approvedAt: '2026-08-26',
-    expiresAt: '2026-11-26',
-    severity: 'high',
-  },
 
-
+  // NOTE: Waivers removed 2026-11-27 (fix/ue-s202-private-catalog-job) after they expired on
+  // 2026-11-26. `npm-bulk-audit.mjs --audit-level=low` against the current pnpm-lock.yaml reports
+  // zero advisories of any severity, and none of the removed IDs or their aliases:
+  //   - CVE-2026-26996 / GHSA-3ppc-4f35-3m26 / 1113371 (minimatch) — override minimatch>=11.0.1 <12
+  //     resolves only minimatch@11.0.9 (fixed from 10.2.1).
+  //   - 1108110, 1108111 (xlsx) — xlsx is no longer in the dependency tree.
+  //   - 1117576, 1117578, 1117591, 1117593 (axios < 1.8.2) — override axios>=1.20.0 resolves only
+  //     axios@1.20.0.
 
   // NOTE: Expired 2026-09-18 waivers removed 2026-09-23 after remediation review:
   //   - 1113686 (minimatch) — override pins minimatch>=10.2.3; advisory no longer in audit
@@ -408,6 +321,9 @@ export interface VulnPolicyResult {
 export function checkVulnerabilityPolicy(
   auditReportPath: string,
   now: Date = new Date(),
+  // Production always evaluates ACTIVE_WAIVERS. Tests inject fixture waivers so
+  // expiry and matching rules stay exercised after real waivers are retired.
+  waivers: readonly VulnerabilityWaiver[] = ACTIVE_WAIVERS,
 ): VulnPolicyResult {
   const errors: string[] = []
   // An invalid or untrusted evaluation clock must never authorize a waiver.
@@ -422,7 +338,7 @@ export function checkVulnerabilityPolicy(
   const activeWaivers = new Map<string, VulnerabilityWaiver>()
   const expiredWaivers: string[] = []
   const seenIds = new Set<string>()
-  for (const waiver of ACTIVE_WAIVERS) {
+  for (const waiver of waivers) {
     const endOfDay = isCanonicalUtcDate(waiver.expiresAt)
       ? new Date(`${waiver.expiresAt}T23:59:59.999Z`) : new Date(Number.NaN)
     if (!Number.isFinite(endOfDay.valueOf())) {
