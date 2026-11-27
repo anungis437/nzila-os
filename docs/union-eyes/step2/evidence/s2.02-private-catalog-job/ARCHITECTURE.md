@@ -1,6 +1,6 @@
 # S2.02 private catalogue job — engineering record
 
-Status: engineering package only. No live Azure job was created and no PostgreSQL session was opened on staging.
+Status: engineering record. One runtime-role session ran on staging (run 45940281038, `CATALOG_PARTIAL`). No privileged session has been opened.
 
 ## Rejected route
 
@@ -46,6 +46,21 @@ The forward-upgrade job was not reused as the operator. It exposes DDL and the a
 | A continuation could merge counts from a different operator source | Tokens were bound to the revision and image only | Tokens carry the source SHA; a mismatch is `CONTINUATION_SOURCE_CHANGED` |
 | The operator's base and the pinned serving image could drift | Two independent literals | A test requires the workflow base to equal `EXPECTED_IMAGE` |
 | The first dispatch would have failed to pull the private base | `docker build` ran before `az acr login` | Login precedes the build; the build pins `linux/amd64`; a test enforces the order |
+
+## Corrections after run 45940281038 (two evidence planes)
+
+Run 45940281038 was the first live session. It was correct for the runtime role and returned `CATALOG_PARTIAL`. The decision, the missing evidence and the protected procedure are in [PLANE_B_DECISION_RECORD.md](PLANE_B_DECISION_RECORD.md).
+
+| Defect | Evidence | Correction |
+| --- | --- | --- |
+| Audit inspection needed schema access | `to_regclass` gave `permission denied for schema audit_security` | `pg_class` plus `has_*_privilege()`; no USAGE needed |
+| Hidden columns read as absence | `information_schema.columns` returned 0 rows for a discovered ledger | `pg_attribute`; a ledger without columns is `INCONSISTENT` |
+| Role-visible zeros were accepted as preservation counts | 103 `count(*) = 0` under forced RLS | `ROLE_VISIBLE_ONLY`, never accepted; totals come only from the privileged plane with proven `GLOBAL` scope |
+| Counts were attempted on unreadable tables | 147 `permission denied` statements | A per-table privilege matrix gates counts: `PRIVILEGE_DENIED`, no statement spent |
+| A ledger without access read as `UNREADABLE` | `permission denied for schema drizzle` | `PRIVILEGE_DENIED` |
+| No cross-session structure or data drift check | Only table names were compared | Server-side column-structure digest, migration digest, and row-change counters plus `relfilenode` per privileged session |
+
+The public evidence index for that run is in [run-45940281038/](run-45940281038/). The full artifact is kept privately and is hash-verified.
 
 ## Real-image facts (registry read, no container run)
 

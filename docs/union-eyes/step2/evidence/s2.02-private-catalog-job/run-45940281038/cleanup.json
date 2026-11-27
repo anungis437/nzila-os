@@ -1,0 +1,7 @@
+{
+  "schema": "ue-v2-staging-catalog-cleanup/v1",
+  "job": "ue-s202-cat-45940281038",
+  "deleted": true,
+  "defect": null,
+  "absent": true
+}

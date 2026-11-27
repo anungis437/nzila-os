@@ -210,6 +210,7 @@ jobs:
           node --test tooling/scripts/ue-v2-staging-readonly-inventory.test.mjs
           node --test tooling/scripts/ue-v2-staging-catalog-exec.test.mjs
           node --test tooling/scripts/ue-v2-staging-catalog-job.test.mjs
+          node --test tooling/scripts/ue-v2-staging-catalog-operator.fault.test.mjs
           node --test tooling/scripts/ue-v2-staging-catalog-operator.docker.test.mjs
           # This checkout may be shallow. Supply the declared immutable source
           # object without changing the proposed application's working tree.

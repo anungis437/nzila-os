@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -21,8 +21,11 @@ import {
   buildContinuationToken,
   containerSource,
   continuationDefect,
+  generateRecipientKeyPair,
   reconcileCatalogSessions,
+  reconcilePlanes,
 } from './ue-v2-staging-catalog-exec.mjs'
+import { privilegedCatalog, runtimeCatalog, sealPrivileged } from './ue-v2-staging-catalog.fixtures.mjs'
 import {
   ENVIRONMENT_ID,
   EVIDENCE_CHUNK_BYTES,
@@ -33,7 +36,12 @@ import {
   LOG_PAGE_CHUNKS,
   OPERATOR_CONTAINER,
   STAGING_HOST,
+  ADMIN_SECRET_NAME,
+  assemblePlane,
   assertStagingTarget,
+  preimageSummary,
+  sessionPlaneDefect,
+  specificationSecretDefect,
   cleanupForRun,
   cleanupOwnedJob,
   evidenceQuery,
@@ -65,34 +73,17 @@ function query(id, rows) {
   return { id, rowCount: rows.length, rows }
 }
 
+// Plane A as staging is (see the shared fixtures): posture observable, no global totals.
 function completeCatalog() {
-  return {
-    schema: CATALOG_SCHEMA,
-    rolledBack: true,
-    observedAt: '2026-11-26T20:00:00.000Z',
-    readOnlyCredential: false,
-    identity: { database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on', version: 'PostgreSQL 16.8' },
-    privilege: { user: RUNTIME_ROLE, login: RUNTIME_LOGIN, classification: 'LIMITED_RUNTIME', readOnlyCredential: false, rolsuper: false, rolbypassrls: false },
-    queries: [
-      query('identity', [{ database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on' }]),
-      query('migration_relations', []),
-      query('migration_columns', []),
-      query('drizzle_rows', []),
-      query('roles', [{ rolname: RUNTIME_ROLE, rolsuper: false, rolbypassrls: false }]),
-      query('memberships', []),
-      query('relations', [{ schema: 'public', name: 'members' }]),
-      query('rls', [{ schema: 'public', name: 'members', relrowsecurity: true }]),
-      query('policies', []),
-      query('function', []),
-      query('security_definer', []),
-      query('event_trigger', []),
-      query('audit', []),
-      query('audit_grants', []),
-      query('sequences', []),
-      query('tables', [{ schema: 'public', name: 'members' }]),
-    ],
-    counts: [{ schema: 'public', name: 'members', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '1' }],
-  }
+  return runtimeCatalog({ observedAt: '2026-11-26T20:00:00.000Z', readOnlyCredential: false })
+}
+
+function withTables(catalog, tables, counts) {
+  catalog.queries = catalog.queries.map((item) => item.id === 'tables' ? query('tables', tables)
+    : item.id === 'privilege_matrix' ? query('privilege_matrix', tables.map((table) => ({ ...table, owner: 'ue_v2_owner', rls: true, force: true, schema_usage: true, can_select: true, acts_as_owner: catalog.plane === 'privileged', rls_active: catalog.plane !== 'privileged' })))
+      : item)
+  catalog.counts = tables.map(counts)
+  return catalog
 }
 
 /** A realistic catalogue at the measured canonical scale (1,819 policies, 803 relations, 784 tables). */
@@ -107,8 +98,7 @@ function realisticCatalog() {
     if (item.id === 'policies') return query('policies', Array.from({ length: 1819 }, (_, index) => ({ ...tables[index % tables.length], polname: `ue_v2_policy_${index}`, polcmd: 'r', polpermissive: true, using_expr: expression, check_expr: expression })))
     return item
   })
-  catalog.counts = tables.map((table) => ({ ...table, visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' }))
-  return catalog
+  return withTables(catalog, tables, (table) => ({ ...table, countScope: 'ROLE_VISIBLE', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' }))
 }
 
 function frameRows(body, overrides = {}) {
@@ -125,7 +115,7 @@ function frameRows(body, overrides = {}) {
 function ownedJob(extra = {}) {
   return {
     name: NAME,
-    tags: { purpose: JOB_PURPOSE, runId: RUN, source: SHA, owner: JOB_OWNER },
+    tags: { purpose: JOB_PURPOSE, runId: RUN, source: SHA, owner: JOB_OWNER, plane: 'runtime' },
     identity: { type: 'UserAssigned', userAssignedIdentities: { [IDENTITY]: {} } },
     properties: { environmentId: ENVIRONMENT_ID, template: { containers: [{ name: OPERATOR_CONTAINER, image: IMAGE }] } },
     ...extra,
@@ -164,6 +154,7 @@ const quotedValues = (kql) => [...kql.matchAll(/'([^']*)'/g)].map((match) => mat
 function harness(options = {}) {
   const calls = []
   const specs = []
+  const manifests = []
   const statuses = [...(options.statuses ?? [options.status ?? 'Succeeded'])]
   let statusIndex = 0
   let stopped = false
@@ -188,7 +179,9 @@ function harness(options = {}) {
     if (line.includes('secrets[].name')) return { code: 0, stdout: JSON.stringify(options.secrets ?? ['database-url']), stderr: '' }
     if (line.includes('containerapp env show')) return { code: options.envCode ?? 0, stdout: JSON.stringify(options.logsConfig ?? { destination: 'log-analytics', logAnalyticsConfiguration: { customerId: WORKSPACE } }), stderr: '' }
     if (line.includes('job create')) {
-      specs.push(JSON.parse(readFileSync(args[args.indexOf('--yaml') + 1], 'utf8')))
+      const file = args[args.indexOf('--yaml') + 1]
+      manifests.push({ file, mode: statSync(file).mode & 0o777, directoryMode: statSync(path.dirname(file)).mode & 0o777 })
+      specs.push(JSON.parse(readFileSync(file, 'utf8')))
       if ((options.createCode ?? 0) === 0 || options.createShow === 'created') created = true
       return { code: options.createCode ?? 0, stdout: '', stderr: options.createError ?? '' }
     }
@@ -220,7 +213,7 @@ function harness(options = {}) {
       }
       if (deleted && options.afterDeleteShow === 'unreadable') return { code: 1, stdout: '', stderr: 'gateway timeout' }
       if (!created || deleted) return { code: 3, stdout: '', stderr: "(ResourceNotFound) The Resource 'Microsoft.App/jobs/x' was not found." }
-      return { code: 0, stdout: JSON.stringify(options.jobShape ?? ownedJob()), stderr: '' }
+      return { code: 0, stdout: JSON.stringify(options.jobShape ?? ownedJob(specs.length ? { tags: specs[specs.length - 1].tags } : {})), stderr: '' }
     }
     if (line.includes('log-analytics query')) {
       queryCalls += 1
@@ -241,7 +234,7 @@ function harness(options = {}) {
     }
     return { code: 1, stdout: '', stderr: `UNEXPECTED ${line}` }
   }
-  return { calls, specs, spawn, did: (fragment) => calls.some((call) => call.args.join(' ').includes(fragment)), count: (fragment) => calls.filter((call) => call.args.join(' ').includes(fragment)).length }
+  return { calls, specs, manifests, spawn, did: (fragment) => calls.some((call) => call.args.join(' ').includes(fragment)), count: (fragment) => calls.filter((call) => call.args.join(' ').includes(fragment)).length }
 }
 
 const run = (options = {}, clock = virtualClock(1000)) => {
@@ -337,9 +330,11 @@ test('a complete run retrieves the full catalogue through Log Analytics and dele
   assert.equal(text.includes("'exec'"), false)
   assert.equal(text.includes('exec/action'), false)
   const { exitCode, report, fake } = await run({ body: realisticCatalog() })
+  // The runtime plane delivered its whole share: exit 0, but never a complete preimage.
   assert.equal(exitCode, 0, JSON.stringify(report.defects))
-  assert.equal(report.verdict, 'CATALOG_COMPLETE')
-  assert.equal(report.catalogAccepted, true)
+  assert.equal(report.verdict, 'CATALOG_PARTIAL')
+  assert.equal(report.planeVerdict, 'PLANE_ACCEPTED')
+  assert.equal(report.catalogAccepted, false)
   assert.equal(report.S2_02_PREIMAGE_COMPLETE, 'NO')
   assert.equal(fake.did('logs show'), false, 'the replica log-stream proxy is never used')
   assert.ok(fake.count('log-analytics query') >= 3)
@@ -349,7 +344,11 @@ test('a complete run retrieves the full catalogue through Log Analytics and dele
   assert.equal(report.phases.delete, 'DONE')
   const manifest = report.manifest
   assert.equal(manifest.categoryInventory.required, CATALOG_CONTRACT.categories.length)
-  assert.equal(manifest.categoryInventory.accepted, CATALOG_CONTRACT.categories.length)
+  assert.equal(manifest.categoryInventory.inPlane, 13)
+  assert.equal(manifest.categoryInventory.accepted, 13)
+  assert.equal(manifest.plane, 'runtime')
+  assert.equal(manifest.counts.roleVisibleScope, 784)
+  assert.equal(manifest.counts.globalScope, 0)
   assert.equal(manifest.sha256, report.evidenceSha256)
   assert.equal(manifest.operatorImage, IMAGE)
   assert.deepEqual(manifest.execution, { githubRunId: RUN, sourceSha: SHA, job: NAME, execution: EXECUTION, replica: REPLICA })
@@ -573,9 +572,11 @@ test('count continuation reconciles one inventory and rejects drift or overlap',
     observedAt: '2026-11-26T21:00:00.000Z',
     token,
     now: Date.parse('2026-11-26T21:00:00.000Z'),
-    catalog: { queries: [query('tables', tables)], counts: [{ schema: 'public', name: 't250', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' }] },
+    catalog: { plane: 'runtime', queries: [query('tables', tables), baseline.queries.find((item) => item.id === 'structure'), baseline.queries.find((item) => item.id === 'relation_metadata')], counts: [{ schema: 'public', name: 't250', visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' }] },
   }
-  assert.equal(reconcileCatalogSessions([{ catalog: baseline, observedAt: baseline.observedAt }, continuation], binding).verdict, 'CATALOG_COMPLETE')
+  const merged = reconcileCatalogSessions([{ catalog: baseline, observedAt: baseline.observedAt }, continuation], binding)
+  assert.equal(merged.evaluation.planeVerdict, 'PLANE_ACCEPTED')
+  assert.equal(merged.consistency.atomicSnapshot, false)
   const drifted = structuredClone(continuation)
   drifted.catalog.queries[0].rows.push({ schema: 'public', name: 'extra' })
   assert.equal(reconcileCatalogSessions([{ catalog: baseline, observedAt: baseline.observedAt }, drifted], binding).reason, 'SCHEMA_DRIFT')
@@ -595,7 +596,12 @@ test('the workflow is manual, private, smoke-tests the real image, and always cl
   assert.match(workflow.jobs.catalog.if, /refs\/heads\/main/)
   assert.equal(text.includes('containerapp exec'), false)
   assert.equal(text.includes('logs show'), false)
-  assert.equal(text.includes('UE_V2_STAGING_DB_ADMIN_PASSWORD'), false)
+  // The admin secret reaches only the controller step, and only for the privileged plane.
+  assert.equal(text.split('UE_V2_STAGING_DB_ADMIN_PASSWORD').length - 1, 1)
+  const controller = workflow.jobs.catalog.steps.find((step) => String(step.run ?? '').includes('ue-v2-staging-catalog-job.mjs --out'))
+  assert.match(String(controller.env.PG_ADMIN_PASSWORD), /inputs\.plane == 'privileged' && secrets\.UE_V2_STAGING_DB_ADMIN_PASSWORD \|\| ''/)
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.plane.options, ['runtime', 'privileged'])
+  assert.equal(workflow.on.workflow_dispatch.inputs.plane.default, 'runtime')
   assert.equal(text.includes('forward-upgrade'), false)
   assert.equal(text.includes('postgres flexible-server firewall'), false)
   assert.ok(text.indexOf('--verify-image-smoke') > 0 && text.indexOf('--verify-image-smoke') < text.indexOf('docker push'), 'the real image is smoke-tested before it is pushed')
@@ -614,7 +620,7 @@ test('the workflow is manual, private, smoke-tests the real image, and always cl
   assert.equal(source.includes('UE_UPGRADE_OPERATION'), false)
   assert.match(source, /BEGIN READ ONLY/)
   assert.match(source, /-c role=/)
-  assert.equal(/\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP|CREATE|GRANT|REVOKE)\s/.test(source.replace(/'[^']*'/g, "''").replace(/"[^"]*"/g, '""')), false, 'the operator issues no write or DDL statement')
+  assert.equal(/\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP|CREATE|GRANT|REVOKE)\s/.test(source.replace(/^\s*\/\/.*$/gm, '').replace(/'[^']*'/g, "''").replace(/"[^"]*"/g, '""')), false, 'the operator issues no write or DDL statement')
   const directory = mkdtempSync(path.join(tmpdir(), 'ue-operator-'))
   writeFileSync(path.join(directory, 'operator.cjs'), source)
   assert.equal(spawnSync(process.execPath, ['--check', path.join(directory, 'operator.cjs')]).status, 0)
@@ -659,16 +665,17 @@ test('continuation sessions chain through hash-verified artifacts to one complet
   assert.equal(prior.token.remaining.length, 10)
 
   const continuation = {
-    schema: CATALOG_SCHEMA, rolledBack: true, observedAt: '2026-11-27T03:00:00.000Z', sessionKind: 'continuation',
-    identity: { database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on' },
+    schema: CATALOG_SCHEMA, plane: 'runtime', rolledBack: true, observedAt: '2026-11-27T03:00:00.000Z', sessionKind: 'continuation',
+    identity: { database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on', default_read_only: 'on' },
     privilege: { user: RUNTIME_ROLE, login: RUNTIME_LOGIN, classification: 'LIMITED_RUNTIME', readOnlyCredential: false, rolsuper: false, rolbypassrls: false },
-    queries: [query('identity', [{ database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on' }]), query('tables', tables)],
+    queries: [query('identity', [{ database: 'ue_v2_staging', user: RUNTIME_ROLE, session_user: RUNTIME_LOGIN, transaction_read_only: 'on' }]), query('tables', tables), baseline.queries.find((item) => item.id === 'structure'), baseline.queries.find((item) => item.id === 'relation_metadata')],
     counts: tables.slice(250).map((table) => ({ ...table, visibleToConnectedRole: true, globalTotal: false, classification: 'OBSERVED', n: '0' })),
   }
   const second = await run({ body: continuation, prior })
   assert.equal(second.exitCode, 0, JSON.stringify(second.report.defects))
-  assert.equal(second.report.verdict, 'CATALOG_COMPLETE')
-  assert.equal(second.report.catalogAccepted, true)
+  assert.equal(second.report.verdict, 'CATALOG_PARTIAL')
+  assert.equal(second.report.planeVerdict, 'PLANE_ACCEPTED')
+  assert.equal(second.report.catalogAccepted, false)
   assert.equal(second.report.continuationToken, null)
   assert.deepEqual(second.report.mergedCatalog.sessions, [baseline.observedAt, continuation.observedAt])
   const env = second.fake.specs[0].properties.template.containers[0].env
@@ -697,7 +704,7 @@ test('continuation sessions chain through hash-verified artifacts to one complet
   assert.equal(newSource.fake.did('job create'), false)
 
   const drifted = structuredClone(continuation)
-  drifted.queries[1].rows.push({ schema: 'public', name: 'new_table' })
+  drifted.queries[1] = query('tables', [...tables, { schema: 'public', name: 'new_table' }])
   const drift = await run({ body: drifted, prior })
   assert.equal(drift.report.defects.includes('SCHEMA_DRIFT'), true)
   assert.equal(drift.report.catalogAccepted, false)
@@ -720,8 +727,187 @@ test('the full 32 MiB ceiling travels through workspace paging and reassembly in
   assert.equal(report.evidenceBody, body)
   const pages = fake.calls.filter((call) => /between \(\d+ \.\. \d+\)/.test(call.args.join(' '))).length
   assert.equal(pages, Math.ceil(report.evidence.chunks / LOG_PAGE_CHUNKS))
-  assert.equal(report.verdict, 'CATALOG_COMPLETE', 'the padded catalogue still evaluates; the transport adds nothing and drops nothing')
+  assert.equal(report.planeVerdict, 'PLANE_ACCEPTED', 'the padded catalogue still evaluates; the transport adds nothing and drops nothing')
   const over = await run({ rows: frameCatalog(`${body} `, { runId: RUN, source: SHA }).lines.map((Log_s) => ({ ...frameRows('{}')[0], Log_s })) })
   assert.equal(over.report.defects.includes('EVIDENCE_TRANSPORT_EXCEEDED'), true)
   assert.equal(over.report.catalogAccepted, false)
+})
+
+// ── Plane B: privileged, sealed, founder-authorized ──────────────────────────
+
+const FOUNDER = generateRecipientKeyPair()
+// Generated per run so no credential-shaped literal sits in the repository.
+const ADMIN_PASSWORD = ['fixture', 'admin', randomBytes(8).toString('hex')].join('-')
+const privilegedEnv = (extra = {}) => ({ UE_CATALOG_PLANE: 'privileged', UE_CATALOG_EVIDENCE_RECIPIENT: FOUNDER.publicKey, PG_ADMIN_PASSWORD: ADMIN_PASSWORD, ...extra })
+const sealedSession = (catalog = privilegedCatalog(), key = FOUNDER.publicKey) => sealPrivileged(catalog, key, { run: RUN, source: SHA })
+
+test('the privileged job carries the admin secret only as its own job-scoped secret and never echoes it', async () => {
+  const { exitCode, report, fake } = await run({ body: sealedSession(), env: privilegedEnv() })
+  assert.equal(exitCode, 0, JSON.stringify(report.defects))
+  assert.equal(report.plane, 'privileged')
+  assert.equal(report.planeVerdict, 'PLANE_CAPTURED_SEALED')
+  assert.equal(report.verdict, 'CATALOG_PARTIAL', 'sealed evidence is never accepted until the founder opens and reconciles it')
+  assert.equal(report.catalogAccepted, false)
+  const spec = fake.specs[0]
+  assert.equal(specificationSecretDefect(spec, ADMIN_PASSWORD), null)
+  assert.deepEqual(spec.properties.configuration.secrets, [{ name: ADMIN_SECRET_NAME, value: ADMIN_PASSWORD }])
+  const env = spec.properties.template.containers[0].env
+  assert.deepEqual(env.find((item) => item.name === 'PGPASSWORD'), { name: 'PGPASSWORD', secretRef: ADMIN_SECRET_NAME })
+  assert.equal(env.find((item) => item.name === 'PGUSER').value, 'uev2admin')
+  assert.equal(env.some((item) => item.name === 'DATABASE_URL'), false, 'the privileged job receives no runtime URL')
+  assert.equal(spec.tags.plane, 'privileged')
+  assert.equal(fake.manifests[0].mode, 0o600)
+  assert.equal(fake.manifests[0].directoryMode, 0o700)
+  assert.equal(existsSync(fake.manifests[0].file), false, 'the manifest holding the secret is removed')
+  assert.equal(JSON.stringify(report).includes(ADMIN_PASSWORD), false)
+  assert.equal(fake.calls.some((call) => call.args.join(' ').includes(ADMIN_PASSWORD)), false, 'the secret never reaches a command line')
+  assert.equal(report.cleanup.deleted, true, 'the job, and with it the secret, is deleted')
+  const directory = mkdtempSync(path.join(tmpdir(), 'ue-catalog-privileged-'))
+  writeJobArtifacts(directory, report)
+  for (const file of ['catalog.json', 'catalog-evidence.json', 'evidence-manifest.json', 'catalog-merged.json']) {
+    const text = readFileSync(path.join(directory, file), 'utf8')
+    assert.equal(text.includes(ADMIN_PASSWORD), false, file)
+    assert.equal(/"n":"(41|7)"/.test(text), false, `${file} carries no clear count`)
+    assert.equal(text.includes('"hash":"abc"'), false, `${file} carries no clear ledger`)
+  }
+  assert.equal(report.manifest.sealed.recipientKeyId, FOUNDER.keyId)
+  assert.equal(report.manifest.counts.sealed, 2)
+  rmSync(directory, { recursive: true, force: true })
+})
+
+test('the privileged plane creates nothing without its key and credential, and the runtime plane refuses the credential', async () => {
+  for (const [env, defect] of [
+    [privilegedEnv({ UE_CATALOG_EVIDENCE_RECIPIENT: '' }), 'EVIDENCE_RECIPIENT_MISSING'],
+    [privilegedEnv({ UE_CATALOG_EVIDENCE_RECIPIENT: Buffer.from('not a key').toString('base64') }), 'EVIDENCE_RECIPIENT_MISSING'],
+    [privilegedEnv({ PG_ADMIN_PASSWORD: '' }), 'PRIVILEGED_CREDENTIAL_ABSENT'],
+    [{ PG_ADMIN_PASSWORD: ADMIN_PASSWORD }, 'UNEXPECTED_PRIVILEGED_CREDENTIAL'],
+    [{ UE_CATALOG_PLANE: 'superuser' }, 'WRONG_ENVIRONMENT'],
+  ]) {
+    const { report, fake } = await run({ body: sealedSession(), env })
+    assert.equal(report.defects.includes(defect), true, `${defect}: ${report.defects}`)
+    assert.equal(fake.calls.length, 0, `${defect} reaches no Azure call`)
+  }
+  assert.throws(() => jobSpecification({ image: IMAGE, runId: RUN, source: SHA, plane: 'privileged', recipient: FOUNDER.publicKey }), /PRIVILEGED_INPUTS_REFUSED/)
+  const spec = jobSpecification({ image: IMAGE, runId: RUN, source: SHA, plane: 'privileged', adminPassword: ADMIN_PASSWORD, recipient: FOUNDER.publicKey })
+  assert.equal(specificationSecretDefect({ ...spec, tags: { ...spec.tags, note: ADMIN_PASSWORD } }, ADMIN_PASSWORD), 'ADMIN_SECRET_MISPLACED')
+  const leaked = structuredClone(spec)
+  leaked.properties.template.containers[0].env.push({ name: 'PGPASSWORD_COPY', value: ADMIN_PASSWORD })
+  assert.equal(specificationSecretDefect(leaked, ADMIN_PASSWORD), 'ADMIN_SECRET_MISPLACED')
+  const inlineEnv = structuredClone(spec)
+  inlineEnv.properties.template.containers[0].env = inlineEnv.properties.template.containers[0].env.map((item) => item.name === 'PGPASSWORD' ? { name: 'PGPASSWORD', value: 'x' } : item)
+  assert.equal(specificationSecretDefect(inlineEnv, ADMIN_PASSWORD), 'ADMIN_SECRET_MISPLACED')
+  assert.equal(specificationSecretDefect(jobSpecification({ image: IMAGE, runId: RUN, source: SHA }), undefined), null)
+  // Assembled at runtime: a synthetic connection URL, never a credential-shaped literal in the tree.
+  const syntheticUrl = ['postgres', 'ql:/', '/', 'fixture-user', ':', randomBytes(6).toString('hex'), '@', 'fixture-host', '/', 'fixture-db'].join('')
+  assert.equal(specificationSecretDefect({ ...spec, url: syntheticUrl }, ADMIN_PASSWORD), 'CONNECTION_URL_IN_SPEC')
+  // Ownership includes the plane: a runtime job is never deleted as a privileged one.
+  assert.equal(ownedJobDefect(ownedJob(), { name: NAME, runId: RUN, source: SHA, image: IMAGE, plane: 'privileged' }), 'UNOWNED_JOB')
+})
+
+test('the privileged session is verified from its own evidence: login, isolation, no superuser, nothing in the clear', async () => {
+  const stranger = generateRecipientKeyPair()
+  const opened = privilegedCatalog()
+  const cases = [
+    [opened, 'PRIVILEGED_VALUE_IN_CLEAR'],
+    [sealedSession(privilegedCatalog(), stranger.publicKey), 'SEALED_FOR_ANOTHER_RECIPIENT'],
+    [sealedSession(privilegedCatalog({ privilege: { ...privilegedCatalog().privilege, rolsuper: true } })), 'DATABASE_PRIVILEGE_UNEXPECTED'],
+    [sealedSession(privilegedCatalog({ identity: { ...privilegedCatalog().identity, isolation: 'read committed' } })), 'SNAPSHOT_ISOLATION_UNPROVEN'],
+    [sealedSession(privilegedCatalog({ identity: { ...privilegedCatalog().identity, user: 'union_eyes_runtime', session_user: 'ue_staging_runtime' } })), 'DATABASE_IDENTITY_REFUSED'],
+    [sealedSession(privilegedCatalog({ rolledBack: false })), 'READ_ONLY_TRANSACTION_UNPROVEN'],
+    [completeCatalog(), 'CATALOG_PLANE_MISMATCH'],
+    // What the operator emits when sealing fails: values scrubbed, no envelope, a blocker.
+    [(() => { const body = sealedSession(); delete body.sealed; return { ...body, blocker: 'SEALING_FAILED' } })(), 'SEALING_FAILED'],
+    [sealedSession(privilegedCatalog({ blocker: 'PRIVILEGE_REFUSED' })), 'PRIVILEGE_REFUSED'],
+    [sealedSession(privilegedCatalog({ identity: { ...privilegedCatalog().identity, default_read_only: 'off' } })), 'READ_ONLY_TRANSACTION_UNPROVEN'],
+    [{ ...sealedSession(), queries: [...sealedSession().queries, { id: 'debug_dump', rowCount: 1, rows: [{ n: '41' }] }] }, 'PRIVILEGED_VALUE_IN_CLEAR'],
+    [{ ...sealedSession(), modificationCounters: [] }, 'PRIVILEGED_VALUE_IN_CLEAR'],
+  ]
+  for (const [body, defect] of cases) {
+    const { exitCode, report } = await run({ body, env: privilegedEnv() })
+    assert.equal(exitCode, 5, defect)
+    assert.equal(report.defects.includes(defect), true, `${defect}: ${report.defects}`)
+    assert.equal(report.cleanup.deleted, true)
+  }
+  // A leaking body is quarantined: no artifact, no report field carries it.
+  const leaked = await run({ body: privilegedCatalog(), env: privilegedEnv() })
+  assert.equal(leaked.report.quarantine.reason, 'PRIVILEGED_VALUE_IN_CLEAR')
+  assert.equal(leaked.report.evidenceBody, undefined)
+  assert.equal(leaked.report.catalog, null)
+  const quarantineDir = mkdtempSync(path.join(tmpdir(), 'ue-catalog-quarantine-'))
+  writeJobArtifacts(quarantineDir, leaked.report)
+  for (const file of ['catalog.json', 'evidence-manifest.json']) {
+    const text = readFileSync(path.join(quarantineDir, file), 'utf8')
+    assert.equal(/"n":"(41|7)"/.test(text) || text.includes('"hash":"abc"'), false, file)
+  }
+  assert.equal(existsSync(path.join(quarantineDir, 'catalog-evidence.json')), false)
+  rmSync(quarantineDir, { recursive: true, force: true })
+  assert.equal(sessionPlaneDefect(completeCatalog(), 'runtime'), null)
+  assert.equal(sessionPlaneDefect(sealedSession(), 'runtime'), 'CATALOG_PLANE_MISMATCH')
+})
+
+test('offline assembly opens each privileged session, chains it, and reconciles both planes to one verdict', async () => {
+  const directories = []
+  const keep = (report) => { const directory = mkdtempSync(path.join(tmpdir(), 'ue-plane-')); writeJobArtifacts(directory, report); directories.push(directory); return directory }
+  const runtimeRun = await run({ body: completeCatalog() })
+  const runtimeDir = keep(runtimeRun.report)
+
+  const baseline = privilegedCatalog({ observedAt: '2026-11-27T01:00:00.000Z' })
+  baseline.counts[1] = { ...baseline.counts[1], classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET', n: undefined }
+  const first = await run({ body: sealedSession(baseline), env: privilegedEnv() })
+  assert.equal(first.report.planeVerdict, 'PLANE_INCOMPLETE')
+  assert.equal(first.report.continuationToken.plane, 'privileged')
+  const firstDir = keep(first.report)
+  const prior = loadPriorSession(firstDir)
+  const crossed = await run({ body: completeCatalog(), prior })
+  assert.equal(crossed.report.defects.includes('CONTINUATION_PLANE_CHANGED'), true, 'a runtime run cannot continue a privileged chain')
+  assert.equal(crossed.fake.did('job create'), false)
+
+  const continuation = privilegedCatalog({ observedAt: '2026-11-27T02:30:00.000Z', snapshot: '1010:1010:', sessionKind: 'continuation' })
+  continuation.counts = [continuation.counts[1]]
+  const second = await run({ body: sealedSession(continuation), env: privilegedEnv(), prior })
+  assert.equal(second.exitCode, 0, JSON.stringify(second.report.defects))
+  const sent = JSON.parse(second.fake.specs[0].properties.template.containers[0].env.find((item) => item.name === 'UE_CATALOG_CONTINUATION').value)
+  assert.equal(sent.plane, 'privileged')
+  const secondDir = keep(second.report)
+
+  assert.equal(assemblePlane([firstDir, secondDir]).defect, 'RECIPIENT_KEY_REQUIRED')
+  assert.equal(assemblePlane([firstDir, secondDir], { privateKeyPem: generateRecipientKeyPair().privateKeyPem }).defect, 'SEALED_FOR_ANOTHER_RECIPIENT')
+  const privileged = assemblePlane([firstDir, secondDir], { privateKeyPem: FOUNDER.privateKeyPem })
+  assert.equal(privileged.defect, undefined, privileged.defect)
+  assert.equal(privileged.consistency.sessions, 2)
+  assert.equal(privileged.consistency.atomicSnapshot, false)
+  const runtime = assemblePlane([runtimeDir])
+  const result = reconcilePlanes({ runtime, privileged })
+  assert.equal(result.verdict, 'CATALOG_COMPLETE')
+  assert.equal(result.consistency.crossPlaneAtomic, false)
+  const summary = preimageSummary(result, 'd'.repeat(64))
+  assert.equal(/"n":"(41|7)"/.test(JSON.stringify(summary)), false, 'the public-safe summary carries no values')
+  assert.equal(summary.S2_02_PREIMAGE_COMPLETE, 'NO')
+
+  // A tampered artifact is refused before it is opened.
+  writeFileSync(path.join(secondDir, 'catalog-evidence.json'), readFileSync(path.join(secondDir, 'catalog-evidence.json'), 'utf8').replace('"plane":"privileged"', '"plane":"privileged" '))
+  assert.equal(assemblePlane([firstDir, secondDir], { privateKeyPem: FOUNDER.privateKeyPem }).defect, 'SESSION_ARTIFACT_UNVERIFIED')
+
+  // The CLI keeps privileged values out of the repository.
+  const cli = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--assemble', '--runtime', runtimeDir, '--privileged', firstDir, '--out', path.join(REPO, 'tmp-preimage')], { encoding: 'utf8' })
+  assert.equal(cli.status, 1)
+  assert.match(cli.stderr, /PREIMAGE_OUTPUT_PATH_REFUSED/)
+  const key = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--generate-recipient', path.join(REPO, 'founder.pem')], { encoding: 'utf8' })
+  assert.equal(key.status, 1)
+  assert.equal(existsSync(path.join(REPO, 'founder.pem')), false)
+  for (const directory of directories) rmSync(directory, { recursive: true, force: true })
+})
+
+test('the founder key tool writes the private half once, 0600, and prints only the public half', () => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'ue-founder-'))
+  const target = path.join(directory, 'recipient.pem')
+  const made = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--generate-recipient', target], { encoding: 'utf8' })
+  assert.equal(made.status, 0, made.stderr)
+  const printed = JSON.parse(made.stdout)
+  assert.equal(printed.variable, 'UE_V2_STAGING_CATALOG_RECIPIENT')
+  assert.equal(made.stdout.includes('PRIVATE KEY'), false)
+  assert.equal(statSync(target).mode & 0o777, 0o600)
+  const again = spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/ue-v2-staging-catalog-job.mjs'), '--generate-recipient', target], { encoding: 'utf8' })
+  assert.notEqual(again.status, 0, 'an existing key is never overwritten')
+  rmSync(directory, { recursive: true, force: true })
 })

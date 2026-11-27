@@ -12,13 +12,19 @@
  * after completion and which shares the console proxy that returned HTTP 404.
  */
 import { spawnSync } from 'node:child_process'
-import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { createHash, createPublicKey } from 'node:crypto'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
   CATALOG_CONTRACT,
+  CATALOG_PLANES,
   CATALOG_SCHEMA,
+  PRIVILEGED_LOGIN,
+  generateRecipientKeyPair,
+  openSealedCatalog,
+  reconcilePlanes,
+  recipientKeyId,
   CONTAINER_APP,
   EVIDENCE_CHUNK_BYTES,
   EVIDENCE_FRAME,
@@ -61,6 +67,10 @@ export const STOP_DEADLINE_MS = 60000
 export const INGEST_DEADLINE_MS = 15 * 60 * 1000
 export const INGEST_INTERVAL_MS = 20000
 export const DELETE_ATTEMPTS = 3
+// Plane B carries the existing admin password as a job-scoped Container Apps secret. It
+// exists only in this owned job's configuration and is destroyed with the job.
+export const ADMIN_SECRET_NAME = 'catalog-admin-password'
+export const RECIPIENT_VARIABLE = 'UE_V2_STAGING_CATALOG_RECIPIENT'
 
 const TERMINAL_FAILURE = new Set(['Failed', 'Stopped', 'Cancelled', 'Degraded'])
 const NOT_FOUND = /ResourceNotFound|ResourceGroupNotFound|could not be found|was not found|\(NotFound\)|Code: NotFound/i
@@ -100,6 +110,7 @@ export function ownedJobDefect(job, expected) {
   const tags = job?.tags ?? {}
   if (tags.purpose !== JOB_PURPOSE || tags.owner !== JOB_OWNER) return 'UNOWNED_JOB'
   if (tags.runId !== expected.runId || tags.source !== expected.source) return 'UNOWNED_JOB'
+  if ((tags.plane ?? 'runtime') !== (expected.plane ?? 'runtime')) return 'UNOWNED_JOB'
   const properties = job?.properties ?? {}
   if (String(properties.environmentId ?? '').toLowerCase() !== ENVIRONMENT_ID.toLowerCase()) return 'UNOWNED_JOB'
   const containers = properties.template?.containers ?? []
@@ -109,12 +120,42 @@ export function ownedJobDefect(job, expected) {
   return null
 }
 
+export function recipientDefect(value) {
+  try {
+    const key = createPublicKey({ key: Buffer.from(String(value ?? ''), 'base64'), format: 'der', type: 'spki' })
+    return key.asymmetricKeyType === 'x25519' ? null : 'EVIDENCE_RECIPIENT_MISSING'
+  } catch {
+    return 'EVIDENCE_RECIPIENT_MISSING'
+  }
+}
+
 export function jobSpecification(options) {
   const name = jobNameForRun(options.runId)
+  const plane = options.plane ?? 'runtime'
+  if (!CATALOG_PLANES.includes(plane)) throw new Error('PLANE_REFUSED')
+  const privileged = plane === 'privileged'
+  if (privileged && (!options.adminPassword || recipientDefect(options.recipient))) throw new Error('PRIVILEGED_INPUTS_REFUSED')
+  const common = [
+    { name: 'UE_CATALOG_TRANSPORT', value: 'private-job' },
+    { name: 'UE_CATALOG_RUN_ID', value: options.runId },
+    { name: 'UE_CATALOG_SOURCE_SHA', value: options.source },
+    { name: 'UE_CATALOG_PLANE', value: plane },
+    { name: 'PGHOST', value: STAGING_HOST },
+    { name: 'PGDATABASE', value: EXPECTED_DATABASE },
+  ]
+  const env = privileged
+    ? [...common,
+      { name: 'PGPORT', value: '5432' },
+      { name: 'PGUSER', value: PRIVILEGED_LOGIN },
+      { name: 'PGPASSWORD', secretRef: ADMIN_SECRET_NAME },
+      { name: 'UE_CATALOG_PRIVILEGED_LOGIN', value: PRIVILEGED_LOGIN },
+      { name: 'UE_CATALOG_EVIDENCE_RECIPIENT', value: options.recipient }]
+    : [...common, { name: 'DATABASE_URL', secretRef: 'database-url' }]
+  if (options.continuation) env.push({ name: 'UE_CATALOG_CONTINUATION', value: options.continuation })
   return {
     location: 'canadacentral',
     identity: { type: 'UserAssigned', userAssignedIdentities: { [IDENTITY]: {} } },
-    tags: { purpose: JOB_PURPOSE, runId: options.runId, source: options.source, owner: JOB_OWNER },
+    tags: { purpose: JOB_PURPOSE, runId: options.runId, source: options.source, owner: JOB_OWNER, plane },
     properties: {
       environmentId: ENVIRONMENT_ID,
       workloadProfileName: 'Consumption',
@@ -124,25 +165,33 @@ export function jobSpecification(options) {
         replicaRetryLimit: 0,
         manualTriggerConfig: { parallelism: 1, replicaCompletionCount: 1 },
         registries: [{ server: 'nzilaventuresacr.azurecr.io', identity: IDENTITY }],
-        secrets: [{ name: 'database-url', keyVaultUrl: KEY_VAULT_SECRET, identity: IDENTITY }],
+        // The privileged job receives no runtime URL; the runtime job receives no admin secret.
+        secrets: privileged
+          ? [{ name: ADMIN_SECRET_NAME, value: options.adminPassword }]
+          : [{ name: 'database-url', keyVaultUrl: KEY_VAULT_SECRET, identity: IDENTITY }],
       },
-      template: { containers: [{
-        name: OPERATOR_CONTAINER,
-        image: options.image,
-        resources: { cpu: 0.5, memory: '1Gi' },
-        env: [
-          { name: 'UE_CATALOG_TRANSPORT', value: 'private-job' },
-          { name: 'UE_CATALOG_RUN_ID', value: options.runId },
-          { name: 'UE_CATALOG_SOURCE_SHA', value: options.source },
-          { name: 'PGHOST', value: STAGING_HOST },
-          { name: 'PGDATABASE', value: EXPECTED_DATABASE },
-          { name: 'DATABASE_URL', secretRef: 'database-url' },
-          ...(options.continuation ? [{ name: 'UE_CATALOG_CONTINUATION', value: options.continuation }] : []),
-        ],
-      }] },
+      template: { containers: [{ name: OPERATOR_CONTAINER, image: options.image, resources: { cpu: 0.5, memory: '1Gi' }, env }] },
     },
     name,
   }
+}
+
+/**
+ * The admin password may appear exactly once: as the value of the job-scoped secret.
+ * Never in env values, tags, names or anywhere else; and no connection URL at all.
+ */
+export function specificationSecretDefect(spec, adminPassword) {
+  const serialized = JSON.stringify(spec)
+  if (/postgres(?:ql)?:\/\//i.test(serialized)) return 'CONNECTION_URL_IN_SPEC'
+  const secrets = spec?.properties?.configuration?.secrets ?? []
+  const inline = secrets.filter((item) => Object.hasOwn(item, 'value'))
+  if (!adminPassword) return inline.length ? 'UNEXPECTED_INLINE_SECRET' : null
+  if (inline.length !== 1 || inline[0].name !== ADMIN_SECRET_NAME || inline[0].value !== adminPassword) return 'ADMIN_SECRET_MISPLACED'
+  const withoutSecret = JSON.stringify({ ...spec, properties: { ...spec.properties, configuration: { ...spec.properties.configuration, secrets: secrets.map((item) => ({ ...item, value: undefined })) } } })
+  if (withoutSecret.includes(adminPassword) || serialized.split(adminPassword).length !== 2) return 'ADMIN_SECRET_MISPLACED'
+  const env = spec?.properties?.template?.containers?.[0]?.env ?? []
+  if (env.some((item) => item.name === 'PGPASSWORD' && (item.value !== undefined || item.secretRef !== ADMIN_SECRET_NAME))) return 'ADMIN_SECRET_MISPLACED'
+  return null
 }
 
 // ── Evidence frame v2 ────────────────────────────────────────────────────────
@@ -342,8 +391,8 @@ export function evidenceManifest({ binding, evidence, catalog, evaluation, revis
   const categories = CATALOG_CONTRACT.categories.map((category) => {
     const found = evaluation?.categories?.find((item) => item.id === category.id)
     const items = found?.queries ?? found?.items ?? []
-    const captured = items.filter((item) => ['OBSERVED', 'ABSENT_VERIFIED'].includes(item.classification)).length
-    return { id: category.id, accepted: Boolean(found?.accepted), observations: items.length, captured, missing: items.length - captured }
+    const captured = items.filter((item) => ['OBSERVED', 'ABSENT_VERIFIED', 'GLOBAL_OBSERVED', 'SEALED'].includes(item.classification)).length
+    return { id: category.id, plane: found?.plane ?? null, inPlane: found ? found.classification !== 'NOT_IN_PLANE' : false, accepted: Boolean(found?.accepted), observations: items.length, captured, missing: items.length - captured }
   })
   const counts = catalog?.counts ?? []
   const byClass = (value) => counts.filter((item) => item.classification === value).length
@@ -359,8 +408,15 @@ export function evidenceManifest({ binding, evidence, catalog, evaluation, revis
     capturedAt,
     sha256: evidence.sha256,
     categories,
-    categoryInventory: { required: CATALOG_CONTRACT.categories.length, accepted: categories.filter((item) => item.accepted).length },
-    counts: { tables: counts.length, observed: byClass('OBSERVED'), notAttempted: byClass('NOT_ATTEMPTED'), timedOut: byClass('TIMED_OUT'), unreadable: byClass('UNREADABLE') },
+    plane: catalog?.plane ?? 'runtime',
+    planeVerdict: evaluation?.planeVerdict ?? null,
+    categoryInventory: { required: CATALOG_CONTRACT.categories.length, inPlane: categories.filter((item) => item.inPlane).length, accepted: categories.filter((item) => item.accepted).length },
+    counts: { tables: counts.length, observed: byClass('OBSERVED'), privilegeDenied: byClass('PRIVILEGE_DENIED'), notAttempted: byClass('NOT_ATTEMPTED'), timedOut: byClass('TIMED_OUT'), unreadable: byClass('UNREADABLE'),
+      globalScope: counts.filter((item) => item.countScope === 'GLOBAL').length, roleVisibleScope: counts.filter((item) => item.countScope === 'ROLE_VISIBLE').length, sealed: counts.filter((item) => item.sealed === true).length },
+    snapshot: catalog?.snapshot ?? null,
+    sessionEndedAt: catalog?.sessionEndedAt ?? null,
+    consistency: catalog?.consistency ?? null,
+    sealed: catalog?.sealed ? { scheme: catalog.sealed.scheme, recipientKeyId: catalog.sealed.recipientKeyId, plaintextSha256: catalog.sealed.plaintextSha256, plaintextBytes: catalog.sealed.plaintextBytes } : null,
     verdict: evaluation?.verdict ?? 'CATALOG_UNREADABLE',
   }
 }
@@ -375,25 +431,82 @@ export const SESSION_BINDING = { revision: EXPECTED_REVISION, image: EXPECTED_IM
  * prior SHA256SUMS with a matching digest; the merged catalogue and the token are
  * otherwise refused.
  */
-export function loadPriorSession(directory) {
+function verifiedReader(directory) {
   const sumsPath = path.join(directory, 'SHA256SUMS')
-  if (!existsSync(sumsPath)) return { defect: 'CONTINUATION_REJECTED', reason: 'PRIOR_SUMS_MISSING' }
+  if (!existsSync(sumsPath)) return null
   const sums = new Map(readFileSync(sumsPath, 'utf8').trim().split('\n').map((line) => line.split(/\s+/)).map(([digest, file]) => [file, digest]))
-  const verified = (file) => {
+  return (file) => {
     const full = path.join(directory, file)
     if (!sums.has(file) || !existsSync(full)) return null
     const bytes = readFileSync(full)
     return createHash('sha256').update(bytes).digest('hex') === sums.get(file) ? bytes.toString('utf8') : null
   }
+}
+
+export function loadPriorSession(directory) {
+  const verified = verifiedReader(directory)
+  if (!verified) return { defect: 'CONTINUATION_REJECTED', reason: 'PRIOR_SUMS_MISSING' }
   const merged = verified('catalog-merged.json')
   const token = verified('continuation-token.json')
   if (merged === null || token === null) return { defect: 'CONTINUATION_REJECTED', reason: 'PRIOR_ARTIFACT_UNVERIFIED' }
   try { return { merged: JSON.parse(merged), token: JSON.parse(token) } } catch { return { defect: 'CONTINUATION_REJECTED', reason: 'PRIOR_ARTIFACT_UNREADABLE' } }
 }
 
+/**
+ * Offline, on the founder's machine: rebuild one plane's chain from downloaded run
+ * artifacts. Every file must match its run's SHA256SUMS; privileged sessions are
+ * opened with the founder's key and must be bound to the run that produced them.
+ */
+export function assemblePlane(directories, options = {}) {
+  if (!Array.isArray(directories) || directories.length === 0) return { defect: 'PLANE_EVIDENCE_MISSING' }
+  const sessions = []
+  let previousToken = null
+  let source = null
+  for (const directory of directories) {
+    const verified = verifiedReader(directory)
+    const evidence = verified?.('catalog-evidence.json')
+    const manifestText = verified?.('evidence-manifest.json')
+    if (!evidence || !manifestText) return { defect: 'SESSION_ARTIFACT_UNVERIFIED', directory }
+    let catalog
+    let manifest
+    try { catalog = JSON.parse(evidence); manifest = JSON.parse(manifestText) } catch { return { defect: 'SESSION_ARTIFACT_UNREADABLE', directory } }
+    if (manifest.sha256 !== createHash('sha256').update(Buffer.from(evidence, 'utf8')).digest('hex')) return { defect: 'SESSION_ARTIFACT_UNVERIFIED', directory }
+    source = source ?? manifest.execution?.sourceSha
+    if (manifest.execution?.sourceSha !== source) return { defect: 'CONTINUATION_SOURCE_CHANGED', directory }
+    if (catalog.plane === 'privileged') {
+      if (!options.privateKeyPem) return { defect: 'RECIPIENT_KEY_REQUIRED', directory }
+      let opened
+      try { opened = openSealedCatalog(catalog, options.privateKeyPem) } catch (error) { return { defect: error.message, directory } }
+      if (opened.run !== String(manifest.execution?.githubRunId) || opened.source !== source) return { defect: 'SEALED_EVIDENCE_UNBOUND', directory }
+      catalog = opened.catalog
+    }
+    sessions.push(previousToken ? { catalog, token: previousToken, observedAt: catalog.observedAt } : { catalog, observedAt: catalog.observedAt })
+    const tokenText = verified('continuation-token.json')
+    previousToken = tokenText ? JSON.parse(tokenText) : null
+  }
+  const reconciled = reconcileCatalogSessions(sessions, { ...SESSION_BINDING, source })
+  if (!reconciled.catalog) return { defect: reconciled.reason ?? 'CONTINUATION_REJECTED' }
+  return { catalog: reconciled.catalog, consistency: reconciled.consistency, evaluation: reconciled.evaluation, source }
+}
+
+/** Public-safe view of a reconciled preimage: classifications and digests, never values. */
+export function preimageSummary(result, privateDigest) {
+  return {
+    schema: 'ue-v2-staging-preimage-summary/v1',
+    verdict: result.verdict,
+    reason: result.reason ?? null,
+    categories: (result.categories ?? []).map((category) => ({ id: category.id, source: category.source, accepted: category.accepted,
+      ...(category.tally ? { tally: category.tally } : {}), ...(category.queries ? { queries: category.queries.map((item) => ({ id: item.id, classification: item.classification, accepted: item.accepted })) } : {}) })),
+    consistency: result.consistency ?? null,
+    privateEvidenceSha256: privateDigest,
+    S2_02_PREIMAGE_COMPLETE: 'NO',
+    S2_02_LEGACY_GATE: 'INDETERMINATE',
+  }
+}
+
 /** The container needs only what it checks and the tables it still has to count. */
 export function slimContinuation(token) {
-  return JSON.stringify({ schema: token.schema, database: token.database, inventoryDigest: token.inventoryDigest, remaining: token.remaining,
+  return JSON.stringify({ schema: token.schema, database: token.database, plane: token.plane ?? 'runtime', inventoryDigest: token.inventoryDigest, remaining: token.remaining,
     expiresAt: token.expiresAt, baselineSessionId: token.baselineSessionId })
 }
 
@@ -479,7 +592,89 @@ async function reconcileCreatedJob(spawn, expected, clock) {
   return cleanupOwnedJob(spawn, expected, clock)
 }
 
+/**
+ * The session must be exactly the plane it claims. Runtime: the limited runtime role,
+ * no RLS bypass. Privileged: the existing admin login, not a superuser, in a REPEATABLE
+ * READ read-only transaction, with every privileged value sealed to the expected key.
+ */
+export function sessionPlaneDefect(body, plane, expectedKeyId) {
+  if ((body.plane ?? 'runtime') !== plane) return 'CATALOG_PLANE_MISMATCH'
+  if (['EVIDENCE_RECIPIENT_MISSING', 'SEALING_FAILED', 'WRONG_TARGET', 'PRIVILEGE_REFUSED', 'STATS_UNTRACKED', 'STATS_UNREADABLE'].includes(body.blocker)) return body.blocker
+  if (body.blocker === 'DATABASE_URL_ABSENT' || body.blocker === 'PRIVILEGED_CREDENTIAL_ABSENT' || /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|28P01|28000|connection refused|password authentication failed/i.test(body.error ?? '')) return 'DATABASE_CONNECTION_REFUSED'
+  if (plane === 'runtime') {
+    if (body.blocker === 'IDENTITY_REFUSED' || body.identity?.user !== RUNTIME_ROLE || body.identity?.session_user !== RUNTIME_LOGIN) return 'DATABASE_IDENTITY_REFUSED'
+  } else if (body.blocker === 'IDENTITY_REFUSED' || body.identity?.user !== PRIVILEGED_LOGIN || body.identity?.session_user !== PRIVILEGED_LOGIN) return 'DATABASE_IDENTITY_REFUSED'
+  if (body.identity?.transaction_read_only !== 'on' || body.identity?.default_read_only !== 'on' || body.rolledBack !== true) return 'READ_ONLY_TRANSACTION_UNPROVEN'
+  if (plane === 'runtime') {
+    // Runtime evidence is claimed for the limited runtime role: an elevated login or role, or any RLS bypass, is refused.
+    if (body.privilege?.classification !== 'LIMITED_RUNTIME' || body.privilege?.rolbypassrls !== false || body.privilege?.rolsuper !== false) return 'DATABASE_PRIVILEGE_UNEXPECTED'
+    return null
+  }
+  if (body.identity?.isolation !== 'repeatable read') return 'SNAPSHOT_ISOLATION_UNPROVEN'
+  // Global visibility is earned by BYPASSRLS, never by superuser; a superuser session is refused.
+  if (body.privilege?.rolsuper !== false) return 'DATABASE_PRIVILEGE_UNEXPECTED'
+  const leak = privilegedClearDefect(body)
+  if (leak) return leak
+  const counts = Array.isArray(body.counts) ? body.counts : []
+  const ledger = (body.queries ?? []).find((item) => item.id === 'drizzle_rows')
+  const needsSeal = counts.some((item) => item.sealed === true) || ledger?.rowsSealed === true || Boolean(body.modificationDigest)
+  if (needsSeal && (!body.sealed || body.sealed.recipientKeyId !== expectedKeyId)) return 'SEALED_FOR_ANOTHER_RECIPIENT'
+  return null
+}
+
+// What a privileged session may carry in the clear: catalogue metadata only. Anything
+// else (an unknown query, a count value, a ledger row, a counter row) is a leak.
+const PRIVILEGED_CLEAR_QUERIES = new Set(['identity', 'privilege', 'migration_relations', 'migration_columns', 'effective_roles', 'structure', 'relation_metadata', 'tables', 'privilege_matrix'])
+const PRIVILEGED_SEALED_QUERIES = new Set(['drizzle_rows', 'modification_counters', 'settled_counters'])
+
+export function privilegedClearDefect(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return 'CATALOG_OUTPUT_UNREADABLE'
+  if (body.plane !== 'privileged') return null
+  for (const key of ['counts', 'ledgers', 'modificationCounters', 'settledCounters']) {
+    if (key !== 'counts' && Object.hasOwn(body, key)) return 'PRIVILEGED_VALUE_IN_CLEAR'
+  }
+  for (const item of Array.isArray(body.queries) ? body.queries : []) {
+    if (PRIVILEGED_CLEAR_QUERIES.has(item?.id)) continue
+    if (PRIVILEGED_SEALED_QUERIES.has(item?.id) && item.rows === undefined) continue
+    return 'PRIVILEGED_VALUE_IN_CLEAR'
+  }
+  for (const count of Array.isArray(body.counts) ? body.counts : []) {
+    if (count?.n !== null && count?.n !== undefined) return 'PRIVILEGED_VALUE_IN_CLEAR'
+  }
+  return null
+}
+
+/** A plane that delivered all of its share exits 0; the verdict still says CATALOG_PARTIAL. */
+function planeResult(report, verdict, fail) {
+  if (verdict === 'CATALOG_COMPLETE' || report.planeVerdict === 'PLANE_ACCEPTED' || report.planeVerdict === 'PLANE_CAPTURED_SEALED') return { exitCode: 0, report }
+  return fail(5, verdict)
+}
+
+/**
+ * The admin password is scrubbed from every Azure CLI response the controller sees, and
+ * the finished report is checked once more, so no error path can carry it to an artifact.
+ */
 export async function executeCatalogJob(env, spawn, options = {}) {
+  const secret = env?.UE_CATALOG_PLANE === 'privileged' && env?.PG_ADMIN_PASSWORD ? String(env.PG_ADMIN_PASSWORD) : null
+  if (!secret) return runCatalogJob(env, spawn, options)
+  const tokens = [...new Set([secret, JSON.stringify(secret).slice(1, -1)])]
+  const scrub = (text) => tokens.reduce((value, token) => value.split(token).join('[redacted]'), String(text ?? ''))
+  const guarded = async (executable, args) => {
+    const output = await spawn(executable, args)
+    return { ...output, stdout: scrub(output.stdout), stderr: scrub(output.stderr) }
+  }
+  const result = await runCatalogJob(env, guarded, options)
+  const serialized = JSON.stringify(result.report)
+  if (tokens.some((token) => serialized.includes(token))) {
+    result.report = JSON.parse(scrub(serialized))
+    result.report.defects = [...result.report.defects, 'ADMIN_SECRET_SCRUBBED']
+    result.report.catalogAccepted = false
+    if (result.exitCode === 0) result.exitCode = 5
+  }
+  return result
+}
+
+async function runCatalogJob(env, spawn, options = {}) {
   const report = {
     schema: 'ue-v2-staging-catalog-job/v2',
     defects: [],
@@ -511,6 +706,19 @@ export async function executeCatalogJob(env, spawn, options = {}) {
   if (assertStagingTarget(env.UE_CATALOG_TARGET ? JSON.parse(env.UE_CATALOG_TARGET) : { resourceGroup: RESOURCE_GROUP, database: EXPECTED_DATABASE, host: STAGING_HOST })) {
     return fail(1, 'WRONG_ENVIRONMENT')
   }
+  const plane = env.UE_CATALOG_PLANE || 'runtime'
+  if (!CATALOG_PLANES.includes(plane)) return fail(1, 'WRONG_ENVIRONMENT')
+  report.plane = plane
+  if (plane === 'privileged') {
+    // Nothing is created unless the sealing key and the existing credential are both present.
+    const recipient = recipientDefect(env.UE_CATALOG_EVIDENCE_RECIPIENT)
+    if (recipient) return fail(1, recipient)
+    if (!env.PG_ADMIN_PASSWORD) return fail(1, 'PRIVILEGED_CREDENTIAL_ABSENT')
+    report.recipientKeyId = recipientKeyId({ key: Buffer.from(env.UE_CATALOG_EVIDENCE_RECIPIENT, 'base64'), format: 'der', type: 'spki' })
+  } else if (env.PG_ADMIN_PASSWORD) {
+    // The runtime plane never carries the admin credential, even unused.
+    return fail(1, 'UNEXPECTED_PRIVILEGED_CREDENTIAL')
+  }
   report.phases.preflight = 'DONE'
 
   const account = await spawn('az', ['account', 'show', '--query', '{subscriptionId:id,tenantId:tenantId}', '-o', 'json'])
@@ -529,7 +737,7 @@ export async function executeCatalogJob(env, spawn, options = {}) {
   const secrets = await spawn('az', ['containerapp', 'show', '-g', RESOURCE_GROUP, '-n', CONTAINER_APP, '--query', 'properties.configuration.secrets[].name', '-o', 'json'])
   let secretNames = []
   try { secretNames = secrets.code === 0 ? JSON.parse(secrets.stdout) : [] } catch { secretNames = [] }
-  if (!secretNames.includes('database-url')) return fail(1, 'RUNTIME_SECRET_UNAVAILABLE')
+  if (plane === 'runtime' && !secretNames.includes('database-url')) return fail(1, 'RUNTIME_SECRET_UNAVAILABLE')
   // The evidence channel is checked before any job exists, so a missing channel creates nothing.
   const channel = await resolveWorkspace(spawn)
   if (channel.defect) return fail(1, channel.defect)
@@ -538,6 +746,7 @@ export async function executeCatalogJob(env, spawn, options = {}) {
     if (options.prior.defect) return fail(1, options.prior.defect)
     const defect = continuationDefect(options.prior.token, { ...SESSION_BINDING, source: env.GITHUB_SHA }, clock.now())
     if (defect) return fail(1, defect)
+    if ((options.prior.token.plane ?? 'runtime') !== plane || (options.prior.merged?.plane ?? 'runtime') !== plane) return fail(1, 'CONTINUATION_PLANE_CHANGED')
     continuation = slimContinuation(options.prior.token)
     if (Buffer.byteLength(continuation) > CONTINUATION_ENV_MAX_BYTES) return fail(1, 'CONTINUATION_TOO_LARGE')
     report.continuation = { baselineSessionId: options.prior.token.baselineSessionId, remaining: options.prior.token.remaining.length, inventoryDigest: options.prior.token.inventoryDigest }
@@ -547,21 +756,27 @@ export async function executeCatalogJob(env, spawn, options = {}) {
 
   const name = jobNameForRun(env.GITHUB_RUN_ID)
   const source = env.GITHUB_SHA
-  const expectedJob = { name, runId: env.GITHUB_RUN_ID, source, image: env.OPERATOR_IMAGE }
+  const expectedJob = { name, runId: env.GITHUB_RUN_ID, source, image: env.OPERATOR_IMAGE, plane }
   const preexisting = await showJob(spawn, name)
   if (!preexisting.absent) return fail(1, preexisting.unreadable ? 'JOB_STATE_UNREADABLE' : 'JOB_NAME_CONFLICT')
-  const spec = jobSpecification({ image: env.OPERATOR_IMAGE, runId: env.GITHUB_RUN_ID, source, continuation })
-  const serialized = JSON.stringify(spec)
-  if (/postgres(?:ql)?:\/\//i.test(serialized) || serialized.includes('PGPASSWORD') || serialized.includes('UE_V2_STAGING_DB_ADMIN_PASSWORD')) {
-    return fail(1, 'JOB_CREATION_FAILED')
-  }
-  const directory = mkdtempSync(path.join(tmpdir(), 'ue-catalog-job-'))
-  const manifest = path.join(directory, 'job.json')
-  writeFileSync(manifest, serialized)
-  report.job = { name, source, purpose: JOB_PURPOSE }
+  const adminPassword = plane === 'privileged' ? env.PG_ADMIN_PASSWORD : undefined
+  const spec = jobSpecification({ image: env.OPERATOR_IMAGE, runId: env.GITHUB_RUN_ID, source, continuation, plane, adminPassword, recipient: env.UE_CATALOG_EVIDENCE_RECIPIENT })
+  const secretDefect = specificationSecretDefect(spec, adminPassword)
+  if (secretDefect) return fail(1, secretDefect)
+  report.job = { name, source, purpose: JOB_PURPOSE, plane }
   const since = new Date(clock.now() - 10 * 60 * 1000).toISOString()
-  const created = await spawn('az', ['containerapp', 'job', 'create', '-g', RESOURCE_GROUP, '-n', name, '--yaml', manifest, '-o', 'none'])
-  rmSync(directory, { recursive: true, force: true })
+  // The manifest can hold the admin secret: a fresh 0700 directory, a 0600 file created
+  // exclusively, removed whatever happens. It is never an artifact and never printed.
+  const directory = mkdtempSync(path.join(tmpdir(), 'ue-catalog-job-'))
+  let created
+  try {
+    const manifest = path.join(directory, 'job.json')
+    writeFileSync(manifest, JSON.stringify(spec), { mode: 0o600, flag: 'wx' })
+    created = await spawn('az', ['containerapp', 'job', 'create', '-g', RESOURCE_GROUP, '-n', name, '--yaml', manifest, '-o', 'none'])
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+  if (created.stderr && adminPassword) created = { ...created, stderr: created.stderr.split(adminPassword).join('[redacted]') }
   if (created.code !== 0) {
     report.phases.create = 'FAILED'
     const reconciliation = await reconcileCreatedJob(spawn, expectedJob, clock)
@@ -623,22 +838,26 @@ export async function executeCatalogJob(env, spawn, options = {}) {
         } else {
           report.phases.capture = 'DONE'
           report.evidenceSha256 = evidence.sha256
-          report.evidenceBody = evidence.body
-          const parsed = parseCatalogStdout(`UE_CATALOG_BEGIN\n${evidence.body}\nUE_CATALOG_END\n`)
+          let parsed = parseCatalogStdout(`UE_CATALOG_BEGIN\n${evidence.body}\nUE_CATALOG_END\n`)
+          // A privileged body that is unreadable or carries a clear value never reaches an artifact.
+          const leak = plane === 'privileged' ? privilegedClearDefect(parsed?.body) : null
+          if (leak) {
+            report.quarantine = { sha256: evidence.sha256, bytes: evidence.bytes, reason: leak,
+              action: 'Evidence withheld from every artifact and report. The workspace rows of this execution may hold privileged values: restrict access and purge them before any other dispatch.' }
+            parsed = null
+          } else report.evidenceBody = evidence.body
           if (parsed?.body) report.catalog = parsed.body
           if (parsed?.verdict) report.diagnostics = parsed.verdict
           report.manifest = evidenceManifest({ binding: { ...binding, image: env.OPERATOR_IMAGE }, evidence, catalog: parsed?.body,
             evaluation: parsed?.body?.evaluation, revision: report.revision, capturedAt: new Date(clock.now()).toISOString() })
-          if (observed.status !== 'Succeeded') result = fail(5, 'JOB_EXECUTION_FAILED')
+          if (leak) result = fail(5, leak)
+          else if (observed.status !== 'Succeeded') result = fail(5, 'JOB_EXECUTION_FAILED')
           else if (!parsed?.body) result = fail(5, 'CATALOG_OUTPUT_UNREADABLE')
           else {
             report.phases.verify = 'DONE'
             const body = parsed.body
-            if (body.blocker === 'IDENTITY_REFUSED' || body.identity?.user !== RUNTIME_ROLE || body.identity?.session_user !== RUNTIME_LOGIN) result = fail(5, 'DATABASE_IDENTITY_REFUSED')
-            else if (body.blocker === 'DATABASE_URL_ABSENT' || /ECONNREFUSED|connection refused/i.test(body.error ?? '')) result = fail(5, 'DATABASE_CONNECTION_REFUSED')
-            else if (body.identity?.transaction_read_only !== 'on' || body.rolledBack !== true) result = fail(5, 'READ_ONLY_TRANSACTION_UNPROVEN')
-            // The evidence is claimed for the limited runtime role: an elevated login or role, or any RLS bypass, is refused.
-            else if (body.privilege?.classification !== 'LIMITED_RUNTIME' || body.privilege?.rolbypassrls !== false || body.privilege?.rolsuper !== false) result = fail(5, 'DATABASE_PRIVILEGE_UNEXPECTED')
+            const planeDefect = sessionPlaneDefect(body, plane, report.recipientKeyId)
+            if (planeDefect) result = fail(5, planeDefect)
             else if (options.prior) {
               // A continuation session carries only the remaining counts; its verdict is the reconciled chain's.
               const reconciled = reconcileCatalogSessions([
@@ -651,17 +870,19 @@ export async function executeCatalogJob(env, spawn, options = {}) {
                 report.mergedCatalog = merged
                 report.continuationToken = buildContinuationToken(merged, { ...SESSION_BINDING, source, sessionId: options.prior.token.baselineSessionId }, clock.now())
                 report.verdict = reconciled.verdict
+                report.planeVerdict = reconciled.evaluation?.planeVerdict ?? null
                 report.catalogAccepted = reconciled.verdict === 'CATALOG_COMPLETE'
-                report.manifest = { ...report.manifest, verdict: reconciled.verdict, chain: { sessions: merged.sessions, baselineSessionId: options.prior.token.baselineSessionId },
+                report.manifest = { ...report.manifest, verdict: reconciled.verdict, planeVerdict: report.planeVerdict, consistency: reconciled.consistency, chain: { sessions: merged.sessions, baselineSessionId: options.prior.token.baselineSessionId },
                   counts: evidenceManifest({ binding: { ...binding, image: env.OPERATOR_IMAGE }, evidence, catalog: merged, evaluation: reconciled.evaluation, revision: report.revision }).counts }
-                result = report.catalogAccepted ? { exitCode: 0, report } : fail(5, reconciled.verdict)
+                result = planeResult(report, reconciled.verdict, fail)
               }
             } else {
               report.mergedCatalog = { ...body, lastObservedAt: body.observedAt, sessions: [body.observedAt] }
               report.continuationToken = buildContinuationToken(body, { ...SESSION_BINDING, source, sessionId: env.GITHUB_RUN_ID }, clock.now())
               report.verdict = parsed.verdict
+              report.planeVerdict = body.evaluation?.planeVerdict ?? null
               report.catalogAccepted = parsed.verdict === 'CATALOG_COMPLETE'
-              result = parsed.ok ? { exitCode: 0, report } : fail(5, parsed.verdict)
+              result = planeResult(report, parsed.verdict, fail)
             }
           }
         }
@@ -685,7 +906,7 @@ export async function executeCatalogJob(env, spawn, options = {}) {
 /** Cleanup-only mode for interrupted runs: same ownership, settle and absence rules. */
 export async function cleanupForRun(env, spawn, clock) {
   const name = jobNameForRun(env.GITHUB_RUN_ID)
-  const expected = { name, runId: env.GITHUB_RUN_ID, source: env.GITHUB_SHA, image: env.OPERATOR_IMAGE }
+  const expected = { name, runId: env.GITHUB_RUN_ID, source: env.GITHUB_SHA, image: env.OPERATOR_IMAGE, plane: env.UE_CATALOG_PLANE || 'runtime' }
   const cleanup = await cleanupOwnedJob(spawn, expected, clock)
   return { schema: 'ue-v2-staging-catalog-cleanup/v1', job: name, ...cleanup }
 }
@@ -714,12 +935,13 @@ export function launch(executable, args) {
 }
 
 /** Build-time smoke: the real image's entrypoint must resolve pg and frame its refusal without a database. */
-export function verifyImageSmoke(stdout, expected) {
+export function verifyImageSmoke(stdout, expected, blocker = 'DATABASE_URL_ABSENT') {
+  if (!['DATABASE_URL_ABSENT', 'EVIDENCE_RECIPIENT_MISSING'].includes(blocker)) return { ok: false, defect: 'OPERATOR_IMAGE_SMOKE_FAILED' }
   const lines = String(stdout).split('\n').filter((line) => line.startsWith(`${EVIDENCE_FRAME} `))
   const evidence = reassembleCatalog(lines, expected)
   if (!evidence.ok) return { ok: false, defect: evidence.defect }
   const body = JSON.parse(evidence.body)
-  if (body.client?.resolved !== true || body.runtime?.uid !== 1001 || body.blocker !== 'DATABASE_URL_ABSENT') return { ok: false, defect: 'OPERATOR_IMAGE_SMOKE_FAILED', body }
+  if (body.client?.resolved !== true || body.runtime?.uid !== 1001 || body.blocker !== blocker) return { ok: false, defect: 'OPERATOR_IMAGE_SMOKE_FAILED', body }
   if (!/^\/app\/node_modules\/pg\//.test(String(body.runtime?.pgPath ?? '')) || body.runtime?.entry !== '/app/ue-catalog/operator.cjs') return { ok: false, defect: 'OPERATOR_IMAGE_SMOKE_FAILED', body }
   return { ok: true, runtime: body.runtime }
 }
@@ -729,9 +951,52 @@ if (invoked) {
   const flag = (name) => { const index = process.argv.indexOf(name); return index >= 0 ? process.argv[index + 1] : '' }
   if (process.argv.includes('--verify-image-smoke')) {
     const { readFileSync } = await import('node:fs')
-    const verdict = verifyImageSmoke(readFileSync(flag('--verify-image-smoke'), 'utf8'), { runId: process.env.GITHUB_RUN_ID, source: process.env.GITHUB_SHA })
+    const verdict = verifyImageSmoke(readFileSync(flag('--verify-image-smoke'), 'utf8'), { runId: process.env.GITHUB_RUN_ID, source: process.env.GITHUB_SHA }, flag('--expect-blocker') || undefined)
     console.log(JSON.stringify(verdict))
     process.exit(verdict.ok ? 0 : 1)
+  }
+  const repositoryRoot = realpathSync(path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..'))
+  // Resolve symlinks through the nearest existing ancestor, so a link cannot point output into the repository.
+  const resolved = (target) => {
+    let probe = path.resolve(target)
+    const rest = []
+    while (!existsSync(probe)) { rest.unshift(path.basename(probe)); probe = path.dirname(probe) }
+    return path.join(realpathSync(probe), ...rest)
+  }
+  const outsideRepository = (target) => { const full = resolved(target); return full !== repositoryRoot && !full.startsWith(repositoryRoot + path.sep) }
+  if (process.argv.includes('--generate-recipient')) {
+    // Founder-only, offline. The private key is written once, 0600, outside the repository.
+    const target = flag('--generate-recipient')
+    if (!target || !outsideRepository(target)) { console.error('RECIPIENT_KEY_PATH_REFUSED'); process.exit(1) }
+    const pair = generateRecipientKeyPair()
+    writeFileSync(target, pair.privateKeyPem, { mode: 0o600, flag: 'wx' })
+    console.log(JSON.stringify({ variable: RECIPIENT_VARIABLE, publicKey: pair.publicKey, keyId: pair.keyId }))
+    process.exit(0)
+  }
+  if (process.argv.includes('--assemble')) {
+    // Founder-only, offline: open privileged sessions, reconcile both planes, keep values local.
+    const target = flag('--out')
+    if (!target || !outsideRepository(target)) { console.error('PREIMAGE_OUTPUT_PATH_REFUSED'); process.exit(1) }
+    const list = (name) => flag(name).split(',').filter(Boolean)
+    let privateKeyPem
+    if (flag('--key')) {
+      // Like ssh: a private key readable by anyone else is refused.
+      if ((statSync(flag('--key')).mode & 0o077) !== 0) { console.error('RECIPIENT_KEY_PERMISSIONS_TOO_OPEN'); process.exit(1) }
+      privateKeyPem = readFileSync(flag('--key'), 'utf8')
+    }
+    const runtime = assemblePlane(list('--runtime'))
+    const privileged = assemblePlane(list('--privileged'), { privateKeyPem })
+    const result = runtime.defect || privileged.defect
+      ? { verdict: 'CATALOG_REFUSED', reason: runtime.defect ? `RUNTIME_${runtime.defect}` : `PRIVILEGED_${privileged.defect}` }
+      : reconcilePlanes({ runtime, privileged })
+    mkdirSync(target, { recursive: true, mode: 0o700 })
+    chmodSync(target, 0o700)
+    const privateText = `${JSON.stringify({ result, runtime: runtime.catalog ?? null, privileged: privileged.catalog ?? null }, null, 2)}\n`
+    writeFileSync(path.join(target, 'preimage-private.json'), privateText, { mode: 0o600, flag: 'wx' })
+    const privateDigest = createHash('sha256').update(Buffer.from(privateText, 'utf8')).digest('hex')
+    writeFileSync(path.join(target, 'preimage-summary.json'), `${JSON.stringify(preimageSummary(result, privateDigest), null, 2)}\n`, { mode: 0o600, flag: 'wx' })
+    console.log(`preimage=${result.verdict} reason=${result.reason ?? 'none'} private=${privateDigest} S2_02_PREIMAGE_COMPLETE=NO`)
+    process.exit(result.verdict === 'CATALOG_COMPLETE' ? 0 : 5)
   }
   const directory = flag('--out')
   if (!directory) {
@@ -748,6 +1013,6 @@ if (invoked) {
   const prior = process.env.UE_CATALOG_PRIOR_DIR ? loadPriorSession(process.env.UE_CATALOG_PRIOR_DIR) : undefined
   const result = await executeCatalogJob(process.env, launch, { prior })
   const digest = writeJobArtifacts(directory, result.report)
-  console.log(`catalog=${result.report.verdict ?? 'CATALOG_REFUSED'} sha256=${digest} defects=${result.report.defects.join(',')} S2_02_PREIMAGE_COMPLETE=NO`)
+  console.log(`catalog=${result.report.verdict ?? 'CATALOG_REFUSED'} plane=${result.report.plane ?? 'runtime'} planeVerdict=${result.report.planeVerdict ?? 'none'} sha256=${digest} defects=${result.report.defects.join(',')} S2_02_PREIMAGE_COMPLETE=NO`)
   process.exit(result.report.defects.some((defect) => defect === 'JOB_CLEANUP_FAILED' || defect === 'JOB_CLEANUP_UNPROVEN') ? 6 : result.exitCode)
 }
