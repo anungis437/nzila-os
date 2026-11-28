@@ -40,17 +40,19 @@ describe('UeIntegrationFabric', () => {
     expect(UE_INTEGRATION_EVENTS['case.created']).toBe('case.created');
   });
 
-  it('processInboundCase applies mapping, links identity and returns a run id', async () => {
+  it('processInboundCase maps but refuses success without durable persistence', async () => {
     const result = await fabric.processInboundCase(
       connection,
       { foo: 'bar' },
       { id: 'rule1' } as never,
       'actor1'
     );
-    expect(result.success).toBe(true);
-    expect(result.runId).toBeTruthy();
+    expect(result.success).toBe(false);
+    expect(result.runId).toBe('');
+    expect(result.reason).toBe('INBOUND_PERSISTENCE_NOT_CONFIGURED');
+    expect(result.mappedPayload).toEqual({ externalCaseId: 'ext-1' });
     expect(deps.mappingEngine.execute).toHaveBeenCalled();
-    expect(deps.identityLinker.link).toHaveBeenCalled();
+    expect(deps.identityLinker.link).not.toHaveBeenCalled();
   });
 
   it('processInboundCase returns failure when mapping has errors', async () => {
@@ -63,12 +65,15 @@ describe('UeIntegrationFabric', () => {
     );
     expect(result.success).toBe(false);
     expect(result.runId).toBe('');
+    expect(result.reason).toBe('MAPPING_REJECTED');
     expect(deps.identityLinker.link).not.toHaveBeenCalled();
   });
 
   it('processInboundCase without mapping rule or external id skips linking', async () => {
     const result = await fabric.processInboundCase(connection, { foo: 'bar' }, null, 'actor1');
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+    expect(result.reason).toBe('INBOUND_PERSISTENCE_NOT_CONFIGURED');
+    expect(result.runId).toBe('');
     expect(deps.identityLinker.link).not.toHaveBeenCalled();
   });
 
@@ -87,6 +92,12 @@ describe('UeIntegrationFabric', () => {
     deps.identityLinker.resolve = vi.fn().mockResolvedValue({ found: false }) as never;
     const id = await fabric.resolveExternalId('org1', UE_ENTITY_TYPES.CASE, 'ext-1', 'workday');
     expect(id).toBeNull();
+  });
+
+  it('resolveExternalId refuses stale and blank identity targets', async () => {
+    deps.identityLinker.resolve = vi.fn().mockResolvedValueOnce({ found: true, internalId: 'int-1', stale: true }).mockResolvedValueOnce({ found: true, internalId: '', stale: false }) as never;
+    expect(await fabric.resolveExternalId('org1', UE_ENTITY_TYPES.CASE, 'ext-1', 'workday')).toBeNull();
+    expect(await fabric.resolveExternalId('org1', UE_ENTITY_TYPES.CASE, 'ext-1', 'workday')).toBeNull();
   });
 
   it('previewMapping maps engine errors and warnings to strings', () => {
