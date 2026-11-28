@@ -431,6 +431,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-step1-integration-20261118",
         "note": "Forward-only database defaults for the Django BaseModel id/created_at/updated_at fields of the four case-scope relations (gen_random_uuid(), CURRENT_TIMESTAMP), exactly as the canonical V2 source plan installs them. Future inserts only; no row is changed."
+      },
+      {
+        "tag": "0063_procedural_rules_rls_closure",
+        "sha256": "6dbd1b5fb56cba73ae63898d9d597009573b0e06ecaa308cdac7370a6a96c2be",
+        "status": "UNQUALIFIED",
+        "introducedBy": "feat/ue-procedural-rules-engine",
+        "note": "Forward RLS for the seven procedural rule tables of platform 0090 via ue_create_direct_org_rls_policy (ENABLE + FORCE RLS, runtime org-isolation policies, system policy). Fail-closed prerequisite checks. No DML grants."
       }
     ],
     "platform": [
@@ -951,6 +958,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "a6ed0264eb6a9be1c0c791a4574e3d7c6a264fff",
         "note": "Inventory reconciliation only: existing founder-authored November 9 baseline ancestor source was present on main but absent from the additions registry. Its exact SQL bytes remain unchanged. Registration confers no runtime proof, no positive financial capability or release acceptance; the current base-release finance containment remains in force."
+      },
+      {
+        "tag": "0090_procedural_rules",
+        "sha256": "9087c9463ea69affdd1a9df0626210b0e8263fad80768e03b8ab65929082a265",
+        "status": "UNQUALIFIED",
+        "introducedBy": "feat/ue-procedural-rules-engine",
+        "note": "Versioned procedural intelligence (lane C, P1): seven new tenant tables for rule sources, versioned rule sets, versioned holiday calendars, append-only lifecycle events, grievance procedure bindings, grievance procedural facts and reviewable procedural exceptions, with lifecycle/append-only/void-only/same-organization triggers. No DML grants. RLS is scoped (cache) 0063. Registration confers no runtime proof."
       }
     ]
   }
