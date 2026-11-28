@@ -83,3 +83,12 @@ export { chartOfAccounts, chartOfAccountsRelations } from './erp';
 
 // syncStatusEnum - use erp.ts (primary definition)
 export { syncStatusEnum } from './erp';
+
+// Durable inbound integration (platform 0090, RLS scoped 0063)
+export {
+  ueIntegrationSources,
+  ueIntegrationMappingVersions,
+  ueIntegrationInboundReceipts,
+  ueIntegrationIdentityLinks,
+  ueIntegrationOutbox,
+} from './inbound-integration';
