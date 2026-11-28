@@ -4017,6 +4017,344 @@
           "operationallyActivated": false
         }
       ]
+    },
+    {
+      "id": "PSAC-01",
+      "source": "PSAC Constitution s9(1)-(2)",
+      "assertion": "Component policy consistency and exhausted internal remedy referral to PSAC with consultation; no automatic disclosure.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-02",
+      "source": "PSAC Constitution s7 and s9(5)(a)-(d)",
+      "assertion": "Separate ordinary component representation from adjudication; explicit approved delegated exception, scoped case access and referral receipt.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-B-001",
+        "UE-CAP-F-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-B-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-03",
+      "source": "PSAC Constitution s9(4)(b), s9(13)",
+      "assertion": "Convention delegate and resolution deadline six months before PSAC convention, eligible delegate and alternate snapshots.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-OMIT-COMMITTEE-WORKSPACE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-04",
+      "source": "PSAC Constitution s9(8), s24",
+      "assertion": "Annual audited financial statement handoff to PSAC; layered dues and authorization; no live financial execution without adopted mandate.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-D-001",
+        "UE-CAP-D-002",
+        "UE-CAP-D-003"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-D-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-05",
+      "source": "PSAC Constitution s25(9), regulation on trusteeship and administration",
+      "assertion": "PSAC-level trusteeship appointment is distinct from ordinary CIU branch trusteeship; prove explicit authority scope, restoration and access revocation.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-A-003",
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+        "UE-CAP-K-011"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-06",
+      "source": "PSAC Regulation 15A ss3.7.5-3.7.9; 2026 strike vote FAQ",
+      "assertion": "Distinguish strike and ratification eligibility from officer elections; bargaining-unit employment eligibility, information session gate and approved variations; conflicting policy escalated rather than inferred.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-07",
+      "source": "PSAC Treasury Board strike vote FAQ 2026-10-23",
+      "assertion": "Provider-neutral voting interoperability; Vogo current PSAC vote vs Intelivote CIU branch election; no assumed API, ballot data or live voting activation.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-08",
+      "source": "PSAC Treasury Board strike vote FAQ 2026-10-23",
+      "assertion": "PA/TC/EB event membership snapshot, exclude SV and FB from this particular event, handle term/casual/student/WFA eligibility through approved policies.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-09",
+      "source": "PSAC membership dues FAQ and about union dues",
+      "assertion": "Versioned flat/percentage rates, first salary step, part-time treatment, exclusions, strike-fund contribution and transfers; reconcile source without hardcoding dated figures.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-D-001",
+        "UE-CAP-D-002",
+        "UE-CAP-D-003",
+        "UE-OMIT-MEMBER-DUES-SELF-SERVICE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-D-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "PSAC-10",
+      "source": "PSAC Privacy Policy November 2024",
+      "assertion": "Purpose limitation, sensitivity-based permissions, authorized sharing, retention and privacy-request workflows; actual CIU and PSAC processing roles subject to authorized discovery.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-PRIVACY-RIGHTS",
+        "UE-CAP-E-001",
+        "UE-CAP-F-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing dependencies only; exact action/authority proof required.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-PRIVACY-RIGHTS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     }
   ],
   "publicFederalSources": [
@@ -4031,5 +4369,14 @@
     "sha": "30a11767d8b8c61f191faeb8429724884b77faa4",
     "capabilityCount": 111,
     "note": "Historical matrix baseline; statuses are source inventory not current release truth. Do not alter canonical matrix as part of CIU overlay."
-  }
+  },
+  "publicPSACSources": [
+    "https://psacunion.ca/our-constitution",
+    "https://psacunion.ca/sites/psac/files/psac.constitution.november_2024_edition.eng_v002.pdf",
+    "https://syndicatafpc.ca/statuts-reglements",
+    "https://psacunion.ca/faq-treasury-board-strike-votes",
+    "https://psacunion.ca/membership-dues-faq",
+    "https://psacunion.ca/membership-good-standing",
+    "https://psacunion.ca/psac-privacy-policy-protection-personal"
+  ]
 }
