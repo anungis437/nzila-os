@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   ApiError: {
     badRequest: vi.fn((msg: string) => Object.assign(new Error(msg), { status: 400 })),
+    externalService: vi.fn((service: string, msg: string) => Object.assign(new Error(`${service}: ${msg}`), { status: 502 })),
   },
   withRLSContext: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn() },
@@ -61,7 +62,8 @@ describe('members/import route', () => {
     m.conflictingEmails = new Set();
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockTx));
-    m.getUserList.mockResolvedValue({ data: [] });
+    // By default every email resolves to exactly one directory identity (tests of unresolved identities override this).
+    m.getUserList.mockImplementation(async ({ emailAddress }: { emailAddress: string[] }) => ({ data: [{ id: `entra_${emailAddress[0]}` }] }));
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (request: NextRequest, ctx: any = { organizationId: 'org_1', userId: 'steward_1' }) => {
@@ -150,5 +152,71 @@ describe('members/import route', () => {
     m.insertShouldFail = false;
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
     expect((await POST(csv('email,name\na@example.com,Alpha'))).status).toBe(500);
+  });
+
+  // ─── Identity resolution: an import never mints a person ─────────────────
+
+  it('POST does not import a row whose email has no directory identity, and reports it by row number', async () => {
+    const { POST } = await loadRoute();
+    m.getUserList.mockImplementation(async ({ emailAddress }: { emailAddress: string[] }) =>
+      ({ data: emailAddress[0] === 'known@example.com' ? [{ id: 'entra_known' }] : [] }));
+
+    const response = await POST(csv('email,name\nunknown@example.com,Unknown\nknown@example.com,Known'));
+
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.processed).toBe(1);
+    expect(json.skipped).toBe(1);
+    expect(json.unresolved).toEqual([{ row: 2, reason: 'NO_DIRECTORY_IDENTITY' }]);
+    expect(m.insertedRows).toHaveLength(1);
+    expect(m.insertedRows[0]).toMatchObject({ userId: 'entra_known', email: 'known@example.com' });
+  });
+
+  it('POST imports the same unknown person twice without ever creating a membership', async () => {
+    const { POST } = await loadRoute();
+    m.getUserList.mockResolvedValue({ data: [] });
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const json = await (await POST(csv('email,name\nghost@example.com,Ghost'))).json();
+      expect(json.processed).toBe(0);
+      expect(json.unresolved).toEqual([{ row: 2, reason: 'NO_DIRECTORY_IDENTITY' }]);
+    }
+    expect(m.insertedRows).toHaveLength(0);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST refuses an email that matches more than one directory identity', async () => {
+    const { POST } = await loadRoute();
+    m.getUserList.mockResolvedValue({ data: [{ id: 'entra_a' }, { id: 'entra_b' }] });
+
+    const json = await (await POST(csv('email,name\nshared@example.com,Shared'))).json();
+
+    expect(json.processed).toBe(0);
+    expect(json.unresolved).toEqual([{ row: 2, reason: 'AMBIGUOUS_DIRECTORY_IDENTITY' }]);
+    expect(m.insertedRows).toHaveLength(0);
+  });
+
+  it('POST fails the whole import, writing nothing, when the directory lookup fails', async () => {
+    const { POST } = await loadRoute();
+    m.getUserList
+      .mockResolvedValueOnce({ data: [{ id: 'entra_first' }] })
+      .mockRejectedValueOnce(new Error('directory unavailable'));
+
+    const response = await POST(csv('email,name\nfirst@example.com,First\nsecond@example.com,Second'));
+
+    expect(response.status).toBe(502);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.insertedRows).toHaveLength(0);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST imports an email that appears twice in the file once, and reports the repeat', async () => {
+    const { POST } = await loadRoute();
+
+    const json = await (await POST(csv('email,name\nsame@example.com,Same\nSAME@example.com,Same Again'))).json();
+
+    expect(json.processed).toBe(1);
+    expect(json.unresolved).toEqual([{ row: 3, reason: 'DUPLICATE_IN_FILE' }]);
+    expect(m.insertedRows).toHaveLength(1);
   });
 });

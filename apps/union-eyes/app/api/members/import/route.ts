@@ -8,6 +8,11 @@
  *
  * Synchronous processing is used here (parse + insert) for simplicity.
  * A job ID is generated so the response shape is compatible with async expectations.
+ *
+ * An import never creates a person. Each row's email must resolve to exactly one identity in the directory; a row with no identity,
+ * with more than one, or repeating an earlier row's email is not imported and is reported by its CSV line number. If the directory
+ * cannot be asked, the whole import fails before anything is written (it used to mint a random user id, which made a second,
+ * unreachable membership for the same person on every re-import).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -54,17 +59,19 @@ export const POST = withApi(
 
     const rows = parseCSV(csvText);
     if (rows.length === 0) {
-      return { job: { id: crypto.randomUUID() }, processed: 0, skipped: 0 };
+      return { job: { id: crypto.randomUUID() }, processed: 0, skipped: 0, unresolved: [] };
     }
 
     const jobId = crypto.randomUUID();
     let skipped = 0;
 
-    // Resolve auth client for user lookups; fall back to provisional UUIDs if unavailable
-    const authClient = adminClient;
-
+    type Unresolved = { row: number; reason: 'NO_DIRECTORY_IDENTITY' | 'AMBIGUOUS_DIRECTORY_IDENTITY' | 'DUPLICATE_IN_FILE' };
+    const unresolved: Unresolved[] = [];
+    const seenEmails = new Set<string>();
     const candidates: Array<{ userId: string; name: string; email: string }> = [];
-    for (const row of rows) {
+
+    for (const [index, row] of rows.entries()) {
+      const line = index + 2; // the header is line 1
       const email = (row['email'] ?? row['Email'] ?? '').trim();
       const name  = (row['name']  ?? row['Name']  ?? row['full_name'] ?? '').trim();
       const role  = (row['role']  ?? row['Role']  ?? 'member').trim().toLowerCase();
@@ -73,16 +80,22 @@ export const POST = withApi(
       // An import is not a way to grant authority: only plain membership can be imported.
       if (role !== 'member') { skipped++; continue; }
 
-      // Look up the auth user by email; fall back to a provisional UUID if not found
-      let resolvedUserId: string = crypto.randomUUID();
+      const key = email.toLowerCase();
+      if (seenEmails.has(key)) { unresolved.push({ row: line, reason: 'DUPLICATE_IN_FILE' }); continue; }
+      seenEmails.add(key);
+
+      let matches: Array<{ id: string }>;
       try {
-        const found = await authClient.users.getUserList({ emailAddress: [email] });
-        if (found.data.length > 0) resolvedUserId = found.data[0].id;
-      } catch {
-        // Keep the provisional UUID
+        matches = (await adminClient.users.getUserList({ emailAddress: [email] })).data;
+      } catch (error) {
+        logger.warn('Member import stopped: directory lookup failed', { jobId, organizationId, line, error: error instanceof Error ? error.message : String(error) });
+        throw ApiError.externalService('Directory', 'member identities could not be resolved; nothing was imported');
       }
-      candidates.push({ userId: resolvedUserId, name: name || email, email });
+      if (matches.length === 0) { unresolved.push({ row: line, reason: 'NO_DIRECTORY_IDENTITY' }); continue; }
+      if (matches.length > 1) { unresolved.push({ row: line, reason: 'AMBIGUOUS_DIRECTORY_IDENTITY' }); continue; }
+      candidates.push({ userId: matches[0].id, name: name || email, email });
     }
+    skipped += unresolved.length;
 
     // The memberships and the audit record commit together; a failed audit leaves no imported members.
     const processed = await withRLSContext({ organizationId }, async (tx) => {
@@ -116,9 +129,9 @@ export const POST = withApi(
     });
     skipped += candidates.length - processed;
 
-    logger.info('Members imported', { jobId, processed, skipped, organizationId });
+    logger.info('Members imported', { jobId, processed, skipped, unresolved: unresolved.length, organizationId });
 
-    return { job: { id: jobId }, processed, skipped };
+    return { job: { id: jobId }, processed, skipped, unresolved };
   },
 );
 
