@@ -158,3 +158,34 @@ Both sessions ran from `main` `2927b25caaa3ad2f6b4c2616acc8352e2dbbf98e` (merge 
   - Plane B restarts from a fresh baseline on the merged `main`. Plane A stays valid, because plane reconciliation does not bind the source SHA.
 
 Receipts for all four runs (`SHA256SUMS`, `evidence-manifest.json`, `cleanup.json`) are in `run-<id>/`, byte-identical to the artifacts. Full artifacts are held privately (directories 0700, files 0600).
+
+## 11. Plane B captured in one snapshot; offline assembly
+
+- **Run 46084209107.** Dispatched from `main` `445451712b56da74fa572dd1c5928045c0f9d99b` (merge of PR #1325, ceiling 1,000), on revision `rel6a60c95c9d`. The founder authorized it and approved `build` and `ue-staging`.
+  - Result: `PLANE_CAPTURED_SEALED`, no defects, exit 0.
+  - Session: `uev2admin`, `REPEATABLE READ`, both read-only settings on, `ROLLBACK`. `rolbypassrls` true, `rolsuper` false.
+  - Coverage: all 790 tables counted in one transaction, in 6.8 s of the 45 s budget (23:53:51.781Z to 23:53:58.536Z). No continuation token was issued.
+  - Settle check: opening and settled counters were equal after 75,053 ms.
+  - Sealing: values are sealed to `bd8fa0572d31b7ce`. There is no clear count or ledger row in the artifact. None of the 40 ledger hashes appears in the artifact or the run log. Opened offline, the evidence is bound to this run and source, and evaluates to `PLANE_ACCEPTED`.
+  - Integrity: every file verifies against `SHA256SUMS`.
+  - Cleanup: `deleted: true, absent: true`, and `az containerapp job show` returns `ResourceNotFound`.
+- **Assembly.** Run offline on the founder machine with the founder key: `--assemble --runtime <46036574426>,<46038068694> --privileged <46084209107>`. Nothing contacted staging.
+  - Verdict: `CATALOG_COMPLETE`, with all 15 categories accepted.
+  - The output is private: directory 0700, files 0600. Only `preimage-20261127/preimage-summary.json` (classifications and digests, no values) is in this folder.
+  - Its `privateEvidenceSha256` (`7e326e99…afbec`) binds it to the private preimage.
+- **Correction made with this record.** The first assembly gave the runtime plane the privileged caveat. That caveat claims row-change statistics and the migration ledger were identical across sessions. The runtime plane reads neither, and counts in plain `READ ONLY`, not `REPEATABLE READ`.
+  - `RUNTIME_CONSISTENCY_CAVEAT` now states only what runtime reconciliation compares: inventory, column structure, and relation and policy metadata. It says that data changes between runtime sessions are not detected.
+  - The assembly was re-run with the correction. The two private preimages differ only in that caveat text. The first (`430f6e08…f58e00`) is kept privately as superseded.
+- **What the result does and does not establish.**
+  - Plane B (exact global totals and the migration ledger) is one atomic snapshot: `ONE_REPEATABLE_READ_TRANSACTION`.
+  - Plane A (posture, plus role-visible counts that are never totals) is two sessions with unchanged structure, not one snapshot.
+  - The planes were captured about six hours apart, from two `main` SHAs that differ only in the statement ceiling. `crossPlaneAtomic` is false.
+  - Statistics counters detect recorded writes. They are not a complete detector of every mutation.
+  - `public.audit_logs` grows continuously on live staging, so the preimage describes 2026-11-27 23:53:51Z for totals.
+- **Flags.** `CATALOG_COMPLETE` from assembly is the evidence. It is not acceptance. `S2.02_PREIMAGE_COMPLETE` stays `NO` and `S2.02_LEGACY_GATE` stays `INDETERMINATE` until the founder reviews `preimage-private.json` and accepts S2.02. Every other flag in the table above is unchanged.
+- **Open after-steps (founder).**
+  - Review the private preimage.
+  - Remove `UE_V2_STAGING_CATALOG_RECIPIENT` when no longer needed.
+  - Consider rotating the `uev2admin` password.
+  - Decide on early deletion of run 45940281038's artifact (expires 2026-12-04).
+  - The deploy and merge freezes for the chains are no longer needed.
