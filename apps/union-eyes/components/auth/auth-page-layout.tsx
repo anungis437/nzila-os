@@ -133,23 +133,7 @@ export default function AuthPageLayout({
             )}
           </div>
 
-          {/* Bottom: Trust indicators */}
-          <motion.div
-            className="flex items-center gap-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-emerald/20 text-emerald">
-              SOC 2 Compliant
-            </span>
-            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-gold/20 text-gold">
-              PIPEDA Ready
-            </span>
-            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-white/10 text-gray-300">
-              End-to-End Encrypted
-            </span>
-          </motion.div>
+          {/* No assurance badges: a certification, compliance or encryption claim is shown only with evidence on file (none is). */}
         </div>
       </div>
 
