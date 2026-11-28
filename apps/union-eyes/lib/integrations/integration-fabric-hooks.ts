@@ -15,6 +15,7 @@ import { IntegrationExecutionEngine } from '@nzila/platform-integrations/executi
 import { MappingEngine } from '@nzila/platform-integrations/mapping-engine'
 import { WebhookEngine } from '@nzila/platform-integrations/webhook-engine'
 import { IdentityLinker } from '@nzila/platform-integrations/identity-linker'
+import type { DurableInboundCaseExecutor, InboundDelivery, InboundOutcome } from './inbound/durable-inbound-executor'
 
 // ─── UE Entity Types ─────────────────────────────────────────────────────────
 
@@ -81,6 +82,8 @@ export interface UeIntegrationFabricDeps {
   mappingEngine: MappingEngine
   webhookEngine: WebhookEngine
   identityLinker: IdentityLinker
+  /** The durable inbound path (lib/integrations/inbound). Absent: inbound cases are refused, never faked. */
+  inboundCaseExecutor?: Pick<DurableInboundCaseExecutor, 'execute'>
 }
 
 /**
@@ -127,6 +130,15 @@ export class UeIntegrationFabric {
       success: false,
       reason: 'INBOUND_PERSISTENCE_NOT_CONFIGURED',
     }
+  }
+
+  /**
+   * Execute an inbound case durably: authorized source, claim, versioned mapping, validation, identity reconciliation,
+   * case write with audit, receipt and outbox event in one transaction. Without a configured executor it refuses.
+   */
+  async executeInboundCase(delivery: InboundDelivery): Promise<InboundOutcome | { kind: 'unavailable'; code: 'INBOUND_PERSISTENCE_NOT_CONFIGURED'; persisted: false }> {
+    if (!this.deps.inboundCaseExecutor) return { kind: 'unavailable', code: 'INBOUND_PERSISTENCE_NOT_CONFIGURED', persisted: false }
+    return this.deps.inboundCaseExecutor.execute(delivery)
   }
 
   /**
