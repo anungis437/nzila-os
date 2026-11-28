@@ -298,6 +298,10 @@ export const organizationMembers = pgTable(
     position: text('position'),
     hireDate: timestamp('hire_date', { withTimezone: true }),
     membershipNumber: text('membership_number'),
+    // The member's stable identifier in an external system of record (platform 0089): whole or absent (a CHECK), one membership per
+    // (organization, source, external id) (a partial unique index, also the concurrency guard for imports). Never matched on a name or an email.
+    externalMemberSource: varchar('external_member_source', { length: 100 }),
+    externalMemberId: varchar('external_member_id', { length: 255 }),
     seniority: integer('seniority'),
     unionJoinDate: timestamp('union_join_date', { withTimezone: true }),
     metadata: jsonb('metadata').$type<Record<string, unknown> | null>(),
@@ -325,6 +329,9 @@ export const organizationMembers = pgTable(
     orgIdIdx: index('idx_organization_members_org_id').on(table.organizationId),
     userIdIdx: index('idx_organization_members_user_id').on(table.userId),
     demoSeedIdx: index('idx_organization_members_demo_seed').on(table.organizationId, table.demoSeedId).where(sql`${table.demoSeedId} IS NOT NULL`),
+    externalIdentity: uniqueIndex('ux_organization_members_external_identity')
+      .on(table.organizationId, table.externalMemberSource, table.externalMemberId)
+      .where(sql`${table.externalMemberId} IS NOT NULL`),
     uniqueMembership: uniqueIndex('unique_org_membership').on(
       table.organizationId,
       table.userId
