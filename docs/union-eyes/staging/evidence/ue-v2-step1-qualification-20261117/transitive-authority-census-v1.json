@@ -4,17 +4,17 @@
   "scope": "app/api mutation exports (POST/PUT/PATCH/DELETE)",
   "proxyAuthenticatesApi": false,
   "summary": {
-    "mutationExports": 921,
+    "mutationExports": 931,
     "byClass": {
       "CAPABILITY_TOKEN": 22,
-      "GUARDED_SESSION": 603,
+      "GUARDED_SESSION": 613,
       "PUBLIC_INTAKE_GUARDED": 4,
       "PUBLIC_REGISTRY": 3,
       "REFUSAL_STUB": 286,
       "SIGNED_OR_SECRET": 1,
       "UNCLASSIFIED": 2
     },
-    "guardedWithRouteTest": 500,
+    "guardedWithRouteTest": 510,
     "guardedWithoutRouteTest": 103,
     "unclassified": [],
     "reviewedUnclassified": [
@@ -3494,6 +3494,36 @@
       "testFiles": 2
     },
     {
+      "route": "/api/grievances/[id]/procedure/calculate",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/grievances/[id]/procedure/exceptions/[exceptionId]",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/grievances/[id]/procedure/facts/[factId]/void",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/grievances/[id]/procedure/facts",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/grievances/[id]/procedure",
+      "method": "PUT",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
       "route": "/api/grievances/[id]/recommend-steward",
       "method": "POST",
       "class": "GUARDED_SESSION",
@@ -4803,6 +4833,36 @@
     },
     {
       "route": "/api/privacy/threads/[threadId]",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/procedural-rules/holiday-calendars/[id]/lifecycle",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/procedural-rules/holiday-calendars",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/procedural-rules/rule-sets/[id]/lifecycle",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/procedural-rules/rule-sets",
+      "method": "POST",
+      "class": "GUARDED_SESSION",
+      "testFiles": 1
+    },
+    {
+      "route": "/api/procedural-rules/sources",
       "method": "POST",
       "class": "GUARDED_SESSION",
       "testFiles": 1
