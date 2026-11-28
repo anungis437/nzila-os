@@ -12479,5 +12479,27 @@
     "evidence": "evidence/ue-v2-forward-upgrade-20261122/operator-binding-6a60c95c.json"
   },
   "latestObservedCandidateDeltaScope": "ENGINEERING_AND_NORMAL_APPLICATION_ADMISSION_ONLY_CURRENT_SOURCE_RUNTIME_PENDING",
-  "scopedStagingDecisionSourceSha": "241006d302c14567e541d619675fbead3ec3f258"
+  "scopedStagingDecisionSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "currentReleaseExecution": {
+    "observedAt": "2026-11-23T22:44:02.282355+00:00",
+    "applicationCandidateSourceSha": "e508c801f5e1f929dfaff2c33b55862f57785485",
+    "normalApplicationAdmissionMergeSha": "97cd90fb029af07dbfcbf4455c1068acfd6e1cb8",
+    "applicationPullRequest": 1307,
+    "applicationLocalFivePassed": true,
+    "applicationCiPassed": true,
+    "applicationRequiredCheckInstancesPassed": 19,
+    "applicationRequiredContextNames": 16,
+    "currentlyServingSourceSha": "6a60c95c9de17e9343e0414bb51766afbc190054",
+    "originalSchemaUpgradeApplyRunId": 45238707739,
+    "schemaUpgradeCommitted": true,
+    "originalSchemaUpgradeReceiptRetained": true,
+    "requiredScopeNodes": 654,
+    "requiredStoredRoleBoundaries": 34,
+    "newCandidateImageRollout": "PENDING_QUALIFIED_BUILD_AND_NORMAL_OPERATOR_ADMISSION",
+    "baseStagingAcceptance": false,
+    "financeFeatureImplementation": false,
+    "productionDeployment": false,
+    "evidence": "docs/union-eyes/staging/evidence/ue-v2-forward-upgrade-20261122/admitted-app-source-e508c801.json",
+    "priorLedgerStatesPreservedForFinalEvidenceReconciliation": true
+  }
 }
