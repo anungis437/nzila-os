@@ -32,6 +32,49 @@ vi.mock('@/db/db', () => ({
 // ─── Import under test ──────────────────────────────────────────────────────
 
 import { verifyImportBatch } from '../post-import-verification';
+import { PgDialect } from 'drizzle-orm/pg-core';
+
+const dialect = new PgDialect();
+const textOf = (query: unknown) => dialect.sqlToQuery(query as never).sql;
+
+/**
+ * The eight transport checks get their responses in order from each test. The manifest and content checks that follow
+ * (§12.9–§12.11) are answered here, consistently with that test's own batch record and document count, as a clean
+ * import would leave them; `manifestState` lets a test break one of them.
+ */
+const manifestState = vi.hoisted(() => ({ manifest: 'clean' as 'clean' | 'absent' | 'unsealed' | 'no-source', missingCase: false, evidence: 'verified' as 'verified' | 'reference' | 'mismatch' }));
+
+async function settled(index: number): Promise<any> {
+  const result = mocks.mockExecute.mock.results[index];
+  return result ? await result.value : undefined;
+}
+
+async function manifestResponder(query: unknown): Promise<unknown[]> {
+  const text = textOf(query);
+  const meta = (await settled(7))?.[0];
+  const documents = (await settled(4))?.[0]?.cnt ?? 0;
+  if (text.includes('FROM ue_ingestion_batch_manifests m')) {
+    if (manifestState.manifest === 'absent' || !meta) return [];
+    return [{
+      source_system: 'legacy', source_manifest_id: manifestState.manifest === 'no-source' ? null : 'manifest-1', predecessor_batch_id: null,
+      record_count: meta.total_records, succeeded: manifestState.manifest === 'unsealed' ? null : meta.succeeded,
+      failed: manifestState.manifest === 'unsealed' ? null : meta.failed, sealed: manifestState.manifest !== 'unsealed', successor_batch_id: null,
+    }];
+  }
+  if (text.includes('FROM ue_ingestion_source_manifests')) {
+    return [{ source_system: 'legacy', expected_case_ids: manifestState.missingCase ? ['C-1', 'C-2'] : ['C-1'], expected_document_count: documents }];
+  }
+  if (text.includes('FROM ue_ingestion_record_provenance')) return [{ external_case_id: 'C-1' }];
+  if (text.includes('ue_imported_document_evidence')) {
+    return [{
+      verified: manifestState.evidence === 'verified' ? documents : 0,
+      reference_only: manifestState.evidence === 'reference' ? documents : 0,
+      mismatched: manifestState.evidence === 'mismatch' ? documents : 0,
+      without_evidence: 0,
+    }];
+  }
+  return [];
+}
 
 // ─── Default Mock Responses ─────────────────────────────────────────────────
 
@@ -72,6 +115,9 @@ function setCleanMocks() {
 describe('verifyImportBatch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.mockExecute.mockReset();
+    mocks.mockExecute.mockImplementation(manifestResponder);
+    Object.assign(manifestState, { manifest: 'clean', missingCase: false, evidence: 'verified' });
   });
 
   it('passes when all checks are clean', async () => {
@@ -279,5 +325,38 @@ describe('verifyImportBatch', () => {
 
     expect(result.passed).toBe(false);
     expect(result.checks.map(c => c.check)).toEqual(['batch_incomplete']);
+  });
+
+  it('fails a batch with no manifest, an unsealed manifest or no expected source manifest (MIG-07, MIG-11)', async () => {
+    for (const [state, check] of [['absent', 'batch_manifest_missing'], ['unsealed', 'batch_manifest_unsealed'], ['no-source', 'source_manifest_missing']] as const) {
+      mocks.mockExecute.mockReset();
+      mocks.mockExecute.mockImplementation(manifestResponder);
+      manifestState.manifest = state;
+      setCleanMocks();
+      const result = await verifyImportBatch(BATCH_ID);
+      expect(result.passed, state).toBe(false);
+      expect(result.checks.map((c) => c.check), state).toContain(check);
+    }
+  });
+
+  it('fails a batch that does not reconcile with its source manifest (MIG-07)', async () => {
+    manifestState.missingCase = true;
+    setCleanMocks();
+    const result = await verifyImportBatch(BATCH_ID);
+    expect(result.passed).toBe(false);
+    expect(result.checks.find((c) => c.check === 'source_manifest_missing_cases')).toMatchObject({ count: 1, details: ['C-2'] });
+  });
+
+  it('never passes a document that is only a reference or whose bytes did not match (MIG-05)', async () => {
+    for (const [state, check] of [['reference', 'document_content_unverified'], ['mismatch', 'document_digest_mismatch']] as const) {
+      mocks.mockExecute.mockReset();
+      mocks.mockExecute.mockImplementation(manifestResponder);
+      manifestState.evidence = state;
+      setCleanMocks();
+      const result = await verifyImportBatch(BATCH_ID);
+      expect(result.passed, state).toBe(false);
+      expect(result.checks.find((c) => c.check === check), state).toMatchObject({ severity: 'error', count: 3 });
+      expect(result.summary.documentsContentVerified).toBe(0);
+    }
   });
 });
