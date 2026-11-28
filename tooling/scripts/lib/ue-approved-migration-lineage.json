@@ -961,7 +961,7 @@
       },
       {
         "tag": "0090_procedural_rules",
-        "sha256": "9087c9463ea69affdd1a9df0626210b0e8263fad80768e03b8ab65929082a265",
+        "sha256": "42d6117ab33f06664610d4c1201fadd83e0928faf93eb6d2392516e2922be495",
         "status": "UNQUALIFIED",
         "introducedBy": "feat/ue-procedural-rules-engine",
         "note": "Versioned procedural intelligence (lane C, P1): seven new tenant tables for rule sources, versioned rule sets, versioned holiday calendars, append-only lifecycle events, grievance procedure bindings, grievance procedural facts and reviewable procedural exceptions, with lifecycle/append-only/void-only/same-organization triggers. No DML grants. RLS is scoped (cache) 0063. Registration confers no runtime proof."

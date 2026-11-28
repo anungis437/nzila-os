@@ -370,6 +370,27 @@ export async function* iterateRuntimeSecurityReports(
     },
     organizing_form_template_versions: { source_digest: 'a'.repeat(64) },
     ue_authority_resource_relationships: { origin: 'explicit' },
+    // Procedural rules (platform 0090): values pinned to the tables' CHECK constraints.
+    procedural_rule_sources: { source_kind: 'statute', language: 'en', effective_from: '2026-01-01' },
+    procedural_rule_sets: {
+      rule_key: 'synthetic/standard',
+      version: 1,
+      origin: 'human_authored',
+      effective_from: '2026-01-01',
+      content_digest: 'a'.repeat(64),
+    },
+    procedural_holiday_calendars: {
+      calendar_key: 'synthetic/designated',
+      version: 1,
+      origin: 'human_authored',
+      coverage_from: '2027-01-01',
+      coverage_to: '2027-12-31',
+      days: ['2027-01-01'],
+      content_digest: 'a'.repeat(64),
+    },
+    procedural_rule_lifecycle_events: { subject_type: 'rule_set', to_status: 'draft' },
+    grievance_procedural_facts: { fact_kind: 'trigger' },
+    grievance_procedural_exceptions: { codes: ['missing_trigger'], evidence_digest: 'a'.repeat(64) },
     // assign: no source staff, a target staff, through a triage designation.
     message_thread_assignments: {
       action: 'assign',

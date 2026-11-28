@@ -189,6 +189,7 @@ DECLARE
   old_content jsonb := to_jsonb(OLD) - ARRAY['status','reviewed_by','reviewed_at','adopted_by','adopted_at','closed_by','closed_at'];
   new_content jsonb := to_jsonb(NEW) - ARRAY['status','reviewed_by','reviewed_at','adopted_by','adopted_at','closed_by','closed_at'];
 BEGIN
+  IF to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF OLD.status <> 'draft' AND old_content IS DISTINCT FROM new_content THEN
     RAISE EXCEPTION '%: content is frozen once a version leaves draft; create a new version', TG_TABLE_NAME USING ERRCODE = 'check_violation';
   END IF;
@@ -207,9 +208,10 @@ BEGIN
   RETURN NEW;
 END $ue_fn$;
 --> statement-breakpoint
--- Insert-only records: sources, lifecycle events.
+-- Insert-only records: sources, lifecycle events. A no-op UPDATE (every column unchanged) is let through; any change is refused.
 CREATE OR REPLACE FUNCTION public.procedural_append_only() RETURNS trigger LANGUAGE plpgsql AS $ue_fn$
 BEGIN
+  IF TG_OP = 'UPDATE' AND to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   RAISE EXCEPTION '%: rows are append-only', TG_TABLE_NAME USING ERRCODE = 'check_violation';
 END $ue_fn$;
 --> statement-breakpoint
@@ -219,6 +221,7 @@ DECLARE
   closing text[] := CASE WHEN TG_TABLE_NAME = 'grievance_procedure_bindings' THEN ARRAY['superseded_by','superseded_at'] ELSE ARRAY['voided_by','voided_at','void_reason'] END;
   marker text := CASE WHEN TG_TABLE_NAME = 'grievance_procedure_bindings' THEN 'superseded_at' ELSE 'voided_at' END;
 BEGIN
+  IF to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF (to_jsonb(OLD) ->> marker) IS NOT NULL THEN
     RAISE EXCEPTION '%: a closed record cannot change', TG_TABLE_NAME USING ERRCODE = 'check_violation';
   END IF;
@@ -233,6 +236,7 @@ CREATE OR REPLACE FUNCTION public.procedural_exception_guard() RETURNS trigger L
 DECLARE
   resolution_cols text[] := ARRAY['status','resolved_by','resolved_at','resolution'];
 BEGIN
+  IF to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF OLD.status <> 'open' THEN
     RAISE EXCEPTION 'grievance_procedural_exceptions: a resolved exception cannot change' USING ERRCODE = 'check_violation';
   END IF;
