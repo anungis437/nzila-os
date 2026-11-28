@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-28",
+  "status": "PREPARATION_CANDIDATE_NOT_ACCEPTED",
+  "baseline": "30a11767d8b8c61f191faeb8429724884b77faa4",
+  "candidate": {
+    "pr": 1328,
+    "sha": "e15e8fea809c5ce4776adf9c59c213c11ae92a21",
+    "status": "DRAFT_CI_PENDING_AT_OBSERVATION"
+  },
+  "requirementsSource": "CIU_ACCEPTANCE_REGISTER.json",
+  "groups": [
+    {
+      "id": "E0",
+      "title": "Baseline, institutional source and release reconciliation",
+      "prefixes": [],
+      "ids": [],
+      "deps": [],
+      "outputs": [
+        "Pin current main, inspect PR #1328 and full Step 2 plan/acceptance record; reconcile new work without altering frozen release gates.",
+        "Verify both language versions, governing instrument editions and agreement applicability; correct source references and legal ambiguity with designated review.",
+        "Regenerate only through canonical scripts when required; no manual inventory counter changes."
+      ]
+    },
+    {
+      "id": "E1",
+      "title": "Institutional hierarchy, identity and authority",
+      "prefixes": [
+        "GOV",
+        "MEM",
+        "PSAC"
+      ],
+      "ids": [
+        "GOV-01",
+        "GOV-02",
+        "GOV-03",
+        "GOV-04",
+        "GOV-05",
+        "GOV-06",
+        "GOV-07",
+        "GOV-08",
+        "GOV-09",
+        "GOV-10",
+        "GOV-11",
+        "GOV-12",
+        "GOV-13",
+        "GOV-14",
+        "GOV-15",
+        "GOV-16",
+        "GOV-17",
+        "GOV-18",
+        "GOV-19",
+        "GOV-20",
+        "MEM-01",
+        "MEM-02",
+        "MEM-03",
+        "MEM-04",
+        "MEM-05",
+        "MEM-06",
+        "PSAC-01",
+        "PSAC-02",
+        "PSAC-03",
+        "PSAC-04",
+        "PSAC-05",
+        "PSAC-06",
+        "PSAC-07",
+        "PSAC-08",
+        "PSAC-09",
+        "PSAC-10"
+      ],
+      "deps": [
+        "E0"
+      ],
+      "outputs": [
+        "Configure federation/component/branch/worksite and independent tenant grants; demonstrate cross-institutional referral, scoped authority, local policy variation, trusteeship and succession.",
+        "Test all rights distinctions, delegated authority, conflict, revocation and dual institutional approval."
+      ]
+    },
+    {
+      "id": "E2",
+      "title": "Representation, agreements and federal procedural engine",
+      "prefixes": [
+        "REP",
+        "FED",
+        "SVC"
+      ],
+      "ids": [
+        "REP-01",
+        "REP-02",
+        "REP-03",
+        "REP-04",
+        "REP-05",
+        "REP-06",
+        "REP-07",
+        "REP-08",
+        "REP-09",
+        "REP-10",
+        "REP-11",
+        "REP-12",
+        "REP-13",
+        "REP-14",
+        "REP-15",
+        "REP-16",
+        "REP-17",
+        "REP-18",
+        "REP-19",
+        "REP-20",
+        "REP-21",
+        "REP-22",
+        "REP-23",
+        "FED-01",
+        "FED-02",
+        "FED-03",
+        "FED-04",
+        "FED-05",
+        "FED-06",
+        "FED-07",
+        "FED-08",
+        "FED-09",
+        "FED-10",
+        "SVC-01",
+        "SVC-02",
+        "SVC-03",
+        "SVC-04",
+        "SVC-05",
+        "SVC-06",
+        "SVC-07",
+        "SVC-08"
+      ],
+      "deps": [
+        "E0",
+        "E1"
+      ],
+      "outputs": [
+        "Trace all agreement and statutory rules; versioned applicability, separate deadline regimes and full evidence handoff.",
+        "Complete generic workflows for VSSA, WFA, safety, equity and alternatives, using existing domain capabilities; no client-specific fork."
+      ]
+    },
+    {
+      "id": "E3",
+      "title": "Enterprise integration and full-fidelity migration",
+      "prefixes": [
+        "INT",
+        "MIG"
+      ],
+      "ids": [
+        "INT-01",
+        "INT-02",
+        "INT-03",
+        "INT-04",
+        "INT-05",
+        "INT-06",
+        "INT-07",
+        "INT-08",
+        "INT-09",
+        "INT-10",
+        "INT-11",
+        "INT-12",
+        "INT-13",
+        "INT-14",
+        "INT-15",
+        "INT-16",
+        "MIG-01",
+        "MIG-02",
+        "MIG-03",
+        "MIG-04",
+        "MIG-05",
+        "MIG-06",
+        "MIG-07",
+        "MIG-08",
+        "MIG-09",
+        "MIG-10",
+        "MIG-11",
+        "MIG-12"
+      ],
+      "deps": [
+        "E0",
+        "E1"
+      ],
+      "outputs": [
+        "Qualify and reconcile PR #1328; reuse admin/ingest and grievance import where appropriate.",
+        "Durable governed case/member writers, scoped persistent idempotency, receipt and audit atomicity, source ownership, document integrity, complete reconciliation, failure recovery and export/rollback.",
+        "Provider-neutral adapter contract only; no speculative Vogo/Intelivote/PSAC live integration."
+      ]
+    },
+    {
+      "id": "E4",
+      "title": "Enterprise assurance, experience and operational proof",
+      "prefixes": [
+        "SEC",
+        "OPS",
+        "UX"
+      ],
+      "ids": [
+        "OPS-01",
+        "OPS-02",
+        "OPS-03",
+        "OPS-04",
+        "OPS-05",
+        "OPS-06",
+        "OPS-07",
+        "SEC-01",
+        "SEC-02",
+        "SEC-03",
+        "SEC-04",
+        "SEC-05",
+        "SEC-06",
+        "SEC-07",
+        "SEC-08",
+        "SEC-09",
+        "UX-01",
+        "UX-02",
+        "UX-03",
+        "UX-04",
+        "UX-05"
+      ],
+      "deps": [
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "outputs": [
+        "Isolated deterministic fixture 22 branches, 12500 members, 5000 cases; native PG, authenticated HTTP/browser and adversarial qualification.",
+        "Measured workload and recovery; bilingual mobile accessibility, security and privacy; no deployment or restricted action without existing authorization."
+      ]
+    },
+    {
+      "id": "E5",
+      "title": "Procurement, support and executive demonstration",
+      "prefixes": [
+        "BUY"
+      ],
+      "ids": [
+        "BUY-01",
+        "BUY-02",
+        "BUY-03",
+        "BUY-04",
+        "BUY-05",
+        "BUY-06",
+        "BUY-07"
+      ],
+      "deps": [
+        "E0",
+        "E4"
+      ],
+      "outputs": [
+        "Current proof-backed dossier, actual corporate/legal/insurance and independent assurance; approved service scope and support capacity.",
+        "Run ten synthetic demonstration journeys with receipts; final acceptance separates internal readiness from authorized client discovery."
+      ]
+    }
+  ],
+  "acceptance": {
+    "allRequirementsMustHaveDisposition": true,
+    "noSourceOnlyRuntimePass": true,
+    "clientDiscoveryCannotHideGenericProductGap": true,
+    "noNewReviewersOrUnnecessaryGates": true,
+    "existingReleaseAuthorityPreserved": true,
+    "ciustatus": "NO_GO",
+    "step2": "UNCHANGED"
+  },
+  "evidenceGaps": [
+    {
+      "id": "P01",
+      "finding": "Broken canonical DPA reference",
+      "closure": "Recover authoritative current DPA from repository or approved private record; no invented legal terms.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P02",
+      "finding": "MSA/SOW and contract authority",
+      "closure": "Locate approved versions and signer, record legal review.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P03",
+      "finding": "Insurance and incorporation",
+      "closure": "Verify active E&O/cyber certificate and legal entity/name privately; only value-free evidence reference in repo.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P04",
+      "finding": "Restore proof",
+      "closure": "April report failed and live restore skipped; seek superseding evidence, otherwise execute approved isolated restore.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P05",
+      "finding": "Subprocessor reconciliation",
+      "closure": "Verify actual deployed provider inventory, regions, data flows and terms; reconcile buyer list.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P06",
+      "finding": "Vendor assurance",
+      "closure": "Retrieve current restricted provider artifacts, review and record provenance.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P07",
+      "finding": "Support",
+      "closure": "Verify staff coverage, bilingual support, incident response and approved SLA.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P08",
+      "finding": "Independent assurance",
+      "closure": "Verify actual attestation/pentest status; disclose limits; no claim of certification.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P09",
+      "finding": "Bilingual sources",
+      "closure": "Complete official French clause comparison and source version/applicability reconciliation.",
+      "status": "OPEN"
+    },
+    {
+      "id": "P10",
+      "finding": "Runtime and CI",
+      "closure": "Current candidate, full suite, native and browser proof, durable integration and migration acceptance.",
+      "status": "OPEN"
+    }
+  ]
+}
