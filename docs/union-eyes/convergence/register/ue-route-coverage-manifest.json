@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1055,
-  "mutating": 722,
-  "kernel": 69,
+  "routes": 1058,
+  "mutating": 725,
+  "kernel": 72,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 15,
@@ -16,7 +16,7 @@
    "ROLE_AUTH": 102,
    "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 430,
+   "WITH_API": 433,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -31,11 +31,11 @@
    "ROLE_AUTH": 54,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 273
+   "WITH_API": 276
   },
   "mutatingByAudit": {
    "ATOMIC": 173,
-   "ATOMIC_SERVICE": 147,
+   "ATOMIC_SERVICE": 150,
    "COMPUTE_ONLY": 34,
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -47,7 +47,7 @@
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 82,
-   "NONE": 344,
+   "NONE": 347,
    "SYSTEM_CONTEXT": 58,
    "TENANT_TX": 237
   }
@@ -8406,6 +8406,31 @@
    "audit": "ATOMIC"
   },
   {
+   "route": "grievances/[id]/group-participants/[participantId]/withdraw/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "grievances/[id]/group-participants/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "grievances/[id]/intelligence/route.ts",
    "methods": [
     "GET"
@@ -8513,6 +8538,19 @@
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
+  },
+  {
+   "route": "grievances/[id]/representation-records/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": true,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "grievances/[id]/route.ts",

@@ -438,6 +438,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "feat/ue-procedural-rules-engine",
         "note": "Forward RLS for the seven procedural rule tables of platform 0090 via ue_create_direct_org_rls_policy (ENABLE + FORCE RLS, runtime org-isolation policies, system policy). Fail-closed prerequisite checks. No DML grants."
+      },
+      {
+        "tag": "0064_representation_workflows_rls_closure",
+        "sha256": "ce3790caabfe452518374ecbb0528ddf62641e21e77e578eadc98d0f4a92079b",
+        "status": "UNQUALIFIED",
+        "introducedBy": "feat/ue-representation-workflows",
+        "note": "Forward RLS for the two representation workflow tables of platform 0091 via ue_create_direct_org_rls_policy. Fail-closed prerequisite checks. No DML grants."
       }
     ],
     "platform": [
@@ -965,6 +972,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "feat/ue-procedural-rules-engine",
         "note": "Versioned procedural intelligence (lane C, P1): seven new tenant tables for rule sources, versioned rule sets, versioned holiday calendars, append-only lifecycle events, grievance procedure bindings, grievance procedural facts and reviewable procedural exceptions, with lifecycle/append-only/void-only/same-organization triggers. No DML grants. RLS is scoped (cache) 0063. Registration confers no runtime proof."
+      },
+      {
+        "tag": "0091_representation_workflows",
+        "sha256": "40ae6b8d382098aaeafe7cc14e50398670b1eb01a9961f5312476391dfc68446",
+        "status": "UNQUALIFIED",
+        "introducedBy": "feat/ue-representation-workflows",
+        "note": "Representation workflows (lane C, P5): grievance_group_participants (per-member consent and employer portion, withdraw-once) and grievance_representation_records (append-only employer-initiated and policy filings, approvals, final-level handoff and receipt, abandonment and beyond-control findings), with same-organization triggers. No record changes a grievance. No DML grants. RLS is scoped (cache) 0064."
       }
     ]
   }
