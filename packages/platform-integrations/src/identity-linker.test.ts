@@ -70,7 +70,7 @@ describe('IdentityLinker', () => {
           orgId: 'org-1',
           connectionId: 'conn-1',
           entityType: 'case',
-          internalId: 'int-1',
+          internalId: 'int-case-1',
           externalId: 'ext-case-1',
           externalSystem: 'workday',
         },
@@ -78,6 +78,23 @@ describe('IdentityLinker', () => {
       )
       expect(mocks.store.create).not.toHaveBeenCalled()
       expect(result.id).toBe('link-1')
+    })
+
+    it('rejects empty internal target before resolving or creating', async () => {
+      await expect(linker.link({ orgId: 'org-1', connectionId: 'conn-1', entityType: 'case', internalId: ' ', externalId: 'ext-case-1', externalSystem: 'workday' }, 'actor-1')).rejects.toThrow('IDENTITY_LINK_INVALID_IDENTIFIER')
+      expect(mocks.store.resolve).not.toHaveBeenCalled()
+      expect(mocks.store.create).not.toHaveBeenCalled()
+    })
+
+    it('rejects conflicting, stale or foreign mappings without metadata writes', async () => {
+      const input = { orgId: 'org-1', connectionId: 'conn-1', entityType: 'case' as const, internalId: 'int-case-1', externalId: 'ext-case-1', externalSystem: 'workday', metadataJson: { version: 2 } }
+      for (const existing of [{ ...MOCK_LINK, internalId: 'different' }, { ...MOCK_LINK, staleAt: '2026-07-16T00:00:00Z' }, { ...MOCK_LINK, orgId: 'foreign' }]) {
+        vi.mocked(mocks.store.resolve).mockResolvedValueOnce(existing)
+        await expect(linker.link(input, 'actor-1')).rejects.toThrow('IDENTITY_LINK_RECONCILIATION_REQUIRED')
+      }
+      expect(mocks.store.create).not.toHaveBeenCalled()
+      expect(mocks.store.update).not.toHaveBeenCalled()
+      expect(mocks.auditHooks.recordIntegrationAction).not.toHaveBeenCalled()
     })
 
     it('records audit action on new link', async () => {

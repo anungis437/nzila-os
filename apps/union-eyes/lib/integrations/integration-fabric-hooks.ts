@@ -96,14 +96,14 @@ export class UeIntegrationFabric {
 
   /**
    * Process an inbound case from an external system.
-   * Applies mapping rules, links external identity, creates execution run.
+   * Maps for inspection only; durable inbound case execution is not wired.
    */
   async processInboundCase(
-    connection: IntegrationConnection,
+    _connection: IntegrationConnection,
     rawPayload: Record<string, unknown>,
     mappingRule: MappingRuleDefinition | null,
-    actorId: string,
-  ): Promise<{ runId: string; mappedPayload: Record<string, unknown>; success: boolean }> {
+    _actorId: string,
+  ): Promise<{ runId: string; mappedPayload: Record<string, unknown>; success: boolean; reason?: 'MAPPING_REJECTED' | 'INBOUND_PERSISTENCE_NOT_CONFIGURED' }> {
     // Apply mapping if rule is provided
     let mappedPayload = rawPayload
     if (mappingRule) {
@@ -113,31 +113,19 @@ export class UeIntegrationFabric {
           runId: '',
           mappedPayload: rawPayload,
           success: false,
+          reason: 'MAPPING_REJECTED',
         }
       }
       mappedPayload = mappingResult.output
     }
 
-    // Link external identity if externalCaseId present
-    const externalId = (mappedPayload.externalCaseId ?? mappedPayload.external_case_id) as string | undefined
-    if (externalId) {
-      await this.deps.identityLinker.link(
-        {
-          orgId: connection.orgId,
-          connectionId: connection.id,
-          entityType: 'case',
-          internalId: '', // Will be set after case creation
-          externalId,
-          externalSystem: (mappedPayload.externalSystem ?? connection.connectorType) as string,
-        },
-        actorId,
-      )
-    }
-
+    // No authorized domain writer or durable receipt is wired here.
+    // Mapping alone cannot create a case or an external identity link.
     return {
-      runId: crypto.randomUUID(),
+      runId: '',
       mappedPayload,
-      success: true,
+      success: false,
+      reason: 'INBOUND_PERSISTENCE_NOT_CONFIGURED',
     }
   }
 
@@ -167,7 +155,7 @@ export class UeIntegrationFabric {
       externalId,
       externalSystem,
     })
-    return result.found ? result.internalId : null
+    return result.found && !result.stale && result.internalId?.trim() ? result.internalId : null
   }
 
   /**

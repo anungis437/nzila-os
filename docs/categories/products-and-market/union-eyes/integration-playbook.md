@@ -1,6 +1,6 @@
 # Union Eyes — Integration Playbook
 
-> **Status**: Active  
+> **Status**: Inbound case execution held pending durable domain persistence qualification  
 > **App**: Union Eyes (`apps/union-eyes`)  
 > **Integration hooks**: `lib/integrations/integration-fabric-hooks.ts`
 
@@ -28,10 +28,8 @@ External HR System
   ▼ (webhook POST)
 UE API Route → WebhookConnector.executeInbound()
   → MappingEngine (transform payload)
-  → IdentityLinker (resolve/create external ID link)
-  → UeIntegrationFabric.processInboundCase()
-  → Insert into UE database tables
-  → Audit record
+  → UeIntegrationFabric.processInboundCase() (mapping-only; activation held)
+  → Required future qualified domain writer + identity link + durable run + audit
 
 UE Internal Event (e.g., case.resolved)
   → UeIntegrationFabric.emitOutboundEvent()
@@ -159,31 +157,7 @@ const preview = fabric.previewMapping(connectionId, inboundPayload)
 
 ## 6. Handling Inbound Cases
 
-When an external system sends casework via webhook:
-
-```ts
-// In your webhook API route handler
-const fabric = new UeIntegrationFabric(/* dependencies */)
-
-const result = await fabric.processInboundCase(
-  connectionId,
-  rawPayload,      // the POST body from external system
-  actorId,         // the integration service principal
-)
-// result.mappedPayload — the transformed casework data
-// result.identityLink — the external ↔ internal ID link
-```
-
-### What Happens Internally
-
-1. Mapping engine transforms the raw payload using configured rules
-2. Identity linker checks if a link already exists for this external casework record
-3. If new → creates identity link and the internal record
-4. If existing → updates the existing record according to sync policy
-5. Audit record created
-6. Integration run recorded
-
----
+The facade is mapping-only until an authorized canonical domain writer, persistent run receipt, identity target, mandatory audit and replay/recovery path are connected and qualified. It returns `success: false`, an empty run ID and a reason; it does not create an identity link. Use `previewMapping(payload, rule)` for discovery. Do not activate an inbound connection or report a case imported based on a mapped payload.
 
 ## 7. Emitting Outbound Events
 

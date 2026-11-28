@@ -76,11 +76,19 @@ export class IntegrationExecutionEngine {
     payload: Record<string, unknown>,
     context: ExecutionContext,
   ): Promise<IntegrationRun> {
+    if (connection.orgId !== context.orgId) throw new Error('INTEGRATION_TENANT_MISMATCH')
     // Check idempotency
     if (context.idempotencyKey) {
       const existing = await this.ports.idempotencyStore.check(context.idempotencyKey)
       if (existing) {
-        return existing as unknown as IntegrationRun
+        const runId = existing.runId
+        if (typeof runId !== 'string' || !runId.trim()) throw new Error('INTEGRATION_REPLAY_RECONCILIATION_REQUIRED')
+        const persisted = await this.ports.runStore.getById(runId)
+        if (!persisted || persisted.orgId !== context.orgId || persisted.connectionId !== connection.id ||
+            persisted.direction !== 'inbound' || persisted.idempotencyKey !== context.idempotencyKey) {
+          throw new Error('INTEGRATION_REPLAY_RECONCILIATION_REQUIRED')
+        }
+        return persisted
       }
     }
 
@@ -172,6 +180,7 @@ export class IntegrationExecutionEngine {
     payload: Record<string, unknown>,
     context: ExecutionContext,
   ): Promise<IntegrationRun> {
+    if (connection.orgId !== context.orgId) throw new Error('INTEGRATION_TENANT_MISMATCH')
     const run = await this.ports.runStore.create({
       orgId: context.orgId,
       connectionId: connection.id,

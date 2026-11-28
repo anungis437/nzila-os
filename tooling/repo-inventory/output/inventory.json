@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-27T00:00:00.000Z",
+  "generatedAt": "2026-11-28T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
   "workflowCount": 77,
   "contractTestCount": 309,
-  "tsTestFileCount": 3871,
+  "tsTestFileCount": 3872,
   "pythonTestFileCount": 54,
   "apps": [
     {

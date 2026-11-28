@@ -42,6 +42,9 @@ export class IdentityLinker {
    * Create a new external ↔ internal identity link.
    */
   async link(input: CreateIdentityLinkInput, actorId: string): Promise<ExternalIdentityLink> {
+    if (!input.internalId.trim() || !input.externalId.trim() || !input.externalSystem.trim()) {
+      throw new Error('IDENTITY_LINK_INVALID_IDENTIFIER')
+    }
     // Check for existing link to prevent duplicates
     const existing = await this.store.resolve({
       orgId: input.orgId,
@@ -51,6 +54,11 @@ export class IdentityLinker {
     })
 
     if (existing) {
+      if (existing.orgId !== input.orgId || existing.entityType !== input.entityType ||
+          existing.externalId !== input.externalId || existing.externalSystem !== input.externalSystem ||
+          existing.internalId !== input.internalId || existing.staleAt !== null) {
+        throw new Error('IDENTITY_LINK_RECONCILIATION_REQUIRED')
+      }
       // Update metadata if link already exists
       if (input.metadataJson) {
         await this.store.update(existing.id, input.metadataJson)
