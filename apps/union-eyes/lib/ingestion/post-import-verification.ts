@@ -8,6 +8,11 @@
  * - Timeline events ordered correctly
  * - All ingestion_records resolved (no stuck 'processing')
  * - Entity counts match expectations
+ * - The batch exists in this organization's scope and completed
+ *
+ * Every finding is an error: a batch with an orphan document, a stuck record, unreconciled counts, a partial outcome, or no batch record
+ * in scope (a foreign or unknown id is invisible under row-level security) does not pass. Passing is transport integrity only; it is not
+ * migration acceptance, which also needs the source manifest reconciled and an authorized acceptance decision.
  */
 
 import { db } from '@/db/db';
@@ -87,7 +92,7 @@ export async function verifyImportBatch(batchId: string): Promise<VerificationRe
   if (orphans.length > 0) {
     checks.push({
       check: 'orphan_documents',
-      severity: 'warning',
+      severity: 'error',
       message: `${orphans.length} document(s) not linked to an existing grievance`,
       count: orphans.length,
       details: orphans.slice(0, 10),
@@ -122,7 +127,7 @@ export async function verifyImportBatch(batchId: string): Promise<VerificationRe
   if (stuckCount > 0) {
     checks.push({
       check: 'stuck_records',
-      severity: 'warning',
+      severity: 'error',
       message: `${stuckCount} ingestion record(s) still in 'processing' state`,
       count: stuckCount,
     });
@@ -149,19 +154,32 @@ export async function verifyImportBatch(batchId: string): Promise<VerificationRe
 
   // §12.8: Batch record counts match
   const batchMeta = await db.execute(sql`
-    SELECT total_records, succeeded, failed, skipped
+    SELECT total_records, succeeded, failed, skipped, status
     FROM ingestion_batches
     WHERE id = ${batchId}::uuid
-  `) as Array<{ total_records: number; succeeded: number; failed: number; skipped: number }>;
+  `) as Array<{ total_records: number; succeeded: number; failed: number; skipped: number; status?: string }>;
 
-  if (batchMeta.length > 0) {
+  if (batchMeta.length === 0) {
+    checks.push({
+      check: 'batch_not_found',
+      severity: 'error',
+      message: `No ingestion batch '${batchId}' in this organization's scope`,
+    });
+  } else {
     const meta = batchMeta[0];
     const processedSum = meta.succeeded + meta.failed + meta.skipped;
     if (processedSum !== meta.total_records) {
       checks.push({
         check: 'batch_count_mismatch',
-        severity: 'warning',
+        severity: 'error',
         message: `Batch total_records (${meta.total_records}) != succeeded+failed+skipped (${processedSum})`,
+      });
+    }
+    if (meta.status !== 'completed') {
+      checks.push({
+        check: 'batch_incomplete',
+        severity: 'error',
+        message: `Batch status is '${meta.status ?? 'unknown'}', not 'completed'`,
       });
     }
   }

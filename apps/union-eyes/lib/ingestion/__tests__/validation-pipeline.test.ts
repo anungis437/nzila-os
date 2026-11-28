@@ -29,6 +29,7 @@ function makeRecord(overrides: Partial<IngestionGrievanceRecord> = {}): Ingestio
     title: 'Wage dispute for Q4 bonuses',
     description: 'Employee claims unpaid bonus for Q4 2025',
     organization_id: '00000000-0000-4000-a000-000000000001',
+    filed_date: '2025-10-15',
     ...overrides,
   };
 }
@@ -98,10 +99,20 @@ describe('validateIngestionBatch', () => {
     expect(result.warnings.some(w => w.field === 'priority')).toBe(true);
   });
 
-  it('warns on invalid step (non-blocking)', () => {
+  it('refuses an unknown procedural stage instead of dropping it', () => {
     const result = validateIngestionBatch([makeRecord({ step: 'step_99' })]);
-    expect(result.valid).toBe(true);
-    expect(result.warnings.some(w => w.field === 'step')).toBe(true);
+    expect(result.valid).toBe(false);
+    const issue = result.errors.find(e => e.field === 'step');
+    expect(issue?.message).toContain("Unknown procedural stage 'step_99'");
+    expect(result.warnings.some(w => w.field === 'step')).toBe(false);
+  });
+
+  it('refuses a record without a historical filed date (the import date is never substituted)', () => {
+    for (const filed_date of [undefined, '', '   ']) {
+      const result = validateIngestionBatch([makeRecord({ filed_date })]);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.field === 'filed_date' && e.message.includes('never substituted'))).toBe(true);
+    }
   });
 
   it('rejects invalid date format', () => {
@@ -123,12 +134,20 @@ describe('validateIngestionBatch', () => {
     expect(result.warnings.some(w => w.field === 'grievant_name')).toBe(true);
   });
 
-  it('warns on missing timeline dates', () => {
+  it('refuses a timeline event without a date of its own', () => {
     const result = validateIngestionBatch([makeRecord({
       timeline: [{ date: '', action: 'filed', actor: 'Jane' }],
     })]);
-    expect(result.valid).toBe(true);
-    expect(result.warnings.some(w => w.field.includes('timeline'))).toBe(true);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(e => e.field === 'timeline[0].date')).toBe(true);
+  });
+
+  it('refuses a timeline event with an unparseable date', () => {
+    const result = validateIngestionBatch([makeRecord({
+      timeline: [{ date: 'sometime in spring', action: 'filed', actor: 'Jane' }],
+    })]);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some(e => e.field === 'timeline[0].date' && e.message.includes('Invalid timeline date'))).toBe(true);
   });
 
   it('warns on missing timeline action', () => {

@@ -204,12 +204,15 @@ function validateRecord(record: IngestionGrievanceRecord, idx: number): Validati
     issues.push({ index: idx, field: 'priority', severity: 'warning', message: `Unknown priority '${record.priority}', will default to 'medium'` });
   }
 
-  // Step
+  // Step. A procedural stage the platform does not know is a finding to remediate, not a stage to drop: storing the case without it would lose where it stood.
   if (record.step && !VALID_STEPS.has(record.step)) {
-    issues.push({ index: idx, field: 'step', severity: 'warning', message: `Unknown step '${record.step}', will be omitted` });
+    issues.push({ index: idx, field: 'step', severity: 'error', message: `Unknown procedural stage '${record.step}'. Map it to a known stage before import; it is never dropped` });
   }
 
-  // Date validation
+  // Date validation. The filed date is the case's history: when the source does not give it the record is refused, because the import date is never written in its place.
+  if (!record.filed_date?.trim()) {
+    issues.push({ index: idx, field: 'filed_date', severity: 'error', message: 'Missing filed_date. The import date is never substituted for a historical date' });
+  }
   for (const dateField of ['incident_date', 'filed_date'] as const) {
     const val = record[dateField];
     if (val) {
@@ -226,12 +229,13 @@ function validateRecord(record: IngestionGrievanceRecord, idx: number): Validati
   if (record.timeline?.length) {
     for (let ti = 0; ti < record.timeline.length; ti++) {
       const ev = record.timeline[ti];
-      if (!ev.date) {
-        issues.push({ index: idx, field: `timeline[${ti}].date`, severity: 'warning', message: 'Timeline event missing date — will use filed_date or import time' });
+      // A historical event without a valid date of its own is refused: dating it at the import would present an import observation as history.
+      if (!ev.date?.trim()) {
+        issues.push({ index: idx, field: `timeline[${ti}].date`, severity: 'error', message: 'Timeline event missing date. The import date is never substituted for a historical date' });
       } else {
         const parsed = new Date(ev.date);
         if (isNaN(parsed.getTime())) {
-          issues.push({ index: idx, field: `timeline[${ti}].date`, severity: 'warning', message: `Invalid timeline date: '${ev.date}'` });
+          issues.push({ index: idx, field: `timeline[${ti}].date`, severity: 'error', message: `Invalid timeline date: '${ev.date}'` });
         }
       }
       if (!ev.action?.trim()) {

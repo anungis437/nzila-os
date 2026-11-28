@@ -12,7 +12,9 @@
  *   - the same external id from another source system, or from another organization, is another case, and one organization never sees the other's;
  *   - a record that fails leaves nothing behind and the records after it still import (each record runs in a savepoint: one failed statement would otherwise abort
  *     the whole tenant transaction);
- *   - the post-import verification counts the batch and finds a document no case owns;
+ *   - the post-import verification counts the batch, and fails it for a document no case owns, a partial outcome, or a batch outside the organization's scope;
+ *   - a re-import never overwrites a case changed in the platform after its last import, nor takes over a platform case with the same key: the record fails with a conflict;
+ *   - a record without its historical filed date, with an undated timeline event, or with an unknown procedural stage is refused before anything is written;
  *   - the database refuses what the writer relies on being true: an external id with no source system, a second case with the same key.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
@@ -277,9 +279,67 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     await admin.query(`DELETE FROM document_links WHERE document_id = $1`, [orphan])
     const latest = (await rows(`SELECT import_batch_id::text batch FROM documents WHERE id = $1`, [orphan]))[0].batch as string
     const verified = await run(ORG, () => verification!.verifyImportBatch(latest))
-    expect(verified.passed).toBe(true)
-    expect(verified.checks).toMatchObject([{ check: 'orphan_documents', severity: 'warning', count: 1 }])
+    // An orphan document blocks: the batch does not pass verification.
+    expect(verified.passed).toBe(false)
+    expect(verified.checks).toMatchObject([{ check: 'orphan_documents', severity: 'error', count: 1 }])
     expect(verified.summary.orphanDocuments).toBe(1)
+  })
+
+  it('does not overwrite a case changed in the platform after its last import: the record fails with a conflict and the change stays', async () => {
+    const first = await importAs(ORG, [record(ORG, 'E-1')])
+    expect(first).toMatchObject({ status: 'completed', succeeded: 1 })
+    const stamped = (await rows(`SELECT updated_at = imported_at same FROM grievances WHERE organization_id = $1 AND external_case_id = 'E-1'`, [ORG]))[0]
+    expect(stamped.same).toBe(true)
+
+    // A platform write after the import (a handler's correction) moves updated_at past imported_at.
+    await admin.query(`UPDATE grievances SET title = 'Corrected by the handler', updated_at = imported_at + interval '1 minute' WHERE organization_id = $1 AND external_case_id = 'E-1'`, [ORG])
+
+    const again = await importAs(ORG, [record(ORG, 'E-1', { title: 'Source title' }), record(ORG, 'E-2')])
+    expect(again).toMatchObject({ status: 'partial', succeeded: 1, failed: 1 })
+    expect(again.errors[0]).toMatchObject({ externalId: 'E-1' })
+    expect(again.errors[0].error).toMatch(/changed after its last import/)
+    const kept = await rows(`SELECT title, import_batch_id::text batch FROM grievances WHERE organization_id = $1 AND external_case_id = 'E-1'`, [ORG])
+    expect(kept).toEqual([{ title: 'Corrected by the handler', batch: first.batchId }])
+    expect((await rows(`SELECT count(*)::int n FROM grievance_timeline_events WHERE import_batch_id = $1 AND grievance_id = (SELECT id FROM grievances WHERE organization_id = $2 AND external_case_id = 'E-1')`, [again.batchId, ORG]))[0].n).toBe(0)
+
+    // The partial batch does not pass verification.
+    const verified = await run(ORG, () => verification!.verifyImportBatch(again.batchId))
+    expect(verified.passed).toBe(false)
+    expect(verified.checks.map((c) => c.check)).toEqual(['batch_incomplete'])
+  })
+
+  it('a case created in the platform with the same external key is never taken over by an import', async () => {
+    await admin.query(
+      `INSERT INTO grievances (id, created_at, updated_at, grievance_number, description, organization_id, title, type, status, priority, has_legal_implications, is_arbitration_eligible, is_confidential, is_group_grievance, external_case_id, source_system)
+       VALUES (gen_random_uuid(), now(), now(), $1, 'd', $2, 'Platform case', 'individual', 'filed', 'medium', false, false, false, false, 'P-1', $3)`,
+      [`KEY-${randomUUID().slice(0, 8)}`, ORG, SOURCE],
+    )
+    const result = await importAs(ORG, [record(ORG, 'P-1')])
+    expect(result).toMatchObject({ status: 'failed', succeeded: 0, failed: 1 })
+    expect(result.errors[0].error).toMatch(/changed after its last import/)
+    expect((await rows(`SELECT title, import_batch_id FROM grievances WHERE organization_id = $1 AND external_case_id = 'P-1'`, [ORG]))).toEqual([{ title: 'Platform case', import_batch_id: null }])
+  })
+
+  it('refuses a record without a historical filed date, or with an undated or unknown-stage history, before it writes anything', async () => {
+    for (const bad of [
+      record(ORG, 'H-1', { filed_date: undefined }),
+      record(ORG, 'H-2', { timeline: [{ date: '', action: 'acknowledged', actor: 'Steward' }] }),
+      record(ORG, 'H-3', { step: 'second_level_hearing' }),
+    ]) {
+      const result = await importAs(ORG, [bad])
+      expect(result).toMatchObject({ status: 'failed', succeeded: 0, batchId: '' })
+    }
+    expect((await rows(`SELECT count(*)::int n FROM grievances WHERE organization_id = $1 AND external_case_id LIKE 'H-%'`, [ORG]))[0].n).toBe(0)
+  })
+
+  it('verification fails for a batch the organization cannot see (another organization\'s, or none)', async () => {
+    const theirs = (await rows(`SELECT id::text id FROM ingestion_batches WHERE organization_id = $1 LIMIT 1`, [OTHER]))[0].id as string
+    for (const batchId of [theirs, randomUUID()]) {
+      const verified = await run(ORG, () => verification!.verifyImportBatch(batchId))
+      expect(verified.passed).toBe(false)
+      expect(verified.checks.map((c) => c.check)).toContain('batch_not_found')
+      expect(verified.summary.grievancesImported).toBe(0)
+    }
   })
 
   it('the database refuses an external id with no source system, and a second case with the same key', async () => {

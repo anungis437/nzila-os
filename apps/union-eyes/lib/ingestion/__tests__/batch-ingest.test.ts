@@ -95,6 +95,7 @@ function makeRecord(overrides: Partial<IngestionGrievanceRecord> = {}): Ingestio
     title: 'Test grievance title',
     description: 'Test grievance description',
     organization_id: ORG_ID,
+    filed_date: '2025-10-15',
     ...overrides,
   };
 }
@@ -182,6 +183,26 @@ describe('ingestGrievanceBatch', () => {
     expect(result.failed).toBe(0);
     expect(result.batchId).toBe('batch-001');
     expect(result.dryRun).toBe(false);
+  });
+
+  // ─── Re-import of a case changed since its last import ───────────────
+
+  it('fails the record with a conflict, not an overwrite, when the case was changed after its last import', async () => {
+    // The guarded upsert updates nothing (the case was edited after import); the follow-up lookup finds the case.
+    mocks.mockExecute.mockImplementation((query: unknown) => {
+      const text = JSON.stringify(query);
+      if (text.includes('INSERT INTO grievances')) return Promise.resolve([]);
+      if (text.includes('SELECT id FROM grievances')) return Promise.resolve([{ id: 'grievance-edited' }]);
+      return Promise.resolve([{ id: 'x' }]);
+    });
+
+    const result = await ingestGrievanceBatch([makeRecord()], makeOpts({ continueOnError: true }));
+
+    expect(result.status).toBe('failed');
+    expect(result.succeeded).toBe(0);
+    expect(result.errors[0].error).toContain("was changed after its last import");
+    const timelineWrites = mocks.mockExecute.mock.calls.filter(([q]) => JSON.stringify(q).includes('INSERT INTO grievance_timeline_events'));
+    expect(timelineWrites).toHaveLength(0);
   });
 
   // ─── §3: Partial Ingestion ────────────────────────────────────────────
