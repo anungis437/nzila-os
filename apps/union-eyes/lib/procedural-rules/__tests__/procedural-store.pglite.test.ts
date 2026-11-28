@@ -187,7 +187,7 @@ describe('grievance integration: calculated_due_date with evidence, or an except
     await gp.recordProceduralFact(actorA, G_A, 'trigger', { event: 'presentation', receivedAt: '2027-03-01T15:00:00Z' });
     const out = await gp.computeGrievanceDeadline(actorA, G_A, 'reply_l1');
     expect(out).toMatchObject({ status: 'computed', dueDay: '2027-03-15', dueAt: '2027-03-16T03:59:00.000Z', written: 'created' });
-    const { rows } = await pg.query<{ calculated_due_date: Date; due_date: Date; confirmation_status: string; calculation_provenance: Record<string, any>; deadline_type: string }>(
+    const { rows } = await pg.query<{ calculated_due_date: Date; due_date: Date; confirmation_status: string; calculation_provenance: { ruleSet: { id: string }; holidayCalendar: { id: string }; engineVersion: string }; deadline_type: string }>(
       `SELECT * FROM grievance_deadlines WHERE grievance_id = '${G_A}'`);
     expect(rows).toHaveLength(1);
     expect(rows[0].calculated_due_date.toISOString()).toBe('2027-03-16T03:59:00.000Z');
