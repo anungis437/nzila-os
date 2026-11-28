@@ -5,7 +5,9 @@
   "status": "INITIAL_REGISTER_NOT_FROZEN",
   "sourceRecords": [
     "docs/union-eyes/enterprise/CIU_CLAUSE_CROSSWALK_BATCH_02.md",
-    "docs/union-eyes/enterprise/CIU_INTEGRATION_QUALIFICATION_BATCH_03.md"
+    "docs/union-eyes/enterprise/CIU_INTEGRATION_QUALIFICATION_BATCH_03.md",
+    "docs/union-eyes/enterprise/CIU_ENTERPRISE_DISCOVERY_AND_DELIVERY.md",
+    "docs/union-eyes/enterprise/CIU_PROCUREMENT_EVIDENCE_AND_DEMO.md"
   ],
   "requirements": [
     {
@@ -85,12 +87,17 @@
       "source": "BL7",
       "assertion": "Dues, waiver, parent-to-component-to-branch reconciliation and subsidy.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-D-001",
+        "UE-CAP-D-002",
+        "UE-CAP-D-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "GOV-08",
@@ -133,12 +140,17 @@
       "source": "BL14–15; Reg14–15",
       "assertion": "Governed expenses, finance statements, auditor scope, disbursement and retention.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-D-001",
+        "UE-CAP-D-002",
+        "UE-CAP-D-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "GOV-12",
@@ -289,12 +301,15 @@
       "source": "FB18.08–09",
       "assertion": "Employer receipt and alternate form accepted; preserve source identifier.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "REP-05",
@@ -433,12 +448,17 @@
       "source": "CIU SOP final level",
       "assertion": "Executive signature, full handoff packet, national LRO restricted grant and receipt.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-B-001",
+        "UE-CAP-K-010",
+        "UE-CAP-F-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "REP-17",
@@ -529,12 +549,15 @@
       "source": "CIU integration qualification batch 03",
       "assertion": "valid inbound case: persisted canonical case, identity target exists, persisted run matches returned ID and mandatory audit; no empty internal ID",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "INT-02",
@@ -841,24 +864,30 @@
       "source": "batch-ingest.ts; validation-pipeline.ts",
       "assertion": "Preserve unknown or invalid source date as an explicit exception; never fabricate filed date from import time.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "MIG-02",
       "source": "batch-ingest.ts; validation-pipeline.ts",
       "assertion": "Store source priority/step values and explicit mappings; unknown step cannot silently omit a mandatory procedural stage.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "MIG-03",
@@ -889,24 +918,30 @@
       "source": "batch-ingest.ts",
       "assertion": "Document bytes, malware status, cryptographic content digest, confidentiality, version and approved storage verified before availability; reference-only not imported file.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-F-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "MIG-06",
       "source": "batch-ingest.ts",
       "assertion": "Resolve member and representative IDs through governed identity and mandate authority, not names or raw assigned_to.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-B-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
     },
     {
       "id": "MIG-07",
@@ -973,6 +1008,514 @@
       "source": "batch-ingest.ts; admin/ingest route",
       "assertion": "All historical case stages, deadlines, decisions, consent, signatures and confidentiality metadata reconciled, or explicitly quarantined.",
       "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-F-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+    },
+    {
+      "id": "MEM-01",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Source identity: Stable PSAC member identity and branch allocation, effective-dated transfers and no duplicate identity from names.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "MEM-02",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Membership state: Represented worker, membership card, good standing, leave/dues exception, suspension and representation rights independently evaluated.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "MEM-03",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Disputed allocation: Authorized branch allocation decision and appeal preserve historical case access.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "MEM-04",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Source reconciliation: Member count reconciliation by source and branch; ambiguous identity quarantined; no destructive merge.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "MEM-05",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Lifecycle: Join, transfer, leave, reactivate, retire and revoke authority with current/historical state.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "MEM-06",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Multiple capacities: One principal can exercise independent scoped offices; no inherited cross-branch permissions.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-01",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "VSSA: Appointment, worksite constituency, consultation, negotiation, national review, ratification receipt and effective agreement version.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-02",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Workforce adjustment: Affected cohorts, options and deadlines; member confidentiality and human decision, agreement-specific version.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-03",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Health and safety: Incident intake, designated representative, committee scope and restricted health information.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-04",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Equity: Voluntary self-identification and mandate-specific access, consent and minimum aggregate thresholds.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-05",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Staffing/classification: Separate recourse and applicable deadline with referral; no automatic grievance filing.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-06",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Privacy/ATIP: Controlled request, authorization and retention; no automatic government information intake.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-07",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Professional standards: Restricted disciplinary and investigation case, classified/restricted material refused absent authorized handling.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SVC-08",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Accommodation: Restricted medical details and authorized representative; redacted reporting.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-01",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Provisioning: Repeatable institution-neutral tenant creation and 22-branch fixture; no CUPE-specific bootstrap prerequisite.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-02",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Operator access: Scoped support, approval, revocation, break-glass audit; no unrestricted cross-tenant case access.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-03",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Bilingual support: Named support capacity, escalation coverage, incident communications and approved targets; no invented SLA.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-04",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Recovery: Measured backup restoration, recovery time/point, data reconciliation and rollback rehearsal.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-05",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Operations: Health telemetry, alert delivery, incident ownership, remediation and post-incident evidence.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-06",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Upgrade: Rehearsed schema upgrade and rollback with versioned data and preimage; existing release gates enforced.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "OPS-07",
+      "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
+      "assertion": "Exit: Complete authorized export, digest, transfer, retention/legal hold and deletion verification.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-01",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Tenant boundary: Positive and adversarial isolation across HTTP, database, search, cache, jobs, exports, webhooks and analytics.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-02",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Authority: Grant, expiration, revocation, delegation, conflict, succession and denied privilege escalation.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-03",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Confidentiality: Case/document-specific access and member disclosure labels; deny unrelated national/branch staff.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-04",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Identity: Canonical identity binding, MFA/session policy, stale session and revoked identity denial.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-05",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Audit: Atomic or durably reconciled mandatory evidence; no unqualified success.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-06",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Data protection: Actual Canadian residency and subprocessor flow evidence; credentials and sensitive payloads absent from logs.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-07",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "AI: Permission-scoped retrieval, injection isolation, source citations, human decision and no unauthorized external disclosures.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-08",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Scale: Measured 100/500/1000 concurrent workload profiles and 12,500 members; realistic mix and approved SLO.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "SEC-09",
+      "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
+      "assertion": "Independent assurance: Current penetration-test/attestation evidence or explicitly disclosed limitations; no certification inference.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "UX-01",
+      "source": "CIU enterprise procurement evidence and demo",
+      "assertion": "Language: English/French functional and terminology parity for routes, messages, forms, exports and notifications.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "UX-02",
+      "source": "CIU enterprise procurement evidence and demo",
+      "assertion": "Mobile: Member/steward/branch/LRO journeys with keyboard and viewport safe navigation; no unreachable controls.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "UX-03",
+      "source": "CIU enterprise procurement evidence and demo",
+      "assertion": "Accessibility: Keyboard, focus, screen reader and contrast testing; no unsupported WCAG claim.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "UX-04",
+      "source": "CIU enterprise procurement evidence and demo",
+      "assertion": "Failure states: Actionable errors, retry semantics, no fake success and no unnecessary descriptive clutter.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "UX-05",
+      "source": "CIU enterprise procurement evidence and demo",
+      "assertion": "Demonstration: All ten synthetic demo scenarios rehearsed with current candidate and evidence.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-01",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Corporate: Corporate entity, authority, insurance, IP and procurement contacts verified.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-02",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Commercial: Enterprise licensing, implementation and support scope, proposal QA and no unapproved pricing commitment.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-03",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Legal: Canonical MSA, DPA, SOW and exit terms reviewed and current.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-04",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Trust pack: Current claim-to-evidence map; historical pilot status not production proof.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-05",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Discovery: Structured source inventory, authorized interface, sample schemas and source-of-truth matrix.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-06",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Implementation: D0–D7 stage gates, accountable owners and rehearsal of controlled migration and cutover.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "BUY-07",
+      "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
+      "assertion": "Client boundary: Formal sponsor introduction only after internal acceptance; no real data or live authority without client adoption.",
+      "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
@@ -980,5 +1523,12 @@
       "acceptance": "OPEN",
       "evidence": []
     }
+  ],
+  "publicFederalSources": [
+    "https://laws-lois.justice.gc.ca/eng/acts/P-33.3/FullText.html",
+    "https://www.njc-cnm.gc.ca/s18/s97/en",
+    "https://www.fpslreb-crtespf.gc.ca/en/resources/guides/lr-procedural-guide.html",
+    "https://fpslreb-crtespf.gc.ca/en/resources/fact-sheets/grievances/individual.html",
+    "https://www.fpslreb-crtespf.gc.ca/en/resources/fact-sheets/procedural-guidance/extension-of-time.html"
   ]
 }
