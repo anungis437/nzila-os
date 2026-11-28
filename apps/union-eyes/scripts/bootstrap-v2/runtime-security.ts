@@ -379,8 +379,9 @@ export async function* iterateRuntimeSecurityReports(
     },
     // close by a thread member: no hold, so no hold reference.
     message_thread_lifecycle: { action: 'close', acted_via: 'thread_member', reference: null },
-    // Durable inbound integration (platform 0090): SHA-256 shaped digests and a first mapping version.
-    ue_integration_mapping_versions: { version: 1, rule_digest: 'd'.repeat(64) },
+    // Durable inbound integration (platform 0090): SHA-256 shaped digests. The mapping version stays synthetic (party + 1), so
+    // each tenant's receipt pins a different version and re-pointing one at the other is a real, refused change.
+    ue_integration_mapping_versions: { rule_digest: 'd'.repeat(64) },
     ue_integration_inbound_receipts: { payload_digest: 'e'.repeat(64) },
   }
   for (const [name, overrides] of Object.entries(metadataOverrides))
