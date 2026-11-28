@@ -1,12 +1,27 @@
 /**
  * Ingestion Module
  *
- * Hardened data ingestion pipeline for real-world CUPE pilot data.
+ * Hardened data ingestion pipeline for historical case data.
  * Covers all 13 sections of the ingestion hardening specification.
  */
 
 export {
+  declareSourceManifest,
+  sourceManifestDigest,
+  type SourceManifestDeclaration,
+} from './source-manifest';
+
+export {
+  verifyImportedDocumentContent,
+  isImportedDocumentContentAvailable,
+  type DocumentVerificationOutcome,
+  type DocumentVerificationState,
+} from './document-evidence';
+
+export {
   ingestGrievanceBatch,
+  DocumentReimportConflictError,
+  ReimportConflictError,
   type IngestionOptions,
   type IngestionResult,
 } from './batch-ingest';
@@ -16,6 +31,10 @@ export {
   computeRecordFingerprint,
   computeTimelineEventHash,
   mapImportStatus,
+  importMappingDigest,
+  resolveImportPriority,
+  resolveImportStep,
+  type ImportValueMapping,
   type IngestionGrievanceRecord,
   type ValidationResult,
   type ValidationIssue,

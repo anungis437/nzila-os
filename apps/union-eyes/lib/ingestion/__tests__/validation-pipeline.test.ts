@@ -93,10 +93,22 @@ describe('validateIngestionBatch', () => {
     expect(result.errors.some(e => e.message.includes('Duplicate external_case_id'))).toBe(true);
   });
 
-  it('warns on invalid priority (non-blocking)', () => {
-    const result = validateIngestionBatch([makeRecord({ priority: 'super_high' })]);
-    expect(result.valid).toBe(true); // warnings don't block
-    expect(result.warnings.some(w => w.field === 'priority')).toBe(true);
+  it('refuses an unknown priority instead of defaulting it, and accepts it once explicitly mapped (MIG-02)', () => {
+    const refused = validateIngestionBatch([makeRecord({ priority: 'super_high' })]);
+    expect(refused.valid).toBe(false);
+    expect(refused.errors.find(e => e.field === 'priority')?.message).toContain("Unknown priority 'super_high'");
+    expect(validateIngestionBatch([makeRecord({ priority: 'super_high' })], { priority: { super_high: 'urgent' } }).valid).toBe(true);
+    // A mapping to a value the platform does not have is itself refused.
+    expect(validateIngestionBatch([makeRecord({ priority: 'super_high' })], { priority: { super_high: 'critical' } }).valid).toBe(false);
+  });
+
+  it('maps an unknown stage only through an explicit mapping', () => {
+    expect(validateIngestionBatch([makeRecord({ step: 'stage-two' })], { step: { 'stage-two': 'step_2' } }).valid).toBe(true);
+  });
+
+  it('refuses a declared document digest that is not a SHA-256', () => {
+    const result = validateIngestionBatch([makeRecord({ documents: [{ name: 'a.pdf', sha256: 'abc' }] })]);
+    expect(result.errors.find(e => e.field === 'documents[0].sha256')).toBeDefined();
   });
 
   it('refuses an unknown procedural stage instead of dropping it', () => {
@@ -242,5 +254,32 @@ describe('mapImportStatus', () => {
   it('returns lifecycle state for known statuses', () => {
     const result = mapImportStatus('filed');
     expect(result.lifecycleState).not.toBeNull();
+  });
+});
+
+describe('exact record and event digests (MIG-09)', () => {
+  it('distinguishes records that differ only past the old 500-character description prefix, or in status, priority, timeline or documents', async () => {
+    const { computeRecordFingerprint } = await import('../validation-pipeline');
+    const long = 'x'.repeat(600);
+    const base = makeRecord({ description: long });
+    const variants = [
+      makeRecord({ description: long.slice(0, 599) + 'y' }),
+      makeRecord({ description: long, status: 'closed' }),
+      makeRecord({ description: long, priority: 'low' }),
+      makeRecord({ description: long, timeline: [{ date: '2026-01-02', action: 'x' }] }),
+      makeRecord({ description: long, documents: [{ name: 'a.pdf', sha256: 'a'.repeat(64) }] }),
+    ];
+    const fingerprints = new Set([base, ...variants].map(computeRecordFingerprint));
+    expect(fingerprints.size).toBe(variants.length + 1);
+    expect(computeRecordFingerprint(base)).toBe(computeRecordFingerprint(makeRecord({ description: long })));
+  });
+
+  it('hashes timeline notes in full, and keeps the earlier bytes for notes of 200 characters or fewer', async () => {
+    const { computeTimelineEventHash } = await import('../validation-pipeline');
+    const { createHash } = await import('crypto');
+    const prefix = 'n'.repeat(200);
+    expect(computeTimelineEventHash({ date: 'd', action: 'a', notes: prefix + '1' })).not.toBe(computeTimelineEventHash({ date: 'd', action: 'a', notes: prefix + '2' }));
+    const earlier = createHash('sha256').update(JSON.stringify({ d: 'd', a: 'a', actor: '', n: 'short note' })).digest('hex');
+    expect(computeTimelineEventHash({ date: 'd', action: 'a', notes: 'short note' })).toBe(earlier);
   });
 });

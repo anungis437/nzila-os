@@ -1,7 +1,7 @@
 /**
  * Batch Ingestion Engine (§1-§10)
  *
- * Hardened ingestion pipeline for real-world CUPE pilot data:
+ * Hardened ingestion pipeline for historical case data:
  *
  * §1  Strict Idempotency — external_case_id + fingerprint dedup, ON CONFLICT UPDATE
  * §2  Migration Traceability — source_system, imported_at, import_batch_id on every row
@@ -29,6 +29,10 @@ import {
   computeRecordFingerprint,
   computeTimelineEventHash,
   mapImportStatus,
+  importMappingDigest,
+  resolveImportPriority,
+  resolveImportStep,
+  type ImportValueMapping,
   type IngestionGrievanceRecord,
   type ValidationResult,
 } from './validation-pipeline';
@@ -42,6 +46,10 @@ export interface IngestionOptions {
   dryRun?: boolean;
   continueOnError?: boolean;
   batchSize?: number;
+  /** The tenant-bound expected source manifest (source-manifest.ts) this batch is reconciled against. Verification fails without one. */
+  sourceManifestId?: string;
+  /** Explicit mappings for source priorities and stages the platform does not use (MIG-02). */
+  valueMapping?: ImportValueMapping;
 }
 
 export interface IngestionResult {
@@ -72,6 +80,16 @@ function toUTCIso(dateStr: string | undefined, field: string): string {
     throw new Error(`${field} is missing or invalid; the import date is never substituted for a historical date`);
   }
   return d.toISOString();
+}
+
+/** A re-import that finds an imported document changed in the platform since its last import, or declaring different bytes. */
+export class DocumentReimportConflictError extends Error {
+  constructor(documentId: string, reason: 'changed' | 'digest') {
+    super(reason === 'changed'
+      ? `Document '${documentId}' was changed after its last import; a re-import does not overwrite it`
+      : `Document '${documentId}' was imported with a different declared digest; a re-import does not replace its content`);
+    this.name = 'DocumentReimportConflictError';
+  }
 }
 
 /** A re-import that finds the case changed in the platform since its last import. The record fails with this reason and the case keeps its changes. */
@@ -172,13 +190,14 @@ async function writeGrievanceRecord(
   const filedDate = toUTCIso(record.filed_date, 'filed_date');
   const incidentDate = record.incident_date ? toUTCIso(record.incident_date, 'incident_date') : null;
 
-  const priority = ['low', 'medium', 'high', 'urgent'].includes(record.priority ?? '')
-    ? record.priority!
-    : 'medium';
-
-  const step = ['step_1', 'step_2', 'step_3', 'final', 'arbitration'].includes(record.step ?? '')
-    ? record.step!
-    : null;
+  // Validation refused unknown values; resolving again here keeps the writer from ever defaulting one on its own.
+  const resolvedPriority = resolveImportPriority(record.priority, opts.valueMapping);
+  const resolvedStep = resolveImportStep(record.step, opts.valueMapping);
+  if (resolvedPriority.error || resolvedStep.error || !resolvedPriority.value) {
+    throw new Error(resolvedPriority.error ?? resolvedStep.error ?? 'priority is unresolved');
+  }
+  const priority = resolvedPriority.value;
+  const step = resolvedStep.value;
 
   const insertResult = await tx.execute(sql`
     INSERT INTO grievances (
@@ -261,29 +280,17 @@ async function writeGrievanceRecord(
     }
   }
 
-  // §4: Synthetic history event for imported status
-  const statusEventHash = computeTimelineEventHash({
-    date: filedDate,
-    action: 'imported',
-    actor: SYSTEM_USER,
-    notes: `Imported with status '${grievanceStatus}' from ${opts.sourceSystem}`,
-  });
-
+  // The import's own observation (when it saw the case, and the raw values it mapped) is provenance, kept apart from the
+  // case's history: no synthetic event is written into the timeline, dated at the filed date or at any other time (MIG-03).
   await tx.execute(sql`
-    INSERT INTO grievance_timeline_events (
-      grievance_id, organization_id, event_type, event_date,
-      actor, description, content_hash,
-      source_system, import_batch_id, sequence_number
+    INSERT INTO ue_ingestion_record_provenance (
+      organization_id, batch_id, grievance_id, external_case_id, record_fingerprint,
+      source_status_raw, source_priority_raw, source_step_raw, mapped_status, mapped_priority, mapped_step, observed_at
     ) VALUES (
-      ${grievanceId}::uuid, ${opts.organizationId}::uuid,
-      'imported', ${filedDate}::timestamptz,
-      ${SYSTEM_USER},
-      ${'Imported with status \'' + grievanceStatus + '\' from ' + opts.sourceSystem},
-      ${statusEventHash},
-      ${opts.sourceSystem}, ${batchId}::uuid, ${9999}
+      ${opts.organizationId}::uuid, ${batchId}::uuid, ${grievanceId}::uuid, ${externalId}, ${fingerprint},
+      ${record.status}, ${record.priority ?? null}, ${record.step ?? null}, ${grievanceStatus}, ${priority}, ${step},
+      ${importTime.toISOString()}::timestamptz
     )
-    ON CONFLICT (grievance_id, event_date, event_type, content_hash)
-    DO NOTHING
   `);
 
   // §6: Document normalization. A document is the canonical set the upload routes write: the documents row (one per organization, source system and external id,
@@ -298,11 +305,11 @@ async function writeGrievanceRecord(
       const stored = await tx.execute(sql`
         INSERT INTO documents (
           organization_id, name, title, file_url, file_type, document_type,
-          uploaded_by, source_system, external_document_id, imported_at, import_batch_id
+          uploaded_by, source_system, external_document_id, imported_at, import_batch_id, updated_at
         ) VALUES (
           ${opts.organizationId}::uuid, ${docName}, ${docName}, ${fileUrl}, ${docType}, ${docType},
           ${opts.createdBy}, ${opts.sourceSystem}, ${externalDocId},
-          ${importTime.toISOString()}::timestamptz, ${batchId}::uuid
+          ${importTime.toISOString()}::timestamptz, ${batchId}::uuid, ${importTime.toISOString()}::timestamptz
         )
         ON CONFLICT (organization_id, source_system, external_document_id)
           WHERE external_document_id IS NOT NULL
@@ -314,12 +321,30 @@ async function writeGrievanceRecord(
           document_type = EXCLUDED.document_type,
           imported_at = EXCLUDED.imported_at,
           import_batch_id = EXCLUDED.import_batch_id,
-          updated_at = NOW()
+          updated_at = EXCLUDED.imported_at
+        -- As for a case: an import leaves updated_at equal to imported_at, and a document changed in the platform since is not overwritten.
+        WHERE documents.imported_at IS NOT NULL
+          AND documents.updated_at <= documents.imported_at
         RETURNING id
       `);
       const documentId = (stored as any as Array<{ id: string }>)[0]?.id;
       if (!documentId) {
-        throw new Error(`No document ID returned for '${docName}'`);
+        throw new DocumentReimportConflictError(externalDocId, 'changed');
+      }
+
+      // What the source says the file's bytes are. Until bytes are fetched and their SHA-256 matches, the document is a
+      // reference, never verified content (document-evidence.ts). A re-import may not swap the declared content.
+      const declaredDigest = doc.sha256 ?? null;
+      await tx.execute(sql`
+        INSERT INTO ue_imported_document_evidence (organization_id, document_id, batch_id, source_declared_digest)
+        VALUES (${opts.organizationId}::uuid, ${documentId}::uuid, ${batchId}::uuid, ${declaredDigest})
+        ON CONFLICT (document_id) DO NOTHING
+      `);
+      const [evidence] = (await tx.execute(sql`
+        SELECT source_declared_digest FROM ue_imported_document_evidence WHERE document_id = ${documentId}::uuid
+      `)) as unknown as Array<{ source_declared_digest: string | null }>;
+      if (!evidence || (evidence.source_declared_digest ?? null) !== declaredDigest) {
+        throw new DocumentReimportConflictError(externalDocId, 'digest');
       }
 
       // A document with no file reference is a record of a document, not a stored file: it has no version.
@@ -352,7 +377,7 @@ export async function ingestGrievanceBatch(
   const importTime = new Date();
 
   // §11: Pre-flight validation
-  const validation = validateIngestionBatch(records);
+  const validation = validateIngestionBatch(records, opts.valueMapping);
   if (!validation.valid) {
     logger.warn('Ingestion pre-validation failed', {
       organizationId: opts.organizationId,
@@ -428,6 +453,28 @@ export async function ingestGrievanceBatch(
     .returning({ id: ingestionBatches.id });
 
   const batchId = batch.id;
+
+  // The batch's immutable manifest: its place in this organization's chain of imports from this source, the exact digest
+  // of what it received and of the value mapping it applied (MIG-09, MIG-11). The chain is extended under a transaction
+  // lock, and the database allows one root and one successor per batch, so two imports never fork it.
+  await db.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`ue-ingestion-chain:${opts.organizationId}:${opts.sourceSystem}`}::text, 0))`);
+  const [head] = (await db.execute(sql`
+    SELECT m.batch_id::text AS batch_id FROM ue_ingestion_batch_manifests m
+    WHERE m.organization_id = ${opts.organizationId}::uuid AND m.source_system = ${opts.sourceSystem}
+      AND NOT EXISTS (SELECT 1 FROM ue_ingestion_batch_manifests s WHERE s.predecessor_batch_id = m.batch_id)
+  `)) as unknown as Array<{ batch_id: string }>;
+  const recordDigest = createHash('sha256')
+    .update(JSON.stringify(records.map((record) => [record.external_case_id, computeRecordFingerprint(record)])))
+    .digest('hex');
+  await db.execute(sql`
+    INSERT INTO ue_ingestion_batch_manifests (
+      batch_id, organization_id, source_system, source_manifest_id, predecessor_batch_id, record_count, record_digest, mapping_digest
+    ) VALUES (
+      ${batchId}::uuid, ${opts.organizationId}::uuid, ${opts.sourceSystem}, ${opts.sourceManifestId ?? null}::uuid,
+      ${head?.batch_id ?? null}::uuid, ${records.length}, ${recordDigest}, ${importMappingDigest(opts.valueMapping)}
+    )
+  `);
+
   let succeeded = 0;
   let failed = 0;
   let skipped = 0;
@@ -527,6 +574,14 @@ export async function ingestGrievanceBatch(
         error_summary = ${JSON.stringify(errorList.slice(0, 100))}::jsonb,
         completed_at = NOW()
     WHERE id = ${batchId}::uuid
+  `);
+
+  // Seal the manifest once with the outcome. A record never reached (a stop on the first error) counts as skipped.
+  await db.execute(sql`
+    UPDATE ue_ingestion_batch_manifests
+    SET succeeded = ${succeeded}, failed = ${failed}, skipped = ${records.length - succeeded - failed},
+        outcome = ${finalStatus}, sealed_at = NOW()
+    WHERE batch_id = ${batchId}::uuid
   `);
 
   // §9: Log final summary

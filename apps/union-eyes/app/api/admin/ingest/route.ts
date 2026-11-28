@@ -35,6 +35,7 @@ const documentSchema = z.object({
   name: z.string(),
   file_url: z.string().optional(),
   file_type: z.string().optional(),
+  sha256: z.string().regex(/^[0-9a-f]{64}$/).optional(),
 });
 
 const recordSchema = z.object({
@@ -62,6 +63,13 @@ const ingestBodySchema = z.object({
   source_system: z.string().min(1).max(100),
   dry_run: z.boolean().optional().default(false),
   continue_on_error: z.boolean().optional().default(true),
+  // The organization's declared expected source manifest; verification cannot pass without one.
+  source_manifest_id: z.guid().optional(),
+  // Explicit mappings for source priorities and stages the platform does not use; an unmapped unknown value is refused.
+  value_mapping: z.object({
+    priority: z.record(z.string(), z.string()).optional(),
+    step: z.record(z.string(), z.string()).optional(),
+  }).optional(),
   records: z.array(recordSchema).min(1).max(5000),
 });
 
@@ -105,6 +113,8 @@ export const POST = withApi(
           createdBy: userId ?? 'system',
           dryRun: body.dry_run,
           continueOnError: body.continue_on_error,
+          sourceManifestId: body.source_manifest_id,
+          valueMapping: body.value_mapping,
         }),
       );
 

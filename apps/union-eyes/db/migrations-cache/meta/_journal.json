@@ -421,6 +421,13 @@
       "when": 1794873601000,
       "tag": "0062_case_scope_model_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1794873603000,
+      "tag": "0064_ingestion_provenance_rls_closure",
+      "breakpoints": true
     }
   ]
 }

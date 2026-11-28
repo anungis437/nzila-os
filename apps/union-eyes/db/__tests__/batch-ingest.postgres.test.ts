@@ -19,7 +19,7 @@
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
  */
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import pg from 'pg'
 import postgres from 'postgres'
 import { drizzle } from 'drizzle-orm/postgres-js'
@@ -50,6 +50,8 @@ vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: 
 
 const ingest = URL ? await import('@/lib/ingestion/batch-ingest') : null
 const verification = URL ? await import('@/lib/ingestion/post-import-verification') : null
+const manifests = URL ? await import('@/lib/ingestion/source-manifest') : null
+const evidence = URL ? await import('@/lib/ingestion/document-evidence') : null
 
 const SOURCE = 'legacy-case-system'
 const IMPORTER = 'importer-1'
@@ -82,9 +84,11 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     filed_date: '2026-01-10',
     ...extra,
   })
-  const options = (organizationId: string, sourceSystem = SOURCE) => ({ organizationId, sourceSystem, createdBy: IMPORTER, continueOnError: true })
-  const importAs = (organizationId: string, records: Array<ReturnType<typeof record>>, sourceSystem = SOURCE) =>
-    run(organizationId, () => ingest!.ingestGrievanceBatch(records as never, options(organizationId, sourceSystem)))
+  type Extra = { sourceManifestId?: string; valueMapping?: { priority?: Record<string, string>; step?: Record<string, string> } }
+  const options = (organizationId: string, sourceSystem = SOURCE, extra: Extra = {}) => ({ organizationId, sourceSystem, createdBy: IMPORTER, continueOnError: true, ...extra })
+  const importAs = (organizationId: string, records: Array<ReturnType<typeof record>>, sourceSystem = SOURCE, extra: Extra = {}) =>
+    run(organizationId, () => ingest!.ingestGrievanceBatch(records as never, options(organizationId, sourceSystem, extra)))
+  const sha = (text: string) => createHash('sha256').update(text).digest('hex')
   const rows = async (query: string, params: unknown[] = []) => (await admin.query(query, params)).rows
 
   beforeAll(async () => {
@@ -148,10 +152,8 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     expect(cases[0].grievance_number).toMatch(/^IMP-[0-9a-f]{10}-C-1$/)
 
     const events = await rows(`SELECT event_type, count(*)::int n FROM grievance_timeline_events WHERE organization_id = $1 AND import_batch_id = $2 GROUP BY event_type ORDER BY event_type`, [ORG, firstBatch])
-    expect(events).toEqual([
-      { event_type: 'acknowledged', n: 1 },
-      { event_type: 'imported', n: 2 },
-    ])
+    // Only the source's own history: the import writes no synthetic event into it (MIG-03).
+    expect(events).toEqual([{ event_type: 'acknowledged', n: 1 }])
 
     const docs = await rows(`SELECT id::text id, name, file_type, document_type, source_system, external_document_id, import_batch_id::text batch, imported_at IS NOT NULL imported, uploaded_by, privacy_label FROM documents WHERE organization_id = $1 AND import_batch_id = $2 ORDER BY name`, [ORG, firstBatch])
     expect(docs.map((d) => d.name)).toEqual(['Grievance form.pdf', 'Phone note'])
@@ -173,11 +175,33 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     expect((await rows(`SELECT status, succeeded, failed FROM ingestion_batches WHERE id = $1`, [firstBatch]))[0]).toEqual({ status: 'completed', succeeded: 2, failed: 0 })
   })
 
-  it('verifies the batch it wrote, as the same runtime role', async () => {
+  it('verifies the batch it wrote, as the same runtime role, and does not pass it without a source manifest or verified document content', async () => {
     const verified = await run(ORG, () => verification!.verifyImportBatch(firstBatch))
-    expect(verified.passed).toBe(true)
-    expect(verified.checks).toEqual([])
-    expect(verified.summary).toEqual({ grievancesImported: 2, timelineEventsCreated: 3, documentsLinked: 2, orphanDocuments: 0, stuckRecords: 0 })
+    expect(verified.passed).toBe(false)
+    expect(verified.checks.map((c) => c.check)).toEqual(['source_manifest_missing', 'document_content_unverified'])
+    expect(verified.summary).toEqual({
+      grievancesImported: 2, timelineEventsCreated: 1, documentsLinked: 2, orphanDocuments: 0, stuckRecords: 0,
+      documentsContentVerified: 0, documentsReferenceOnly: 2, sourceManifestId: null, predecessorBatchId: null, successorBatchId: null,
+    })
+  })
+
+  it('keeps the raw source values, their mapping and the import observation apart from the case history (MIG-02, MIG-03)', async () => {
+    const provenance = await rows(`SELECT p.external_case_id, p.source_status_raw, p.source_priority_raw, p.source_step_raw, p.mapped_status, p.mapped_priority, p.mapped_step,
+        p.observed_at = g.imported_at observed_at_import, length(p.record_fingerprint) fp, p.record_fingerprint = g.import_fingerprint same_fp
+      FROM ue_ingestion_record_provenance p JOIN grievances g ON g.id = p.grievance_id WHERE p.batch_id = $1 ORDER BY 1`, [firstBatch])
+    expect(provenance).toEqual([
+      { external_case_id: 'C-1', source_status_raw: 'filed', source_priority_raw: null, source_step_raw: null, mapped_status: 'filed', mapped_priority: 'medium', mapped_step: null, observed_at_import: true, fp: 64, same_fp: true },
+      { external_case_id: 'C-2', source_status_raw: 'filed', source_priority_raw: null, source_step_raw: null, mapped_status: 'filed', mapped_priority: 'medium', mapped_step: null, observed_at_import: true, fp: 64, same_fp: true },
+    ])
+    expect((await rows(`SELECT count(*)::int n FROM grievance_timeline_events WHERE organization_id = $1 AND event_type = 'imported'`, [ORG]))[0].n).toBe(0)
+    // An unknown priority is refused before anything is written; an explicitly mapped one is stored with its raw value.
+    expect(await importAs(ORG, [record(ORG, 'M-0', { priority: 'P1' })])).toMatchObject({ status: 'failed', batchId: '' })
+    const mapped = await importAs(ORG, [record(ORG, 'M-1', { priority: 'P1', step: 'stage-two' })], SOURCE, { valueMapping: { priority: { P1: 'urgent' }, step: { 'stage-two': 'step_2' } } })
+    expect(mapped).toMatchObject({ status: 'completed', succeeded: 1 })
+    expect((await rows(`SELECT g.priority, g.step, p.source_priority_raw, p.source_step_raw FROM grievances g JOIN ue_ingestion_record_provenance p ON p.grievance_id = g.id WHERE g.organization_id = $1 AND g.external_case_id = 'M-1'`, [ORG]))[0])
+      .toEqual({ priority: 'urgent', step: 'step_2', source_priority_raw: 'P1', source_step_raw: 'stage-two' })
+    expect((await rows(`SELECT mapping_digest <> (SELECT mapping_digest FROM ue_ingestion_batch_manifests WHERE batch_id = $2) differs FROM ue_ingestion_batch_manifests WHERE batch_id = $1`, [mapped.batchId, firstBatch]))[0].differs).toBe(true)
+    await expect(admin.query(`UPDATE ue_ingestion_record_provenance SET source_status_raw = 'x' WHERE batch_id = $1`, [firstBatch])).rejects.toThrow(/UE_INGESTION_RECORD_IMMUTABLE/)
   })
 
   it('is idempotent: the same records again change the same rows and add no copy', async () => {
@@ -214,11 +238,22 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     expect((await rows(`SELECT name FROM documents WHERE organization_id = $1 AND external_document_id = 'D-1'`, [ORG]))[0].name).toBe('Grievance form (signed).pdf')
     expect((await rows(`SELECT count(*)::int n FROM document_versions WHERE organization_id = $1`, [ORG]))[0].n).toBe(1)
     expect((await rows(`SELECT count(*)::int n FROM document_links WHERE organization_id = $1`, [ORG]))[0].n).toBe(2)
-    // The acknowledged event is unchanged, and the imported event names the same status as before, so neither is copied.
+    // The acknowledged event is unchanged, so it is not copied.
     expect(await rows(`SELECT event_type, count(*)::int n FROM grievance_timeline_events WHERE grievance_id = $1 GROUP BY event_type ORDER BY event_type`, [before[0].id])).toEqual([
       { event_type: 'acknowledged', n: 1 },
-      { event_type: 'imported', n: 1 },
     ])
+    // Each batch is the successor of the one before it from this source: one chain, sealed and immutable (MIG-11).
+    const chain = await rows(`SELECT batch_id::text batch, predecessor_batch_id::text predecessor, outcome, sealed_at IS NOT NULL sealed FROM ue_ingestion_batch_manifests WHERE batch_id = ANY($1::uuid[])`, [[moved.batchId, second.batchId]])
+    expect(chain).toEqual(expect.arrayContaining([
+      expect.objectContaining({ batch: second.batchId, predecessor: moved.batchId, outcome: 'completed', sealed: true }),
+      expect.objectContaining({ batch: moved.batchId, outcome: 'partial', sealed: true }),
+    ]))
+    await expect(admin.query(`UPDATE ue_ingestion_batch_manifests SET outcome = 'completed' WHERE batch_id = $1`, [moved.batchId])).rejects.toThrow(/UE_INGESTION_BATCH_MANIFEST_IMMUTABLE/)
+    await expect(admin.query(`DELETE FROM ue_ingestion_batch_manifests WHERE batch_id = $1`, [moved.batchId])).rejects.toThrow(/UE_INGESTION_BATCH_MANIFEST_RETAINED/)
+    // A second successor of the same batch (a fork) is refused by the database.
+    const forkBatch = (await admin.query(`INSERT INTO ingestion_batches (organization_id, source_system, status) VALUES ($1, $2, 'processing') RETURNING id::text`, [ORG, SOURCE])).rows[0].id
+    await expect(admin.query(`INSERT INTO ue_ingestion_batch_manifests (batch_id, organization_id, source_system, predecessor_batch_id, record_count, record_digest, mapping_digest)
+      VALUES ($1, $2, $3, $4, 0, $5, $5)`, [forkBatch, ORG, SOURCE, moved.batchId, sha('x')])).rejects.toSatisfy((error) => codeOf(error) === '23505')
   })
 
   it('treats the same external id from another source system, or another organization, as another case', async () => {
@@ -281,7 +316,7 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     const verified = await run(ORG, () => verification!.verifyImportBatch(latest))
     // An orphan document blocks: the batch does not pass verification.
     expect(verified.passed).toBe(false)
-    expect(verified.checks).toMatchObject([{ check: 'orphan_documents', severity: 'error', count: 1 }])
+    expect(verified.checks).toEqual(expect.arrayContaining([expect.objectContaining({ check: 'orphan_documents', severity: 'error', count: 1 })]))
     expect(verified.summary.orphanDocuments).toBe(1)
   })
 
@@ -305,7 +340,7 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
     // The partial batch does not pass verification.
     const verified = await run(ORG, () => verification!.verifyImportBatch(again.batchId))
     expect(verified.passed).toBe(false)
-    expect(verified.checks.map((c) => c.check)).toEqual(['batch_incomplete'])
+    expect(verified.checks.map((c) => c.check)).toContain('batch_incomplete')
   })
 
   it('a case created in the platform with the same external key is never taken over by an import', async () => {
@@ -363,5 +398,82 @@ describe.skipIf(!URL)('the batch ingestion over the real grievance, document and
         [ORG, SOURCE],
       ),
     ).rejects.toSatisfy((error) => codeOf(error) === '23505')
+  })
+
+  it('does not overwrite a document changed in the platform, or swap the content a source declared for it (MIG-04, MIG-05)', async () => {
+    const doc = { external_id: 'DD-1', name: 'Original.pdf', file_type: 'pdf', file_url: 'https://files.example.test/dd1.pdf', sha256: sha('dd1') }
+    expect(await importAs(ORG, [record(ORG, 'DOC-1', { documents: [doc] })])).toMatchObject({ status: 'completed' })
+    expect((await rows(`SELECT updated_at = imported_at same FROM documents WHERE organization_id = $1 AND external_document_id = 'DD-1'`, [ORG]))[0].same).toBe(true)
+    // The same declaration again is a no-op re-import.
+    expect(await importAs(ORG, [record(ORG, 'DOC-1', { documents: [doc] })])).toMatchObject({ status: 'completed' })
+    const swapped = await importAs(ORG, [record(ORG, 'DOC-1', { documents: [{ ...doc, sha256: sha('other bytes') }] })])
+    expect(swapped).toMatchObject({ status: 'failed', failed: 1 })
+    expect(swapped.errors[0].error).toMatch(/different declared digest/)
+    await admin.query(`UPDATE documents SET name = 'Renamed by a handler', updated_at = imported_at + interval '1 minute' WHERE organization_id = $1 AND external_document_id = 'DD-1'`, [ORG])
+    const overwrite = await importAs(ORG, [record(ORG, 'DOC-1', { documents: [doc] })])
+    expect(overwrite).toMatchObject({ status: 'failed', failed: 1 })
+    expect(overwrite.errors[0].error).toMatch(/changed after its last import/)
+    expect((await rows(`SELECT name FROM documents WHERE organization_id = $1 AND external_document_id = 'DD-1'`, [ORG]))[0].name).toBe('Renamed by a handler')
+  })
+
+  it('passes verification only once a declared source manifest reconciles and every document\'s bytes match their declared digest (MIG-05, MIG-07)', async () => {
+    const VERIFIED = 'verified-system'
+    const declared = await run(ORG, () => manifests!.declareSourceManifest({ organizationId: ORG, sourceSystem: VERIFIED, caseIds: ['V-1'], expectedDocumentCount: 2, declaredBy: IMPORTER }))
+    // The same declaration is the same manifest.
+    expect((await run(ORG, () => manifests!.declareSourceManifest({ organizationId: ORG, sourceSystem: VERIFIED, caseIds: ['V-1'], expectedDocumentCount: 2, declaredBy: IMPORTER }))).manifestId).toBe(declared.manifestId)
+    await expect(admin.query(`UPDATE ue_ingestion_source_manifests SET expected_document_count = 0 WHERE id = $1`, [declared.manifestId])).rejects.toThrow(/UE_INGESTION_RECORD_IMMUTABLE/)
+    const result = await importAs(ORG, [record(ORG, 'V-1', { documents: [
+      { external_id: 'VD-1', name: 'Form.pdf', file_type: 'pdf', file_url: 'https://files.example.test/v1.pdf', sha256: sha('form bytes') },
+      { external_id: 'VD-2', name: 'Letter.pdf', file_type: 'pdf', file_url: 'https://files.example.test/v2.pdf', sha256: sha('letter bytes') },
+    ] })], VERIFIED, { sourceManifestId: declared.manifestId })
+    expect(result).toMatchObject({ status: 'completed', succeeded: 1 })
+    const docIds = Object.fromEntries((await rows(`SELECT external_document_id, id::text id FROM documents WHERE organization_id = $1 AND source_system = $2`, [ORG, VERIFIED])).map((r) => [r.external_document_id, r.id]))
+
+    let verified = await run(ORG, () => verification!.verifyImportBatch(result.batchId))
+    expect(verified.checks.map((c) => c.check)).toEqual(['document_content_unverified'])
+    expect(verified.summary).toMatchObject({ sourceManifestId: declared.manifestId, documentsReferenceOnly: 2, documentsContentVerified: 0 })
+
+    const bytes = (text: string) => new TextEncoder().encode(text)
+    expect(await run(ORG, () => evidence!.verifyImportedDocumentContent({ organizationId: ORG, documentId: docIds['VD-1'], bytes: bytes('form bytes'), verifiedBy: IMPORTER })))
+      .toMatchObject({ status: 'verified', state: 'digest_verified', byteSize: 10 })
+    verified = await run(ORG, () => verification!.verifyImportBatch(result.batchId))
+    expect(verified.checks.map((c) => c.check)).toEqual(['document_content_unverified'])
+    expect(await run(ORG, () => evidence!.verifyImportedDocumentContent({ organizationId: ORG, documentId: docIds['VD-2'], bytes: bytes('letter bytes'), verifiedBy: IMPORTER })))
+      .toMatchObject({ status: 'verified' })
+    verified = await run(ORG, () => verification!.verifyImportBatch(result.batchId))
+    expect(verified.passed).toBe(true)
+    expect(verified.checks).toEqual([])
+    expect(verified.summary).toMatchObject({ documentsContentVerified: 2, documentsReferenceOnly: 0 })
+
+    // Verified once: a second verification is refused, and the evidence cannot be rewritten. No scanner has passed it, so it is not available content.
+    expect(await run(ORG, () => evidence!.verifyImportedDocumentContent({ organizationId: ORG, documentId: docIds['VD-1'], bytes: bytes('other'), verifiedBy: IMPORTER })))
+      .toEqual({ status: 'refused', reason: 'ALREADY_DECIDED', state: 'digest_verified' })
+    await expect(admin.query(`UPDATE ue_imported_document_evidence SET verification_state = 'reference_only', verified_digest = NULL, verified_at = NULL, byte_size = NULL WHERE document_id = $1`, [docIds['VD-1']])).rejects.toThrow(/UE_IMPORTED_DOCUMENT_EVIDENCE_IMMUTABLE/)
+    expect(await run(ORG, () => evidence!.isImportedDocumentContentAvailable(ORG, docIds['VD-1']))).toBe(false)
+  })
+
+  it('fails a batch that does not reconcile with its manifest, and records mismatched bytes as a mismatch (MIG-05, MIG-07)', async () => {
+    const SYS = 'reconcile-system'
+    const declared = await run(ORG, () => manifests!.declareSourceManifest({ organizationId: ORG, sourceSystem: SYS, caseIds: ['R-1', 'R-2'], expectedDocumentCount: 1, declaredBy: IMPORTER }))
+    const result = await importAs(ORG, [record(ORG, 'R-1', { documents: [{ external_id: 'RD-1', name: 'R.pdf', file_type: 'pdf', file_url: 'https://files.example.test/r.pdf', sha256: sha('r bytes') }] }), record(ORG, 'R-3')], SYS, { sourceManifestId: declared.manifestId })
+    expect(result).toMatchObject({ status: 'completed', succeeded: 2 })
+    const doc = (await rows(`SELECT id::text id FROM documents WHERE organization_id = $1 AND external_document_id = 'RD-1'`, [ORG]))[0].id
+    expect(await run(ORG, () => evidence!.verifyImportedDocumentContent({ organizationId: ORG, documentId: doc, bytes: new TextEncoder().encode('tampered'), verifiedBy: IMPORTER })))
+      .toMatchObject({ status: 'mismatch', state: 'digest_mismatch' })
+    const verified = await run(ORG, () => verification!.verifyImportBatch(result.batchId))
+    expect(verified.passed).toBe(false)
+    expect(verified.checks.map((c) => c.check).sort()).toEqual(['document_digest_mismatch', 'source_manifest_missing_cases', 'source_manifest_unexpected_cases'])
+    expect(verified.checks.find((c) => c.check === 'source_manifest_missing_cases')?.details).toEqual(['R-2'])
+    expect(verified.checks.find((c) => c.check === 'source_manifest_unexpected_cases')?.details).toEqual(['R-3'])
+    // A document without a declared digest can never be verified.
+    const plain = (await rows(`SELECT id::text id FROM documents WHERE organization_id = $1 AND name = 'Phone note' LIMIT 1`, [ORG]))[0].id
+    expect(await run(ORG, () => evidence!.verifyImportedDocumentContent({ organizationId: ORG, documentId: plain, bytes: new Uint8Array(), verifiedBy: IMPORTER })))
+      .toMatchObject({ status: 'refused', reason: 'SOURCE_DIGEST_REQUIRED' })
+  })
+
+  it('binds a source manifest to its organization: another organization cannot import against it', async () => {
+    const declared = await run(ORG, () => manifests!.declareSourceManifest({ organizationId: ORG, sourceSystem: 'bound-system', caseIds: ['B-1'], expectedDocumentCount: 0, declaredBy: IMPORTER }))
+    await expect(importAs(OTHER, [record(OTHER, 'B-1')], 'bound-system', { sourceManifestId: declared.manifestId })).rejects.toBeDefined()
+    expect((await rows(`SELECT count(*)::int n FROM grievances WHERE organization_id = $1 AND external_case_id = 'B-1'`, [OTHER]))[0].n).toBe(0)
   })
 })

@@ -56,6 +56,8 @@ export interface IngestionGrievanceRecord {
     name: string;
     file_url?: string;
     file_type?: string;
+    /** The SHA-256 (lowercase hex) the source declares for the file's bytes; verification compares fetched bytes with it. */
+    sha256?: string;
   }>;
   assigned_to?: string;
   filed_by?: string;
@@ -91,20 +93,48 @@ const VALID_IMPORT_STATES = new Set([
 
 // ─── Fingerprint ────────────────────────────────────────────────────────────
 
+/** Stable JSON: object keys sorted, undefined members left out, so the same record always has the same bytes. */
+export function canonicalImportJson(value: unknown): string {
+  if (value === null || value === undefined || typeof value !== 'object') return JSON.stringify(value ?? null);
+  if (Array.isArray(value)) return `[${value.map(canonicalImportJson).join(',')}]`;
+  const entries = Object.entries(value as Record<string, unknown>).filter(([, v]) => v !== undefined).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalImportJson(v)}`).join(',')}}`;
+}
+
+export const RECORD_FINGERPRINT_VERSION = 2;
+
+/**
+ * The exact digest of everything an import takes from a record (MIG-09). Version 1 hashed the first 500 characters of
+ * the description and left out the status, priority, step, parties, timeline and documents, so two different records
+ * could share a fingerprint. Nothing is truncated or omitted here.
+ */
 export function computeRecordFingerprint(record: IngestionGrievanceRecord): string {
-  const canonical = JSON.stringify({
+  return createHash('sha256').update(canonicalImportJson({
+    v: RECORD_FINGERPRINT_VERSION,
     ext: record.external_case_id,
+    num: record.grievance_number,
     org: record.organization_id,
     type: record.type,
-    title: record.title?.trim(),
-    desc: record.description?.trim().substring(0, 500),
-    date: record.incident_date ?? record.filed_date,
-  });
-  return createHash('sha256').update(canonical).digest('hex');
+    status: record.status,
+    priority: record.priority,
+    step: record.step,
+    title: record.title,
+    desc: record.description,
+    grievant: record.grievant_name,
+    email: record.grievant_email,
+    incident: record.incident_date,
+    filed: record.filed_date,
+    assigned: record.assigned_to,
+    filedBy: record.filed_by,
+    timeline: record.timeline,
+    documents: record.documents,
+  })).digest('hex');
 }
 
 // ─── Timeline Event Hash ────────────────────────────────────────────────────
 
+// The notes are hashed in full: a 200-character prefix made two different events one. For notes of 200 characters or
+// fewer the bytes are unchanged, so re-importing an earlier import adds no duplicate event.
 export function computeTimelineEventHash(event: {
   date: string;
   action: string;
@@ -115,10 +145,56 @@ export function computeTimelineEventHash(event: {
     d: event.date,
     a: event.action,
     actor: event.actor ?? '',
-    n: (event.notes ?? '').trim().substring(0, 200),
+    n: (event.notes ?? '').trim(),
   });
   return createHash('sha256').update(canonical).digest('hex');
 }
+
+// ─── Explicit value mapping (MIG-02) ────────────────────────────────────────
+
+/** Source values the platform does not use, mapped explicitly by the operator to a platform value. */
+export interface ImportValueMapping {
+  priority?: Record<string, string>;
+  step?: Record<string, string>;
+}
+
+export const STATUS_MAPPING_VERSION = 'status-aliases-v1';
+
+export function importMappingDigest(mapping: ImportValueMapping | undefined): string {
+  return createHash('sha256').update(canonicalImportJson({
+    status: STATUS_MAPPING_VERSION,
+    priority: mapping?.priority ?? {},
+    step: mapping?.step ?? {},
+  })).digest('hex');
+}
+
+type Resolved = { value: string | null; error?: string };
+
+/** An absent priority is the platform default (the raw absence is kept in provenance); an unknown one is mapped explicitly or refused, never defaulted. */
+export function resolveImportPriority(raw: string | undefined, mapping?: ImportValueMapping): Resolved {
+  const value = raw?.trim();
+  if (!value) return { value: 'medium' };
+  if (VALID_PRIORITIES.has(value)) return { value };
+  const mapped = mapping?.priority?.[value];
+  if (mapped !== undefined) {
+    return VALID_PRIORITIES.has(mapped) ? { value: mapped } : { value: null, error: `Priority mapping for '${value}' names '${mapped}', which is not a platform priority` };
+  }
+  return { value: null, error: `Unknown priority '${value}'. Map it explicitly (value_mapping.priority); it is never defaulted` };
+}
+
+/** An absent stage stays absent; an unknown one is mapped explicitly or refused, never dropped. */
+export function resolveImportStep(raw: string | undefined, mapping?: ImportValueMapping): Resolved {
+  const value = raw?.trim();
+  if (!value) return { value: null };
+  if (VALID_STEPS.has(value)) return { value };
+  const mapped = mapping?.step?.[value];
+  if (mapped !== undefined) {
+    return VALID_STEPS.has(mapped) ? { value: mapped } : { value: null, error: `Stage mapping for '${value}' names '${mapped}', which is not a platform stage` };
+  }
+  return { value: null, error: `Unknown procedural stage '${value}'. Map it to a known stage before import (value_mapping.step); it is never dropped` };
+}
+
+const SHA256_HEX = /^[0-9a-f]{64}$/;
 
 // ─── Status Mapping ─────────────────────────────────────────────────────────
 
@@ -163,7 +239,7 @@ export function mapImportStatus(rawStatus: string): {
 
 // ─── Validate Single Record ─────────────────────────────────────────────────
 
-function validateRecord(record: IngestionGrievanceRecord, idx: number): ValidationIssue[] {
+function validateRecord(record: IngestionGrievanceRecord, idx: number, mapping?: ImportValueMapping): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
   // Required fields
@@ -199,15 +275,18 @@ function validateRecord(record: IngestionGrievanceRecord, idx: number): Validati
     }
   }
 
-  // Priority
-  if (record.priority && !VALID_PRIORITIES.has(record.priority)) {
-    issues.push({ index: idx, field: 'priority', severity: 'warning', message: `Unknown priority '${record.priority}', will default to 'medium'` });
-  }
+  // Priority and stage: the source's value is kept, and an unknown one must be mapped explicitly; it is never defaulted or dropped.
+  const priority = resolveImportPriority(record.priority, mapping);
+  if (priority.error) issues.push({ index: idx, field: 'priority', severity: 'error', message: priority.error });
+  const step = resolveImportStep(record.step, mapping);
+  if (step.error) issues.push({ index: idx, field: 'step', severity: 'error', message: step.error });
 
-  // Step. A procedural stage the platform does not know is a finding to remediate, not a stage to drop: storing the case without it would lose where it stood.
-  if (record.step && !VALID_STEPS.has(record.step)) {
-    issues.push({ index: idx, field: 'step', severity: 'error', message: `Unknown procedural stage '${record.step}'. Map it to a known stage before import; it is never dropped` });
-  }
+  // A declared document digest must be a SHA-256: anything else could never verify the bytes.
+  record.documents?.forEach((doc, di) => {
+    if (doc.sha256 !== undefined && !SHA256_HEX.test(doc.sha256)) {
+      issues.push({ index: idx, field: `documents[${di}].sha256`, severity: 'error', message: 'A declared document digest must be 64 lowercase hexadecimal characters (SHA-256)' });
+    }
+  });
 
   // Date validation. The filed date is the case's history: when the source does not give it the record is refused, because the import date is never written in its place.
   if (!record.filed_date?.trim()) {
@@ -254,7 +333,7 @@ function validateRecord(record: IngestionGrievanceRecord, idx: number): Validati
 
 // ─── Validate Batch ─────────────────────────────────────────────────────────
 
-export function validateIngestionBatch(records: IngestionGrievanceRecord[]): ValidationResult {
+export function validateIngestionBatch(records: IngestionGrievanceRecord[], mapping?: ImportValueMapping): ValidationResult {
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
 
@@ -268,7 +347,7 @@ export function validateIngestionBatch(records: IngestionGrievanceRecord[]): Val
 
   for (let i = 0; i < records.length; i++) {
     const rec = records[i];
-    const issues = validateRecord(rec, i);
+    const issues = validateRecord(rec, i, mapping);
 
     for (const issue of issues) {
       (issue.severity === 'error' ? errors : warnings).push(issue);

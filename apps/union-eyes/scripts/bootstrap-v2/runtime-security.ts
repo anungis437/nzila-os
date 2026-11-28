@@ -369,6 +369,10 @@ export async function* iterateRuntimeSecurityReports(
       expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
     },
     organizing_form_template_versions: { source_digest: 'a'.repeat(64) },
+    // Import provenance (platform 0091): SHA-256 shaped digests and a consistent empty manifest.
+    ue_ingestion_source_manifests: { manifest_digest: 'a'.repeat(64), expected_case_ids: [], expected_case_count: 0, expected_document_count: 0 },
+    ue_ingestion_batch_manifests: { record_digest: 'a'.repeat(64), mapping_digest: 'b'.repeat(64), record_count: 0 },
+    ue_ingestion_record_provenance: { record_fingerprint: 'c'.repeat(64) },
     ue_authority_resource_relationships: { origin: 'explicit' },
     // assign: no source staff, a target staff, through a triage designation.
     message_thread_assignments: {

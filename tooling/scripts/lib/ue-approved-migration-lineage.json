@@ -431,6 +431,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-step1-integration-20261118",
         "note": "Forward-only database defaults for the Django BaseModel id/created_at/updated_at fields of the four case-scope relations (gen_random_uuid(), CURRENT_TIMESTAMP), exactly as the canonical V2 source plan installs them. Future inserts only; no row is changed."
+      },
+      {
+        "tag": "0064_ingestion_provenance_rls_closure",
+        "sha256": "a0ecbc5718777ddddcab4446283fe718362e0ca6a38e4c6c7ef3d142be85d4e1",
+        "status": "UNQUALIFIED",
+        "introducedBy": "feat/ue-migration-provenance",
+        "note": "Row security for the ingestion provenance relations (platform 0091): FORCE RLS + the direct-org tenant policy on all four. Fails closed when a relation is absent, its organization_id is not uuid NOT NULL, or a runtime role owns it."
       }
     ],
     "platform": [
@@ -951,6 +958,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "a6ed0264eb6a9be1c0c791a4574e3d7c6a264fff",
         "note": "Inventory reconciliation only: existing founder-authored November 9 baseline ancestor source was present on main but absent from the additions registry. Its exact SQL bytes remain unchanged. Registration confers no runtime proof, no positive financial capability or release acceptance; the current base-release finance containment remains in force."
+      },
+      {
+        "tag": "0091_ingestion_provenance_and_manifests",
+        "sha256": "c9ad8d09b701580711cdbd7da2b7e254f3bafd4627279832741f17297447bd94",
+        "status": "UNQUALIFIED",
+        "introducedBy": "feat/ue-migration-provenance",
+        "note": "MIG-02/03/05/07/09/11: immutable tenant-bound expected source manifests; one sealed manifest per import batch, chained to its predecessor (one root and one successor per batch); append-only per-record provenance with raw source values, mapped values, the exact record fingerprint and the import observation time; imported document evidence (declared digest, verification state, scan state) verified once. RLS is scoped (cache) 0064."
       }
     ]
   }
