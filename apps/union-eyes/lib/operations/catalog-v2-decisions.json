@@ -7562,6 +7562,60 @@
       "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0086 and protected by scoped 0060 (FORCE RLS, same ue_create_direct_org_rls_policy helper as the ue_verified_dependency_evidence family). Reached only through lib/knowledge-transfer/propagation/node-alias-store.ts and the authenticated route under app/api/exit-interviews/node-aliases/, which run every statement inside inOrganization/withRLSContext on the tenant runtime identity. Runtime DML is SELECT, INSERT and UPDATE (creating a new alias conditionally supersedes a prior active one in the same transaction; there is no DELETE path - history is preserved, never removed - and no schema authority)."
     },
     {
+      "table": "ue_integration_identity_links",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Reached only through lib/integrations/inbound, which runs every statement inside the caller's tenant transaction on the tenant runtime identity; the source is bound by a composite (organization_id, source_id) key. Runtime DML: a link is written in the receipt's transaction (INSERT) and can only be marked stale (UPDATE); a trigger refuses retargeting and DELETE."
+    },
+    {
+      "table": "ue_integration_inbound_receipts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Reached only through lib/integrations/inbound, which runs every statement inside the caller's tenant transaction on the tenant runtime identity; the source is bound by a composite (organization_id, source_id) key. Runtime DML: the claim is INSERT ... ON CONFLICT DO NOTHING on the unique (organization, source, idempotency key); settling, retry and fenced lease takeover are conditional UPDATEs. A trigger refuses a claim on a revoked source, any change to a terminal receipt and DELETE."
+    },
+    {
+      "table": "ue_integration_mapping_versions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Reached only through lib/integrations/inbound, which runs every statement inside the caller's tenant transaction on the tenant runtime identity; the source is bound by a composite (organization_id, source_id) key. Runtime DML: publish a new mapping version (INSERT) and read the pinned one; a trigger refuses UPDATE and DELETE."
+    },
+    {
+      "table": "ue_integration_outbox",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Reached only through lib/integrations/inbound, which runs every statement inside the caller's tenant transaction on the tenant runtime identity; the source is bound by a composite (organization_id, source_id) key. Runtime DML: the event is written in the receipt's transaction (INSERT) and marked published after commit (UPDATE of published_at only, once); a trigger refuses any other change and DELETE."
+    },
+    {
+      "table": "ue_integration_sources",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Reached only through lib/integrations/inbound, which runs every statement inside the caller's tenant transaction on the tenant runtime identity; the source is bound by a composite (organization_id, source_id) key. Runtime DML: an administrator authorizes a source (INSERT) and revokes it (UPDATE; a trigger makes revocation terminal and refuses DELETE)."
+    },
+    {
       "table": "ue_policy_bindings",
       "classification": "CONTAINED_NO_AUTHORITY",
       "runtime": [],
@@ -8221,7 +8275,7 @@
   ],
   "currentSecurity": {
     "contractVersion": "1",
-    "sourcePlanDigest": "211ec1f8dfcfaef367231576611379245356e9b93255789bb7ef2cfa0834c9fb",
+    "sourcePlanDigest": "5bc67bf756175efdae9f1d7f94863e91da84df1e08bfadc031503a823da4d346",
     "currentFunctions": [
       {
         "schema": "public",
