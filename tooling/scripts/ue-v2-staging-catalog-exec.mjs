@@ -40,6 +40,8 @@ export const RUNTIME_LOGIN = 'ue_staging_runtime'
 // REPEATABLE READ transaction that ends in ROLLBACK, and only by founder dispatch.
 export const PRIVILEGED_LOGIN = 'uev2admin'
 export const CATALOG_PLANES = ['runtime', 'privileged']
+// The bootstrap-v2 installer's singleton receipt: the v2 record of the installed source plan.
+export const INSTALLER_RECEIPT = 'public.ue_v2_bootstrap_receipt'
 // Privileged values (exact counts, migration ledger, change counters) leave the
 // container only sealed to the founder's X25519 key. The repository is public, so
 // Actions artifacts and workspace logs are treated as broadly readable.
@@ -109,6 +111,7 @@ const FRAME = ${JSON.stringify(EVIDENCE_FRAME)}
 const CHUNK_BYTES = ${EVIDENCE_CHUNK_BYTES}
 const MAX_BYTES = ${EVIDENCE_MAX_BYTES}
 const PRIVILEGED_LOGIN = ${JSON.stringify(PRIVILEGED_LOGIN)}
+const INSTALLER_RECEIPT = ${JSON.stringify(INSTALLER_RECEIPT)}
 const STAGING_DB_HOST = ${JSON.stringify(STAGING_DB_HOST)}
 const STATS_SETTLE_MS = ${STATS_SETTLE_MS}
 const SEAL_INFO = ${JSON.stringify(SEAL_INFO)}
@@ -310,6 +313,22 @@ async function main() {
           out.queries.push({ id: 'drizzle_rows', rowCount: ledger.rows.length, rowsSealed: true, ledgerDigest: digestOf(ledger.rows) })
         } else out.queries.push(ledger)
       }
+      // A v2 database is installed from a bootstrap source plan, not from the Drizzle journal.
+      // Its installed state is the installer's singleton receipt (contract, source and catalog
+      // digests). The runtime role is revoked from it, so only this plane reads it, sealed.
+      if (PLANE === 'privileged') {
+        const receiptEntry = byName.get(INSTALLER_RECEIPT)
+        if (matrix.error || !Array.isArray(matrix.rows)) out.queries.push({ id: 'installer_receipt', classification: 'NOT_ATTEMPTED', reason: 'DISCOVERY_UNREADABLE' })
+        else if (!receiptEntry) out.queries.push({ id: 'installer_receipt', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_INVENTORY' })
+        else if (!receiptEntry.schema_usage || !receiptEntry.can_select) out.queries.push({ id: 'installer_receipt', classification: 'PRIVILEGE_DENIED', reason: 'INSTALLER_RECEIPT_NOT_READABLE_BY_ROLE' })
+        else {
+          const receipt = await query(client, 'installer_receipt', 'SELECT contract_version, source_digest, catalog_digest FROM ' + INSTALLER_RECEIPT + ' ORDER BY singleton')
+          if (Array.isArray(receipt.rows)) {
+            sensitive.ledgers.push({ relation: INSTALLER_RECEIPT, rows: receipt.rows })
+            out.queries.push({ id: 'installer_receipt', rowCount: receipt.rows.length, rowsSealed: true, ledgerDigest: digestOf(receipt.rows) })
+          } else out.queries.push(receipt)
+        }
+      }
       if (PLANE === 'runtime' && !continuation) {
         const audit = out.queries.find((item) => item.id === 'audit')
         const auditAbsent = Boolean(audit && !audit.error && Array.isArray(audit.rows) && audit.rows.length === 0)
@@ -455,6 +474,7 @@ export const CATALOG_CONTRACT = {
     { id: 'migration_history', queries: [
       { id: 'migration_columns', accept: ['OBSERVED'], covers: 'migration_relations' },
       { id: 'drizzle_rows', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'discovery' },
+      { id: 'installer_receipt', accept: ['OBSERVED', 'ABSENT_VERIFIED'], absence: 'inventory' },
     ] },
     { id: 'roles_and_memberships', queries: [
       { id: 'roles', accept: ['OBSERVED'] },
@@ -491,6 +511,13 @@ function timeoutText(value) {
   return /statement timeout|canceling statement/i.test(String(value ?? ''))
 }
 
+// Absence is proven only by a readable table inventory of the same session that lacks it.
+function inventoryHas(catalog, qualified) {
+  const matrix = findQuery(catalog, 'privilege_matrix')
+  if (!matrix || matrix.error || !Array.isArray(matrix.rows)) return null
+  return matrix.rows.some((row) => `${row.schema}.${row.name}` === qualified)
+}
+
 function discoveryHasDrizzle(catalog) {
   const relations = findQuery(catalog, 'migration_relations')
   if (!relations || relations.error || !Array.isArray(relations.rows)) return null
@@ -505,6 +532,7 @@ export function classifyCatalogQuery(spec, query, catalog) {
   if (query.rowsSealed === true && !Array.isArray(query.rows)) return 'SEALED'
   if (query.classification === 'NOT_ATTEMPTED') {
     if (query.reason === 'RELATION_NOT_IN_DISCOVERY' && spec.absence === 'discovery' && discoveryHasDrizzle(catalog) === false) return 'ABSENT_VERIFIED'
+    if (query.reason === 'RELATION_NOT_IN_INVENTORY' && spec.absence === 'inventory' && inventoryHas(catalog, INSTALLER_RECEIPT) === false) return 'ABSENT_VERIFIED'
     if (query.reason === 'PARENT_ABSENT' && spec.absence === 'parent-audit') {
       const audit = classifyCatalogQuery({ absence: 'zero-rows' }, findQuery(catalog, 'audit'), catalog)
       if (audit === 'ABSENT_VERIFIED') return 'ABSENT_VERIFIED'
@@ -710,6 +738,9 @@ function relationDigest(catalog) {
   return row && typeof row.digest === 'string' ? `${row.relations}:${row.digest}:${row.policy_digest}` : null
 }
 
+// Sealed ledger queries and the relation each one reads.
+const SEALED_LEDGER_QUERIES = [['drizzle_rows', 'drizzle.__drizzle_migrations'], ['installer_receipt', INSTALLER_RECEIPT]]
+
 function migrationDigest(catalog) {
   const relations = findQuery(catalog, 'migration_relations')
   const columns = findQuery(catalog, 'migration_columns')
@@ -886,13 +917,20 @@ export function openSealedCatalog(catalog, privateKeyPem) {
     if (value === undefined) throw new Error('SEALED_COUNTS_INCONSISTENT')
     item.n = value
   }
-  const ledgerQuery = findQuery(opened, 'drizzle_rows')
+  // Every sealed ledger must match the clear row count and digest of its own query, and the
+  // envelope may hold no ledger that the clear summary does not announce.
   const ledgers = values.ledgers ?? []
-  if (ledgerQuery?.rowsSealed === true) {
-    const ledger = ledgers.find((item) => item.relation === 'drizzle.__drizzle_migrations')
-    if (!ledger || !Array.isArray(ledger.rows) || ledger.rows.length !== ledgerQuery.rowCount || sha256Hex(ledger.rows) !== ledgerQuery.ledgerDigest) throw new Error('SEALED_LEDGER_INCONSISTENT')
+  const announced = new Set()
+  for (const [id, relation] of SEALED_LEDGER_QUERIES) {
+    const ledgerQuery = findQuery(opened, id)
+    if (ledgerQuery?.rowsSealed !== true) continue
+    const matching = ledgers.filter((item) => item.relation === relation)
+    const ledger = matching[0]
+    if (matching.length !== 1 || !Array.isArray(ledger.rows) || ledger.rows.length !== ledgerQuery.rowCount || sha256Hex(ledger.rows) !== ledgerQuery.ledgerDigest) throw new Error('SEALED_LEDGER_INCONSISTENT')
     ledgerQuery.rows = ledger.rows
-  } else if (ledgers.length) throw new Error('SEALED_LEDGER_INCONSISTENT')
+    announced.add(relation)
+  }
+  if (ledgers.some((item) => !announced.has(item.relation))) throw new Error('SEALED_LEDGER_INCONSISTENT')
   const countersDigest = (rows) => sha256Hex(rows.map((item) => [item.oid, item.schema, item.name, item.ins, item.upd, item.del, item.filenode].join(':')).join('\n'))
   for (const [field, digestField] of [['modificationCounters', 'modificationDigest'], ['settledCounters', 'settledModificationDigest']]) {
     const rows = Array.isArray(values[field]) ? values[field] : []

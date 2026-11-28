@@ -118,7 +118,8 @@ The workflow input `plane` selects one of two sessions. They are reconciled offl
 - **`privileged` (Plane B).**
   - Runs only with separate founder authorization.
   - Uses the existing `uev2admin` login and its existing environment secret, which reaches only this step and only on this plane. Read-only, `REPEATABLE READ`, `ROLLBACK`, with the same time and statement bounds.
-  - Reads the migration ledger and exact global counts. Those values are sealed in the container to the founder's key (`UE_V2_STAGING_CATALOG_RECIPIENT`). Without the key, nothing is created.
+  - Reads the migration ledger, the bootstrap-v2 installer receipt (`public.ue_v2_bootstrap_receipt`) and exact global counts. Those values are sealed in the container to the founder's key (`UE_V2_STAGING_CATALOG_RECIPIENT`). Without the key, nothing is created.
+  - The installer receipt is the v2 record of the installed source plan. The Drizzle ledger on staging is an older lineage and does not describe it. The runtime role is revoked from the receipt, so only this plane reads it. It is absent only when the session's own table inventory lacks it. Evidence captured before 2026-11-28 does not include it.
   - A complete run reports `PLANE_CAPTURED_SEALED`, which is not acceptance.
 
 Only `--assemble`, run offline by the founder with the private key, can produce `CATALOG_COMPLETE`. It needs both planes, every artifact verified against its `SHA256SUMS`, and matching inventory, structure and migration discovery. Continuation chains never cross planes.

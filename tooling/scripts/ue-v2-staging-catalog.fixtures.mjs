@@ -12,6 +12,7 @@ export function fixtureQuery(id, rows) {
 }
 
 export const FIXTURE_TABLES = [{ schema: 'public', name: 'members' }, { schema: 'public', name: 'claims' }]
+export const FIXTURE_RECEIPT = [{ contract_version: 'ue-v2-bootstrap/1', source_digest: '1'.repeat(64), catalog_digest: '2'.repeat(64) }]
 export const FIXTURE_LEDGER = [{ id: 1, hash: 'abc', created_at: '1767225600000' }, { id: 2, hash: 'def', created_at: '1767312000000' }]
 const STRUCTURE = [{ columns: 9, digest: 'f'.repeat(32) }]
 const RELATIONS = [{ relations: 4, digest: 'e'.repeat(32), policy_digest: 'd'.repeat(32) }]
@@ -98,6 +99,7 @@ export function privilegedCatalog(overrides = {}) {
       ...sharedQueries(PRIVILEGED_LOGIN).map((item) => item.id === 'tables' ? fixtureQuery('tables', tables) : item),
       fixtureQuery('privilege_matrix', matrix),
       { ...fixtureQuery('drizzle_rows', FIXTURE_LEDGER), ledgerDigest: sha(FIXTURE_LEDGER) },
+      { ...fixtureQuery('installer_receipt', FIXTURE_RECEIPT), ledgerDigest: sha(FIXTURE_RECEIPT) },
       { id: 'modification_counters', rowCount: FIXTURE_TABLES.length, rowsSealed: true },
       { id: 'settled_counters', rowCount: FIXTURE_TABLES.length, rowsSealed: true },
     ],
@@ -117,10 +119,12 @@ export function sealPrivileged(opened, recipientPublicKey, { run = '45999999999'
       count.sealed = true
     }
   }
-  const ledger = catalog.queries.find((item) => item.id === 'drizzle_rows')
-  if (Array.isArray(ledger?.rows)) {
-    sensitive.ledgers.push({ relation: 'drizzle.__drizzle_migrations', rows: ledger.rows })
-    catalog.queries = catalog.queries.map((item) => item.id === 'drizzle_rows' ? { id: 'drizzle_rows', rowCount: ledger.rows.length, rowsSealed: true, ledgerDigest: sha(ledger.rows) } : item)
+  for (const [id, relation] of [['drizzle_rows', 'drizzle.__drizzle_migrations'], ['installer_receipt', 'public.ue_v2_bootstrap_receipt']]) {
+    const ledger = catalog.queries.find((item) => item.id === id)
+    if (Array.isArray(ledger?.rows)) {
+      sensitive.ledgers.push({ relation, rows: ledger.rows })
+      catalog.queries = catalog.queries.map((item) => item.id === id ? { id, rowCount: ledger.rows.length, rowsSealed: true, ledgerDigest: sha(ledger.rows) } : item)
+    }
   }
   const aad = ['ue-v2-staging-catalog-sealed/v1', run, source, catalog.observedAt, catalog.snapshot, 'privileged', sha(JSON.stringify(catalog))].join('|')
   catalog.sealed = sealForRecipient(JSON.stringify(sensitive), recipientPublicKey, aad)
