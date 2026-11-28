@@ -961,7 +961,7 @@
       },
       {
         "tag": "0090_inbound_integration_execution",
-        "sha256": "5178ef1ca8432661fd02913a47308e11a2dfe08b61bd2bd7b647df9a83c3f958",
+        "sha256": "cde13b77efc3324dfd8201c67ace34184dd5a7dc56d341f5a97c972c9fbad89d",
         "status": "UNQUALIFIED",
         "introducedBy": "feat/ue-durable-inbound-execution",
         "note": "INT-01..16: durable inbound integration storage. ue_integration_sources (terminal revocation), ue_integration_mapping_versions (immutable, numbered), ue_integration_inbound_receipts (unique (organization, source, idempotency key) claim with fencing token and lease; terminal receipts immutable; a claim on a revoked source refused by trigger), ue_integration_identity_links (never retargeted or deleted, only marked stale) and ue_integration_outbox (published once). Composite (organization_id, source_id) keys bind every row to its organization's source. RLS is scoped (cache) 0063."

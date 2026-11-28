@@ -100,7 +100,10 @@ CREATE TABLE IF NOT EXISTS public.ue_integration_inbound_receipts (
   CONSTRAINT ue_integration_inbound_receipts_claimed_check CHECK (
     status <> 'claimed' OR (finished_at IS NULL AND case_id IS NULL AND effect IS NULL)),
   CONSTRAINT ue_integration_inbound_receipts_source_fk FOREIGN KEY (organization_id, source_id)
-    REFERENCES public.ue_integration_sources (organization_id, id)
+    REFERENCES public.ue_integration_sources (organization_id, id),
+  -- A receipt pins an existing mapping version of its own source.
+  CONSTRAINT ue_integration_inbound_receipts_mapping_fk FOREIGN KEY (organization_id, source_id, mapping_version)
+    REFERENCES public.ue_integration_mapping_versions (organization_id, source_id, version)
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS ue_integration_inbound_receipts_claim_key_idx
@@ -159,6 +162,8 @@ CREATE INDEX IF NOT EXISTS ue_integration_outbox_pending_idx
 CREATE OR REPLACE FUNCTION public.ue_integration_source_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
+  -- A statement that changes nothing is not a modification.
+  IF TG_OP = 'UPDATE' AND to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF TG_OP = 'DELETE' THEN
     RAISE EXCEPTION 'UE_INTEGRATION_SOURCE_RETAINED' USING ERRCODE = '42501';
   END IF;
@@ -178,6 +183,8 @@ CREATE TRIGGER ue_integration_source_guard BEFORE UPDATE OR DELETE ON public.ue_
 CREATE OR REPLACE FUNCTION public.ue_integration_immutable_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
+  -- A statement that changes nothing is not a modification.
+  IF TG_OP = 'UPDATE' AND to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   RAISE EXCEPTION 'UE_INTEGRATION_RECORD_IMMUTABLE:%', TG_TABLE_NAME USING ERRCODE = '42501';
 END $$;
 --> statement-breakpoint
@@ -191,6 +198,8 @@ CREATE TRIGGER ue_integration_mapping_versions_immutable BEFORE UPDATE OR DELETE
 CREATE OR REPLACE FUNCTION public.ue_integration_receipt_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
+  -- A statement that changes nothing is not a modification.
+  IF TG_OP = 'UPDATE' AND to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF TG_OP = 'DELETE' THEN
     RAISE EXCEPTION 'UE_INTEGRATION_RECEIPT_RETAINED' USING ERRCODE = '42501';
   END IF;
@@ -237,6 +246,8 @@ CREATE TRIGGER ue_integration_receipt_guard BEFORE INSERT OR UPDATE OR DELETE ON
 CREATE OR REPLACE FUNCTION public.ue_integration_identity_link_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
+  -- A statement that changes nothing is not a modification.
+  IF TG_OP = 'UPDATE' AND to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF TG_OP = 'DELETE' THEN
     RAISE EXCEPTION 'UE_INTEGRATION_IDENTITY_LINK_RETAINED' USING ERRCODE = '42501';
   END IF;
@@ -258,6 +269,8 @@ CREATE TRIGGER ue_integration_identity_link_guard BEFORE UPDATE OR DELETE ON pub
 CREATE OR REPLACE FUNCTION public.ue_integration_outbox_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, public AS $$
 BEGIN
+  -- A statement that changes nothing is not a modification.
+  IF TG_OP = 'UPDATE' AND to_jsonb(NEW) = to_jsonb(OLD) THEN RETURN NEW; END IF;
   IF TG_OP = 'DELETE' THEN
     RAISE EXCEPTION 'UE_INTEGRATION_OUTBOX_RETAINED' USING ERRCODE = '42501';
   END IF;

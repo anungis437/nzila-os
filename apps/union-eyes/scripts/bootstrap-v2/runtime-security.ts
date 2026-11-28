@@ -379,6 +379,9 @@ export async function* iterateRuntimeSecurityReports(
     },
     // close by a thread member: no hold, so no hold reference.
     message_thread_lifecycle: { action: 'close', acted_via: 'thread_member', reference: null },
+    // Durable inbound integration (platform 0090): SHA-256 shaped digests and a first mapping version.
+    ue_integration_mapping_versions: { version: 1, rule_digest: 'd'.repeat(64) },
+    ue_integration_inbound_receipts: { payload_digest: 'e'.repeat(64) },
   }
   for (const [name, overrides] of Object.entries(metadataOverrides))
     for (const row of proposed.get(name) ?? []) Object.assign(row, overrides)

@@ -80,6 +80,7 @@ export const ueIntegrationInboundReceipts = pgTable('ue_integration_inbound_rece
     OR (${table.reasonCode} IS NOT NULL AND ${table.finishedAt} IS NOT NULL AND ${table.caseId} IS NULL AND ${table.effect} IS NULL)`),
   check('ue_integration_inbound_receipts_claimed_check', sql`${table.status} <> 'claimed' OR (${table.finishedAt} IS NULL AND ${table.caseId} IS NULL AND ${table.effect} IS NULL)`),
   foreignKey({ name: 'ue_integration_inbound_receipts_source_fk', columns: [table.organizationId, table.sourceId], foreignColumns: [ueIntegrationSources.organizationId, ueIntegrationSources.id] }),
+  foreignKey({ name: 'ue_integration_inbound_receipts_mapping_fk', columns: [table.organizationId, table.sourceId, table.mappingVersion], foreignColumns: [ueIntegrationMappingVersions.organizationId, ueIntegrationMappingVersions.sourceId, ueIntegrationMappingVersions.version] }),
 ])
 
 export const ueIntegrationIdentityLinks = pgTable('ue_integration_identity_links', {
