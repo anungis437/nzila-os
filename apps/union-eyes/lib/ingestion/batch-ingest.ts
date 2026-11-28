@@ -65,10 +65,21 @@ const UNASSIGNED_LABEL = 'Unassigned';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function toUTCIso(dateStr: string | undefined, fallback: Date): string {
-  if (!dateStr) return fallback.toISOString();
-  const d = new Date(dateStr);
-  return isNaN(d.getTime()) ? fallback.toISOString() : d.toISOString();
+// A historical date is the source's or nothing: the import time is never written in its place (validation refuses such a record; this refuses it again).
+function toUTCIso(dateStr: string | undefined, field: string): string {
+  const d = dateStr?.trim() ? new Date(dateStr) : null;
+  if (!d || isNaN(d.getTime())) {
+    throw new Error(`${field} is missing or invalid; the import date is never substituted for a historical date`);
+  }
+  return d.toISOString();
+}
+
+/** A re-import that finds the case changed in the platform since its last import. The record fails with this reason and the case keeps its changes. */
+export class ReimportConflictError extends Error {
+  constructor(externalId: string) {
+    super(`Case '${externalId}' was changed after its last import; a re-import does not overwrite it. Resolve the conflict before importing it again`);
+    this.name = 'ReimportConflictError';
+  }
 }
 
 // grievances.grievance_number is unique across every organization, so the number given to a case that arrives without one names its organization and source system,
@@ -158,8 +169,8 @@ async function writeGrievanceRecord(
   const grievanceNumber = record.grievance_number?.trim()
     || importedGrievanceNumber(opts.organizationId, opts.sourceSystem, externalId);
 
-  const filedDate = toUTCIso(record.filed_date, importTime);
-  const incidentDate = record.incident_date ? toUTCIso(record.incident_date, importTime) : null;
+  const filedDate = toUTCIso(record.filed_date, 'filed_date');
+  const incidentDate = record.incident_date ? toUTCIso(record.incident_date, 'incident_date') : null;
 
   const priority = ['low', 'medium', 'high', 'urgent'].includes(record.priority ?? '')
     ? record.priority!
@@ -187,7 +198,7 @@ async function writeGrievanceRecord(
       ${incidentDate ? sql`${incidentDate}::timestamptz` : sql`NULL`},
       ${filedDate}::timestamptz,
       ${opts.sourceSystem}, ${importTime.toISOString()}::timestamptz, ${batchId}::uuid,
-      NOW(), NOW()
+      ${importTime.toISOString()}::timestamptz, ${importTime.toISOString()}::timestamptz
     )
     ON CONFLICT (organization_id, source_system, external_case_id)
       WHERE external_case_id IS NOT NULL
@@ -201,12 +212,24 @@ async function writeGrievanceRecord(
       import_fingerprint = EXCLUDED.import_fingerprint,
       imported_at = EXCLUDED.imported_at,
       import_batch_id = EXCLUDED.import_batch_id,
-      updated_at = NOW()
+      updated_at = EXCLUDED.imported_at
+    -- An import leaves updated_at equal to imported_at; a platform write after it moves updated_at on. Such a case is not overwritten.
+    WHERE grievances.imported_at IS NOT NULL
+      AND grievances.updated_at <= grievances.imported_at
     RETURNING id
   `);
 
   const grievanceId = (insertResult as any as Array<{ id: string }>)[0]?.id;
   if (!grievanceId) {
+    const existing = await tx.execute(sql`
+      SELECT id FROM grievances
+      WHERE organization_id = ${opts.organizationId}::uuid
+        AND source_system = ${opts.sourceSystem}
+        AND external_case_id = ${externalId}
+    `);
+    if ((existing as unknown as Array<{ id: string }>).length > 0) {
+      throw new ReimportConflictError(externalId);
+    }
     throw new Error('No grievance ID returned from upsert');
   }
 
@@ -214,7 +237,7 @@ async function writeGrievanceRecord(
   if (record.timeline?.length) {
     let seq = 0;
     for (const ev of record.timeline) {
-      const eventDate = toUTCIso(ev.date, importTime);
+      const eventDate = toUTCIso(ev.date, `timeline[${seq}].date`);
       const contentHash = computeTimelineEventHash(ev);
       const action = ev.action?.trim() || 'status_change';
       const actor = ev.actor?.trim() || SYSTEM_USER;

@@ -63,6 +63,7 @@ function setCleanMocks() {
       succeeded: 5,
       failed: 0,
       skipped: 0,
+      status: 'completed',
     }]);
 }
 
@@ -110,7 +111,7 @@ describe('verifyImportBatch', () => {
     expect(nullCheck!.count).toBe(1);
   });
 
-  it('reports orphan documents as warning', async () => {
+  it('fails a batch with an orphan document', async () => {
     mocks.mockExecute
       .mockResolvedValueOnce([{ cnt: 3 }])
       .mockResolvedValueOnce([])                     // null critical (clean)
@@ -125,14 +126,14 @@ describe('verifyImportBatch', () => {
 
     const result = await verifyImportBatch(BATCH_ID);
 
-    expect(result.passed).toBe(true); // warnings don't fail
+    expect(result.passed).toBe(false); // every finding blocks
     const orphanCheck = result.checks.find(c => c.check === 'orphan_documents');
     expect(orphanCheck).toBeDefined();
-    expect(orphanCheck!.severity).toBe('warning');
+    expect(orphanCheck!.severity).toBe('error');
     expect(result.summary.orphanDocuments).toBe(1);
   });
 
-  it('reports stuck records as warning', async () => {
+  it('fails a batch with a record stuck in processing', async () => {
     mocks.mockExecute
       .mockResolvedValueOnce([{ cnt: 10 }])
       .mockResolvedValueOnce([])
@@ -145,7 +146,7 @@ describe('verifyImportBatch', () => {
 
     const result = await verifyImportBatch(BATCH_ID);
 
-    expect(result.passed).toBe(true); // warnings don't fail
+    expect(result.passed).toBe(false); // every finding blocks
     const stuckCheck = result.checks.find(c => c.check === 'stuck_records');
     expect(stuckCheck).toBeDefined();
     expect(stuckCheck!.count).toBe(2);
@@ -173,7 +174,7 @@ describe('verifyImportBatch', () => {
     expect(orgCheck!.severity).toBe('error');
   });
 
-  it('warns on batch count mismatch', async () => {
+  it('fails a batch whose counts do not reconcile', async () => {
     mocks.mockExecute
       .mockResolvedValueOnce([{ cnt: 5 }])
       .mockResolvedValueOnce([])
@@ -187,14 +188,15 @@ describe('verifyImportBatch', () => {
         succeeded: 5,
         failed: 2,
         skipped: 1,   // sum = 8, but total = 10 → mismatch
+        status: 'completed',
       }]);
 
     const result = await verifyImportBatch(BATCH_ID);
 
-    expect(result.passed).toBe(true); // mismatch is a warning
+    expect(result.passed).toBe(false); // unreconciled counts block
     const mismatchCheck = result.checks.find(c => c.check === 'batch_count_mismatch');
     expect(mismatchCheck).toBeDefined();
-    expect(mismatchCheck!.severity).toBe('warning');
+    expect(mismatchCheck!.severity).toBe('error');
   });
 
   it('handles empty batch gracefully', async () => {
@@ -206,7 +208,7 @@ describe('verifyImportBatch', () => {
       .mockResolvedValueOnce([{ cnt: 0 }])           // no documents
       .mockResolvedValueOnce([{ cnt: 0 }])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ total_records: 0, succeeded: 0, failed: 0, skipped: 0 }]);
+      .mockResolvedValueOnce([{ total_records: 0, succeeded: 0, failed: 0, skipped: 0, status: 'completed' }]);
 
     const result = await verifyImportBatch(BATCH_ID);
 
@@ -216,7 +218,7 @@ describe('verifyImportBatch', () => {
     expect(result.summary.documentsLinked).toBe(0);
   });
 
-  it('handles missing batch meta record', async () => {
+  it('fails when the batch record is missing or out of scope', async () => {
     mocks.mockExecute
       .mockResolvedValueOnce([{ cnt: 3 }])
       .mockResolvedValueOnce([])
@@ -229,8 +231,9 @@ describe('verifyImportBatch', () => {
 
     const result = await verifyImportBatch(BATCH_ID);
 
-    // Should still pass — missing meta just skips that check
-    expect(result.passed).toBe(true);
+    // A batch id with no batch record in scope (unknown, or another organization's under RLS) fails
+    expect(result.passed).toBe(false);
+    expect(result.checks.find(c => c.check === 'batch_not_found')?.severity).toBe('error');
     expect(result.summary.grievancesImported).toBe(3);
   });
 
@@ -249,15 +252,32 @@ describe('verifyImportBatch', () => {
       .mockResolvedValueOnce([                       // broken org
         { id: 'g2', organization_id: 'bad-org' },
       ])
-      .mockResolvedValueOnce([{ total_records: 5, succeeded: 3, failed: 1, skipped: 0 }]); // mismatch
+      .mockResolvedValueOnce([{ total_records: 5, succeeded: 3, failed: 1, skipped: 0, status: 'partial' }]); // mismatch
 
     const result = await verifyImportBatch(BATCH_ID);
 
     expect(result.passed).toBe(false); // has errors
-    expect(result.checks.length).toBe(5); // null_critical + orphan + stuck + broken_org + mismatch
-    const errors = result.checks.filter(c => c.severity === 'error');
-    const warnings = result.checks.filter(c => c.severity === 'warning');
-    expect(errors.length).toBe(2);   // null_critical + broken_org
-    expect(warnings.length).toBe(3); // orphan + stuck + mismatch
+    // null_critical + orphan + stuck + broken_org + mismatch + incomplete
+    expect(result.checks.map(c => c.check).sort()).toEqual([
+      'batch_count_mismatch', 'batch_incomplete', 'broken_org_reference', 'null_critical_fields', 'orphan_documents', 'stuck_records',
+    ]);
+    expect(result.checks.every(c => c.severity === 'error')).toBe(true);
+  });
+
+  it('fails a batch that did not complete, even when its counts reconcile', async () => {
+    mocks.mockExecute
+      .mockResolvedValueOnce([{ cnt: 4 }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ cnt: 8 }])
+      .mockResolvedValueOnce([{ cnt: 0 }])
+      .mockResolvedValueOnce([{ cnt: 0 }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ total_records: 5, succeeded: 4, failed: 1, skipped: 0, status: 'partial' }]);
+
+    const result = await verifyImportBatch(BATCH_ID);
+
+    expect(result.passed).toBe(false);
+    expect(result.checks.map(c => c.check)).toEqual(['batch_incomplete']);
   });
 });
