@@ -15,72 +15,198 @@
       "source": "BL1–2",
       "assertion": "Component and branch boundaries independent of access grants; preserve leading zero external branch codes.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+        "UE-CAP-K-006"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-02",
       "source": "BL2.3",
       "assertion": "Jurisdiction dispute goes to National Executive with appeal to Board and Convention; no silent transfer.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-03",
       "source": "BL3.1",
       "assertion": "Versioned authorized interpretation, subsequent reversal preserves earlier decisions.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-CAP-K-011"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-04",
       "source": "BL5.2–10",
       "assertion": "Branch membership, card evidence, democratic rights, representative and bargaining authority distinct.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-A-005",
+        "UE-CAP-K-009",
+        "UE-CAP-A-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-05",
       "source": "BL5.4",
       "assertion": "Recognition categories and dues exception distinct from active voting rights; secret award vote with applicable threshold.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-OMIT-MEMBER-DUES-SELF-SERVICE"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-06",
       "source": "BL6",
       "assertion": "Separate confidential membership discipline and appeal workflow, not employer grievance.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-E-001",
+        "UE-OMIT-PRIVACY-RIGHTS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-PRIVACY-RIGHTS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-07",
@@ -97,43 +223,130 @@
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-D-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-08",
       "source": "BL8–9",
       "assertion": "Convention credentials, alternates, committees, quorum, resolutions; special meeting scope.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COMMITTEE-WORKSPACE",
+        "UE-CAP-K-009",
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-09",
       "source": "BL10",
       "assertion": "Eligibility, nominations, vacancies, office succession, oath and outgoing authority revocation.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-CAP-A-003",
+        "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-10",
       "source": "BL11–13",
       "assertion": "National executive and board distinct responsibilities; equity mandates and review.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COMMITTEE-WORKSPACE",
+        "UE-CAP-A-003",
+        "UE-OMIT-EQUITY-SELF-IDENTIFICATION"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-11",
@@ -150,156 +363,1446 @@
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-D-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-12",
       "source": "BL16–20",
       "assertion": "Communications, referendum, amendment, oath, national president compensation; no assumed live voting/finance.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009",
+        "UE-CAP-D-003",
+        "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COMMUNICATIONS-CAMPAIGN-AUTHORING",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-13",
       "source": "Reg3",
       "assertion": "Committee mandates, chairs, term, vacancy, expenses and delegated powers.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COMMITTEE-WORKSPACE",
+        "UE-CAP-A-003",
+        "UE-CAP-D-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-14",
       "source": "Reg6",
       "assertion": "Explicit signing delegation on grievance; no role-based implicit authority.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-B-001",
+        "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-B-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-15",
       "source": "Reg7",
       "assertion": "Release-from-duty request and evidence under applicable policy.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-CAP-F-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-16",
       "source": "Reg11; BR14",
       "assertion": "Trusteeship temporary authority, preservation of historical mandates, review and restoration.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+        "UE-CAP-A-003",
+        "UE-CAP-K-011"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-17",
       "source": "BR9–10,16; amendments",
       "assertion": "Branch-specific executive and steward configuration, Sarnia example; no bespoke fork.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+        "UE-CAP-A-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-STEWARD-ASSIGNMENT-DIRECTORY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-18",
       "source": "BR11; amendments",
       "assertion": "Branch-specific quorum, motions, notice and meeting scopes.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COMMITTEE-WORKSPACE",
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-19",
       "source": "BR12; 2026 kit p3",
       "assertion": "Electronic OR permitted paper method; disallow mixing within election; local timezone, acclamation, appeal and tie windows.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-009"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "GOV-20",
       "source": "BR13; Hamilton amendment",
       "assertion": "Temporary excluded management appointment suspends authority as applicable; reinstatement controlled.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-A-003",
+        "UE-CAP-A-005"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "REP-01",
       "source": "FB18.03",
       "assertion": "Written group consent per person; reject missing consent, allow compliant alternate form.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-F-002",
+        "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-ESIGNATURE-DOCUMENT-REQUESTS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "REP-02",
       "source": "FB18.04",
       "assertion": "Policy grievance direct final level; employer-originated path distinct; CIU SOP dual presidential approval.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-OMIT-EMPLOYER-RELATIONS-RECORDS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "REP-03",
       "source": "FB18.07; TC18.07",
       "assertion": "Qualifying informal discussions pause elapsed calculation with evidence and bounded start/end.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "REP-04",
       "source": "FB18.08–09",
       "assertion": "Employer receipt and alternate form accepted; preserve source identifier.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+        "UE-OMIT-REP-CORRESPONDENCE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REP-CORRESPONDENCE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-05",
+      "source": "FB18.11; TC18.11",
+      "assertion": "FB ordinary three levels versus TC maximum four with permitted intermediate waiver; agreement-specific transitions, no universal skip rule.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-06",
+      "source": "FB18.15; TC18.15",
+      "assertion": "25 days from notification/awareness, not necessarily incident.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-07",
+      "source": "FB18.16(a); TC18.16(a)",
+      "assertion": "Escalation within ten days of written decision conveyed.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-08",
+      "source": "FB18.16(b); TC18.16(b)",
+      "assertion": "Non-response escalation limit fifteen days from prior presentation, distinct from ten-day normal reply.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-09",
+      "source": "FB18.17; TC18.17",
+      "assertion": "Normal reply ten intermediate, twenty final, thirty policy; separate clocks from member escalation.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-10",
+      "source": "FB18.20; TC18.20",
+      "assertion": "Exclude Saturday/Sunday/designated paid holidays; calendar version and source.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-11",
+      "source": "FB18.21; TC18.21",
+      "assertion": "Mail postmark vs delivery vs receipt trigger distinguished.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-REP-CORRESPONDENCE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REP-CORRESPONDENCE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-12",
+      "source": "FB18.22; TC18.22",
+      "assertion": "Mutual extension and applicable Alliance participation recorded.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-13",
+      "source": "FB18.23–24; TC18.23–24",
+      "assertion": "Governed level elimination and qualifying demotion/termination direct final level.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-14",
+      "source": "FB18.25–26; TC18.25–26",
+      "assertion": "Written abandonment, missed escalation and beyond-control exception; no automatic irreversible closure.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-OMIT-M04-LEGAL-DEADLINE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-15",
+      "source": "FB18.27–28; TC18.27–28",
+      "assertion": "Adjudicability and Alliance approval/representation where required; no universal referral.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-CAP-F-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-16",
+      "source": "CIU SOP final level",
+      "assertion": "Executive signature, full handoff packet, national LRO restricted grant and receipt.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-B-001",
+        "UE-CAP-F-002",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-B-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-17",
+      "source": "CIU SOP discipline",
+      "assertion": "Restricted PSI and medical evidence, classification and redacted export.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-E-001",
+        "UE-CAP-F-001",
+        "UE-CAP-F-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-001",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-18",
+      "source": "CIU classification FAQ",
+      "assertion": "Statutory classification and statement-of-duties pathways distinct from ordinary agreement grievance.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-OMIT-M04-LEGAL-DEADLINE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-19",
+      "source": "WFA index",
+      "assertion": "EB B / FB C / PA D / SV I / TC T appendix mapping; dated cohort and option decisions.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-20",
+      "source": "Batch 03 official agreement source inventory",
+      "assertion": "employer representative cannot hear same grievance at multiple levels (FB/PA/SV/TC 18.11; verify EB37.11).",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+        "UE-OMIT-EMPLOYER-RELATIONS-RECORDS"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-EMPLOYER-RELATIONS-RECORDS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-21",
+      "source": "Batch 03 official agreement source inventory",
+      "assertion": "rule selection must scope employer, classification, agreement version, effective date, procedural route; reject RCMP-only TC XX article for CBSA TC.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-22",
+      "source": "Batch 03 official agreement source inventory",
+      "assertion": "PSAC good-standing exception and source authorization; no automatic removal of representation rights due to missing payroll deduction (https://psacunion.ca/node/7064).",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-A-005",
+        "UE-OMIT-MEMBER-DUES-SELF-SERVICE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "REP-23",
+      "source": "Batch 03 official agreement source inventory",
+      "assertion": "telework letter periods and expiry separately tracked; do not apply expired temporary panel arrangements automatically (https://www.canada.ca/en/treasury-board-secretariat/services/collective-agreements/collective-bargaining/collective-bargaining-update/letter-agreement-telework-eb-pa-sv-tc.html).",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-M04-LEGAL-DEADLINE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-01",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "valid inbound case: persisted canonical case, identity target exists, persisted run matches returned ID and mandatory audit; no empty internal ID",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-02",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "malformed mapped payload: no case, identity link or success event; explicit rejection",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-002",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-03",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "same source event repeated: same canonical entity and durable receipt, one domain effect",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-04",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "conflicting external ID mapping: quarantine with reason; no silent overwrite or stale link reuse",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-A-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-001",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-05",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "same external ID in unrelated tenant: distinct isolated outcomes; wrong connection context denied before write",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-006",
+        "UE-CAP-K-010"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-06",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "concurrent retry: unique scoped key, no duplicate row, audit or notification",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-07",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "adapter failure before persistence: failed run; retry policy explicit, no fake completed result",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-002",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-08",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "failure after domain commit: durable recovery/reconciliation, no duplicate creation",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-09",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "audit failure: transaction rolls back or recoverable durable intermediate status; never success without mandatory audit",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-011",
+        "UE-CAP-K-005"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-005",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-10",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "stale link or missing internal entity: reject or approved reconciliation; no implicit relink",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-A-001",
+        "UE-CAP-K-010"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-001",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-11",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "payload or mapping schema evolution: versioned rules, deterministic replay and explicit drift errors",
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
         "UE-CAP-K-010"
@@ -309,147 +1812,237 @@
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
-      "id": "REP-05",
-      "source": "FB18.11; TC18.11",
-      "assertion": "FB ordinary three levels versus TC maximum four with permitted intermediate waiver; agreement-specific transitions, no universal skip rule.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-06",
-      "source": "FB18.15; TC18.15",
-      "assertion": "25 days from notification/awareness, not necessarily incident.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-07",
-      "source": "FB18.16(a); TC18.16(a)",
-      "assertion": "Escalation within ten days of written decision conveyed.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-08",
-      "source": "FB18.16(b); TC18.16(b)",
-      "assertion": "Non-response escalation limit fifteen days from prior presentation, distinct from ten-day normal reply.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-09",
-      "source": "FB18.17; TC18.17",
-      "assertion": "Normal reply ten intermediate, twenty final, thirty policy; separate clocks from member escalation.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-10",
-      "source": "FB18.20; TC18.20",
-      "assertion": "Exclude Saturday/Sunday/designated paid holidays; calendar version and source.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-11",
-      "source": "FB18.21; TC18.21",
-      "assertion": "Mail postmark vs delivery vs receipt trigger distinguished.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-12",
-      "source": "FB18.22; TC18.22",
-      "assertion": "Mutual extension and applicable Alliance participation recorded.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-13",
-      "source": "FB18.23–24; TC18.23–24",
-      "assertion": "Governed level elimination and qualifying demotion/termination direct final level.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-14",
-      "source": "FB18.25–26; TC18.25–26",
-      "assertion": "Written abandonment, missed escalation and beyond-control exception; no automatic irreversible closure.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-15",
-      "source": "FB18.27–28; TC18.27–28",
-      "assertion": "Adjudicability and Alliance approval/representation where required; no universal referral.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-16",
-      "source": "CIU SOP final level",
-      "assertion": "Executive signature, full handoff packet, national LRO restricted grant and receipt.",
+      "id": "INT-12",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "source revocation: unauthorized new ingest denied, previously imported history retained subject to policy",
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
-        "UE-CAP-B-001",
+        "UE-CAP-A-003",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-13",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "raw PII or credential in failure: redacted logs/receipts; restricted quarantine and retention",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-006",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-14",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "bulk import partial failure: counts reconcile, restart resumes only incomplete records, evidence digest and controlled rollback",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-15",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "cross-tenant export/event: deny unrelated case and sensitive fields; no notification before committed state",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-006",
+        "UE-CAP-E-001",
+        "UE-OMIT-DELIVERY-EVIDENCE"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-DELIVERY-EVIDENCE",
+          "sourceStatus": "NATIVE_PENDING",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "INT-16",
+      "source": "CIU integration qualification batch 03",
+      "assertion": "retry existing idempotency key: load authoritative persisted run and preserve failed/pending/completed disposition; no unsafe cast to success",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-002"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-002",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "FED-01",
+      "source": "FPSLRA ss208,215,220",
+      "assertion": "Differentiate statutory exclusions, alternative recourse and required bargaining-agent participation; human decision required.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "FED-02",
+      "source": "FPSLRA s215",
+      "assertion": "Group grievance participant eligibility and single portion of federal administration; refuse incompatible cohort.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-BARGAINING-UNIT-AND-WORKSITE-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "FED-03",
+      "source": "FPSLRA ss217.1–218",
+      "assertion": "Record applicable individual withdrawal and retain consent and history; no deletion of entire group matter.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
         "UE-CAP-K-010",
         "UE-CAP-F-002"
       ],
@@ -458,406 +2051,253 @@
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
-    },
-    {
-      "id": "REP-17",
-      "source": "CIU SOP discipline",
-      "assertion": "Restricted PSI and medical evidence, classification and redacted export.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-18",
-      "source": "CIU classification FAQ",
-      "assertion": "Statutory classification and statement-of-duties pathways distinct from ordinary agreement grievance.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-19",
-      "source": "WFA index",
-      "assertion": "EB B / FB C / PA D / SV I / TC T appendix mapping; dated cohort and option decisions.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-20",
-      "source": "Batch 03 official agreement source inventory",
-      "assertion": "employer representative cannot hear same grievance at multiple levels (FB/PA/SV/TC 18.11; verify EB37.11).",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-21",
-      "source": "Batch 03 official agreement source inventory",
-      "assertion": "rule selection must scope employer, classification, agreement version, effective date, procedural route; reject RCMP-only TC XX article for CBSA TC.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-22",
-      "source": "Batch 03 official agreement source inventory",
-      "assertion": "PSAC good-standing exception and source authorization; no automatic removal of representation rights due to missing payroll deduction (https://psacunion.ca/node/7064).",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "REP-23",
-      "source": "Batch 03 official agreement source inventory",
-      "assertion": "telework letter periods and expiry separately tracked; do not apply expired temporary panel arrangements automatically (https://www.canada.ca/en/treasury-board-secretariat/services/collective-agreements/collective-bargaining/collective-bargaining-update/letter-agreement-telework-eb-pa-sv-tc.html).",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-01",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "valid inbound case: persisted canonical case, identity target exists, persisted run matches returned ID and mandatory audit; no empty internal ID",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [
-        "UE-CAP-K-010"
-      ],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
-    },
-    {
-      "id": "INT-02",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "malformed mapped payload: no case, identity link or success event; explicit rejection",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-03",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "same source event repeated: same canonical entity and durable receipt, one domain effect",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-04",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "conflicting external ID mapping: quarantine with reason; no silent overwrite or stale link reuse",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-05",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "same external ID in unrelated tenant: distinct isolated outcomes; wrong connection context denied before write",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-06",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "concurrent retry: unique scoped key, no duplicate row, audit or notification",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-07",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "adapter failure before persistence: failed run; retry policy explicit, no fake completed result",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-08",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "failure after domain commit: durable recovery/reconciliation, no duplicate creation",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-09",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "audit failure: transaction rolls back or recoverable durable intermediate status; never success without mandatory audit",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-10",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "stale link or missing internal entity: reject or approved reconciliation; no implicit relink",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-11",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "payload or mapping schema evolution: versioned rules, deterministic replay and explicit drift errors",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-12",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "source revocation: unauthorized new ingest denied, previously imported history retained subject to policy",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-13",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "raw PII or credential in failure: redacted logs/receipts; restricted quarantine and retention",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-14",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "bulk import partial failure: counts reconcile, restart resumes only incomplete records, evidence digest and controlled rollback",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-15",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "cross-tenant export/event: deny unrelated case and sensitive fields; no notification before committed state",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "INT-16",
-      "source": "CIU integration qualification batch 03",
-      "assertion": "retry existing idempotency key: load authoritative persisted run and preserve failed/pending/completed disposition; no unsafe cast to success",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "FED-01",
-      "source": "FPSLRA ss208,215,220",
-      "assertion": "Differentiate statutory exclusions, alternative recourse and required bargaining-agent participation; human decision required.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "FED-02",
-      "source": "FPSLRA s215",
-      "assertion": "Group grievance participant eligibility and single portion of federal administration; refuse incompatible cohort.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "FED-03",
-      "source": "FPSLRA ss217.1–218",
-      "assertion": "Record applicable individual withdrawal and retain consent and history; no deletion of entire group matter.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-04",
       "source": "FPSLRA ss209–214; FPSLREB individual grievances guidance",
       "assertion": "Determine eligible adjudication route and approval; final non-adjudicable decision remains distinct.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-05",
       "source": "FPSLREB individual grievances guidance; FPSLR Regulations",
       "assertion": "Ordinary 40 calendar-day referral period, actual final response/non-response trigger, applicable exception and weekend/holiday roll-forward; not internal CBA business days.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-06",
       "source": "FPSLR Regulations s61; FPSLREB extension guidance",
       "assertion": "Record extension application, authority, decision and effective date, including after expiry where permitted.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-CAP-K-011"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-07",
       "source": "FPSLREB individual grievances guidance; Regulations s92",
       "assertion": "Human-rights notice Form 24 where applicable, recipient and filing evidence.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-F-002",
+        "UE-OMIT-REP-CORRESPONDENCE"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REP-CORRESPONDENCE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-08",
       "source": "NJC By-Laws Part 15; referral guide",
       "assertion": "Route applicable directive grievances through separate NJC steps and decision authority.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-09",
       "source": "FPSLREB individual grievances guidance",
       "assertion": "Joint mediation request, abeyance and resumption; distinguish pause authority from deadline calculation.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "FED-10",
       "source": "FPSLRA ss214,232",
       "assertion": "Distinguish final binding decision and policy grievance remedy restrictions; no automatic legal conclusion.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-01",
@@ -865,14 +2305,28 @@
       "assertion": "Preserve unknown or invalid source date as an explicit exception; never fabricate filed date from import time.",
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
-        "UE-CAP-K-010"
+        "UE-CAP-K-010",
+        "UE-OMIT-M04-LEGAL-DEADLINE"
       ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-02",
@@ -880,38 +2334,92 @@
       "assertion": "Store source priority/step values and explicit mappings; unknown step cannot silently omit a mandatory procedural stage.",
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
-        "UE-CAP-K-010"
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
       ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-03",
       "source": "batch-ingest.ts",
       "assertion": "Separate import observation time from historical event time; synthetic imported event labelled provenance, not historical evidence.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-04",
       "source": "batch-ingest.ts",
       "assertion": "No unauthorized overwrite of native case changes during reimport; field ownership, conflict detection and human approval.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-05",
@@ -919,14 +2427,28 @@
       "assertion": "Document bytes, malware status, cryptographic content digest, confidentiality, version and approved storage verified before availability; reference-only not imported file.",
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
-        "UE-CAP-F-002"
+        "UE-CAP-F-002",
+        "UE-CAP-E-001"
       ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-06",
@@ -934,6 +2456,8 @@
       "assertion": "Resolve member and representative IDs through governed identity and mandate authority, not names or raw assigned_to.",
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
+        "UE-CAP-A-001",
+        "UE-CAP-A-005",
         "UE-CAP-B-001"
       ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
@@ -941,67 +2465,188 @@
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-001",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-B-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-07",
       "source": "post-import-verification.ts",
       "assertion": "Missing/foreign batch, missing receipt or zero visible rows cannot pass; require tenant-bound expected source manifest.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-08",
       "source": "post-import-verification.ts",
       "assertion": "Unreconciled counts, stuck records and orphan links block acceptance; distinct transport status and migration acceptance.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-09",
       "source": "batch-ingest.ts; validation-pipeline.ts",
       "assertion": "Exact stable record/event hashes over all relevant versioned fields; no truncation-based equivalence for evidence.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-10",
       "source": "batch-ingest.ts; admin/ingest route",
       "assertion": "Dry run validates expected storage conflicts, authority, source identity and planned operations without mutations; no claims of persisted records.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-002",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-11",
       "source": "batch-ingest.ts; post-import-verification.ts",
       "assertion": "Immutable batch manifest and outcomes across re-import, with predecessor/successor references, reconciliation and governed reversal.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-K-011",
+        "UE-CAP-K-006"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "MIG-12",
@@ -1010,6 +2655,438 @@
       "priority": "P0_PRE_INTRODUCTION",
       "canonicalCapabilityIds": [
         "UE-CAP-K-010",
+        "UE-CAP-F-002",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "MEM-01",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Source identity: Stable PSAC member identity and branch allocation, effective-dated transfers and no duplicate identity from names.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-A-005",
+        "UE-CAP-A-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-001",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "MEM-02",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Membership state: Represented worker, membership card, good standing, leave/dues exception, suspension and representation rights independently evaluated.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-A-005",
+        "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+        "UE-CAP-K-009"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-MEMBER-DUES-SELF-SERVICE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "MEM-03",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Disputed allocation: Authorized branch allocation decision and appeal preserve historical case access.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-FEDERATION-LOCAL-HIERARCHY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "MEM-04",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Source reconciliation: Member count reconciliation by source and branch; ambiguous identity quarantined; no destructive merge.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-A-005",
+        "UE-CAP-A-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-001",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "MEM-05",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Lifecycle: Join, transfer, leave, reactivate, retire and revoke authority with current/historical state.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-A-005",
+        "UE-CAP-A-003"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-005",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "MEM-06",
+      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
+      "assertion": "Multiple capacities: One principal can exercise independent scoped offices; no inherited cross-branch permissions.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-A-003",
+        "UE-CAP-K-006",
+        "UE-CAP-B-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-B-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "SVC-01",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "VSSA: Appointment, worksite constituency, consultation, negotiation, national review, ratification receipt and effective agreement version.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-COMMITTEE-WORKSPACE",
+        "UE-OMIT-BARGAINING-RECORDS",
+        "UE-CAP-K-009",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-BARGAINING-RECORDS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "SVC-02",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Workforce adjustment: Affected cohorts, options and deadlines; member confidentiality and human decision, agreement-specific version.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+        "UE-OMIT-M04-LEGAL-DEADLINE",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COLLECTIVE-AGREEMENT-REGISTER",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-M04-LEGAL-DEADLINE",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "SVC-03",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Health and safety: Incident intake, designated representative, committee scope and restricted health information.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-OHS-REGULATORY-RECORDS",
+        "UE-OMIT-COMMITTEE-WORKSPACE",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-OHS-REGULATORY-RECORDS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-COMMITTEE-WORKSPACE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "SVC-04",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Equity: Voluntary self-identification and mandate-specific access, consent and minimum aggregate thresholds.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+        "UE-CAP-E-001"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-EQUITY-SELF-IDENTIFICATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "SVC-05",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Staffing/classification: Separate recourse and applicable deadline with referral; no automatic grievance filing.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY"
+      ],
+      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
+      "sourceInspection": "REQUIREMENT_REGISTERED",
+      "runtime": "NOT_EXECUTED",
+      "acceptance": "OPEN",
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-REPRESENTATION-PROTOCOL-POLICY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
+    },
+    {
+      "id": "SVC-06",
+      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
+      "assertion": "Privacy/ATIP: Controlled request, authorization and retention; no automatic government information intake.",
+      "priority": "P0_PRE_INTRODUCTION",
+      "canonicalCapabilityIds": [
+        "UE-OMIT-PRIVACY-RIGHTS",
         "UE-CAP-F-002"
       ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
@@ -1017,355 +3094,597 @@
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
       "evidence": [],
-      "mappingStatus": "INITIAL_PARTIAL_MAPPING_NOT_ACCEPTANCE"
-    },
-    {
-      "id": "MEM-01",
-      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
-      "assertion": "Source identity: Stable PSAC member identity and branch allocation, effective-dated transfers and no duplicate identity from names.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "MEM-02",
-      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
-      "assertion": "Membership state: Represented worker, membership card, good standing, leave/dues exception, suspension and representation rights independently evaluated.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "MEM-03",
-      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
-      "assertion": "Disputed allocation: Authorized branch allocation decision and appeal preserve historical case access.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "MEM-04",
-      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
-      "assertion": "Source reconciliation: Member count reconciliation by source and branch; ambiguous identity quarantined; no destructive merge.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "MEM-05",
-      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
-      "assertion": "Lifecycle: Join, transfer, leave, reactivate, retire and revoke authority with current/historical state.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "MEM-06",
-      "source": "CIU By-Laws; PSAC Constitution and membership good-standing guidance",
-      "assertion": "Multiple capacities: One principal can exercise independent scoped offices; no inherited cross-branch permissions.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "SVC-01",
-      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
-      "assertion": "VSSA: Appointment, worksite constituency, consultation, negotiation, national review, ratification receipt and effective agreement version.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "SVC-02",
-      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
-      "assertion": "Workforce adjustment: Affected cohorts, options and deadlines; member confidentiality and human decision, agreement-specific version.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "SVC-03",
-      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
-      "assertion": "Health and safety: Incident intake, designated representative, committee scope and restricted health information.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "SVC-04",
-      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
-      "assertion": "Equity: Voluntary self-identification and mandate-specific access, consent and minimum aggregate thresholds.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "SVC-05",
-      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
-      "assertion": "Staffing/classification: Separate recourse and applicable deadline with referral; no automatic grievance filing.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
-    },
-    {
-      "id": "SVC-06",
-      "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
-      "assertion": "Privacy/ATIP: Controlled request, authorization and retention; no automatic government information intake.",
-      "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
-      "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
-      "sourceInspection": "REQUIREMENT_REGISTERED",
-      "runtime": "NOT_EXECUTED",
-      "acceptance": "OPEN",
-      "evidence": []
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-PRIVACY-RIGHTS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SVC-07",
       "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
       "assertion": "Professional standards: Restricted disciplinary and investigation case, classified/restricted material refused absent authorized handling.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-E-001",
+        "UE-CAP-F-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SVC-08",
       "source": "CIU VSSA, WFA, grievance SOP and public resource inventory",
       "assertion": "Accommodation: Restricted medical details and authorized representative; redacted reporting.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-010",
+        "UE-CAP-E-001",
+        "UE-CAP-F-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-010",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-01",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Provisioning: Repeatable institution-neutral tenant creation and 22-branch fixture; no CUPE-specific bootstrap prerequisite.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ONBOARDING",
+        "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+        "UE-CAP-H-003",
+        "UE-CAP-H-005"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ONBOARDING",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-ORGANIZATION-ADMINISTRATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-H-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-H-005",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-02",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Operator access: Scoped support, approval, revocation, break-glass audit; no unrestricted cross-tenant case access.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+        "UE-CAP-K-006",
+        "UE-CAP-K-011"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-03",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Bilingual support: Named support capacity, escalation coverage, incident communications and approved targets; no invented SLA.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-DELIVERY-EVIDENCE",
+        "UE-OMIT-A11Y-BILINGUAL"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-DELIVERY-EVIDENCE",
+          "sourceStatus": "NATIVE_PENDING",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-A11Y-BILINGUAL",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-04",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Recovery: Measured backup restoration, recovery time/point, data reconciliation and rollback rehearsal.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-J-001",
+        "UE-CAP-H-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-H-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-05",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Operations: Health telemetry, alert delivery, incident ownership, remediation and post-incident evidence.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+        "UE-OMIT-PLATFORM-OPERATOR-CONTROLS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-OBSERVABILITY-ALERT-VISIBILITY",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-PLATFORM-OPERATOR-CONTROLS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-06",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Upgrade: Rehearsed schema upgrade and rollback with versioned data and preimage; existing release gates enforced.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-J-001",
+        "UE-CAP-K-001",
+        "UE-CAP-H-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-001",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-H-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "OPS-07",
       "source": "CIU enterprise discovery and delivery; existing pilot operations runbook",
       "assertion": "Exit: Complete authorized export, digest, transfer, retention/legal hold and deletion verification.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-PRIVACY-RIGHTS",
+        "UE-CAP-F-002",
+        "UE-CAP-K-006"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-PRIVACY-RIGHTS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-01",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Tenant boundary: Positive and adversarial isolation across HTTP, database, search, cache, jobs, exports, webhooks and analytics.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-006",
+        "UE-CAP-E-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-02",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Authority: Grant, expiration, revocation, delegation, conflict, succession and denied privilege escalation.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-A-003",
+        "UE-CAP-B-001",
+        "UE-CAP-D-003",
+        "UE-CAP-K-009"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-B-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-D-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-009",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-03",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Confidentiality: Case/document-specific access and member disclosure labels; deny unrelated national/branch staff.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-E-001",
+        "UE-CAP-F-001",
+        "UE-CAP-F-002"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-001",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-F-002",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-04",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Identity: Canonical identity binding, MFA/session policy, stale session and revoked identity denial.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-A-001",
+        "UE-CAP-A-002",
+        "UE-CAP-A-003",
+        "UE-CAP-A-004",
+        "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-A-001",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-002",
+          "sourceStatus": "SOURCE_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-003",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-A-004",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-ENTERPRISE-SSO-IDENTITY-PROVIDERS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-05",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Audit: Atomic or durably reconciled mandatory evidence; no unqualified success.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-011",
+        "UE-CAP-K-005"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-011",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-005",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-06",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Data protection: Actual Canadian residency and subprocessor flow evidence; credentials and sensitive payloads absent from logs.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-006",
+        "UE-CAP-E-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-07",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "AI: Permission-scoped retrieval, injection isolation, source citations, human decision and no unauthorized external disclosures.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+        "UE-CAP-K-006",
+        "UE-CAP-E-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-AI-ADVISORY-GOVERNANCE",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-006",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-E-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-08",
       "source": "CIU enterprise procurement evidence and demo; trust center and current UE release evidence",
       "assertion": "Scale: Measured 100/500/1000 concurrent workload profiles and 12,500 members; realistic mix and approved SLO.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-H-004",
+        "UE-CAP-J-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-H-004",
+          "sourceStatus": "NOT_IMPLEMENTED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "SEC-09",
@@ -1377,67 +3696,154 @@
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "NON_PRODUCT_EVIDENCE_REQUIRED",
+      "mappingBasis": "Independent assurance requires actual attestation or testing and disclosure outside product capability matrix."
     },
     {
       "id": "UX-01",
       "source": "CIU enterprise procurement evidence and demo",
       "assertion": "Language: English/French functional and terminology parity for routes, messages, forms, exports and notifications.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-A11Y-BILINGUAL",
+        "UE-OMIT-DELIVERY-EVIDENCE"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-A11Y-BILINGUAL",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-DELIVERY-EVIDENCE",
+          "sourceStatus": "NATIVE_PENDING",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "UX-02",
       "source": "CIU enterprise procurement evidence and demo",
       "assertion": "Mobile: Member/steward/branch/LRO journeys with keyboard and viewport safe navigation; no unreachable controls.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-A11Y-BILINGUAL",
+        "UE-CAP-I-001",
+        "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-A11Y-BILINGUAL",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-I-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-MOBILE-DEVICES-AND-IN-APP-NOTIFICATIONS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "UX-03",
       "source": "CIU enterprise procurement evidence and demo",
       "assertion": "Accessibility: Keyboard, focus, screen reader and contrast testing; no unsupported WCAG claim.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-A11Y-BILINGUAL"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-A11Y-BILINGUAL",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "UX-04",
       "source": "CIU enterprise procurement evidence and demo",
       "assertion": "Failure states: Actionable errors, retry semantics, no fake success and no unnecessary descriptive clutter.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-K-002",
+        "UE-CAP-I-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-K-002",
+          "sourceStatus": "SOURCE_VERIFIED",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-I-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "UX-05",
       "source": "CIU enterprise procurement evidence and demo",
       "assertion": "Demonstration: All ten synthetic demo scenarios rehearsed with current candidate and evidence.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-I-001",
+        "UE-CAP-J-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-I-001",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "BUY-01",
@@ -1449,19 +3855,38 @@
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "NON_PRODUCT_EVIDENCE_REQUIRED",
+      "mappingBasis": "Corporate records and insurance verification are corporate responsibilities."
     },
     {
       "id": "BUY-02",
       "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
       "assertion": "Commercial: Enterprise licensing, implementation and support scope, proposal QA and no unapproved pricing commitment.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+        "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-PLATFORM-SUBSCRIPTION-BILLING",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "BUY-03",
@@ -1473,55 +3898,125 @@
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "NON_PRODUCT_EVIDENCE_REQUIRED",
+      "mappingBasis": "Legal review and contract approval are not product capability claims."
     },
     {
       "id": "BUY-04",
       "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
       "assertion": "Trust pack: Current claim-to-evidence map; historical pilot status not production proof.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-CAP-J-001",
+        "UE-CAP-K-003"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-K-003",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "BUY-05",
       "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
       "assertion": "Discovery: Structured source inventory, authorized interface, sample schemas and source-of-truth matrix.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ONBOARDING"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ONBOARDING",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "BUY-06",
       "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
       "assertion": "Implementation: D0–D7 stage gates, accountable owners and rehearsal of controlled migration and cutover.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-ORGANIZATION-ONBOARDING",
+        "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+        "UE-CAP-J-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-ORGANIZATION-ONBOARDING",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-OMIT-PILOT-PROGRAM-OPERATIONS",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        }
+      ]
     },
     {
       "id": "BUY-07",
       "source": "CIU enterprise discovery and delivery; procurement evidence and demo",
       "assertion": "Client boundary: Formal sponsor introduction only after internal acceptance; no real data or live authority without client adoption.",
       "priority": "P0_PRE_INTRODUCTION",
-      "canonicalCapabilityIds": [],
+      "canonicalCapabilityIds": [
+        "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+        "UE-CAP-J-001"
+      ],
       "owner": "UNASSIGNED_PENDING_CANONICAL_CROSSWALK",
       "sourceInspection": "REQUIREMENT_REGISTERED",
       "runtime": "NOT_EXECUTED",
       "acceptance": "OPEN",
-      "evidence": []
+      "evidence": [],
+      "mappingStatus": "RELATED_CANONICAL_DEPENDENCIES_VERIFIED_NOT_FULL_COVERAGE",
+      "mappingBasis": "Relevant existing canonical capability identifiers; exact route/action/storage ownership and residual proof must be reconciled in executable checkout. No implied coverage.",
+      "canonicalBaselineStates": [
+        {
+          "id": "UE-OMIT-PILOT-APPLICATION-COMMERCIALIZATION",
+          "sourceStatus": "PARTIAL",
+          "operationallyActivated": false
+        },
+        {
+          "id": "UE-CAP-J-001",
+          "sourceStatus": "EXTERNAL_GATE",
+          "operationallyActivated": false
+        }
+      ]
     }
   ],
   "publicFederalSources": [
@@ -1530,5 +4025,11 @@
     "https://www.fpslreb-crtespf.gc.ca/en/resources/guides/lr-procedural-guide.html",
     "https://fpslreb-crtespf.gc.ca/en/resources/fact-sheets/grievances/individual.html",
     "https://www.fpslreb-crtespf.gc.ca/en/resources/fact-sheets/procedural-guidance/extension-of-time.html"
-  ]
+  ],
+  "canonicalMatrix": {
+    "path": "docs/union-eyes/convergence/register/ue-pre-vs-engineering-completion.json",
+    "sha": "30a11767d8b8c61f191faeb8429724884b77faa4",
+    "capabilityCount": 111,
+    "note": "Historical matrix baseline; statuses are source inventory not current release truth. Do not alter canonical matrix as part of CIU overlay."
+  }
 }
