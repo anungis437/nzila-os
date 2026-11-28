@@ -951,6 +951,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "a6ed0264eb6a9be1c0c791a4574e3d7c6a264fff",
         "note": "Inventory reconciliation only: existing founder-authored November 9 baseline ancestor source was present on main but absent from the additions registry. Its exact SQL bytes remain unchanged. Registration confers no runtime proof, no positive financial capability or release acceptance; the current base-release finance containment remains in force."
+      },
+      {
+        "tag": "0089_member_external_identity",
+        "sha256": "531e32bc553ed27e12d0858fb073d9c0eadd427d886267bf49c799e11379a457",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-member-import-identity",
+        "note": "Adds nullable external_member_source and external_member_id to organization_members, a whole-key CHECK and a partial unique index per (organization, source, external id) that is also the concurrency guard for imports. Invents no value for existing rows. Rollback refuses while a membership holds an external identity. Registration confers no runtime proof."
       }
     ]
   }
