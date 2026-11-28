@@ -20,6 +20,7 @@
 // Core Business Domains
 export * from "./domains/member";           // Priority 1: Member profiles and user management
 export * from "./domains/claims";           // Priority 2: Claims, grievances, deadlines
+export * from "./procedural-rules-schema";  // Procedural rule versions and grievance procedural facts (platform 0090)
 export * from "./domains/agreements";       // Priority 3: Collective bargaining agreements
 export * from "./domains/finance";          // Priority 4: Financial transactions and accounting
 export * from "./domains/governance";       // Priority 5: Governance, voting, structure

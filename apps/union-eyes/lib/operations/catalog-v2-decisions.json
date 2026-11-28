@@ -3732,6 +3732,39 @@
       "decision": "11 non-test reference(s) to 'grievanceEvents' found (round-7 scope-expansion scan). At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). RESOLVED (round 11): app/api/grievances/route.ts and its [id]/** sub-routes execute via withRLSContext (requireEntitlement + org-scoped) — tenant-scoped, no withSystemContext site found for this table."
     },
     {
+      "table": "grievance_procedural_exceptions",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Reviewable exceptions raised instead of a deadline when rule applicability is uncertain. UPDATE only records a resolution once, from open (trigger); DELETE refused; same-organization trigger. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
+      "table": "grievance_procedural_facts",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Recorded trigger events, pauses, extensions, level hearings and level waivers. UPDATE only voids a fact once (trigger); DELETE refused; same-organization trigger. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
+      "table": "grievance_procedure_bindings",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). The facts a grievance records for procedural rule selection; one current row per grievance (partial unique index). UPDATE only sets superseded_by/superseded_at once (trigger); DELETE refused. A same-organization trigger refuses a row whose grievance is in another organization. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
       "table": "grievance_responses",
       "classification": "LATENT_UNREACHABLE",
       "runtime": [],
@@ -5961,6 +5994,48 @@
       "runtime": [],
       "system": [],
       "decision": "CLOSED round 52 (NON_FINANCE_SCOPE_EXCEPTION_REMEDIATION, PRIVACY_AND_JURISDICTION family): db/schema/provincial-privacy-schema.ts's privacyBreaches has no organizationId column (reportedBy is a user id, affectedProvince is province-wide, not tenant-scoped) — this is a platform-wide breach registry by design, not per-tenant state. However, its ONLY TypeScript writers/readers — services/provincial-privacy-service.ts's reportBreach, markBreachNotificationSent, getBreachesApproachingDeadline, and the private triggerUrgentBreachNotification — have ZERO production callers anywhere in app/, actions/, lib/, services/ outside their own test file (git-grep confirmed); a separate module of DB-free helpers once cited here (lib/services/provincial-privacy-service.ts's getPrivacyRules/assessBreachNotification/generateComplianceReport) had no importer either and was deleted in the 2026-11-03 mismatch census. Dead TS code. Django: backend/compliance/views.py PrivacyBreachesViewSet was a separate unscoped IsAuthenticated-only surface with no legitimate consumer — contained via DenyAllPermission. Satisfies CONTAINED_NO_AUTHORITY: reachable-but-denied Django, dead TS, no legitimate consumer."
+    },
+    {
+      "table": "procedural_holiday_calendars",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Versioned holiday calendars with a source and a coverage span; same lifecycle guard trigger as procedural_rule_sets. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
+      "table": "procedural_rule_lifecycle_events",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Append-only record (trigger) of every rule set and holiday calendar lifecycle step. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
+      "table": "procedural_rule_sets",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Versioned procedural rule sets. UPDATE is limited by the procedural_versioned_rule_guard trigger to lifecycle columns (status, reviewer, adopter, closer) once a version leaves draft; DELETE is refused by trigger. Independent review/adoption are CHECK constraints. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
+      "table": "procedural_rule_sources",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). Rule sources (the instrument a rule is read from: edition, language, effective/supersession dates, reference). Append-only by trigger; corrections are a new source that supersedes the old one. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
     },
     {
       "table": "procurement_bids",
@@ -8221,7 +8296,7 @@
   ],
   "currentSecurity": {
     "contractVersion": "1",
-    "sourcePlanDigest": "211ec1f8dfcfaef367231576611379245356e9b93255789bb7ef2cfa0834c9fb",
+    "sourcePlanDigest": "f4555daba1a88f6751d3adb8278a1333681bbf2ce22a98d39f3e91634c8a6e91",
     "currentFunctions": [
       {
         "schema": "public",

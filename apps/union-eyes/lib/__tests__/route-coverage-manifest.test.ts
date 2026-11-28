@@ -134,8 +134,17 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('treats a route as kernel-decided only when it imports the kernel or the kernel-backed case access service', () => {
     for (const e of fresh.filter((r) => r.kernel && r.guard !== 'DELEGATED')) {
       const source = readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8')
-      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|ocr-authority|intake-lifecycle|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(|(?:listCaseDeadlines|createCaseDeadline|changeCaseDeadline)\(/)
+      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|ocr-authority|intake-lifecycle|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(|(?:listCaseDeadlines|createCaseDeadline|changeCaseDeadline)\(|(?:readGrievanceProcedure|recordProcedureBinding|recordProceduralFact|voidProceduralFact|computeGrievanceDeadline|resolveProceduralException)\(/)
     }
+  })
+
+  it('recognizes the grievance procedure boundary only while every entry point locks and kernel-decides the grievance and audits atomically', () => {
+    const service = readFileSync(join(ROOT, 'lib', 'procedural-rules', 'grievance-procedure.ts'), 'utf8')
+    for (const [name, action] of [['readGrievanceProcedure', 'case:read_internal'], ['recordProcedureBinding', 'case:transition'], ['recordProceduralFact', 'case:transition'], ['voidProceduralFact', 'case:transition'], ['computeGrievanceDeadline', 'case:transition'], ['resolveProceduralException', 'case:transition']]) {
+      expect(service).toMatch(new RegExp(`export async function ${name}[\\s\\S]*?await requireGrievance\\(tx, actor, grievanceId, '${action}'\\)`))
+    }
+    expect(service).toContain("decideCase(tx, { userId: actor.userId, organizationId: actor.organizationId, caseId: grievanceId, action: 'case:read' })")
+    expect(service).toContain('await persistAtomicAudit(tx,')
   })
 
   it('recognizes the deadline boundary only while both writes require case-specific kernel authority and mandatory audit', () => {
