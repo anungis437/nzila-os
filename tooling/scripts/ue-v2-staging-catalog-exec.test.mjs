@@ -38,8 +38,9 @@ import {
   reconcileCatalogSessions,
   buildContinuationToken,
   sealForRecipient,
+  INSTALLER_RECEIPT,
 } from './ue-v2-staging-catalog-exec.mjs'
-import { FIXTURE_COUNTS, FIXTURE_LEDGER, fixtureQuery, privilegedCatalog, runtimeCatalog, sealPrivileged } from './ue-v2-staging-catalog.fixtures.mjs'
+import { FIXTURE_COUNTS, FIXTURE_LEDGER, FIXTURE_RECEIPT, fixtureQuery, privilegedCatalog, runtimeCatalog, sealPrivileged } from './ue-v2-staging-catalog.fixtures.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const require = createRequire(path.join(REPO, 'package.json'))
@@ -709,4 +710,59 @@ test('the operator program reads catalogues without schema access, gates counts 
   // Privileged values are scrubbed before the frame is written, whatever happened.
   assert.match(program, /Never emit a privileged value in the clear/)
   assert.ok(program.indexOf('sensitive.counts.length = 0') < program.indexOf('const body = JSON.stringify(out)'))
+})
+
+test('the installer receipt is the v2 installed state: read only by the privileged plane, sealed, and absent only when the inventory proves it', () => {
+  const history = (catalog) => evaluateCatalogCompleteness(catalog).categories.find((category) => category.id === 'migration_history')
+  const receiptClass = (catalog) => history(catalog).queries.find((item) => item.id === 'installer_receipt').classification
+  assert.equal(INSTALLER_RECEIPT, 'public.ue_v2_bootstrap_receipt')
+  assert.ok(!PLANE_RESPONSIBILITY.runtime.includes('migration_history'), 'the runtime role is revoked from the receipt; it never supplies it')
+
+  const privileged = privilegedCatalog()
+  assert.equal(receiptClass(privileged), 'OBSERVED')
+  assert.equal(history(privileged).accepted, true)
+
+  // Evidence captured before this query existed (run 46084209107) does not satisfy migration history.
+  const withoutReceipt = privilegedCatalog()
+  withoutReceipt.queries = withoutReceipt.queries.filter((item) => item.id !== 'installer_receipt')
+  assert.equal(receiptClass(withoutReceipt), 'NOT_ATTEMPTED')
+  assert.equal(history(withoutReceipt).accepted, false)
+  assert.notEqual(evaluateCatalogCompleteness(withoutReceipt).planeVerdict, 'PLANE_ACCEPTED')
+
+  const absent = (catalog) => { catalog.queries = catalog.queries.map((item) => item.id === 'installer_receipt' ? { id: 'installer_receipt', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_INVENTORY' } : item); return catalog }
+  assert.equal(receiptClass(absent(privilegedCatalog())), 'ABSENT_VERIFIED')
+  // Claimed absent, but the same session's inventory lists it: not proof of anything.
+  const listed = absent(privilegedCatalog())
+  listed.queries = listed.queries.map((item) => item.id === 'privilege_matrix' ? { ...item, rows: [...item.rows, { schema: 'public', name: 'ue_v2_bootstrap_receipt', owner: 'uev2admin', rls: false, force: false, schema_usage: true, can_select: true, acts_as_owner: true, rls_active: false }] } : item)
+  assert.equal(receiptClass(listed), 'NOT_ATTEMPTED')
+  const blind = absent(privilegedCatalog())
+  blind.queries = blind.queries.map((item) => item.id === 'privilege_matrix' ? { id: 'privilege_matrix', error: 'permission denied' } : item)
+  assert.equal(receiptClass(blind), 'NOT_ATTEMPTED')
+  const denied = privilegedCatalog()
+  denied.queries = denied.queries.map((item) => item.id === 'installer_receipt' ? { id: 'installer_receipt', classification: 'PRIVILEGE_DENIED', reason: 'INSTALLER_RECEIPT_NOT_READABLE_BY_ROLE' } : item)
+  assert.equal(receiptClass(denied), 'PRIVILEGE_DENIED')
+  const failed = privilegedCatalog()
+  failed.queries = failed.queries.map((item) => item.id === 'installer_receipt' ? { id: 'installer_receipt', error: 'relation does not exist' } : item)
+  assert.equal(receiptClass(failed), 'UNREADABLE')
+
+  const founder = generateRecipientKeyPair()
+  const sealed = sealPrivileged(privilegedCatalog(), founder.publicKey)
+  const text = JSON.stringify(sealed)
+  assert.equal(text.includes(FIXTURE_RECEIPT[0].source_digest), false)
+  assert.equal(text.includes(FIXTURE_RECEIPT[0].catalog_digest), false)
+  assert.equal(receiptClass(sealed), 'SEALED')
+  assert.equal(evaluateCatalogCompleteness(sealed).planeVerdict, 'PLANE_CAPTURED_SEALED')
+  const opened = openSealedCatalog(sealed, founder.privateKeyPem)
+  assert.deepEqual(opened.catalog.queries.find((item) => item.id === 'installer_receipt').rows, FIXTURE_RECEIPT)
+  assert.equal(evaluateCatalogCompleteness(opened.catalog).planeVerdict, 'PLANE_ACCEPTED')
+
+  // An envelope re-sealed under the same binding must still agree with the clear row count and digest.
+  const counts = Object.entries(FIXTURE_COUNTS).map(([key, n]) => ({ schema: key.split('.')[0], name: key.split('.')[1], n }))
+  const drizzle = { relation: 'drizzle.__drizzle_migrations', rows: FIXTURE_LEDGER }
+  const forge = (ledgers) => { const forged = structuredClone(sealed); forged.sealed = sealForRecipient(JSON.stringify({ counts, ledgers, modificationCounters: [], settledCounters: [] }), founder.publicKey, sealed.sealed.aad); return forged }
+  const altered = [{ ...FIXTURE_RECEIPT[0], source_digest: '3'.repeat(64) }]
+  assert.throws(() => openSealedCatalog(forge([drizzle, { relation: INSTALLER_RECEIPT, rows: altered }]), founder.privateKeyPem), /SEALED_LEDGER_INCONSISTENT/)
+  assert.throws(() => openSealedCatalog(forge([drizzle]), founder.privateKeyPem), /SEALED_LEDGER_INCONSISTENT/)
+  assert.throws(() => openSealedCatalog(forge([drizzle, { relation: INSTALLER_RECEIPT, rows: FIXTURE_RECEIPT }, { relation: INSTALLER_RECEIPT, rows: FIXTURE_RECEIPT }]), founder.privateKeyPem), /SEALED_LEDGER_INCONSISTENT/)
+  assert.throws(() => openSealedCatalog(forge([drizzle, { relation: INSTALLER_RECEIPT, rows: FIXTURE_RECEIPT }, { relation: 'public.other', rows: [] }]), founder.privateKeyPem), /SEALED_LEDGER_INCONSISTENT/)
 })

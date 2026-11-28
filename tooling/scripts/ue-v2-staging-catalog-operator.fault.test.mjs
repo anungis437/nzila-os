@@ -18,6 +18,7 @@ const RUN = '4343'
 const SHA = 'b'.repeat(40)
 const SECRET_VALUE = '9183'
 const LEDGER_HASH = 'ledger-hash-secret-value'
+const RECEIPT_DIGEST = 'receipt-source-digest-secret-value'
 
 // The scripted driver. Behaviour comes from FAKE_PG (JSON): login, superuser, bypass,
 // rlsActive, isolation, failOn (substring), failCode, failMessage, dropOn (substring).
@@ -25,7 +26,7 @@ const FAKE_PG = String.raw`
 const fs = require('fs')
 const spec = JSON.parse(process.env.FAKE_PG || '{}')
 const log = (line) => fs.appendFileSync(process.env.FAKE_PG_LOG, JSON.stringify(line) + '\n')
-const tables = [['public', 'members'], ['public', 'claims'], ['drizzle', '__drizzle_migrations']]
+const tables = [['public', 'members'], ['public', 'claims'], ['drizzle', '__drizzle_migrations'], ...(spec.receipt ? [['public', 'ue_v2_bootstrap_receipt']] : [])]
 class Client {
   constructor(config) {
     // As node-postgres does: every query parameter of the connection string overlays the config.
@@ -62,6 +63,7 @@ class Client {
     if (sql.includes('row_security_active')) return rows(tables.map(([schema, name]) => ({ schema, name, owner: 'ue_v2_owner', rls: true, force: true, schema_usage: true, can_select: true, acts_as_owner: false, rls_active: spec.rlsActive !== undefined ? spec.rlsActive : !spec.bypass })))
     if (sql.startsWith('SELECT n.nspname AS schema, c.relname AS name FROM pg_class')) return rows(tables.map(([schema, name]) => ({ schema, name })))
     if (sql.includes('FROM drizzle.__drizzle_migrations')) return rows([{ id: 1, hash: ${JSON.stringify(LEDGER_HASH)}, created_at: '1767225600000' }])
+    if (sql.includes('FROM public.ue_v2_bootstrap_receipt')) return rows([{ contract_version: 'ue-v2-bootstrap/1', source_digest: ${JSON.stringify(RECEIPT_DIGEST)}, catalog_digest: 'c'.repeat(64) }])
     if (sql.startsWith('SELECT count(*)::bigint AS n FROM ONLY')) return rows([{ n: ${JSON.stringify(SECRET_VALUE)} }])
     return rows([])
   }
@@ -106,7 +108,7 @@ test('the privileged session opens read-only, refuses before reading, and only r
     assert.deepEqual(staging.statements[0].connect, { user: PRIVILEGED_LOGIN, options: '-c default_transaction_read_only=on', ssl: true, host: STAGING_DB_HOST })
     const stagingSettle = operate(directory, { fake: { bypass: true, connectFail: 'staging' }, recipient: recipient.publicKey, env: { UE_CATALOG_STATS_SETTLE_MS: '0' } })
     assert.equal(stagingSettle.body.statsSettleTargetMs, 75000, 'the settle interval cannot be shortened against Azure')
-    const { body, sql, statements, result } = operate(directory, { fake: { bypass: true }, recipient: recipient.publicKey, env: settleFast })
+    const { body, sql, statements, result } = operate(directory, { fake: { bypass: true, receipt: true }, recipient: recipient.publicKey, env: settleFast })
     assert.equal(result.stderr, '', 'nothing is written to stderr')
     assert.deepEqual(statements[0].connect, { user: PRIVILEGED_LOGIN, options: '-c default_transaction_read_only=on', ssl: false, host: 'fake-db' })
     assert.equal(sql[0], 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY')
@@ -119,17 +121,23 @@ test('the privileged session opens read-only, refuses before reading, and only r
     assert.equal(sessionPlaneDefect(body, 'privileged', recipient.keyId), null)
     assert.equal(privilegedClearDefect(body), null)
     const text = JSON.stringify(body)
-    assert.equal(text.includes(SECRET_VALUE) || text.includes(LEDGER_HASH), false, 'no count or ledger value in the clear')
+    assert.equal(text.includes(SECRET_VALUE) || text.includes(LEDGER_HASH) || text.includes(RECEIPT_DIGEST), false, 'no count, ledger or installer receipt value in the clear')
+    assert.equal(body.queries.find((item) => item.id === 'installer_receipt').rowsSealed, true)
     const opened = openSealedCatalog(body, recipient.privateKeyPem)
     assert.equal(opened.run, RUN)
     assert.ok(opened.catalog.counts.filter((item) => item.classification === 'OBSERVED').every((item) => item.n === SECRET_VALUE))
     assert.equal(opened.catalog.queries.find((item) => item.id === 'drizzle_rows').rows[0].hash, LEDGER_HASH)
+    assert.equal(opened.catalog.queries.find((item) => item.id === 'installer_receipt').rows[0].source_digest, RECEIPT_DIGEST)
+    // Without the relation in the session's own inventory, absence is proven rather than assumed.
+    const bare = operate(directory, { fake: { bypass: true }, recipient: recipient.publicKey, env: settleFast })
+    assert.equal(bare.body.queries.find((item) => item.id === 'installer_receipt').reason, 'RELATION_NOT_IN_INVENTORY')
+    assert.equal(bare.sql.some((statement) => statement.includes('ue_v2_bootstrap_receipt')), false)
   } finally { rmSync(directory, { recursive: true, force: true }) }
 })
 
 test('refusals happen before any data is read: key, target, login, superuser, statistics, isolation', () => {
   const directory = harness()
-  const dataRead = (sql) => sql.some((statement) => /count\(\*\)|__drizzle_migrations ORDER BY|pg_stat_user_tables/.test(statement))
+  const dataRead = (sql) => sql.some((statement) => /count\(\*\)|__drizzle_migrations ORDER BY|ue_v2_bootstrap_receipt ORDER BY|pg_stat_user_tables/.test(statement))
   try {
     const keyless = operate(directory, { fake: { bypass: true } })
     assert.equal(keyless.body.blocker, 'EVIDENCE_RECIPIENT_MISSING')

@@ -55,6 +55,7 @@ import {
   reassembleCatalog,
   verifyImageSmoke,
   writeJobArtifacts,
+  privilegedClearDefect,
 } from './ue-v2-staging-catalog-job.mjs'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -954,4 +955,11 @@ test('a catalogue job left by any other run blocks a new session and is never to
   const unrelated = await run({ otherJobs: [{ name: 'ue-role-probe2', purpose: null }, { name: 'nzila-ue-v2-stagin-alert', purpose: null }] })
   assert.equal(unrelated.fake.did('job create'), true, 'unrelated scheduled jobs do not block a session')
   assert.equal(unrelated.report.residualJobs, undefined)
+})
+
+test('the installer receipt may leave a privileged session only sealed', () => {
+  const body = (query) => ({ plane: 'privileged', queries: [query], counts: [] })
+  assert.equal(privilegedClearDefect(body({ id: 'installer_receipt', rowCount: 1, rowsSealed: true, ledgerDigest: 'a'.repeat(64) })), null)
+  assert.equal(privilegedClearDefect(body({ id: 'installer_receipt', classification: 'NOT_ATTEMPTED', reason: 'RELATION_NOT_IN_INVENTORY' })), null)
+  assert.equal(privilegedClearDefect(body({ id: 'installer_receipt', rows: [{ contract_version: 'v', source_digest: 's', catalog_digest: 'c' }] })), 'PRIVILEGED_VALUE_IN_CLEAR')
 })

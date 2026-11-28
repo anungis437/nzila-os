@@ -637,8 +637,8 @@ export function sessionPlaneDefect(body, plane, expectedKeyId) {
   const leak = privilegedClearDefect(body)
   if (leak) return leak
   const counts = Array.isArray(body.counts) ? body.counts : []
-  const ledger = (body.queries ?? []).find((item) => item.id === 'drizzle_rows')
-  const needsSeal = counts.some((item) => item.sealed === true) || ledger?.rowsSealed === true || Boolean(body.modificationDigest)
+  const sealedLedger = (body.queries ?? []).some((item) => (item.id === 'drizzle_rows' || item.id === 'installer_receipt') && item.rowsSealed === true)
+  const needsSeal = counts.some((item) => item.sealed === true) || sealedLedger || Boolean(body.modificationDigest)
   if (needsSeal && (!body.sealed || body.sealed.recipientKeyId !== expectedKeyId)) return 'SEALED_FOR_ANOTHER_RECIPIENT'
   return null
 }
@@ -646,7 +646,7 @@ export function sessionPlaneDefect(body, plane, expectedKeyId) {
 // What a privileged session may carry in the clear: catalogue metadata only. Anything
 // else (an unknown query, a count value, a ledger row, a counter row) is a leak.
 const PRIVILEGED_CLEAR_QUERIES = new Set(['identity', 'privilege', 'migration_relations', 'migration_columns', 'effective_roles', 'structure', 'relation_metadata', 'tables', 'privilege_matrix'])
-const PRIVILEGED_SEALED_QUERIES = new Set(['drizzle_rows', 'modification_counters', 'settled_counters'])
+const PRIVILEGED_SEALED_QUERIES = new Set(['drizzle_rows', 'installer_receipt', 'modification_counters', 'settled_counters'])
 
 export function privilegedClearDefect(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'CATALOG_OUTPUT_UNREADABLE'

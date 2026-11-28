@@ -82,6 +82,10 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
       'ALTER TABLE audit_security.audit_logs ENABLE ROW LEVEL SECURITY',
       'ALTER TABLE audit_security.audit_logs FORCE ROW LEVEL SECURITY',
       "INSERT INTO audit_security.audit_logs VALUES (1, 'a'), (2, 'b')",
+      // The bootstrap-v2 installer receipt, revoked from the runtime role as the installer does.
+      'CREATE TABLE public.ue_v2_bootstrap_receipt (singleton boolean PRIMARY KEY CHECK(singleton), contract_version text NOT NULL, source_digest text NOT NULL, catalog_digest text NOT NULL)',
+      "INSERT INTO public.ue_v2_bootstrap_receipt VALUES (true, 'ue-v2-bootstrap/1', 'src-digest-0001', 'cat-digest-0001')",
+      `REVOKE ALL ON TABLE public.ue_v2_bootstrap_receipt FROM PUBLIC, ${RUNTIME_ROLE}`,
     ].join(';\n')
     const applied = docker(['exec', '-i', '-e', `PGPASSWORD=${password}`, name, 'psql', '-q', '-h', '127.0.0.1', '-U', 'postgres', '-d', 'ue_v2_staging', '-v', 'ON_ERROR_STOP=1'], { input: `${setup};\n` })
     assert.equal(applied.status, 0, applied.stderr)
@@ -150,7 +154,7 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     const denied = runtime.counts.filter((item) => item.classification === 'PRIVILEGE_DENIED')
     assert.equal(observed.length, COUNT_MAX_STATEMENTS, 'the 1,000-statement ceiling is honoured')
     assert.equal(deferred.length, 10)
-    assert.deepEqual(denied.map((item) => `${item.schema}.${item.name}`), ['audit_security.audit_logs', 'drizzle.__drizzle_migrations', ...[...hidden].map((table) => `public.${table}`)], 'tables without SELECT or schema USAGE are classified from the catalogue, not counted')
+    assert.deepEqual(denied.map((item) => `${item.schema}.${item.name}`), ['audit_security.audit_logs', 'drizzle.__drizzle_migrations', ...[...hidden].map((table) => `public.${table}`), 'public.ue_v2_bootstrap_receipt'], 'tables without SELECT or schema USAGE are classified from the catalogue, not counted')
     assert.ok(observed.every((item) => item.n === '0' && item.countScope === 'ROLE_VISIBLE' && item.globalTotal === false), 'RLS stays in force: role-visible counts are zero and not totals')
     assert.equal(runtime.counts.some((item) => item.classification === 'UNREADABLE'), false, 'no statement is spent on a table the role cannot read')
     const queryOf = (catalog, id) => catalog.queries.find((item) => item.id === id)
@@ -158,7 +162,8 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     assert.equal(queryOf(runtime, 'drizzle_rows').classification, 'PRIVILEGE_DENIED')
     assert.equal(queryOf(runtime, 'audit').rows.length, 1, 'the audit table is seen in pg_class without schema USAGE')
     assert.equal(queryOf(runtime, 'audit').rows[0].schema_usage, false)
-    assert.equal(queryOf(runtime, 'privilege_matrix').rows.length, 1022)
+    assert.equal(queryOf(runtime, 'privilege_matrix').rows.length, 1023)
+    assert.equal(queryOf(runtime, 'installer_receipt'), undefined, 'the runtime plane never asks for the installer receipt')
     const evaluation = evaluateCatalogCompleteness(runtime)
     assert.equal(evaluation.verdict, 'CATALOG_PARTIAL')
     assert.equal(evaluation.planeVerdict, 'PLANE_ACCEPTED')
@@ -223,6 +228,7 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     assert.equal(sessionPlaneDefect(sealedBaseline, 'privileged', founder.keyId), null)
     assert.equal(privilegedStdout.includes(adminPassword), false)
     assert.equal(privilegedStdout.includes('h-0001'), false, 'the ledger never leaves the container in the clear')
+    assert.equal(privilegedStdout.includes('src-digest-0001'), false, 'the installer receipt never leaves the container in the clear')
     assert.ok(sealedBaseline.counts.filter((item) => item.classification === 'OBSERVED').every((item) => item.n === null && item.sealed === true && item.countScope === 'GLOBAL'))
     assert.equal(evaluateCatalogCompleteness(sealedBaseline).categories.find((category) => category.id === 'preservation_counts').accepted, false, 'sealed is not accepted')
 
@@ -232,15 +238,17 @@ test('both planes read staging-shaped PostgreSQL read-only: runtime posture, the
     const globals = baseline.catalog.counts.filter((item) => item.classification === 'OBSERVED')
     assert.equal(globals.length, COUNT_MAX_STATEMENTS)
     assert.ok(globals.every((item) => item.n === (item.schema === 'public' ? '3' : '2')), 'exact global totals: 3 rows per business table where the runtime role saw 0, 2 in the ledger and the forced-RLS audit table')
-    assert.equal(baseline.catalog.counts.filter((item) => item.classification === 'NOT_ATTEMPTED').length, 22, 'bounded: the 15s/45s/1000 ceiling')
+    assert.equal(baseline.catalog.counts.filter((item) => item.classification === 'NOT_ATTEMPTED').length, 23, 'bounded: the 15s/45s/1000 ceiling')
     assert.deepEqual(queryOf(baseline.catalog, 'drizzle_rows').rows.map((row) => row.hash), ['h-0001', 'h-0002'])
+    assert.deepEqual(queryOf(baseline.catalog, 'installer_receipt').rows, [{ contract_version: 'ue-v2-bootstrap/1', source_digest: 'src-digest-0001', catalog_digest: 'cat-digest-0001' }])
+    assert.equal(evaluateCatalogCompleteness(baseline.catalog).categories.find((category) => category.id === 'migration_history').accepted, true)
 
     const privilegedToken = buildContinuationToken(sealedBaseline, { ...binding, sessionId: 'b1' })
     assert.equal(privilegedToken.plane, 'privileged')
     const { body: sealedContinued } = operate(null, [...privilegedEnv(), '-e', `UE_CATALOG_CONTINUATION=${JSON.stringify(privilegedToken)}`])
     assert.equal(sealedContinued.sessionKind, 'continuation')
     const continuedOpen = openSealedCatalog(sealedContinued, founder.privateKeyPem).catalog
-    assert.equal(continuedOpen.counts.length, 22)
+    assert.equal(continuedOpen.counts.length, 23)
     assert.ok(continuedOpen.counts.every((item) => item.classification === 'OBSERVED' && item.n !== null))
     const privilegedChain = reconcileCatalogSessions([{ catalog: baseline.catalog, observedAt: baseline.catalog.observedAt }, { catalog: continuedOpen, token: privilegedToken, observedAt: continuedOpen.observedAt }], binding, { statsSettleMs: SETTLE_MS })
     assert.equal(privilegedChain.evaluation?.planeVerdict, 'PLANE_ACCEPTED', privilegedChain.reason)
