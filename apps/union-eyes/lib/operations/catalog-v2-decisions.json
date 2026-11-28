@@ -3732,6 +3732,17 @@
       "decision": "11 non-test reference(s) to 'grievanceEvents' found (round-7 scope-expansion scan). At least one reference is under an app/api/**/route.ts, actions/, cron, or webhook path (RUNTIME-REACHABLE HINT — prioritize this table for manual review). RESOLVED (round 11): app/api/grievances/route.ts and its [id]/** sub-routes execute via withRLSContext (requireEntitlement + org-scoped) — tenant-scoped, no withSystemContext site found for this table."
     },
     {
+      "table": "grievance_group_participants",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0091 and protected by scoped 0064 (FORCE RLS, ue_create_direct_org_rls_policy). One row per member of a group grievance with the member consent (form, evidence) and employer portion. UPDATE only records a withdrawal once (trigger); DELETE refused; same-organization trigger. Reached only through lib/representation-workflows on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
       "table": "grievance_procedural_exceptions",
       "classification": "TENANT_RLS_REQUIRED",
       "runtime": [
@@ -3763,6 +3774,16 @@
       ],
       "system": [],
       "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0090 and protected by scoped 0063 (FORCE RLS, ue_create_direct_org_rls_policy). The facts a grievance records for procedural rule selection; one current row per grievance (partial unique index). UPDATE only sets superseded_by/superseded_at once (trigger); DELETE refused. A same-organization trigger refuses a row whose grievance is in another organization. Reached only through lib/procedural-rules on the tenant runtime identity inside withRLSContext; no schema authority."
+    },
+    {
+      "table": "grievance_representation_records",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": [
+        "SELECT",
+        "INSERT"
+      ],
+      "system": [],
+      "decision": "Direct organization_id uuid NOT NULL, created by platform migration 0091 and protected by scoped 0064 (FORCE RLS, ue_create_direct_org_rls_policy). Append-only typed representation records (employer-initiated and policy filings, approvals, final-level handoff and receipt, abandonment and beyond-control findings); UPDATE and DELETE refused by trigger; same-organization and same-grievance parent trigger. Reached only through lib/representation-workflows on the tenant runtime identity inside withRLSContext; no schema authority."
     },
     {
       "table": "grievance_responses",
@@ -8296,7 +8317,7 @@
   ],
   "currentSecurity": {
     "contractVersion": "1",
-    "sourcePlanDigest": "f4555daba1a88f6751d3adb8278a1333681bbf2ce22a98d39f3e91634c8a6e91",
+    "sourcePlanDigest": "3975a03f019d4baa8762e6d96ffb1ce371885c083be5d599c18be6b9b7d27ba3",
     "currentFunctions": [
       {
         "schema": "public",

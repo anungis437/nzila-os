@@ -391,6 +391,9 @@ export async function* iterateRuntimeSecurityReports(
     procedural_rule_lifecycle_events: { subject_type: 'rule_set', to_status: 'draft' },
     grievance_procedural_facts: { fact_kind: 'trigger' },
     grievance_procedural_exceptions: { codes: ['missing_trigger'], evidence_digest: 'a'.repeat(64) },
+    // Representation workflows (platform 0091).
+    grievance_group_participants: { consent_form: 'written_signature', consented_at: '2027-03-01T15:00:00Z' },
+    grievance_representation_records: { record_kind: 'employer_initiated_filing', parent_record_id: null, actor_office: null },
     // assign: no source staff, a target staff, through a triage designation.
     message_thread_assignments: {
       action: 'assign',
