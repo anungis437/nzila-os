@@ -7,6 +7,7 @@ import test from 'node:test'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import {
+  RUNTIME_CONSISTENCY_CAVEAT,
   CONTAINER_APP,
   CONTAINER_NAME,
   EXPECTED_IMAGE,
@@ -647,6 +648,21 @@ test('privileged sessions merge only when nothing moved between them, and are ne
   assert.equal(chain(baseline, altered).reason, 'STRUCTURE_DRIFT')
   const crossed = runtimeCatalog({ observedAt: '2026-11-26T11:05:00.000Z' })
   assert.equal(chain(baseline, crossed).reason, 'CONTINUATION_PLANE_CHANGED')
+})
+
+test('a runtime chain claims only what it compared: no statistics, no ledger, no snapshot', () => {
+  const baseline = runtimeCatalog()
+  baseline.counts[1] = { ...baseline.counts[1], classification: 'NOT_ATTEMPTED', reason: 'COUNT_BUDGET', n: undefined }
+  const continuation = runtimeCatalog({ observedAt: '2026-11-26T11:05:00.000Z' })
+  continuation.counts = [continuation.counts[1]]
+  const merged = chain(baseline, continuation)
+  assert.equal(merged.evaluation.planeVerdict, 'PLANE_ACCEPTED', merged.reason)
+  assert.equal(merged.consistency.basis, 'MULTI_SESSION_STRUCTURE_UNCHANGED')
+  assert.equal(merged.consistency.atomicSnapshot, false)
+  assert.equal(merged.consistency.caveat, RUNTIME_CONSISTENCY_CAVEAT)
+  assert.doesNotMatch(merged.consistency.caveat, /REPEATABLE READ|n_tup_|statistics flush|ledger(,| and per-table) .*identical/)
+  assert.match(merged.consistency.caveat, /not detected/)
+  assert.match(merged.consistency.caveat, /not one atomic snapshot/)
 })
 
 test('the complete preimage needs both planes, opened, on one inventory; it is never one snapshot', () => {

@@ -1,0 +1,212 @@
+{
+  "schema": "ue-v2-staging-preimage-summary/v1",
+  "verdict": "CATALOG_COMPLETE",
+  "reason": null,
+  "categories": [
+    {
+      "id": "database_identity",
+      "source": "both",
+      "accepted": true
+    },
+    {
+      "id": "migration_discovery",
+      "source": "both",
+      "accepted": true
+    },
+    {
+      "id": "migration_history",
+      "source": "privileged",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "migration_columns",
+          "classification": "OBSERVED",
+          "accepted": true
+        },
+        {
+          "id": "drizzle_rows",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "roles_and_memberships",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "roles",
+          "classification": "OBSERVED",
+          "accepted": true
+        },
+        {
+          "id": "memberships",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "relation_ownership_acl",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "relations",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "rls_configuration",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "rls",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "rls_policies",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "policies",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "function_topology",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "function",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "security_definer",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "security_definer",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "event_triggers",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "event_trigger",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "audit_permissions",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "audit",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "audit_grants",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "audit_grants",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "sequences",
+      "source": "runtime",
+      "accepted": true,
+      "queries": [
+        {
+          "id": "sequences",
+          "classification": "OBSERVED",
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "id": "business_tables",
+      "source": "both",
+      "accepted": true
+    },
+    {
+      "id": "preservation_counts",
+      "source": "privileged",
+      "accepted": true,
+      "tally": {
+        "GLOBAL_OBSERVED": 790
+      }
+    }
+  ],
+  "consistency": {
+    "crossPlaneAtomic": false,
+    "runtime": {
+      "plane": "runtime",
+      "sessions": 2,
+      "sessionWindow": {
+        "first": "2026-11-27T16:53:30.489Z",
+        "last": "2026-11-27T17:49:00.987Z"
+      },
+      "snapshots": [
+        "280633:280633:",
+        "281073:281073:"
+      ],
+      "atomicSnapshot": false,
+      "basis": "MULTI_SESSION_STRUCTURE_UNCHANGED",
+      "statsSettleMs": null,
+      "caveat": "Each session counted inside one READ ONLY transaction as the runtime role. Across sessions, the table inventory, column structure, and relation and policy metadata were identical. This plane reads neither row-change statistics nor the migration ledger, so data changes between sessions are not detected here; its counts are role-visible posture, never totals. It is a bounded multi-session inventory, not one atomic snapshot."
+    },
+    "privileged": {
+      "plane": "privileged",
+      "sessions": 1,
+      "sessionWindow": {
+        "first": "2026-11-27T23:53:51.797Z",
+        "last": "2026-11-27T23:53:51.797Z"
+      },
+      "snapshots": [
+        "283976:283976:"
+      ],
+      "atomicSnapshot": true,
+      "basis": "ONE_REPEATABLE_READ_TRANSACTION",
+      "statsSettleMs": [
+        75053
+      ],
+      "caveat": null
+    },
+    "note": "Runtime posture and privileged totals are separate sessions on separate logins. Inventory, column structure and migration discovery matched across planes; the planes are not one snapshot."
+  },
+  "privateEvidenceSha256": "7e326e995dcafb73def9468b2f3e61b0129181818680038d4dd47b20785afbec",
+  "S2_02_PREIMAGE_COMPLETE": "NO",
+  "S2_02_LEGACY_GATE": "INDETERMINATE"
+}

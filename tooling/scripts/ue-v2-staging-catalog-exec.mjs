@@ -783,7 +783,7 @@ export function reconcileCatalogSessions(sessions, binding, options = {}) {
       ? (plane === 'privileged' ? 'ONE_REPEATABLE_READ_TRANSACTION' : 'ONE_READ_ONLY_SESSION')
       : (plane === 'privileged' ? 'MULTI_SESSION_NO_CHANGE_DETECTED' : 'MULTI_SESSION_STRUCTURE_UNCHANGED'),
     statsSettleMs: plane === 'privileged' ? sessions.map((session) => session.catalog?.statsSettledMs ?? null) : null,
-    caveat: sessions.length === 1 ? null : CONSISTENCY_CAVEAT,
+    caveat: sessions.length === 1 ? null : plane === 'privileged' ? CONSISTENCY_CAVEAT : RUNTIME_CONSISTENCY_CAVEAT,
   }
   merged.consistency = consistency
   const evaluation = evaluateCatalogCompleteness(merged)
@@ -791,6 +791,10 @@ export function reconcileCatalogSessions(sessions, binding, options = {}) {
 }
 
 export const CONSISTENCY_CAVEAT = 'Each session counted inside one REPEATABLE READ snapshot. Across sessions, the table inventory, column structure, relation and policy metadata, migration ledger, and per-table cumulative statistics (relid, n_tup_ins, n_tup_upd, n_tup_del, relfilenode) read at the start of every session and again after the statistics flush interval were identical. That detects any insert, update, delete, TRUNCATE, rewrite or table replacement whose statistics were recorded; it does not detect a statistics reset followed by replay to identical values, or statistics lost without a reset. It is a bounded multi-session inventory, not one atomic snapshot.'
+
+// The runtime plane reads neither row-change statistics nor the migration ledger, and counts in a
+// plain READ ONLY transaction; its multi-session caveat claims only what reconciliation compared.
+export const RUNTIME_CONSISTENCY_CAVEAT = 'Each session counted inside one READ ONLY transaction as the runtime role. Across sessions, the table inventory, column structure, and relation and policy metadata were identical. This plane reads neither row-change statistics nor the migration ledger, so data changes between sessions are not detected here; its counts are role-visible posture, never totals. It is a bounded multi-session inventory, not one atomic snapshot.'
 
 export function recipientKeyId(publicKey) {
   const key = publicKey?.type === 'public' && typeof publicKey.export === 'function' ? publicKey : createPublicKey(publicKey)
