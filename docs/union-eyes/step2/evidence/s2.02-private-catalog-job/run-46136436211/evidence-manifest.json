@@ -1,0 +1,205 @@
+{
+  "schema": "ue-v2-staging-catalog-evidence/v1",
+  "catalogSchema": "ue-v2-staging-catalog/v2",
+  "execution": {
+    "githubRunId": "46136436211",
+    "sourceSha": "30a11767d8b8c61f191faeb8429724884b77faa4",
+    "job": "ue-s202-cat-46136436211",
+    "execution": "ue-s202-cat-46136436211-4lwp1tu",
+    "replica": "ue-s202-cat-46136436211-4lwp1tu-2b228"
+  },
+  "environment": {
+    "subscription": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+    "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+    "resourceGroup": "nzila-canada-staging-rg",
+    "managedEnvironment": "nzila-ue-v2-staging-env",
+    "database": "ue_v2_staging",
+    "revision": "nzila-ue-v2-staging-app--rel6a60c95c9d",
+    "servingImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:2bf18216fda45d71395b6396ec65b3974745f5446696d378f6ea6d37fe2e67ef"
+  },
+  "operatorImage": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2-catalog@sha256:a4e3283b709c35839a982551bc7ee54863e03abd41bd3aa9a699c4e395ffc92d",
+  "transport": {
+    "channel": "log-analytics",
+    "workspace": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+    "frame": "UE_CATALOG_V2",
+    "nonce": "d83a6add1a36800f58e45bb37841a431",
+    "chunks": 104,
+    "bytes": 623782,
+    "duplicatesIgnored": 0
+  },
+  "observedIdentity": {
+    "database": "ue_v2_staging",
+    "role": "uev2admin",
+    "login": "uev2admin",
+    "transactionReadOnly": "on",
+    "version": "PostgreSQL 16.15 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 13.2.0, 64-bit"
+  },
+  "observedAt": "2026-11-28T11:03:03.124Z",
+  "capturedAt": "2026-11-28T11:04:29.003Z",
+  "sha256": "6e04ea96077fe0858bdaed2c1c60d4692c10292509511a97c8e5b5d0d28a84b8",
+  "categories": [
+    {
+      "id": "database_identity",
+      "plane": "privileged",
+      "inPlane": true,
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "migration_discovery",
+      "plane": "privileged",
+      "inPlane": true,
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "migration_history",
+      "plane": "privileged",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 3,
+      "captured": 3,
+      "missing": 0
+    },
+    {
+      "id": "roles_and_memberships",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "relation_ownership_acl",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "rls_configuration",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "rls_policies",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "function_topology",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "security_definer",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "event_triggers",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "audit_permissions",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "audit_grants",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "sequences",
+      "plane": null,
+      "inPlane": false,
+      "accepted": false,
+      "observations": 0,
+      "captured": 0,
+      "missing": 0
+    },
+    {
+      "id": "business_tables",
+      "plane": "privileged",
+      "inPlane": true,
+      "accepted": true,
+      "observations": 1,
+      "captured": 1,
+      "missing": 0
+    },
+    {
+      "id": "preservation_counts",
+      "plane": "privileged",
+      "inPlane": true,
+      "accepted": false,
+      "observations": 790,
+      "captured": 790,
+      "missing": 0
+    }
+  ],
+  "plane": "privileged",
+  "planeVerdict": "PLANE_CAPTURED_SEALED",
+  "categoryInventory": {
+    "required": 15,
+    "inPlane": 5,
+    "accepted": 3
+  },
+  "counts": {
+    "tables": 790,
+    "observed": 790,
+    "privilegeDenied": 0,
+    "notAttempted": 0,
+    "timedOut": 0,
+    "unreadable": 0,
+    "globalScope": 790,
+    "roleVisibleScope": 0,
+    "sealed": 790
+  },
+  "snapshot": "289312:289312:",
+  "sessionEndedAt": "2026-11-28T11:03:08.460Z",
+  "consistency": null,
+  "sealed": {
+    "scheme": "X25519-HKDF-SHA256-AES-256-GCM/v1",
+    "recipientKeyId": "bd8fa0572d31b7ce",
+    "plaintextSha256": "887cbe1f08e55aeed8770c06d7b581fa34c132240796bfa52ff1b9c8dfb33360",
+    "plaintextBytes": 229259
+  },
+  "verdict": "CATALOG_PARTIAL"
+}
