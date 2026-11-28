@@ -89,7 +89,7 @@ This record holds no counts, ledger rows, receipt values or credentials. The pri
 | Catalogue jobs | None in staging. |
 | `uev2admin` | Exposure rated moderate-low. A controlled rotation plan (dependency inventory, recovery, validation) is in the founder's private evidence folder. Not rotated. Rotate after the B1 session and before S2.02-REHEARSAL. |
 | `ue-role-probe2` | A pre-existing manual job from the 2026-11-13 execution. It still holds an administrator credential and is outside S2.02 cleanup ownership. Deletion awaits founder authorization, and precedes rotation. |
-| Run artifacts | All seven S2.02 artifacts expire 2026-12-04. In this public repository they are readable by any signed-in GitHub user. The runtime-plane ones hold policy text and role-visible counts in clear. Private copies are verified above. Early deletion is recommended for all seven and awaits founder authorization. |
+| Run artifacts | Deleted 2026-11-28 on founder authorization, all seven, ahead of their 2026-12-04 expiry. In this public repository they were readable by any signed-in GitHub user, and the runtime-plane ones held policy text and role-visible counts in clear. Each artifact ID now returns 404 and each run lists no artifacts. The verified private copies are now the only copies. The digests in the Integrity table remain checkable against the retained job logs. |
 | Catalogue workflows | Kept on `main`. The runtime plane is read-only, manual and environment-approved, and is needed for any later preimage refresh. The privileged plane is retired by the missing recipient. |
 
 ## Next work package
