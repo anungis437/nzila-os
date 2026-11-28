@@ -1,0 +1,405 @@
+{
+  "schemaVersion": 1,
+  "classification": "SYNTHETIC_TEST_SPECIFICATION_ONLY",
+  "status": "NOT_PROVISIONED_NOT_EXECUTED",
+  "namespace": "nzila-ciu-reference-synthetic",
+  "seed": 20261128,
+  "organization": {
+    "parent": "Synthetic Federation",
+    "component": "Synthetic National Component",
+    "unrelatedTenant": "Synthetic Unrelated Institution",
+    "branchCount": 22,
+    "governanceTerms": 3
+  },
+  "populations": {
+    "members": 12500,
+    "cases": 5000,
+    "agreementGroups": [
+      "FB",
+      "PA",
+      "SV",
+      "EB",
+      "TC"
+    ],
+    "languages": [
+      "en-CA",
+      "fr-CA"
+    ],
+    "concurrency": [
+      100,
+      500,
+      1000
+    ]
+  },
+  "branches": [
+    {
+      "id": "SYN-BR-001",
+      "displayName": "Synthetic Branch 01",
+      "timezone": "America/St_Johns",
+      "members": 569,
+      "cases": 228
+    },
+    {
+      "id": "SYN-BR-002",
+      "displayName": "Synthetic Branch 02",
+      "timezone": "America/Halifax",
+      "members": 569,
+      "cases": 228
+    },
+    {
+      "id": "SYN-BR-003",
+      "displayName": "Synthetic Branch 03",
+      "timezone": "America/Toronto",
+      "members": 569,
+      "cases": 228
+    },
+    {
+      "id": "SYN-BR-004",
+      "displayName": "Synthetic Branch 04",
+      "timezone": "America/Winnipeg",
+      "members": 569,
+      "cases": 228
+    },
+    {
+      "id": "SYN-BR-005",
+      "displayName": "Synthetic Branch 05",
+      "timezone": "America/Regina",
+      "members": 568,
+      "cases": 228
+    },
+    {
+      "id": "SYN-BR-006",
+      "displayName": "Synthetic Branch 06",
+      "timezone": "America/Edmonton",
+      "members": 568,
+      "cases": 228
+    },
+    {
+      "id": "SYN-BR-007",
+      "displayName": "Synthetic Branch 07",
+      "timezone": "America/Vancouver",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-008",
+      "displayName": "Synthetic Branch 08",
+      "timezone": "America/St_Johns",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-009",
+      "displayName": "Synthetic Branch 09",
+      "timezone": "America/Halifax",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-010",
+      "displayName": "Synthetic Branch 10",
+      "timezone": "America/Toronto",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-011",
+      "displayName": "Synthetic Branch 11",
+      "timezone": "America/Winnipeg",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-012",
+      "displayName": "Synthetic Branch 12",
+      "timezone": "America/Regina",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-013",
+      "displayName": "Synthetic Branch 13",
+      "timezone": "America/Edmonton",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-014",
+      "displayName": "Synthetic Branch 14",
+      "timezone": "America/Vancouver",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-015",
+      "displayName": "Synthetic Branch 15",
+      "timezone": "America/St_Johns",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-016",
+      "displayName": "Synthetic Branch 16",
+      "timezone": "America/Halifax",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-017",
+      "displayName": "Synthetic Branch 17",
+      "timezone": "America/Toronto",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-018",
+      "displayName": "Synthetic Branch 18",
+      "timezone": "America/Winnipeg",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-019",
+      "displayName": "Synthetic Branch 19",
+      "timezone": "America/Regina",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-020",
+      "displayName": "Synthetic Branch 20",
+      "timezone": "America/Edmonton",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-021",
+      "displayName": "Synthetic Branch 21",
+      "timezone": "America/Vancouver",
+      "members": 568,
+      "cases": 227
+    },
+    {
+      "id": "SYN-BR-022",
+      "displayName": "Synthetic Branch 22",
+      "timezone": "America/St_Johns",
+      "members": 568,
+      "cases": 227
+    }
+  ],
+  "identityGeneration": {
+    "memberId": "SYN-MEMBER-{global index padded 6}",
+    "email": "member-{global index}@example.invalid",
+    "caseId": "SYN-CASE-{global index padded 6}",
+    "sourceId": "SYN-LEGACY-{case index}",
+    "noRealNames": true,
+    "noRealDocuments": true,
+    "allDatesSynthetic": true
+  },
+  "scenarios": [
+    {
+      "id": "SYN-01",
+      "requirement": "GOV-01",
+      "title": "Affiliation and access separation",
+      "expected": "parent affiliation cannot read private component data",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-02",
+      "requirement": "MEM-01",
+      "title": "Member transfer",
+      "expected": "same source identity, preserved history, old representative authority reviewed",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-03",
+      "requirement": "REP-05",
+      "title": "FB versus TC stage routing",
+      "expected": "correct version-specific permitted transitions",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-04",
+      "requirement": "REP-06",
+      "title": "Awareness versus incident",
+      "expected": "different dates preserved and correct trigger chosen",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-05",
+      "requirement": "REP-08",
+      "title": "Employer non-response",
+      "expected": "separate reply and escalation limits",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-06",
+      "requirement": "REP-10",
+      "title": "Calendar exclusions",
+      "expected": "versioned approved calendar, not hardcoded locale",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-07",
+      "requirement": "FED-05",
+      "title": "Adjudication calendar",
+      "expected": "distinct calendar-day calculation",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-08",
+      "requirement": "REP-01",
+      "title": "Group consent",
+      "expected": "missing consent rejected",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-09",
+      "requirement": "REP-02",
+      "title": "Dual approval",
+      "expected": "missing institutional approval denied",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-10",
+      "requirement": "REP-16",
+      "title": "Branch-to-national handoff",
+      "expected": "assigned LRO only receives complete authorized packet",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-11",
+      "requirement": "GOV-16",
+      "title": "Trusteeship",
+      "expected": "temporary scope and reversible authority",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-12",
+      "requirement": "GOV-19",
+      "title": "Election method and succession",
+      "expected": "mixed election methods denied; old office revoked",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-13",
+      "requirement": "SVC-01",
+      "title": "VSSA",
+      "expected": "committee appointment, national review, result receipt",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-14",
+      "requirement": "SVC-02",
+      "title": "WFA",
+      "expected": "cohort options and deadline history",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-15",
+      "requirement": "INT-03",
+      "title": "Repeated source event",
+      "expected": "one domain effect and authoritative receipt",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-16",
+      "requirement": "INT-04",
+      "title": "Conflicting identity",
+      "expected": "quarantine without overwrite",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-17",
+      "requirement": "INT-05",
+      "title": "Unrelated tenant same external ID",
+      "expected": "isolated mappings and wrong context denial",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-18",
+      "requirement": "MIG-01",
+      "title": "Missing historical date",
+      "expected": "explicit exception, no fabricated date",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-19",
+      "requirement": "MIG-05",
+      "title": "Unverified file reference",
+      "expected": "not represented as verified evidence",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-20",
+      "requirement": "MIG-07",
+      "title": "Missing batch",
+      "expected": "cannot certify nonexistent receipt",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-21",
+      "requirement": "MIG-08",
+      "title": "Orphan/stuck/count mismatch",
+      "expected": "blocks migration acceptance",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-22",
+      "requirement": "SEC-03",
+      "title": "Privileged evidence",
+      "expected": "unrelated national officer denied",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-23",
+      "requirement": "SEC-04",
+      "title": "Revoked session",
+      "expected": "immediate denial at defined authority boundary",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-24",
+      "requirement": "SEC-07",
+      "title": "AI retrieval injection",
+      "expected": "no foreign content or unauthorized decision",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-25",
+      "requirement": "GOV-07",
+      "title": "Finance without live mandate",
+      "expected": "denied; synthetic reconcile only",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-26",
+      "requirement": "UX-01",
+      "title": "Language parity",
+      "expected": "same workflow, English and French",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-27",
+      "requirement": "OPS-04",
+      "title": "Restore",
+      "expected": "reconcile manifest and measured recovery",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "id": "SYN-28",
+      "requirement": "BUY-05",
+      "title": "Discovery sample",
+      "expected": "no real records or unauthorized connection",
+      "status": "NOT_EXECUTED"
+    }
+  ],
+  "constraints": [
+    "No external network, payment, live voting, production or client data",
+    "Actual authority rules must be adopted only through existing gates; synthetic fixture isolated and disposable",
+    "Populate case events, documents, ownership and consent via canonical approved test provisioning, not direct writes that bypass contract",
+    "Counts are proposed workload targets, not actual CIU data",
+    "Invalid rows separate from valid population; record expected acceptance or denial per scenario",
+    "Performance profile requires measured load mix and approved SLO; no claimed capacity from row count"
+  ]
+}
